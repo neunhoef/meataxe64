@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.84 2003/06/13 22:54:10 jon Exp $
+# $Id: makefile,v 1.85 2003/06/21 14:04:24 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -107,6 +107,7 @@ ZTRACE_TARGET=	ztrace
 ZTRECOV_TARGET=	ztrecover
 ZTSP_TARGET=	ztsp
 ZTSPF_TARGET=	ztspf
+ZTTR_TARGET=	zttr
 ZVP_TARGET=	zvp
 ZWORDS_TARGET=	zwords
 
@@ -208,6 +209,7 @@ ZTRACE_MODULES=	elements endian header memory parse primes read rows utils ztrac
 ZTRECOV_MODULES=	elements endian header maps matrix memory mv parse primes read rows utils write ztrecover
 ZTSP_MODULES=	clean elements endian grease header maps matrix memory mul mv parse primes read rows tra tsp utils write ztsp
 ZTSPF_MODULES=	clean clean_file elements endian grease header maps matrix memory mul mv parse primes read rows system tra tspf utils write ztspf
+ZTTR_MODULES=	elements endian header memory parse primes read rows ttr utils write zttr
 ZVP_MODULES=	elements endian grease header maps matrix memory mul parse primes read rows vp utils write zvp
 ZWORDS_MODULES=	elements endian grease header maps matrix memory mul parse primes read rows utils write zwords
 
@@ -309,6 +311,7 @@ MODULES=	$(CONS_MODULES) \
 	$(ZTRACE_MODULES) \
 	$(ZTSP_MODULES) \
 	$(ZTSPF_MODULES) \
+	$(ZTTR_MODULES) \
 	$(ZVP_MODULES) \
 	$(ZWORDS_MODULES)
 
@@ -627,6 +630,9 @@ TARGET:=ZTMU
 include targets.txt
 
 TARGET:=ZTR
+include targets.txt
+
+TARGET:=ZTTR
 include targets.txt
 
 TARGET:=ZTRACE

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: sym_basis_delta,v 1.2 2003/05/31 20:50:30 jon Exp $
+# $Id: sym_basis_delta,v 1.3 2003/06/21 14:04:24 jon Exp $
 #
 # Script to compute a symmetry basis wrt an ordered set of irreducibles,
 # using delta words
@@ -140,180 +140,41 @@ for x in `cat $irreds`; do
     echo tot=$tot, r=$r, wdim=$wdim, dim=$dim
     y=0
     have_local_basis=0
-    while [ $y -lt $dim -a $count -lt $tot ]; do
-      zsel ${tmp}.1 ${tmp}.2 $y
+    dim=`zsymb -m $memory $tot $wdim ${tmp}.1 ${tmp}.2 . $*`
+    ret=$?
+    if [ 0 -ne $ret ]; then
+      rm -f ${tmp}.*
+      echo $dim
+      echo code $ret
+      echo "$name: failed to base component for $w, terminating"
+      exit 1
+    fi
+    if [ $r -ne $dim ]; then
+      rm -f ${tmp}.*
+      echo "$name: expected dimension $r for component $w but got $dim, terminating"
+      exit 1
+    fi
+    count=$tot
+    if [ 0 -eq $have_basis ]; then
+      cp ${tmp}.2 $basis
       ret=$?
-      if [ 0 -ne $? ]; then
-        rm -f ${tmp}.*
-        echo "$name: zsel failed, terminating"
-        exit 1
-      fi
-# See if vector already in space
-      if [ 0 -ne $have_local_basis ]; then
-        zclean -m $memory $local_basis ${tmp}.2 ${tmp}.3
-        ret=$?
-        if [ 0 -ne $ret ]; then
-          rm -f ${tmp}.*
-          echo "$name: zclean failed, terminating"
-          exit 1
-        fi
-        r=`zrn -m $memory ${tmp}.3`
-        ret=$?
-        if [ 0 -ne $ret ]; then
-          rm -f ${tmp}.*
-          echo $r
-          echo "$name: zrn failed, terminating"
-          exit 1
-        fi
-        if [ 0 -eq $r ]; then
-# This one already in the space, so ignore it
-          let y=$y+1
-          continue
-        fi
-        if [ 1 -ne $r ]; then
-          echo $name: zclean returns $r, terminating
-          exit 1
-        fi
-      fi
-# Otherwise, spin up, create subspace, do sb, add vectors
-      d=`zmsp -m $memory ${tmp}.2 ${tmp}.3 $*`
+      have_basis=1
+    else
+      zjoin $basis ${tmp}.2 ${tmp}.3
       ret=$?
       if [ 0 -ne $ret ]; then
         rm -f ${tmp}.*
-        echo $d
-        echo "$name: failed to spin vector $y, terminating"
+        echo "$name: unexpected failure in zjoin, terminating"
         exit 1
       fi
-      if [ $d -ne `znor ${w}_1` ]; then
-        rm -f ${tmp}.*
-        echo "$name: vector $y spins to an incorrect subspace, terminating"
-        exit 1
-      fi
-      z=1
-      names=
-      for a in $*; do
-        zmu -m $memory ${tmp}.3 $a ${tmp}.4
-        zss ${tmp}.3 ${tmp}.4 ${tmp}.5_$z
-        names="$names ${tmp}.5_$z"
-        let z=$z+1
-      done
-# Need to convert our non-standard basis in ${tmp}.3 to a standard basis as per the irreducibles
-# Use the script associated with irreducible x
-      zscript -m $memory ${tmp}.6 ${tmp}.zscript $script_x ${names}
+      cp ${tmp}.3 $basis
       ret=$?
-      rm -f ${tmp}.zscript*
-      if [ 0 -ne $ret ]; then
-        rm -f ${tmp}.*
-        echo "$name: failed to apply script to ${names}, terminating"
-        exit 1
-      fi
-      n=`zns -m $memory ${tmp}.6 ${tmp}.7`
-      ret=$?
-      if [ 0 -ne $ret ]; then
-        echo "$name: zns failed with code $ret, terminating"
-        rm -f ${tmp}.*
-        exit 1
-      fi
-      zsel ${tmp}.7 ${tmp}.8 0
-      ret=$?
-      if [ 0 -ne $ret ]; then
-        echo "$name: zsel failed with code $ret, terminating"
-        rm -f ${tmp}.*
-        exit 1
-      fi
-      base_from_vector ${tmp}.8 ${tmp}.8_sb $memory ${tmp}.4 $names
-      ret=$?
-      if [ 1 -eq $ret ]; then
-        echo "$name: base_from_vector failed, terminating"
-        rm -f ${tmp}.*
-        exit 1
-      elif [ 0 -ne $ret ]; then
-        echo "$name: base_from_vector unexpectedly returns $ret, terminating"
-        rm -f ${tmp}.*
-        exit 1
-      fi
-# Now check we've got the right irreducible
-      i=1
-      for x in $names; do
-        if ! diff ${tmp}.8_sb_$i ${w}_$i 1>/dev/null 2>&1; then
-          echo "$name: base_from_vector returns unexpected irreducible, terminating"
-#         rm -f ${tmp}.*
-          echo "$name: y = $y, count = $count, i = $i, x = $x"
-          exit 1
-        fi
-        let i=$i+1
-      done
-# Now convert the non-standard basis in ${tmp}.3 to a standard basis
-      zmu -m $memory ${tmp}.4 ${tmp}.3 ${tmp}.5
-      if [ 0 -ne $ret ]; then
-        rm -f ${tmp}.*
-        exit 1
-      fi
-# ${tmp}.5 is a standard basis for this irreducible piece
-      if [ 0 -eq $have_basis ]; then
-        cp ${tmp}.5 $basis
-        ret=$?
-        have_basis=1
-      else
-        zjoin $basis ${tmp}.5 ${tmp}.4
-        ret=$?
-        if [ 0 -ne $ret ]; then
-          rm -f ${tmp}.*
-          echo "$name: unexpected failure in zjoin, terminating"
-          exit 1
-        fi
-        cp ${tmp}.4 $basis
-        ret=$?
-      fi
-      if [ 0 -ne $ret ]; then
-        rm -f ${tmp}.*
-        echo "$name: unexpected failure in cp, terminating"
-        exit 1
-      fi
-      if [ 0 -eq $have_local_basis ]; then
-        ldim=`zbase -m $memory ${tmp}.5 . $local_basis`
-        ret=$?
-        if [ 0 -ne $ret ]; then
-          rm -f ${tmp}.*
-          echo $ldim
-          echo "$name: failed to compute ldim, terminating"
-          exit 1
-        fi
-      else
-        zclean -m $memory $local_basis ${tmp}.5 ${tmp}.4
-        ret=$?
-        if [ 0 -ne $ret ]; then
-          rm -f ${tmp}.*
-          echo "$name: zclean failed, terminating"
-          exit 1
-        fi
-        ldim=`zbase -m $memory ${tmp}.4 . ${tmp}.5`
-        ret=$?
-        if [ 0 -ne $ret ]; then
-          rm -f ${tmp}.*
-          echo $ldim
-          echo "$name: failed to compute ldim, terminating"
-          exit 1
-        fi
-        zclean -m $memory ${tmp}.5 $local_basis ${tmp}.4
-        ret=$?
-        if [ 0 -ne $ret ]; then
-          rm -f ${tmp}.*
-          echo "$name: zclean failed, terminating"
-          exit 1
-        fi
-        zjoin ${tmp}.4 ${tmp}.5 $local_basis
-        ret=$?
-        if [ 0 -ne $ret ]; then
-          rm -f ${tmp}.*
-          echo "$name: unexpected failure in zjoin, terminating"
-          exit 1
-        fi
-      fi
-      have_local_basis=1
-      let count=$count+1
-      let y=$y+1
-    done
+    fi
+    if [ 0 -ne $ret ]; then
+      rm -f ${tmp}.*
+      echo "$name: unexpected failure in cp, terminating"
+      exit 1
+    fi
   fi
   echo $count >> $mult
   let irred_num=$irred_num+1

@@ -1,5 +1,5 @@
 /*
- * $Id: symb.c,v 1.5 2003/06/16 21:54:19 jon Exp $
+ * $Id: symb.c,v 1.6 2003/06/21 14:04:24 jon Exp $
  *
  * Function to compute a symmetry basis
  *
@@ -51,10 +51,18 @@ struct file_struct
 static void cleanup_files(file_struct *t1, file_struct *t2)
 {
   if (t1->created) {
+    if (NULL != t1->f) {
+      fclose(t1->f);
+      t1->f = NULL;
+    }
     (void)remove(t1->name);
     t1->created = 0;
   }
   if (t2->created) {
+    if (NULL != t2->f) {
+      fclose(t2->f);
+      t2->f = NULL;
+    }
     (void)remove(t2->name);
     t2->created = 0;
   }
@@ -244,10 +252,13 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
   t1.name = name1;
   t2.name = name2;
   f.next = &t1;
+  f.created = 0;
   t1.next = &t2;
   t2.next = &t1;
   t1.created = 0;
   t2.created = 0;
+  t1.f = NULL;
+  t2.f = NULL;
   map = my_malloc((ech_size + space_size * nor) * sizeof(int));
   errno = 0;
   o = fopen64(name_o1, "wb");
@@ -455,8 +466,10 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
           /* Update space pointers */
           if (&f != t_in) {
             fclose(t_in->f);
+            t_in->f = NULL;
           }
           fclose(t_out->f);
+          t_out->f = NULL;
           t_in = t_in->next;
           t_out = t_out->next;
           errno = 0;
@@ -497,6 +510,7 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
     }
     if (&f != t_in) {
       fclose(t_in->f);
+      t_in->f = NULL;
     }
   }
   fclose(f.f);
