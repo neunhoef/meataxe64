@@ -1,5 +1,5 @@
 /*
- * $Id: header.c,v 1.1 2001/08/28 21:39:44 jon Exp $
+ * $Id: header.c,v 1.2 2001/09/04 23:00:12 jon Exp $
  *
  * Header manipulation
  *
@@ -87,14 +87,16 @@ void header_set_noc(header h, unsigned int n)
   h->noc = n;
 }
 
-header header_alloc(void)
+int header_alloc(header *h)
 {
-  header h = malloc(sizeof(*h));
-  if (NULL == h) {
-    fprintf(stderr, "Failed to allocate header structure, terminating\n");
-    exit(1);
+  header h1 = malloc(sizeof(*h1));
+  assert(NULL != h);
+  if (NULL == h1) {
+    fprintf(stderr, "Failed to allocate header structure\n");
+    return 0;
   }
-  return h;
+  *h = h1;
+  return 1;
 }
 
 void header_free(header h)
@@ -108,8 +110,11 @@ header header_create(unsigned int prime, unsigned int nob,
                      unsigned int nod, unsigned int noc,
                      unsigned int nor)
 {
-  header h = header_alloc();
+  header h;
+  int i = header_alloc(&h);
   assert(NULL != h);
+  assert(i);
+  NOT_USED(i);
   header_set_prime(h, prime);
   header_set_nob(h, nob);
   header_set_nod(h, nod);

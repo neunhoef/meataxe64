@@ -1,5 +1,5 @@
 /*
- * $Id: ad.c,v 1.2 2001/09/02 22:16:41 jon Exp $
+ * $Id: ad.c,v 1.3 2001/09/04 23:00:12 jon Exp $
  *
  * Add two matrices to give a third
  *
@@ -30,5 +30,5 @@ int main(int argc, const char * const argv[])
   if (0 == add(in1, in2, out, "ad")) {
     exit(1);
   }
-  return 1;
+  return 0;
 }

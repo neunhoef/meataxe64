@@ -1,5 +1,5 @@
 /*
- * $Id: mul.c,v 1.2 2001/09/02 22:16:41 jon Exp $
+ * $Id: mul.c,v 1.3 2001/09/04 23:00:12 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
@@ -30,6 +30,10 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
   unsigned int step;
   header h1, h2, h3;
   unsigned int **rows1, **rows2, **rows3;
+  unsigned int grease_row_count;
+  unsigned int ** grease_rows;
+  row_ops row_operations;
+  row_adder adder;
 
   endian_init();
   inp1 = fopen(m1, "rb");
@@ -73,9 +77,23 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
     return 0;
   }
   h3 = header_create(prime, nob, header_get_nod(h1), noc2, nor1);
-  write_binary_header(outp, h3, m3);
+  if (0 == write_binary_header(outp, h3, m3)) {
+    fprintf(stderr, "%s: cannot write binary header to %s, terminating\n", name, m3);
+    fclose(inp1);
+    fclose(inp2);
+    fclose(outp);
+    return 0;
+  }
+  if (0 == rows_init(prime, &row_operations)) {
+    fprintf(stderr, "%s: cannot initialise row operations for %s, %s, terminating\n", name, m1, m2);
+    fclose(inp1);
+    fclose(inp2);
+    fclose(outp);
+    return 0;
+  }
+  adder = row_operations.adder;
   if (0 == grease(nob, nor1, noc1, noc2, prime, &step)) {
-    fprintf(stderr, "%s: cannot compute grease for %s, %s, terminating\n", name, m1, m2);
+    fprintf(stderr, "%s: cannot compute grease level for %s, %s, terminating\n", name, m1, m2);
     fclose(inp1);
     fclose(inp2);
     fclose(outp);
@@ -110,21 +128,37 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
     fclose(outp);
     return 0;
   }
+  /* Allocate the grease space */
+  if (0 == grease_allocate_rows(step, prime, nob, noc2,
+                                &grease_row_count, &grease_rows)) {
+    fprintf(stderr, "%s: unable to allocate grease, terminating\n", name);
+    fclose(inp1);
+    fclose(inp2);
+    fclose(outp);
+    return 0;
+  } /* Could consider working ungreased */
   /* Then multiply */
   for (i = 0; i < noc1; i += step) {
-    unsigned int grease_row_count;
     unsigned int size = (step + i <= noc1) ? step : noc1 - i;
-    unsigned int **grease_rows = grease_make_rows(rows2, size, prime, nob, i, &grease_row_count);
-    /* Initialise the grease for matrix 2 */
+    unsigned int word_offset, bit_offset, mask;
+    element_access_init(nob, i, size, &word_offset, &bit_offset, &mask);
+    if (0 == grease_make_rows(rows2, size, prime, noc2, i, &grease_rows))
+    {
+      fprintf(stderr, "%s: unable to compute grease, terminating\n", name);
+      fclose(inp1);
+      fclose(inp2);
+      fclose(outp);
+      return 0;
+    }
     for (j = 0; j < nor1; j++) {
       unsigned int *row1 = rows1[j];
-      unsigned int elt = grease_get_elt(row1, i, size, prime, nob);
+      unsigned int elt = get_elements_from_row(row1 + word_offset, bit_offset, mask);
       if (0 == i) {
         row_init(rows3[j], nob, noc2);
       }
       if (0 != elt) {
         unsigned int *grease_row = grease_rows[elt-1];
-        if (0 == row_add(rows3[j], grease_row, rows3[j], prime, nob, noc2)) {
+        if (0 == (*adder)(rows3[j], grease_row, rows3[j], noc2)) {
           fprintf(stderr, "%s: add failed, terminating\n", name);
           fclose(inp1);
           fclose(inp2);

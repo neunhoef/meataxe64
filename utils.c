@@ -1,5 +1,5 @@
 /*
- * $Id: utils.c,v 1.3 2001/09/02 22:16:41 jon Exp $
+ * $Id: utils.c,v 1.4 2001/09/04 23:00:12 jon Exp $
  *
  * Utils for meataxe
  *
@@ -83,7 +83,7 @@ int alloc_matrix(unsigned int nob, unsigned int noc,
   return 1;
 }
 
-unsigned int read_decimal(const char *str, unsigned int len)
+int read_decimal(const char *str, unsigned int len, unsigned int *out)
 {
   unsigned int res = 0;
 
@@ -99,11 +99,12 @@ unsigned int read_decimal(const char *str, unsigned int len)
       str++;
       len--;
     } else {
-      fprintf(stderr, "Unrecognised digit '%c', terminating\n", *str);
-      exit(1);
+      fprintf(stderr, "Unrecognised digit '%c'\n", *str);
+      return 0;
     }
   }
-  return res;
+  *out = res;
+  return 1;
 }
 
 unsigned int bits_of(unsigned int n)

@@ -1,5 +1,5 @@
 /*
- * $Id: write.c,v 1.2 2001/08/30 18:31:45 jon Exp $
+ * $Id: write.c,v 1.3 2001/09/04 23:00:12 jon Exp $
  *
  * Write a header
  *
@@ -12,7 +12,7 @@
 #include "utils.h"
 #include "write.h"
 
-void write_text_header(const FILE *fp, const header h)
+int write_text_header(const FILE *fp, const header h)
 {
   unsigned int prime, nod, noc, nor;
   char buf1[12];
@@ -36,11 +36,12 @@ void write_text_header(const FILE *fp, const header h)
       6 != fwrite(buf4, 1, 6, (FILE *)fp) ||
       fputc('\n', (FILE *)fp) < 0) {
     fprintf(stderr, "Failed to write header to text output\n");
-    exit(1);
+    return 0;
   }
+  return 1;
 }
 
-void write_binary_header(const FILE *fp, header h, const char *name)
+int write_binary_header(const FILE *fp, header h, const char *name)
 {
   unsigned int nob;
   unsigned int prime;
@@ -60,6 +61,7 @@ void write_binary_header(const FILE *fp, header h, const char *name)
       1 != fwrite(&nor, sizeof(unsigned int), 1, (FILE *)fp) ||
       1 != fwrite(&noc, sizeof(unsigned int), 1, (FILE *)fp)) {
     fprintf(stderr, "Failed to write header to binary output %s\n", name);
-    exit(1);
+    return 0;
   }
+  return 1;
 }

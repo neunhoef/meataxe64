@@ -1,5 +1,5 @@
 /*
- * $Id: dtou.c,v 1.1 2001/08/28 21:39:43 jon Exp $
+ * $Id: dtou.c,v 1.2 2001/09/04 23:00:12 jon Exp $
  *
  * Strip out DOS style line termination
  */
@@ -34,5 +34,5 @@ int main(int argc, const char * const argv[])
       break;
     }
   }
-  return 1;
+  return 0;
 }

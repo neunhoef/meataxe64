@@ -1,5 +1,5 @@
 /*
- * $Id: pr.c,v 1.1 2001/08/30 18:31:45 jon Exp $
+ * $Id: pr.c,v 1.2 2001/09/04 23:00:12 jon Exp $
  *
  * Print a matrix
  *
@@ -61,7 +61,11 @@ int main(int argc, const char * const argv[])
   elts_per_word = bits_in_unsigned_int / nob;
   row_words = (noc + elts_per_word - 1) / elts_per_word;
   row_chars = row_words * sizeof(unsigned int);
-  write_text_header(stdout, h);
+  if (0 == write_text_header(stdout, h)) {
+    fprintf(stderr, "pr: cannot write text header, terminating\n");
+    fclose(inp);
+    exit(1);
+  }
   row = malloc(row_chars);
   if (NULL == row) {
     fprintf(stderr, "pr: cannot allocate row for %s, terminating\n", in);
@@ -114,5 +118,5 @@ int main(int argc, const char * const argv[])
     }
   }
   fclose(inp);
-  return 1;
+  return 0;
 }

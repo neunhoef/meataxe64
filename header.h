@@ -1,5 +1,5 @@
 /*
- * $Id: header.h,v 1.2 2001/08/30 18:31:45 jon Exp $
+ * $Id: header.h,v 1.3 2001/09/04 23:00:12 jon Exp $
  *
  * Internal header for meataxe
  *
@@ -20,7 +20,7 @@ extern unsigned int header_get_nor(const header);
 extern void header_set_nor(header, unsigned int);
 extern unsigned int header_get_noc(const header);
 extern void header_set_noc(header, unsigned int);
-extern header header_alloc(void);
+extern int header_alloc(header *);
 extern void header_free(header);
 extern header header_create(unsigned int prime, unsigned int nob,
                             unsigned int nod, unsigned int noc,

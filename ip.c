@@ -1,5 +1,5 @@
 /*
- * $Id: ip.c,v 1.3 2001/09/02 22:16:41 jon Exp $
+ * $Id: ip.c,v 1.4 2001/09/04 23:00:12 jon Exp $
  *
  * Read a matrix
  *
@@ -55,7 +55,11 @@ int main(int argc, const char * const argv[])
     fclose(outp);
     exit(1);
   }
-  write_binary_header(outp, h, out);
+  if (0 == write_binary_header(outp, h, out)) {
+    fclose(inp);
+    fclose(outp);
+    exit(1);
+  }
   prime = header_get_prime(h);
   nob = header_get_nob(h);
   nor = header_get_nor(h);
@@ -98,5 +102,5 @@ int main(int argc, const char * const argv[])
   }
   fclose(inp);
   fclose(outp);
-  return 1;
+  return 0;
 }

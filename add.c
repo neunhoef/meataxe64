@@ -1,5 +1,5 @@
 /*
- * $Id: add.c,v 1.3 2001/09/02 22:16:41 jon Exp $
+ * $Id: add.c,v 1.4 2001/09/04 23:00:12 jon Exp $
  *
  * Function to add two matrices to give a third
  *
@@ -68,7 +68,13 @@ int add(const char *m1, const char *m2, const char *m3, const char *name)
     fclose(outp);
     return 0;
   }
-  write_binary_header(outp, h1, m3);
+  if (0 == write_binary_header(outp, h1, m3)) {
+    fprintf(stderr, "%s cannot write header to %s, terminating\n", name, m3);
+    fclose(inp1);
+    fclose(inp2);
+    fclose(outp);
+    return 0;
+  }
   if (0 == row_malloc(nob, noc, &row1) ||
       0 == row_malloc(nob, noc, &row2) ||
       0 == row_malloc(nob, noc, &row3)) {

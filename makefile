@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.4 2001/09/02 22:16:41 jon Exp $
+# $Id: makefile,v 1.5 2001/09/04 23:00:12 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -20,8 +20,6 @@ MU_TARGET=	mu
 PR_TARGET=	pr
 DTOU_TARGET=	dtou
 
-TARGETS=	$(IP_TARGET) $(DTOU_TARGET)
-
 AD_MODULES=	ad add elements endian header primes read rows utils write
 ID_MODULES=	id elements endian header primes rows utils write
 IP_MODULES=	elements endian header ip primes read utils write
@@ -29,7 +27,7 @@ MU_MODULES=	elements endian grease header matrix mu mul primes read rows utils w
 PR_MODULES=	elements endian header pr primes read utils write
 DTOU_MODULES=	dtou
 
-MODULES=	$(IP_MODULES) $(DTOU_MODULES)
+MODULES=	$(AD_MODULES) $(ID_MODULES) $(IP_MODULES) $(MU_MODULES) $(PR_MODULES) $(DTOU_MODULES)
 
 #
 # Modify this from the command line to change where derived files go

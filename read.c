@@ -1,5 +1,5 @@
 /*
- * $Id: read.c,v 1.4 2001/09/02 22:16:41 jon Exp $
+ * $Id: read.c,v 1.5 2001/09/04 23:00:12 jon Exp $
  *
  * Read a header
  *
@@ -39,8 +39,8 @@ int read_text_header(const FILE *fp, header *hp, const char *name)
   assert(NULL != name);
   j = fread(str, 1, LINE_LENGTH, (FILE *)fp);
   if (LINE_LENGTH != j) {
-    fprintf(stderr, "End of file reading '%s', terminating\n", name);
-    exit(1);
+    fprintf(stderr, "End of file reading '%s'\n", name);
+    return 0;
   }
   i = fgetc((FILE *)fp);
   while (i >= 0 && '\n' != (char)i) {
@@ -50,17 +50,29 @@ int read_text_header(const FILE *fp, header *hp, const char *name)
       break;
   }
   if ('\n' != (char)i) {
-    fprintf(stderr, "Newline expected reading '%s', terminating\n", name);
-    exit(1);
+    fprintf(stderr, "Newline expected reading '%s'\n", name);
+    return 0;
   }
-  nod = read_decimal(str, 2);
-  prime = read_decimal(str+2, 6);
+  if (0 == read_decimal(str, 2, &nod)) {
+    fprintf(stderr, "Failed to read nod from %s\n", name);
+    return 0;
+  }
+  if (0 == read_decimal(str+2, 6, &prime)) {
+    fprintf(stderr, "Failed to read prime from %s\n", name);
+    return 0;
+  }
   if (0 == is_a_prime_power(prime)) {
-    fprintf(stderr, "Prime power expected, found %d reading %s, terminating\n", prime, name);
-    exit(1);
+    fprintf(stderr, "Prime power expected, found %d reading %s\n", prime, name);
+    return 0;
   }
-  nor = read_decimal(str+2+6, 6);
-  noc = read_decimal(str+2+6+6, 6);
+  if (0 == read_decimal(str+2+6, 6, &nor)) {
+    fprintf(stderr, "Failed to read nor from %s\n", name);
+    return 0;
+  }
+  if (0 == read_decimal(str+2+6+6, 6, &noc)) {
+    fprintf(stderr, "Failed to read noc from %s\n", name);
+    return 0;
+  }
   nob = bits_of(prime);
   *hp = header_create(prime, nob, nod, noc, nor);
   return 1;
@@ -78,17 +90,20 @@ int read_binary_header(const FILE *fp, header *hp, const char *name)
   assert(NULL != hp);
   assert(NULL != fp);
   assert(NULL != name);
-  h = header_alloc();
+  if (0 == header_alloc(&h)) {
+    fprintf(stderr, "Failed to allocate header for binary input %s\n", name);
+    return 0;
+  }
   if (1 != fread(&nob, sizeof(unsigned int), 1, (FILE *)fp) ||
       1 != fread(&prime, sizeof(unsigned int), 1, (FILE *)fp) ||
       1 != fread(&nor, sizeof(unsigned int), 1, (FILE *)fp) ||
       1 != fread(&noc, sizeof(unsigned int), 1, (FILE *)fp)) {
     fprintf(stderr, "Failed to read header from binary input %s\n", name);
-    exit(1);
+    return 0;
   }
   if (0 == is_a_prime_power(prime)) {
-    fprintf(stderr, "Prime power expected, found %d reading %s, terminating\n", prime, name);
-    exit(1);
+    fprintf(stderr, "Prime power expected, found %d while reading %s\n", prime, name);
+    return 0;
   }
   nod = digits_of(prime);
   header_set_nob(h, nob);

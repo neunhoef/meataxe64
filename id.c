@@ -1,5 +1,5 @@
 /*
- * $Id: id.c,v 1.1 2001/09/02 22:16:41 jon Exp $: ad.c,v 1.1 2001/08/30 18:31:45 jon Exp $
+ * $Id: id.c,v 1.2 2001/09/04 23:00:12 jon Exp $: ad.c,v 1.1 2001/08/30 18:31:45 jon Exp $
  *
  * Generate identity matrix
  *
@@ -34,13 +34,22 @@ int main(int argc, const char * const argv[])
     exit(1);
   }
   out = argv[4];
-  prime = read_decimal(argv[1], strlen(argv[1]));
+  if (0 == read_decimal(argv[1], strlen(argv[1]), &prime)) {
+    fprintf(stderr, "Failed to read prime from command line\n");
+    return 0;
+  }
   if (0 == is_a_prime_power(prime)) {
     fprintf(stderr, "id: non prime %d\n", prime);
     exit(1);
   }
-  nor = read_decimal(argv[2], strlen(argv[2]));
-  noc = read_decimal(argv[3], strlen(argv[3]));
+  if (0 == read_decimal(argv[2], strlen(argv[2]), &nor)) {
+    fprintf(stderr, "Failed to read nor from command line\n");
+    return 0;
+  }
+  if (0 == read_decimal(argv[3], strlen(argv[3]), &noc)) {
+    fprintf(stderr, "Failed to read noc from command line\n");
+    return 0;
+  }
   nob = bits_of(prime);
   nod = digits_of(prime);
   endian_init();
@@ -50,7 +59,11 @@ int main(int argc, const char * const argv[])
     exit(1);
   }
   h = header_create(prime, nob, nod, noc, nor);
-  write_binary_header(outp, h, out);
+  if (0 == write_binary_header(outp, h, out)) {
+    fprintf(stderr, "id: cannot write header\n");
+    fclose(outp);
+    exit(1);
+  }
   if (0 == row_malloc(nob, noc, &row)) {
     fprintf(stderr, "id: cannot create output row\n");
     fclose(outp);
@@ -68,5 +81,5 @@ int main(int argc, const char * const argv[])
     }
   }
   fclose(outp);
-  return 1;
+  return 0;
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: rows.c,v 1.2 2001/09/02 22:16:41 jon Exp $
+ * $Id: rows.c,v 1.3 2001/09/04 23:00:12 jon Exp $
  *
  * Row manipulation for meataxe
  *
@@ -12,22 +12,16 @@
 #include "utils.h"
 #include "rows.h"
 
-typedef int (*row_adder)(const unsigned int *, const unsigned int *,
-                         unsigned int *, unsigned int, unsigned int);
-
 static int row_add_2(const unsigned int *row1, const unsigned int *row2,
-                     unsigned int *row3, unsigned int nob, unsigned int noc)
+                     unsigned int *row3, unsigned int noc)
 {
-  unsigned int elts_per_word;
   unsigned int row_words;
   unsigned int i;
-  assert(0 != nob);
   assert(0 != noc);
   assert(NULL != row1);
   assert(NULL != row2);
   assert(NULL != row3);
-  elts_per_word = bits_in_unsigned_int / nob;
-  row_words = (noc + elts_per_word - 1) / elts_per_word;
+  row_words = (noc + bits_in_unsigned_int - 1) / bits_in_unsigned_int;
   for (i = 0; i < row_words; i++) {
     *(row3++) = *(row1++) ^ *(row2++);
   }
@@ -38,8 +32,9 @@ int row_add(const unsigned int *row1, const unsigned int *row2,
             unsigned int *row3, unsigned int prime,
             unsigned int nob, unsigned int noc)
 {
+  NOT_USED(nob);
   if (2 == prime) {
-    return row_add_2(row1, row2, row3, nob, noc);
+    return row_add_2(row1, row2, row3, noc);
   } else {
     return 0;
   }
@@ -78,3 +73,12 @@ void row_init(unsigned int *row, unsigned int nob, unsigned int noc)
   memset(row, 0, row_chars);
 }
 
+int rows_init(unsigned int prime, row_opsp ops)
+{
+  if (2 == prime) {
+    ops->adder = &row_add_2;
+    return 1;
+  } else {
+    return 0;
+  }
+}
