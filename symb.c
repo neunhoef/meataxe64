@@ -1,5 +1,5 @@
 /*
- * $Id: symb.c,v 1.6 2003/06/21 14:04:24 jon Exp $
+ * $Id: symb.c,v 1.7 2004/04/25 16:31:48 jon Exp $
  *
  * Function to compute a symmetry basis
  *
@@ -289,7 +289,7 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
       exit(1);
     }
     /* Compute the map[0] entry, and fail if blank */
-    echelise(ech_rows, 1, &d, &new_map, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, 1, name);
+    echelise(&row_operations, ech_rows, 1, &d, &new_map, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, 1, name);
     /* Clean up the rows we use for basis detection, 
      * either for multiple rows, or non-identity leading non-zero entry */
     if (0 == d) {
@@ -342,13 +342,13 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
           exit(1);
         }
         /* Prune the results */
-        clean(ech_rows, sub_nor, mat + rows_to_do, rows_to_do, map, NULL, NULL, 0,
+        clean(&row_operations, ech_rows, sub_nor, mat + rows_to_do, rows_to_do, map, NULL, NULL, 0,
               grease.level, prime, len, nob, 900, 0, 0, verbose, name);
-        echelise(mat + rows_to_do, rows_to_do, &d, &new_map, NULL, 0,
+        echelise(&row_operations, mat + rows_to_do, rows_to_do, &d, &new_map, NULL, 0,
                  grease.level, prime, len, nob, 900, 0, 0, 1, name);
         /* Now we know which rows are new */
         if (sub_nor + d < space_size) {
-          clean(mat + rows_to_do, rows_to_do, ech_rows, sub_nor, new_map, NULL, NULL, 0,
+          clean(&row_operations, mat + rows_to_do, rows_to_do, ech_rows, sub_nor, new_map, NULL, NULL, 0,
                 grease.level, prime, len, nob, 900, 0, 0, 0, name);
         }
         /* Reset to file pointer in t_in */
@@ -571,7 +571,7 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
     for (j = 0; j < space_size; j++) {
       memcpy(ech_rows[j], mat[j], len * sizeof(unsigned int));
     }
-    if (0 == clean_file(temp, &count, ech_rows, space_size, mat + space_size, total_rows - space_size,
+    if (0 == clean_file(&row_operations, temp, &count, ech_rows, space_size, mat + space_size, total_rows - space_size,
                         map, NULL, 0, grease.level, prime, len, nob, 900, name)) {
       cleanup(NULL, 0, name1, name2, name_o1, name_o2, NULL, NULL, NULL, &t1, &t2, temp);
       exit(1);

@@ -1,5 +1,5 @@
 /*
- * $Id: msb.c,v 1.7 2003/06/21 13:19:13 jon Exp $
+ * $Id: msb.c,v 1.8 2004/04/25 16:31:48 jon Exp $
  *
  * Function to spin some vectors under two generators to obtain a standard base
  *
@@ -167,7 +167,7 @@ unsigned int spin(const char *in, const char *out,
   }
   map = my_malloc(max_rows * sizeof(int));
   assert(1 == nor);
-  echelise(rows2, nor, &d, &new_map, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, 1, name);
+  echelise(&row_operations, rows2, nor, &d, &new_map, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, 1, name);
   /* Clean up the rows we use for basis detection, 
    * either for multiple rows, or non-identity leading non-zero entry */
   free(new_map);
@@ -211,13 +211,13 @@ unsigned int spin(const char *in, const char *out,
         memcpy(rows2[nor + i], rows1[nor + i], len * sizeof(unsigned int));
       }
       gen->nor += stride;
-      clean(rows2, nor, rows2 + nor, stride, map, NULL, NULL, 0,
+      clean(&row_operations, rows2, nor, rows2 + nor, stride, map, NULL, NULL, 0,
             grease.level, prime, len, nob, 900, 0, 0, verbose, name);
-      echelise(rows2 + nor, stride, &d, &new_map, NULL, 0,
+      echelise(&row_operations, rows2 + nor, stride, &d, &new_map, NULL, 0,
                grease.level, prime, len, nob, 900, 0, 0, 1, name);
       /* Now we know which rows are new */
       if (nor + d < noc) {
-        clean(rows2 + nor, stride, rows2, nor, new_map, NULL, NULL, 0,
+        clean(&row_operations, rows2 + nor, stride, rows2, nor, new_map, NULL, NULL, 0,
               grease.level, prime, len, nob, 900, 0, 0, 0, name);
       } else {
         /* No point in cleaning if we have the whole space */

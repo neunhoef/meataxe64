@@ -1,5 +1,5 @@
 /*
- * $Id: project.c,v 1.9 2003/07/28 21:07:31 jon Exp $
+ * $Id: project.c,v 1.10 2004/04/25 16:31:48 jon Exp $
  *
  * Function to project into quotient space representation
  *
@@ -190,7 +190,7 @@ void project(const char *range, const char *in,
         cleanup(inp_r, inp_g, outp);
         exit(1);
       }
-      clean(rows1, stride_k, rows2, stride_j, map_r + k, NULL, NULL, 0,
+      clean(&row_operations, rows1, stride_k, rows2, stride_j, map_r + k, NULL, NULL, 0,
             grease.level, prime, len, nob, 900, 0, 0, verbose, name);
     }
     for (d = 0; d < stride_j; d++) {

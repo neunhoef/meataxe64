@@ -1,5 +1,5 @@
 /*
- * $Id: singular.c,v 1.6 2004/02/15 10:27:17 jon Exp $
+ * $Id: singular.c,v 1.7 2004/04/25 16:31:48 jon Exp $
  *
  * Function to find a singular vector, given a quadratic form
  *
@@ -23,7 +23,8 @@
 #include "utils.h"
 #include "write.h"
 
-int singular_vector(unsigned int **rows, unsigned int **work,
+int singular_vector(row_ops *row_operations,
+                    unsigned int **rows, unsigned int **work,
                     unsigned int *out, unsigned int *out_num, FILE *formp,
                     unsigned int noc, unsigned int nor, unsigned int nob,
                     unsigned int len, unsigned int prime, grease grease,
@@ -32,7 +33,6 @@ int singular_vector(unsigned int **rows, unsigned int **work,
   unsigned int products[3][3], vector[3];
   unsigned int i, j, power = 1;
   prime_ops prime_operations;
-  row_ops row_operations;
   assert(NULL != rows);
   assert(NULL != work);
   assert(NULL != out);
@@ -47,7 +47,6 @@ int singular_vector(unsigned int **rows, unsigned int **work,
   assert(0 != prime);
   assert(is_a_prime_power(prime));
   primes_init(prime, &prime_operations);
-  rows_init(prime, &row_operations);
   if (nor >= 3) {
     nor = 3;
   }
@@ -57,7 +56,7 @@ int singular_vector(unsigned int **rows, unsigned int **work,
   }
   for (i = 0; i < nor; i++) {
     for (j = 0; j < nor; j++) {
-      products[i][j] = (*row_operations.product)(rows[i], work[j], len);
+      products[i][j] = (*row_operations->product)(rows[i], work[j], len);
       /*
       printf("products[%d][%d] = %d\n", i, j, products[i][j]);
       */
@@ -86,9 +85,9 @@ int singular_vector(unsigned int **rows, unsigned int **work,
         for (l = 0; l < nor; l++) {
           if (0 != vector[l]) {
             if (1 != vector[l]) {
-              (*row_operations.scaled_incer)(rows[l], out, len, vector[l]);
+              (*row_operations->scaled_incer)(rows[l], out, len, vector[l]);
             } else {
-              (*row_operations.incer)(rows[l], out, len);
+              (*row_operations->incer)(rows[l], out, len);
             }
           }
         }
@@ -128,9 +127,9 @@ int singular_vector(unsigned int **rows, unsigned int **work,
         for (l = 0; l < nor; l++) {
           if (0 != vector[l]) {
             if (1 != vector[l]) {
-              (*row_operations.scaled_incer)(rows[l], out, len, vector[l]);
+              (*row_operations->scaled_incer)(rows[l], out, len, vector[l]);
             } else {
-              (*row_operations.incer)(rows[l], out, len);
+              (*row_operations->incer)(rows[l], out, len);
             }
           }
         }
@@ -235,7 +234,7 @@ int singular(const char *space, const char *form, const char *out, const char *n
     return 1;
   }
   fclose(inp1);
-  res = singular_vector(mat, mat + 3, out_row, &out_num, inp2,
+  res = singular_vector(&row_operations, mat, mat + 3, out_row, &out_num, inp2,
                         nor, nor, nob, len, prime, &grease, 0, form, name);
   matrix_free(mat);
   fclose(inp2);

@@ -1,5 +1,5 @@
 /*
- * $Id: tspf.c,v 1.13 2003/06/28 10:15:50 jon Exp $
+ * $Id: tspf.c,v 1.14 2004/04/25 16:31:48 jon Exp $
  *
  * Function to spin some vectors under two generators in tensor space
  * using intermediate files in a temporary directory.
@@ -260,7 +260,7 @@ unsigned int spin(const char *in, const char *out,
       create_pointers(rows2[j], mat_rows, nor1, len2, prime);
       v_to_m(rows1[j], mat_rows, nor1, nor2, prime);
     }
-    if (0 == clean_file(echelised, &clean_nor, rows2, stride, rows1, max_rows,
+    if (0 == clean_file(&row_operations, echelised, &clean_nor, rows2, stride, rows1, max_rows,
                         map, NULL, 0, grease.level, prime,
                         len, nob, 900, name)) {
       cleanup(inp, f_a1, f_b1, f_a2, f_b2);
@@ -391,7 +391,7 @@ unsigned int spin(const char *in, const char *out,
         printf("%s: cleaning %d rows\n", name, stride);
         fflush(stdout);
       }
-      if (0 == clean_file(echelised, &d, rows1, stride, rows2, step,
+      if (0 == clean_file(&row_operations, echelised, &d, rows1, stride, rows2, step,
                           map, NULL, 0, grease.level, prime,
                           len, nob, 900, name)) {
         cleanup_tmp(echelised, name_echelised);

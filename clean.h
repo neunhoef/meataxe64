@@ -1,5 +1,5 @@
 /*
- * $Id: clean.h,v 1.7 2003/02/28 20:04:58 jon Exp $
+ * $Id: clean.h,v 1.8 2004/04/25 16:31:47 jon Exp $
  *
  * Cleaning and echilisation for meataxe
  *
@@ -12,7 +12,8 @@
 
 /* Clean m2 with m1 */
 /* Record in m2_e with m1_e if record != 0 */
-extern void clean(unsigned int **m1, unsigned int d1,
+extern void clean(row_ops *row_operations,
+                  unsigned int **m1, unsigned int d1,
                   unsigned int **m2, unsigned int d2, int *map,
                   unsigned int **m1_e, unsigned int **m2_e, int record,
                   unsigned int grease_level, unsigned int prime,
@@ -20,7 +21,8 @@ extern void clean(unsigned int **m1, unsigned int d1,
                   unsigned int start, unsigned int start_e,
                   unsigned int len_e, int verbose, const char *name);
 
-extern void echelise(unsigned int **m, unsigned int d,
+extern void echelise(row_ops *row_operations,
+                     unsigned int **m, unsigned int d,
                      unsigned int *d_out, int **map,
                      unsigned int **m_e, int record,
                      unsigned int grease_level, unsigned int prime,

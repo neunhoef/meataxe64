@@ -1,5 +1,5 @@
 /*
- * $Id: clean_file.c,v 1.4 2003/02/28 20:04:58 jon Exp $
+ * $Id: clean_file.c,v 1.5 2004/04/25 16:31:47 jon Exp $
  *
  * Cleaning and echilisation, when the already clean vectors
  * are in a file which is to be updated
@@ -22,7 +22,8 @@
 /* nor is total rows in file, nor1 is number in rows1 */
 /* nor2 is space available in rows2 (scratch) */
 /* Also, if asked, return the map for input rows (needed for standard base) */
-int clean_file(FILE *clean_vectors, unsigned int *nor,
+int clean_file(row_ops *row_operations,
+               FILE *clean_vectors, unsigned int *nor,
                unsigned int **rows1, unsigned int nor1,
                unsigned int **rows2, unsigned int nor2,
                int *map, int *new_map, int record,
@@ -59,11 +60,11 @@ int clean_file(FILE *clean_vectors, unsigned int *nor,
         fprintf(stderr, "%s: failed to read %d rows from temporary file, terminating\n", name, stride);
         return 0;
       }
-      clean(rows2, stride, rows1, nor1, map + i, NULL, NULL, 0,
+      clean(row_operations, rows2, stride, rows1, nor1, map + i, NULL, NULL, 0,
             grease_level, prime, len, nob, start, 0, 0, 0, name);
     }
   }
-  echelise(rows1, nor1, &d, &internal_new_map, NULL, 0,
+  echelise(row_operations, rows1, nor1, &d, &internal_new_map, NULL, 0,
            grease_level, prime, len, nob, start, 0, 0, 1, name);
   if (0 != d) {
     if (0 != my_nor) {
@@ -81,7 +82,7 @@ int clean_file(FILE *clean_vectors, unsigned int *nor,
           return 0;
         }
         /* Clean the rows we read with the newly made rows */
-        clean(rows1, nor1, rows2, stride2, internal_new_map, NULL, NULL, 0,
+        clean(row_operations, rows1, nor1, rows2, stride2, internal_new_map, NULL, NULL, 0,
               grease_level, prime, len, nob, start, 0, 0, 0, name);
         /* Write back the cleaned version to echelised */
         fseeko64(clean_vectors, ptr, SEEK_SET);

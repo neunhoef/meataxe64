@@ -1,5 +1,5 @@
 /*
- * $Id: iv.c,v 1.6 2002/11/30 10:36:26 jon Exp $
+ * $Id: iv.c,v 1.7 2004/04/25 16:31:48 jon Exp $
  *
  * Invert a matrix
  *
@@ -29,7 +29,6 @@ void invert(const char *m1, const char *m2, const char *name)
   unsigned int prime, nob, nor, len, n, r, **mat1, **mat2;
   int *map1, *map2;
   int is_perm;
-  grease_struct grease;
   assert(NULL != m1);
   assert(NULL != m2);
   assert(NULL != name);
@@ -54,6 +53,9 @@ void invert(const char *m1, const char *m2, const char *name)
     fclose(inp);
     header_free(h);
   } else {
+    row_ops row_operations;
+    grease_struct grease;
+    rows_init(prime, &row_operations);
     len = header_get_len(h);
     r = memory_rows(len, 100);
     if (memory_rows(len, 400) < nor || r < prime) {
@@ -88,7 +90,7 @@ void invert(const char *m1, const char *m2, const char *name)
       row_init(mat2[n], len);
       put_element_to_row(nob, n, mat2[n], 1);
     }
-    echelise(mat1, nor, &n, &map1, mat2, 1, grease.level, prime, len, nob, 800, 900, len, 1, name);
+    echelise(&row_operations, mat1, nor, &n, &map1, mat2, 1, grease.level, prime, len, nob, 800, 900, len, 1, name);
     if (nor != n) {
       fprintf(stderr, "%s: matrix %s is singular with rank %d, terminating\n", name, m1, n);
       exit(1);

@@ -1,5 +1,5 @@
 /*
- * $Id: rn.c,v 1.13 2002/06/28 08:39:16 jon Exp $
+ * $Id: rn.c,v 1.14 2004/04/25 16:31:48 jon Exp $
  *
  * Compute the rank of a matrix
  *
@@ -25,7 +25,6 @@ int rank(const char *m, unsigned int *r, const char *name)
   unsigned int prime, nob, nor, len, n, **mat;
   int *map;
   int is_perm;
-  grease_struct grease;
   assert(NULL != m);
   assert(NULL != name);
   assert(NULL != r);
@@ -45,6 +44,9 @@ int rank(const char *m, unsigned int *r, const char *name)
     }
     header_free(h);
   } else {
+    row_ops row_operations;
+    grease_struct grease;
+    rows_init(prime, &row_operations);
     header_free(h);
     n = memory_rows(len, 100);
     if (memory_rows(len, 900) < nor || n < prime) {
@@ -67,7 +69,7 @@ int rank(const char *m, unsigned int *r, const char *name)
       fclose(inp);
       return 0;
     }
-    echelise(mat, nor, r, &map, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, 0, name);
+    echelise(&row_operations, mat, nor, r, &map, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, 0, name);
     matrix_free(mat);
     free(map);
   }

@@ -1,5 +1,5 @@
 /*
- * $Id: msbf.c,v 1.10 2003/06/21 13:19:13 jon Exp $
+ * $Id: msbf.c,v 1.11 2004/04/25 16:31:48 jon Exp $
  *
  * Function to spin some vectors under multiple generators to obtain a standard base
  *
@@ -220,7 +220,7 @@ unsigned int spin(const char *in, const char *out, const char *dir,
   map = my_malloc(noc * sizeof(int));
   /* And compute the first entry */
   assert(1 == nor);
-  echelise(rows2, 1, &d, &new_map, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, 1, name);
+  echelise(&row_operations, rows2, 1, &d, &new_map, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, 1, name);
   /* Clean up the rows we use for basis detection, 
    * in case of non-identity leading non-zero entry */
   free(new_map);
@@ -292,7 +292,7 @@ unsigned int spin(const char *in, const char *out, const char *dir,
         printf("%s: cleaning %d rows\n", name, stride);
         fflush(stdout);
       }
-      if (0 == clean_file(echelised, &d, rows2, stride, rows3, step,
+      if (0 == clean_file(&row_operations, echelised, &d, rows2, stride, rows3, step,
                           map, new_map, 1, grease.level, prime,
                           len, nob, 900, name)) {
         cleanup_all(NULL, argc, files, basis, echelised, name_basis, name_echelised);

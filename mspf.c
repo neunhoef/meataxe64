@@ -1,5 +1,5 @@
 /*
- * $Id: mspf.c,v 1.15 2004/02/21 08:57:44 jon Exp $
+ * $Id: mspf.c,v 1.16 2004/04/25 16:31:48 jon Exp $
  *
  * Function to spin some vectors under multiple generators
  * using intermediate files in a temporary directory.
@@ -202,7 +202,7 @@ unsigned int spin(const char *in, const char *out, const char *dir,
       cleanup_all(inp, argc, files, echelised, name_echelised);
       exit(1);
     }
-    if (0 == clean_file(echelised, &clean_nor, rows1, stride, rows2, max_rows,
+    if (0 == clean_file(&row_operations, echelised, &clean_nor, rows1, stride, rows2, max_rows,
                         map, NULL, 0, grease.level, prime,
                         len, nob, 900, name)) {
       cleanup_all(inp, argc, files, echelised, name_echelised);
@@ -266,7 +266,7 @@ unsigned int spin(const char *in, const char *out, const char *dir,
         printf("%s: cleaning %d rows\n", name, stride);
         fflush(stdout);
       }
-      if (0 == clean_file(echelised, &d, rows1, stride, rows2, step,
+      if (0 == clean_file(&row_operations, echelised, &d, rows1, stride, rows2, step,
                           map, NULL, 0, grease.level, prime,
                           len, nob, 900, name)) {
         cleanup_all(NULL, argc, files, echelised, name_echelised);

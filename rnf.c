@@ -1,5 +1,5 @@
 /*
- * $Id: rnf.c,v 1.14 2003/02/28 20:04:58 jon Exp $
+ * $Id: rnf.c,v 1.15 2004/04/25 16:31:48 jon Exp $
  *
  * Compute the rank of a matrix, using temporary files
  *
@@ -49,6 +49,7 @@ unsigned int rank(const char *m1, const char *dir, const char *name)
   const header *h;
   unsigned int prime, nob, nod, noc, nor, len, n, r, **mat1, **mat2, i, rows_to_do, max_rows, step1, step2;
   int *map;
+  row_ops row_operations;
   grease_struct grease;
   const char *tmp = tmp_name();
   char *name1, *name2;
@@ -93,6 +94,7 @@ unsigned int rank(const char *m1, const char *dir, const char *name)
   noc = header_get_noc(h);
   len = header_get_len(h);
   header_free(h);
+  rows_init(prime, &row_operations);
   max_rows = memory_rows(len, 800);
   r = memory_rows(len, 100);
   if (r < prime) {
@@ -127,7 +129,7 @@ unsigned int rank(const char *m1, const char *dir, const char *name)
       cleanup(t1, t2);
       exit(1);
     }
-    echelise(mat1, stride, &n, &map, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, 1, name);
+    echelise(&row_operations, mat1, stride, &n, &map, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, 1, name);
     rows_remaining -= stride;
     if (0 != n) {
       /* Some addition to the rank */
@@ -160,7 +162,7 @@ unsigned int rank(const char *m1, const char *dir, const char *name)
             cleanup(t1, t2);
             exit(1);
           }
-          clean(mat1, stride, mat2, stride2, map, NULL, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, verbose, name);
+          clean(&row_operations, mat1, stride, mat2, stride2, map, NULL, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, verbose, name);
           for (j = 0; j < stride2; j++) {
             if (0 == row_is_zero(mat2[j], len)) {
               errno = 0;

@@ -1,5 +1,5 @@
 /*
- * $Id: ns.c,v 1.10 2003/02/10 23:20:55 jon Exp $
+ * $Id: ns.c,v 1.11 2004/04/25 16:31:48 jon Exp $
  *
  * Compute the null space of a matrix
  *
@@ -27,6 +27,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *name)
   header *h2;
   unsigned int prime, nob, nor, len1, len2, space1, space2, sub1, sub2, n, r, **mat1, **mat2;
   int *map;
+  row_ops row_operations;
   grease_struct grease;
   assert(NULL != m1);
   assert(NULL != m2);
@@ -40,6 +41,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *name)
     fclose(inp);
     exit(1);
   }
+  rows_init(prime, &row_operations);
   nob = header_get_nob(h1);
   nor = header_get_nor(h1);
   len1 = header_get_len(h1);
@@ -94,7 +96,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *name)
     row_init(mat2[n], len2);
     put_element_to_row(nob, n, mat2[n], 1);
   }
-  echelise(mat1, nor, &n, &map, mat2, 1, grease.level, prime, len1, nob, 0, sub1, len2, 0, name);
+  echelise(&row_operations, mat1, nor, &n, &map, mat2, 1, grease.level, prime, len1, nob, 0, sub1, len2, 0, name);
   matrix_free(mat1);
   if (n < nor) {
     /* Output null rows of mat2 */

@@ -1,5 +1,5 @@
 /*
- * $Id: nsf.c,v 1.15 2003/04/28 19:44:47 jon Exp $
+ * $Id: nsf.c,v 1.16 2004/04/25 16:31:48 jon Exp $
  *
  * Compute the nullspace of a matrix, using temporary files
  *
@@ -55,6 +55,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
       n, r, **mat1, **mat2, **mat3, **mat4,
       i, rows_to_do, max_rows, step1, step2;
   int *map;
+  row_ops row_operations;
   grease_struct grease;
   const char *tmp = tmp_name();
   char *name1, *name2, *name3, *name4, *name5;
@@ -109,6 +110,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
     fclose(f.f);
     exit(1);
   }
+  rows_init(prime, &row_operations);
   nob = header_get_nob(h);
   nod = header_get_nod(h);
   nor = header_get_nor(h);
@@ -200,7 +202,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
       exit(1);
     }
     /* Clean input and record */
-    echelise(mat1, stride, &n, &map, mat3, 1, grease.level, prime, len, nob, 0, space, len_id, 1, name);
+    echelise(&row_operations, mat1, stride, &n, &map, mat3, 1, grease.level, prime, len, nob, 0, space, len_id, 1, name);
     rows_remaining -= stride;
     /* Output any new null vectors */
     for (i = 0; i < stride; i++) {
@@ -284,7 +286,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
             cleanup(t1, t2, name5);
             exit(1);
           }
-          clean(mat1, stride, mat2, stride2, map, mat3, mat4, 1, grease.level, prime, len, nob, 0, space, len_id, verbose, name);
+          clean(&row_operations, mat1, stride, mat2, stride2, map, mat3, mat4, 1, grease.level, prime, len, nob, 0, space, len_id, verbose, name);
           for (j = 0; j < stride2; j++) {
             errno = 0;
             if (0 == endian_write_row(out->f, mat2[j], len)) {

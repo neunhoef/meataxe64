@@ -1,5 +1,5 @@
 /*
- * $Id: tsp.c,v 1.12 2003/06/21 21:56:57 jon Exp $
+ * $Id: tsp.c,v 1.13 2004/04/25 16:31:48 jon Exp $
  *
  * Function to spin some vectors under two generators in tensor space
  *
@@ -209,7 +209,7 @@ unsigned int spin(const char *in, const char *out,
   }
   fclose(inp);
   map = my_malloc(max_rows * sizeof(int));
-  echelise(rows, nor, &d, &new_map, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, 1, name);
+  echelise(&row_operations, rows, nor, &d, &new_map, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, 1, name);
   if (0 == d) {
     fprintf(stderr, "%s: %s contains no non-zero vectors, terminating\n", name, in);
     cleanup(NULL, f_a1, f_b1, f_a2, f_b2);
@@ -299,11 +299,11 @@ unsigned int spin(const char *in, const char *out,
       }
     }
     gen->nor += rows_to_do;
-    clean(rows, nor, rows + nor, rows_to_do, map, NULL, NULL, 0,
+    clean(&row_operations, rows, nor, rows + nor, rows_to_do, map, NULL, NULL, 0,
           grease.level, prime, len, nob, 900, 0, 0, verbose, name);
-    echelise(rows + nor, rows_to_do, &d, &new_map, NULL, 0,
+    echelise(&row_operations, rows + nor, rows_to_do, &d, &new_map, NULL, 0,
              grease.level, prime, len, nob, 900, 0, 0, 1, name);
-    clean(rows + nor, rows_to_do, rows, nor, new_map, NULL, NULL, 0,
+    clean(&row_operations, rows + nor, rows_to_do, rows, nor, new_map, NULL, NULL, 0,
             grease.level, prime, len, nob, 900, 0, 0, 0, name);
     for (i = 0; i < rows_to_do; i++) {
       if (new_map[i] >= 0) {

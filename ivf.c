@@ -1,5 +1,5 @@
 /*
- * $Id: ivf.c,v 1.6 2003/02/28 20:04:58 jon Exp $
+ * $Id: ivf.c,v 1.7 2004/04/25 16:31:48 jon Exp $
  *
  * Invert a matrix using intermediate files
  *
@@ -45,7 +45,6 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
   unsigned int prime, nob, nor, len, n, r;
   int *map1;
   int is_perm;
-  grease_struct grease;
   assert(NULL != m1);
   assert(NULL != m2);
   assert(NULL != dir);
@@ -81,6 +80,9 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
     /* rows3, rows4 for forward and backward cleaning */
     unsigned int **rows1, **rows2, **rows3, **rows4;
     long long ptr_echelised = 0, ptr_id = 0;
+    row_ops row_operations;
+    grease_struct grease;
+    rows_init(prime, &row_operations);
     /* Create names for the temporary files */
     n = strlen(tmp) + strlen(dir);
     name_echelised = my_malloc(n + 4);
@@ -190,7 +192,7 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
       }
       ptr_echelised = ftello64(echelised);
       ptr_id = ftello64(id);
-      echelise(rows1, stride, &n, &map, rows2, 1, grease.level, prime, len, nob, 900, 950, len, 1, name);
+      echelise(&row_operations, rows1, stride, &n, &map, rows2, 1, grease.level, prime, len, nob, 900, 950, len, 1, name);
       if (stride != n) {
         fprintf(stderr, "%s: matrix %s is singular with rank at most %d, terminating\n", name, m1, nor + n - stride);
         header_free(h);
@@ -234,7 +236,7 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
           cleanup_all(echelised, name_echelised, id, name_id);
         }
         /* Clean the rows we read with the newly made rows */
-        clean(rows1, stride, rows3, stride2, map1 + r, rows2, rows4, 1,
+        clean(&row_operations, rows1, stride, rows3, stride2, map1 + r, rows2, rows4, 1,
               grease.level, prime, len, nob, 900, 950, len, 0, name);
         /* Write back the cleaned version to echelised and id */
         fseeko64(echelised, ptr_e1, SEEK_SET);
@@ -274,7 +276,7 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
           cleanup_all(echelised, name_echelised, id, name_id);
         }
         /* Clean the rows we read with the newly made rows */
-        clean(rows1, stride, rows3, stride2, map1 + r, rows2, rows4, 1,
+        clean(&row_operations, rows1, stride, rows3, stride2, map1 + r, rows2, rows4, 1,
               grease.level, prime, len, nob, 900, 950, len, 0, name);
         /* Write back the cleaned version to echelised and id */
         fseeko64(echelised, ptr_e1, SEEK_SET);

@@ -1,5 +1,5 @@
 /*
- * $Id: sign.c,v 1.8 2004/02/15 10:27:17 jon Exp $
+ * $Id: sign.c,v 1.9 2004/04/25 16:31:48 jon Exp $
  *
  * Function compute the orthogonal group sign
  *
@@ -154,7 +154,7 @@ int sign(const char *qform, const char *bform, const char *name)
       assert(pos + 3 >= nor);
     }
 #endif
-    res = singular_vector(mat + start, mat + noc, sing_row1, &out_num, qinp,
+    res = singular_vector(&row_operations, mat + start, mat + noc, sing_row1, &out_num, qinp,
                           noc, 3, nob, len, prime, &grease, nor - 3, qform, name);
     if (0 != res) {
       fclose(binp);
@@ -252,7 +252,7 @@ int sign(const char *qform, const char *bform, const char *name)
 #endif
   }
   assert(nor == 2 && noc == nor + start);
-  res = singular_vector(mat + start, mat + noc, sing_row1, &out_num, qinp,
+  res = singular_vector(&row_operations, mat + start, mat + noc, sing_row1, &out_num, qinp,
                         noc, nor, nob, len, prime, &grease, 0, qform, name);
   matrix_free(mat);
   free(products);

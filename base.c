@@ -1,5 +1,5 @@
 /*
- * $Id: base.c,v 1.5 2002/11/19 19:09:30 jon Exp $
+ * $Id: base.c,v 1.6 2004/04/25 16:31:47 jon Exp $
  *
  * Form an echelised basis from one file to another
  *
@@ -126,7 +126,7 @@ unsigned int base(const char *in, const char *dir,
       cleanup_tmp(echelised, name_echelised);
       exit(1);
     }
-    if (0 == clean_file(echelised, &nor, rows1, stride, rows2, max_rows,
+    if (0 == clean_file(&row_operations, echelised, &nor, rows1, stride, rows2, max_rows,
                         map, NULL, 0, grease.level, prime, len, nob, 900, name)) {
       fclose(inp);
       cleanup_tmp(echelised, name_echelised);
