@@ -1,5 +1,5 @@
 /*
- * $Id: pco.c,v 1.4 2002/10/13 16:38:07 jon Exp $
+ * $Id: pco.c,v 1.5 2003/07/28 21:04:46 jon Exp $
  *
  * Permuation condense one group element
  *
@@ -111,6 +111,7 @@ int pcondense(const char *in1, const char *in2,
       assert(orbit_numbers[k] < nor_o);
       int_row[orbit_numbers[k]]++;
     }
+#if 0
     k = orb->size;
     if (0 == k % characteristic) {
       fprintf(stderr, "%s: orbit size %d is divisible by field characteristic %d, terminating\n", name, k, characteristic);
@@ -129,6 +130,26 @@ int pcondense(const char *in1, const char *in2,
         put_element_to_clean_row_with_params(nob, j, elts_per_word, row, l);
       }
     }
+#else
+    for (j = 0; j < nor_o; j++) {
+      unsigned int l = int_row[j] % characteristic;
+      if ( 0 != l) {
+        k = (orbits->orbits[j]).size;
+        if (0 == k % characteristic) {
+          fprintf(stderr, "%s: orbit size %d is divisible by field characteristic %d, terminating\n", name, k, characteristic);
+          fclose(outf);
+          exit(1);
+        }
+        k = k % characteristic;
+        assert(0 != k);
+        if (1 != k) {
+          k = operations.invert(k);
+        }
+        l = operations.mul(l, k);
+        put_element_to_clean_row_with_params(nob, j, elts_per_word, row, l);
+      }
+    }
+#endif
     errno = 0;
     if (0 == endian_write_row(outf, row, len)){
       if ( 0 != errno) {

@@ -264,3 +264,4 @@ skew seventh
 20030629 - Fixed sym_basis to use zsymb
 20030720 - Fix minor bug in real_indicate on group signs for odd primes
 20030720 - Add GF9 support first version
+20030725 - Fix bug in zpco where wrong orbit size used
