@@ -1,5 +1,5 @@
 /*
- * $Id: memory.c,v 1.10 2002/07/04 17:50:06 jon Exp $
+ * $Id: memory.c,v 1.11 2002/07/09 10:36:35 jon Exp $
  *
  * Large memory manipulation for meataxe
  *
@@ -77,7 +77,7 @@ unsigned int find_extent(unsigned int nor, unsigned int len)
   assert(0 != nor);
   assert(0 != len);
   avail = memory_rows(len, 10);
-  ratio = nor / ((0 == avail) ? 1 : avail);
+  ratio = ((double)nor) / ((double)((0 == avail) ? 1 : avail));
   avail = (unsigned int)ceil(ratio * avail);
   if (0 == avail) {
     avail = 1;
