@@ -1,5 +1,5 @@
 /*
- * $Id: elements.c,v 1.19 2002/09/27 19:36:59 jon Exp $
+ * $Id: elements.c,v 1.20 2002/09/28 09:47:43 jon Exp $
  *
  * Element manipulation for meataxe
  *
@@ -168,6 +168,22 @@ void put_element_to_row_with_params(unsigned int nob, unsigned int index, unsign
   assert(bit_offset + nob <= bits_in_unsigned_int);
   elt = elt << bit_offset;
   word = (word & (~mask)) | elt;
+  *row = word;
+}
+
+void put_element_to_clean_row_with_params(unsigned int nob, unsigned int index,
+                                          unsigned int elts_per_word, unsigned int *row, unsigned int elt)
+{
+  unsigned int word_offset = index / elts_per_word;
+  unsigned int bit_offset = (index % elts_per_word) * nob;
+  unsigned int word;
+  row += word_offset;
+  word = *row;
+  assert(0 != nob);
+  assert(NULL != row);
+  assert(bit_offset + nob <= bits_in_unsigned_int);
+  elt = elt << bit_offset;
+  word = word | elt;
   *row = word;
 }
 
