@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: new_irred_and_indicate,v 1.4 2002/09/11 21:20:47 jon Exp $
+# $Id: new_irred_and_indicate,v 1.5 2002/10/02 17:03:14 jon Exp $
 #
 # Script to classify an irreducible representation
 # and compute its indicator in characteristic two
@@ -56,7 +56,7 @@ else
 fi
 i=0
 for x in $*; do
-  ord=`singular_order $x`
+  ord=`order $x`
   ret=$?
   if [ 1 -eq $ret ]; then
     echo Cannot compute order of $x
@@ -69,7 +69,7 @@ for x in $*; do
   elif [ 255 -eq $ret ]; then
     continue
   else
-    echo singular_order returns unexpected code $ret
+    echo order returns unexpected code $ret
     exit 1
   fi
 done
