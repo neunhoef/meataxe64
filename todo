@@ -9,7 +9,6 @@ Think about Sn and symmetrized powers
 Optimise monst by reversing bit order
 Investigate better matrix multiplications
 Think about orthogonal group sign
-Consider allowing maps into ztsp and ztspf and ztco
 Look into intermediate file version of find_best_nullity_with_orders and zfln *
 Fix zvp and zps to take less memory
 Think about better grease vector selection for making vectors
