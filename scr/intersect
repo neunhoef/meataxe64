@@ -1,12 +1,12 @@
 #!/bin/sh
 #
-# $Id: intersect,v 1.8 2002/11/29 19:19:01 jon Exp $
+# $Id: intersect,v 1.9 2004/09/12 21:25:17 jon Exp $
 #
 # Script to intersect two spaces
 #
 # Inputs
 # $1: space 1
-# $2 space 2
+# $2: space 2
 # $3: output file
 #
 # Return codes
