@@ -1,11 +1,7 @@
 #
 # win32 specific fragment for building
 #
-# Copyright (C) 2001 Advanced Rendering technology Limited
-# All rights reserved
-# Company confidential
-#
-# $Id: win32.txt,v 1.1 2001/08/28 21:39:44 jon Exp $
+# $Id: win32.txt,v 1.2 2001/09/27 11:45:30 jon Exp $
 #
 EXEEXT= .exe
 LIBEXT= lib

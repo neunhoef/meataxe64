@@ -40,7 +40,9 @@ void wait_lock(const char *task_name)
       fflush(stdout);
       exit(1);
     }
+#if 0
     printf("Acquiring lock\n");
+#endif
     fflush(stdout);
     foo = fopen(name, "wb");
     if (foo == NULL) {
@@ -75,7 +77,9 @@ void wait_lock(const char *task_name)
 	/* Check NFS isn't lying */
 	struct stat buf;
 	int i = stat(name, &buf);
+#if 0
 	printf("link succeeded, checking stat\n");
+#endif
 	fflush(stdout);
 	if (i) {
 	  /* Failed to stat hitch file */
@@ -99,7 +103,9 @@ void wait_lock(const char *task_name)
   }
   unlink(name);
   /* If unlink fails here we don't really care */
+#if 0
   printf("Acquired lock\n");
+#endif
   fflush(stdout);
 }
 
@@ -142,7 +148,9 @@ int ren(const char *old, const char *new)
 
 void release_lock(void)
 {
+#if 0
   printf("Releasing lock\n");
+#endif
   fflush(stdout);
   if (remove(LOCK)) {
     printf("Release lock failed\n");
@@ -166,7 +174,9 @@ void release_lock(void)
       exit(1);
     }
   } else {
+#if 0
     printf("Released lock\n");
+#endif
     fflush(stdout);
   }
 }

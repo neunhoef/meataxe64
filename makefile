@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.11 2001/09/25 22:31:58 jon Exp $
+# $Id: makefile,v 1.12 2001/09/27 11:45:30 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -35,32 +35,7 @@ SL_MODULES=	add command elements endian grease header matrix memory mul primes r
 
 MODULES=	$(AD_MODULES) $(DTOU_MODULES) $(EMU_MODULES) $(ID_MODULES) $(IP_MODULES) $(MON_MODULES) $(MU_MODULES) $(PR_MODULES) $(SL_MODULES)
 
-#
-# Modify this from the command line to change where derived files go
-#
-BASEDIR=derived
-
-OSARCHBASEDIR=$(BASEDIR)/$(OS)/$(ARCH)
-
-# Keep separate bases for different OSes
-# If we have different architectures, extend by $(ARCH)
-
-# Release optimised no asserts
-RELOBJDIR=$(OSARCHBASEDIR)/obj
-RELBINDIR=$(OSARCHBASEDIR)/bin
-# Debug, asserts
-DEBUGOBJDIR=$(OSARCHBASEDIR)/debugobj
-DEBUGBINDIR=$(OSARCHBASEDIR)/debugbin
-# Profiling, debug, asserts
-PROFOBJDIR=$(OSARCHBASEDIR)/profobj
-PROFBINDIR=$(OSARCHBASEDIR)/profbin
-#Profiing, debug, without asserts
-PROFNAOBJDIR=$(OSARCHBASEDIR)/profnaobj
-PROFNABINDIR=$(OSARCHBASEDIR)/profnabin
-
-DEPENDDIR=$(OSARCHBASEDIR)/depends
-GENDIR=$(OSARCHBASEDIR)/gen
-GENFILES=$(GENERATED:%=$(GENDIR)/%)
+include dirs.txt
 
 .PRECIOUS: $(GENFILES)
 
@@ -90,10 +65,10 @@ vpath %.h . $(SRCDIR) $(SRCDIR)/$(OS) $(GENDIR)
 # Parameterically generate the link commands
 CLEAN_ITEMS:=$(DEPENDS) $(GENFILES)
 
-RELTARGETS:=
-DEBUGTARGETS:=
-PROFTARGETS:=
-PROFNATARGETS:=
+REL_TARGETS:=
+DEBUG_TARGETS:=
+PROF_TARGETS:=
+PROFNA_TARGETS:=
 
 TARGET:=AD
 include targets.txt
@@ -122,13 +97,13 @@ include targets.txt
 TARGET:=SL
 include targets.txt
 
-debug: $(DEBUGTARGETS)
+debug: $(DEBUG_TARGETS)
 
-rel: $(RELTARGETS)
+rel: $(REL_TARGETS)
 
-profile: $(PROFTARGETS)
+profile: $(PROF_TARGETS)
 
-profilena: $(PROFNATARGETS)
+profilena: $(PROFNA_TARGETS)
 
 clean:
 	rm -rf $(CLEAN_ITEMS)

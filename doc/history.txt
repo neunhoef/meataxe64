@@ -23,3 +23,4 @@
 20010925 - Cut headers down to prime, nor, noc, in that order
 20010925 - First cut at conversion of emu and slave
 20010926 - First emu running single machine
+20010927 - Better modularisation of makefile

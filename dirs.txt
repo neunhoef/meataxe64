@@ -1,0 +1,30 @@
+#
+# Generic build directories
+#
+# $Id: dirs.txt,v 1.1 2001/09/27 11:45:30 jon Exp $
+#
+# Modify this from the command line to change where derived files go
+#
+BASEDIR=derived
+
+OSARCHBASEDIR=$(BASEDIR)/$(OS)/$(ARCH)
+
+# Keep separate bases for different OSes
+# If we have different architectures, extend by $(ARCH)
+
+# Release optimised no asserts
+RELOBJDIR=$(OSARCHBASEDIR)/obj
+RELBINDIR=$(OSARCHBASEDIR)/bin
+# Debug, asserts
+DEBUGOBJDIR=$(OSARCHBASEDIR)/debugobj
+DEBUGBINDIR=$(OSARCHBASEDIR)/debugbin
+# Profiling, debug, asserts
+PROFOBJDIR=$(OSARCHBASEDIR)/profobj
+PROFBINDIR=$(OSARCHBASEDIR)/profbin
+#Profiing, debug, without asserts
+PROFNAOBJDIR=$(OSARCHBASEDIR)/profnaobj
+PROFNABINDIR=$(OSARCHBASEDIR)/profnabin
+
+DEPENDDIR=$(OSARCHBASEDIR)/depends
+GENDIR=$(OSARCHBASEDIR)/gen
+GENFILES=$(GENERATED:%=$(GENDIR)/%)
