@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: basef_vectors,v 1.2 2002/07/01 18:02:37 jon Exp $
+# $Id: basef_vectors,v 1.3 2002/07/04 17:56:46 jon Exp $
 #
 # Script to find a representation in standard base
 # using intermediate files
@@ -70,17 +70,7 @@ if [ 1 -ne $nullity ]; then
   rm -f ${tmp}*
   exit 255
 fi
-dim=`zsbf ${tmp}.0 $s $a $b $dir $memory`
+basef_with_vector ${tmp}.0 $a $b $s $dir $memory
 ret=$?
-if [ 0 -eq $ret ]; then
-  if [ $dim -ne $nor ]; then
-    echo Strange result from zsb giving wrong dimension $dim vs $nor
-    rm -f ${tmp}*
-    exit 1
-  fi
-else
-  echo zsbf unexpectedly returns $ret
-  rm -f ${tmp}*
-  exit 1
-fi
 rm -f ${tmp}*
+exit $ret

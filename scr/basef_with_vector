@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: base_with_vector,v 1.2 2002/07/04 17:56:45 jon Exp $
+# $Id: basef_with_vector,v 1.1 2002/07/04 17:56:46 jon Exp $
 #
 # Script to find a standard base for a representation, given a vector
 #
@@ -9,7 +9,8 @@
 # $2: generator a
 # $3: generator b
 # $4: the standard basis
-# $5: memory
+# $5: temporary directory
+# $6: memory
 #
 #
 #
@@ -20,8 +21,8 @@
 #
 #set -v
 . functions
-usage="$0: usage: $0 <e> <a> <b> <s> <memory>"
-if [ $# -ne 5 ]; then
+usage="$0: usage: $0 <e> <a> <b> <s> <tmp dir> <memory>"
+if [ $# -ne 6 ]; then
   echo $usage
   exit 1;
 fi
@@ -29,6 +30,7 @@ e=$1
 a=$2
 b=$3
 s=$4
+dir=$5
 if [ -e $e -a -e $a -a -e $b ]; then
   q=`zprime $a`
   nor=`znor $a`
@@ -50,26 +52,19 @@ else
   exit 1
 fi
 tmp=tmp${PPID}
-memory=$5
-ok=0
-while [ 0 -eq $ok ]; do
-  dim=`zsb $e $s $a $b $memory`
-  ret=$?
-  if [ 0 -eq $ret ]; then
-    if [ $dim -eq $nor ]; then
-      ok=1
-    else
-      echo Strange result from zsb giving wrong dimension $dim vs $nor
-      rm -f ${tmp}*
-      exit 1
-    fi
-  elif [ $ret -eq 2 ]; then
-    let memory=`more_memory $memory`
-  else
-    echo zsb unexpectedly returns $ret
+memory=$6
+dim=`zsbf $e $s $a $b $dir $memory`
+ret=$?
+if [ 0 -eq $ret ]; then
+  if [ $dim -ne $nor ]; then
+    echo Strange result from zsb giving wrong dimension $dim vs $nor
     rm -f ${tmp}*
     exit 1
   fi
-done
+else
+  echo zsbf unexpectedly returns $ret
+  rm -f ${tmp}*
+  exit 1
+fi
 rm -f ${tmp}*
 exit 0

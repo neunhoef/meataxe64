@@ -1,0 +1,69 @@
+#!/bin/sh
+#
+# $Id: conjugatef,v 1.1 2002/07/04 17:56:46 jon Exp $
+#
+# Script to conjugate elements into another base, using intermediate files
+#
+# Inputs
+# $1: element with which to conjugate
+# $2: base name for output elements
+# $3 temporary directory
+# $4 memory to use
+# $5-: generators
+#
+# outputs will be of the form <$5>_{1,...}
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+#
+#set -v
+. functions
+usage="$0: usage: $0 <e> <output_stem> <tmp dir> <memory> <elements>"
+if [ $# -lt 5 ]; then
+  echo $usage
+  exit 1;
+fi
+e=$1
+o=$2
+dir=$3
+memory=$4
+a=$5
+if [ -e $e -a -e $a ]; then
+  q=`zprime $a`
+  nor=`znor $a`
+  noc=`znoc $a`
+  if [ $nor -ne $noc ]; then
+    echo "$0: $a is not square"
+    exit 1
+  fi
+  if [ $nor -ne `znoc $e` -o $nor -ne `znor $e` ]; then
+    echo "$0: $a and $e are not compatible"
+    exit 1
+  fi
+else
+  echo "$0: missing files $e, $a"
+  exit 1
+fi
+tmp=tmp${PPID}
+zivf $e ${tmp}.2 $dir $memory 2>/dev/null
+ret=$?
+if [ 0 -ne $ret ]; then
+  echo zivf unexpectedly returns $ret
+  rm -f ${tmp}*
+  exit $ret
+fi
+shift 4
+i=1
+for x in $*; do
+  zmu $e $x ${tmp}.3 $memory
+  zmu ${tmp}.3 ${tmp}.2 ${o}_$i $memory
+  ret=$?
+  if [ 0 -ne $ret ]; then
+    rm -f ${tmp}*
+    exit $ret
+  fi
+  let i=$i+1
+done
+rm -f ${tmp}*
+exit 0

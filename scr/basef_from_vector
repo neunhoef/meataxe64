@@ -1,18 +1,17 @@
 #!/bin/sh
 #
-# $Id: basef,v 1.7 2002/07/04 17:56:46 jon Exp $
+# $Id: basef_from_vector,v 1.1 2002/07/04 17:56:46 jon Exp $
 #
-# Script to find a representation in standard base
-# using intermediate files
+# Script to find a representation in standard base, given a vector
 #
 # Inputs
-# $1: element with which to split
+# $1: vector with which to split
 # $2: generator a
 # $3: generator b
 # $4: output filename base
 # $5: the standard basis
-# $6: temporary directory to be used
-# $7: memory (optional)
+# $6: temporary directory
+# $7: memory
 #
 # outputs will be of the form <$4>_sb_{1,2}
 # where nor is number of rows, and q is the prime power
@@ -22,12 +21,11 @@
 # 1: error in parameters
 # 0: success
 # 254: reducible
-# 255: nullity not 1
 #
 #set -v
 . functions
-usage="$0: usage: $0 <e> <a> <b> <output_stem> <s> <tmp directory> [<memory>]"
-if [ $# -ne 6 -a $# -ne 7 ]; then
+usage="$0: usage: $0 <e> <a> <b> <output_stem> <s> <tmp dir> <memory>"
+if [ $# -ne 7 ]; then
   echo $usage
   exit 1;
 fi
@@ -37,11 +35,7 @@ b=$3
 o=$4
 s=$5
 dir=$6
-if [ 7 -eq $# ]; then
-  memory=$7
-else
-  memory=200
-fi
+memory=$7
 if [ -e $e -a -e $a -a -e $b ]; then
   q=`zprime $a`
   nor=`znor $a`
@@ -54,7 +48,7 @@ if [ -e $e -a -e $a -a -e $b ]; then
     echo "$0: $a and $b are not compatible"
     exit 1
   fi
-  if [ $nor -ne `znoc $e` -o $nor -ne `znor $e` ]; then
+  if [ $noc -ne `znoc $e` ]; then
     echo "$0: $a and $e are not compatible"
     exit 1
   fi
@@ -63,13 +57,13 @@ else
   exit 1
 fi
 tmp=tmp${PPID}
-basef_vectors $e $a $b $s $dir $memory
+basef_with_vector $e $a $b $s $dir $memory
 ret=$?
 if [ 0 -ne $ret ]; then
   rm -f ${tmp}*
   exit $ret
 fi
-conjugatef $s ${o}_sb $dir $memory $a $b
+conjugatef $s ${o} $dir $memory $a $b
 ret=$?
 rm -f ${tmp}*
 exit $ret

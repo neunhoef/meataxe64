@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: new_irred,v 1.6 2002/07/02 16:16:16 jon Exp $
+# $Id: new_irred,v 1.7 2002/07/04 17:56:46 jon Exp $
 #
 # Script to classify an irreducible representation
 #
@@ -55,7 +55,6 @@ for x in $*; do
   ret=$?
   if [ 1 -eq $ret ]; then
     echo Cannot compute order of $x
-    rm -f ${tmp}*
     exit 1
   fi
   if [ 0 -eq $ret ]; then
@@ -69,13 +68,11 @@ for x in $*; do
     continue
   else
     echo singular_order returns unexpected code $ret
-    rm -f ${tmp}*
     exit 1
   fi
 done
 if [ 2 -ne $i ]; then
-  echo Failed i not 2
-  rm -f ${tmp}*
+  echo "Failed i not 2 ($i)"
   exit 254
 fi
 exec new_irred_with_orders ${y[0]} ${y[1]} ${order[0]} ${order[1]} $memory
