@@ -1,5 +1,5 @@
 /*
- * $Id: utils.h,v 1.17 2002/06/25 10:30:12 jon Exp $
+ * $Id: utils.h,v 1.18 2002/09/01 12:33:40 jon Exp $
  *
  * Utilities for meataxe
  *
@@ -53,5 +53,9 @@ extern int int_pow(unsigned int n, unsigned int index,
 
 /* Swap the bit order in a char */
 extern unsigned char convert_char(unsigned char in);
+
+/* Read a file of numbers into an array */
+
+extern int read_numbers(FILE *inp, unsigned int s, unsigned int *out);
 
 #endif

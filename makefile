@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.71 2002/08/27 17:12:38 jon Exp $
+# $Id: makefile,v 1.72 2002/09/01 12:33:40 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -10,6 +10,7 @@ GENERATED=
 .PHONY: debug rel profile profilena clean full_clean
 
 DTOU_TARGET=	dtou
+DECOMP_TARGET=	decomp
 EAD_TARGET=	ead
 ECT_TARGET=	ect
 EID_TARGET=	eid
@@ -105,6 +106,7 @@ ZVP_TARGET=	zvp
 ZWORDS_TARGET=	zwords
 
 DTOU_MODULES=	dtou
+DECOMP_MODULES=	decomp utils
 EAD_MODULES=	add ead elements endian files header map map_or_row maps memory parse primes read rows system utils write
 ECT_MODULES=	count ect elements endian files header map memory parse primes read utils
 EID_MODULES=	eid elements endian exrows files header map memory parse primes rows utils write
@@ -199,7 +201,8 @@ ZTSPF_MODULES=	clean clean_file elements endian grease header maps matrix memory
 ZVP_MODULES=	elements endian grease header maps matrix memory mul parse primes read rows vp utils write zvp
 ZWORDS_MODULES=	elements endian grease header maps matrix memory mul parse primes read rows utils write zwords
 
-MODULES=	$(DTOU_MODULES) \
+MODULES=	$(DECOMP_MODULES) \
+	$(DTOU_MODULES) \
 	$(EAD_MODULES) \
 	$(ECT_MODULES) \
 	$(EID_MODULES) \
@@ -328,6 +331,9 @@ REL_TARGETS:=
 DEBUG_TARGETS:=
 PROF_TARGETS:=
 PROFNA_TARGETS:=
+
+TARGET:=DECOMP
+include targets.txt
 
 TARGET:=DTOU
 include targets.txt

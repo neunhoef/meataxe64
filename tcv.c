@@ -1,5 +1,5 @@
 /*
- * $Id: tcv.c,v 1.1 2002/08/27 17:12:38 jon Exp $
+ * $Id: tcv.c,v 1.2 2002/09/01 12:33:40 jon Exp $
  *
  * Function to lift vectors from a tensor condensation representation
  *
@@ -81,21 +81,6 @@ static int cleanup(unsigned int *left_multiplicities, unsigned int *right_multip
     matrix_free(rows);
   }
   return 0;
-}
-
-static int read_numbers(FILE *inp, unsigned int s, unsigned int *out)
-{
-  unsigned int i;
-  assert(NULL != inp);
-  assert(0 != s);
-  assert(NULL != out);
-  for (i = 0; i < s; i++) {
-    fscanf(inp, "%u", out + i);
-    if (ferror(inp) || feof(inp)) {
-      return 0;
-    }
-  }
-  return 1;
 }
 
 int lift(unsigned int s, const char *mults_l, const char *mults_r, const char *in,

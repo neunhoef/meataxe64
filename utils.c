@@ -1,5 +1,5 @@
 /*
- * $Id: utils.c,v 1.19 2002/06/28 08:39:16 jon Exp $
+ * $Id: utils.c,v 1.20 2002/09/01 12:33:40 jon Exp $
  *
  * Utils for meataxe
  *
@@ -235,4 +235,19 @@ unsigned char convert_char(unsigned char in)
     init_table();
   }
   return table[in];
+}
+
+int read_numbers(FILE *inp, unsigned int s, unsigned int *out)
+{
+  unsigned int i;
+  assert(NULL != inp);
+  assert(0 != s);
+  assert(NULL != out);
+  for (i = 0; i < s; i++) {
+    fscanf(inp, "%u", out + i);
+    if (ferror(inp) || feof(inp)) {
+      return 0;
+    }
+  }
+  return 1;
 }
