@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.43 2002/01/18 21:52:23 jon Exp $
+# $Id: makefile,v 1.44 2002/01/22 08:40:24 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -23,6 +23,7 @@ SNS_TARGET=	sns
 SRN_TARGET=	srn
 STOP_TARGET=	stop
 ZAD_TARGET=	zad
+ZBASE_TARGET=	zbase
 ZCHAR_TARGET=	zchar
 ZCHECK_TARGET=	zcheck
 ZCT_TARGET=	zct
@@ -30,9 +31,11 @@ ZCV_TARGET=	zcv
 ZDIAG_TARGET=	zdiag
 ZDIFF_TARGET=	zdiff
 ZEX_TARGET=	zex
+ZFE_TARGET=	zfe
 ZID_TARGET=	zid
 ZIP_TARGET=	zip
 ZIV_TARGET=	ziv
+ZJOIN_TARGET=	zjoin
 ZMU_TARGET=	zmu
 ZNOC_TARGET=	znoc
 ZNOR_TARGET=	znor
@@ -73,6 +76,7 @@ SNS_MODULES=	clean elements endian grease header matrix memory primes read rows 
 SRN_MODULES=	clean elements endian grease header matrix memory primes read rows srn utils
 STOP_MODULES=	command files stop system utils
 ZAD_MODULES=	ad add elements endian header memory primes read rows utils write
+ZBASE_MODULES=	clean elements endian grease header matrix memory primes read rnf rows system utils write zbase
 ZCHAR_MODULES=	endian header primes read utils zchar
 ZCHECK_MODULES=	elements endian header memory primes read utils zcheck
 ZCT_MODULES=	count ct elements endian header memory primes read utils
@@ -80,9 +84,11 @@ ZCV_MODULES=	elements endian header ip primes read utils write
 ZDIAG_MODULES=	elements endian header memory primes read rows utils write zdiag
 ZDIFF_MODULES=	diff endian header memory primes read utils zdiff
 ZEX_MODULES=	elements endian exrows files header map memory primes read rows utils write zex
+ZFE_MODULES=	elements endian extend extend_matrix header memory primes read rows utils write zfe
 ZID_MODULES=	id ident elements endian header memory primes rows utils write
 ZIP_MODULES=	elements endian header ipp memory primes read rows utils write
 ZIV_MODULES=	clean elements endian grease header matrix memory primes read iv rows utils write ziv
+ZJOIN_MODULES=	endian header join memory primes read utils write zjoin
 ZMU_MODULES=	elements endian grease header matrix memory mu mul primes read rows utils write
 ZNOC_MODULES=	endian header primes read utils znoc
 ZNOR_MODULES=	endian header primes read utils znor
@@ -94,7 +100,7 @@ ZQF_MODULES=	elements endian header memory primes read rows utils write zqf
 ZQS_MODULES=	clean elements endian grease header matrix memory primes qs read rows utils write zqs
 ZRE_MODULES=	elements endian header memory primes read utils write zre
 ZRN_MODULES=	clean elements endian grease header matrix memory primes read rn rows utils zrn
-ZRNF_MODULES=	clean elements endian grease header matrix memory primes read rnf rows system utils zrnf
+ZRNF_MODULES=	clean elements endian grease header matrix memory primes read rnf rows system utils write zrnf
 ZSB_MODULES=	clean elements endian grease header matrix memory mul primes read rows sb utils write zsb
 ZSEL_MODULES=	endian header memory primes read utils write zse
 ZSID_MODULES=	ident elements endian header memory primes rows utils write zsid
@@ -108,7 +114,7 @@ ZTR_MODULES=	elements endian header matrix memory primes read tr tra utils write
 ZTRACE_MODULES=	elements endian header memory primes read rows utils ztrace
 ZWORDS_MODULES=	elements endian grease header matrix memory mul primes read rows utils write zwords
 
-MODULES=	$(DTOU_MODULES) $(EAD_MODULES) $(ECT_MODULES) $(EID_MODULES) $(EIM_MODULES) $(EIP_MODULES) $(EMU_MODULES) $(ESID_MODULES) $(ETR_MODULES) $(MON_MODULES) $(SNS_MODULES) $(SRN_MODULES) $(STOP_MODULES) $(ZAD_MODULES) $(ZCHAR_MODULES) $(ZCHECK_MODULES) $(ZCT_MODULES) $(ZCV_MODULES) $(ZDIAG_MODULES) $(ZDIFF_MODULES) $(ZEX_MODULES) $(ZID_MODULES) $(ZIP_MODULES) $(ZIV_MODULES) $(ZMU_MODULES) $(ZNOC_MODULES) $(ZNOR_MODULES) $(ZNS_MODULES) $(ZNSF_MODULES) $(ZPR_MODULES) $(ZPRIME_MODULES) $(ZQF_MODULES) $(ZQS_MODULES) $(ZRE_MODULES) $(ZRN_MODULES) $(ZRNF_MODULES) $(ZSEL_MODULES) $(ZSID_MODULES) $(ZSL_MODULES) $(ZSP_MODULES) $(ZSPAN_MODULES) $(ZSS_MODULES) $(ZSUMS_MODULES) $(ZTE_MODULES) $(ZTR_MODULES) $(ZTRACE_MODULES) $(ZWORDS_MODULES)
+MODULES=	$(DTOU_MODULES) $(EAD_MODULES) $(ECT_MODULES) $(EID_MODULES) $(EIM_MODULES) $(EIP_MODULES) $(EMU_MODULES) $(ESID_MODULES) $(ETR_MODULES) $(MON_MODULES) $(SNS_MODULES) $(SRN_MODULES) $(STOP_MODULES) $(ZAD_MODULES) $(ZBASE_MODULES) $(ZCHAR_MODULES) $(ZCHECK_MODULES) $(ZCT_MODULES) $(ZCV_MODULES) $(ZDIAG_MODULES) $(ZDIFF_MODULES) $(ZEX_MODULES) $(ZQE_MODULES) $(ZID_MODULES) $(ZIP_MODULES) $(ZIV_MODULES) $(ZJOIN_MODULES) $(ZMU_MODULES) $(ZNOC_MODULES) $(ZNOR_MODULES) $(ZNS_MODULES) $(ZNSF_MODULES) $(ZPR_MODULES) $(ZPRIME_MODULES) $(ZQF_MODULES) $(ZQS_MODULES) $(ZRE_MODULES) $(ZRN_MODULES) $(ZRNF_MODULES) $(ZSEL_MODULES) $(ZSID_MODULES) $(ZSL_MODULES) $(ZSP_MODULES) $(ZSPAN_MODULES) $(ZSS_MODULES) $(ZSUMS_MODULES) $(ZTE_MODULES) $(ZTR_MODULES) $(ZTRACE_MODULES) $(ZWORDS_MODULES)
 
 include dirs.txt
 
@@ -187,6 +193,9 @@ include targets.txt
 TARGET:=ZAD
 include targets.txt
 
+TARGET:=ZBASE
+include targets.txt
+
 TARGET:=ZCHAR
 include targets.txt
 
@@ -208,6 +217,9 @@ include targets.txt
 TARGET:=ZEX
 include targets.txt
 
+TARGET:=ZFE
+include targets.txt
+
 TARGET:=ZID
 include targets.txt
 
@@ -215,6 +227,9 @@ TARGET:=ZIP
 include targets.txt
 
 TARGET:=ZIV
+include targets.txt
+
+TARGET:=ZJOIN
 include targets.txt
 
 TARGET:=ZMU

@@ -1,7 +1,7 @@
 /*
- * $Id: zrnf.c,v 1.2 2002/01/22 08:40:24 jon Exp $
+ * $Id: zbase.c,v 1.1 2002/01/22 08:40:24 jon Exp $
  *
- * Compute the rank of a matrix, using temporary files
+ * Compute a basis for a space from a set of vectors
  *
  */
 
@@ -10,9 +10,9 @@
 #include "memory.h"
 #include "rnf.h"
 
-static const char *name = "zrnf";
+static const char *name = "zbase";
 
-static void rnf_usage(void)
+static void base_usage(void)
 {
   fprintf(stderr, "%s: usage: %s <in_file> <temp dir> [<memory>]\n", name, name);
 }
@@ -22,16 +22,16 @@ int main(int argc, const char * const argv[])
   unsigned int n;
   unsigned int memory = MEM_SIZE;
 
-  if (3 != argc && 4 != argc) {
-    rnf_usage();
+  if (4 != argc && 5 != argc) {
+    base_usage();
     exit(1);
   }
   endian_init();
-  if (4 == argc) {
-    memory = strtoul(argv[3], NULL, 0);
+  if (5 == argc) {
+    memory = strtoul(argv[4], NULL, 0);
   }
   memory_init(name, memory);
-  n = rank(argv[1], argv[2], NULL, 0, name);
+  n = rank(argv[1], argv[2], argv[3], 1, name);
   printf("%d\n", n);
   memory_dispose();
   return 0;

@@ -1,0 +1,74 @@
+#
+# $Id: intersect,v 1.1 2002/01/22 08:40:24 jon Exp $
+#
+# Script to intersect two spaces
+#
+# Inputs
+# $1: space 1
+# $2 space 2
+# $3: output file
+#
+# Return codes
+# 1: error in parameters
+# 0: some intersection found
+# 255: trivial intersection
+#
+#set -v
+. functions
+usage="$0: usage: $0 <i> <n> <o>"
+if [ $# -ne 3 ]; then
+  echo $usage
+  exit 1;
+fi
+a=$1
+b=$2
+o=$3
+if [ -e $a -a -e $b ]; then
+  q=`zprime $a`
+  nor=`znor $a`
+  noc=`znoc $a`
+  if [ `znoc $b` -ne $noc -o `zprime $b` -ne $q ]; then
+    echo parameter inconsistency between $a and $b
+    exit 1
+  fi
+else
+  echo "$0: missing files $a or $b"
+  exit 1
+fi
+tmp=tmp${PPID}
+zjoin $a $b ${tmp}.0
+ret=$?
+if [ $ret -ne 0 ]; then
+  exit $ret
+fi
+ok=0
+while [ 0 -eq $ok ]; do
+  nullity=`zns ${tmp}.0 ${tmp}.1 $memory 2>/dev/null`
+  ret=$?
+  if [ $ret -eq 0 ]; then
+    ok=1
+  else
+    if [ $ret -eq 2 ]; then
+      let memory=`more_memory $memory`
+#     echo Allocating more memory for zns, now $memory
+    else
+      rm ${tmp}*
+      exit $ret
+    fi
+  fi
+done
+if [ $nullity -eq 0 ]; then
+  rm ${tmp}*
+  echo Trivial intersection
+  exit 255    
+fi
+cut ${tmp}.1 $nor ${tmp}.2
+ret=$?
+if [ $ret -ne 0 ]; then
+  rm ${tmp}*
+  exit $ret
+fi
+zmu ${tmp}.2 $a $o
+ret=$?
+rm ${tmp}*
+exit $ret

@@ -70,3 +70,4 @@
 20020113 - add indicator claculation for characteristic 2
 20020114 - add zdiag for use in indicator calculation
 20020118 - started on znsf
+20020121 - added intersect, join, zfe

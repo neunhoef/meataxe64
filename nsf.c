@@ -1,5 +1,5 @@
 /*
- * $Id: nsf.c,v 1.1 2002/01/18 21:52:23 jon Exp $
+ * $Id: nsf.c,v 1.2 2002/01/22 08:40:24 jon Exp $
  *
  * Compute the nullspace of a matrix, using temporary files
  *
@@ -36,7 +36,8 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
   FILE *inp, *outp;
   const header *h;
   header *h_out;
-  unsigned int prime, nob, nod, nor, len, len_id, n, r, **mat1, **mat2, **mat3, **mat4,
+  unsigned int prime, nob, nod, nor, len, len_id, max_len,
+      n, r, **mat1, **mat2, **mat3, **mat4,
       i, rows_to_do, max_rows, step1, step2;
   int *map;
   grease_struct grease;
@@ -95,14 +96,19 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
     exit(1);
   }
   if (0 == open_and_read_binary_header(&f.f_id, &h, name4, name)) {
+    fclose(f.f);
+    fclose(outp);
     exit(1);
   }
   len_id = header_get_len(h);
-  max_rows = memory_rows(len, 800);
-  r = memory_rows(len, 100);
+  max_len = (len > len_id) ? len : len_id;
+  max_rows = memory_rows(max_len, 400);
+  r = memory_rows(max_len, 50);
   if (r < prime) {
     fprintf(stderr, "%s: cannot allocate %d rows for %s, terminating\n", name, prime, m1);
     fclose(f.f);
+    fclose(f.f_id);
+    fclose(outp);
     exit(2);
   }
   (void)grease_level(prime, &grease, r);
@@ -112,33 +118,69 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
   step2 = r;
   mat1 = matrix_malloc(step1);
   mat2 = matrix_malloc(step2);
+  mat3 = matrix_malloc(step1);
+  mat4 = matrix_malloc(step2);
   for (n = 0; n < step1; n++) {
     mat1[n] = memory_pointer_offset(0, n, len);
+    mat3[n] = memory_pointer_offset(400, n, len);
   }
   for (n = 0; n < step2; n++) {
     mat2[n] = memory_pointer_offset(800, n, len);
+    mat4[n] = memory_pointer_offset(850, n, len);
   }
   r = 0; /* Rank count */
   while (rows_to_do > 0) {
     unsigned int rows_remaining = rows_to_do;
     unsigned int stride = (step1 > rows_remaining) ? rows_remaining : step1;
+    unsigned int i;
     if (0 == endian_read_matrix(in->f, mat1, len, stride)) {
       fprintf(stderr, "%s: cannot read matrix for %s, terminating\n", name, in->name);
       fclose(in->f);
+      fclose(in->f_id);
+      fclose(outp);
       exit(1);
     }
-    echelise(mat1, stride, &n, &map, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, 0, name);
+    if (0 == endian_read_matrix(in->f_id, mat3, len_id, stride)) {
+      fprintf(stderr, "%s: cannot read matrix for %s, terminating\n", name, in->name_id);
+      fclose(in->f);
+      fclose(in->f_id);
+      fclose(outp);
+      exit(1);
+    }
+    echelise(mat1, stride, &n, &map, mat3, 1, grease.level, prime, len, nob, 900, 950, len_id, 1, name);
     rows_remaining -= stride;
+    for (i = 0; i < stride; i++) {
+      if (map[i] < 0) {
+        if (0 == endian_write_row(outp, mat3[i], len_id)) {
+          fprintf(stderr, "%s: cannot write matrix for %s, terminating\n", name, name5);
+          fclose(in->f);
+          fclose(in->f_id);
+          fclose(outp);
+          exit(1);
+        }
+      }
+    }
     if (0 != n) {
       /* Some addition to the rank */
       r += n;
       if (rows_remaining > 0) {
         unsigned int rows_written = 0;
         out->f = fopen(out->name, "wb");
-        out->created = 1;
         if (NULL == out->f) {
           fprintf(stderr, "%s: cannot open temporary output %s, terminating\n", name, out->name);
           fclose(in->f);
+          fclose(in->f_id);
+          fclose(outp);
+          exit(1);
+        }
+        out->f_id = fopen(out->name_id, "wb");
+        out->created = 1;
+        if (NULL == out->f_id) {
+          fprintf(stderr, "%s: cannot open temporary output %s, terminating\n", name, out->name_id);
+          fclose(in->f);
+          fclose(in->f_id);
+          fclose(out->f);
+          fclose(outp);
           exit(1);
         }
         for (i = 0; i < rows_remaining; i += step2) {
@@ -150,19 +192,54 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
           if (0 == endian_read_matrix(in->f, mat2, len, stride2)) {
             fprintf(stderr, "%s: cannot read matrix for %s, terminating\n", name, in->name);
             fclose(in->f);
+            fclose(in->f_id);
             fclose(out->f);
+            fclose(out->f_id);
+            fclose(outp);
             exit(1);
           }
-          clean(mat1, stride, mat2, stride2, map, NULL, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, name);
+          if (0 == endian_read_matrix(in->f_id, mat4, len_id, stride2)) {
+            fprintf(stderr, "%s: cannot read matrix for %s, terminating\n", name, in->name_id);
+            fclose(in->f);
+            fclose(in->f_id);
+            fclose(out->f);
+            fclose(out->f_id);
+            fclose(outp);
+            exit(1);
+          }
+          clean(mat1, stride, mat2, stride2, map, mat3, mat4, 1, grease.level, prime, len, nob, 900, 950, len_id, name);
           for (j = 0; j < stride2; j++) {
             if (0 == row_is_zero(mat2[j], len)) {
               if (0 == endian_write_row(out->f, mat2[j], len)) {
-                fprintf(stderr, "%s: cannot read matrix for %s, terminating\n", name, in->name);
+                fprintf(stderr, "%s: cannot write matrix for %s, terminating\n", name, out->name);
                 fclose(in->f);
+                fclose(in->f_id);
                 fclose(out->f);
+                fclose(out->f_id);
+                fclose(outp);
+                exit(1);
+              }
+              if (0 == endian_write_row(out->f_id, mat4[j], len_id)) {
+                fprintf(stderr, "%s: cannot write matrix for %s, terminating\n", name, out->name_id);
+                fclose(in->f);
+                fclose(in->f_id);
+                fclose(out->f);
+                fclose(out->f_id);
+                fclose(outp);
                 exit(1);
               }
               rows_written++;
+            } else {
+              /* Found a null row, write it out */
+              if (0 == endian_write_row(outp, mat4[j], len_id)) {
+                fprintf(stderr, "%s: cannot write matrix for %s, terminating\n", name, name5);
+                fclose(in->f);
+                fclose(in->f_id);
+                fclose(out->f);
+                fclose(out->f_id);
+                fclose(outp);
+                exit(1);
+              }
             }
           }
         }
@@ -170,12 +247,18 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
         printf("wrote %d rows to %s\n", rows_written, out->name);
 #endif
         fclose(out->f);
+        fclose(out->f_id);
         in = in->next;
         out = out->next;
         if (rows_written > 0) {
           in->f = fopen(in->name, "rb");
           if (NULL == in->f) {
             fprintf(stderr, "%s: cannot open temporary output %s, terminating\n", name, in->name);
+            exit(1);
+          }
+          in->f_id = fopen(in->name_id, "rb");
+          if (NULL == in->f_id) {
+            fprintf(stderr, "%s: cannot open temporary output %s, terminating\n", name, in->name_id);
             exit(1);
           }
         }
@@ -185,15 +268,19 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
       /* Just keep reading from same input */
     }
     rows_to_do = rows_remaining;
+    free(map);
   }
   matrix_free(mat1);
   matrix_free(mat2);
-  free(map);
+  matrix_free(mat3);
+  matrix_free(mat4);
   if (t1.created) {
     (void)remove(t1.name);
+    (void)remove(t1.name_id);
   }
   if (t2.created) {
     (void)remove(t2.name);
+    (void)remove(t2.name_id);
   }
   fclose(outp);
   if (nor > r) {
@@ -209,6 +296,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
     if (NULL == inp) {
       fprintf(stderr, "%s: cannot open intermediate null vector file %s, terminating\n",
               name, name5);
+      fclose(outp);
       exit(1);
     }
     for (i = 0; i < nor - r; i++) {
@@ -228,5 +316,6 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
     fclose(inp);
     fclose(outp);
   }
+  (void)remove(name5);
   return nor - r;
 }
