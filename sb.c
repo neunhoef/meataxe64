@@ -1,5 +1,5 @@
 /*
- * $Id: sb.c,v 1.8 2002/06/28 08:39:16 jon Exp $
+ * $Id: sb.c,v 1.9 2002/07/05 10:46:23 jon Exp $
  *
  * Function to spin some vectors under two generators to obtain a standard base
  *
@@ -126,6 +126,7 @@ unsigned int spin(const char *in, const char *out, const char *a,
     rows1[d] = memory_pointer_offset(0, d, len);
     rows2[d] = memory_pointer_offset(450, d, len);
   }
+  assert(1 == nor);
   errno = 0;
   if (0 == endian_read_matrix(inp, rows1, len, nor)) {
     if ( 0 != errno) {
@@ -137,33 +138,35 @@ unsigned int spin(const char *in, const char *out, const char *a,
     exit(1);
   }
   fclose(inp);
+  assert(1 == nor);
   for (d = 0; d < nor; d++) {
     memcpy(rows2[d], rows1[d], len * sizeof(unsigned int));
   }
   map = my_malloc(max_rows * sizeof(int));
-  if (1 != nor || 2 != prime) {
-    echelise(rows2, nor, &d, &new_map, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, 1, name);
-    /* Clean up the rows we use for basis detection, 
-     * either for multiple rows, or non-identity leading non-zero entry */
-    free(new_map);
-    if (d != nor) {
-      fprintf(stderr, "%s: %s contains dependent vectors, terminating\n", name, in);
-      cleanup(NULL, f_a, f_b);
-      exit(1);
-    }
+  assert(1 == nor);
+  echelise(rows2, nor, &d, &new_map, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, 1, name);
+  /* Clean up the rows we use for basis detection, 
+   * either for multiple rows, or non-identity leading non-zero entry */
+  free(new_map);
+  assert(1 == nor);
+  if (d != nor) {
+    fprintf(stderr, "%s: %s contains dependent vectors, terminating\n", name, in);
+    cleanup(NULL, f_a, f_b);
+    exit(1);
   }
-  for (d = 0; d < nor; d++) {
+  assert(1 == nor);
+  {
     unsigned int i;
-    unsigned int elt = first_non_zero(rows1[d], nob, len, &i);
+    unsigned int elt = first_non_zero(rows1[0], nob, len, &i);
     assert(0 != elt);
     NOT_USED(elt);
-    map[d] = i;
+    map[0] = i;
   }
   if (0 == grease_allocate(prime, len, &grease, 900)){
     fprintf(stderr, "%s: unable to allocate grease, terminating\n", name);
-    cleanup(inp, f_a, f_b);
+    cleanup(NULL, f_a, f_b);
   }
-  while (/*nor < max_rows &&*/ nor < noc && (gen_a.nor < nor || gen_b.nor < nor)) {
+  while (nor < noc && (gen_a.nor < nor || gen_b.nor < nor)) {
     unsigned int rows_to_do = nor - gen->nor;
     unsigned int i, j, k, old_nor = nor;
     /* Ensure we don't try to do too many */
@@ -177,7 +180,7 @@ unsigned int spin(const char *in, const char *out, const char *a,
       if (0 == mul_from_store(rows1 + gen->nor, rows1 + nor, gen->f, gen->is_map, noc, len, nob,
                               stride, noc, prime, &grease, gen->m, name)) {
         fprintf(stderr, "%s: failed to multiply using %s, terminating\n", name, gen->m);
-        cleanup(inp, f_a, f_b);
+        cleanup(NULL, f_a, f_b);
         exit(1);
       }
       /* Now copy rows created to rows2 */
@@ -255,5 +258,6 @@ unsigned int spin(const char *in, const char *out, const char *a,
   matrix_free(rows2);
   grease_free(&grease);
   fclose(outp);
+  free(map);
   return nor;
 }

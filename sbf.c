@@ -1,5 +1,5 @@
 /*
- * $Id: sbf.c,v 1.7 2002/06/28 08:39:16 jon Exp $
+ * $Id: sbf.c,v 1.8 2002/07/05 10:46:23 jon Exp $
  *
  * Function to spin some vectors under two generators to obtain a standard base
  *
@@ -184,18 +184,16 @@ unsigned int spin(const char *in, const char *out, const char *a,
   /* Set up the map for the echelised form of the basis */
   map = my_malloc(noc * sizeof(int));
   /* And compute the first entry */
-  if (2 != prime) {
-    assert(1 == nor);
-    echelise(rows2, 1, &d, &new_map, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, 1, name);
-    /* Clean up the rows we use for basis detection, 
-     * in case of for non-identity leading non-zero entry */
-    free(new_map);
-    assert(1 == nor);
-    if (1 != d) {
-      fprintf(stderr, "%s: %s contains dependent vectors, terminating\n", name, in);
-      cleanup(NULL, f_a, f_b);
-      exit(1);
-    }
+  assert(1 == nor);
+  echelise(rows2, 1, &d, &new_map, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, 1, name);
+  /* Clean up the rows we use for basis detection, 
+   * in case of for non-identity leading non-zero entry */
+  free(new_map);
+  assert(1 == nor);
+  if (1 != d) {
+    fprintf(stderr, "%s: %s contains dependent vectors, terminating\n", name, in);
+    cleanup(NULL, f_a, f_b);
+    exit(1);
   }
   new_map = my_malloc(noc * sizeof(int)); /* A map for new rows */
   assert(1 == nor);
@@ -206,7 +204,7 @@ unsigned int spin(const char *in, const char *out, const char *a,
   /* Set up grease for cleaning */
   if (0 == grease_allocate(prime, len, &grease, 900)) {
     fprintf(stderr, "%s: unable to allocate grease, terminating\n", name);
-    cleanup(inp, f_a, f_b);
+    cleanup(NULL, f_a, f_b);
   }
   /* Create the two temporary files */
   errno = 0;
