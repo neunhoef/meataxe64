@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: new_irredf_with_orders,v 1.6 2002/07/15 17:02:57 jon Exp $
+# $Id: new_irredf_with_orders,v 1.7 2002/08/02 09:04:09 jon Exp $
 #
 # Script to classify an irreducible representation
 #
@@ -115,6 +115,7 @@ elif [ 254 -eq $ret ]; then
       let memory=`more_memory $memory 2>/dev/null`
     else
       rm -f ${tmp}*
+      echo $nullity
       exit 1
     fi
   done

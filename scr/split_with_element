@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: split_with_element,v 1.14 2002/07/24 16:00:18 jon Exp $
+# $Id: split_with_element,v 1.15 2002/08/02 09:04:09 jon Exp $
 #
 # Script to split a representation given a particular element to work from
 #
@@ -97,8 +97,10 @@ if [ $count -gt 5 ]; then
     rm -f ${tmp}*
     exit 254
   fi
-  echo Restricting span to 5 vectors
-  count=5
+  if [ 0 -ne $path ]; then
+    echo Restricting span to 5 vectors
+    count=5
+  fi
 fi
 #echo Considering $vectors vectors
 if [ 0 -eq $c ]; then

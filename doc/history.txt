@@ -174,3 +174,4 @@ skew seventh
 20020715 - Brought new_irred_and_indicate into line with other scripts
 20020720 - Add zrand
 20020724 - Fix split_with_element to allow pathological elements
+20020802 - Add new_irredf_and_indiciate_with_orders
