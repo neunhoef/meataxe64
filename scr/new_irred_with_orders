@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: new_irred_with_orders,v 1.6 2002/07/02 10:58:43 jon Exp $
+# $Id: new_irred_with_orders,v 1.7 2002/07/02 16:16:16 jon Exp $
 #
 # Script to classify an irreducible representation
 #
@@ -69,6 +69,7 @@ e=${tmp}.1
 script=`find_nullity_one_with_orders $a $b $e $o_a $o_b $memory`
 ret=$?
 if [ $ret -ne 0 ]; then
+  echo $script
   rm -f ${tmp}.*
   exit $ret
 fi

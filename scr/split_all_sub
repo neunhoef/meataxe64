@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: split_all_sub,v 1.1 2002/06/25 10:30:12 jon Exp $
+# $Id: split_all_sub,v 1.2 2002/07/02 16:16:16 jon Exp $
 #
 # Script to split a representation completely
 # and possibly classify the irreducibles
@@ -47,7 +47,7 @@ elif [ 255 -eq $ret ]; then
   if [ 0 -ne $classify ]; then
     new_irred_and_indicate $a $1
   else
-    new_irred $a $1
+    new_irred 400 $a $*
   fi
   exit 0
 elif [ 254 -eq $ret ]; then

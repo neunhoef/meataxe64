@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.3 2002/06/30 21:33:15 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.4 2002/07/02 16:16:17 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -3922,7 +3922,6 @@ dimension increases.
 <li><a href="#f8">f8</a></li>
 <li><a href="#f9">f9</a></li>
 <li><a href="#find_element">find_element</a></li>
-<li><a href="#find_nullity_one">find_nullity_one</a></li>
 <li><a href="#find_nullity_one_with_orders">find_nullity_one_with_orders</a></li>
 <li><a href="#find_nullity_onef_with_orders">find_nullity_onef_with_orders</a></li>
 <li><a href="#find_restricted_nullity_one_with_orders">find_restricted_nullity_one_with_orders</a></li>
@@ -4841,49 +4840,6 @@ onwards are of the form &lt;stem&gt;, where &lt;stem&gt;_{1,2} are the
 real files.
 </li>
 <li>
-<h3><a name="find_nullity_one">find_nullity_one</a></h3>
-Purpose: Find an element of nullity one
-<table>
-<thead>
-<td valign=top>Parameters:</td>
-</thead>
-<tr>
-<td valign=top>1</td><td valign=top>Generator 1</td>
-</tr>
-<tr>
-<td valign=top>2</td><td valign=top>Generator 2</td>
-</tr>
-<tr>
-<td valign=top>3</td><td valign=top>Output</td>
-</tr>
-<tr>
-<td valign=top>4</td><td valign=top>Optional memory size (default 200k)</td>
-</tr>
-<tr>
-<td valign=top>Textual output on stdout:</td><td valign=top>The script used to produce the element</td>
-</tr>
-</table>
-<table>
-<thead>Return codes:</thead>
-<tr>
-<td valign=top>0</td><td valign=top>Success</td>
-</tr>
-<tr>
-<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
-</tr>
-<tr>
-<td valign=top>2</td><td valign=top>Insufficient memory for workspace</td>
-</tr>
-<tr>
-<td valign=top>255</td><td valign=top>No nullity one element found</td>
-</tr>
-</table>
-Commentary: This is essentially a support program in the computation
-of standard base representations. Its function is to compute the
-element orders, and then call <a
-href="#find_nullity_one_with_orders">find_nullity_one_with_orders</a>.
-</li>
-<li>
 <h3><a name="find_nullity_one_with_orders">find_nullity_one_with_orders</a></h3>
 Purpose: Find an element of nullity one, given the orders of the
 generators
@@ -5449,13 +5405,13 @@ Purpose: Classify a potential new irreducible
 <td valign=top>Parameters:</td>
 </thead>
 <tr>
-<td valign=top>1</td><td valign=top>Generator 1</td>
+<td valign=top>1</td><td valign=top>Memory size</td>
 </tr>
 <tr>
-<td valign=top>2</td><td valign=top>Generator 2</td>
+<td valign=top>2</td><td valign=top>Generator 1</td>
 </tr>
 <tr>
-<td valign=top>3</td><td valign=top>Optional memory size (default 200k)</td>
+<td valign=top>3</td><td valign=top>other generators</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td
@@ -6065,7 +6021,10 @@ matrix is potentially singular
 </tr>
 <tr>
 <td valign=top>1</td><td valign=top>Some sort of error, reported
-textually by the program. May indicate rank 0</td>
+textually by the program</td>
+</tr>
+<tr>
+<td valign=top>255</td><td valign=top>Rank 0</td>
 </tr>
 <tr>
 <td valign=top>2</td><td valign=top>Insufficient memory for workspace</td>

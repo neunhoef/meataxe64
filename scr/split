@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: split,v 1.8 2002/07/02 10:58:43 jon Exp $
+# $Id: split,v 1.9 2002/07/02 16:16:16 jon Exp $
 #
 # Script to split a representation
 #
@@ -73,7 +73,7 @@ for i in 1 2 3 4 5 6 7 8 9 10; do
     exit $ret
   fi
 done
-# If any generators are singular, try them
+ If any generators are singular, try them
 for x in $a $*; do
   split_with_element $x $o 0 ${tmp}.2 $a $*
   ret=$?
@@ -85,24 +85,52 @@ for x in $a $*; do
 done
 echo searching for suitable element using zsums
 # First compute o_a and o_b
-o_a=`singular_order $a`
-ret=$?
-if [ 0 -ne $ret ]; then
-  echo Cannot compute order of $a
-  rm -f ${tmp}*
-  exit 1
-fi
-o_b=`singular_order $b`
-ret=$?
-if [ 0 -ne $ret ]; then
-  echo Cannot compute order of $b
+#o_a=`singular_order $a`
+#ret=$?
+#if [ 0 -ne $ret ]; then
+#  echo Cannot compute order of $a
+#  rm -f ${tmp}*
+#  exit 1
+#fi
+#o_b=`singular_order $b`
+#ret=$?
+#if [ 0 -ne $ret ]; then
+#  echo Cannot compute order of $b
+#  rm -f ${tmp}*
+#  exit 254
+#fi
+i=0
+for x in $a $*; do
+  order=`singular_order $x`
+  ret=$?
+  if [ 1 -eq $ret ]; then
+    echo Cannot compute order of $x
+    rm -f ${tmp}*
+    exit 1
+  fi
+  if [ 0 -eq $ret ]; then
+    order[$i]=$order
+    y[$i]=$x
+    let i=$i+1
+    if [ 2 -le $i ]; then
+      break
+    fi
+  elif [ 255 -eq $ret ]; then
+    continue
+  else
+    echo singular_order returns unexpected code $ret
+    rm -f ${tmp}*
+    exit 1
+  fi
+done
+if [ 2 -ne $i ]; then
   rm -f ${tmp}*
   exit 254
 fi
 ok=0
 memory=200
 while [ $ok -eq 0 ]; do
-  out=`zsums $a $b ${tmp}.zsums $o_a $o_b 5 5 $memory 2>/dev/null`
+  out=`zsums ${y[0]} ${y[1]} ${tmp}.zsums ${order[0]} ${order[1]} 5 5 $memory 2>/dev/null`
   ret=$?
   if [ 2 -eq $ret ]; then
     let memory=`more_memory $memory`

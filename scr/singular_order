@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: singular_order,v 1.1 2002/06/25 10:30:12 jon Exp $: f1,v 1.2 2001/12/01 10:46:02 jon Exp $
+# $Id: singular_order,v 1.2 2002/07/02 16:16:16 jon Exp $: f1,v 1.2 2001/12/01 10:46:02 jon Exp $
 #
 # Script to compute number of distinct powers of a matrix, in a naive fashion
 # Terminates at 5
@@ -11,6 +11,7 @@
 # Return codes
 # 1: error in parameters
 # 0: success
+# 255: element is zero
 #
 . functions
 usage="$0: usage: $0 <in>"
@@ -52,7 +53,7 @@ t=$a
 if [ $r -ne $nor ]; then
   if [ 0 -eq $r ]; then
     echo $a is zero
-    exit 1
+    exit 255
   fi
   while [ $ok -eq 0 -a $o -lt 5 ]; do
     zmu $a $t ${tmp}.$o 400 1>/dev/null
