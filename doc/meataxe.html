@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.14 2002/09/10 17:10:50 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.15 2002/09/10 17:47:34 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -4086,6 +4086,7 @@ dimension increases.
 <li><a href="#order">order</a></li>
 <li><a href="#power">power</a></li>
 <li><a href="#preserves">preserves</a></li>
+<li><a href="#qp">qp</a></li>
 <li><a href="#quick_order">quick_order</a></li>
 <li><a href="#real_indicate">real_indicate</a></li>
 <li><a href="#restrict_with_orders">restrict_with_orders</a></li>
@@ -6256,6 +6257,50 @@ need g transpose. We also do not transpose the form Q, as we are only
 interested in the resulting diagonal and the resulting symmetrized
 sum. This does provide significant speed improvements, particularly in
 larger dimensions.
+</li>
+<li>
+<h3><a name="qp">qp</a></h3>
+Purpose: Produce the matrices Q and P required for tensor
+condensation.
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>E, the sum over the condensation
+subgroup modulo its order, in the given representation</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Memory</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>The matrix Q, a basis for the
+space spanned by the rows of E</td>
+</tr>
+<tr>
+<td valign=top>4</td><td valign=top>The matrix P, such that E = PQ</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>None</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient memory for workspace</td>
+</tr>
+</table>
+Commentary: This just a service script for the tensor condensation and
+uncondensation algorithm. For each irreducible representation X of the
+condensation subgroup we compute E(X) as the fixed space of X x
+dual(X) on the condensation subgroup. Q and P are then derived as
+above.
 </li>
 <li>
 <h3><a name="quick_order">quick_order</a></h3>
