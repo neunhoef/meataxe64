@@ -1,12 +1,12 @@
 #
-# $Id: f1,v 1.2 2001/12/01 10:46:02 jon Exp $
+# $Id: f10,v 1.1 2001/12/01 10:46:02 jon Exp $
 #
-# Script to add three matrices giving a fourth
+# Script to perform A + BC + CC
 #
 # Inputs
-# $1: input 1
-# $2: input 2
-# $3: input 3
+# $1: input A
+# $2: input B
+# $3: input C
 # $4: output
 # $5: temporary stem
 #
@@ -20,16 +20,15 @@ if [ $# -ne 5 ]; then
   exit 1;
 fi
 if [ -e $1 -a -e $2 -a -e $3 ]; then
-  zad $1 $2 ${5}_1
+  zmu $3 $3 ${5}_1
   if [ $? -ne 0 ]; then
     exit 1
   fi
-  zad ${5}_1 $3 $4
+  zmu $2 $3 ${5}_2
   if [ $? -ne 0 ]; then
-    rm ${5}_1
     exit 1
   fi
-  rm ${5}_1
+  f1 $1 ${5}_1 ${5}_2 $4 ${5}_1
 else
   echo "$0: missing files $1, $2 or $3"
   exit 1

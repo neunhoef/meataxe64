@@ -1,0 +1,72 @@
+#
+# $Id: irred,v 1.1 2001/12/01 10:46:02 jon Exp $
+#
+# Script to discover if a representation is irreducible
+#
+# Inputs
+# $1: generator a
+# $2: generator b
+# $3: element with which to split
+# $4: output filename base
+#
+# outputs will be of the form <$3>_<q>_<nor>_{1,2}
+# where nor is number of rows, and q is the prime power
+#
+#
+# Return codes
+# 1: error in parameters
+# 0: split
+# 254: did not split
+# 255: irreducible
+#
+#set -v
+usage="$0: usage: $0 <a> <b> <e> <output_stem>"
+if [ $# -ne 4 ]; then
+  echo $usage
+  exit 1;
+fi
+a=$1
+b=$2
+e=$3
+o=$4
+if [ -e $a -a -e $b -a -e $e ]; then
+  q=`zprime $a`
+  nor=`znor $a`
+  noc=`znoc $a`
+  if [ $nor -ne $noc ]; then
+    echo "$0: $a is not square"
+    exit 1
+  fi
+  if [ $nor -ne `znor $b` -o $nor -ne `znoc $b` ]; then
+    echo "$0: $a and $b are not compatible"
+    exit 1
+  fi
+  if [ $noc -ne `znoc $e` -o $q -ne `zprime $e` ]; then
+    echo "$0: $a and $e are not compatible"
+    exit 1
+  fi
+else
+  echo "$0: missing files $a, $b or $e"
+  exit 1
+fi
+tmp=tmp${PPID}
+#echo Using tmp stem $tmp
+memory=200
+ok=0
+nullity=0
+ztr $a ${tmp}.1
+if [ $? -ne 0 ]; then
+  exit 1
+fi
+ztr $b ${tmp}.2
+if [ $? -ne 0 ]; then
+  exit 1
+fi
+ztr $e ${tmp}.3
+if [ $? -ne 0 ]; then
+  exit 1
+fi
+#echo irred calls split_with_element
+split_with_element ${tmp}.1 ${tmp}.2 ${tmp}.3 ${o}_tra 1
+ret=$?
+exit $ret

@@ -1,5 +1,5 @@
 /*
- * $Id: sp.c,v 1.5 2001/11/29 01:13:09 jon Exp $
+ * $Id: sp.c,v 1.6 2001/12/01 10:46:02 jon Exp $
  *
  * Function to spin some vectors under two generators
  *
@@ -136,6 +136,10 @@ unsigned int spin(const char *in, const char *out, const char *a,
     unsigned int i, j = 0;
     /* Ensure we don't try to do too many */
     rows_to_do = (rows_to_do + gen->nor > nor) ? (nor - gen->nor) : rows_to_do;
+#if 0
+    fprintf(stderr, "spin looping with rows_to_do = %d, nor = %d, max_rows = %d\n",
+            rows_to_do, nor, max_rows);
+#endif
     if (0 == mul_from_store(rows + gen->nor, rows + nor, gen->f, noc, len, nob,
                             rows_to_do, prime, &grease, gen->m, name)) {
       fprintf(stderr, "%s: failed to multiply using %s, terminating\n", name, gen->m);
@@ -165,6 +169,11 @@ unsigned int spin(const char *in, const char *out, const char *a,
     assert(j == d);
     nor += d; /* The number of extra rows we made */
     gen = gen->next;
+  }
+  if (nor >= max_rows) {
+    fprintf(stderr, "%s: out of memory at %d rows, terminating\n",
+            name, nor);
+    exit(2);
   }
   fclose(f_a);
   fclose(f_b);

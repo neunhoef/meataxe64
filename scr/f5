@@ -1,0 +1,17 @@
+#
+# $Id: f5,v 1.1 2001/12/01 10:46:02 jon Exp $
+#
+# Script to perform A + CB + C
+#
+# Inputs
+# $1: input A
+# $2: input B
+# $3: input C
+# $4: output
+# $5: temporary stem
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+#
+f3 $1 $3 $2 $4 $5

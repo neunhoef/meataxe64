@@ -1,5 +1,5 @@
 /*
- * $Id: grease.c,v 1.14 2001/11/29 01:13:09 jon Exp $
+ * $Id: grease.c,v 1.15 2001/12/01 10:46:02 jon Exp $
  *
  * Functions to grease matrix rows
  *
@@ -30,7 +30,6 @@ int grease_level(unsigned int prime, grease grease, unsigned int avail)
     j *= prime;
     i++;
   }
-  fprintf(stderr, "Using grease level %d\n", i);
   grease->level = i;
   return 1;
 }

@@ -1,5 +1,5 @@
 #
-# $Id: split,v 1.1 2001/11/29 01:13:09 jon Exp $
+# $Id: split,v 1.2 2001/12/01 10:46:02 jon Exp $
 #
 # Script to split a representation
 #
@@ -15,8 +15,11 @@
 # Return codes
 # 1: error in parameters
 # 0: success
-# 256: failed to split
+# 252: ran out of possible splitters
+# 254: failed to split
+# 255: irreducible
 #
+#set -v
 usage="$0: usage: $0 <a> <b> <output_stem>"
 if [ $# -ne 3 ]; then
   echo $usage
@@ -54,91 +57,18 @@ rm -f ${tmp}*
 #
 # Try 1 + a + b
 #
-f1 $id $a $b ${tmp}.1 ${tmp}.1
-if [ $? -ne 0 ]; then
-  exit 1
-fi
-memory=200
-ok=0
-nullity=0
-while [ 0 -eq $ok ]; do
-  nullity=`zns ${tmp}.1 ${tmp}.2 $memory`
+for i in 1 2 3 4 5 6 7 8 9 10; do
+  echo using f$i to split
+  f$i $id $a $b ${tmp}.1 ${tmp}.1
+  if [ $? -ne 0 ]; then
+    exit 1
+  fi
+  split_with_element $a $b ${tmp}.1 $o 0
   ret=$?
-  if [ $ret -eq 0 ]; then
-    ok=1
-  else
-    if [ $ret -eq 2 ]; then
-      let memory=$memory*2
-      echo Allocating more memory for zns, now $memory
-    else
-      exit 1
-    fi
+  if [ $ret -eq 255 -o $ret -eq 0 ]; then
+    rm tmp*
+    exit $ret
   fi
 done
-echo nullity $nullity
-if [ $nullity -eq 0 ]; then
-  echo Failed to split
-  exit 256
-fi
-#
-# Todo: try other f scripts
-#
-ok=0
-count=$nullity
-if [ $count -ge 5 ]; then
-  echo Restricting span to 5 vectors
-  count=5
-fi
-let vectors=$q**$count-1
-echo Considering $vectors vectors
-zspan ${tmp}.2 ${tmp}.3 $count
-if [ $? -ne 0 ]; then
-  exit 1
-fi
-vector=0;
-while [ $vector -lt $vectors ]; do
-split=0
-#
-# Pick vector $vector from ${tmp}.3 and attempt to spin
-#
-  echo Trying vector $vector
-  zsel ${tmp}.3 ${tmp}.4 $vector
-  mem_ok=0
-  while [ 0 -eq $mem_ok ]; do
-    dim=`zsp ${tmp}.4 ${tmp}.5 $a $b $memory`
-    ret=$?
-    if [ $ret -eq 0 ]; then
-      mem_ok=1
-    else
-      if [ $ret -eq 2 ]; then
-        let memory=$memory*2
-        echo Allocating more memory for zsp, now $memory
-      else
-        exit 1
-      fi
-    fi
-  done
-  let vector=$vector+1
-  if [ $dim -lt $nor ]; then
-    split=1
-    break
-  fi
-  echo Resplitting with vector $vector
-done
-let codim=$nor-$dim
-if [ $split -ne 0 ]; then
-  echo Obtained a subspace of dimension $dim, codimension $codim
-else
-  echo suspect irreducible
-  exit 256  
-fi
-let memory=$memory*4
-ss_name=${o}_${nor}_${dim}
-qs_name=${o}_${nor}_${codim}
-zmu ${tmp}.5 $a ${tmp}.6
-zss ${tmp}.5 ${tmp}.6 ${ss_name}_1 $memory
-zmu ${tmp}.5 $b ${tmp}.6
-zss ${tmp}.5 ${tmp}.6 ${ss_name}_2 $memory
-zqs ${tmp}.5 $a ${qs_name}_1 $memory
-zqs ${tmp}.5 $b ${qs_name}_2 $memory
-#rm -f ${tmp}*
+rm tmp*
+exit 252

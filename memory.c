@@ -1,5 +1,5 @@
 /*
- * $Id: memory.c,v 1.4 2001/11/07 22:35:27 jon Exp $
+ * $Id: memory.c,v 1.5 2001/12/01 10:46:02 jon Exp $
  *
  * Large memory manipulation for meataxe
  *
@@ -23,7 +23,7 @@ void memory_init(const char *name, size_t size)
   assert(NULL == memory);
   memory = malloc(extent * 1000);
   if (NULL == memory) {
-    fprintf(stderr, "%s: failed to allocated %d bytes, exiting\n", name, extent * 1000);
+    fprintf(stderr, "%s: failed to allocate %d bytes, exiting\n", name, extent * 1000);
     exit(1);
   }
 }
