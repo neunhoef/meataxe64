@@ -1,5 +1,5 @@
 /*
- * $Id: rows.c,v 1.25 2004/04/25 16:31:48 jon Exp $
+ * $Id: rows.c,v 1.26 2004/04/28 21:55:30 jon Exp $
  *
  * Row manipulation for meataxe
  *
@@ -602,7 +602,7 @@ static int check_for_5(unsigned int a)
 #define TWO_BITS_5 ((ONE_BITS_5) << 1) /* Detect bit 1 one in digit */
 
 #define mod_5_add(a,b,c,d,e,f,g,h,j,k) \
-  c = (a) + (b); /* Result, not reduced mod 3 */ \
+  c = (a) + (b); /* Result, not reduced mod 5 */ \
   d = (a) & (b) & (FOUR_BITS_5); /* 4 gives the overflow into next digit case */ \
   e = d | (d >> 2); /* Overflow indicator * 5 */ \
   f = c - e; /* Correct overflow into next digit */ \
@@ -614,12 +614,13 @@ static int check_for_5(unsigned int a)
 static void row_add_5(const unsigned int *row1, const unsigned int *row2,
                      unsigned int *row3, unsigned int len)
 {
-  unsigned int i;
+  const unsigned int *rowa;
   assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
   assert(NULL != row3);
-  for (i = 0; i < len; i++) {
+  rowa = row1 + len;
+  while (row1 < rowa) {
     unsigned int a, b, c, d, e, f, g, h, j, k;
     assert(4 == sizeof(unsigned int));
     a = *(row1++);
@@ -632,11 +633,12 @@ static void row_add_5(const unsigned int *row1, const unsigned int *row2,
 
 static void row_inc_5_sub(const unsigned int *row1, unsigned int *row2, unsigned int len)
 {
-  unsigned int i;
+  const unsigned int *rowa;
   assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
-  for (i = 0; i < len; i++) {
+  rowa = row1 + len;
+  while (row1 < rowa) {
     unsigned int a, b, c, d, e, f, g, h, j, k;
     assert(4 == sizeof(unsigned int));
     a = *(row1++);
@@ -652,14 +654,16 @@ static void row_inc_5(const unsigned int *row1,
 {
   if (len > 10) {
     /* Search for first non-zero */
-    while (len > 0) {
+    const unsigned int *rowa = row1 + len, *rowb = row1;
+    while (row1 < rowa) {
       if (0 != *row1) {
+        unsigned int len1 = row1 - rowb;
+        len -= len1;
+        row2 += len1;
         row_inc_5_sub(row1, row2, len);
         return;
       }
       row1++;
-      row2++;
-      len--;
     }
   } else {
     row_inc_5_sub(row1, row2, len);
@@ -701,13 +705,14 @@ static void row_inc_5(const unsigned int *row1,
 static void scaled_row_add_5(const unsigned int *row1, const unsigned int *row2,
                              unsigned int *row3, unsigned int len, unsigned int elt)
 {
-  unsigned int i;
+  const unsigned int *rowa;
   assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
   assert(NULL != row3);
   assert(2 <= elt && elt <= 4);
-  for (i = 0; i < len; i++) {
+  rowa = row1 + len;
+  while (row1 < rowa) {
     unsigned int a, b, c, d, e, f, g, h, j, k;
     assert(4 == sizeof(unsigned int));
     a = *(row1++);
@@ -722,12 +727,13 @@ static void scaled_row_add_5(const unsigned int *row1, const unsigned int *row2,
 static void scaled_row_inc_5_sub(const unsigned int *row1, unsigned int *row2,
                                  unsigned int len, unsigned int elt)
 {
-  unsigned int i;
+  const unsigned int *rowa;
   assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
   assert(2 <= elt && elt <= 4);
-  for (i = 0; i < len; i++) {
+  rowa = row1 + len;
+  while (row1 < rowa) {
     unsigned int a, b, c, d, e, f, g, h, j, k;
     assert(4 == sizeof(unsigned int));
     a = *(row1++);
@@ -744,14 +750,16 @@ static void scaled_row_inc_5(const unsigned int *row1, unsigned int *row2,
 {
   if (len > 10) {
     /* Search for first non-zero */
-    while (len > 0) {
+    const unsigned int *rowa = row1 + len, *rowb = row1;
+    while (row1 < rowa) {
       if (0 != *row1) {
+        unsigned int len1 = row1 - rowb;
+        len -= len1;
+        row2 += len1;
         scaled_row_inc_5_sub(row1, row2, len, elt);
         return;
       }
       row1++;
-      row2++;
-      len--;
     }
   } else {
     scaled_row_inc_5_sub(row1, row2, len, elt);
@@ -761,12 +769,13 @@ static void scaled_row_inc_5(const unsigned int *row1, unsigned int *row2,
 static void row_scale_5(const unsigned int *row1, unsigned int *row2,
                        unsigned int len, unsigned int elt)
 {
-  unsigned int i;
+  const unsigned int *rowa;
   assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
   assert(2 <= elt && elt <= 4);
-  for (i = 0; i < len; i++) {
+  rowa = row1 + len;
+  while (row1 < rowa) {
     unsigned int b, c, d, e, f, g, h, j;
     assert(4 == sizeof(unsigned int));
     b = *(row1++);
@@ -778,11 +787,12 @@ static void row_scale_5(const unsigned int *row1, unsigned int *row2,
 static void row_scale_in_place_5(unsigned int *row,
                                  unsigned int len, unsigned int elt)
 {
-  unsigned int i;
+  const unsigned int *rowa;
   assert(0 != len);
   assert(NULL != row);
   assert(2 <= elt && elt <= 4);
-  for (i = 0; i < len; i++) {
+  rowa = row + len;
+  while (row < rowa) {
     unsigned int b, c, d, e, f, g, h, j;
     assert(4 == sizeof(unsigned int));
     b = *(row);

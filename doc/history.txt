@@ -293,3 +293,4 @@ skew seventh
 20040424 - Further GF3 improvements
 20040425 - Changed row_product for GF3 and GF4 to 64k
 20040425 - Stopped clean and friends from calling rows_init
+20040428 - Minor improvements to GF5
