@@ -1,8 +1,8 @@
 #!/bin/sh
 #
-# $Id: singular_vector,v 1.1 2002/10/04 17:15:06 jon Exp $
+# $Id: singular_vector,v 1.2 2002/10/07 15:59:21 jon Exp $
 #
-# Script to find a singular vector form a form
+# Script to find a singular vector for a form
 #
 # Inputs
 # $1: initial memory
@@ -50,28 +50,7 @@ if [ $ret -ne 0 ]; then
   rm -f ${tmp}*
   exit 1
 fi
-zspan ${tmp}.0 ${tmp}.1 $nor
+singular_vector_in_space $memory $form ${tmp}.0 $o
 ret=$?
-if [ $ret -ne 0 ]; then
-  rm -f ${tmp}*
-  exit 1
-fi
-i=`znor ${tmp}.1`
-j=0
-while [ $j -lt $i ]; do
-  zsel ${tmp}.1 ${tmp}.2 $j
-  ret=$?
-  if [ $ret -ne 0 ]; then
-    rm -f ${tmp}*
-    exit 1
-  fi
-  n=`norm $memory ${tmp}.2 $form`
-  if [ "0" == "$n" ]; then
-    cp -p ${tmp}.2 $o
-    rm -f ${tmp}*
-    exit 0
-  fi
-  let j=$j+1
-done
 rm -f ${tmp}*
-exit 255
+exit $ret

@@ -1,0 +1,80 @@
+#!/bin/sh
+#
+# $Id: singular_vector_in_space,v 1.1 2002/10/07 15:59:21 jon Exp $
+#
+# Script to find a singular vector for a form in a given space
+#
+# Inputs
+# $1: initial memory
+# $2: form S
+# $3: space
+# $4: output
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+# 255: no vector found
+#
+#set -v
+. functions
+usage="$0: usage: $0 <memory> <S> <space> <o>"
+if [ $# -ne 4 ]; then
+  echo "$usage"
+  exit 1;
+fi
+memory=$1
+form=$2
+space=$3
+o=$4
+if [ -e $form -a $space ]; then
+  nor=`znor $form`
+  noc=`znoc $form`
+  prime=`zprime $form`
+  if [ 1 -eq $prime ]; then
+    echo "$form cannot be a map, terminating"
+    exit 1
+  fi
+  if [ $prime -ne `zprime $space` -o $noc -ne `znoc $space` ]; then
+    echo "$space inconsistent with $form, terminating"
+    exit 1
+  fi
+  if [ $noc -ne $nor ]; then
+    echo "form must be square, terminating"
+    exit 1
+  fi
+  if [ 4 -lt $nor ]; then
+    nor=4
+  fi
+  if [ $nor -gt `znor $space` ]; then
+    nor=`znor $space`
+  fi
+else
+  echo "$form or $space not found, terminating"
+  exit 1
+fi
+tmp=tmp${PPID}
+zspan $space ${tmp}.1 $nor
+ret=$?
+if [ $ret -ne 0 ]; then
+  rm -f ${tmp}*
+  exit 1
+fi
+i=`znor ${tmp}.1`
+j=0
+while [ $j -lt $i ]; do
+  zsel ${tmp}.1 ${tmp}.2 $j
+  ret=$?
+  if [ $ret -ne 0 ]; then
+    rm -f ${tmp}*
+    exit 1
+  fi
+  n=`norm $memory ${tmp}.2 $form`
+  if [ "0" == "$n" ]; then
+    cp -p ${tmp}.2 $o
+    rm -f ${tmp}*
+    exit 0
+  fi
+  let j=$j+1
+done
+rm -f ${tmp}*
+exit 255
