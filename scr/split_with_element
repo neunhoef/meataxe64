@@ -1,5 +1,5 @@
 #
-# $Id: split_with_element,v 1.1 2001/12/01 10:46:02 jon Exp $
+# $Id: split_with_element,v 1.2 2001/12/02 01:35:06 jon Exp $
 #
 # Script to split a representation given a particular element to work from
 #
@@ -161,9 +161,9 @@ if [ $dim -eq $codim ]; then
   ss_name=${ss_name}_a
   qs_name=${qs_name}_b
 fi
-zmu ${tmp}.5 $a ${tmp}.6
+zmu ${tmp}.5 $a ${tmp}.6 1>/dev/null
 zss ${tmp}.5 ${tmp}.6 ${ss_name}_1 $memory
-zmu ${tmp}.5 $b ${tmp}.6
+zmu ${tmp}.5 $b ${tmp}.6 1>/dev/null
 zss ${tmp}.5 ${tmp}.6 ${ss_name}_2 $memory
 zqs ${tmp}.5 $a ${qs_name}_1 $memory
 zqs ${tmp}.5 $b ${qs_name}_2 $memory
