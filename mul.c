@@ -1,5 +1,5 @@
 /*
- * $Id: mul.c,v 1.5 2001/09/12 23:13:04 jon Exp $
+ * $Id: mul.c,v 1.6 2001/09/13 19:44:31 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
@@ -102,12 +102,8 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
     fclose(outp);
     return 0;
   }
-  /* Here is where to insert loop to read only partial matrices */
-  /* Initialise grease, deferred */
-  /* Sort out prime operations structs */
-  /* For the moment, read entire matrices */
+  /* For the moment, read entire matrices for 1 & 3 */
   if (0 == matrix_malloc(len1, nor1, &rows1) ||
-      0 == matrix_malloc(len2, nor2, &rows2) ||
       0 == matrix_malloc(len2, nor1, &rows3)) {
     fprintf(stderr, "%s: cannot allocate rows for %s, %s, %s, terminating\n", name, m1, m2, m3);
     fclose(inp1);
@@ -115,17 +111,10 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
     fclose(outp);
     return 0;
   }
+  /* Here is where to insert loop to read only partial matrices */
   /* Read matrix 1 */
   if (0 == endian_read_matrix(inp1, rows1, len1, nor1)) {
     fprintf(stderr, "%s: unable to read %s, terminating\n", name, m1);
-    fclose(inp1);
-    fclose(inp2);
-    fclose(outp);
-    return 0;
-  }
-  /* Read matrix 2 */
-  if (0 == endian_read_matrix(inp2, rows2, len2, nor2)) {
-    fprintf(stderr, "%s: unable to read %s, terminating\n", name, m2);
     fclose(inp1);
     fclose(inp2);
     fclose(outp);
@@ -140,12 +129,28 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
     fclose(outp);
     return 0;
   } /* Could consider working ungreased */
+  /* Allocate step rows for input 2 */
+  if (0 == matrix_malloc(len2, step, &rows2)) {
+    fprintf(stderr, "%s: cannot allocate rows for %s, %s, %s, terminating\n", name, m1, m2, m3);
+    fclose(inp1);
+    fclose(inp2);
+    fclose(outp);
+    return 0;
+  }
   /* Then multiply */
   for (i = 0; i < noc1; i += step) {
     unsigned int size = (step + i <= noc1) ? step : noc1 - i;
     unsigned int word_offset, bit_offset, mask;
+    /* Read step rows from matrix 2 into rows 2 */
+    if (0 == endian_read_matrix(inp2, rows2, len2, step)) {
+      fprintf(stderr, "%s: unable to read %s, terminating\n", name, m2);
+      fclose(inp1);
+      fclose(inp2);
+      fclose(outp);
+      return 0;
+    }
     element_access_init(nob, i, size, &word_offset, &bit_offset, &mask);
-    if (step > 1 && 0 == grease_make_rows(rows2, size, prime, len2, i, &grease_rows))
+    if (step > 1 && 0 == grease_make_rows(rows2, size, prime, len2, 0, &grease_rows))
     {
       fprintf(stderr, "%s: unable to compute grease, terminating\n", name);
       fclose(inp1);
@@ -164,8 +169,8 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
         if (step > 1) {
           res = (*adder)(rows3[j], grease_rows[elt-1], rows3[j], len2);
         } else {
-          res = (1 == elt) ? (*adder)(rows3[j], rows2[i], rows3[j], len2) :
-              (*scaled_adder)(rows3[j], rows2[i], rows3[j], len2, elt);
+          res = (1 == elt) ? (*adder)(rows3[j], rows2[0], rows3[j], len2) :
+              (*scaled_adder)(rows3[j], rows2[0], rows3[j], len2, elt);
         }
         if (0 == res) {
           fprintf(stderr, "%s: add failed, terminating\n", name);
