@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.69 2002/07/12 18:37:06 jon Exp $
+# $Id: makefile,v 1.70 2002/07/20 12:59:44 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -64,6 +64,7 @@ ZPROJ_TARGET=	zproj
 ZPS_TARGET=	zps
 ZQF_TARGET=	zqf
 ZQS_TARGET=	zqs
+ZRAND_TARGET=	zrand
 ZRANKS_TARGET=	zranks
 ZRE_TARGET=	zre
 ZRES_TARGET=	zrestrict
@@ -156,6 +157,7 @@ ZPROJ_MODULES=	clean elements endian grease header map_or_row maps matrix memory
 ZPS_MODULES=	endian header matrix memory parse primes ps read utils write zps
 ZQF_MODULES=	elements endian header memory parse primes read rows utils write zqf
 ZQS_MODULES=	clean elements endian grease header matrix memory parse primes qs read rows utils write zqs
+ZRAND_MODULES=	rand elements endian header maps memory parse primes rows utils write zrand
 ZRANKS_MODULES=	add clean elements endian grease header ident map_or_row maps matrix memory mul parse primes read rn rows sums utils write zranks
 ZRE_MODULES=	elements endian header memory parse primes read utils write zre
 ZRES_MODULES=	elements endian header memory parse primes read restrict rows utils write zrestrict
@@ -248,6 +250,7 @@ MODULES=	$(DTOU_MODULES) \
 	$(ZPS_MODULES) \
 	$(ZQF_MODULES) \
 	$(ZQS_MODULES) \
+	$(ZRAND_MODULES) \
 	$(ZRANKS_MODULES) \
 	$(ZRE_MODULES) \
 	$(ZRES_MODULES) \
@@ -483,6 +486,9 @@ TARGET:=ZQF
 include targets.txt
 
 TARGET:=ZQS
+include targets.txt
+
+TARGET:=ZRAND
 include targets.txt
 
 TARGET:=ZRANKS

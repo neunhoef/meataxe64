@@ -1,5 +1,5 @@
 /*
- * $Id: tspf.c,v 1.10 2002/07/10 15:13:07 jon Exp $
+ * $Id: tspf.c,v 1.11 2002/07/20 12:59:44 jon Exp $
  *
  * Function to spin some vectors under two generators in tensor space
  * using intermediate files in a temporary directory.
@@ -173,7 +173,7 @@ unsigned int spin(const char *in, const char *out,
   rows_init(prime, &row_operations);
   grease_init(&row_operations, &grease);
   size = find_extent(max_nor, max_len);
-  max_rows = memory_rows(max_len, 50);
+  max_rows = memory_rows(max_len, size);
   if (max_rows < max_nor || size > 200) {
     fprintf(stderr, "%s: failed to allocate space for one of %s, %s, %s, %s, terminating\n",
             name, a1, b1, a2, b2);
