@@ -1,5 +1,5 @@
 /*
- * $Id: zexport.c,v 1.10 2004/01/04 21:22:50 jon Exp $
+ * $Id: zexport.c,v 1.11 2004/01/24 14:47:13 jon Exp $
  *
  * Export matrix to old system
  *
@@ -83,7 +83,7 @@ int main(int argc, const char * const argv[])
     row_init(out_row, (blen + sizeof(unsigned int) - 1) / (sizeof(unsigned int)));
     for (j = 0; j < noc; j++) {
       unsigned int elt = get_element_from_row_with_params(nob, j, mask, elts_per_word, in_row);
-      put_element_to_char_row(eperb, prime, j, (char *)out_row, elt);
+      put_element_to_char_row(eperb, prime, j, (unsigned char *)out_row, elt);
     }
     if (blen != fwrite(out_row, 1, blen, f_out)) {
       fprintf(stderr, "%s: failed to write row %d to %s, terminating\n", name, i, out);

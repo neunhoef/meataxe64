@@ -1,5 +1,5 @@
 /*
- * $Id: zimport.c,v 1.9 2004/01/04 21:22:50 jon Exp $
+ * $Id: zimport.c,v 1.10 2004/01/24 14:47:13 jon Exp $
  *
  * Import matrix from old system
  *
@@ -32,7 +32,7 @@ int main(int argc, const char * const argv[])
   const char *out;
   const header *h_in;
   unsigned int prime, nob, noc, nor, eperb, i, j, *out_row, len, blen, elts_per_word;
-  char *in_row;
+  unsigned char *in_row;
   FILE *f_in;
   FILE *f_out;
 

@@ -1,5 +1,5 @@
 /*
- * $Id: elements.c,v 1.20 2002/09/28 09:47:43 jon Exp $
+ * $Id: elements.c,v 1.21 2004/01/24 14:47:13 jon Exp $
  *
  * Element manipulation for meataxe
  *
@@ -64,7 +64,7 @@ unsigned int get_element_from_row(unsigned int nob, unsigned int index,
 }
 
 unsigned int get_element_from_char_row(unsigned int eperb, unsigned int prime,
-                                       unsigned int index, const char *row)
+                                       unsigned int index, const unsigned char *row)
 {
   unsigned int char_offset;
   unsigned int field;
@@ -188,7 +188,7 @@ void put_element_to_clean_row_with_params(unsigned int nob, unsigned int index,
 }
 
 void put_element_to_char_row(unsigned int eperb, unsigned int prime,
-                             unsigned int index, char *row, unsigned int elt)
+                             unsigned int index, unsigned char *row, unsigned int elt)
 {
   unsigned int char_offset;
   unsigned int field;
