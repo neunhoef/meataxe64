@@ -317,3 +317,4 @@ skew seventh
 20040814 - Add ztcocon documentation
 20040821 - Add FreeBSD port
 20040822 - Changed to building a meataxe library for the utility functions
+20040822 - Moved some functions out of library due to name duplication
