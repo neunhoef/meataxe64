@@ -1,0 +1,34 @@
+#
+# unix specific fragment for building
+#
+# Copyright (C) 2001 Advanced Rendering technology Limited
+# All rights reserved
+# Company confidential
+#
+# $Id: unix.txt,v 1.1 2001/08/28 21:39:44 jon Exp $
+#
+EXEEXT=
+LIBEXT= a
+OBJEXT= o
+DEPENDOBJEXT= o
+DEPENDEXT= d
+CC= gcc
+DEPEND_CC= gcc
+REL_COMPILE_FLAGS= -O3
+DEBUG_COMPILE_FLAGS= -g
+LINK_FLAGS= -static
+REL_LINK_FLAGS= $(LINK_FLAGS)
+DEBUG_LINK_FLAGS= $(REL_LINK_FLAGS) $(DEBUG_COMPILE_FLAGS)
+PROF_COMPILE_FLAGS= -pg
+PROF_LINK_FLAGS= $(DEBUG_LINK_FLAGS) $(PROF_COMPILE_FLAGS)
+PROFNA_LINK_FLAGS= $(PROF_LINK_FLAGS)
+NA_COMPILE_FLAGS= "-DNDEBUG=1"
+LINK= $(CC) -o # terminating space
+REL_LIBS= -lm
+DEBUG_LIBS= -lmcheck
+PROF_LIBS= $(DEBUGLIBS)
+PROFNA_LIBS= $(DEBUGLIBS)
+COMPILE_CFLAGS= -Werror -ansi -Wall -Wpointer-arith -Wwrite-strings -Winline -Waggregate-return -Wmissing-prototypes -Wnested-externs -W -Wunused -Wcast-align -Wstrict-prototypes -Wmissing-declarations -pedantic
+COMPILE= $(CC) -c -o $@
+DEP_COMPILE_CFLAGS= -MM -MG $(COMPILE_CFLAGS)
+

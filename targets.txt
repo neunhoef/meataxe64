@@ -1,0 +1,21 @@
+#
+# Generic target rules
+#
+# $Id: targets.txt,v 1.1 2001/08/28 21:39:44 jon Exp $
+#
+# generate target names plus objects
+#
+
+$(TARGET_TYPE)OBJECTS:= $($(TARGET)_MODULES:%=$($(TARGET_TYPE)OBJDIR)/%.$(OBJEXT))
+$(TARGET_TYPE)EXETARGETS:= $($(TARGET)_TARGET:%=$($(TARGET_TYPE)BINDIR)/%$(EXEEXT))
+$(TARGET_TYPE)TARGETS+= $($(TARGET_TYPE)EXETARGETS)
+
+# Build executable
+
+COMMAND := $($(TARGET_TYPE)EXETARGETS): $($(TARGET_TYPE)OBJECTS) ; @echo Link $$@; rm -f $$@ || true; mkdir -p $($(TARGET_TYPE)BINDIR) || true ; $(LINK)$$@ $($(TARGET_TYPE)_LINK_FLAGS) $($(TARGET_TYPE)OBJECTS) $($(TARGET_TYPE)LIBS)
+
+$(COMMAND)
+
+#Add to list of things to be removed by make clean
+CLEAN_ITEMS+= $($(TARGET_TYPE)OBJECTS) $($(TARGET_TYPE)TARGETS)
+

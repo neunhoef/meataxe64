@@ -1,0 +1,30 @@
+#
+# win32 specific fragment for building
+#
+# Copyright (C) 2001 Advanced Rendering technology Limited
+# All rights reserved
+# Company confidential
+#
+# $Id: win32.txt,v 1.1 2001/08/28 21:39:44 jon Exp $
+#
+EXEEXT= .exe
+LIBEXT= lib
+OBJEXT= obj
+DEPENDOBJEXT= o
+DEPENDEXT= d
+CC= cl
+DEPEND_CC= gcc
+REL_COMPILE_FLAGS= /O2
+DEBUG_COMPILE_FLAGS= /Zi
+REL_LINK_FLAGS=
+DEBUG_LINK_FLAGS= /DEBUG /PDBTYPE:SEPT
+PROF_COMPILE_FLAGS= 
+PROF_LINK_FLAGS= /PROFILE $(DEBUG_LINK_FLAGS)
+PROFNA_LINK_FLAGS= $(PROF_LINK_FLAGS)
+NA_COMPILE_FLAGS= "/DNDEBUG=1"
+# Note $$@ below. This is because LINK will be expanded in targets.txt
+LINK= link /nologo /subsystem:console /machine:ix86 /stack:0x2000000 /out:
+COMPILE_CFLAGS= /W3 /WX
+COMPILE= $(CC) /c /Fo$@ /nologo
+DEP_COMPILE_CFLAGS= -MM -MG
+
