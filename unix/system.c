@@ -1,5 +1,5 @@
 /*
- * $Id: system.c,v 1.3 2001/09/30 21:49:19 jon Exp $
+ * $Id: system.c,v 1.4 2001/10/03 23:57:33 jon Exp $
  *
  * system dependent stuff for locking etc
  */
@@ -12,9 +12,7 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <string.h>
-#if 0
-#include <time.h>
-#endif
+#include <limits.h>
 #include "files.h"
 #include "system.h"
 
@@ -30,13 +28,8 @@ void wait_lock(const char *task_name)
   FILE *foo;
   __pid_t pid = getpid();
   struct hostent *h = gethostbyname("localhost");
-#if 0
-  unsigned long hostid;
-
- = (unsigned long)gethostid();
-#endif
   assert(0 != h->h_length);
-  sprintf(name, "meataxe_lock_%u_%s", pid, h->h_addr_list[0]);
+  sprintf(name, "meataxe_lock_%u_%s", pid, h->h_name);
   while(1) {
     retries--;
     if (retries <= 0) {
@@ -53,7 +46,7 @@ void wait_lock(const char *task_name)
       printf("Cannot create lock file hitch, retrying\n");
       fflush(stdout);
     } else {
-      fprintf(foo, "Process %u, host %s, task %s\n", pid, h->h_addr_list[0], task_name);
+      fprintf(foo, "Process %u, host %s, task %s\n", pid, h->h_name, task_name);
       fclose(foo);
       /* Now we have our unique name, try to link to the universal name */
       if (link(name, LOCK)) {

@@ -1,5 +1,5 @@
 /*
- * $Id: read.c,v 1.9 2001/09/25 22:31:58 jon Exp $
+ * $Id: read.c,v 1.10 2001/10/03 23:57:33 jon Exp $
  *
  * Read a header
  *
@@ -53,26 +53,10 @@ int read_text_header(FILE *fp, const header **hp, const char *name)
     fprintf(stderr, "Newline expected reading '%s'\n", name);
     return 0;
   }
-  if (0 == read_decimal(str, 2, &nod)) {
-    fprintf(stderr, "Failed to read nod from %s\n", name);
-    return 0;
-  }
-  if (0 == read_decimal(str+2, 6, &prime)) {
-    fprintf(stderr, "Failed to read prime from %s\n", name);
-    return 0;
-  }
-  if (0 == is_a_prime_power(prime)) {
-    fprintf(stderr, "Prime power expected, found %d reading %s\n", prime, name);
-    return 0;
-  }
-  if (0 == read_decimal(str+2+6, 6, &nor)) {
-    fprintf(stderr, "Failed to read nor from %s\n", name);
-    return 0;
-  }
-  if (0 == read_decimal(str+2+6+6, 6, &noc)) {
-    fprintf(stderr, "Failed to read noc from %s\n", name);
-    return 0;
-  }
+  nod = read_decimal(str, 2);
+  prime = read_decimal(str + 2, 6);
+  nor = read_decimal(str + 2 + 6, 6);
+  noc = read_decimal(str + 2 + 6 + 6, 6);
   nob = bits_of(prime);
   *hp = header_create(prime, nob, nod, noc, nor);
   return 1;

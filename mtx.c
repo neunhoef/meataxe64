@@ -1,5 +1,5 @@
 /*
- * $Id: mtx.c,v 1.6 2001/10/03 00:01:42 jon Exp $
+ * $Id: mtx.c,v 1.7 2001/10/03 23:57:33 jon Exp $
  *
  * Extended row operations for monster meataxe
  *
@@ -20,7 +20,7 @@
 #include "mtx.h"
 
 static const char *name = "monst";
-static unsigned char *row;
+static unsigned int *row;
 static unsigned char table[256];
 static int cv_initialised = 0;
 static int initialised = 0;
@@ -33,15 +33,15 @@ static void quit(const char *a)
   exit(15);
 }
 
-static void convert_byte(unsigned char *out, const unsigned char *in)
+static unsigned char convert_char(unsigned char in)
 {
-  *out = table[*in];
+  return table[in];
 }
 
 static void convert_row(unsigned int total_cols, const unsigned char *bits)
 {
   unsigned int nox = (total_cols + bits_in_unsigned_int - 1) / bits_in_unsigned_int;
-  unsigned int i;
+  unsigned int i, j, k, x;
   if (0 == cv_initialised) {
     unsigned int total_fit;
     memory_init(name, 0);
@@ -61,9 +61,24 @@ static void convert_row(unsigned int total_cols, const unsigned char *bits)
     }
     cv_initialised = 1;
   }
-  /* Now convert the incoming row a word at a time */
-  for (i = 0; i < nox * sizeof(unsigned int); i += 1) {
-    convert_byte(row + i, bits + i);
+  i = 0;
+  j = 0;
+  k = 0;
+  x = 0;
+  /* Now convert the incoming row a char at a time in, a word at a time out */
+  while (i < (total_cols + (CHAR_BIT) - 1) / (CHAR_BIT)) {
+    x |= (convert_char(bits[i]) << ((CHAR_BIT) * k));
+    k++;
+    if (4 == k) {
+      row[j] = x;
+      j++;
+      k = 0;
+      x = 0;
+    }
+    i++;
+  }
+  if (0 != k) {
+    row[j] = x;
   }
 }
 
@@ -78,5 +93,5 @@ void put_row(unsigned int row_num, unsigned int total_cols, unsigned int split_s
     outputs = my_malloc(cols * sizeof(FILE *));
   }
   convert_row(total_cols, bits);
-  ex_row_put(row_num, total_cols, ".", names, split_size, (unsigned int *)row, outputs);
+  ex_row_put(row_num, total_cols, total_cols, ".", names, split_size, row, outputs);
 }

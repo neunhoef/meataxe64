@@ -1,5 +1,5 @@
 /*
- * $Id: eid.c,v 1.1 2001/10/03 00:01:42 jon Exp $
+ * $Id: eid.c,v 1.2 2001/10/03 23:57:32 jon Exp $
  *
  * Generate exploded identity matrix
  *
@@ -28,7 +28,7 @@ int main(int argc, const char * const argv[])
 {
   const char *out;
   unsigned int prime, nob, noc, nor, len;
-  unsigned int split, bits_in_word;
+  unsigned int split, elts_in_word;
   unsigned int cols, rows;
   unsigned int i;
   unsigned int *row;
@@ -50,16 +50,16 @@ int main(int argc, const char * const argv[])
   noc = strtoul(argv[3], NULL, 0);
   split = strtoul(argv[4], &ptr, 0);
   nob = bits_of(prime);
-  bits_in_word = bits_in_unsigned_int / nob;
+  elts_in_word = bits_in_unsigned_int / nob;
   /* Align split to word boundary */
-  split = ((split + bits_in_word - 1) / bits_in_word) * bits_in_word;
+  split = ((split + elts_in_word - 1) / elts_in_word) * elts_in_word;
   cols = (noc + split - 1) / split;
   rows = (nor + split - 1) / split;
   outputs = my_malloc(cols * sizeof(FILE *));
   output_map(name, argv[5], cols, rows, &names);
   endian_init();
   memory_init(name, 0);
-  len = (noc + bits_in_word - 1) / bits_in_word;
+  len = (noc + elts_in_word - 1) / elts_in_word;
   if (memory_rows(len, 1000) < 1) {
     fprintf(stderr, "%s: cannot create output row\n", name);
     exit(1);
@@ -71,7 +71,7 @@ int main(int argc, const char * const argv[])
       put_element_to_row(nob, i, row, 1);
     }
     /* Write the row */
-    ex_row_put(i, noc, argv[5], names, split, row, outputs);
+    ex_row_put(i, noc, nor, argv[5], names, split, row, outputs);
   }
   memory_dispose();
   return 0;

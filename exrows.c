@@ -1,5 +1,5 @@
 /*
- * $Id: exrows.c,v 1.1 2001/10/03 00:01:42 jon Exp $
+ * $Id: exrows.c,v 1.2 2001/10/03 23:57:32 jon Exp $
  *
  * Extended row manipulation for meataxe
  *
@@ -14,11 +14,10 @@
 #include "write.h"
 #include "exrows.h"
 
-int ex_row_put(unsigned int row_num, unsigned int total_cols,
+int ex_row_put(unsigned int row_num, unsigned int total_cols, unsigned int total_rows,
                const char *dir, const char *names[],
                unsigned int split_size, const unsigned int *row, FILE *outputs[])
 {
-  unsigned int total_rows = total_cols;
   unsigned int i;
   unsigned int cols;
   split_size = ((split_size + bits_in_unsigned_int - 1)/ bits_in_unsigned_int) * bits_in_unsigned_int;

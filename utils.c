@@ -1,5 +1,5 @@
 /*
- * $Id: utils.c,v 1.8 2001/10/03 00:01:42 jon Exp $
+ * $Id: utils.c,v 1.9 2001/10/03 23:57:33 jon Exp $
  *
  * Utils for meataxe
  *
@@ -66,28 +66,16 @@ int is_a_prime_power(unsigned int n)
   return 0;
 }
 
-int read_decimal(const char *str, unsigned int len, unsigned int *out)
+unsigned int read_decimal(const char *str, unsigned int len)
 {
-  unsigned int res = 0;
+  char s[7];
 
   assert(0 < len);
   assert(len <= 6);
-  while (my_isspace(*str) && len > 0) {
-    len--;
-    str++;
-  }
-  while (len > 0) {
-    if (isdigit(*str)) {
-      res = res*10 + (*str-'0');
-      str++;
-      len--;
-    } else {
-      fprintf(stderr, "Unrecognised digit '%c'\n", *str);
-      return 0;
-    }
-  }
-  *out = res;
-  return 1;
+  assert(NULL != str);
+  strncpy(s, str, len);
+  s[len] = '\0';
+  return strtoul(s, NULL, 0);
 }
 
 unsigned int getin(FILE *f, unsigned int a)
@@ -98,9 +86,8 @@ unsigned int getin(FILE *f, unsigned int a)
  
   if (NULL == t) {
     j = 0;
-    return 0;
   } else {
-    j = strtoul(s, &t, 0);
+    j = strtoul(s, NULL, 0);
   }
   free(s);
   return j;

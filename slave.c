@@ -1,5 +1,5 @@
 /*
- * $Id: slave.c,v 1.2 2001/09/26 22:04:47 jon Exp $
+ * $Id: slave.c,v 1.3 2001/10/03 23:57:33 jon Exp $
  *
  * Slave for extended operations
  * Based on zsl.c     MTX6 slave version 6.0.11 7.11.98 
@@ -25,7 +25,7 @@ static const char *name = "meataxe slave";
 
 static void slave_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <name>\n", name, name);
+  fprintf(stderr, "%s: usage: %s <name> [<memory>]\n", name, name);
 }
 
 /* Read a line into buf */
@@ -96,12 +96,17 @@ int main(int argc, const char *const argv[])
 {
   unsigned int i = 0, got = 1; 
   int cmdpar = 0;
+  unsigned int memory = MEM_SIZE;
   FILE *f1, *f2; 
-  memory_init(name, 0);
-  if (2 != argc) {
+  if (2 != argc && 3 != argc) {
     slave_usage();
     exit(1);
   }
+  if (3 == argc) {
+    memory = strtoul(argv[2], NULL, 0);
+  }
+  memory_init(name, memory);
+  memory_init(name, 0);
   init_system();
   while(1) {
 /*  open files   */

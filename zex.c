@@ -78,7 +78,7 @@ int main(int argc,  char **argv)
       fclose(input);
     }
     /* Write the row */
-    ex_row_put(i, noc, argv[2], names, split, row, outputs);
+    ex_row_put(i, noc, nor, argv[2], names, split, row, outputs);
   }
   fclose(input);
   memory_dispose();

@@ -1,5 +1,5 @@
 /*
- * $Id: header.c,v 1.4 2001/09/25 22:31:58 jon Exp $
+ * $Id: header.c,v 1.5 2001/10/03 23:57:32 jon Exp $
  *
  * Header manipulation
  *
@@ -90,8 +90,8 @@ void header_set_noc(header *h, unsigned int n)
 
 static unsigned int get_len(unsigned int nob, unsigned int noc)
 {
-  unsigned int bits_in_word = bits_in_unsigned_int / nob;
-  return (noc + bits_in_word - 1) / bits_in_word;
+  unsigned int elts_in_word = bits_in_unsigned_int / nob;
+  return (noc + elts_in_word - 1) / elts_in_word;
 }
 
 unsigned int header_get_len(const header *h)

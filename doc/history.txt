@@ -28,3 +28,4 @@
 20010930 - Move some junk out of ead and emu into utils, system, files
 20011001 - Abstract out map creation and extended row output
 20011002 - Created eid and used to complete check on A*A, Created zex
+20011003 - Add goals, update design. Fix funny lock files. Finish work on getin. Sort exrows. Add memory to slave

@@ -1,5 +1,5 @@
 /*
- * $Id: utils.h,v 1.8 2001/10/03 00:01:42 jon Exp $
+ * $Id: utils.h,v 1.9 2001/10/03 23:57:33 jon Exp $
  *
  * Utilities for meataxe
  *
@@ -15,7 +15,7 @@
 
 extern int is_a_prime_power(unsigned int);
 
-extern int read_decimal(const char *str, unsigned int len, unsigned int *out);
+extern unsigned int read_decimal(const char *str, unsigned int len);
 
 extern unsigned int bits_in_unsigned_int;
 

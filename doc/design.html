@@ -31,9 +31,9 @@ internally, except that they are always little endian. Endian
 conversion takes place on input and output. This allows different
 endian machines, eg Sparcs and PCs, to use the same binary format
 whilst achieving internal efficiency. Each binary matrix contains a
-four word header, consisting of nob (number of bytes), prime power,
-nor, noc. Again, this is in contrast to meataxe 6. As far as I can
-tell, meataxe six did not consider the problem of a consistent
+three word header, consisting of prime power, nor, noc, in little
+endian format. Again, this is in contrast to meataxe 6. As far as I
+can tell, meataxe six did not consider the problem of a consistent
 external binary representation, and hence big and little endian
 machines would be unable to operate on the same file data.
 </li>
