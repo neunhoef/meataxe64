@@ -1,5 +1,5 @@
 /*
- * $Id: tco.c,v 1.18 2004/05/06 20:27:44 jon Exp $
+ * $Id: tco.c,v 1.19 2004/05/06 22:46:20 jon Exp $
  *
  * Tensor condense one group element
  *
@@ -22,6 +22,59 @@
 #include "rows.h"
 #include "utils.h"
 #include "write.h"
+
+#define use_minor_tensor 0
+#if use_minor_tensor
+static void minor_tensor(unsigned int **expanded_rrows, unsigned int beta_i, unsigned int te_j, unsigned int **te_rows,
+                         unsigned int te_o_r, unsigned int max_irr_len, unsigned int dim_irr_j, unsigned int *expanded_lrow,
+                         unsigned int base_i, row_ops row_operations, unsigned int *te_row, unsigned int nob, unsigned int elts_per_word_nob,
+                         unsigned int nobj)
+{
+  unsigned int te_o_c_word = 0;
+  unsigned int te_o_c_offset = 0;
+  unsigned int word = 0;
+  unsigned int *expanded_rrow = expanded_rrows[beta_i + te_j];
+  unsigned int *te_rowsr = te_rows[te_o_r];
+  unsigned int te_k, te_o_c;
+  row_init(te_rowsr, max_irr_len);
+  te_o_c = 0;
+  for (te_k = 0; te_k < dim_irr_j; te_k++) {
+    /* Columns of M */
+    unsigned int elt = expanded_lrow[te_k];
+    if (0 != elt) {
+      unsigned int *row = expanded_rrow + base_i; /* was rrows */
+      unsigned int *row1;
+      if (1 != elt) {
+        (*row_operations.scaler)(row, te_row, dim_irr_j, elt);
+        row = te_row;
+      }
+      row1 = row + dim_irr_j;
+      while (row < row1) {
+        elt = *row;
+        word |= elt << te_o_c_offset;
+        te_o_c_offset += nob;
+        if (te_o_c_offset + nob > bits_in_unsigned_int) {
+          te_o_c_offset = 0;
+          te_rowsr[te_o_c_word] = word;
+          te_o_c_word++;
+          word = 0;
+        }
+        row++;
+      }
+    } else {
+      te_o_c_offset += nobj;
+      if (te_o_c_offset + nob > bits_in_unsigned_int) {
+        te_rowsr[te_o_c_word] = word;
+        te_o_c_word += te_o_c_offset / elts_per_word_nob;
+        te_o_c_offset %= elts_per_word_nob;
+        word = 0;
+      }
+    }
+    te_o_c += dim_irr_j;
+  }
+  te_rowsr[te_o_c_word] = word;
+}
+#endif
 
 static void close_files_and_headers(FILE **p, FILE **q, const header **h_p, const header **h_q, unsigned int i)
 {
@@ -518,6 +571,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
         for (j = 0; j < s; j++) {
           /* Column loop over distinct irreducibles of H */
           unsigned int dim_irr_j = dim_irr[j];
+          unsigned int nobj = nob * dim_irr_j;
           unsigned int dim_endj = dim_end[j];
           unsigned int len_pj = len_p[j];
           unsigned int len_qj = len_q[j];
@@ -531,21 +585,28 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
             /* Column loop over multiplicity of Sj */
             for (delta = 0; delta < right_multiplicitiesj; delta++) {
               /* Column loop over multiplicity of Sj* */
-              unsigned int te_i, te_j, te_k, te_o_r, te_o_c;
+              unsigned int te_i, te_o_r;
               unsigned int base_i = n_c + delta * dim_irr_j;
               unsigned int **arg1, **arg2;
               te_o_r = 0;
               for (te_i = 0; te_i < dim_irr_i; te_i++) {
                 /* Rows of M */
                 unsigned int *expanded_lrow = expanded_lrows[te_i] + m_c + gamma * dim_irr_j;
+                unsigned int te_j;
                 for (te_j = 0; te_j < dim_irr_i; te_j++) {
                   /* Rows of N */
                   if (0 != q_row[te_o_r]) {
+#if use_minor_tensor
+                    minor_tensor(expanded_rrows, beta_i, te_j, te_rows,
+                                 te_o_r, max_irr_len, dim_irr_j, expanded_lrow,
+                                 base_i, row_operations, te_row, nob, elts_per_word_nob, nobj);
+#else
                     unsigned int te_o_c_word = 0;
                     unsigned int te_o_c_offset = 0;
                     unsigned int word = 0;
                     unsigned int *expanded_rrow = expanded_rrows[beta_i + te_j];
                     unsigned int *te_rowsr = te_rows[te_o_r];
+                    unsigned int te_k, te_o_c;
                     row_init(te_rowsr, max_irr_len);
                     te_o_c = 0;
                     for (te_k = 0; te_k < dim_irr_j; te_k++) {
@@ -561,9 +622,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
                         row1 = row + dim_irr_j;
                         while (row < row1) {
                           elt = *row;
-                          if (0 != elt) {
-                            word |= elt << te_o_c_offset;
-                          }
+                          word |= elt << te_o_c_offset;
                           te_o_c_offset += nob;
                           if (te_o_c_offset + nob > bits_in_unsigned_int) {
                             te_o_c_offset = 0;
@@ -574,7 +633,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
                           row++;
                         }
                       } else {
-                        te_o_c_offset += nob * dim_irr_j;
+                        te_o_c_offset += nobj;
                         if (te_o_c_offset + nob > bits_in_unsigned_int) {
                           te_rowsr[te_o_c_word] = word;
                           te_o_c_word += te_o_c_offset / elts_per_word_nob;
@@ -585,6 +644,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
                       te_o_c += dim_irr_j;
                     }
                     te_rowsr[te_o_c_word] = word;
+#endif
                   }
                   te_o_r++;
                 }
