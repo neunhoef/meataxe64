@@ -1,5 +1,5 @@
 /*
- * $Id: rn.c,v 1.2 2001/11/12 13:43:38 jon Exp $
+ * $Id: rn.c,v 1.3 2001/11/14 00:07:42 jon Exp $
  *
  * Compute the rank of a matrix
  *
@@ -42,11 +42,7 @@ unsigned int rank(const char *m, const char *name)
   }
   (void)grease(prime, &grease_level, r);
   /* Now read the matrix */
-  if ( 0 == matrix_malloc(nor, (void **)&mat)) {
-    fprintf(stderr, "%s: cannot allocate matrix for %s, terminating\n", name, m);
-    fclose(inp);
-    exit(1);
-  }
+  matrix_malloc(nor, (void **)&mat);
   for (n = 0; n < nor; n++) {
     mat[n] = memory_pointer_offset(0, n, len);
   }
@@ -55,7 +51,7 @@ unsigned int rank(const char *m, const char *name)
     fclose(inp);
     exit(1);
   }
-  echelise(mat, nor, &n, &map, &new_mat, grease_level, prime, len, nob, 900);
+  echelise(mat, nor, &n, &map, &new_mat, grease_level, prime, len, nob, 900, name);
   free(mat);
   free(map);
   free(new_mat);

@@ -1,5 +1,5 @@
 /*
- * $Id: tra.c,v 1.2 2001/11/07 22:35:27 jon Exp $
+ * $Id: tra.c,v 1.3 2001/11/14 00:07:42 jon Exp $
  *
  * Function to transpose a matrix
  *
@@ -70,12 +70,7 @@ int tra(const char *m1, const char *m2, const char *name)
     return 0;
   }
   t1 = total - 1;
-  if (0 == matrix_malloc(t1, (void **)&rows)) {
-    fprintf(stderr, "%s cannot allocate rows for %s, %s, terminating\n", name, m1, m2);
-    fclose(input);
-    fclose(output);
-    return 0;
-  }
+  matrix_malloc(t1, (void **)&rows);
   row1 = memory_pointer_offset(0, 0, max);
   for (i = 0; i < t1; i++) {
       rows[i] = memory_pointer_offset(0, i + 1, max);

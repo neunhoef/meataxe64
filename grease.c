@@ -1,5 +1,5 @@
 /*
- * $Id: grease.c,v 1.9 2001/11/12 13:43:38 jon Exp $
+ * $Id: grease.c,v 1.10 2001/11/14 00:07:42 jon Exp $
  *
  * Functions to grease matrix rows
  *
@@ -23,7 +23,7 @@ static unsigned int **grease_table;
 /* An array giving the status of rows in the grease table */
 /* 0 => unset, 1 => set */
 static int *grease_table_comp;
-static row_ops row_operations = { NULL, NULL, NULL, NULL};
+static row_ops row_operations = {NULL, NULL, NULL, NULL, NULL};
 
 int grease(unsigned int prime, unsigned int *step, unsigned int avail)
 {
@@ -56,15 +56,10 @@ int grease_allocate_rows(unsigned int size,
   }
   grease_table_rows = size;
   grease_table_size = q_n - 1;
-  if (0 == matrix_malloc(grease_table_size, &temp)) {
-    return 0;
-  }
+  matrix_malloc(grease_table_size, &temp);
   grease_table_comp = temp;
   /* Get the table pointers */
-  if (0 == matrix_malloc(grease_table_size, &temp)) {
-    matrix_free(grease_table_comp);
-    return 0;
-  }
+  matrix_malloc(grease_table_size, &temp);
   grease_table = temp;
   for (i = 0; i < grease_table_size; i++) {
     grease_table[i] = memory_pointer_offset(start, i, len);

@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.25 2001/11/12 13:43:38 jon Exp $
+# $Id: makefile,v 1.26 2001/11/14 00:07:42 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -53,7 +53,7 @@ ZRN_MODULES=	clean elements endian grease header matrix memory primes read rn ro
 ZSL_MODULES=	add elements endian files grease header matrix memory mul primes read rows slave system utils write
 ZTR_MODULES=	elements endian header matrix memory primes read tr tra utils write
 
-MODULES=	$(ZAD_MODULES) $(ZCT_MODULES) $(DTOU_MODULES) $(EAD_MODULES) $(ECT_MODULES) $(EID_MODULES) $(EIM_MODULES) $(EMU_MODULES) $(ETR_MODULES) $(ZID_MODULES) $(ZCV_MODULES) $(MON_MODULES) $(ZMU_MODULES) $(ZPR_MODULES) $(ZSL_MODULES) $(STOP_MODULES) $(ZTR_MODULES) $(ZEX_MODULES)
+MODULES=	$(DTOU_MODULES) $(EAD_MODULES) $(ECT_MODULES) $(EID_MODULES) $(EIM_MODULES) $(EIP_MODULES) $(EMU_MODULES) $(ETR_MODULES) $(MON_MODULES) $(STOP_MODULES) $(ZAD_MODULES) $(ZCT_MODULES) $(ZCV_MODULES) $(ZEX_MODULES) $(ZID_MODULES) $(ZIP_MODULES) $(ZMU_MODULES) $(ZPR_MODULES) $(ZRN_MODULES) $(ZSL_MODULES) $(ZTR_MODULES)
 
 include dirs.txt
 

@@ -44,3 +44,5 @@
 20011106 - Added invert and negate for 2, 3, 4, 5, and for element sets
 20011107 - Added first version of clean and echelise
 20011112 - First in store rn
+20011112 - rn can operate without grease
+20011113 - matrix_malloc can't fail. Debugging rn. Add proper row_incer and in place scale

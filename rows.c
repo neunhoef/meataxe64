@@ -1,5 +1,5 @@
 /*
- * $Id: rows.c,v 1.11 2001/11/07 22:35:27 jon Exp $
+ * $Id: rows.c,v 1.12 2001/11/14 00:07:42 jon Exp $
  *
  * Row manipulation for meataxe
  *
@@ -120,13 +120,25 @@ static void row_add_3(const unsigned int *row1, const unsigned int *row2,
 
 static void row_inc_3(const unsigned int *row1, unsigned int *row2, unsigned int len)
 {
-  row_add_3(row1, row2, row2, len);
+  unsigned int i;
+  assert(0 != len);
+  assert(NULL != row1);
+  assert(NULL != row2);
+  for (i = 0; i < len; i++) {
+    unsigned int a, b, c, d, e, f, g, h;
+    assert(4 == sizeof(unsigned int));
+    a = *(row1++);
+    b = *(row2);
+    mod_3_add(a,b,c,d,e,f,g,h);
+    *(row2++) = c - (h * 3); /* Reduce mod 3 if needed */
+    assert(check_for_3(c - (h * 3)));
+  }
 }
 
 #define scale_mod_3(b) (((b) & (ONE_BITS_3)) << 1) | (((b) & (TWO_BITS_3)) >> 1)
 
 static void scaled_row_add_3(const unsigned int *row1, const unsigned int *row2,
-                            unsigned int *row3, unsigned int len, unsigned int elt)
+                             unsigned int *row3, unsigned int len, unsigned int elt)
 {
   unsigned int i;
   assert(2 == elt);
@@ -148,7 +160,7 @@ static void scaled_row_add_3(const unsigned int *row1, const unsigned int *row2,
 }
 
 static void row_scale_3(const unsigned int *row1, unsigned int *row2,
-                       unsigned int len, unsigned int elt)
+                        unsigned int len, unsigned int elt)
 {
   unsigned int i;
   assert(2 == elt);
@@ -164,11 +176,27 @@ static void row_scale_3(const unsigned int *row1, unsigned int *row2,
   }
 }
 
+static void row_scale_in_place_3(unsigned int *row,
+                                 unsigned int len, unsigned int elt)
+{
+  unsigned int i;
+  assert(2 == elt);
+  assert(0 != len);
+  assert(NULL != row);
+  NOT_USED(elt);
+  for (i = 0; i < len; i++) {
+    unsigned int a;
+    assert(4 == sizeof(unsigned int));
+    a = *(row);
+    *(row++) = scale_mod_3(a);
+  }
+}
+
 #define ONE_BITS_4 0x55555555
 #define TWO_BITS_4 ((ONE_BITS_4) << 1)
 
 static void row_add_4(const unsigned int *row1, const unsigned int *row2,
-                     unsigned int *row3, unsigned int len)
+                      unsigned int *row3, unsigned int len)
 {
   unsigned int i;
   assert(0 != len);
@@ -182,7 +210,13 @@ static void row_add_4(const unsigned int *row1, const unsigned int *row2,
 
 static void row_inc_4(const unsigned int *row1, unsigned int *row2, unsigned int len)
 {
-  row_add_4(row1, row2, row2, len);
+  unsigned int i;
+  assert(0 != len);
+  assert(NULL != row1);
+  assert(NULL != row2);
+  for (i = 0; i < len; i++) {
+    *(row2++) ^= *(row1++);
+  }
 }
 
 #define scale_mod_4(b,c,d,e,f,g,h,elt) \
@@ -195,7 +229,7 @@ static void row_inc_4(const unsigned int *row1, unsigned int *row2, unsigned int
     b = f - (g |  h) * 3 /* Subtract out the overflows */ 
 
 static void scaled_row_add_4(const unsigned int *row1, const unsigned int *row2,
-                            unsigned int *row3, unsigned int len, unsigned int elt)
+                             unsigned int *row3, unsigned int len, unsigned int elt)
 {
   unsigned int i;
   assert(0 != len);
@@ -228,6 +262,22 @@ static void row_scale_4(const unsigned int *row1, unsigned int *row2,
     b = *(row1++);
     scale_mod_4(b,c,d,e,f,g,h,elt);
     *(row2++) = b;
+  }
+}
+
+static void row_scale_in_place_4(unsigned int *row,
+                                 unsigned int len, unsigned int elt)
+{
+  unsigned int i;
+  assert(2 <= elt && elt <= 3);
+  assert(0 != len);
+  assert(NULL != row);
+  for (i = 0; i < len; i++) {
+    unsigned int b, c, d, e, f, g, h;
+    assert(4 == sizeof(unsigned int));
+    b = *(row);
+    scale_mod_4(b,c,d,e,f,g,h,elt);
+    *(row++) = b;
   }
 }
 
@@ -280,7 +330,19 @@ static void row_add_5(const unsigned int *row1, const unsigned int *row2,
 
 static void row_inc_5(const unsigned int *row1, unsigned int *row2, unsigned int len)
 {
-  row_add_5(row1, row2, row2, len);
+  unsigned int i;
+  assert(0 != len);
+  assert(NULL != row1);
+  assert(NULL != row2);
+  for (i = 0; i < len; i++) {
+    unsigned int a, b, c, d, e, f, g, h, j, k;
+    assert(4 == sizeof(unsigned int));
+    a = *(row1++);
+    b = *(row2);
+    mod_5_add(a,b,c,d,e,f,g,h,j,k);
+    assert(check_for_5(f - (k * 5)));
+    *(row2++) = f - (k * 5); /* Reduce mod 5 if needed */
+  }
 }
 
 #define scale_mod_5(b,d,c,e,f,g,h,j,elt) \
@@ -353,6 +415,22 @@ static void row_scale_5(const unsigned int *row1, unsigned int *row2,
   }
 }
 
+static void row_scale_in_place_5(unsigned int *row,
+                                 unsigned int len, unsigned int elt)
+{
+  unsigned int i;
+  assert(0 != len);
+  assert(NULL != row);
+  assert(2 <= elt && elt <= 4);
+  for (i = 0; i < len; i++) {
+    unsigned int b, c, d, e, f, g, h, j;
+    assert(4 == sizeof(unsigned int));
+    b = *(row);
+    scale_mod_5(b,d,c,e,f,g,h,j,elt);
+    *(row++) = b;
+  }
+}
+
 void row_copy(const unsigned int *row1, unsigned int *row2,
               unsigned int len)
 {
@@ -375,24 +453,28 @@ int rows_init(unsigned int prime, row_opsp ops)
     ops->incer = &row_inc_2;
     ops->scaled_adder = NULL; /* Should never be called */
     ops->scaler = NULL; /* Should never be called */
+    ops->scaler_in_place = NULL; /* Should never be called */
     return 1;
   } else if (3 == prime) {
     ops->adder = &row_add_3;
     ops->incer = &row_inc_3;
     ops->scaled_adder = &scaled_row_add_3;
     ops->scaler = &row_scale_3;
+    ops->scaler_in_place = &row_scale_in_place_3;
     return 1;
   } else if (4 == prime) {
     ops->adder = &row_add_4;
     ops->incer = &row_inc_4;
     ops->scaled_adder = &scaled_row_add_4;
     ops->scaler = &row_scale_4;
+    ops->scaler_in_place = &row_scale_in_place_4;
     return 1;
   } else if (5 == prime) {
     ops->adder = &row_add_5;
     ops->incer = &row_inc_5;
     ops->scaled_adder = &scaled_row_add_5;
     ops->scaler = &row_scale_5;
+    ops->scaler_in_place = &row_scale_in_place_5;
     return 1;
   } else {
     return 0;

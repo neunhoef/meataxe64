@@ -1,5 +1,5 @@
 /*
- * $Id: mul.c,v 1.11 2001/11/07 22:35:27 jon Exp $
+ * $Id: mul.c,v 1.12 2001/11/14 00:07:42 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
@@ -124,19 +124,12 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
       return cleanup(inp1, inp2, outp);
     }
   } else {
-    if (0 == matrix_malloc(1, &t1)) {
-      fprintf(stderr, "%s: unable to allocate row for matrix 2, terminating\n", name);
-      return cleanup(inp1, inp2, outp);
-    }
+    matrix_malloc(1, &t1);
     grease_rows = t1;
     *grease_rows = memory_pointer(M1_SIZE);
   }
-/* Could consider working ungreased */
-  if (0 == matrix_malloc(nox, &t1) ||
-      0 == matrix_malloc(nox, &t2)) {
-    fprintf(stderr, "%s: cannot allocate rows for %s, %s, %s, terminating\n", name, m1, m2, m3);
-    return cleanup(inp1, inp2, outp);
-  }
+  matrix_malloc(nox, &t1);
+  matrix_malloc(nox, &t2);
   /* Set up pointers for rows1 and rows3 */
   rows1 = t1;
   rows3 = t2;
