@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: real_indicate,v 1.13 2004/07/28 21:35:42 jon Exp $
+# $Id: real_indicate,v 1.14 2005/02/20 09:51:04 jon Exp $
 #
 # Script to find the indicator of an irreducible representation
 # assuming it is real, and we have the standard basis conjugating
@@ -208,7 +208,7 @@ else
           ok=0
           memory=$init_memory
           while [ 0 -eq $ok ]; do
-            out=`zsignf -m $memory ${tmp}.8 $S . 2>&1`
+            out=`zsignf -m $memory $S $S . 2>&1`
             ret=$?
             if [ 2 -eq $ret ]; then
               let memory=`more_memory $memory 2>/dev/null`
