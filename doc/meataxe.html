@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.43 2003/04/26 16:55:46 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.44 2003/04/26 18:35:37 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -4546,8 +4546,9 @@ dimension increases.
 <li><a href="#irred">irred</a></li>
 <li><a href="#new_irred">new_irred</a></li>
 <li><a href="#new_irred_and_indicate">new_irred_and_indicate</a></li>
-<li><a href="#new_irred_with_orders">new_irred_with_orders</a></li>
 <li><a href="#new_irred_and_indicate_with_orders">new_irred_and_indicate_with_orders</a></li>
+<li><a href="#new_irred_with_orders">new_irred_with_orders</a></li>
+<li><a href="#new_irred_with_script">new_irred_with_script</a></li>
 <li><a href="#new_irredf_and_indicate_with_orders">new_irredf_and_indicate_with_orders</a></li>
 <li><a href="#new_irredf_with_orders">new_irredf_with_orders</a></li>
 <li><a href="#norm">norm</a></li>
@@ -6806,6 +6807,54 @@ this is new or, if already known, which known irreducible it is.</td>
 </tr>
 <tr>
 <td valign=top>254</td><td valign=top>No nullity one element found</td>
+</tr>
+<tr>
+<td valign=top>255</td><td valign=top>Module is a known irreducible</td>
+</tr>
+</table>
+Commentary: As for <a href="#new_irred">new_irred</a>.
+</li>
+<li>
+<h3><a name="new_irred_with_script">new_irred_with_script</a></h3>
+Purpose: Classify a potential new irreducible, given the script
+producing the element whose nullspace seeds the standard base
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Memory size</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Script giving the required element</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>Generator 1</td>
+</tr>
+<tr>
+<td valign=top>4</td><td valign=top>Generator 2</td>
+</tr>
+<tr>
+<td valign=top>5-</td><td valign=top>Other generators</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>Information indicating either that
+this is new or, if already known, which known irreducible it is.</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient memory for workspace</td>
+</tr>
+<tr>
+<td valign=top>254</td><td valign=top>Script does not produce a nullity one element</td>
 </tr>
 <tr>
 <td valign=top>255</td><td valign=top>Module is a known irreducible</td>
