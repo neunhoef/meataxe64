@@ -1,5 +1,5 @@
 /*
- * $Id: sums.c,v 1.11 2002/09/11 15:34:59 jon Exp $
+ * $Id: sums.c,v 1.12 2002/09/18 10:33:15 jon Exp $
  *
  * Function to compute linear sums of two matices
  *
@@ -80,7 +80,7 @@ int sums(const char *out, unsigned int n, unsigned int argc, const char *const a
   unsigned int argc2 = argc / 2;
   unsigned int i, j, k, l, r, s, cur_word = 0, cur_power = 1, base_prime;
   unsigned int prime = 1, nod = 0, nor = 0, noc = 0, count;
-  unsigned int o_a, o_b;
+  unsigned int order_sum = 0;
   const header *h;
   int m;
   const char **names;
@@ -90,6 +90,7 @@ int sums(const char *out, unsigned int n, unsigned int argc, const char *const a
   const char *gen_names[] = { "A", "B", "C", "D", "E", "F", "G", "H" };
 
   assert(NULL != out);
+  assert(NULL != name);
   assert(NULL != args);
   assert(2 < argc && 0 == argc % 2);
   if (argc2 > 8) {
@@ -99,11 +100,10 @@ int sums(const char *out, unsigned int n, unsigned int argc, const char *const a
   orders = my_malloc(argc2 * sizeof(unsigned int));
   for (i = 0; i < argc2; i++) {
     orders[i] = strtoul(args[1 + 2 * i], NULL, 0);
+    order_sum += orders[i];
   }
-  o_a = orders[0];
-  o_b = orders[1];
-  if (0 == o_a || 0 == o_b || 0 == n) {
-    fprintf(stderr, "%s: unexpected zero in order of a, order of b or n, terminating\n", name);
+  if (2 > order_sum || 0 == n) {
+    fprintf(stderr, "%s: unexpected zeroes in orders, or zero depth, terminating\n", name);
     cleanup(orders);
     exit(1);
   }
@@ -196,9 +196,6 @@ int sums(const char *out, unsigned int n, unsigned int argc, const char *const a
       sprintf(buf, "%s%d", out, i - 1);
       names[i] = buf;
     }
-/*
-    printf("New loop, i = %d\n", i);
-*/
     while (1) {
       const char *word = words[cur_word];
       m = next_gen(m, argc2, &letter, orders, word);
@@ -226,11 +223,6 @@ int sums(const char *out, unsigned int n, unsigned int argc, const char *const a
         cleanup(orders);
         exit(1);
       }
-/*
-      printf("Multiplying %s(%s) * %s(%s) giving %s(%s)\n", c, words[cur_word], b, chosen_letter, names[i], words[i]);
-    } else {
-      printf("No multiplication required to produce %s\n", names[i]);
-*/
     }
     /* Now compute the sums we require, and their ranks */
     for (l = 0; l < cur_power; l++) {
@@ -244,18 +236,12 @@ int sums(const char *out, unsigned int n, unsigned int argc, const char *const a
         if (0 == scaled_add(names[i], elts[l], elts[pos], r, name)) {
           fprintf(stderr, "%s: scaled add failed on %s + %d * %s, terminating\n",
                   name, elts[l], r, names[i - 1]);
-/*
-          printf("Scaled add %s(%s) + %d.%s(%s) giving %s(%s)\n", elts[l], elt_names[l], r, names[i], words[i], elts[pos], elt_names[pos]);
-*/
           cleanup(orders);
           exit(1);
         }
         /* l != 0 mean we have 1 + old element + lambda * new element, ie at least 3 in sum */
         if (0 != l) {
           int res;
-/*
-          printf("Checking rank of %s(%s)\n", elts[pos], elt_names[pos]);
-*/
           if (0 == rank(elts[pos], &s, name)) {
             cleanup(orders);
             exit(1);

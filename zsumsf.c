@@ -1,5 +1,5 @@
 /*
- * $Id: zsumsf.c,v 1.4 2002/09/11 10:02:28 jon Exp $
+ * $Id: zsumsf.c,v 1.5 2002/09/18 10:33:15 jon Exp $
  *
  * Compute sums in the group algebra in two matrices
  *
@@ -19,7 +19,7 @@ static unsigned int nullity = 0;
 
 static void sumsf_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <in_file a> <in_file b> <out_file_stem> <tmp dir> <order a> <order b> <n> <nullity> [<memory>]\n", name, name);
+  fprintf(stderr, "%s: usage: %s <out_file_stem> <n> <nullity> <memory> <tmp dir> <in_file a> <order a> <in_file b> <order b>\n", name, name);
 }
 
 static int acceptor(unsigned int rank, unsigned int nor, const char *file, const char *form)
@@ -36,28 +36,24 @@ static int acceptor(unsigned int rank, unsigned int nor, const char *file, const
 int main(int argc, const char * const argv[])
 {
   unsigned int memory = MEM_SIZE;
-  unsigned int o_a, o_b, n;
+  unsigned int n;
   int res;
 
   argv = parse_line(argc, argv, &argc);
-  if (9 != argc && 10 != argc) {
+  if (10 > argc || 0 != argc % 2) {
     sumsf_usage();
     exit(1);
   }
-  o_a = strtoul(argv[5], NULL, 0);
-  o_b = strtoul(argv[6], NULL, 0);
-  n = strtoul(argv[7], NULL, 0);
-  nullity = strtoul(argv[8], NULL, 0);
-  if (10 == argc) {
-    memory = strtoul(argv[9], NULL, 0);
-  }
+  n = strtoul(argv[2], NULL, 0);
+  nullity = strtoul(argv[3], NULL, 0);
+  memory = strtoul(argv[4], NULL, 0);
   if (0 == n) {
     fprintf(stderr, "%s: no sums requested\n", name);
     exit(1);
   }
   endian_init();
   memory_init(name, memory);
-  res = sumsf(argv[1], argv[2], argv[3], argv[4], o_a, o_b, n, 0, &acceptor, name);
+  res = sumsf(argv[1], argv[5], n, argc - 6, argv + 6, 0, &acceptor, name);
   if (0 != res) {
     printf("Failed to find a suitable element\n");
   }

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: find_nullity_onef_with_orders,v 1.6 2002/09/16 09:26:47 jon Exp $
+# $Id: find_nullity_onef_with_orders,v 1.7 2002/09/18 10:33:15 jon Exp $
 #
 # Script to find an element of nullity one in two generators, using intermediate files
 #
@@ -44,7 +44,7 @@ done
 depth=`max_depth $q 1023`
 # Try zsums
 while [ $ok -eq 0 ]; do
-  out=`zsumsf $a $b ${tmp}.zsums $dir $o_a $o_b $depth 1 $memory 2>/dev/null`
+  out=`zsumsf ${tmp}.zsums $depth 1 $memory $dir $a $o_a $b $o_b 2>/dev/null`
   ret=$?
   if [ 2 -eq $ret ]; then
     let memory=`more_memory $memory`
