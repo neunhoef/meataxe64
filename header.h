@@ -1,5 +1,5 @@
 /*
- * $Id: header.h,v 1.7 2002/03/09 19:18:02 jon Exp $
+ * $Id: header.h,v 1.8 2002/03/10 22:45:28 jon Exp $
  *
  * Internal header for meataxe
  *
@@ -31,5 +31,6 @@ extern void header_free(const header *);
 extern header *header_create(unsigned int prime, unsigned int nob,
                              unsigned int nod, unsigned int noc,
                              unsigned int nor);
+extern int header_compare(const header *, const header *);
 
 #endif

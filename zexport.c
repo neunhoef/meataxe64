@@ -1,5 +1,5 @@
 /*
- * $Id: zexport.c,v 1.2 2002/03/09 19:18:02 jon Exp $
+ * $Id: zexport.c,v 1.3 2002/03/10 22:45:28 jon Exp $
  *
  * Export matrix to old system
  *
@@ -78,6 +78,7 @@ int main(int argc, const char * const argv[])
       exit(1);
     }
   }
+  header_free(h_in);
   memory_dispose();
   return 0;
 }

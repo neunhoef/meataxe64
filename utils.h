@@ -1,5 +1,5 @@
 /*
- * $Id: utils.h,v 1.15 2002/03/09 19:18:02 jon Exp $
+ * $Id: utils.h,v 1.16 2002/03/10 22:45:28 jon Exp $
  *
  * Utilities for meataxe
  *
@@ -27,6 +27,8 @@ extern unsigned int digits_of(unsigned int n);
 extern unsigned int bits_of(unsigned int n);
 
 extern int my_isspace(int);
+
+extern int my_isdigit(int);
 
 extern void *my_malloc(size_t);
 

@@ -1,5 +1,5 @@
 /*
- * $Id: header.c,v 1.10 2002/03/09 19:18:02 jon Exp $
+ * $Id: header.c,v 1.11 2002/03/10 22:45:28 jon Exp $
  *
  * Header manipulation
  *
@@ -195,3 +195,9 @@ header *header_create(unsigned int prime, unsigned int nob,
   header_set_blen(h);
   return h;
 }
+
+int header_compare(const header *a, const header *b)
+{
+  return (0 == memcmp(a, b, sizeof(*a)));
+}
+

@@ -1,5 +1,5 @@
 /*
- * $Id: add.c,v 1.16 2002/02/05 19:50:55 jon Exp $
+ * $Id: add.c,v 1.17 2002/03/10 22:45:28 jon Exp $
  *
  * Function to add two matrices to give a third
  *
@@ -72,8 +72,6 @@ static int add_sub(const char *m1, const char *m2, const char *m3, const char *n
   elt = elt % prime; /* Bring into range */
   if (0 == rows_init(prime, &row_operations)) {
     fprintf(stderr, "%s: cannot initialise row operations for %s, %s, terminating\n", name, m1, m2);
-    fclose(inp1);
-    fclose(inp2);
     header_free(h1);
     return cleanup(inp1, inp2, NULL);
   }

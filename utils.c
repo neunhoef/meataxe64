@@ -1,5 +1,5 @@
 /*
- * $Id: utils.c,v 1.17 2002/03/09 19:18:02 jon Exp $
+ * $Id: utils.c,v 1.18 2002/03/10 22:45:28 jon Exp $
  *
  * Utils for meataxe
  *
@@ -18,6 +18,11 @@ unsigned int bits_in_unsigned_int = CHAR_BIT * sizeof(unsigned int);
 int my_isspace(int i)
 {
   return (i == ' ') || (i == 9) || (i == 10) || (i == 13);
+}
+
+int my_isdigit(int i)
+{
+  return (i >= '0') && (i <= '9');
 }
 
 unsigned int read_decimal(const char *str, unsigned int len)

@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.51 2002/03/09 19:18:02 jon Exp $
+# $Id: makefile,v 1.52 2002/03/10 22:45:28 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -56,6 +56,7 @@ ZRN_TARGET=	zrn
 ZRNF_TARGET=	zrnf
 ZSAD_TARGET=	zsad
 ZSB_TARGET=	zsb
+ZSCRIPT_TARGET=	zscript
 ZSEL_TARGET=	zsel
 ZSID_TARGET=	zsid
 ZSKCU_TARGET=	zskcu
@@ -123,6 +124,7 @@ ZRN_MODULES=	clean elements endian grease header matrix memory primes read rn ro
 ZRNF_MODULES=	clean elements endian grease header matrix memory primes read rnf rows system utils write zrnf
 ZSAD_MODULES=	add elements endian header memory primes read rows utils write zsad
 ZSB_MODULES=	clean elements endian grease header matrix memory mul primes read rows sb utils write zsb
+ZSCRIPT_MODULES=	add elements endian files grease header ident matrix memory mul primes read rows scale script utils write zscript
 ZSEL_MODULES=	endian header memory primes read utils write zse
 ZSID_MODULES=	ident elements endian header memory primes rows utils write zsid
 ZSKCU_MODULES=	dets elements endian header matrix memory powers primes read rows utils write zskcu
@@ -190,6 +192,7 @@ MODULES=	$(DTOU_MODULES) \
 	$(ZRNF_MODULES) \
 	$(ZSAD_MODULES) \
 	$(ZSB_MODULES) \
+	$(ZSCRIPT_MODULES) \
 	$(ZSEL_MODULES) \
 	$(ZSID_MODULES) \
 	$(ZSKCU_MODULES) \
@@ -384,6 +387,9 @@ TARGET:=ZSAD
 include targets.txt
 
 TARGET:=ZSB
+include targets.txt
+
+TARGET:=ZSCRIPT
 include targets.txt
 
 TARGET:=ZSEL
