@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.77 2002/10/12 17:40:49 jon Exp $
+# $Id: makefile,v 1.78 2002/10/13 15:35:21 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -77,8 +77,6 @@ ZRRANKS_TARGET=	zrranks
 ZRSUMS_TARGET=	zrsums
 ZRSUMSF_TARGET=	zrsumsf
 ZSAD_TARGET=	zsad
-ZSB_TARGET=	zsb
-ZSBF_TARGET=	zsbf
 ZSCRIPT_TARGET=	zscript
 ZSEL_TARGET=	zsel
 ZSID_TARGET=	zsid
@@ -91,10 +89,8 @@ ZSKSE_TARGET=	zskse
 ZSKSI_TARGET=	zsksi
 ZSKSQ_TARGET=	zsksq
 ZSL_TARGET=	zsl
-ZSP_TARGET=	zsp
 ZSPAN_TARGET=	zspan
 ZSPANMSP_TARGET=	zspanmsp
-ZSPF_TARGET=	zspf
 ZSS_TARGET=	zss
 ZSUMS_TARGET=	zsums
 ZSUMSF_TARGET=	zsumsf
@@ -179,8 +175,6 @@ ZRRANKS_MODULES=	add clean elements endian grease header ident map_or_row maps m
 ZRSUMS_MODULES=	add clean elements endian grease header ident map_or_row maps matrix memory mul parse primes read rn rows sums utils write zrsums
 ZRSUMSF_MODULES=	add clean elements endian grease header ident map_or_row maps matrix memory mul parse primes read rnf rows sumsf system utils write zrsumsf
 ZSAD_MODULES=	add elements endian header map_or_row maps memory parse primes read rows utils write zsad
-ZSB_MODULES=	clean elements endian grease header maps matrix memory mul parse primes read rows sb utils write zsb
-ZSBF_MODULES=	clean clean_file elements endian grease header maps matrix memory mul parse primes read rows sbf system utils write zsbf
 ZSCRIPT_MODULES=	add elements endian files grease header ident map_or_row maps matrix memory mul parse primes read rows scale script utils write zscript
 ZSEL_MODULES=	endian header memory parse primes read utils write zse
 ZSID_MODULES=	ident elements endian header maps memory parse primes rows utils write zsid
@@ -193,10 +187,8 @@ ZSKSE_MODULES=	dets elements endian header matrix memory powers parse primes rea
 ZSKSI_MODULES=	dets elements endian header matrix memory powers parse primes read rows utils write zsksi
 ZSKSQ_MODULES=	dets elements endian header matrix memory powers parse primes read rows utils write zsksq
 ZSL_MODULES=	add elements endian files grease header map_or_row maps matrix memory mul parse primes read rows slave system utils write
-ZSP_MODULES=	clean elements endian grease header maps matrix memory mul parse primes read rows sp utils write zsp
 ZSPAN_MODULES=	elements endian header matrix memory parse primes read rows utils write zspan
 ZSPANMSP_MODULES=	elements endian grease header maps matrix memory mul parse primes read rows spanmsp utils write zspanmsp
-ZSPF_MODULES=	clean clean_file elements endian grease header maps matrix memory mul parse primes read rows spf system utils write zspf
 ZSS_MODULES=	elements endian header memory parse primes read rows ss ss_map utils write zss
 ZSUMS_MODULES=	add clean elements endian grease header ident map_or_row maps matrix memory mul parse primes read rn rows sums utils write zsums
 ZSUMSF_MODULES=	add clean elements endian grease header ident map_or_row maps matrix memory mul parse primes read rnf rows sumsf system utils write zsumsf
@@ -281,8 +273,6 @@ MODULES=	$(DECOMP_MODULES) \
 	$(ZRSUMS_MODULES) \
 	$(ZRSUMSF_MODULES) \
 	$(ZSAD_MODULES) \
-	$(ZSB_MODULES) \
-	$(ZSBF_MODULES) \
 	$(ZSCRIPT_MODULES) \
 	$(ZSEL_MODULES) \
 	$(ZSID_MODULES) \
@@ -295,10 +285,8 @@ MODULES=	$(DECOMP_MODULES) \
 	$(ZSKSI_MODULES) \
 	$(ZSKSQ_MODULES) \
 	$(ZSL_MODULES) \
-	$(ZSP_MODULES) \
 	$(ZSPAN_MODULES) \
 	$(ZSPANMSP_MODULES) \
-	$(ZSPF_MODULES) \
 	$(ZSS_MODULES) \
 	$(ZSUMS_MODULES) \
 	$(ZSUMSF_MODULES) \
@@ -554,12 +542,6 @@ include targets.txt
 TARGET:=ZSAD
 include targets.txt
 
-TARGET:=ZSB
-include targets.txt
-
-TARGET:=ZSBF
-include targets.txt
-
 TARGET:=ZSCRIPT
 include targets.txt
 
@@ -596,16 +578,10 @@ include targets.txt
 TARGET:=ZSL
 include targets.txt
 
-TARGET:=ZSP
-include targets.txt
-
 TARGET:=ZSPAN
 include targets.txt
 
 TARGET:=ZSPANMSP
-include targets.txt
-
-TARGET:=ZSPF
 include targets.txt
 
 TARGET:=ZSS
