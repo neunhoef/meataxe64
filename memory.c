@@ -1,5 +1,5 @@
 /*
- * $Id: memory.c,v 1.9 2002/07/02 11:04:51 jon Exp $
+ * $Id: memory.c,v 1.10 2002/07/04 17:50:06 jon Exp $
  *
  * Large memory manipulation for meataxe
  *
@@ -11,6 +11,7 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
+#include <math.h>
 #include "utils.h"
 
 static unsigned int *memory = NULL;
@@ -67,4 +68,24 @@ unsigned int memory_rows(unsigned int len, unsigned int size)
   assert(0 != len);
   assert(1000 >= size);
   return (size * extent) / len;
+}
+
+unsigned int find_extent(unsigned int nor, unsigned int len)
+{
+  unsigned int avail;
+  double ratio;
+  assert(0 != nor);
+  assert(0 != len);
+  avail = memory_rows(len, 10);
+  ratio = nor / ((0 == avail) ? 1 : avail);
+  avail = (unsigned int)ceil(ratio * avail);
+  if (0 == avail) {
+    avail = 1;
+  } else if (avail >= 100) {
+    avail = 99;
+  }
+  while (avail > 0 && memory_rows(len, avail) > nor) {
+    avail--;
+  }
+  return avail + 1;
 }

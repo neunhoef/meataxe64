@@ -1,5 +1,5 @@
 /*
- * $Id: tspf.c,v 1.4 2002/07/02 11:06:35 jon Exp $
+ * $Id: tspf.c,v 1.5 2002/07/04 17:50:06 jon Exp $
  *
  * Function to spin some vectors under two generators in tensor space
  * using intermediate files in a temporary directory.
@@ -93,7 +93,6 @@ unsigned int spin(const char *in, const char *out,
   assert(NULL != b1);
   assert(NULL != b2);
   assert(NULL != dir);
-  NOT_USED(dir);
   assert(NULL != name);
   /* Open and examine the vector and generators */
   if (0 == open_and_read_binary_header(&inp, &h_in, in, name) ||

@@ -1,5 +1,5 @@
 /*
- * $Id: memory.h,v 1.4 2001/11/07 22:35:27 jon Exp $
+ * $Id: memory.h,v 1.5 2002/07/04 17:50:06 jon Exp $
  *
  * Large memory manipulation for meataxe
  *
@@ -27,5 +27,8 @@ extern void *memory_pointer_offset(unsigned int n, unsigned int i, unsigned int 
 /* Find out how many rows of given size fit in given memory */
 /* len is in words */
 extern unsigned int memory_rows(unsigned int len, unsigned int size);
+
+/* Find out how much memory is required for a given number of rows */
+extern unsigned int find_extent(unsigned int nor, unsigned int len);
 
 #endif

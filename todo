@@ -4,9 +4,13 @@ Profile multiply (eg on 26750 for Co1) for different memory sizes
 Investigate better matrix multiplications
 Implement a verbosity level for all programs, with -v <n>. Add a standard parser to deal with this
 Debug zsymsq failure on Co2 23 mod 3
-Put memory reduction stuff into memory.c
+Test memory reduction stuff in memory.c using ztsp
+Investigate rename failure on large files from zscript
+Remove nor == 1 restriction from ztspf
+Analyse unexpected split failure
 Apply memory reduction to ztspf
 Fix zps to take less memory
+Think about better grease vector selection for making
 Improve zsb{,f} to take multiple generators
 Fix zsums use to handle zero elements
 Find a better algorithm for zsp memory. Investigate performance (1)
