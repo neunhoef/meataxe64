@@ -1,5 +1,5 @@
 /*
- * $Id: tcv.c,v 1.3 2002/09/09 13:18:04 jon Exp $
+ * $Id: tcv.c,v 1.4 2002/10/13 19:08:58 jon Exp $
  *
  * Function to lift vectors from a tensor condensation representation
  *
@@ -118,7 +118,7 @@ int lift(unsigned int s, const char *mults_l, const char *mults_r, const char *i
   unsigned int *left_multiplicities = NULL, *right_multiplicities = NULL;
   FILE *inp = NULL, *outp = NULL, **q;
   const header **h_q, *h_i, *h_o;
-  unsigned int i, j, row, nob, nor_i, noc_i, len_i, noc_o, len_o, prime, max_end, max_irr, max_irr_len, extent_q, extent_i, extent_o, dim_l, dim_r;
+  unsigned int i, j, row, nob, nor_i, noc_i, len_i, noc_o, len_o, prime, max_end, max_irr, max_irr_len, extent_q, extent_i, extent_o, dim_l, dim_r, elts_per_word;
   unsigned int *nor_q = NULL, *noc_q = NULL, *len_q = NULL, *irr_q = NULL;
   unsigned int *row_i, *row_o, *inter_row_i, *inter_row_o;
   grease_struct grease;
@@ -257,6 +257,7 @@ int lift(unsigned int s, const char *mults_l, const char *mults_r, const char *i
                    nor_q, noc_q, len_q, irr_q, inp,
                    q, h_q, s, h_i, h_o, outp);
   }
+  (void)get_mask_and_elts(nob, &elts_per_word);
   for (row = 0; row < nor_i; row++) {
     unsigned int col_i, col_o;
     if (0 == endian_read_row(inp, row_i, len_i)) {
@@ -280,7 +281,7 @@ int lift(unsigned int s, const char *mults_l, const char *mults_r, const char *i
           for (m = 0; m < nor_q[i]; m++) {
             unsigned int elt = get_element_from_row(nob, col_i + m, row_i);
             if (0 != elt) {
-              put_element_to_row(nob, m, inter_row_i, elt);
+              put_element_to_clean_row_with_params(nob, m, elts_per_word, inter_row_i, elt);
             }
           }
           if (0 ==  mul_from_store(&inter_row_i, &inter_row_o,
@@ -298,7 +299,7 @@ int lift(unsigned int s, const char *mults_l, const char *mults_r, const char *i
             for (t = 0; t < irr_q[i]; t++) {
               unsigned int elt = get_element_from_row(nob, n + t, inter_row_o);
               if (0 != elt) {
-                put_element_to_row(nob, col_o + t, row_o, elt);
+                put_element_to_clean_row_with_params(nob, col_o + t, elts_per_word, row_o, elt);
               }
             }
             n += irr_q[i];
