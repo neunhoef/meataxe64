@@ -1,5 +1,5 @@
 #
-# $Id: new_irred_with_orders,v 1.2 2002/03/20 18:42:30 jon Exp $
+# $Id: new_irred_with_orders,v 1.3 2002/03/24 19:44:02 jon Exp $
 #
 # Script to classify an irreducible representation
 #
@@ -45,10 +45,6 @@ if [ -e $a -a -e $b ]; then
 else
   echo "$0: missing files $a or $b"
   exit 1
-fi
-id=id_${q}_$nor
-if [ ! -e $id ]; then
-  zid $q $nor $nor $id
 fi
 if [ $# -eq 5 ]; then
   memory=$5

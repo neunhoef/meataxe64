@@ -1,5 +1,5 @@
 #
-# $Id: split,v 1.5 2002/02/05 19:50:56 jon Exp $
+# $Id: split,v 1.6 2002/03/24 19:44:02 jon Exp $
 #
 # Script to split a representation
 #
@@ -47,7 +47,6 @@ else
 fi
 id=id_${q}_$nor
 if [ ! -e $id ]; then
-  echo Creating id
   zid $q $nor $nor $id
 fi
 #

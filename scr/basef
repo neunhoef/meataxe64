@@ -1,7 +1,8 @@
 #
-# $Id: base,v 1.6 2002/03/24 19:44:02 jon Exp $
+# $Id: basef,v 1.1 2002/03/24 19:44:02 jon Exp $
 #
 # Script to to find a representation in standard base
+# using intermediate files
 #
 # Inputs
 # $1: element with which to split
@@ -9,6 +10,8 @@
 # $3: generator b
 # $4: output filename base
 # $5: the standard basis
+# $6: temporary directory to be used
+# $7: memory (optional)
 #
 # outputs will be of the form <$4>_sb_{1,2}
 # where nor is number of rows, and q is the prime power
@@ -22,8 +25,8 @@
 #
 #set -v
 . functions
-usage="$0: usage: $0 <e> <a> <b> <output_stem> <s>"
-if [ $# -ne 5 ]; then
+usage="$0: usage: $0 <e> <a> <b> <output_stem> <s> <tmp directory> [<memory>]"
+if [ $# -ne 6 -a $# -ne 7 ]; then
   echo $usage
   exit 1;
 fi
@@ -32,6 +35,12 @@ a=$2
 b=$3
 o=$4
 s=$5
+dir=$6
+if [ 7 -eq $# ]; then
+  memory=$7
+else
+  memory=200
+fi
 if [ -e $e -a -e $a -a -e $b ]; then
   q=`zprime $a`
   nor=`znor $a`
@@ -53,45 +62,31 @@ else
   exit 1
 fi
 tmp=tmp${PPID}
-memory=200
 ok=0
-while [ $ok -eq 0 ]; do
-  nullity=`zns $e ${tmp}.0 $memory 2>/dev/null`
-  ret=$?
-  if [ $ret -eq 0 ]; then
-    ok=1
-  elif [ $ret -eq 2 ]; then
-    let memory=`more_memory $memory 2>/dev/null`
-  else
-    rm -f ${tmp}*
-    exit 1
-  fi
-done
+nullity=`znsf $e ${tmp}.0 $dir $memory`
+ret=$?
+if [ 0 -ne $ret ]; then
+  rm -f ${tmp}*
+  exit 1
+fi
 if [ 1 -ne $nullity ]; then
   echo "$e has nullity $nullity different from 1"
   rm -f ${tmp}*
   exit 255
 fi
-ok=0
-while [ 0 -eq $ok ]; do
-  dim=`zsb ${tmp}.0 ${tmp}.1 $a $b $memory`
-  ret=$?
-  if [ 0 -eq $ret ]; then
-    if [ $dim -eq $nor ]; then
-      ok=1
-    else
-      echo Strange result from zsb giving wrong dimension $dim vs $nor
-      rm -f ${tmp}*
-      exit 1
-    fi
-  elif [ $ret -eq 2 ]; then
-    let memory=`more_memory $memory`
-  else
-    echo zsb unexpectedly returns $ret
+dim=`zsbf ${tmp}.0 ${tmp}.1 $a $b $dir $memory`
+ret=$?
+if [ 0 -eq $ret ]; then
+  if [ $dim -ne $nor ]; then
+    echo Strange result from zsb giving wrong dimension $dim vs $nor
     rm -f ${tmp}*
     exit 1
   fi
-done
+else
+  echo zsbf unexpectedly returns $ret
+  rm -f ${tmp}*
+  exit 1
+fi
 ok=0
 while [ 0 -eq $ok ]; do
   ziv ${tmp}.1 ${tmp}.2 $memory 2>/dev/null

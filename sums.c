@@ -1,5 +1,5 @@
 /*
- * $Id: sums.c,v 1.4 2002/03/20 18:42:30 jon Exp $
+ * $Id: sums.c,v 1.5 2002/03/24 19:44:02 jon Exp $
  *
  * Function to compute linear sums of two matices
  *
@@ -15,17 +15,19 @@
 #include "header.h"
 #include "ident.h"
 #include "mul.h"
+#include "primes.h"
 #include "read.h"
 #include "rn.h"
 #include "utils.h"
 
 int sums(const char *in1, const char *in2, const char *out,
          unsigned int o_a, unsigned o_b, unsigned int n,
+         unsigned int sub_order,
          const char *name, accept acceptor)
 {
   char *buf;
   FILE *f;
-  unsigned int i, j, k, l, r, s, cur_word = 0, cur_power = 1;
+  unsigned int i, j, k, l, r, s, cur_word = 0, cur_power = 1, base_prime;
   unsigned int prime, nod, nor, noc, count;
   const header *h;
   int m;
@@ -34,6 +36,17 @@ int sums(const char *in1, const char *in2, const char *out,
   const char **elts;
   const char **elt_names;
 
+  assert(NULL != in1);
+  assert(NULL != in2);
+  assert(NULL != out);
+  if (0 == o_a || 0 == o_b || 0 == n) {
+    fprintf(stderr, "%s: unexpected zero in order of a, order of b or n, terminating\n", name);
+    exit(1);
+  }
+  if (0 != sub_order && 0 == is_a_prime_power(sub_order)) {
+    fprintf(stderr, "%s: bad value %d for subfield order, terminating\n", name, sub_order);
+    exit(1);
+  }
   if (0 == open_and_read_binary_header(&f, &h, in1, name)) {
     exit(1);
   }
@@ -47,12 +60,23 @@ int sums(const char *in1, const char *in2, const char *out,
   }
   header_free(h);
   fclose(f);
+  if (0 != sub_order) {
+    if (0 != prime % sub_order) {
+      fprintf(stderr, "%s: %d is not a field order, terminating\n", name, sub_order);
+      exit(1);
+    }
+    base_prime = prime_divisor(prime);
+    if (0 != prime_index(prime, base_prime) % prime_index(sub_order, base_prime)) {
+      fprintf(stderr, "%s: %d is not a sub field order for %d, terminating\n", name, sub_order, prime);
+      exit(1);
+    }
+  }
   i = 1;
   m = 0;
   j = strlen(out);
   k = j + 13;
   n += 1;
-  if (0 == int_pow(prime, n, &count)) {
+  if (0 == int_pow((0 != sub_order) ? sub_order : prime, n, &count)) {
     fprintf(stderr, "%s: too many elements requested (%d ** %d), terminating\n", name, prime, n);
     exit(1);
   }
@@ -72,6 +96,9 @@ int sums(const char *in1, const char *in2, const char *out,
   elt_names[0] = "I";
   words[0] = "A";
   names[0] = in1;
+  if (0 != sub_order) {
+    prime = sub_order; /* Restrict to subfield if requested */
+  }
   for (l = 1; l < prime; l++) {
     /* lambda names[0] + elts[0] */
     if (0 == scaled_add(names[0], elts[0], elts[l], l, name)) {

@@ -94,3 +94,6 @@
 several bugs in zsums
 20020320 - add restrict for reducing field of definition. Fix bugs in
 skew seventh
+20020320 - add restrict script and support in zsums to drive zrestrict
+20020323 - first version of zsbf and basef
+20020324 - first version of ivf. Fix bug in znsf

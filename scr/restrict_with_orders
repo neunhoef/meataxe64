@@ -1,0 +1,87 @@
+#
+# $Id: restrict_with_orders,v 1.1 2002/03/24 19:44:02 jon Exp $
+#
+# Script to restrict a representation from a field to a subfield
+#
+# Inputs
+# $1: generator a
+# $2: generator b
+# $3: order a
+# $4: order b
+# $5: subfield order
+# $6: output stem
+# $7: initial memory (optional)
+#
+# outputs will be of the form <stem>_${nor}_{1,2}
+#
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+# 254: no nullity one element found
+# 255: representation does not reduce
+#
+usage="$0: usage: $0 <a> <b> <order a> <order b> <subfield size> <output stem> [<memory>]"
+if [ $# -ne 6 -a $# -ne 7 ]; then
+  echo $usage
+  exit 1;
+fi
+. functions
+a=$1
+b=$2
+o_a=$3
+o_b=$4
+sub=$5
+o=$6
+if [ -e $a -a -e $b ]; then
+  q=`zprime $a`
+  nor=`znor $a`
+  noc=`znoc $a`
+  if [ $nor -ne $noc ]; then
+    echo "$0: $a is not square"
+    exit 1
+  fi
+  if [ $nor -ne `znor $b` -o $nor -ne `znoc $b` ]; then
+    echo "$0: $a and $b are not compatible"
+    exit 1
+  fi
+else
+  echo "$0: missing files $a or $b"
+  exit 1
+fi
+if [ $# -eq 7 ]; then
+  memory=$7
+else
+  memory=200
+fi
+#
+# Now search for element of nullity one in the restricted group algebra
+#
+tmp=tmp${PPID}
+e=${tmp}.1
+script=`find_restricted_nullity_one_with_orders $a $b $e $o_a $o_b $sub $memory`
+ret=$?
+if [ $ret -ne 0 ]; then
+  rm -f ${tmp}.*
+  exit $ret
+fi
+name=${tmp}_${nor}
+x=`base $e $a $b ${name} ${tmp}.0`
+ret=$?
+if [ $ret -ne 0 ]; then
+  echo base returns $ret, terminating
+  rm -f ${tmp}*
+  exit 1
+fi
+zrestrict ${name}_sb_1 ${o}_${nor}_1 $sub
+ret=$?
+if [ 0 -ne $ret ]; then
+  rm -f ${tmp}*
+  exit $ret
+fi
+zrestrict ${name}_sb_2 ${o}_${nor}_2 $sub
+ret=$?
+if [ 0 -ne $ret ]; then
+  rm -f ${tmp}*
+  exit $ret
+fi

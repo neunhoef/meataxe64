@@ -1,5 +1,5 @@
 /*
- * $Id: nsf.c,v 1.3 2002/03/07 13:43:30 jon Exp $
+ * $Id: nsf.c,v 1.4 2002/03/24 19:44:02 jon Exp $
  *
  * Compute the nullspace of a matrix, using temporary files
  *
@@ -121,18 +121,21 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
   mat3 = matrix_malloc(step1);
   mat4 = matrix_malloc(step2);
   for (n = 0; n < step1; n++) {
-    mat1[n] = memory_pointer_offset(0, n, len);
-    mat3[n] = memory_pointer_offset(400, n, len);
+    mat1[n] = memory_pointer_offset(0, n, max_len);
+    mat3[n] = memory_pointer_offset(400, n, max_len);
   }
   for (n = 0; n < step2; n++) {
-    mat2[n] = memory_pointer_offset(800, n, len);
-    mat4[n] = memory_pointer_offset(850, n, len);
+    mat2[n] = memory_pointer_offset(800, n, max_len);
+    mat4[n] = memory_pointer_offset(850, n, max_len);
   }
   r = 0; /* Rank count */
   while (rows_to_do > 0) {
     unsigned int rows_remaining = rows_to_do;
     unsigned int stride = (step1 > rows_remaining) ? rows_remaining : step1;
     unsigned int i;
+#if 0
+    printf("Looping with rank now %d\n", r);
+#endif
     if (0 == endian_read_matrix(in->f, mat1, len, stride)) {
       fprintf(stderr, "%s: cannot read matrix for %s, terminating\n", name, in->name);
       fclose(in->f);
@@ -209,7 +212,10 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
           }
           clean(mat1, stride, mat2, stride2, map, mat3, mat4, 1, grease.level, prime, len, nob, 900, 950, len_id, name);
           for (j = 0; j < stride2; j++) {
+#if 0 /* If we include the code below, we disturb the order of vectors */
+/* This invalidates nullspace algorithms for inverses */
             if (0 == row_is_zero(mat2[j], len)) {
+#endif
               if (0 == endian_write_row(out->f, mat2[j], len)) {
                 fprintf(stderr, "%s: cannot write matrix for %s, terminating\n", name, out->name);
                 fclose(in->f);
@@ -229,6 +235,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
                 exit(1);
               }
               rows_written++;
+#if 0
             } else {
               /* Found a null row, write it out */
               if (0 == endian_write_row(outp, mat4[j], len_id)) {
@@ -241,6 +248,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
                 exit(1);
               }
             }
+#endif
           }
         }
 #if 0

@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.53 2002/03/20 18:42:30 jon Exp $
+# $Id: makefile,v 1.54 2002/03/24 19:44:02 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -55,8 +55,11 @@ ZRE_TARGET=	zre
 ZRES_TARGET=	zrestrict
 ZRN_TARGET=	zrn
 ZRNF_TARGET=	zrnf
+ZRRANKS_TARGET=	zrranks
+ZRSUMS_TARGET=	zrsums
 ZSAD_TARGET=	zsad
 ZSB_TARGET=	zsb
+ZSBF_TARGET=	zsbf
 ZSCRIPT_TARGET=	zscript
 ZSEL_TARGET=	zsel
 ZSID_TARGET=	zsid
@@ -124,8 +127,11 @@ ZRE_MODULES=	elements endian header memory primes read utils write zre
 ZRES_MODULES=	elements endian header memory primes read restrict rows utils write zrestrict
 ZRN_MODULES=	clean elements endian grease header matrix memory primes read rn rows utils zrn
 ZRNF_MODULES=	clean elements endian grease header matrix memory primes read rnf rows system utils write zrnf
+ZRRANKS_MODULES=	add clean elements endian grease header ident matrix memory mul primes read rn rows sums utils write zrranks
+ZRSUMS_MODULES=	add clean elements endian grease header ident matrix memory mul primes read rn rows sums utils write zrsums
 ZSAD_MODULES=	add elements endian header memory primes read rows utils write zsad
 ZSB_MODULES=	clean elements endian grease header matrix memory mul primes read rows sb utils write zsb
+ZSBF_MODULES=	clean elements endian grease header matrix memory mul primes read rows sbf system utils write zsbf
 ZSCRIPT_MODULES=	add elements endian files grease header ident matrix memory mul primes read rows scale script utils write zscript
 ZSEL_MODULES=	endian header memory primes read utils write zse
 ZSID_MODULES=	ident elements endian header memory primes rows utils write zsid
@@ -193,8 +199,11 @@ MODULES=	$(DTOU_MODULES) \
 	$(ZRES_MODULES) \
 	$(ZRN_MODULES) \
 	$(ZRNF_MODULES) \
+	$(ZRRANKS_MODULES) \
+	$(ZRSUMS_MODULES) \
 	$(ZSAD_MODULES) \
 	$(ZSB_MODULES) \
+	$(ZSBF_MODULES) \
 	$(ZSCRIPT_MODULES) \
 	$(ZSEL_MODULES) \
 	$(ZSID_MODULES) \
@@ -389,10 +398,19 @@ include targets.txt
 TARGET:=ZRNF
 include targets.txt
 
+TARGET:=ZRRANKS
+include targets.txt
+
+TARGET:=ZRSUMS
+include targets.txt
+
 TARGET:=ZSAD
 include targets.txt
 
 TARGET:=ZSB
+include targets.txt
+
+TARGET:=ZSBF
 include targets.txt
 
 TARGET:=ZSCRIPT
