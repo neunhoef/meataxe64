@@ -254,3 +254,4 @@ skew seventh
 20030428 - Fix further bug in znsf with non-square matrices
 20030516 - Fix minor bug in check_irredf documentation and add text output
 20030517 - Improve sym_basis by using new_irred_with_script. Allow new_irred_with_script to handle non-nullity one case
+20030518 - Improve sym_basis by holding echelised basis so far for given irreducible, and using that to determine if a vector needs spinning. Also compute irred script only once.

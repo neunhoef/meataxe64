@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: sym_basis,v 1.13 2003/05/17 21:35:41 jon Exp $
+# $Id: sym_basis,v 1.14 2003/05/18 16:19:08 jon Exp $
 #
 # Script to compute a symmetry basis wrt an ordered set of irreducibles
 #
@@ -35,12 +35,12 @@ shift 6
 gen_count=$#
 tmp=tmp${PPID}
 basis=${tmp}.31
+local_basis=${tmp}.32
 cat /dev/null > $mult
 for x in `cat $irreds`; do
   w=$x
 #
-# TODO: cope with dual here
-# TODO: dualise x, classify, reset x and then continue
+# Cope with dual here
 #
   if [ 1 -eq $dualise ]; then
     i=1
@@ -85,6 +85,13 @@ for x in `cat $irreds`; do
     echo "$name: failed to find irreducible script for ${w}, terminating"
     exit 1
   fi
+  script_x=`echo $y | sed -e "s?${w}_1_??g"`
+  ret=$?
+  if [ 0 -ne $ret ]; then
+    echo "$name: failed to produce irreducible script for ${w}, terminating"
+    rm -f ${tmp}.*
+    exit 1
+  fi
   count=0
   gamma=${tmp}.0
 # compute the gamma operator in the generators for irreducible X
@@ -99,11 +106,13 @@ for x in `cat $irreds`; do
   ret=$?
   if [ 0 -ne $ret ]; then
     rm -f ${tmp}.*
+    echo $dim
     echo "$name: failed to compute dim, terminating"
     exit 1
   fi
   if [ $dim -gt 0 ]; then
     y=0
+    have_local_basis=0
     while [ $y -lt $dim ]; do
       zsel ${tmp}.1 ${tmp}.2 $y
       ret=$?
@@ -113,12 +122,12 @@ for x in `cat $irreds`; do
         exit 1
       fi
 # See if vector already in space
-      if [ 0 -ne $have_basis ]; then
-        zjoin $basis ${tmp}.2 ${tmp}.3
+      if [ 0 -ne $have_local_basis ]; then
+        zclean -m $memory $local_basis ${tmp}.2 ${tmp}.3
         ret=$?
         if [ 0 -ne $ret ]; then
           rm -f ${tmp}.*
-          echo "$name: zjoin failed, terminating"
+          echo "$name: zclean failed, terminating"
           exit 1
         fi
         r=`zrn -m $memory ${tmp}.3`
@@ -129,10 +138,14 @@ for x in `cat $irreds`; do
           echo "$name: zrn failed, terminating"
           exit 1
         fi
-        if [ `znor $basis` -eq $r ]; then
+        if [ 0 -eq $r ]; then
 # This one already in the space, so ignore it
           let y=$y+1
           continue
+        fi
+        if [ 1 -ne $r ]; then
+          echo $name: zclean returns $r, terminating
+          exit 1
         fi
       fi
 # Otherwise, spin up, create subspace, do sb, add vectors
@@ -157,20 +170,6 @@ for x in `cat $irreds`; do
         names="$names ${tmp}.5_$z"
         let z=$z+1
       done
-      z=`ls ${w}_1_I*`
-      ret=$?
-      if [ 0 -ne $ret ]; then
-        echo "$name: failed to find irreducible script for ${w}, terminating"
-        rm -f ${tmp}.*
-        exit 1
-      fi
-      script_x=`echo $z | sed -e "s?${w}_1_??g"`
-      ret=$?
-      if [ 0 -ne $ret ]; then
-        echo "$name: failed to produce irreducible script for ${w}, terminating"
-        rm -f ${tmp}.*
-        exit 1
-      fi
       r=`new_irred_with_script $memory $script_x $names`
       ret=$?
       if [ 0 -eq $ret ]; then
@@ -209,7 +208,7 @@ for x in `cat $irreds`; do
         rm -f ${tmp}.*
         exit 1
       fi
-       zsel ${tmp}.7 ${tmp}.8 0
+      zsel ${tmp}.7 ${tmp}.8 0
       ret=$?
       if [ 0 -ne $ret ]; then
         echo "$name: zsel failed with code $ret, terminating"
@@ -248,6 +247,32 @@ for x in `cat $irreds`; do
       if [ 0 -ne $ret ]; then
         rm -f ${tmp}.*
         echo "$name: unexpected failure in cp, terminating"
+        exit 1
+      fi
+      if [ 0 -eq $have_local_basis ]; then
+        cp ${tmp}.5 ${tmp}.4
+        ret=$?
+        if [ 0 -ne $ret ]; then
+          rm -f ${tmp}.*
+          echo "$name: unexpected failure in cp, terminating"
+          exit 1
+        fi
+      else
+        zjoin $local_basis ${tmp}.5 ${tmp}.4
+        ret=$?
+        if [ 0 -ne $ret ]; then
+          rm -f ${tmp}.*
+          echo "$name: unexpected failure in zjoin, terminating"
+          exit 1
+        fi
+      fi
+      have_local_basis=1
+      ldim=`zbase -m $memory ${tmp}.4 . $local_basis`
+      ret=$?
+      if [ 0 -ne $ret ]; then
+        rm -f ${tmp}.*
+        echo $ldim
+        echo "$name: failed to compute dim, terminating"
         exit 1
       fi
       let count=$count+1
