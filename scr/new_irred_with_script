@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: new_irred_with_script,v 1.4 2003/11/26 21:55:16 jon Exp $
+# $Id: new_irred_with_script,v 1.5 2005/01/08 09:54:30 jon Exp $
 #
 # Script to classify an irreducible representation, given its script
 #
@@ -83,7 +83,7 @@ if [ 0 -eq $ret ]; then
   if [ 0 -eq $nullity ]; then
     echo "Unexpected result, nullity $nullity when expected > 0"
     rm -f ${tmp}*
-    exit 1
+    exit 254
   fi
   zsel ${tmp}.2 ${tmp}.2.0 0
   ret=$?

@@ -332,3 +332,4 @@ skew seventh
 20050102 - Allow zpro to handle prime not 1
 20050102 - First attempt at zfol working
 20050106 - Got zfol to handle HN 1539000 permutation representation
+20050108 - Fix bug in new_irred_with_script

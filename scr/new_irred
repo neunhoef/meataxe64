@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: new_irred,v 1.12 2004/11/24 21:42:43 jon Exp $
+# $Id: new_irred,v 1.13 2005/01/08 09:54:30 jon Exp $
 #
 # Script to classify an irreducible representation by
 # first trying against existing irreducibles of the same degree
@@ -76,15 +76,16 @@ if [ -d irreds ]; then
           # got the script, use it to form a standard basis
           out=`new_irred_with_script $memory $script $*`
           ret=$?
-          if [ 0 -ne $ret ]; then
-            echo $out
-            exit $ret
-            # Exit on existing irred or error
-          else
+          if [ 0 -eq $ret ]; then
             # New irreducible found, we need to do things properly
             new=`echo $out | sed -e "s/^Found a new irreducible //g;s/ of dimension.*$//g"`
             rm ${new}_*
-            # And try properly
+            # And try properly to get the script right
+          elif [ 254 -ne $ret ]; then
+            echo $out
+            exit $ret
+            # Exit on existing irred or error
+            # Fall through on nullity zero
           fi
         fi
       fi
