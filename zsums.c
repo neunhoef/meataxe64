@@ -1,5 +1,5 @@
 /*
- * $Id: zsums.c,v 1.11 2002/09/24 19:08:54 jon Exp $
+ * $Id: zsums.c,v 1.12 2002/10/14 08:36:36 jon Exp $
  *
  * Compute sums in the group algebra in two matrices
  *
@@ -19,7 +19,7 @@ static unsigned int nullity = 0;
 
 static void sums_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <out_file_stem> <n> <nullity> <memory> <in_file a> <order a> <in_file b> <order b>\n", name, name);
+  fprintf(stderr, "%s: usage: %s [-v] [-m <memory>] <out_file_stem> <n> <nullity> <in_file a> <order a> <in_file b> <order b>\n", name, name);
 }
 
 static int acceptor(unsigned int rank, unsigned int nor, const char *file, const char *form)
@@ -35,24 +35,23 @@ static int acceptor(unsigned int rank, unsigned int nor, const char *file, const
 
 int main(int argc, const char * const argv[])
 {
-  unsigned int n, memory = MEM_SIZE;
+  unsigned int n;
   int res;
 
   argv = parse_line(argc, argv, &argc);
-  if (9 > argc || 1 != argc % 2) {
+  if (8 > argc || 0 != argc % 2) {
     sums_usage();
     exit(1);
   }
   n = strtoul(argv[2], NULL, 0);
   nullity = strtoul(argv[3], NULL, 0);
-  memory = strtoul(argv[4], NULL, 0);
   if (0 == n) {
     fprintf(stderr, "%s: no sums requested\n", name);
     exit(1);
   }
   endian_init();
   memory_init(name, memory);
-  res = sums(argv[1], n, argc - 5, argv + 5, 0, &acceptor, name);
+  res = sums(argv[1], n, argc - 4, argv + 4, 0, &acceptor, name);
   if (255 == res) {
     printf("Failed to find a suitable element\n");
   }

@@ -205,3 +205,4 @@ skew seventh
 20021013 - Read memory size from environment
 20021013 - Use -m for ztr throughout all scripts
 20021013 - Use -m for zrn, zns, zbase throughout all scripts
+20021014 - Use -m for zsums and friends

@@ -1,5 +1,5 @@
 /*
- * $Id: zsumsf.c,v 1.6 2002/09/24 19:21:43 jon Exp $
+ * $Id: zsumsf.c,v 1.7 2002/10/14 08:36:36 jon Exp $
  *
  * Compute sums in the group algebra in two matrices
  *
@@ -19,7 +19,7 @@ static unsigned int nullity = 0;
 
 static void sumsf_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <out_file_stem> <n> <nullity> <memory> <tmp dir> <in_file a> <order a> <in_file b> <order b>\n", name, name);
+  fprintf(stderr, "%s: usage: %s [-v] <-m <memory>] <out_file_stem> <n> <nullity> <tmp dir> <in_file a> <order a> <in_file b> <order b>\n", name, name);
 }
 
 static int acceptor(unsigned int rank, unsigned int nor, const char *file, const char *form)
@@ -40,20 +40,19 @@ int main(int argc, const char * const argv[])
   int res;
 
   argv = parse_line(argc, argv, &argc);
-  if (10 > argc || 0 != argc % 2) {
+  if (9 > argc || 1 != argc % 2) {
     sumsf_usage();
     exit(1);
   }
   n = strtoul(argv[2], NULL, 0);
   nullity = strtoul(argv[3], NULL, 0);
-  memory = strtoul(argv[4], NULL, 0);
   if (0 == n) {
     fprintf(stderr, "%s: no sums requested\n", name);
     exit(1);
   }
   endian_init();
   memory_init(name, memory);
-  res = sumsf(argv[1], argv[5], n, argc - 6, argv + 6, 0, &acceptor, name);
+  res = sumsf(argv[1], argv[4], n, argc - 5, argv + 5, 0, &acceptor, name);
   if (255 == res) {
     printf("Failed to find a suitable element\n");
   }
