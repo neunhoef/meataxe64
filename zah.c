@@ -1,5 +1,5 @@
 /*
- * $Id: zah.c,v 1.5 2002/07/09 09:08:12 jon Exp $
+ * $Id: zah.c,v 1.6 2002/11/02 10:28:10 jon Exp $
  *
  * Add a header to en intermediate file matrix
  * Essentially a disaster recovery program
@@ -24,7 +24,7 @@ static const char *name = "zah";
 
 static void ah_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <text header> <in_file> <out_file> [<memory>]\n", name, name);
+  fprintf(stderr, "%s: usage: %s [-m <memory>] <text header> <in_file> <out_file>\n", name, name);
 }
 
 int main(int argc, const char * const argv[])
@@ -39,12 +39,9 @@ int main(int argc, const char * const argv[])
   const header *h;
 
   argv = parse_line(argc, argv, &argc);
-  if (4 != argc && 5 != argc) {
+  if (4 != argc) {
     ah_usage();
     exit(1);
-  }
-  if (5 == argc) {
-    memory = strtoul(argv[4], NULL, 0);
   }
   text_in = argv[1];
   in = argv[2];

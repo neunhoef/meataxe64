@@ -221,3 +221,4 @@ skew seventh
 20021018 - Fix bug in real_indicate. Minor improvements to sign calculation
 20021027 - Added span.{c,h} and used it in zspan.c
 20021027 - Used new span code in singular_vector
+20021102 - Fix bug in zmsbf where memory was wrongly initialised

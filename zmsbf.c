@@ -1,5 +1,5 @@
 /*
- * $Id: zmsbf.c,v 1.3 2002/10/14 09:05:57 jon Exp $
+ * $Id: zmsbf.c,v 1.4 2002/11/02 10:28:10 jon Exp $
  *
  * Spin some vectors under multiple generators to obtain a standard base
  * using intermediate files in a temporary directory
@@ -29,7 +29,6 @@ int main(int argc, const char * const argv[])
     exit(1);
   }
   endian_init();
-  memory = strtoul(argv[4], NULL, 0);
   memory_init(name, memory);
   dim = spin(argv[1], argv[2], argv[3], argc - 4, argv + 4, name);
   printf("%d\n", dim);
