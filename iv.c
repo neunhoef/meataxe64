@@ -1,5 +1,5 @@
 /*
- * $Id: iv.c,v 1.5 2002/06/28 08:39:16 jon Exp $
+ * $Id: iv.c,v 1.6 2002/11/30 10:36:26 jon Exp $
  *
  * Invert a matrix
  *
@@ -91,7 +91,6 @@ void invert(const char *m1, const char *m2, const char *name)
     echelise(mat1, nor, &n, &map1, mat2, 1, grease.level, prime, len, nob, 800, 900, len, 1, name);
     if (nor != n) {
       fprintf(stderr, "%s: matrix %s is singular with rank %d, terminating\n", name, m1, n);
-      fclose(outp);
       exit(1);
     }
     if (0 == open_and_write_binary_header(&outp, h, m2, name)) {
