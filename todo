@@ -11,7 +11,7 @@ Investigate rename failure on large files from zscript
 Consider allowing maps into ztsp and ztspf
 Analyse unexpected split failure
 Document new scripts *
-Remove 1 == nor restriction in ztsp *
+Remove dependent input restriction in sp.c and msp.c *
 Fix zvp and zps to take less memory
 Think about better grease vector selection for making
 Improve zsb{,f} to take multiple generators and extend scripts

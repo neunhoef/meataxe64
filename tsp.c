@@ -1,5 +1,5 @@
 /*
- * $Id: tsp.c,v 1.6 2002/07/05 09:04:44 jon Exp $
+ * $Id: tsp.c,v 1.7 2002/07/05 09:32:51 jon Exp $
  *
  * Function to spin some vectors under two generators in tensor space
  *
@@ -61,7 +61,7 @@ unsigned int spin(const char *in, const char *out,
   FILE *inp = NULL, *outp = NULL, *f_a1 = NULL, *f_a2 = NULL, *f_b1 = NULL, *f_b2 = NULL;
   const header *h_in, *h_a1, *h_a2, *h_b1, *h_b2;
   header *h_out;
-  unsigned int prime, nob, noc, nor, noc1, nor1, noc2, nor2, len, len1, len2, max_rows, max_nor, max_len, d, size, limit;
+  unsigned int prime, nob, noc, nor, noc1, nor1, noc2, nor2, len, len1, len2, max_rows, max_nor, max_len, d, j, len_in, size, limit;
   unsigned int **rows, *work_row;
   unsigned int **rows_a1, **rows_a2, **rows_b1, **rows_b2, **mat_rows, **work_rows;
   int *map, *new_map;
@@ -94,6 +94,7 @@ unsigned int spin(const char *in, const char *out,
   nob = header_get_nob(h_in);
   noc = header_get_noc(h_in);
   nor = header_get_nor(h_in);
+  len_in = header_get_len(h_in);
   noc1 = header_get_noc(h_a1);
   nor1 = header_get_nor(h_a1);
   noc2 = header_get_noc(h_a2);
@@ -110,7 +111,6 @@ unsigned int spin(const char *in, const char *out,
       noc2 != header_get_noc(h_b2) ||
       noc2 != header_get_nor(h_b2) ||
       noc1 * noc2 != noc ||
-      1 != nor ||
       (prime != header_get_prime(h_a1) && 0 == gen_a.is_map1) ||
       (prime != header_get_prime(h_b1) && 0 == gen_b.is_map1) ||
       (prime != header_get_prime(h_a2) && 0 == gen_a.is_map2) ||
@@ -134,7 +134,7 @@ unsigned int spin(const char *in, const char *out,
   len = noc1 * len2; /* Space for matrix form */
   h_out = header_create(prime, nob, header_get_nod(h_in), noc, 1);
   assert(header_get_len(h_out) <= len);
-  assert(header_get_len(h_in) <= len);
+  assert(len_in  <= len);
   gen_a.f1 = f_a1;
   gen_a.m1 = a1;
   gen_a.f2 = f_a2;
@@ -194,34 +194,40 @@ unsigned int spin(const char *in, const char *out,
   work_row = memory_pointer_offset(0, 0, len);
   create_pointers(work_row, work_rows, nor1, len2, prime);
   errno = 0;
-  if (0 == endian_read_row(inp, work_row, header_get_len(h_in))) {
-    if ( 0 != errno) {
-      perror(name);
+  for (d = 0; d < nor; d++) {
+    if (0 == endian_read_row(inp, work_row, len_in)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
+      fprintf(stderr, "%s: failed to read row from %s, terminating\n", name, in);
+      cleanup(inp, f_a1, f_b1, f_a2, f_b2);
+      exit(1);
     }
-    fprintf(stderr, "%s: failed to read row from %s, terminating\n", name, in);
-    cleanup(inp, f_a1, f_b1, f_a2, f_b2);
-    exit(1);
+    create_pointers(rows[d], mat_rows, nor1, len2, prime);
+    v_to_m(work_row, mat_rows, nor1, nor2, prime);
   }
   fclose(inp);
   map = my_malloc(max_rows * sizeof(int));
-  create_pointers(rows[0], mat_rows, nor1, len2, prime);
-  /* mat_rows subdivides rows[0] as a matrix */
-  v_to_m(work_row, mat_rows, nor1, nor2, prime);
-  echelise(rows, 1, &d, &new_map, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, 1, name);
-  /* Clean up either for zero row, or non-identity leading non-zero entry */
-  free(new_map);
-  if (1 != d) {
-    fprintf(stderr, "%s: %s contains dependent vectors, terminating\n", name, in);
+  echelise(rows, nor, &d, &new_map, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, 1, name);
+  if (0 == d) {
+    fprintf(stderr, "%s: %s contains no non-zero vectors, terminating\n", name, in);
     cleanup(NULL, f_a1, f_b1, f_a2, f_b2);
     exit(1);
   }
-  {
-    unsigned int i;
-    unsigned int elt = first_non_zero(rows[0], nob, len, &i);
-    assert(0 != elt);
-    NOT_USED(elt);
-    map[0] = i;
+  j = 0;
+  for (d = 0; d < nor; d++) {
+    if (new_map[d] >= 0) {
+      unsigned int *row;
+      map[j] = new_map[d];
+      /* Swap pointers */
+      row = rows[j];
+      rows[j] = rows[d];
+      rows[d] = row;
+      j++;
+    }
   }
+  free(new_map);
+  nor = j;
   if (0 == grease_allocate(prime, len, &grease, 900)){
     fprintf(stderr, "%s: unable to allocate grease, terminating\n", name);
     cleanup(NULL, f_a1, f_b1, f_a2, f_b2);
