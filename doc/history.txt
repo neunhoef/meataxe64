@@ -244,3 +244,4 @@ skew seventh
 20030325 - Reduce memory requirement for left tensor in ztco
 20030329 - Hold P matrices in memory in ztco. Modify find_element to take more generators
 20030418 - Fix bug in field extend
+20030419 - Fix corresponding bug in field restrict

@@ -1,5 +1,5 @@
 /*
- * $Id: restrict.c,v 1.6 2002/10/13 16:38:07 jon Exp $
+ * $Id: restrict.c,v 1.7 2003/04/19 15:43:49 jon Exp $
  *
  * Function to restrict a matrix from a big field to a smaller
  *
@@ -37,7 +37,7 @@ int restrict(const char *m1, const char *m2, unsigned int q, const char *name)
   FILE *outp = NULL;
   unsigned int prime_in, nob_in, noc, nor, len_in,
       nob_out, nod_out, len_out, base_prime, index_in, index_out;
-  unsigned int i, mask, elts_per_word;
+  unsigned int i, in_mask, out_mask, elts_per_in_word, elts_per_out_word;
   const header *h_in;
   header *h_out;
   unsigned int *row1, *row2;
@@ -93,7 +93,9 @@ int restrict(const char *m1, const char *m2, unsigned int q, const char *name)
   }
   row1 = memory_pointer_offset(0, 0, len_in);
   row2 = memory_pointer_offset(0, 1, len_in);
-  mask = get_mask_and_elts(nob_in, &elts_per_word);
+  in_mask = get_mask_and_elts(nob_in, &elts_per_in_word);
+  out_mask = get_mask_and_elts(nob_out, &elts_per_out_word);
+  NOT_USED(out_mask);
   for (i = 0; i < nor; i++) {
     unsigned int j;
     errno = 0;
@@ -106,13 +108,13 @@ int restrict(const char *m1, const char *m2, unsigned int q, const char *name)
     }
     row_init(row2, len_out);
     for (j = 0; j < noc; j++) {
-      unsigned int elt = get_element_from_row_with_params(nob_in, j, mask, elts_per_word, row1);
+      unsigned int elt = get_element_from_row_with_params(nob_in, j, in_mask, elts_per_in_word, row1);
       if (elt >= q) {
         fprintf(stderr, "%s: element %d from row %d, column %d of %s is not in field of order %d, terminating\n", name, elt, i, j, m1, q);
         (void)cleanup(inp, outp);
         return 255;
       }
-      put_element_to_clean_row_with_params(nob_out, j, elts_per_word, row2, elt);
+      put_element_to_clean_row_with_params(nob_out, j, elts_per_out_word, row2, elt);
     }
     errno = 0;
     if (0 == endian_write_row(outp, row2, len_out)) {
