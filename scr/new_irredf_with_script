@@ -1,15 +1,16 @@
 #!/bin/sh
 #
-# $Id: new_irred_with_script,v 1.2 2003/04/26 18:46:51 jon Exp $
+# $Id: new_irredf_with_script,v 1.1 2003/04/26 18:46:51 jon Exp $
 #
 # Script to classify an irreducible representation, given its script
 #
 # Inputs
 # $1: initial memory
-# $2: script to produce the required element
-# $3: generator a
-# $4: generator b
-# $5-: other generators and orders
+# $2: temporary directory
+# $3: script to produce the required element
+# $4: generator a
+# $5: generator b
+# $6-: other generators and orders
 #
 # outputs will be of the form irred/${nor}_${i}_{1,..}
 # where nor = znor $a and i is an available unused index
@@ -21,16 +22,17 @@
 # 254: no nullity one element found
 # 255: existing irreducible
 #
-usage="$0: usage: $0 <memory> <script> <a> <b> [<other generators>]"
-if [ $# -lt 4 ]; then
+usage="$0: usage: $0 <memory> <tmp directory> <script> <a> <b> [<other generators>]"
+if [ $# -lt 5 ]; then
   echo "$usage"
   exit 1;
 fi
 . functions
 memory=$1
-script=$2
-a=$3
-b=$4
+tmp_dir=$2
+script=$3
+a=$4
+b=$5
 if [ -e $a -a -e $b ]; then
   nor=`znor $a`
   noc=`znoc $a`
@@ -46,9 +48,9 @@ else
   echo "$0: missing files $a or $b"
   exit 1
 fi
-let j=$#-2
+let j=$#-3
 i=0
-shift 2
+shift 3
 args=
 while [ $i -lt $j ]; do
   let i=$i+1
@@ -65,7 +67,7 @@ zscript -m $memory $e zscript.${tmp} $script $args
 ret=$?
 rm zscript.${tmp}*
 if [ 0 -eq $ret ]; then
-  x=`base $e ${name} ${tmp}.0 ${args}`
+  x=`basef $e ${name} ${tmp}.0 ${tmp_dir} $memory ${args}`
   ret=$?
   if [ $ret -ne 0 ]; then
     echo $x

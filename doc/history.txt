@@ -249,3 +249,4 @@ skew seventh
 20030426 - Add check_irred and check_irredf
 20030426 - Minor improvements in base, indicate_with_element, new_irred_with_orders, restrict_with_orders
 20030426 - Add new_irred_with_script
+20030426 - Add new_irredf_with_script
