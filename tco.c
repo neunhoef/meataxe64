@@ -1,5 +1,5 @@
 /*
- * $Id: tco.c,v 1.12 2004/03/29 21:43:16 jon Exp $
+ * $Id: tco.c,v 1.13 2004/03/30 20:11:23 jon Exp $
  *
  * Tensor condense one group element
  *
@@ -416,7 +416,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
   }
   rows_init(prime, &row_operations);
   grease_init(&row_operations, &grease);
-  if (0 == grease_level(prime, &grease, 100)) {
+  if (0 == grease_level(prime, &grease, memory_rows(max_end_len, 100))) {
     fprintf(stderr, "%s: failed to determine grease level, terminating\n", name);
     matrix_free(te_rows);
     matrix_free(end_rows);
@@ -430,7 +430,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
   if (grease.level > 5) {
     grease.level = 5; /* No point in greasing these little multiplications */
   }
-  if (0 == grease_allocate(prime, max_irr_len, &grease, 900)){
+  if (0 == grease_allocate(prime, max_end_len, &grease, 900)){
     fprintf(stderr, "%s: failed to allocate grease, terminating\n", name);
     matrix_free(te_rows);
     matrix_free(end_rows);

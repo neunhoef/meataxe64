@@ -1,5 +1,5 @@
 /*
- * $Id: spanmsp.c,v 1.2 2003/02/24 18:02:43 jon Exp $
+ * $Id: spanmsp.c,v 1.3 2004/03/30 20:11:23 jon Exp $
  *
  * Function to spin from a span under multiple generators until a proper subspace is found
  *
@@ -62,6 +62,7 @@ unsigned int spanmspin(const char *in, const char *out,
   scalar_row = my_malloc(scalar_len);
   seed_row = my_malloc(len);
   row_init(scalar_row, scalar_len);
+  /* Fix len in the following, it is wrong */
   if (0 == grease_level(prime, &grease, len)) {
     fprintf(stderr, "%s: cannot allocate grease space, terminating\n", name);
     exit(2);
