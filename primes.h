@@ -1,5 +1,5 @@
 /*
- * $Id: primes.h,v 1.4 2001/11/06 22:25:40 jon Exp $
+ * $Id: primes.h,v 1.5 2002/01/14 23:43:45 jon Exp $
  *
  * Prime power manipulation for meataxe
  *
@@ -24,5 +24,7 @@ extern int primes_init(unsigned int prime, prime_opsp ops);
 extern int is_a_prime(unsigned int);
 
 extern int is_a_prime_power(unsigned int);
+
+extern unsigned int prime_divisor(unsigned int q);
 
 #endif

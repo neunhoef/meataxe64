@@ -1,5 +1,5 @@
 /*
- * $Id: primes.c,v 1.7 2001/11/07 22:35:27 jon Exp $
+ * $Id: primes.c,v 1.8 2002/01/14 23:43:45 jon Exp $
  *
  * Prime manipulation for meataxe
  *
@@ -96,17 +96,26 @@ static int next_prime(unsigned int *i)
 
 int is_a_prime_power(unsigned int q)
 {
+  unsigned int i = prime_divisor(q);
+  if (0 != i) {
+    while (q % i ==  0) {
+      q /= i;
+    }
+    return (1 == q);
+  }
+  return 0;
+}
+
+unsigned int prime_divisor(unsigned int q)
+{
   unsigned int i = 2;
   while (i <= q) {
     if (q % i ==  0) {
-      /* Now found the prime */      
-        while (q % i ==  0) {
-          q /= i;
-        }
-        return (1 == q);
+      return i;
     } else {
-      if (0 == next_prime(&i))
+      if (0 == next_prime(&i)) {
         return 0;
+      }
     }
   }
   return 0;

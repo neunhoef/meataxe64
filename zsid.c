@@ -1,7 +1,7 @@
 /*
- * $Id: id.c,v 1.11 2002/01/14 23:43:45 jon Exp $: ad.c,v 1.1 2001/08/30 18:31:45 jon Exp $
+ * $Id
  *
- * Generate identity matrix
+ * Generate scaled identity matrix
  *
  */
 
@@ -12,29 +12,30 @@
 #include "memory.h"
 #include "ident.h"
 
-static const char *name = "zid";
+static const char *name = "zsid";
 
-static void id_usage(void)
+static void sid_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <prime> <nor> <noc> <out_file>\n", name, name);
+  fprintf(stderr, "%s: usage: %s <prime> <nor> <noc> <elt> <out_file>\n", name, name);
 }
 
 int main(int argc, const char * const argv[])
 {
   const char *out;
-  unsigned int prime, noc, nor;
+  unsigned int prime, noc, nor, elt;
 
-  if (5 != argc) {
-    id_usage();
+  if (6 != argc) {
+    sid_usage();
     exit(1);
   }
-  out = argv[4];
+  out = argv[5];
   prime = strtoul(argv[1], NULL, 0);
   nor = strtoul(argv[2], NULL, 0);
   noc = strtoul(argv[3], NULL, 0);
+  elt = strtoul(argv[4], NULL, 0);
   memory_init(name, 0);
   endian_init();
-  if (0 == ident(prime, nor, noc, 1, out, name)) {
+  if (0 == ident(prime, nor, noc, elt, out, name)) {
     exit(1);
   }
   memory_dispose();

@@ -1,5 +1,5 @@
 /*
- * $Id: ident.c,v 1.6 2002/01/06 16:35:48 jon Exp $
+ * $Id: ident.c,v 1.7 2002/01/14 23:43:45 jon Exp $
  *
  * Subroutine to generate identity matrix
  *
@@ -17,7 +17,7 @@
 #include "utils.h"
 #include "write.h"
 
-int ident(unsigned int prime, unsigned int nor, unsigned int noc,
+int ident(unsigned int prime, unsigned int nor, unsigned int noc, unsigned int elt,
           const char *out, const char *name)
 {
   unsigned int nob, nod, len;
@@ -30,6 +30,10 @@ int ident(unsigned int prime, unsigned int nor, unsigned int noc,
   assert(NULL != name);
   if (0 == is_a_prime_power(prime)) {
     fprintf(stderr, "%s: non prime %d\n", name, prime);
+    return 0;
+  }
+  if (elt >= prime) {
+    fprintf(stderr, "%s: %d is too large for %d\n", name, elt, prime);
     return 0;
   }
   nob = bits_of(prime);
@@ -54,7 +58,7 @@ int ident(unsigned int prime, unsigned int nor, unsigned int noc,
   for (i = 0; i < nor; i++) {
     row_init(row, len);
     if (i < noc) {
-      put_element_to_row(nob, i, row, 1);
+      put_element_to_row(nob, i, row, elt);
     }
     if (0 == endian_write_row(outp, row, len)) {
       fprintf(stderr, "%s: write output row to %s\n", name, out);

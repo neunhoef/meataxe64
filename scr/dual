@@ -1,5 +1,5 @@
 #
-# $Id: dual,v 1.1 2001/12/23 23:31:42 jon Exp $
+# $Id: dual,v 1.2 2002/01/14 23:43:45 jon Exp $
 #
 # Script to dual of a matrix
 #
@@ -37,7 +37,7 @@ ztr $a ${tmp}.0
 ok=0
 memory=200
 while [ 0 -eq $ok ]; do
-  ziv ${tmp}.0 $o $memory
+  ziv ${tmp}.0 $o $memory 2>/dev/null
   ret=$?
   if [ 2 -eq $ret ]; then
     let memory=`more_memory $memory`

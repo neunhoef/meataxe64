@@ -67,3 +67,5 @@
 20011223 - add lazy grease
 20011226 - complete split_all
 20020106 - complete standard base. Add zsums
+20020113 - add indicator claculation for characteristic 2
+20020114 - add zdiag for use in indicator calculation

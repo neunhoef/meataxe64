@@ -1,7 +1,7 @@
 /*
- * $Id: zprime.c,v 1.2 2002/01/14 23:43:45 jon Exp $
+ * $Id
  *
- * Print the field order from a matrix
+ * Print the field characteristic from a matrix
  *
  */
 
@@ -13,9 +13,9 @@
 #include "primes.h"
 #include "read.h"
 
-static const char *name = "zprime";
+static const char *name = "zchar";
 
-static void prime_usage(void)
+static void char_usage(void)
 {
   fprintf(stderr, "%s: usage: %s <in_file>\n", name, name);
 }
@@ -23,12 +23,12 @@ static void prime_usage(void)
 int main(int argc, const char * const argv[])
 {
   FILE *inp;
-  unsigned int prime;
+  unsigned int prime, ch;
   const header *h;
 
   endian_init();
   if (2 != argc) {
-    prime_usage();
+    char_usage();
     exit(1);
   }
   if (0 == open_and_read_binary_header(&inp, &h, argv[1], name)) {
@@ -37,6 +37,11 @@ int main(int argc, const char * const argv[])
   prime = header_get_prime(h);
   header_free(h);
   assert(is_a_prime_power(prime));
+  ch = prime_divisor(prime);
+  if (0 == ch) {
+    fprintf(stderr, "%s: %s has bad prime power %d\n", name, argv[1], prime);
+    exit(1);
+  }
   printf("%d\n", prime);
   fclose(inp);
   return 0;

@@ -1,5 +1,5 @@
 /*
- * $Id: add.c,v 1.14 2002/01/06 16:35:48 jon Exp $
+ * $Id: add.c,v 1.15 2002/01/14 23:43:45 jon Exp $
  *
  * Function to add two matrices to give a third
  *
@@ -99,7 +99,9 @@ static int add_sub(const char *m1, const char *m2, const char *m3, const char *n
       return cleanup(inp1, inp2, outp);
     }
     if (scale && 1 != elt) {
-      (*scaled_incer)(row1, row2, len, elt);
+      if (0 != elt) {
+        (*scaled_incer)(row1, row2, len, elt);
+      }
     } else {
       (*incer)(row1, row2, len);
     }

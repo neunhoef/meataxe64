@@ -1,5 +1,5 @@
 /*
- * $Id: utils.c,v 1.15 2001/11/29 01:13:09 jon Exp $
+ * $Id: utils.c,v 1.16 2002/01/14 23:43:45 jon Exp $
  *
  * Utils for meataxe
  *
@@ -120,8 +120,11 @@ void copy_rest(FILE *new, FILE *old)
   char temp[1000];
   do {
     unsigned int i = fread(temp, 1, 1000, old);
+    assert(i <= 1000);
     if (0 != i) {
-      fwrite(temp, 1, i, new);
+      unsigned int j = fwrite(temp, 1, i, new);
+      assert(j == i);
+      NOT_USED(j);
     } else {
       break;
     }

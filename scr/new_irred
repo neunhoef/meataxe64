@@ -1,5 +1,5 @@
 #
-# $Id: new_irred,v 1.1 2002/01/06 16:35:48 jon Exp $
+# $Id: new_irred,v 1.2 2002/01/14 23:43:45 jon Exp $
 #
 # Script to classify an irreducible representation
 #
@@ -50,66 +50,15 @@ fi
 # Now search for element of nullity one
 #
 tmp=tmp${PPID}
-ok=0
-memory=200
-for i in 1 2 3 4 5 6 7 8 9 10; do
-  f$i $id $a $b ${tmp}.1 ${tmp}.1
-  if [ $? -ne 0 ]; then
-    rm -f ${tmp}*
-    exit 1
-  fi
-  r=`zrn ${tmp}.1 $memory 2>/dev/null`
-  ret=$?
-  while [ $ret -eq 2 ]; do
-    let memory=`more_memory $memory`
-    r=`zrn ${tmp}.1 $memory 2>/dev/null`
-    ret=$?
-  done
-  if [ $ret -ne 0 ]; then
-    rm -f ${tmp}*
-    exit 1
-  fi
-  let s=$r+1
-  if [ $s -eq $nor ]; then
-    ok=1
-    break
-  fi
-done
 e=${tmp}.1
-if [ $ok -eq 0 ]; then
-# Try zsums
-# First compute o_a and o_b
-  o_a=`order $a`
-  ret=$?
-  if [ 0 -ne $ret ]; then
-    echo Cannot compute order of $a
-    exit 1
-  fi
-  o_b=`order $b`
-  ret=$?
-  if [ 0 -ne $ret ]; then
-    echo Cannot compute order of $b
-    exit 1
-  fi
-  while [ $ok -eq 0 ]; do
-    out=`zsums $a $b ${tmp}.zsums $o_a $o_b 10 $memory`
-    ret=$?
-    if [ 2 -eq $ret ]; then
-      let memory=`more_memory $memory`
-    elif [ 0 -eq $ret ]; then
-      ok=1
-      name=`echo $out | sed -e "s/^.*element //g;s/ of nullity.*$//g"`
-      mv ${name} ${tmp}.1
-    else
-      echo Failed to find an element of nullity one
-      rm -f ${tmp}*
-      exit 254
-    fi
-  done
+find_nullity_one $a $b $e
+ret=$?
+if [ $ret -ne 0 ]; then
+  rm -f ${tmp}.*
+  exit $ret
 fi
 name=${tmp}_${nor}
-#echo base $e $a $b ${name}
-base $e $a $b ${name}
+base $e $a $b ${name} ${tmp}.0
 ret=$?
 if [ $ret -ne 0 ]; then
   echo base returns $ret, terminating
@@ -140,5 +89,8 @@ new_name=`new_irred_name irreds/${nor}`
 #echo assigning new name ${new_name}
 mv ${name}_sb_1 ${new_name}_1
 mv ${name}_sb_2 ${new_name}_2
+if [ `zchar ${tmp}.0` -eq 2 ]; then
+  indicate ${new_name}_1 ${new_name}_2
+fi
 rm -f ${tmp}*
 exit 0

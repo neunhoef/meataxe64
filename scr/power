@@ -1,5 +1,5 @@
 #
-# $Id: power,v 1.4 2002/01/06 16:35:48 jon Exp $
+# $Id: power,v 1.5 2002/01/14 23:43:45 jon Exp $
 #
 # Script to compute a power of a matrix
 #
@@ -74,4 +74,4 @@ while [ $n -gt 0 ]; do
   fi
 done
 cp $res $o
-rm ${tmp}.*
+rm -f ${tmp}.*

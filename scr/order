@@ -1,5 +1,5 @@
 #
-# $Id: order,v 1.5 2002/01/06 16:35:48 jon Exp $: f1,v 1.2 2001/12/01 10:46:02 jon Exp $
+# $Id: order,v 1.6 2002/01/14 23:43:45 jon Exp $: f1,v 1.2 2001/12/01 10:46:02 jon Exp $
 #
 # Script to compute order of a matrix, in a naive fashion
 #
@@ -61,7 +61,7 @@ t=$a
 while [ $ok -eq 0 ]; do
   if diff $t $id 1>/dev/null ; then
     echo $o
-    rm ${tmp}*
+    rm -f ${tmp}*
     exit 0
   fi
   zmu $a $t ${tmp}.$o 400 1>/dev/null

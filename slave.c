@@ -1,5 +1,5 @@
 /*
- * $Id: slave.c,v 1.7 2002/01/06 16:35:48 jon Exp $
+ * $Id: slave.c,v 1.8 2002/01/14 23:43:45 jon Exp $
  *
  * Slave for extended operations
  * Based on zsl.c     MTX6 slave version 6.0.11 7.11.98 
@@ -112,6 +112,8 @@ int main(int argc, const char *const argv[])
       unsigned int a = strlen(argv[1]);
       unsigned int b = strlen("free");
       int is_kill = 1;
+      NOT_USED(a);
+      NOT_USED(b);
       assert(strlen("done") == b);
       if (0 != strncmp(line_ptrs[2], "kill", lengths[2])) {
         fprintf(output, "%s %s", argv[1], line_ptrs[1]);

@@ -1,5 +1,5 @@
 /*
- * $Id: zsums.c,v 1.1 2002/01/06 16:35:48 jon Exp $
+ * $Id: zsums.c,v 1.2 2002/01/14 23:43:45 jon Exp $
  *
  * Compute sums in the group algebra in two matrices
  *
@@ -100,7 +100,7 @@ int main(int argc, const char * const argv[])
     sprintf(buf, "%s.e.%d", out, l);
     elts[l] = buf;
   }
-  if (0 == ident(prime, nor, noc, elts[0], name)) {
+  if (0 == ident(prime, nor, noc, 1, elts[0], name)) {
     fprintf(stderr, "%s: cannot write identity, terminating\n", name);
     exit(1);
   }

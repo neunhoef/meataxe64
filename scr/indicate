@@ -1,0 +1,99 @@
+#
+# $Id: indicate,v 1.1 2002/01/14 23:43:45 jon Exp $
+#
+# Script to find the indicator of an irreducible representation
+# Assumes a and b in standard base form
+#
+# Inputs
+# $1: generator a
+# $2: generator b
+#
+# Return codes
+# 1: error in parameters
+# 0: ok
+#
+usage="$0: usage: $0 <a> <b>"
+if [ $# -ne 2 ]; then
+  echo $usage
+  exit 1;
+fi
+. functions
+a=$1
+b=$2
+if [ -e $a -a -e $b ]; then
+  q=`zprime $a`
+  nor=`znor $a`
+  noc=`znoc $a`
+  if [ $nor -ne $noc ]; then
+    echo "$0: $a is not square"
+    exit 1
+  fi
+  if [ $nor -ne `znor $b` -o $nor -ne `znoc $b` ]; then
+    echo "$0: $a and $b are not compatible"
+    exit 1
+  fi
+else
+  echo "$0: missing files $a or $b"
+  exit 1
+fi
+tmp=tmp${PPID}
+a_d=${tmp}.0
+b_d=${tmp}.1
+dual $a $a_d
+dual $b $b_d
+e=${tmp}.2
+find_nullity_one $a_d $b_d $e
+ret=$?
+if [ $ret -ne 0 ]; then
+  rm -f ${tmp}.*
+  exit $ret
+fi
+S=${tmp}.3
+Q=${tmp}.4
+sb=${tmp}.0
+# TODO: cut down the amount of work here, we don't need the invert, multiplies etc
+base $e $a_d $b_d $sb $S
+if diff $a ${sb}_sb_1 1>/dev/null 2>&1; then
+  if diff $b ${sb}_sb_2 1>/dev/null 2>&1; then
+    if [ $nor -eq 1 ]; then
+      echo indicator +
+      rm -f ${tmp}.*
+      exit 0
+    fi
+    zqf $S $Q
+    a_t=${tmp}.5
+    b_t=${tmp}.6
+    ztr $a $a_t
+    ztr $b $b_t
+    i=0
+    q=`zprime $a`
+    while [ $i -lt $q ]; do
+      zsid $q $nor $noc $i ${tmp}.7
+      zad $Q ${tmp}.7 ${tmp}.8
+      preserves ${tmp}.8 $S ${tmp}.7 $a $a_t
+      ret=$?
+      if [ $ret -eq 0 ]; then
+        preserves ${tmp}.8 $S ${tmp}.7 $b $b_t
+        ret=$?
+        if [ $ret -eq 0 ]; then
+          echo indicator +
+          rm -f ${tmp}.*
+          exit 0
+        elif [ $ret -eq 1 ]; then
+          rm -f ${tmp}.*
+          exit 1
+        fi
+      elif [ $ret -eq 1 ]; then
+        rm -f ${tmp}.*
+        exit 1
+      fi
+# Try next diagonal
+      let i=$i+1
+    done
+    echo indicator -
+   rm -f ${tmp}.*
+    exit 0
+  fi
+fi
+rm -f ${tmp}.*
+echo indicator o

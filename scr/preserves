@@ -1,0 +1,96 @@
+#
+# $Id: preserves,v 1.1 2002/01/14 23:43:45 jon Exp $
+#
+# Script to check if a matrix preservers a quadratic form
+#
+# Inputs
+# $1: quadratic form Q
+# $2: corresponding bilinear form S
+# $3: diagonal matrix for Q
+# $4: g
+# $5: g transpose
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+# 255: fails to preserve
+#
+#set -v
+. functions
+usage="$0: usage: $0 <Q> <S> <lambda> <g> <g transpose>"
+if [ $# -ne 5 ]; then
+  echo $usage
+  exit 1;
+fi
+Q=$1
+S=$2
+L=$3
+g=$4
+g_t=$5
+if [ -e $Q ]; then
+  q=`zprime $Q`
+  nor=`znor $Q`
+  noc=`znoc $Q`
+  if [ $nor -ne $noc ]; then
+    echo "$0: $Q is not square"
+    exit 1
+  fi
+else
+  echo "$0: missing file $Q"
+  exit 1
+fi
+if [ -e $S ]; then
+  if [ `zprime $S` -ne $q -o `znor $S` -ne $nor -o `znoc $S` -ne $noc ]; then
+    echo parameter mismatch between $Q and $S
+    exit 1
+  fi
+else
+  echo "$0: missing file $S"
+  exit 1
+fi
+if [ -e $L ]; then
+  if [ `zprime $L` -ne $q -o `znor $L` -ne $nor -o `znoc $L` -ne $noc ]; then
+    echo parameter mismatch between $Q and $L
+    exit 1
+  fi
+else
+  echo "$0: missing file $L"
+  exit 1
+fi
+if [ -e $g ]; then
+  if [ `zprime $g` -ne $q -o `znor $g` -ne $nor -o `znoc $g` -ne $noc ]; then
+    echo parameter mismatch between $Q and $g
+    exit 1
+  fi
+else
+  echo "$0: missing file $g"
+  exit 1
+fi
+if [ -e $g_t ]; then
+  if [ `zprime $g_t` -ne $q -o `znor $g_t` -ne $nor -o `znoc $g_t` -ne $noc ]; then
+    echo parameter mismatch between $Q and $g_t
+    exit 1
+  fi
+else
+  echo "$0: missing file $g_t"
+  exit 1
+fi
+# TODO: reuse temps
+tmp=tmp${PPID}
+zmu $g $Q ${tmp}.0
+zmu ${tmp}.0 $g_t ${tmp}.1
+ztr ${tmp}.1 ${tmp}.2
+zad ${tmp}.1 ${tmp}.2 ${tmp}.3
+if diff $S ${tmp}.3 2>/dev/null 1>&2; then
+  zdiag ${tmp}.1 ${tmp}.4
+  if diff $L ${tmp}.4 2>/dev/null 1>&2; then
+    rm -f ${tmp}.*
+    exit 0
+  else
+    rm -f ${tmp}.*
+    exit 255
+  fi
+else
+  rm -f ${tmp}.*
+  exit 255
+fi
