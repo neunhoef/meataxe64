@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: split,v 1.10 2002/07/24 16:00:18 jon Exp $
+# $Id: split,v 1.11 2002/09/05 18:22:51 jon Exp $
 #
 # Script to split a representation
 #
@@ -75,6 +75,7 @@ for i in 1 2 3 4 5 6 7 8 9 10; do
 done
  If any generators are singular, try them
 for x in $a $*; do
+  echo "using $x to split"
   split_with_element $x $o 0 1 ${tmp}.2 $a $*
   ret=$?
 # Only loop on nullity 0 or didn't split
@@ -84,21 +85,6 @@ for x in $a $*; do
   fi
 done
 echo searching for suitable element using zsums
-# First compute o_a and o_b
-#o_a=`singular_order $a`
-#ret=$?
-#if [ 0 -ne $ret ]; then
-#  echo Cannot compute order of $a
-#  rm -f ${tmp}*
-#  exit 1
-#fi
-#o_b=`singular_order $b`
-#ret=$?
-#if [ 0 -ne $ret ]; then
-#  echo Cannot compute order of $b
-#  rm -f ${tmp}*
-#  exit 254
-#fi
 i=0
 for x in $a $*; do
   order=`singular_order $x`
@@ -129,22 +115,50 @@ if [ 2 -ne $i ]; then
 fi
 ok=0
 memory=200
+max_null=5
+if [ 2 -eq $q ]; then
+  max_null=30
+elif [ 3 -le $q ]; then
+  max_null=15
+fi
 while [ $ok -eq 0 ]; do
-  out=`zsums ${y[0]} ${y[1]} ${tmp}.zsums ${order[0]} ${order[1]} 5 5 $memory 2>/dev/null`
+  out=`zsums ${y[0]} ${y[1]} ${tmp}.zsums ${order[0]} ${order[1]} 10 $max_null $memory 2>/dev/null`
   ret=$?
   if [ 2 -eq $ret ]; then
     let memory=`more_memory $memory`
   elif [ 0 -eq $ret ]; then
     ok=1
     name=`echo $out | sed -e "s/^.*element //g;s/ of nullity.*$//g"`
-    split_with_element ${name} $o 0 1 ${tmp}.2 $a $*
+    split_with_element ${name} $o 0 0 ${tmp}.2 $a $*
     ret=$?
     if [ $ret -eq 255 -o $ret -eq 0 ]; then
       rm -f ${tmp}*
       exit $ret
     fi
   else
-    echo "Failed to find an element of nullity <= 5"
+    echo "Failed to find an element of nullity <= $max_null"
+    break
+  fi
+done
+ok=0
+let max_null=$nor-1
+echo searching for any element using zsums
+while [ $ok -eq 0 ]; do
+  out=`zsums ${y[0]} ${y[1]} ${tmp}.zsums ${order[0]} ${order[1]} 10 $max_null $memory 2>/dev/null`
+  ret=$?
+  if [ 2 -eq $ret ]; then
+    let memory=`more_memory $memory`
+  elif [ 0 -eq $ret ]; then
+    ok=1
+    name=`echo $out | sed -e "s/^.*element //g;s/ of nullity.*$//g"`
+    split_with_element ${name} $o 0 0 ${tmp}.2 $a $*
+    ret=$?
+    if [ $ret -eq 255 -o $ret -eq 0 ]; then
+      rm -f ${tmp}*
+      exit $ret
+    fi
+  else
+    echo "Failed to find an element of low nullity"
     rm -f ${tmp}*
     exit 254
   fi

@@ -1,16 +1,15 @@
 #!/bin/sh
 #
-# $Id: new_irred_and_indicate,v 1.2 2002/07/15 17:02:57 jon Exp $
+# $Id: new_irred_and_indicate,v 1.3 2002/09/05 18:22:51 jon Exp $
 #
 # Script to classify an irreducible representation
 # and compute its indicator in characteristic two
 #
 # Inputs
 # $1: initial memory
-# $1: generator a
-# $2: generator b
+# $2-: generators
 #
-# outputs will be of the form irred/${nor}_${i}_{1,2}
+# outputs will be of the form irred/${nor}_${i}_{1,2,...}
 # where nor = znor $a and i is an available unused index
 #
 #
@@ -55,17 +54,29 @@ else
   echo "$0: missing files $a or $b"
   exit 1
 fi
-# First compute o_a and o_b
-o_a=`order $a`
-ret=$?
-if [ 0 -ne $ret ]; then
-  echo Cannot compute order of $a
-  exit 1
-fi
-o_b=`order $b`
-ret=$?
-if [ 0 -ne $ret ]; then
-  echo Cannot compute order of $b
-  exit 1
-fi
-exec new_irred_and_indicate_with_orders $memory $a $o_a $b $o_b
+i=0
+for x in $*; do
+  ord=`singular_order $x`
+  ret=$?
+  if [ 1 -eq $ret ]; then
+    echo Cannot compute order of $x
+    exit 1
+  fi
+  if [ 0 -eq $ret ]; then
+    order[$i]=$ord
+    y[$i]=$x
+    let i=$i+1
+  elif [ 255 -eq $ret ]; then
+    continue
+  else
+    echo singular_order returns unexpected code $ret
+    exit 1
+  fi
+done
+j=0
+line=
+while [ $j -lt $i ]; do
+  line="$line ${y[$j]} ${order[$j]}"
+  let j=$j+1
+done
+exec new_irred_and_indicate_with_orders $memory $line
