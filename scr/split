@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: split,v 1.14 2002/09/16 09:26:47 jon Exp $
+# $Id: split,v 1.15 2002/09/16 14:59:37 jon Exp $
 #
 # Script to split a representation
 #
@@ -73,7 +73,7 @@ for i in 1 2 3 4 5 6 7 8 9 10; do
     exit $ret
   fi
 done
- If any generators are singular, try them
+# If any generators are singular, try them
 for x in $a $*; do
   echo "using $x to split"
   split_with_element $x $o 0 1 ${tmp}.2 $a $*
@@ -168,6 +168,25 @@ while [ $ok -eq 0 ]; do
     fi
   else
     echo "Failed to find an element of low nullity"
+    break
+  fi
+done
+echo trying zero
+while [ $ok -eq 0 ]; do
+  zsid $q $nor $nor 0 ${tmp}_zero
+  ret=$?
+  if [ 2 -eq $ret ]; then
+    let memory=`more_memory $memory`
+  elif [ 0 -eq $ret ]; then
+    ok=1
+    split_with_element ${tmp}_zero $o 0 0 ${tmp}.2 $a $*
+    ret=$?
+    if [ $ret -eq 255 -o $ret -eq 0 ]; then
+      rm -f ${tmp}*
+      exit $ret
+    fi
+  else
+    echo "Failed to split with zero"
     rm -f ${tmp}*
     exit 254
   fi
