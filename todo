@@ -1,6 +1,6 @@
 Worry about isspace failure (can't detect \n) (still occurs on RH 7.2) ctype is buggered
 Worry about return (NULL == s) code generation error
-Documentation changes for zfln, zlp, zrand, ztco, ztcv, ztrecover
+Documentation changes for zfln, zrand, ztco, ztcv, ztrecover
 Documentation changes for find_best_nullity_with_orders, qp, sym_basis, proj_base, sub_quot
 Write span_and_spin for spins on large nullspaces
 Extend zscript for multiple (more than 2) generators
