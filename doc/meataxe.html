@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.26 2002/09/19 10:51:09 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.27 2002/09/21 16:54:52 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -310,6 +310,7 @@ Output on stderr is error diagnostic information.
 <li><a href="#zps">zps</a></li>
 <li><a href="#zqf">zqf</a></li>
 <li><a href="#zqs">zqs</a></li>
+<li><a href="#zrand">zrand</a></li>
 <li><a href="#zranks">zranks</a></li>
 <li><a href="#zre">zre</a></li>
 <li><a href="#zrestrict">zrestrict</a></li>
@@ -343,6 +344,7 @@ Output on stderr is error diagnostic information.
 <li><a href="#ztmu">ztmu</a></li>
 <li><a href="#ztr">ztr</a></li>
 <li><a href="#ztrace">ztrace</a></li>
+<li><a href="#ztrecover">ztrecover</a></li>
 <li><a href="#ztsp">ztsp</a></li>
 <li><a href="#ztspf">ztspf</a></li>
 <li><a href="#zvp">zvp</a></li>
@@ -2466,6 +2468,44 @@ rows. The program is linear in the row length, and linear in each of
 the subspace and quotient space size.
 </li>
 <li>
+<h3><a name="zrand">zrand</a></h3>
+Purpose: Generate a random matrix
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Field order</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Number of rows</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>Number of columns</td>
+</tr>
+<tr>
+<td valign=top>4</td><td valign=top>Output file</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>None</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient memory</td>
+</tr>
+</table>
+Commentary: This program is intended for use in performance testing.
+It has little mathematical significance
+</li>
+<li>
 <h3><a name="zranks">zranks</a></h3>
 Purpose: Compute the nullities of a sequence of group algebra elements
 <table>
@@ -3946,6 +3986,55 @@ Commentary: This program provides a crude way of distinguishing
 representations by looking at their traces on particular group
 elements. It is not expected to be greatly used. The input must be
 square.
+</li>
+<li>
+<h3><a name="ztrecover">ztrecover</a></h3>
+Purpose: Recover a file of vectors in tensor product form into normal
+vector form
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Input file</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Output file</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>Number of columns in left hand tensor</td>
+</tr>
+<tr>
+<td valign=top>4</td><td valign=top>Number of columns in right hand tensor</td>
+</tr>
+<tr>
+<td valign=top>5</td><td valign=top>Optional memory size (default 200k)</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>None</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient memory</td>
+</tr>
+</table>
+Commentary: Holding vectors in the form of an m x n matrix allows a
+much more efficient multiplication by group elements in tensor product
+space. In file, this form is achieved by normal vectors with "holes"
+in them, so as to round up each column in the second argument to a
+word length. This program compresses back to the normal form of the
+vector, such as could be used with the full tensor product matrices,
+eg for quotient space operations. Its main use is in recovering from
+the situation where a tensor spin has produced a subspace, but the
+program has been terminated before full closure has been established.
 </li>
 <li>
 <h3><a name="ztsp">ztsp</a></h3>
