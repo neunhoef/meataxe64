@@ -1,5 +1,5 @@
 /*
- * $Id: zrnf.c,v 1.2 2002/01/22 08:40:24 jon Exp $
+ * $Id: zrnf.c,v 1.3 2002/02/21 20:37:21 jon Exp $
  *
  * Compute the rank of a matrix, using temporary files
  *
@@ -31,7 +31,7 @@ int main(int argc, const char * const argv[])
     memory = strtoul(argv[3], NULL, 0);
   }
   memory_init(name, memory);
-  n = rank(argv[1], argv[2], NULL, 0, name);
+  n = rank(argv[1], argv[2], NULL, 0, 0, name);
   printf("%d\n", n);
   memory_dispose();
   return 0;

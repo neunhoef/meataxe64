@@ -1,5 +1,5 @@
 #
-# $Id: split_with_element,v 1.9 2002/02/05 19:50:56 jon Exp $
+# $Id: split_with_element,v 1.10 2002/02/21 20:37:21 jon Exp $
 #
 # Script to split a representation given a particular element to work from
 #
@@ -177,11 +177,7 @@ else
     fi
   fi
 fi
-zmu ${tmp}.5 $a ${tmp}.6 400 1>/dev/null
-zss ${tmp}.5 ${tmp}.6 ${ss_name}_1 $memory
-zmu ${tmp}.5 $b ${tmp}.6 400 1>/dev/null
-zss ${tmp}.5 ${tmp}.6 ${ss_name}_2 $memory
-zqs ${tmp}.5 $a ${qs_name}_1 $memory
-zqs ${tmp}.5 $b ${qs_name}_2 $memory
+split_with_subspace $a ${tmp}.5 ${ss_name}_1 ${qs_name}_1
+split_with_subspace $b ${tmp}.5 ${ss_name}_2 ${qs_name}_2
 rm -f ${tmp}*
 exit 0

@@ -81,3 +81,5 @@
 20020212 - add sym square and skew cube
 20020213 - add zranks
 20020215 - add zproj
+20020218 - add script output to sums
+20020221 - add split_with_subspace

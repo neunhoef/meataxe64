@@ -1,0 +1,66 @@
+#
+# $Id: split_with_subspace,v 1.1 2002/02/21 20:37:21 jon Exp $
+#
+# Script to split a representation given a particular subspace to work from
+#
+# Inputs
+# $1: generator a
+# $2: subspace with which to split
+# $3: output subspace representation filename
+# $4: output quotient representation filename
+# $5: initial memory (optional)
+#
+# outputs will be of the form <$3>_<q>_<nor>
+# where nor is number of rows, and q is the prime power
+#
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+# 254: did not split
+#
+. functions
+usage="$0: usage: $0 <a> <o_s> <o_q> <s> <output_stem> [<memory>]"
+if [ $# -ne 4 -a $# -ne 5 ]; then
+  echo $usage
+  exit 1;
+fi
+a=$1
+s=$2
+o_s=$3
+o_q=$4
+if [ $# -eq 5 ]; then
+  memory=$5
+else
+  memory=200
+fi
+if [ -e $a -a -e $s ]; then
+  q=`zprime $a`
+  nor=`znor $a`
+  noc=`znoc $a`
+  if [ $nor -ne $noc ]; then
+    echo "$0: $a is not square"
+    exit 1
+  fi
+  if [ $noc -ne `znoc $s` -o $q -ne `zprime $s` ]; then
+    echo "$0: $a and $s are not compatible"
+    exit 1
+  fi
+else
+  echo "$0: missing files $a or $s"
+  exit 1
+fi
+tmp=tmp${PPID}
+mem_ok=0
+dim=`znor $s`
+let codim=$nor-$dim
+if [ $dim -lt $nor ]; then
+  zmu $s $a ${tmp}.0 400 1>/dev/null
+  zss $s ${tmp}.0 ${o_s} $memory
+  zqs $s $a ${o_q} $memory
+  rm -f ${tmp}.0
+exit 0
+else
+  echo failed to split
+  exit 254
+fi

@@ -1,5 +1,5 @@
 /*
- * $Id: rnf.c,v 1.4 2002/02/05 19:50:56 jon Exp $
+ * $Id: rnf.c,v 1.5 2002/02/21 20:37:21 jon Exp $
  *
  * Compute the rank of a matrix, using temporary files
  *
@@ -31,7 +31,7 @@ struct file_struct
 };
 
 unsigned int rank(const char *m1, const char *dir, const char *m2,
-                  int record, const char *name)
+                  int record, int full, const char *name)
 {
   FILE *inp, *outp;
   const header *h;
@@ -48,6 +48,7 @@ unsigned int rank(const char *m1, const char *dir, const char *m2,
   assert(NULL != m1);
   assert((0 == record && NULL == m2) ||
          (0 != record && NULL != m2));
+  NOT_USED(full);
   i = strlen(tmp) + strlen(dir);
   name1 = my_malloc(i + 4);
   name2 = my_malloc(i + 4);
@@ -56,6 +57,7 @@ unsigned int rank(const char *m1, const char *dir, const char *m2,
   if (0 == record) {
     NOT_USED(name3);
     NOT_USED(outp);
+    full = 0; /* No point in back cleaning if we don't record */
   } else {
     name3 = my_malloc(i + 4);
     sprintf(name3, "%s/%s.2", dir, tmp);

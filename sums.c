@@ -1,5 +1,5 @@
 /*
- * $Id: sums.c,v 1.1 2002/02/18 20:42:49 jon Exp $
+ * $Id: sums.c,v 1.2 2002/02/21 20:37:21 jon Exp $
  *
  * Function to compute linear sums of two matices
  *
@@ -26,12 +26,13 @@ int sums(const char *in1, const char *in2, const char *out,
   char *buf;
   FILE *f;
   unsigned int i, j, k, l, r, s, cur_word = 0, cur_power = 1;
-  unsigned int prime, nor, noc, count;
+  unsigned int prime, nod, nor, noc, count;
   const header *h;
   int m;
   const char **names;
   const char **words;
   const char **elts;
+  const char **elt_names;
 
   if (0 == open_and_read_binary_header(&f, &h, in1, name)) {
     exit(1);
@@ -39,6 +40,7 @@ int sums(const char *in1, const char *in2, const char *out,
   prime = header_get_prime(h);
   nor = header_get_nor(h);
   noc = header_get_noc(h);
+  nod = header_get_nod(h); /* For printing element names */
   if (nor != noc) {
     fprintf(stderr, "%s: %s is not square, terminating\n", name, in1);
     exit(1);
@@ -54,9 +56,10 @@ int sums(const char *in1, const char *in2, const char *out,
     fprintf(stderr, "%s: too many elements requested (%d ** %d), terminating\n", name, prime, n);
     exit(1);
   }
-  names = my_malloc(2 * n * sizeof(const char *));
-  words = my_malloc(2 * n * sizeof(const char *));
-  elts = my_malloc(2 * count * sizeof(const char *));
+  names = my_malloc(n * sizeof(const char *));
+  words = my_malloc(n * sizeof(const char *));
+  elts = my_malloc(count * sizeof(const char *));
+  elt_names = my_malloc(count * sizeof(const char *));
   for (l = 0; l < count; l++) {
     buf = my_malloc(2 * k + 3);
     sprintf(buf, "%s.e.%d", out, l);
@@ -66,6 +69,7 @@ int sums(const char *in1, const char *in2, const char *out,
     fprintf(stderr, "%s: cannot write identity, terminating\n", name);
     exit(1);
   }
+  elt_names[0] = "I";
   words[0] = "A";
   names[0] = in1;
   for (l = 1; l < prime; l++) {
@@ -74,6 +78,9 @@ int sums(const char *in1, const char *in2, const char *out,
               name, elts[l], l, names[i - 1]);
       exit(1);
     }
+    buf = my_malloc(2 /*I+*/ + nod /* lambda */ + 1 /* A */ + 1 /* eos */);
+    sprintf(buf, "I+%d%s", l, words[0]);
+    elt_names[l] = buf;
   }
   while (i < n) {
     char *a;
@@ -147,6 +154,9 @@ int sums(const char *in1, const char *in2, const char *out,
                   name, elts[l], r, names[i - 1]);
           exit(1);
         }
+        buf = my_malloc(strlen(elt_names[l]) + 1 + nod + strlen(words[i-1]) + 1);
+        sprintf(buf, "%s+%d%s", elt_names[l], r, words[i - 1]);
+        elt_names[pos] = buf;
         /* l != 0 mean we have 1 + old element + lambda * new element, ie at least 3 in sum */
         if (0 != l) {
           int res;
@@ -155,8 +165,8 @@ int sums(const char *in1, const char *in2, const char *out,
           }
           res = (*acceptor)(s, nor);
           if (res & 1) {
-            printf("%s: found element %s of nullity %d\n",
-                   name, elts[pos], nor - s);
+            printf("%s: found element %s of nullity %d, form %s\n",
+                   name, elts[pos], nor - s, elt_names[pos]);
           }
           if (res & 2) {
             printf("%s: terminating\n", name);
