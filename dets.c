@@ -1,5 +1,5 @@
 /*
- * $Id: dets.c,v 1.4 2002/06/30 21:33:14 jon Exp $
+ * $Id: dets.c,v 1.5 2004/03/29 21:43:16 jon Exp $
  *
  * Functions to compute determinants
  *
@@ -15,25 +15,25 @@
 #include <stdlib.h>
 
 static unsigned int det(unsigned int **rows, prime_ops prime_operations,
-                        unsigned int nor)
+                        row_ops *row_operations, unsigned int nor)
 {
-  row_ops row_operations;
   unsigned int i, j, k, det = 1, prime, nob, elts_per_word;
   prime = prime_operations.prime;
   assert(is_a_prime_power(prime));
   assert(NULL != rows);
   nob = bits_of(prime);
   elts_per_word = bits_in_unsigned_int / nob;
-  rows_init(prime, &row_operations);
   for (i = 0; i < nor; i++) {
     unsigned int elt = first_non_zero(rows[i], nob, nor, &j);
     if (0 == elt) {
       return 0;
     } else {
-      det = (*prime_operations.mul)(det, elt);
-      elt = (*prime_operations.invert)(elt);
       if (1 != elt) {
-        (*row_operations.scaler_in_place)(rows[i], nor, elt);
+        det = (*prime_operations.mul)(det, elt);
+        elt = (*prime_operations.invert)(elt);
+      }
+      if (1 != elt) {
+        (*row_operations->scaler_in_place)(rows[i], nor, elt);
       }
       j /= elts_per_word;
       for (k = i+1; k < nor; k++) {
@@ -41,9 +41,9 @@ static unsigned int det(unsigned int **rows, prime_ops prime_operations,
         if (0 != elt) {
           elt = (*prime_operations.negate)(elt);
           if (1 != elt) {
-            (*row_operations.scaled_incer)(rows[i], rows[k], nor, elt);
+            (*row_operations->scaled_incer)(rows[i], rows[k], nor, elt);
           } else {
-            (*row_operations.incer)(rows[i], rows[k], nor);
+            (*row_operations->incer)(rows[i], rows[k], nor);
           }
         }
       }
@@ -148,6 +148,7 @@ unsigned int det3_ptr(unsigned int **rows, unsigned int nob, prime_ops prime_ope
 }
 
 unsigned int det4(prime_ops prime_operations,
+                  row_ops *row_operations,
                   unsigned int e11, unsigned int e12, unsigned int e13, unsigned int e14,
                   unsigned int e21, unsigned int e22, unsigned int e23, unsigned int e24,
                   unsigned int e31, unsigned int e32, unsigned int e33, unsigned int e34,
@@ -178,10 +179,11 @@ unsigned int det4(prime_ops prime_operations,
   rows[1] = r2;
   rows[2] = r3;
   rows[3] = r4;
-  return det(rows, prime_operations, 4);
+  return det(rows, prime_operations, row_operations, 4);
 }
 
 unsigned int det4_ptr(unsigned int **rows, unsigned int nob, prime_ops prime_operations,
+                      row_ops *row_operations,
                       unsigned int row_i1, unsigned int col_i1,
                       unsigned int row_i2, unsigned int col_i2,
                       unsigned int row_i3, unsigned int col_i3,
@@ -206,10 +208,11 @@ unsigned int det4_ptr(unsigned int **rows, unsigned int nob, prime_ops prime_ope
   e42 = get_element_from_row_with_params(nob, col_i2, mask, elts_per_word, rows[row_i4]);
   e43 = get_element_from_row_with_params(nob, col_i3, mask, elts_per_word, rows[row_i4]);
   e44 = get_element_from_row_with_params(nob, col_i4, mask, elts_per_word, rows[row_i4]);
-  return det4(prime_operations, e11, e12, e13, e14, e21, e22, e23, e24, e31, e32, e33, e34, e41, e42, e43, e44);
+  return det4(prime_operations, row_operations, e11, e12, e13, e14, e21, e22, e23, e24, e31, e32, e33, e34, e41, e42, e43, e44);
 }
 
 unsigned int det5(prime_ops prime_operations,
+                  row_ops *row_operations,
                   unsigned int e11, unsigned int e12, unsigned int e13, unsigned int e14, unsigned int e15,
                   unsigned int e21, unsigned int e22, unsigned int e23, unsigned int e24, unsigned int e25,
                   unsigned int e31, unsigned int e32, unsigned int e33, unsigned int e34, unsigned int e35,
@@ -252,10 +255,11 @@ unsigned int det5(prime_ops prime_operations,
   rows[2] = r3;
   rows[3] = r4;
   rows[4] = r5;
-  return det(rows, prime_operations, 5);
+  return det(rows, prime_operations, row_operations, 5);
 }
 
 unsigned int det5_ptr(unsigned int **rows, unsigned int nob, prime_ops prime_operations,
+                      row_ops *row_operations,
                       unsigned int row_i1, unsigned int col_i1,
                       unsigned int row_i2, unsigned int col_i2,
                       unsigned int row_i3, unsigned int col_i3,
@@ -290,7 +294,8 @@ unsigned int det5_ptr(unsigned int **rows, unsigned int nob, prime_ops prime_ope
   e53 = get_element_from_row_with_params(nob, col_i3, mask, elts_per_word, rows[row_i5]);
   e54 = get_element_from_row_with_params(nob, col_i4, mask, elts_per_word, rows[row_i5]);
   e55 = get_element_from_row_with_params(nob, col_i5, mask, elts_per_word, rows[row_i5]);
-  return det5(prime_operations, e11, e12, e13, e14, e15,
+  return det5(prime_operations, row_operations,
+              e11, e12, e13, e14, e15,
               e21, e22, e23, e24, e25,
               e31, e32, e33, e34, e35,
               e41, e42, e43, e44, e45,
@@ -298,6 +303,7 @@ unsigned int det5_ptr(unsigned int **rows, unsigned int nob, prime_ops prime_ope
 }
 
 unsigned int det6(prime_ops prime_operations,
+                  row_ops *row_operations,
                   unsigned int e11, unsigned int e12, unsigned int e13, unsigned int e14, unsigned int e15, unsigned int e16,
                   unsigned int e21, unsigned int e22, unsigned int e23, unsigned int e24, unsigned int e25, unsigned int e26,
                   unsigned int e31, unsigned int e32, unsigned int e33, unsigned int e34, unsigned int e35, unsigned int e36,
@@ -355,10 +361,11 @@ unsigned int det6(prime_ops prime_operations,
   rows[3] = r4;
   rows[4] = r5;
   rows[5] = r6;
-  return det(rows, prime_operations, 6);
+  return det(rows, prime_operations, row_operations, 6);
 }
 
 unsigned int det6_ptr(unsigned int **rows, unsigned int nob, prime_ops prime_operations,
+                      row_ops *row_operations,
                       unsigned int row_i1, unsigned int col_i1,
                       unsigned int row_i2, unsigned int col_i2,
                       unsigned int row_i3, unsigned int col_i3,
@@ -405,7 +412,8 @@ unsigned int det6_ptr(unsigned int **rows, unsigned int nob, prime_ops prime_ope
   e64 = get_element_from_row_with_params(nob, col_i4, mask, elts_per_word, rows[row_i6]);
   e65 = get_element_from_row_with_params(nob, col_i5, mask, elts_per_word, rows[row_i6]);
   e66 = get_element_from_row_with_params(nob, col_i6, mask, elts_per_word, rows[row_i6]);
-  return det6(prime_operations, e11, e12, e13, e14, e15, e16,
+  return det6(prime_operations, row_operations,
+              e11, e12, e13, e14, e15, e16,
               e21, e22, e23, e24, e25, e26,
               e31, e32, e33, e34, e35, e36,
               e41, e42, e43, e44, e45, e46,
@@ -414,6 +422,7 @@ unsigned int det6_ptr(unsigned int **rows, unsigned int nob, prime_ops prime_ope
 }
 
 unsigned int det7(prime_ops prime_operations,
+                  row_ops *row_operations,
                   unsigned int e11, unsigned int e12, unsigned int e13, unsigned int e14, unsigned int e15, unsigned int e16, unsigned int e17,
                   unsigned int e21, unsigned int e22, unsigned int e23, unsigned int e24, unsigned int e25, unsigned int e26, unsigned int e27,
                   unsigned int e31, unsigned int e32, unsigned int e33, unsigned int e34, unsigned int e35, unsigned int e36, unsigned int e37,
@@ -486,10 +495,11 @@ unsigned int det7(prime_ops prime_operations,
   rows[4] = r5;
   rows[5] = r6;
   rows[6] = r7;
-  return det(rows, prime_operations, 7);
+  return det(rows, prime_operations, row_operations, 7);
 }
 
 unsigned int det7_ptr(unsigned int **rows, unsigned int nob, prime_ops prime_operations,
+                      row_ops *row_operations,
                       unsigned int row_i1, unsigned int col_i1,
                       unsigned int row_i2, unsigned int col_i2,
                       unsigned int row_i3, unsigned int col_i3,
@@ -550,7 +560,8 @@ unsigned int det7_ptr(unsigned int **rows, unsigned int nob, prime_ops prime_ope
   e75 = get_element_from_row_with_params(nob, col_i5, mask, elts_per_word, rows[row_i7]);
   e76 = get_element_from_row_with_params(nob, col_i6, mask, elts_per_word, rows[row_i7]);
   e77 = get_element_from_row_with_params(nob, col_i7, mask, elts_per_word, rows[row_i7]);
-  return det7(prime_operations, e11, e12, e13, e14, e15, e16, e17,
+  return det7(prime_operations, row_operations,
+              e11, e12, e13, e14, e15, e16, e17,
               e21, e22, e23, e24, e25, e26, e27,
               e31, e32, e33, e34, e35, e36, e37,
               e41, e42, e43, e44, e45, e46, e47,

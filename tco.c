@@ -1,5 +1,5 @@
 /*
- * $Id: tco.c,v 1.11 2003/03/29 09:32:49 jon Exp $
+ * $Id: tco.c,v 1.12 2004/03/29 21:43:16 jon Exp $
  *
  * Tensor condense one group element
  *
@@ -276,6 +276,19 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
                    NULL, NULL, NULL, NULL, NULL, NULL, NULL, leftp, rightp,
                    h_l, h_r, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL);
   }
+  /* Check the dimensions add up */
+  i = 0;
+  j = 0;
+  for (k = 0; k < s; k++) {
+    i += dim_irr[k] * left_multiplicities[k];
+    j += dim_irr[k] * right_multiplicities[k];
+  }
+  if (i != nor_l || j != nor_r) {
+    fprintf(stderr, "%s: dimension compatibility failure between '%s' and '%s' or '%s' and '%s', terminating\n", name, left, mults_l, right, mults_r);
+    return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
+                   NULL, NULL, NULL, NULL, NULL, NULL, NULL, leftp, rightp,
+                   h_l, h_r, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL);
+  }
   p = my_malloc(s * sizeof(FILE *));
   q = my_malloc(s * sizeof(FILE *));
   h_p = my_malloc(s * sizeof(const header *));
@@ -325,7 +338,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
   extent_l = find_extent(max_irr, len_l);
   extent_r = find_extent(nor_r, len_r);
   extent_te = find_extent(1 + max_irr2, max_irr_len);
-  extent_end = find_extent(max_end, max_end_len);
+  extent_end = find_extent(max_irr2, max_end_len);
   extent_q = find_extent(max_end, max_irr_len);
   extent_p = find_extent(max_irr2 * s, max_end_len);
   if (extent_l + extent_r + extent_te + extent_end + extent_p + extent_q >= 900) {

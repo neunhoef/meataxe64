@@ -1,5 +1,5 @@
 /*
- * $Id: powers.c,v 1.11 2002/10/13 16:38:07 jon Exp $
+ * $Id: powers.c,v 1.12 2004/03/29 21:43:16 jon Exp $
  *
  * Function to compute tensor powers of a matrix, from file
  *
@@ -397,6 +397,7 @@ int skew_fourth(const char *m1, const char *m2, const char *name)
   unsigned int i, i_1, i_2, i_3, i_4, j_1, j_2, j_3, j_4;
   unsigned int **rows, *row_out, *row1, *row2, *row3, *row4;
   prime_ops prime_operations;
+  row_ops row_operations;
   assert(NULL != m1);
   assert(NULL != m2);
   assert(NULL != name);
@@ -427,6 +428,7 @@ int skew_fourth(const char *m1, const char *m2, const char *name)
     fprintf(stderr, "%s: Can't initialise prime operations for %s, terminating\n", name, m1);
     return cleanup(inp, NULL);
   }
+  rows_init(prime, &row_operations);
   nor_out = (nor_in * (nor_in - 1) * (nor_in - 2) * (nor_in - 3)) / 24;
   h_out = header_create(prime, nob, nod, nor_out, nor_out);
   len_out = header_get_len(h_out);
@@ -505,7 +507,9 @@ int skew_fourth(const char *m1, const char *m2, const char *name)
                   unsigned int e24 = row2[j_4];
                   unsigned int e34 = row3[j_4];
                   unsigned int e44 = row4[j_4];
-                  unsigned int elt = det4(prime_operations, e11, e12, e13, e14,
+                  unsigned int elt = det4(prime_operations,
+                                          &row_operations,
+                                          e11, e12, e13, e14,
                                           e21, e22, e23, e24,
                                           e31, e32, e33, e34,
                                           e41, e42, e43, e44);
@@ -549,6 +553,7 @@ int skew_fifth(const char *m1, const char *m2, const char *name)
   unsigned int i, i_1, i_2, i_3, i_4, i_5, j_1, j_2, j_3, j_4, j_5;
   unsigned int **rows, *row_out, *row1, *row2, *row3, *row4, *row5;
   prime_ops prime_operations;
+  row_ops row_operations;
   assert(NULL != m1);
   assert(NULL != m2);
   assert(NULL != name);
@@ -579,6 +584,7 @@ int skew_fifth(const char *m1, const char *m2, const char *name)
     fprintf(stderr, "%s: Can't initialise prime operations for %s, terminating\n", name, m1);
     return cleanup(inp, NULL);
   }
+  rows_init(prime, &row_operations);
   nor_out = (nor_in * (nor_in - 1) * (nor_in - 2) * (nor_in - 3) * (nor_in - 4)) / 120;
   h_out = header_create(prime, nob, nod, nor_out, nor_out);
   len_out = header_get_len(h_out);
@@ -675,6 +681,7 @@ int skew_fifth(const char *m1, const char *m2, const char *name)
                       unsigned int e45 = row4[j_5];
                       unsigned int e55 = row5[j_5];
                       unsigned int elt = det5(prime_operations,
+                                              &row_operations,
                                               e11, e12, e13, e14, e15,
                                               e21, e22, e23, e24, e25,
                                               e31, e32, e33, e34, e35,
@@ -723,6 +730,7 @@ int skew_sixth(const char *m1, const char *m2, const char *name)
   unsigned int i, j, i_1, i_2, i_3, i_4, i_5, i_6, j_1, j_2, j_3, j_4, j_5, j_6;
   unsigned int **rows, *row_out, **int_rows, *row1, *row2, *row3, *row4, *row5, *row6;
   prime_ops prime_operations;
+  row_ops row_operations;
   assert(NULL != m1);
   assert(NULL != m2);
   assert(NULL != name);
@@ -753,6 +761,7 @@ int skew_sixth(const char *m1, const char *m2, const char *name)
     fprintf(stderr, "%s: Can't initialise prime operations for %s, terminating\n", name, m1);
     return cleanup(inp, NULL);
   }
+  rows_init(prime, &row_operations);
   nor_out = (nor_in * (nor_in - 1) * (nor_in - 2) * (nor_in - 3) * (nor_in - 4) * (nor_in - 5)) / 720;
   h_out = header_create(prime, nob, nod, nor_out, nor_out);
   len_out = header_get_len(h_out);
@@ -857,6 +866,7 @@ int skew_sixth(const char *m1, const char *m2, const char *name)
                           unsigned int e56 = row5[j_6];
                           unsigned int e66 = row6[j_6];
                           unsigned int elt = det6(prime_operations,
+                                                  &row_operations,
                                                   e11, e12, e13, e14, e15, e16,
                                                   e21, e22, e23, e24, e25, e26,
                                                   e31, e32, e33, e34, e35, e36,
@@ -907,6 +917,7 @@ int skew_seventh(const char *m1, const char *m2, const char *name)
   unsigned int i, j, i_1, i_2, i_3, i_4, i_5, i_6, i_7, j_1, j_2, j_3, j_4, j_5, j_6, j_7;
   unsigned int **rows, *row_out, **int_rows, *row1, *row2, *row3, *row4, *row5, *row6, *row7;
   prime_ops prime_operations;
+  row_ops row_operations;
   assert(NULL != m1);
   assert(NULL != m2);
   assert(NULL != name);
@@ -937,6 +948,7 @@ int skew_seventh(const char *m1, const char *m2, const char *name)
     fprintf(stderr, "%s: Can't initialise prime operations for %s, terminating\n", name, m1);
     return cleanup(inp, NULL);
   }
+  rows_init(prime, &row_operations);
   nor_out = (nor_in * (nor_in - 1) * (nor_in - 2) * (nor_in - 3) * (nor_in - 4) * (nor_in - 5) * (nor_in - 6)) / 5040;
   h_out = header_create(prime, nob, nod, nor_out, nor_out);
   len_out = header_get_len(h_out);
@@ -1059,6 +1071,7 @@ int skew_seventh(const char *m1, const char *m2, const char *name)
                               unsigned int e67 = row6[j_7];
                               unsigned int e77 = row7[j_7];
                               unsigned int elt = det7(prime_operations,
+                                                      &row_operations,
                                                       e11, e12, e13, e14, e15, e16, e17,
                                                       e21, e22, e23, e24, e25, e26, e27,
                                                       e31, e32, e33, e34, e35, e36, e37,
