@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.49 2003/05/27 21:51:36 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.50 2003/06/21 14:13:24 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -396,6 +396,7 @@ Turn on verbose mode
 <li><a href="#zss">zss</a></li>
 <li><a href="#zsums">zsums</a></li>
 <li><a href="#zsumsf">zsumsf</a></li>
+<li><a href="#zsymb">zsymb</a></li>
 <li><a href="#zsymsq">zsymsq</a></li>
 <li><a href="#ztco">ztco</a></li>
 <li><a href="#ztcv">ztcv</a></li>
@@ -3887,6 +3888,61 @@ computing ranks. The other opreations (add, multiply) are not space
 constrained, and so do not need the use of intermediate files. The
 temporary workspace directory must exist, this program will not create
 it.
+</li>
+<li>
+<h3><a name="zsymb">zsymb</a></h3>
+Purpose: Compute a symmetry basis for a particular irreducible
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>The expected number of copies of
+the irreducible</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>The size of the irreducible</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>Input vectors</td>
+</tr>
+<tr>
+<td valign=top>4</td><td valign=top>Output vectors</td>
+</tr>
+<tr>
+<td valign=top>5</td><td valign=top>Temporary workspace directory</td>
+</tr>
+<tr>
+<td valign=top>6</td><td valign=top>Generator 1</td>
+</tr>
+<tr>
+<td valign=top>7-</td><td valign=top>Other generators</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>The number
+of output vectors</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient memory</td>
+</tr>
+</table>
+Commentary: This computes the portion of a symmetry basis
+corresponding to a particular irreducible. The input vectors are the
+output of a gamma script or the nullspace of a delta word. The number
+of spaces predicts how many copies of the irreducible should be
+produced, and the size says how big each will be. The program is
+generally used via one of the symmetry basis scripts <a
+href="#sym_basis">sym_basis</a> or <a
+href="#sym_basis_delta">sym_basis_delta</a>.
 </li>
 <li>
 <h3><a name="zsymsq">zsymsq</a></h3>
