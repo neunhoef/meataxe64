@@ -1,5 +1,5 @@
 /*
- * $Id: mul.c,v 1.27 2002/06/30 21:33:14 jon Exp $
+ * $Id: mul.c,v 1.28 2002/07/20 12:56:17 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
@@ -459,6 +459,7 @@ int mul_from_store(unsigned int **rows1, unsigned int **rows3,
     /* Then multiply */
     for (i = 0; i < noc; i += grease->level) {
       unsigned int size = (grease->level + i <= noc) ? grease->level : noc - i;
+      unsigned int width = size * nob;
       unsigned int word_offset, bit_offset, mask;
       /* Read size rows from matrix 2 into rows 2 */
       /* This sets the initial rows */
@@ -478,7 +479,7 @@ int mul_from_store(unsigned int **rows1, unsigned int **rows3,
       grease_init_rows(grease, prime);
       for (j = 0; j < nor; j++) {
         unsigned int *row1 = rows1[j];
-        unsigned int elt = get_elements_from_row(row1 + word_offset, size, nob, bit_offset, mask);
+        unsigned int elt = get_elements_from_row(row1 + word_offset, width, nob, bit_offset, mask);
         if (0 == i) {
           row_init(rows3[j], len);
         }
@@ -563,6 +564,7 @@ int mul_in_store(unsigned int **rows1, unsigned int **rows2, unsigned int **rows
       /* We will use our element instead */
       for (i = 0; i < noc; i += grease->level) {
         unsigned int size = (grease->level + i <= noc) ? grease->level : noc - i;
+        unsigned int width = size * nob;
         unsigned int word_offset, bit_offset, mask;
         l = 1;
         /* Replace the initial allocated grease rows with the rows of rows2 */
@@ -574,7 +576,7 @@ int mul_in_store(unsigned int **rows1, unsigned int **rows2, unsigned int **rows
         grease_init_rows(grease, prime);
         for (j = 0; j < nor; j++) {
           unsigned int *row1 = rows1[j];
-          unsigned int elt = get_elements_from_row(row1 + word_offset, size, nob, bit_offset, mask);
+          unsigned int elt = get_elements_from_row(row1 + word_offset, width, nob, bit_offset, mask);
           if (0 == i) {
             row_init(rows3[j], len);
           }

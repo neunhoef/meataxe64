@@ -1,5 +1,5 @@
 /*
- * $Id: elements.c,v 1.17 2002/06/28 08:39:16 jon Exp $
+ * $Id: elements.c,v 1.18 2002/07/20 12:56:17 jon Exp $
  *
  * Element manipulation for meataxe
  *
@@ -119,11 +119,11 @@ void element_access_init(unsigned int nob, unsigned int from, unsigned int size,
 }
 
 /* This allows cross word access */
-unsigned int get_elements_from_row(const unsigned int *row, unsigned int count,
+unsigned int get_elements_from_row(const unsigned int *row, unsigned int width,
                                    unsigned int nob,
                                    unsigned int bit_offset, unsigned int mask)
 {
-  unsigned int word1, word2, width = count * nob;
+  unsigned int word1, word2;
   assert(NULL != row);
   assert(0 != width);
   word1 = *row;
