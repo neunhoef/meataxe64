@@ -1,5 +1,5 @@
 /*
- * $Id: utils.c,v 1.5 2001/09/05 22:47:25 jon Exp $
+ * $Id: utils.c,v 1.6 2001/09/25 22:31:58 jon Exp $
  *
  * Utils for meataxe
  *
@@ -65,29 +65,6 @@ int is_a_prime_power(unsigned int n)
   return 0;
 }
 
-int alloc_matrix(unsigned int nob, unsigned int noc,
-                 unsigned int nor, unsigned int **res)
-{
-  unsigned int *t;
-  unsigned int size =
-    (noc * nob + sizeof(unsigned int) * CHAR_BIT - 1) /
-      (sizeof(unsigned int) * sizeof(char));
-  /* Size in words rounded up to an unsigned int */
-  assert(NULL != res);
-  assert(0 != nob);
-  assert(0 != nor);
-  assert(0 != noc);
-  size *= sizeof(unsigned int);
-  /* Size in allocation units, rounded up */
-  if (UINT_MAX / nor <= size)
-    return 0; /* Asked for too much */
-  t = malloc(size * nor);
-  if (NULL == t)
-    return 0; /* maloc can't cope */
-  *res = t;
-  return 1;
-}
-
 int read_decimal(const char *str, unsigned int len, unsigned int *out)
 {
   unsigned int res = 0;
@@ -135,4 +112,16 @@ unsigned int digits_of(unsigned int n)
     i++;
   }
   return i;
+}
+
+void *my_malloc(size_t size)
+{
+  void *ret;
+  assert(0 != size);
+  ret = malloc(size);
+  if (NULL == ret) {
+    fprintf(stderr, "Failed to allocate %d bytes, terminating\n", size);
+    exit(1);
+  }
+  return ret;
 }

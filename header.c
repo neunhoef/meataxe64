@@ -1,5 +1,5 @@
 /*
- * $Id: header.c,v 1.3 2001/09/12 23:13:04 jon Exp $
+ * $Id: header.c,v 1.4 2001/09/25 22:31:58 jon Exp $
  *
  * Header manipulation
  *
@@ -20,7 +20,7 @@ struct header_struct
   unsigned int nod;	/* The number of digits per element (text) */
   unsigned int nor;	/* The number of rows */
   unsigned int noc;	/* The number of columns */
-  unsigned int len;	/* The number of bytes in a row (rounded up to a word) */
+  unsigned int len;	/* The number of words in a row */
 };
 
 unsigned int header_get_prime(const header *h)
@@ -91,7 +91,7 @@ void header_set_noc(header *h, unsigned int n)
 static unsigned int get_len(unsigned int nob, unsigned int noc)
 {
   unsigned int bits_in_word = bits_in_unsigned_int / nob;
-  return ((noc + bits_in_word - 1) / bits_in_word) * 4;
+  return (noc + bits_in_word - 1) / bits_in_word;
 }
 
 unsigned int header_get_len(const header *h)

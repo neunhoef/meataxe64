@@ -1,5 +1,5 @@
 /*
- * $Id: memory.c,v 1.2 2001/09/18 23:15:46 jon Exp $
+ * $Id: memory.c,v 1.3 2001/09/25 22:31:58 jon Exp $
  *
  * Large memory manipulation for meataxe
  *
@@ -44,18 +44,19 @@ void *memory_pointer(unsigned int n)
 }
 
 /* Get a pointer to the ith row of given size starting n thousandths of the way through the memory */
-/* i is number of bytes per row, rounded up to a multiple of four */
+/* len is number of words per row */
+
 void *memory_pointer_offset(unsigned int n, unsigned int i, unsigned int len)
 {
   assert(n < 1000);
-  assert(0 == len % 4);
-  assert((i + 1) * len + n * extent <= 1000 * extent);
-  return memory + n * extent + i * len;
+  assert(0 != len);
+  assert((i + 1) * (len * 4) + n * extent <= 1000 * extent);
+  return memory + n * extent + i * len * 4;
 }
 
 unsigned int memory_rows(unsigned int len, unsigned int size)
 {
-  assert(0 == len % 4);
+  assert(0 != len);
   assert(1000 >= size);
-  return (size * extent) / len;
+  return (size * extent) / (len * 4);
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: endian.c,v 1.5 2001/09/16 10:05:44 jon Exp $
+ * $Id: endian.c,v 1.6 2001/09/25 22:31:58 jon Exp $
  *
  * Endian handling for meataxe
  *
@@ -61,9 +61,8 @@ unsigned int endian_get_int(unsigned int i, const unsigned int *row)
 
 int endian_read_row(FILE *fp, unsigned int *row, unsigned int len)
 {
-  unsigned int row_words = len / sizeof(unsigned int);
   if (endian_is_big) {
-    while (row_words > 0) {
+    while (len > 0) {
       int j;
       unsigned char buf[4];
       unsigned int res = 0;
@@ -76,26 +75,25 @@ int endian_read_row(FILE *fp, unsigned int *row, unsigned int len)
       }
       *row = res;
       row++;
-      row_words--;
+      len--;
     }
     return 1;
   } else {
-    return row_words == fread(row, sizeof(unsigned int), row_words, fp);
+    return len == fread(row, sizeof(unsigned int), len, fp);
   }
 }
 
 int endian_write_row(FILE *fp, const unsigned int *row, unsigned int len)
 {
-  unsigned int row_words = len / sizeof(unsigned int);
   if (endian_is_big) {
-    while (row_words > 0) {
+    while (len > 0) {
       endian_write_int(*row, fp);
       row++;
-      row_words--;
+      len--;
     }
     return 1;
   } else {
-    return row_words == fwrite(row, sizeof(unsigned int), row_words, fp);
+    return len == fwrite(row, sizeof(unsigned int), len, fp);
   }
 }
 

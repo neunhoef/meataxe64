@@ -1,5 +1,5 @@
 /*
- * $Id: mtx.c,v 1.3 2001/09/18 23:15:46 jon Exp $
+ * $Id: mtx.c,v 1.4 2001/09/25 22:31:58 jon Exp $
  *
  * Extended row operations for monster meataxe
  *
@@ -35,7 +35,7 @@ static void *mymalloc(unsigned long siz)
 
 static void SSET(unsigned long *s_ptr, unsigned long dim)
 {
-  *s_ptr = ( (dim+31)/32) * 4;
+  *s_ptr = ( (dim+31)/32);
 }
 
 void put_row(unsigned int row_num, unsigned int total_rows, unsigned int split_size, unsigned char *bits)

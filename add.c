@@ -1,5 +1,5 @@
 /*
- * $Id: add.c,v 1.8 2001/09/20 00:00:16 jon Exp $
+ * $Id: add.c,v 1.9 2001/09/25 22:31:58 jon Exp $
  *
  * Function to add two matrices to give a third
  *
@@ -111,13 +111,7 @@ int add(const char *m1, const char *m2, const char *m3, const char *name)
       fclose(outp);
       return 0;
     }
-    if (0 == (*incer)(row1, row2, len)) {
-      fprintf(stderr, "%s addition not supported for %d, terminating\n", name, prime);
-      fclose(inp1);
-      fclose(inp2);
-      fclose(outp);
-      return 0;
-    }
+    (*incer)(row1, row2, len);
     if (0 == endian_write_row(outp, row2, len)) {
       fprintf(stderr, "%s cannot write row %d to %s, terminating\n", name, i, m3);
       fclose(inp1);

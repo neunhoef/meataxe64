@@ -1,5 +1,5 @@
 /*
- * $Id: grease.c,v 1.6 2001/09/20 00:00:16 jon Exp $
+ * $Id: grease.c,v 1.7 2001/09/25 22:31:58 jon Exp $
  *
  * Functions to grease matrix rows
  *
@@ -121,26 +121,39 @@ void grease_free_rows(unsigned int **rows)
 static void split(unsigned int prime, unsigned int n,
                   unsigned int *quot, unsigned int *rem, unsigned int *index)
 {
-  unsigned int power = prime, div;
+  unsigned int power, div;
   assert(0 != n);
   assert(0 != prime);
   assert(NULL != quot);
   assert(NULL != rem);
   assert(NULL != index);
-  while (n >= power) {
-    div = n / power;
-    if (div < prime) {
-      assert(0 != div);
-      *index = power;
-      *quot = div;
-      *rem = n % power;
-      return;
+  if (2 == prime) {
+    div = n >> 1;
+    power = 1;
+    while (0 != div) {
+      div >>= 1;
+      power <<= 1;
     }
-    power *= prime;
+    *quot = n / power;
+    *index = power;
+    *rem = n & (power - 1);
+  } else {
+    power = prime;
+    while (n >= power) {
+      div = n / power;
+      if (div < prime) {
+        assert(0 != div);
+        *index = power;
+        *quot = div;
+        *rem = n % power;
+        return;
+      }
+      power *= prime;
+    }
+    *quot = n;
+    *index = 1;
+    *rem = 0;
   }
-  *quot = n;
-  *index = 1;
-  *rem = 0;
 }
 
 /* Compute, if necessary, grease row i */
@@ -158,17 +171,17 @@ static int grease_make_row(unsigned int i, unsigned int prime, unsigned int len)
     if (0 == rem) {
       /* Scaled operation, shouldn't be by 1 */
       assert(1 != quot);
-      return (*row_operations.scaler)(grease_table[index - 1], grease_table[j], len, quot);
+      (*row_operations.scaler)(grease_table[index - 1], grease_table[j], len, quot);
+      return 1;
     } else {
       int ok = (0 != grease_table_comp[rem - 1]) || grease_make_row(rem, prime, len);
       unsigned int k = index * quot - 1;
       if (ok) {
-        ok = (0 != grease_table_comp[k]) ||
-            (*row_operations.scaler)(grease_table[index - 1], grease_table[k], len, quot);
-        grease_table_comp[k] = 1;
-      }
-      if (ok) {
-        ok = (*row_operations.adder)(grease_table[rem - 1], grease_table[k], grease_table[j], len);
+        if (0 == grease_table_comp[k]) {
+          (*row_operations.scaler)(grease_table[index - 1], grease_table[k], len, quot);
+          grease_table_comp[k] = 1;
+        }
+        (*row_operations.adder)(grease_table[rem - 1], grease_table[k], grease_table[j], len);
         grease_table_comp[j] = 1;
       }
       return ok;

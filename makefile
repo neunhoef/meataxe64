@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.10 2001/09/18 23:15:46 jon Exp $
+# $Id: makefile,v 1.11 2001/09/25 22:31:58 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -15,21 +15,25 @@ ARCH=i386
 
 AD_TARGET=	ad
 DTOU_TARGET=	dtou
+EMU_TARGET=	emu
 ID_TARGET=	id
 IP_TARGET=	ip
 MON_TARGET=	monst
 MU_TARGET=	mu
 PR_TARGET=	pr
+SL_TARGET=	sl
 
+DTOU_MODULES=	dtou
 AD_MODULES=	ad add elements endian header memory primes read rows utils write
+EMU_MODULES=	command emu memory system utils
 ID_MODULES=	id elements endian header memory primes rows utils write
 IP_MODULES=	elements endian header ip primes read utils write
 MU_MODULES=	elements endian grease header matrix memory mu mul primes read rows utils write
 MON_MODULES=	endian header mmat mop mtx primes utils write
 PR_MODULES=	elements endian header memory pr primes read rows utils write
-DTOU_MODULES=	dtou
+SL_MODULES=	add command elements endian grease header matrix memory mul primes read rows slave system utils write
 
-MODULES=	$(AD_MODULES) $(DTOU_MODULES) $(ID_MODULES) $(IP_MODULES) $(MON_MODULES) $(MU_MODULES) $(PR_MODULES) $(DTOU_MODULES)
+MODULES=	$(AD_MODULES) $(DTOU_MODULES) $(EMU_MODULES) $(ID_MODULES) $(IP_MODULES) $(MON_MODULES) $(MU_MODULES) $(PR_MODULES) $(SL_MODULES)
 
 #
 # Modify this from the command line to change where derived files go
@@ -97,6 +101,9 @@ include targets.txt
 TARGET:=DTOU
 include targets.txt
 
+TARGET:=EMU
+include targets.txt
+
 TARGET:=ID
 include targets.txt
 
@@ -110,6 +117,9 @@ TARGET:=MU
 include targets.txt
 
 TARGET:=PR
+include targets.txt
+
+TARGET:=SL
 include targets.txt
 
 debug: $(DEBUGTARGETS)

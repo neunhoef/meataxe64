@@ -1,5 +1,5 @@
 /*
- * $Id: rows.c,v 1.9 2001/09/20 00:00:16 jon Exp $
+ * $Id: rows.c,v 1.10 2001/09/25 22:31:58 jon Exp $
  *
  * Row manipulation for meataxe
  *
@@ -12,18 +12,16 @@
 #include "utils.h"
 #include "rows.h"
 
-static int row_add_2(const unsigned int *row1, const unsigned int *row2,
+static void row_add_2(const unsigned int *row1, const unsigned int *row2,
                      unsigned int *row3, unsigned int len)
 {
-  unsigned int row_words;
   unsigned int i, j;
   assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
   assert(NULL != row3);
-  row_words = len / sizeof(unsigned int);
   /* Unroll for efficiency */
-  j = row_words / 8;
+  j = len / 8;
   for (i = 0; i < j; i++) {
     *(row3++) = *(row1++) ^ *(row2++);
     *(row3++) = *(row1++) ^ *(row2++);
@@ -34,23 +32,20 @@ static int row_add_2(const unsigned int *row1, const unsigned int *row2,
     *(row3++) = *(row1++) ^ *(row2++);
     *(row3++) = *(row1++) ^ *(row2++);
   }
-  for (i = j * 8; i < row_words; i++) {
+  for (i = j * 8; i < len; i++) {
     *(row3++) = *(row1++) ^ *(row2++);
   }
-  return 1;
 }
 
-static int row_inc_2(const unsigned int *row1,
+static void row_inc_2(const unsigned int *row1,
                      unsigned int *row2, unsigned int len)
 {
-  unsigned int row_words;
   unsigned int i, j;
   assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
-  row_words = len / sizeof(unsigned int);
   /* Unroll for efficiency */
-  j = row_words / 8;
+  j = len / 8;
   for (i = 0; i < j; i++) {
     *(row2++) ^= *(row1++);
     *(row2++) ^= *(row1++);
@@ -61,10 +56,9 @@ static int row_inc_2(const unsigned int *row1,
     *(row2++) ^= *(row1++);
     *(row2++) ^= *(row1++);
   }
-  for (i = j * 8; i < row_words; i++) {
+  for (i = j * 8; i < len; i++) {
     *(row2++) ^= *(row1++);
   }
-  return 1;
 }
 
 #ifndef NDEBUG
@@ -92,17 +86,15 @@ static int check_for_3(unsigned int a)
   g = ((e & (TWO_BITS_3)) >> 1) & (e & (ONE_BITS_3)); /* Pick out 3 case only */ \
   h = g | (f >> 1) /* 01 if answer was 3 or 4, otherwise 0 */
 
-static int row_add_3(const unsigned int *row1, const unsigned int *row2,
+static void row_add_3(const unsigned int *row1, const unsigned int *row2,
                      unsigned int *row3, unsigned int len)
 {
-  unsigned int row_words;
   unsigned int i;
   assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
   assert(NULL != row3);
-  row_words = len / sizeof(unsigned int);
-  for (i = 0; i < row_words; i++) {
+  for (i = 0; i < len; i++) {
     unsigned int a, b, c, d, e, f, g, h;
     assert(4 == sizeof(unsigned int));
     a = *(row1++);
@@ -111,20 +103,18 @@ static int row_add_3(const unsigned int *row1, const unsigned int *row2,
     *(row3++) = c - (h * 3); /* Reduce mod 3 if needed */
     assert(check_for_3(c - (h * 3)));
   }
-  return 1;
 }
 
-static int row_inc_3(const unsigned int *row1, unsigned int *row2, unsigned int len)
+static void row_inc_3(const unsigned int *row1, unsigned int *row2, unsigned int len)
 {
-  return row_add_3(row1, row2, row2, len);
+  row_add_3(row1, row2, row2, len);
 }
 
 #define scale_mod_3(b) (((b) & (ONE_BITS_3)) << 1) | (((b) & (TWO_BITS_3)) >> 1)
 
-static int scaled_row_add_3(const unsigned int *row1, const unsigned int *row2,
+static void scaled_row_add_3(const unsigned int *row1, const unsigned int *row2,
                             unsigned int *row3, unsigned int len, unsigned int elt)
 {
-  unsigned int row_words;
   unsigned int i;
   assert(2 == elt);
   assert(0 != len);
@@ -132,8 +122,7 @@ static int scaled_row_add_3(const unsigned int *row1, const unsigned int *row2,
   assert(NULL != row2);
   assert(NULL != row3);
   NOT_USED(elt);
-  row_words = len / sizeof(unsigned int);
-  for (i = 0; i < row_words; i++) {
+  for (i = 0; i < len; i++) {
     unsigned int a, b, c, d, e, f, g, h;
     assert(4 == sizeof(unsigned int));
     a = *(row1++);
@@ -143,51 +132,44 @@ static int scaled_row_add_3(const unsigned int *row1, const unsigned int *row2,
     assert(check_for_3(c - (h * 3)));
     *(row3++) = c - (h * 3); /* Reduce mod 3 if needed */
   }
-  return 1;
 }
 
-static int row_scale_3(const unsigned int *row1, unsigned int *row2,
+static void row_scale_3(const unsigned int *row1, unsigned int *row2,
                        unsigned int len, unsigned int elt)
 {
-  unsigned int row_words;
   unsigned int i;
   assert(2 == elt);
   assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
   NOT_USED(elt);
-  row_words = len / sizeof(unsigned int);
-  for (i = 0; i < row_words; i++) {
+  for (i = 0; i < len; i++) {
     unsigned int a;
     assert(4 == sizeof(unsigned int));
     a = *(row1++);
     *(row2++) = scale_mod_3(a);
   }
-  return 1;
 }
 
 #define ONE_BITS_4 0x55555555
 #define TWO_BITS_4 ((ONE_BITS_4) << 1)
 
-static int row_add_4(const unsigned int *row1, const unsigned int *row2,
+static void row_add_4(const unsigned int *row1, const unsigned int *row2,
                      unsigned int *row3, unsigned int len)
 {
-  unsigned int row_words;
   unsigned int i;
   assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
   assert(NULL != row3);
-  row_words = len / sizeof(unsigned int);
-  for (i = 0; i < row_words; i++) {
+  for (i = 0; i < len; i++) {
     *(row3++) = *(row1++) ^ *(row2++);
   }
-  return 1;
 }
 
-static int row_inc_4(const unsigned int *row1, unsigned int *row2, unsigned int len)
+static void row_inc_4(const unsigned int *row1, unsigned int *row2, unsigned int len)
 {
-  return row_add_4(row1, row2, row2, len);
+  row_add_4(row1, row2, row2, len);
 }
 
 #define scale_mod_4(b,c,d,e,f,g,h,elt) \
@@ -199,18 +181,16 @@ static int row_inc_4(const unsigned int *row1, unsigned int *row2, unsigned int 
     h = c & d; /* Detect 3  * any */ \
     b = f - (g |  h) * 3 /* Subtract out the overflows */ 
 
-static int scaled_row_add_4(const unsigned int *row1, const unsigned int *row2,
+static void scaled_row_add_4(const unsigned int *row1, const unsigned int *row2,
                             unsigned int *row3, unsigned int len, unsigned int elt)
 {
-  unsigned int row_words;
   unsigned int i;
   assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
   assert(NULL != row3);
   assert(2 <= elt && elt <= 3);
-  row_words = len / sizeof(unsigned int);
-  for (i = 0; i < row_words; i++) {
+  for (i = 0; i < len; i++) {
     unsigned int a, b, c, d, e, f, g, h;
     assert(4 == sizeof(unsigned int));
     a = *(row1++);
@@ -218,28 +198,24 @@ static int scaled_row_add_4(const unsigned int *row1, const unsigned int *row2,
     scale_mod_4(b,c,d,e,f,g,h,elt);
     *(row3++) = a ^ b;
   }
-  return 1;
 }
 
-static int row_scale_4(const unsigned int *row1, unsigned int *row2,
+static void row_scale_4(const unsigned int *row1, unsigned int *row2,
                        unsigned int len, unsigned int elt)
 {
-  unsigned int row_words;
   unsigned int i;
   assert(2 <= elt && elt <= 3);
   assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
   NOT_USED(elt);
-  row_words = len / sizeof(unsigned int);
-  for (i = 0; i < row_words; i++) {
+  for (i = 0; i < len; i++) {
     unsigned int b, c, d, e, f, g, h;
     assert(4 == sizeof(unsigned int));
     b = *(row1++);
     scale_mod_4(b,c,d,e,f,g,h,elt);
     *(row2++) = b;
   }
-  return 1;
 }
 
 #ifndef NDEBUG
@@ -270,17 +246,15 @@ static int check_for_5(unsigned int a)
   j = (f & (TWO_BITS_5)) >> 1; /* Detect possible 6s */ \
   k = (g >> 2) & (h | j); /* Detect 5s and 6s */
 
-static int row_add_5(const unsigned int *row1, const unsigned int *row2,
+static void row_add_5(const unsigned int *row1, const unsigned int *row2,
                      unsigned int *row3, unsigned int len)
 {
-  unsigned int row_words;
   unsigned int i;
   assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
   assert(NULL != row3);
-  row_words = len / sizeof(unsigned int);
-  for (i = 0; i < row_words; i++) {
+  for (i = 0; i < len; i++) {
     unsigned int a, b, c, d, e, f, g, h, j, k;
     assert(4 == sizeof(unsigned int));
     a = *(row1++);
@@ -289,12 +263,11 @@ static int row_add_5(const unsigned int *row1, const unsigned int *row2,
     assert(check_for_5(f - (k * 5)));
     *(row3++) = f - (k * 5); /* Reduce mod 5 if needed */
   }
-  return 1;
 }
 
-static int row_inc_5(const unsigned int *row1, unsigned int *row2, unsigned int len)
+static void row_inc_5(const unsigned int *row1, unsigned int *row2, unsigned int len)
 {
-  return row_add_5(row1, row2, row2, len);
+  row_add_5(row1, row2, row2, len);
 }
 
 #define scale_mod_5(b,d,c,e,f,g,h,j,elt) \
@@ -329,18 +302,16 @@ static int row_inc_5(const unsigned int *row1, unsigned int *row2, unsigned int 
       assert(0); \
     }
 
-static int scaled_row_add_5(const unsigned int *row1, const unsigned int *row2,
+static void scaled_row_add_5(const unsigned int *row1, const unsigned int *row2,
                             unsigned int *row3, unsigned int len, unsigned int elt)
 {
-  unsigned int row_words;
   unsigned int i;
   assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
   assert(NULL != row3);
   assert(2 <= elt && elt <= 4);
-  row_words = len / sizeof(unsigned int);
-  for (i = 0; i < row_words; i++) {
+  for (i = 0; i < len; i++) {
     unsigned int a, b, c, d, e, f, g, h, j, k;
     assert(4 == sizeof(unsigned int));
     a = *(row1++);
@@ -350,27 +321,23 @@ static int scaled_row_add_5(const unsigned int *row1, const unsigned int *row2,
     assert(check_for_5(f - (k * 5)));
     *(row3++) = f - (k * 5); /* Reduce mod 5 if needed */
   }
-  return 1;
 }
 
-static int row_scale_5(const unsigned int *row1, unsigned int *row2,
+static void row_scale_5(const unsigned int *row1, unsigned int *row2,
                        unsigned int len, unsigned int elt)
 {
-  unsigned int row_words;
   unsigned int i;
   assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
   assert(2 <= elt && elt <= 4);
-  row_words = len / sizeof(unsigned int);
-  for (i = 0; i < row_words; i++) {
+  for (i = 0; i < len; i++) {
     unsigned int b, c, d, e, f, g, h, j;
     assert(4 == sizeof(unsigned int));
     b = *(row1++);
     scale_mod_5(b,d,c,e,f,g,h,j,elt);
     *(row2++) = b;
   }
-  return 1;
 }
 
 void row_copy(const unsigned int *row1, unsigned int *row2,
@@ -385,7 +352,7 @@ void row_copy(const unsigned int *row1, unsigned int *row2,
 void row_init(unsigned int *row, unsigned int len)
 {
   assert(NULL != row);
-  memset(row, 0, len);
+  memset(row, 0, len * sizeof(unsigned int));
 }
 
 int rows_init(unsigned int prime, row_opsp ops)

@@ -1,5 +1,5 @@
 /*
- * $Id: mul.c,v 1.9 2001/09/20 00:00:16 jon Exp $
+ * $Id: mul.c,v 1.10 2001/09/25 22:31:58 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
@@ -23,6 +23,8 @@
 
 #define M1_SIZE 450
 #define M2_SIZE 100
+
+#define contract(elt,prime,nob) ((2 == (prime)) ? (elt) : elements_contract(elt, prime, nob))
 
 static int cleanup(FILE *inp1, FILE *inp2, FILE *outp)
 {
@@ -178,16 +180,14 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
           row_init(rows3[j], len2);
         }
         if (0 != elt) {
-          int res;
           if (greased) {
-            res = (*incer)(grease_rows[elements_contract(elt, prime, nob)-1], rows3[j], len2);
+            (*incer)(grease_rows[contract(elt, prime, nob)-1], rows3[j], len2);
           } else {
-            res = (1 == elt) ? (*incer)(grease_rows[0], rows3[j], len2) :
-                (*scaled_adder)(rows3[j], grease_rows[0], rows3[j], len2, elt);
-          }
-          if (0 == res) {
-            fprintf(stderr, "%s: add failed, terminating\n", name);
-            return cleanup(inp1, inp2, outp);
+            if (1 == elt) {
+              (*incer)(grease_rows[0], rows3[j], len2);
+            } else {
+              (*scaled_adder)(rows3[j], grease_rows[0], rows3[j], len2, elt);
+            }
           }
         }
       }
