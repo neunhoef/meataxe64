@@ -1,5 +1,5 @@
 /*
- * $Id: mul.c,v 1.36 2004/05/02 19:33:19 jon Exp $
+ * $Id: mul.c,v 1.37 2004/05/04 23:27:02 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
@@ -500,7 +500,7 @@ int skip_mul_from_store(unsigned int offset, unsigned int **rows1, unsigned int 
       grease_init_rows(grease, prime);
       for (j = 0; j < nor; j++) {
         unsigned int *row1 = rows1[j];
-        unsigned int elt = (in_word) ? get_elements_in_word_from_row(row1, bit_offset, mask) :
+        unsigned int elt = (in_word) ? get_elements_in_word_from_row(row1 + word_offset, bit_offset, mask) :
           get_elements_out_word_from_row(row1 + word_offset, shift, bit_offset, mask);
         if (offset == i) {
           row_init(rows3[j], len);
