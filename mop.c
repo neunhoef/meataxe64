@@ -1,5 +1,5 @@
 /*
- * $Id: mop.c,v 1.5 2001/10/11 19:07:24 jon Exp $
+ * $Id: mop.c,v 1.6 2001/10/11 22:39:30 jon Exp $
  *
  * Monster operations for meataxe
  *
@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <assert.h>
 #include "mop.h"
 
 unsigned char vectemp[24712];
@@ -33,13 +34,13 @@ unsigned char Tbact[87752];
 
 suzel A, B, C, E, suzwork;
 
-static unsigned char FFRV(unsigned char* a, long b)
+static unsigned char FFRV(unsigned char *a, unsigned long b)
 {
   unsigned char c;
   c=a[b/4];
   return (c>>(2*(3-(b%4))))&3;
 }
-static unsigned char FFRV2(unsigned char* a, long b)
+static unsigned char FFRV2(unsigned char *a, unsigned long b)
 {
   unsigned char c;
   c = a[(b>>3)];
@@ -48,8 +49,8 @@ static unsigned char FFRV2(unsigned char* a, long b)
 
 void FTOV(unsigned char *a, unsigned long b, unsigned char c)
 {
-  char f;
-  long d, e;
+  unsigned char f;
+  unsigned long d, e;
   d=b/4;
   e = 3-(b%4);
   f = a[d];
@@ -77,8 +78,8 @@ void FUNGAP(unsigned char *d, unsigned char *e, unsigned long f, unsigned long g
 void init(void)
 {
   unsigned char uc;
-  int i, j;
-  long k, l, m, n;
+  unsigned int i, j;
+  unsigned long k, l, m, n;
   strncpy(suz1head, "MONSUZ01", 8);
   strncpy(suz2head, "MONSUZ02", 8);
   strncpy(Thead, "MON--T01", 8);
@@ -187,7 +188,7 @@ void init(void)
   T538 = malloc(538*l538*sizeof(long));
   j=0xaa;
   for (i=0; i<256; i++) bar[i] = ((i&j)>>1)^i;
-  for (i=0; i<256; i++)  w[i]=(i&j)^((i&j)>>1)^((i<<1)&j);
+  for (i=0; i<256; i++) w[i]=(i&j)^((i&j)>>1)^((i<<1)&j);
   for (i=0; i<256; i++) {
     uc=(unsigned char)w[i];
     ww[i]=w[uc];
@@ -210,10 +211,10 @@ void init(void)
 
 
 
-static void rdvec(const char* filnam, unsigned char* vecin)
+static void rdvec(const char *filnam, unsigned char *vecin)
 {
-  FILE * f ;
-  int i;
+  FILE *f;
+  unsigned int i;
   f = fopen(filnam, "rb");
   if (f == NULL) {
     printf("File %s does not exist!\n", filnam);
@@ -232,7 +233,7 @@ static void rdvec(const char* filnam, unsigned char* vecin)
   fclose(f);
 }
 
-static int veccomp(unsigned char *veca, unsigned char * vecb)
+static int veccomp(unsigned char *veca, unsigned char *vecb)
 {
   return memcmp(veca, vecb, 24712);
 }
@@ -242,9 +243,10 @@ static void cpvec(unsigned char *veca, unsigned char *vecb)
   (void)memcpy(vecb, veca, 24712);
 }
 
-void malsuz(suzel  * m)
+void malsuz(suzel *m)
 {
   suzel t;
+  assert(NULL != m);
   *m=(suzel)malloc(sizeof(suzex));
   t=*m;
   t->m729 = malloc(729*l729*sizeof(long));
@@ -258,14 +260,14 @@ void malsuz(suzel  * m)
   t->b32760 = malloc(32761);
 }
 
-void rdsuz1(suzel m, const char * fn)
+void rdsuz1(suzel m, const char *fn)
 {
-  FILE * f ;
-  char * ptr;
-  long * ptrl;
-  unsigned char * ptrc;
-  long i;
-  long j;
+  FILE *f ;
+  char *ptr;
+  long *ptrl;
+  unsigned char *ptrc;
+  unsigned long i;
+  unsigned long j;
   unsigned char c[3];
   m->greased =0;
   m->inout=0;
@@ -409,7 +411,7 @@ static int grease(suzel m)
   return(0);
 }
 
-void vecsuz(unsigned char * vecin, suzel m, unsigned char * vecout)
+void vecsuz(unsigned char *vecin, suzel m, unsigned char *vecout)
 {
   unsigned char uc;
   unsigned long i, j, k, l;

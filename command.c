@@ -1,5 +1,5 @@
 /*
- * $Id: command.c,v 1.6 2001/10/11 07:47:13 jon Exp $
+ * $Id: command.c,v 1.7 2001/10/11 22:39:30 jon Exp $
  *
  * Interface to task manager (definition)
  *
@@ -243,7 +243,7 @@ static void add_task_sub(task *task, FILE *file)
 {
   command command = task->command;
   unsigned int i=0;
-  printf("Adding:-\n");
+  printf("Adding:- ");
   print_task(task);
   fprintf(file, "free %lu %s", task->uid, string_task(command));
   while (i < task->input_size) {
@@ -447,7 +447,6 @@ static void process_line(const char *line, task *tasks, unsigned int size, FILE 
 	    }
 	  }
 	  /* Delete all temporaries */
-	  printf("Deleting temporaries\n");
 	  fflush(stdout);
 	  for (i = 0; i < task->input_size; i++) {
 	    char name[MAX_LINE];
