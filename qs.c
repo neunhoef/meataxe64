@@ -1,5 +1,5 @@
 /*
- * $Id: qs.c,v 1.4 2001/12/02 12:05:13 jon Exp $
+ * $Id: qs.c,v 1.5 2001/12/11 01:00:44 jon Exp $
  *
  * Function to compute quotient space representation
  *
@@ -39,7 +39,7 @@ void quotient(const char *range, const char *gen,
   FILE *inp_r = NULL, *inp_g = NULL, *outp = NULL;
   const header *h_in_r, *h_in_g, *h_out;
   unsigned int prime, nob, noc, nor_r, nor_g, nor_o, len, len_o, max_rows, d, i, j, k, elt, step;
-  unsigned int **rows1, **rows2, **rows3;
+  unsigned int **rows1, **rows2;
   int *map_r, *map_g;
   unsigned int *map_o;
   row_ops row_operations;
@@ -85,7 +85,7 @@ void quotient(const char *range, const char *gen,
   header_free(h_in_r);
   header_free(h_in_g);
   assert(len >= len_o);
-  max_rows = memory_rows(len, 300);
+  max_rows = memory_rows(len, 450);
   in_store = max_rows >= nor_g;
   step = (0 != in_store) ? nor_g : max_rows;
   if (0 == open_and_write_binary_header(&outp, h_out, out, name)) {
@@ -95,11 +95,9 @@ void quotient(const char *range, const char *gen,
   header_free(h_out);
   rows1 = matrix_malloc(step); /* range */
   rows2 = matrix_malloc(step); /* gen */
-  rows3 = matrix_malloc(step); /* result */
   for (d = 0; d < step; d++) {
     rows1[d] = memory_pointer_offset(0, d, len);
-    rows2[d] = memory_pointer_offset(300, d, len);
-    rows3[d] = memory_pointer_offset(600, d, len); /* Really len_o */ 
+    rows2[d] = memory_pointer_offset(450, d, len);
   }
   map_r = my_malloc(nor_r * sizeof(int));
   map_g = my_malloc(nor_g * sizeof(int));
@@ -147,6 +145,7 @@ void quotient(const char *range, const char *gen,
   while (j < nor_o) {
     /* Read some rows from inp_g into rows2 */
     unsigned int stride_j = (j + step <= nor_o) ? step : nor_o - j;
+    unsigned int *row_o = memory_pointer(900);
     for (d = 0; d < stride_j; d++) {
       while (map_o[j + d] >= i) {
         if (0 == endian_read_row(inp_g, rows2[d], len)) {
@@ -177,25 +176,25 @@ void quotient(const char *range, const char *gen,
             grease.level, prime, len, nob, 900, 0, 0, name);
     }
     for (d = 0; d < stride_j; d++) {
-      row_init(rows3[d], len_o);
-    }
-    for (d = 0; d < stride_j; d++) {
+      row_init(row_o, len_o);
       for (k = 0; k < nor_o; k++) {
         assert(map_o[k] < noc);
           assert(map_o[k] >= k);
           elt = get_element_from_row(nob, map_o[k], rows2[d]);
-          put_element_to_row(nob, k, rows3[d], elt);
+          put_element_to_row(nob, k, row_o, elt);
       }
-    }
-    if (0 == endian_write_matrix(outp, rows3, len_o, stride_j)) {
-      fprintf(stderr, "%s: failed to write output to %s, terminating\n",
-              name, out);
-      fclose(outp);
-      exit(1);
+      if (0 == endian_write_row(outp, row_o, len_o)) {
+        fprintf(stderr, "%s: failed to write output to %s, terminating\n",
+                name, out);
+        fclose(outp);
+        exit(1);
+      }
     }
     j += stride_j;
   }
   fclose(inp_r);
   fclose(inp_g);
   fclose(outp);
+  matrix_free(rows1);
+  matrix_free(rows2);
 }

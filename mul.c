@@ -1,5 +1,5 @@
 /*
- * $Id: mul.c,v 1.19 2001/12/04 23:14:47 jon Exp $
+ * $Id: mul.c,v 1.20 2001/12/11 01:00:44 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
@@ -127,16 +127,23 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
     /* Read matrix 1 */
     if (0 == endian_read_matrix(inp1, rows1, len1, rest)) {
       fprintf(stderr, "%s: unable to read %s, terminating\n", name, m1);
+      grease_free(&grease);
       return cleanup(inp1, inp2, outp);
     }
     if (0 == mul_from_store(rows1, rows3, inp2, noc1, len2, nob, rest, prime, &grease, m2, name)) {
       fclose(inp2);
       fclose(outp);
+      matrix_free(rows1);
+      matrix_free(rows3);
+      grease_free(&grease);
       return 0;
     }
     /* Write matrix 3 */
     if (0 == endian_write_matrix(outp, rows3, len2, rest)) {
       fprintf(stderr, "%s: unable to write %s, terminating\n", name, m3);
+      matrix_free(rows1);
+      matrix_free(rows3);
+      grease_free(&grease);
       return cleanup(inp1, inp2, outp);
     }
   }

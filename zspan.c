@@ -1,5 +1,5 @@
 /*
- * $Id: zspan.c,v 1.1 2001/11/29 01:13:09 jon Exp $
+ * $Id: zspan.c,v 1.2 2001/12/11 01:00:44 jon Exp $
  *
  * Compute the span of a matrix
  *
@@ -118,5 +118,6 @@ int main(int argc, const char * const argv[])
   }
   fclose(inp);
   fclose(outp);
+  matrix_free(mat);
   return 0;
 }

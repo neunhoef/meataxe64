@@ -1,5 +1,5 @@
 /*
- * $Id: ns.c,v 1.5 2001/11/29 01:13:09 jon Exp $
+ * $Id: ns.c,v 1.6 2001/12/11 01:00:44 jon Exp $
  *
  * Compute the null space of a matrix
  *
@@ -88,7 +88,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *name)
   }
   header_free(h1);
   header_free(h2);
-  free(mat2);
-  free(map);
+  matrix_free(mat2);
+  matrix_free(map);
   return nor - n;
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: te.c,v 1.1 2001/12/01 10:46:02 jon Exp $
+ * $Id: te.c,v 1.2 2001/12/11 01:00:44 jon Exp $
  *
  * Function to tensor two matrices to give a third
  *
@@ -136,6 +136,8 @@ int tensor(const char *m1, const char *m2, const char *m3, const char *name)
       }
     }
   }
+  matrix_free(rows1);
+  matrix_free(rows2);
   fclose(outp);
   return 1;
 }

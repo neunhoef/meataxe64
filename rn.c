@@ -1,5 +1,5 @@
 /*
- * $Id: rn.c,v 1.8 2001/11/29 01:13:09 jon Exp $
+ * $Id: rn.c,v 1.9 2001/12/11 01:00:44 jon Exp $
  *
  * Compute the rank of a matrix
  *
@@ -48,8 +48,9 @@ unsigned int rank(const char *m, const char *name)
     exit(1);
   }
   echelise(mat, nor, &n, &map, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, 0, name);
-  free(mat);
+  matrix_free(mat);
   free(map);
   fclose(inp);
   return n;
 }
+

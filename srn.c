@@ -1,5 +1,5 @@
 /*
- * $Id: srn.c,v 1.4 2001/11/29 01:13:09 jon Exp $: zrn.c,v 1.1 2001/11/12 13:43:38 jon Exp $
+ * $Id: srn.c,v 1.5 2001/12/11 01:00:44 jon Exp $: zrn.c,v 1.1 2001/11/12 13:43:38 jon Exp $
  *
  * Simple compute of the rank of a matrix
  *
@@ -60,7 +60,7 @@ int main(int argc, const char * const argv[])
     exit(1);
   }
   n = simple_echelise(mat, nor, prime, len, nob);
-  free(mat);
+  matrix_free(mat);
   fclose(inp);
   printf("%d\n", n);
   memory_dispose();

@@ -1,5 +1,5 @@
 /*
- * $Id: ss.c,v 1.4 2001/12/02 01:35:06 jon Exp $
+ * $Id: ss.c,v 1.5 2001/12/11 01:00:44 jon Exp $
  *
  * Function to compute subspace representation
  * Will work entirely in RAM if possible, otherwise rereading basis file
@@ -38,14 +38,13 @@ void subspace(const char *range, const char *image,
 {
   FILE *inp1 = NULL, *inp2 = NULL, *outp = NULL;
   const header *h_in1, *h_in2, *h_out;
-  unsigned int prime, nob, noc, nor, len, len_e, max_rows, d, elt, step, i;
+  unsigned int prime, nob, noc, nor, len, len_e, max_rows, d, elt, step_i, step_j, i;
   unsigned int **rows1, **rows2, **rows3, **rows4;
   int *map;
   prime_ops prime_operations;
   row_ops row_operations;
   grease_struct grease;
   long pos;
-  int in_store;
   assert(NULL != range);
   assert(NULL != image);
   assert(NULL != out);
@@ -97,23 +96,26 @@ void subspace(const char *range, const char *image,
   rows2 = matrix_malloc(nor); /* image */
   rows3 = matrix_malloc(nor); /* -1 */
   rows4 = matrix_malloc(nor); /* output */
-  max_rows = memory_rows(len, 230);
-  in_store = max_rows >= nor;
-  step = (0 != in_store) ? nor : max_rows;
+  max_rows = memory_rows(len, 400);
+  step_i = (max_rows > nor) ? nor : max_rows;
+  max_rows = memory_rows(len, 60);
+  step_j = (max_rows > nor) ? nor : max_rows;
   if (0 == open_and_write_binary_header(&outp, h_out, out, name)) {
     cleanup(inp1, inp2, outp);
     exit(1);
   }
-  for (d = 0; d < step; d++) {
+  for (d = 0; d < step_i; d++) {
+    rows2[d] = memory_pointer_offset(800, d, len);
+    rows4[d] = memory_pointer_offset(860, d, len_e);
+  }
+  for (d = 0; d < step_j; d++) {
     rows1[d] = memory_pointer_offset(0, d, len);
-    rows2[d] = memory_pointer_offset(230, d, len);
-    rows3[d] = memory_pointer_offset(460, d, len_e);
-    rows4[d] = memory_pointer_offset(690, d, len_e);
+    rows3[d] = memory_pointer_offset(400, d, len_e);
   }
   map = my_malloc(nor * sizeof(int));
-  for (i = 0; i < nor; i += step) {
+  for (i = 0; i < nor; i += step_i) {
     /* Step through image */
-    unsigned int j, stride_i = (i + step > nor) ? nor - i : step;
+    unsigned int j, stride_i = (i + step_i > nor) ? nor - i : step_i;
     if (0 == endian_read_matrix(inp2, rows2, len, stride_i)) {
       fprintf(stderr, "%s: failed to read rows from %s, terminating\n",
               name, range);
@@ -123,8 +125,8 @@ void subspace(const char *range, const char *image,
     for (d = 0; d < stride_i; d++) {
       row_init(rows4[d], len_e);
     }
-    for (j = 0; j < nor; j += step) {
-      unsigned int stride_j = (j + step > nor) ? nor - j : step;
+    for (j = 0; j < nor; j += step_j) {
+      unsigned int stride_j = (j + step_j > nor) ? nor - j : step_j;
       if (0 == endian_read_matrix(inp1, rows1, len, stride_j)) {
         fprintf(stderr, "%s: failed to read rows from %s, terminating\n",
                 name, range);
@@ -194,6 +196,10 @@ void subspace(const char *range, const char *image,
       exit(1);
     }
   }
+  matrix_free(rows1);
+  matrix_free(rows2);
+  matrix_free(rows3);
+  matrix_free(rows4);
   fclose(inp1);
   fclose(inp2);
   fclose(outp);

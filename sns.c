@@ -1,5 +1,5 @@
 /*
- * $Id: sns.c,v 1.4 2001/11/29 01:13:09 jon Exp $
+ * $Id: sns.c,v 1.5 2001/12/11 01:00:44 jon Exp $
  *
  * Simple compute of the null space of a matrix
  *
@@ -83,13 +83,16 @@ int main(int argc, const char * const argv[])
   }
   for (n = 0; n < nor; n++) {
     if (row_is_zero(mat1[n], len)) {
-      (void)endian_write_row(outp, mat2[n], len);
-      /* TODO: handle error */
+      if (0 == endian_write_row(outp, mat2[n], len)) {
+        fprintf(stderr, "%s: error writing %s, terminating\n", name, argv[2]);
+        exit(1);
+      }
+
     }
   }
   fclose(outp);
-  free(mat1);
-  free(mat2);
+  matrix_free(mat1);
+  matrix_free(mat2);
   printf("%d\n", nor - rank);
   memory_dispose();
   return 0;

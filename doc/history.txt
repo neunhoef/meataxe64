@@ -61,3 +61,4 @@
 20011201 - wrote file based ss and signature
 20011202 - wrote file based qs
 20011204 - wrote zwords for producing words in a representation
+20011210 - improved power, better memory split in ss

@@ -1,5 +1,5 @@
 /*
- * $Id: tra.c,v 1.6 2001/11/29 01:13:09 jon Exp $
+ * $Id: tra.c,v 1.7 2001/12/11 01:00:44 jon Exp $
  *
  * Function to transpose a matrix
  *
@@ -107,5 +107,6 @@ int tra(const char *m1, const char *m2, const char *name)
   fclose(output);
   header_free(h1);
   header_free(h2);
+  matrix_free(rows);
   return 1;
 }

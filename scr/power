@@ -1,5 +1,5 @@
 #
-# $Id: power,v 1.1 2001/12/04 23:14:47 jon Exp $
+# $Id: power,v 1.2 2001/12/11 01:00:44 jon Exp $
 #
 # Script to compute a power of a matrix, in a naive fashion
 #
@@ -12,6 +12,7 @@
 # 1: error in parameters
 # 0: success
 #
+#set -v
 usage="$0: usage: $0 <in> <power> <out>"
 if [ $# -ne 3 ]; then
   echo $usage
@@ -20,6 +21,10 @@ fi
 a=$1
 o=$3
 n=$2
+if [ $n -lt 0 ]; then
+  echo "$0: bad parameters"
+  exit 1
+fi
 if [ -e $a ]; then
   q=`zprime $a`
   nor=`znor $a`
@@ -45,9 +50,40 @@ fi
 tmp=tmp${PPID}
 ok=0
 t=$a
-while [ $n -ge 2 ]; do
-  zmu $a $t ${tmp}.$n 1>/dev/null
-  t=${tmp}.$n
-  let n=$n-1
+#while [ $n -ge 2 ]; do
+#  zmu $a $t ${tmp}.$n 1>/dev/null
+#  t=${tmp}.$n
+#  let n=$n-1
+#done
+#cp ${tmp}.2 $o
+#
+# m is power of two
+# k is log2(m)
+# l = k-1
+# ${tmp}.i is a**(2**i)
+#
+m=2
+k=1
+l=0
+ln -s $a ${tmp}.0
+while [ $m -le $n ]; do
+  zmu ${tmp}.$l ${tmp}.$l ${tmp}.$k
+  let m=$m*2
+  let k=$k+1
+  let l=$l+1
 done
-cp ${tmp}.2 $o
+let m=$m/2
+let n=$n-$m
+res=${tmp}.$l
+while [ $n -gt 0 ]; do
+  let l=$l-1
+  let m=$m/2
+  if [ $n -ne 0 -a $n -ge $m ]; then
+    zmu $res ${tmp}.$l ${tmp}.$k
+    res=${tmp}.$k
+    let k=$k+1
+    let n=$n-$m
+  fi
+done
+cp $res $o
+rm ${tmp}.*

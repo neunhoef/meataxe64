@@ -1,5 +1,5 @@
 /*
- * $Id: clean.c,v 1.8 2001/11/25 00:17:19 jon Exp $
+ * $Id: clean.c,v 1.9 2001/12/11 01:00:44 jon Exp $
  *
  * Cleaning and echilisation for meataxe
  *
@@ -105,6 +105,9 @@ void clean(unsigned int **m1, unsigned int d1,
     i += inc;
   } /* i */
   grease_free(&grease);
+  if (0 != record) {
+    grease_free(&grease_e);
+  }
 }
 
 void echelise(unsigned int **m, unsigned int d,
