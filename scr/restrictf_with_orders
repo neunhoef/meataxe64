@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: restrictf_with_orders,v 1.1 2002/09/18 17:05:06 jon Exp $
+# $Id: restrictf_with_orders,v 1.2 2003/04/26 20:13:16 jon Exp $
 #
 # Script to restrict a representation from a field to a subfield
 #
@@ -87,7 +87,7 @@ name=${tmp}_${nor}
 x=`basef $e ${name} ${tmp}.0 $tmp_dir $memory ${rest[*]}`
 ret=$?
 if [ $ret -ne 0 ]; then
-  echo base returns $ret, terminating
+  echo $x
   rm -f ${tmp}*
   exit 1
 fi

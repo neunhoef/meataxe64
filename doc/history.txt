@@ -250,3 +250,4 @@ skew seventh
 20030426 - Minor improvements in base, indicate_with_element, new_irred_with_orders, restrict_with_orders
 20030426 - Add new_irred_with_script
 20030426 - Add new_irredf_with_script
+20030426 - Minor improvements in indicatef_with_element, new_irredf_with_orders, restrictf_with_orders

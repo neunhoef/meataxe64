@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: new_irredf_with_orders,v 1.13 2002/11/29 19:19:01 jon Exp $
+# $Id: new_irredf_with_orders,v 1.14 2003/04/26 20:13:16 jon Exp $
 #
 # Script to classify an irreducible representation
 #
@@ -78,7 +78,7 @@ if [ 0 -eq $ret ]; then
   x=`basef $e ${name} ${tmp}.0 ${tmp_dir} $memory ${rest[*]}`
   ret=$?
   if [ $ret -ne 0 ]; then
-    echo basef returns $ret, terminating
+    echo $x
     rm -f ${tmp}*
     exit 1
   fi
