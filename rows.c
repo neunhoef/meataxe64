@@ -1,5 +1,5 @@
 /*
- * $Id: rows.c,v 1.21 2004/02/15 10:27:17 jon Exp $
+ * $Id: rows.c,v 1.22 2004/04/20 22:41:10 jon Exp $
  *
  * Row manipulation for meataxe
  *
@@ -349,6 +349,18 @@ static void row_inc_4(const unsigned int *row1, unsigned int *row2, unsigned int
 }
 #endif
 
+#define scale_mod_4_X(b,c,d) \
+    c = (b) & ONE_BITS_4; \
+    d = (b) & TWO_BITS_4; \
+    b = ((c << 1) ^ (d)) | ((d) >> 1)
+
+#define scale_mod_4_X_plus_1(b,c,d) \
+    c = (b) & ONE_BITS_4; \
+    d = (b) & TWO_BITS_4; \
+    b = (c << 1) | (c ^ ((d) >> 1))
+
+#define new_scale_mod_4 1
+
 #define scale_mod_4(b,c,d,e,f,g,h,elt) \
     c = ((b) & TWO_BITS_4) >> 1; \
     d = (b) & ONE_BITS_4; \
@@ -368,11 +380,23 @@ static void scaled_row_add_4(const unsigned int *row1, const unsigned int *row2,
   assert(NULL != row3);
   assert(2 <= elt && elt <= 3);
   for (i = 0; i < len; i++) {
+#if new_scale_mod_4
+    unsigned int a, b, c, d;
+#else
     unsigned int a, b, c, d, e, f, g, h;
+#endif
     assert(4 == sizeof(unsigned int));
     a = *(row1++);
     b = *(row2++);
+#if new_scale_mod_4
+    if (2 == elt) {
+      scale_mod_4_X(b,c,d);
+    } else {
+      scale_mod_4_X_plus_1(b,c,d);
+    }
+#else
     scale_mod_4(b,c,d,e,f,g,h,elt);
+#endif
     *(row3++) = a ^ b;
   }
 }
@@ -386,11 +410,23 @@ static void scaled_row_inc_4_sub(const unsigned int *row1, unsigned int *row2,
   assert(NULL != row2);
   assert(2 <= elt && elt <= 3);
   for (i = 0; i < len; i++) {
+#if new_scale_mod_4
+    unsigned int a, b, c, d;
+#else
     unsigned int a, b, c, d, e, f, g, h;
+#endif
     assert(4 == sizeof(unsigned int));
     a = *(row1++);
     b = *(row2);
+#if new_scale_mod_4
+    if (2 == elt) {
+      scale_mod_4_X(a,c, d);
+    } else {
+      scale_mod_4_X_plus_1(a,c, d);
+    }
+#else
     scale_mod_4(a,c,d,e,f,g,h,elt);
+#endif
     *(row2++) = a ^ b;
   }
 }
@@ -399,15 +435,17 @@ static void scaled_row_inc_4(const unsigned int *row1, unsigned int *row2,
                              unsigned int len, unsigned int elt)
 {
   if (len > 10) {
+    const unsigned int *rowa = row1 + len, *rowb = row1;
     /* Search for first non-zero */
-    while (len > 0) {
+    while (row1 < rowa) {
       if (0 != *row1) {
+        unsigned int len1 = row1 - rowb;
+        len -= len1;
+        row2 += len1;
         scaled_row_inc_4_sub(row1, row2, len, elt);
         return;
       }
       row1++;
-      row2++;
-      len--;
     }
   } else {
     scaled_row_inc_4_sub(row1, row2, len, elt);
@@ -424,10 +462,22 @@ static void row_scale_4(const unsigned int *row1, unsigned int *row2,
   assert(NULL != row2);
   NOT_USED(elt);
   for (i = 0; i < len; i++) {
+#if new_scale_mod_4
+    unsigned int b, c, d;
+#else
     unsigned int b, c, d, e, f, g, h;
+#endif
     assert(4 == sizeof(unsigned int));
     b = *(row1++);
+#if new_scale_mod_4
+    if (2 == elt) {
+      scale_mod_4_X(b,c, d);
+    } else {
+      scale_mod_4_X_plus_1(b,c, d);
+    }
+#else
     scale_mod_4(b,c,d,e,f,g,h,elt);
+#endif
     *(row2++) = b;
   }
 }
