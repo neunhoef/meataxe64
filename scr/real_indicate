@@ -1,10 +1,14 @@
 #!/bin/sh
 #
-# $Id: real_indicate,v 1.3 2002/09/11 22:53:15 jon Exp $
+# $Id: real_indicate,v 1.4 2002/10/15 11:53:19 jon Exp $
 #
 # Script to find the indicator of an irreducible representation
 # assuming it is real, and we have the standard basis conjugating
 # the dual back to the original
+#
+# Two distinct algorithms, depending on the characteristic
+# For characteristic 2 we have to try all q possible quadratic forms, where q is the field size
+# For characteristic not 2, we simply determine if $1 is preserved, and if so, is it quadratic or symplectic
 #
 # Inputs
 # $1: the standard basis for the dual
@@ -42,31 +46,88 @@ else
   echo "$0: missing files $a, $b or $S"
   exit 1
 fi
+p=`zchar $S`
 tmp=tmp${PPID}
-Q=${tmp}.4
 if [ $nor -eq 1 ]; then
   echo indicator +
-  rm -f ${tmp}.*
   if [ -e ${a}_+ -o -L ${a}_+ ]; then
     rm ${a}_+
   fi
   ln -s $a ${a}_+
   exit 0
 fi
-zqf $S $Q
-i=0
-q=`zprime $a`
-while [ $i -lt $q ]; do
-  zsid $q $nor $nor $i ${tmp}.7
-  zad $Q ${tmp}.7 ${tmp}.8
-  ind=1
+if [ 2 -eq $p ]; then
+# Characteristic 2 case
+  Q=${tmp}.4
+  zqf $S $Q
+  i=0
+  q=`zprime $a`
+  while [ $i -lt $q ]; do
+    zsid $q $nor $nor $i ${tmp}.7
+    zad $Q ${tmp}.7 ${tmp}.8
+    ind=1
+    for x in $*; do
+      preserves ${tmp}.8 $S ${tmp}.7 $x $i $memory
+      ret=$?
+      if [ 1 -eq $ret ]; then
+        rm -f ${tmp}.*
+        exit 1
+      elif [ 254 -eq $ret ]; then
+        echo indicator o
+        rm -f ${tmp}.*
+        if [ -e ${a}_o -o -L ${a}_o ]; then
+          rm ${a}_o
+        fi
+        ln -s $a ${a}_o
+        exit 0
+      elif [ 0 -ne $ret ]; then
+        ind=0
+        break
+      fi
+    done
+    if [ 1 -eq $ind ]; then
+      echo indicator +
+      rm -f ${tmp}.*
+      if [ -e ${a}_+ -o -L ${a}_+ ]; then
+        rm ${a}_+
+      fi
+      ln -s $a ${a}_+
+      exit 0
+    fi
+# Try next diagonal
+    let i=$i+1
+  done
+  echo indicator -
+  rm -f ${tmp}.*
+  if [ -e ${a}_- -o -L ${a}_- ]; then
+    rm ${a}_-
+  fi
+  ln -s $a ${a}_-
+else
+# Odd characteristic case
+# TODO: check that the group preserves the form, if not then o
+  ztr -m $memory $S ${tmp}.0
+  if [ 0 -ne $? ]; then
+    rm -f ${tmp}.*
+    exit 1
+  fi
   for x in $*; do
-    preserves ${tmp}.8 $S ${tmp}.7 $x $i $memory
-    ret=$?
-    if [ 1 -eq $ret ]; then
+    zmu -m $memory $x ${tmp}.0 ${tmp}.1
+    if [ 0 -ne $? ]; then
       rm -f ${tmp}.*
       exit 1
-    elif [ 254 -eq $ret ]; then
+    fi
+    ztr -m $memory ${tmp}.1 ${tmp}.2
+    if [ 0 -ne $? ]; then
+      rm -f ${tmp}.*
+      exit 1
+    fi
+    zmu -m $memory $x ${tmp}.2 ${tmp}.3
+    if [ 0 -ne $? ]; then
+      rm -f ${tmp}.*
+      exit 1
+    fi
+    if ! zdiff $S ${tmp}.3 2>/dev/null 1>&2; then
       echo indicator o
       rm -f ${tmp}.*
       if [ -e ${a}_o -o -L ${a}_o ]; then
@@ -74,27 +135,21 @@ while [ $i -lt $q ]; do
       fi
       ln -s $a ${a}_o
       exit 0
-    elif [ 0 -ne $ret ]; then
-      ind=0
-      break
     fi
   done
-  if [ 1 -eq $ind ]; then
+  if zdiff $S ${tmp}.0 2>/dev/null 1>&2; then
     echo indicator +
-    rm -f ${tmp}.*
     if [ -e ${a}_+ -o -L ${a}_+ ]; then
       rm ${a}_+
     fi
     ln -s $a ${a}_+
-    exit 0
+  else
+    echo indicator -
+    if [ -e ${a}_- -o -L ${a}_- ]; then
+      rm ${a}_-
+    fi
+    ln -s $a ${a}_-
   fi
-# Try next diagonal
-  let i=$i+1
-done
-echo indicator -
-rm -f ${tmp}.*
-if [ -e ${a}_- -o -L ${a}_- ]; then
-  rm ${a}_-
+  rm -f ${tmp}.*
 fi
-ln -s $a ${a}_-
 exit 0
