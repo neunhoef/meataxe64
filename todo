@@ -1,10 +1,14 @@
 Worry about isspace failure (can't detect \n) (still occurs on RH 7.2) ctype is buggered
 Worry about return (NULL == s) code generation error
+Documentation changes for zfln, zlp, zrand, ztco, ztcv, ztrecover
+Documentation changes for find_best_nullity_with_orders, qp, sym_basis, proj_base, sub_quot
+Write span_and_spin for spins on large nullspaces
 Make zsums and friends distinguish find failure from errors
 Fix find_nullity_one and friends to use better codes from zsums and friends
 Think about a restricted form of new_irred where we supply the script (only for things like sym_basis)
 Profile multiply (eg on 26750 for Co1) for different memory sizes
 Profile zns on 3584.e.3 for McL for different memory sizes. Think about grease strategy.
+Think about restricting the back echelsiing in rn and ns
 Think about Sn and symmetrized powers
 Optimise monst by reversing bit order
 Investigate better matrix multiplications

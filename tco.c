@@ -1,5 +1,5 @@
 /*
- * $Id: tco.c,v 1.2 2002/09/01 12:33:40 jon Exp $
+ * $Id: tco.c,v 1.3 2002/09/05 18:18:57 jon Exp $
  *
  * Tensor condense one group element
  *
@@ -133,6 +133,8 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
   const header *h_l, *h_r, *h_o, **h_p, **h_q;
   unsigned int alpha, beta, gamma, delta, extent_l, extent_r, extent_te, extent_end, extent_q, o_r, o_c, m_r, m_c, n_r, n_c;
   unsigned int **rows, **lrows, **rrows, **te_rows, *te_row, **end_rows, **q_rows;
+  unsigned int mask, elts_per_word;
+  unsigned int **expanded_lrows, **expanded_rrows;
   row_ops row_operations;
   grease_struct grease;
   assert(0 != s);
@@ -244,6 +246,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
     return 0;
   }
   nob = header_get_nob(h_l);
+  mask = get_mask_and_elts(nob, &elts_per_word);
   nod = header_get_nod(h_l);
   prime = header_get_prime(h_l);
   nor_l = header_get_nor(h_l);
@@ -367,7 +370,8 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
     end_rows[i] = memory_pointer_offset(extent_l + extent_r + extent_te, i, max_end_len);
   }
   /* A workspace row for creating partial tensors in */
-  te_row = memory_pointer_offset(extent_l + extent_r, max_irr * max_irr, max_irr_len);
+  te_row = /*memory_pointer_offset(extent_l + extent_r, max_irr * max_irr, max_irr_len)*/
+    my_malloc(noc_r * sizeof(unsigned int));
   /* Rows for the product with P */
   for (i = 0; i < max_end; i++) {
     q_rows[i] = memory_pointer_offset(extent_l + extent_r + extent_te + extent_end, i, max_irr_len);
@@ -384,6 +388,24 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
                    nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, NULL, NULL,
                    NULL, NULL, p, q, h_p, h_q, s, h_o, NULL, rows, lrows, rrows);
   }
+  expanded_lrows = matrix_malloc(nor_l);
+  expanded_rrows = matrix_malloc(nor_r);
+  for (i = 0; i < nor_l; i++) {
+    expanded_lrows[i] = my_malloc(noc_l * sizeof(unsigned int));
+  }
+  for (i = 0; i < nor_r; i++) {
+    expanded_rrows[i] = my_malloc(noc_r * sizeof(unsigned int));
+  }
+  for (i = 0; i < nor_l; i++) {
+    for (j = 0; j < noc_l; j++) {
+      expanded_lrows[i][j] = get_element_from_row_with_params(nob, j, mask, elts_per_word, lrows[i]);
+    }
+  }
+  for (i = 0; i < nor_r; i++) {
+    for (j = 0; j < noc_r; j++) {
+      expanded_rrows[i][j] = get_element_from_row_with_params(nob, j, mask, elts_per_word, rrows[i]);
+    }
+  }
   o_r = 0;
   m_r = 0;
   n_r = 0;
@@ -394,6 +416,8 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
       matrix_free(te_rows);
       matrix_free(end_rows);
       matrix_free(q_rows);
+      matrix_free(expanded_lrows);
+      matrix_free(expanded_rrows);
       return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
                      nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, NULL, NULL,
                      NULL, NULL, p, q, h_p, h_q, s, h_o, NULL, rows, lrows, rrows);
@@ -424,16 +448,25 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
                   te_o_c = 0;
                   for (te_k = 0; te_k < dim_irr[j]; te_k++) {
                     /* Columns of M */
-                    unsigned int elt = get_element_from_row(nob, m_c + gamma * dim_irr[j] + te_k, lrows[m_r + alpha * dim_irr[i] + te_i]);
-                    unsigned int *row = rrows[n_r + beta * dim_irr[i] + te_j];
+                    unsigned int elt = expanded_lrows[m_r + alpha * dim_irr[i] + te_i][m_c + gamma * dim_irr[j] + te_k];
+                    /*
+                      get_element_from_row_with_params(nob, m_c + gamma * dim_irr[j] + te_k, mask,
+                      elts_per_word, lrows[m_r + alpha * dim_irr[i] + te_i]);
+                    */
+                    unsigned int *row = expanded_rrows[n_r + beta * dim_irr[i] + te_j]; /* was rrows */
                     if (0 != elt) {
                       if (1 != elt) {
-                        (*row_operations.scaler)(row, te_row, len_r, elt);
+                        (*row_operations.scaler)(row, te_row, /* len_r */noc_r, elt);
                         row = te_row;
                       }
                       for (te_l = 0; te_l < dim_irr[j]; te_l++) {
-                        elt = get_element_from_row(nob, n_c + delta * dim_irr[j] + te_l, row);
-                        put_element_to_row(nob, te_o_c + te_l, te_rows[te_o_r], elt);
+                        /*
+                        elt = get_element_from_row_with_params(nob, n_c + delta * dim_irr[j] + te_l, mask, elts_per_word, row);
+                        */
+                        elt = row[n_c + delta * dim_irr[j] + te_l];
+                        if (0 != elt) {
+                          put_element_to_row(nob, te_o_c + te_l, te_rows[te_o_r], elt);
+                        }
                       }
                     }
                     te_o_c += dim_irr[j];
@@ -442,31 +475,35 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
                 }
               }
               if (0 == mul_from_store(te_rows, end_rows, p[j], 0/*is_map*/, dim_irr[j] * dim_irr[j],
-                                      compute_len(nob, dim_irr[j] * dim_irr[j]),
-                                      nob, dim_irr[i] * dim_irr[i], dim_end[j], prime,
-                                      &grease, argv[2 * j], name)) {
+                                      len_p[j], nob, dim_irr[i] * dim_irr[i], dim_end[j], prime,
+                                      &grease, argv[2 * j + 1], name)) {
                 matrix_free(te_rows);
                 matrix_free(end_rows);
                 matrix_free(q_rows);
                 grease_free(&grease);
+                matrix_free(expanded_lrows);
+                matrix_free(expanded_rrows);
                 return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
                                nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, NULL, NULL,
                                NULL, NULL, p, q, h_p, h_q, s, h_o, NULL, rows, lrows, rrows);
               }
               if (0 == mul_in_store(q_rows, end_rows, te_rows, 0 /* is_map1 */, 0 /* is_map2 */,
-                                    noc_q[i], len_q[i], nob, dim_end[i], dim_end[j], prime,
-                                    &grease, argv[2 * i + 1], "sub-tensor", name)) {
+                                    noc_q[i], len_p[j], nob, dim_end[i], dim_end[j], prime,
+                                    &grease, argv[2 * i], "sub-tensor", name)) {
                 matrix_free(te_rows);
                 matrix_free(end_rows);
                 matrix_free(q_rows);
                 grease_free(&grease);
+                matrix_free(expanded_lrows);
+                matrix_free(expanded_rrows);
                 return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
                                nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, NULL, NULL,
                                NULL, NULL, p, q, h_p, h_q, s, h_o, NULL, rows, lrows, rrows);
               }
+              /* Write into the output */
               for (k = 0; k < dim_end[i]; k++) {
                 for (l = 0; l < dim_end[j]; l++) {
-                  unsigned int elt = get_element_from_row(nob, l, te_rows[k]);
+                  unsigned int elt = get_element_from_row_with_params(nob, l, mask, elts_per_word, te_rows[k]);
                   if (0 != elt) {
                     put_element_to_row(nob, o_c + l, rows[o_r + k], elt);
                   }
@@ -488,6 +525,8 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
   matrix_free(end_rows);
   matrix_free(q_rows);
   grease_free(&grease);
+  matrix_free(expanded_lrows);
+  matrix_free(expanded_rrows);
   if (0 == endian_write_matrix(outp, rows, len, nor)) {
     return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
                    nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, NULL, NULL,

@@ -180,3 +180,4 @@ skew seventh
 20020826 - Fix problem in zscript with renaming large files.
 20020901 - Added decomp for finding irreducibles given restrictions to subgroups
 20020901 - First sym_basis using gamma operators
+20020905 - First apparently working ztco and sym_basis, on 748 x 748* for Co2
