@@ -1,5 +1,5 @@
 /*
- * $Id: mul.c,v 1.32 2003/02/24 18:02:43 jon Exp $
+ * $Id: mul.c,v 1.33 2003/03/23 19:35:24 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
@@ -429,7 +429,6 @@ int mul_from_store(unsigned int **rows1, unsigned int **rows3,
 {
   long long pos;
   unsigned int i, j, l;
-  row_ops row_operations;
   assert(NULL != rows1);
   assert(NULL != rows3);
   assert(NULL != inp);
@@ -457,10 +456,6 @@ int mul_from_store(unsigned int **rows1, unsigned int **rows3,
     }
   } else {
     assert(0 != len); /* len may have come from m, and hence would be zero for a map */
-    if (0 == rows_init(prime, &row_operations)) {
-      fprintf(stderr, "%s: cannot initialise row operations for %s, terminating\n", name, m);
-      return 0;
-    }
     /* Then multiply */
     for (i = 0; i < noc; i += grease->level) {
       unsigned int size = (grease->level + i <= noc) ? grease->level : noc - i;
@@ -510,7 +505,6 @@ int mul_in_store(unsigned int **rows1, unsigned int **rows2, unsigned int **rows
                  grease grease, const char *m1, const char *m2, const char *name)
 {
   unsigned int i, j, l;
-  row_ops row_operations;
   assert(NULL != rows1);
   assert(NULL != rows2);
   assert(NULL != rows3);
@@ -552,12 +546,8 @@ int mul_in_store(unsigned int **rows1, unsigned int **rows2, unsigned int **rows
     } else {
       /* Neither parameter is a map */
       unsigned int **grease_rows;
-      assert(0 != len);
       /* len may have come from m2, and hence would be zero for a map */
-      if (0 == rows_init(prime, &row_operations)) {
-        fprintf(stderr, "%s: cannot initialise row operations for %s, terminating\n", name, m1);
-        return 0;
-      }
+      assert(0 != len);
       /* Save the grease row pointers */
       grease_rows = matrix_malloc(grease->level);
       l = 1;
