@@ -1,5 +1,5 @@
 /*
- * $Id: tsp.c,v 1.3 2002/06/28 08:39:16 jon Exp $
+ * $Id: tsp.c,v 1.4 2002/07/03 08:52:49 jon Exp $
  *
  * Function to spin some vectors under two generators in tensor space
  *
@@ -25,6 +25,7 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
+#include <math.h>
 
 typedef struct gen_struct *gen;
 
@@ -38,6 +39,26 @@ struct gen_struct
   unsigned int **rows_2;
   gen next;
 };
+
+static unsigned int find_extent(unsigned int nor, unsigned int len)
+{
+  unsigned int avail;
+  double ratio;
+  assert(0 != nor);
+  assert(0 != len);
+  avail = memory_rows(len, 10);
+  ratio = nor / ((0 == avail) ? 1 : avail);
+  avail = (unsigned int)ceil(ratio * avail);
+  if (0 == avail) {
+    avail = 1;
+  } else if (avail >= 100) {
+    avail = 99;
+  }
+  while (avail > 0 && memory_rows(len, avail) > nor) {
+    avail--;
+  }
+  return avail + 1;
+}
 
 static void cleanup(FILE *f1, FILE *f2, FILE *f3, FILE *f4, FILE *f5)
 {
@@ -60,7 +81,7 @@ unsigned int spin(const char *in, const char *out,
   FILE *inp = NULL, *outp = NULL, *f_a1 = NULL, *f_a2 = NULL, *f_b1 = NULL, *f_b2 = NULL;
   const header *h_in, *h_a1, *h_a2, *h_b1, *h_b2;
   header *h_out;
-  unsigned int prime, nob, noc, nor, noc1, nor1, noc2, nor2, len, len1, len2, max_rows, max_nor, max_len, d;
+  unsigned int prime, nob, noc, nor, noc1, nor1, noc2, nor2, len, len1, len2, max_rows, max_nor, max_len, d, size, limit;
   unsigned int **rows, *work_row;
   unsigned int **rows_a1, **rows_a2, **rows_b1, **rows_b2, **mat_rows, **work_rows;
   int *map, *new_map;
@@ -147,13 +168,15 @@ unsigned int spin(const char *in, const char *out,
   primes_init(prime, &prime_operations);
   rows_init(prime, &row_operations);
   grease_init(&row_operations, &grease);
-  max_rows = memory_rows(max_len, 50);
-  if (max_rows < max_nor) {
+  size = find_extent(max_nor, max_len);
+  max_rows = memory_rows(max_len, size);
+  if (max_rows < max_nor || size > 20) {
     fprintf(stderr, "%s: failed to allocate space for one of %s, %s, %s, %s, terminating\n",
             name, a1, b1, a2, b2);
     cleanup(inp, f_a1, f_b1, f_a2, f_b2);
     exit(2);
   }
+  limit = 900 - 4 * size;
   rows_a1 = matrix_malloc(max_nor);
   rows_b1 = matrix_malloc(max_nor);
   rows_a2 = matrix_malloc(max_nor);
@@ -163,13 +186,13 @@ unsigned int spin(const char *in, const char *out,
   gen_a.rows_2 = rows_a2;
   gen_b.rows_2 = rows_b2;
   for (d = 0; d < max_nor; d++) {
-    rows_a1[d] = memory_pointer_offset(700, d, max_len);
-    rows_b1[d] = memory_pointer_offset(750, d, max_len);
-    rows_a2[d] = memory_pointer_offset(800, d, max_len);
-    rows_b2[d] = memory_pointer_offset(850, d, max_len);
+    rows_a1[d] = memory_pointer_offset(limit, d, max_len);
+    rows_b1[d] = memory_pointer_offset(limit + size, d, max_len);
+    rows_a2[d] = memory_pointer_offset(limit + 2 * size, d, max_len);
+    rows_b2[d] = memory_pointer_offset(limit + 3 * size, d, max_len);
   }
   /* Now compute the maximum space for the subspace */
-  max_rows = memory_rows(len, 700);
+  max_rows = memory_rows(len, limit);
   if (7 > max_rows) {
     fprintf(stderr, "%s: failed to alocate enough memory, terminating\n",
             name);
