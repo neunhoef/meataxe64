@@ -1,5 +1,5 @@
 /*
- * $Id: sums_utils.c,v 1.1 2003/08/04 20:41:57 jon Exp $
+ * $Id: sums_utils.c,v 1.2 2003/08/10 14:30:25 jon Exp $
  *
  * Utilities for sums, sumf etc
  *
@@ -10,8 +10,46 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-/*#include "primes.h"*/
+#include "add.h"
 #include "utils.h"
+
+int make_element(unsigned int pos, unsigned int prime, unsigned int prime_power,
+                 unsigned int i, const char **names, const char **elts, const char **elt_names , const char *name)
+{
+  assert(pos < prime_power);
+  /* prime_power = prime ** (i - 1) */
+  if (0 != pos) {
+    unsigned int l, r;
+    if (pos >= prime) {
+      assert(prime_power >= prime * prime);
+      assert(0 == prime_power % prime);
+      prime_power /= prime;
+      /* Make the earlier element we need */
+      l = pos % prime_power;
+      i--;
+      if (0 == make_element(l, prime, prime_power, i, names, elts, elt_names, name)) {
+        return 0;
+      }
+      if (pos >= prime_power) {
+        r = pos / prime_power;
+      } else {
+        return 1;
+      }
+    } else {
+      l = 0;
+      i = 1;
+      r = pos;
+    }
+    if (0 == scaled_add(names[i], elts[l], elts[pos], r, name)) {
+      return 0;
+    }
+    /* Delete any earlier element we made */
+    if (pos >= prime && 0 != l) {
+      (void)remove(elts[l]);
+    }
+  }
+  return 1;
+}
 
 int next_gen(unsigned int cur_gen, unsigned int max_gen, char *gen, const unsigned int *orders, const char *word)
 {

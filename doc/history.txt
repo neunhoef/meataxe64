@@ -268,3 +268,4 @@ skew seventh
 20030728 - Make the f scripts retry on out of memory
 20030728 - Fix the out of memory exit code in qs.c and project.c
 20030804 - Add stuff to avoid evaluating essentially the same words in sums by eliminating multiples
+20030810 - Added stuff to reduce the disc space requirements of zsums and friends

@@ -1,5 +1,5 @@
 /*
- * $Id: sums.c,v 1.14 2003/08/04 20:41:57 jon Exp $
+ * $Id: sums.c,v 1.15 2003/08/10 14:30:25 jon Exp $
  *
  * Function to compute linear sums of two matices
  *
@@ -29,7 +29,7 @@ static void cleanup(unsigned int *orders)
 }
 
 int sums(const char *out, unsigned int n, unsigned int argc, const char *const args[],
-         unsigned int sub_order, accept acceptor, int invertible, const char *name)
+         unsigned int sub_order, accept acceptor, int invertible, int keep, const char *name)
 {
   char *buf;
   FILE *f;
@@ -184,23 +184,24 @@ int sums(const char *out, unsigned int n, unsigned int argc, const char *const a
     }
     /* Now compute the sums we require, and their ranks */
     for (l = 0; l < cur_power; l++) {
-      for (r = 1; r < prime; r++) {
-        unsigned int pos = cur_power * r + l;
-        /* Range from cur_power to cur_power * prime - 1 */
-        /* scale names[i] and add to elts[l] */
-        buf = my_malloc(strlen(elt_names[l]) + 1 + nod + strlen(words[i]) + 1);
-        sprintf(buf, "%s+%d%s", elt_names[l], r, words[i]);
-        elt_names[pos] = buf;
-        if (0 == scaled_add(names[i], elts[l], elts[pos], r, name)) {
-          fprintf(stderr, "%s: scaled add failed on %s + %d * %s, terminating\n",
-                  name, elts[l], r, names[i]);
+      /* Make the base element if necessary */
+      if (0 == keep) {
+        /* We're discarding as we go for space reasons, so we must remake */
+        if (0 == make_element(l, prime, cur_power, i, names, elts, elt_names, name)) {
+          fprintf(stderr, "%s: failed to make %s, terminating\n", name, elt_names[l]);
           cleanup(orders);
           exit(1);
         }
-        /* l != 0 mean we have 1 + old element + lambda * new element, ie at least 3 in sum */
+      }
+      for (r = 1; r < prime; r++) {
+        unsigned int pos = cur_power * r + l;
+        /* Range from cur_power to cur_power * prime - 1 */
+        int ignore = 0;
+        buf = my_malloc(strlen(elt_names[l]) + 1 + nod + strlen(words[i]) + 1);
+        sprintf(buf, "%s+%d%s", elt_names[l], r, words[i]);
+        elt_names[pos] = buf;
+        /* Compute if this one can be ignored for rank purposes */
         if (0 != l) {
-          int res;
-          int ignore = 0;
           unsigned int j;
           if (invertible) {
             for (j = 0; j < argc2; j++) {
@@ -216,7 +217,24 @@ int sums(const char *out, unsigned int n, unsigned int argc, const char *const a
               }
             }
           }
-          if (0 == ignore) {
+        }
+        if (keep || (0 != l && 0 == ignore)) {
+          /* We only make the element if either we're keeping it, or we want its rank */
+          if (verbose) {
+            printf("%s: making %s, formula %s by %s + %d * %s\n", name, elts[pos], elt_names[pos], elts[l], r, names[i]);
+            fflush(stdout);
+          }
+          /* scale names[i] and add to elts[l] */
+          if (0 == scaled_add(names[i], elts[l], elts[pos], r, name)) {
+            fprintf(stderr, "%s: scaled add failed on %s + %d * %s, terminating\n",
+                    name, elts[l], r, names[i]);
+            cleanup(orders);
+            exit(1);
+          }
+          /* We've made the element, do we want its rank? */
+          /* l != 0 mean we have 1 + old element + lambda * new element, ie at least 3 in sum */
+          if (0 != l && 0 == ignore) {
+            int res;
             if (0 == rank(elts[pos], &s, name)) {
               cleanup(orders);
               exit(1);
@@ -233,10 +251,25 @@ int sums(const char *out, unsigned int n, unsigned int argc, const char *const a
             }
             if (res & 2) {
               printf("%s: terminating\n", name);
+              /* Discard the base element if necessary */
+              if (0 == keep && 0 != l) {
+                /* We're discarding as we go for space reasons, so discard this one */
+                (void)remove(elts[l]);
+              }
               return 0;
             }
           }
+          /* Discard the current element if necessary */
+          if (0 == keep && 0 != pos) {
+            /* We're discarding as we go for space reasons, so discard this one */
+            (void)remove(elts[pos]);
+          }
         }
+      }
+      /* Discard the base element if necessary */
+      if (0 == keep && 0 != l) {
+        /* We're discarding as we go for space reasons, so discard this one */
+        (void)remove(elts[l]);
       }
     }
     cur_power *= prime;

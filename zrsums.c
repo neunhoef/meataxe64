@@ -1,5 +1,5 @@
 /*
- * $Id: zrsums.c,v 1.8 2003/08/04 20:41:57 jon Exp $
+ * $Id: zrsums.c,v 1.9 2003/08/10 14:30:25 jon Exp $
  *
  * Compute restricted sums in the group algebra in two matrices
  *
@@ -52,7 +52,7 @@ int main(int argc, const char * const argv[])
   }
   endian_init();
   memory_init(name, memory);
-  res = sums(argv[1], n, argc - 5, argv + 5, sub_order, &acceptor, 0, name);
+  res = sums(argv[1], n, argc - 5, argv + 5, sub_order, &acceptor, 1, 0, name);
   if (255 == res) {
     printf("Failed to find a suitable element\n");
   }
