@@ -1,5 +1,5 @@
 /*
- * $Id: zproj.c,v 1.2 2002/07/09 09:08:12 jon Exp $
+ * $Id: zproj.c,v 1.3 2002/10/14 09:31:12 jon Exp $
  *
  * Project into quotient space representation
  *
@@ -15,22 +15,17 @@ static const char *name = "zproj";
 
 static void proj_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <range> <input> <output> [<memory>]\n", name, name);
+  fprintf(stderr, "%s: usage: %s [-v] [-m <memory>] <range> <input> <output>\n", name, name);
 }
 
 int main(int argc, const char * const argv[])
 {
-  unsigned int memory = MEM_SIZE;
-
   argv = parse_line(argc, argv, &argc);
-  if (4 != argc && 5 != argc) {
+  if (4 != argc) {
     proj_usage();
     exit(1);
   }
   endian_init();
-  if (5 == argc) {
-    memory = strtoul(argv[4], NULL, 0);
-  }
   memory_init(name, memory);
   project(argv[1], argv[2], argv[3], name);
   memory_dispose();

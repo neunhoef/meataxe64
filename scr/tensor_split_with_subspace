@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: tensor_split_with_subspace,v 1.3 2002/10/13 22:41:39 jon Exp $
+# $Id: tensor_split_with_subspace,v 1.4 2002/10/14 09:31:13 jon Exp $
 #
 # Script to split a representation given a particular subspace to work from
 # where the group generators are tensor products
@@ -61,7 +61,7 @@ mem_ok=0
 dim=`znor $s`
 let codim=$nor-$dim
 if [ $dim -lt $nor ]; then
-  ztmu $s $a_l $a_r ${tmp}.0 $memory 1>/dev/null
+  ztmu -m $memory $s $a_l $a_r ${tmp}.0 1>/dev/null
   zss -m $memory $s ${tmp}.0 ${o_s}
   zqs -m $memory $s $a ${o_q}
   rm -f ${tmp}.0
