@@ -1,15 +1,16 @@
 #!/bin/sh
 #
-# $Id: base_from_vector,v 1.3 2002/09/11 21:20:47 jon Exp $
+# $Id: base_from_vector,v 1.4 2002/11/26 20:46:23 jon Exp $
 #
 # Script to find a representation in standard base, given a vector
 #
 # Inputs
 # $1: vector with which to split
 # $2: output filename base
-# $3: the standard basis
-# $4: generator a
-# $5-: other generators
+# $3: memory
+# $4: the standard basis
+# $5: generator a
+# $6-: other generators
 #
 # outputs will be of the form <$2>_sb_{1,...}
 # where nor is number of rows, and q is the prime power
@@ -23,14 +24,15 @@
 #set -v
 . functions
 usage="$0: usage: $0 <e> <output_stem> <s> <a>  [<other generators>*]"
-if [ $# -lt 5 ]; then
+if [ $# -lt 6 ]; then
   echo "$usage"
   exit 1;
 fi
 e=$1
 o=$2
-s=$3
-a=$4
+memory=$3
+s=$4
+a=$5
 if [ -e $e -a -e $a ]; then
   q=`zprime $a`
   nor=`znor $a`
@@ -48,8 +50,7 @@ else
   exit 1
 fi
 tmp=tmp${PPID}
-memory=200
-shift 4
+shift 5
 base_with_vector $e $s $memory $a $*
 ret=$?
 if [ 0 -ne $ret ]; then

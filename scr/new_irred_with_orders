@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: new_irred_with_orders,v 1.16 2002/10/13 20:07:20 jon Exp $
+# $Id: new_irred_with_orders,v 1.17 2002/11/26 20:46:23 jon Exp $
 #
 # Script to classify an irreducible representation
 #
@@ -30,9 +30,7 @@ fi
 . functions
 memory=$1
 a=$2
-o_a=$3
 b=$4
-o_b=$5
 if [ -e $a -a -e $b ]; then
   nor=`znor $a`
   noc=`znoc $a`
@@ -71,8 +69,6 @@ done
 tmp=tmp${PPID}
 e=${tmp}.1
 name=${tmp}_${nor}
-ok=0
-i=1
 script=`find_nullity_one_with_orders $e $memory $line`
 ret=$?
 if [ 0 -eq $ret ]; then
@@ -119,7 +115,7 @@ elif [ 254 -eq $ret ]; then
   zsel ${tmp}.2 ${tmp}.2.1 1
 # Produce both standard bases
   for i in 0 1; do
-    base_from_vector ${tmp}.2.$i ${name}_sb_$i ${tmp}.3 ${rest[*]}
+    base_from_vector ${tmp}.2.$i ${name}_sb_$i $memory ${tmp}.3 ${rest[*]}
     ret=$?
     if [ 0 -ne $ret ]; then
       rm -f ${tmp}*

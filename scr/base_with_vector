@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: base_with_vector,v 1.8 2002/10/14 09:05:57 jon Exp $
+# $Id: base_with_vector,v 1.9 2002/11/26 20:46:23 jon Exp $
 #
 # Script to find a standard base for a representation, given a vector
 #
@@ -48,7 +48,7 @@ fi
 ok=0
 shift 4
 while [ 0 -eq $ok ]; do
-  dim=`zmsb -m $memory $e $s $a $*`
+  dim=`zmsb -m $memory $e $s $a $* 2>/dev/null`
   ret=$?
   if [ 0 -eq $ret ]; then
     if [ $dim -eq $nor ]; then
