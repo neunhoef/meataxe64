@@ -1,5 +1,5 @@
 /*
- * $Id: mul.c,v 1.18 2001/11/29 01:13:09 jon Exp $
+ * $Id: mul.c,v 1.19 2001/12/04 23:14:47 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
@@ -106,8 +106,6 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
     fprintf(stderr, "%s: cannot initialise input rows, terminating\n", name);
     return cleanup(inp1, inp2, outp);
   }
-  printf("mul handling %d rows from %d at a time\n", nox, nor1);
-  printf("mul nox2 = %d rows\n", nox2);
   /* Compute best lazy grease given nox2 */
   if (0 == grease_level(prime, &grease, nox2)) {
     fprintf(stderr, "%s: cannot allocate grease space, terminating\n", name);

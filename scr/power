@@ -1,0 +1,53 @@
+#
+# $Id: power,v 1.1 2001/12/04 23:14:47 jon Exp $
+#
+# Script to compute a power of a matrix, in a naive fashion
+#
+# Inputs
+# $1: matrix
+# $2: index
+# $3: out
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+#
+usage="$0: usage: $0 <in> <power> <out>"
+if [ $# -ne 3 ]; then
+  echo $usage
+  exit 1;
+fi
+a=$1
+o=$3
+n=$2
+if [ -e $a ]; then
+  q=`zprime $a`
+  nor=`znor $a`
+  noc=`znoc $a`
+  if [ $nor -ne $noc ]; then
+    echo "$0: $a is not square"
+    exit 1
+  fi
+else
+  echo "$0: missing file $a"
+  exit 1
+fi
+if [ $n -eq 1 ]; then
+  cp $a $o
+  exit 0
+fi
+id=id_${q}_$nor
+if [ ! -e $id -a $n -eq 0 ]; then
+  echo Creating id
+  zid $q $nor $nor $o
+  exit 0
+fi
+tmp=tmp${PPID}
+ok=0
+t=$a
+while [ $n -ge 2 ]; do
+  zmu $a $t ${tmp}.$n 1>/dev/null
+  t=${tmp}.$n
+  let n=$n-1
+done
+cp ${tmp}.2 $o

@@ -60,3 +60,4 @@
 20011130 - wrote te, reduced He8330 and started on He29155
 20011201 - wrote file based ss and signature
 20011202 - wrote file based qs
+20011204 - wrote zwords for producing words in a representation

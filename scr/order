@@ -1,5 +1,5 @@
 #
-# $Id: order,v 1.1 2001/12/03 00:07:48 jon Exp $: f1,v 1.2 2001/12/01 10:46:02 jon Exp $
+# $Id: order,v 1.2 2001/12/04 23:14:47 jon Exp $: f1,v 1.2 2001/12/01 10:46:02 jon Exp $
 #
 # Script to compute order of a matrix, in a naive fashion
 #
@@ -28,14 +28,25 @@ else
   echo "$0: missing file $a"
   exit 1
 fi
-r=`zrn $a`
+memory=200
+ok=0
+while [ $ok -eq 0 ]; do
+  r=`zrn $a $memory 2>/dev/null`
+  ret=$?
+  if [ $ret -eq 2 ]; then
+    let memory=$memory*2
+  elif [ $ret -eq 0 ]; then
+    ok=1
+  else
+    exit 1
+  fi
+done
 if [ $r -ne $nor ]; then
   echo $a is singular
   exit 1
 fi
 id=id_${q}_$nor
 if [ ! -e $id ]; then
-  echo Creating id
   zid $q $nor $nor $id
 fi
 tmp=tmp${PPID}
