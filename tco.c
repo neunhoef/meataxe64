@@ -1,5 +1,5 @@
 /*
- * $Id: tco.c,v 1.4 2002/09/09 13:18:03 jon Exp $
+ * $Id: tco.c,v 1.5 2002/09/28 15:39:31 jon Exp $
  *
  * Tensor condense one group element
  *
@@ -389,7 +389,19 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
   }
   rows_init(prime, &row_operations);
   grease_init(&row_operations, &grease);
-  grease.level = 1; /* No point in greasing these little multiplications */
+  if (0 == grease_level(prime, &grease, 100)) {
+    fprintf(stderr, "%s: failed to determine grease level, terminating\n", name);
+    matrix_free(te_rows);
+    matrix_free(end_rows);
+    matrix_free(q_rows);
+    free(te_row);
+    return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
+                   nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, NULL, NULL,
+                   NULL, NULL, p, q, h_p, h_q, s, h_o, NULL, rows, lrows, rrows);
+  }
+  if (grease.level > 5) {
+    grease.level = 5; /* No point in greasing these little multiplications */
+  }
   if (0 == grease_allocate(prime, max_irr_len, &grease, 900)){
     fprintf(stderr, "%s: failed to allocate grease, terminating\n", name);
     matrix_free(te_rows);
@@ -457,6 +469,9 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
                 /* Rows of M */
                 for (te_j = 0; te_j < dim_irr[i]; te_j++) {
                   /* Rows of N */
+                  unsigned int te_o_c_word = 0;
+                  unsigned int te_o_c_offset = 0;
+                  unsigned int word = 0;
                   row_init(te_rows[te_o_r], max_irr_len);
                   te_o_c = 0;
                   for (te_k = 0; te_k < dim_irr[j]; te_k++) {
@@ -466,24 +481,45 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
                       get_element_from_row_with_params(nob, m_c + gamma * dim_irr[j] + te_k, mask,
                       elts_per_word, lrows[m_r + alpha * dim_irr[i] + te_i]);
                     */
-                    unsigned int *row = expanded_rrows[n_r + beta * dim_irr[i] + te_j]; /* was rrows */
                     if (0 != elt) {
+                      unsigned int base = n_c + delta * dim_irr[j];
+                      unsigned int *row = expanded_rrows[n_r + beta * dim_irr[i] + te_j]; /* was rrows */
                       if (1 != elt) {
                         (*row_operations.scaler)(row, te_row, /* len_r */noc_r, elt);
                         row = te_row;
                       }
+                      row += base;
                       for (te_l = 0; te_l < dim_irr[j]; te_l++) {
                         /*
                         elt = get_element_from_row_with_params(nob, n_c + delta * dim_irr[j] + te_l, mask, elts_per_word, row);
                         */
-                        elt = row[n_c + delta * dim_irr[j] + te_l];
+                        elt = row[te_l];
                         if (0 != elt) {
-                          put_element_to_row(nob, te_o_c + te_l, te_rows[te_o_r], elt);
+                          /*
+                          put_element_to_clean_row_with_params(nob, te_o_c + te_l, elts_per_word, te_rows[te_o_r], elt);
+                          */
+                          word |= elt << te_o_c_offset;
                         }
+                        te_o_c_offset += nob;
+                        if (te_o_c_offset + nob > bits_in_unsigned_int) {
+                          te_o_c_offset = 0;
+                          te_rows[te_o_r][te_o_c_word] = word;
+                          te_o_c_word++;
+                          word = 0;
+                        }
+                      }
+                    } else {
+                      te_o_c_offset += nob * dim_irr[j];
+                      if (te_o_c_offset + nob > bits_in_unsigned_int) {
+                        te_rows[te_o_r][te_o_c_word] = word;
+                        te_o_c_word += te_o_c_offset / (elts_per_word * nob);
+                        te_o_c_offset %= (elts_per_word * nob);
+                        word = 0;
                       }
                     }
                     te_o_c += dim_irr[j];
                   }
+                  te_rows[te_o_r][te_o_c_word] = word;
                   te_o_r++;
                 }
               }
