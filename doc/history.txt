@@ -271,3 +271,4 @@ skew seventh
 20030810 - Added stuff to reduce the disc space requirements of zsums and friends
 20030817 - Fix bug in zfln where temporaries were lost
 20030824 - Add find_irred and split_all_decomp
+20031217 - Fixed a bug where split_with_element incorrectly identified irreducibles

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: split_with_element,v 1.21 2002/11/29 19:19:01 jon Exp $
+# $Id: split_with_element,v 1.22 2003/12/17 23:29:06 jon Exp $
 #
 # Script to split a representation given a particular element to work from
 #
@@ -169,6 +169,11 @@ if [ $split -ne 0 ]; then
 else
 # echo checking if irreducible
   if [ $c -eq 0 ]; then
+    if [ $count -ne $nullity ]; then
+#     echo Not calling irred as we did not use all the vectors
+      rm -f ${tmp}*
+      exit 254
+    fi
 #   echo split_with_element calls irred
     irred $e $o $memory $s $a $*
     ret=$?
