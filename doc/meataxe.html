@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.47 2003/05/16 17:49:53 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.48 2003/05/27 22:01:32 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -5857,33 +5857,36 @@ Purpose: Find low nullity elements
 <td valign=top>Parameters:</td>
 </thead>
 <tr>
-<td valign=top>1</td><td valign=top>Generator 1</td>
+<td valign=top>1</td><td valign=top>Number of generators</td>
 </tr>
 <tr>
-<td valign=top>2</td><td valign=top>Generator 2</td>
+<td valign=top>2</td><td valign=top>Generator 1</td>
 </tr>
 <tr>
 <td valign=top>3</td><td valign=top>Order of generator 1</td>
 </tr>
 <tr>
-<td valign=top>4</td><td valign=top>Order of generator 2</td>
+<td valign=top>4-</td><td valign=top>Other generators and orders</td>
 </tr>
 <tr>
-<td valign=top>5</td><td valign=top>Depth of search</td>
+<td valign=top>n</td><td valign=top>Depth of search</td>
 </tr>
 <tr>
-<td valign=top>6</td><td valign=top>File in which nullities are to be recorded</td>
+<td valign=top>n+1</td><td valign=top>Nullity to be searched for</td>
 </tr>
 <tr>
-<td valign=top>7</td><td valign=top>Amount of memory available</td>
+<td valign=top>n+2</td><td valign=top>File in which nullities are to be recorded</td>
 </tr>
 <tr>
-<td valign=top>8</td><td valign=top>Other representations to be considered</td>
+<td valign=top>n+3</td><td valign=top>Amount of memory available</td>
 </tr>
 <tr>
-<td valign=top>Textual output on stdout:</td><td valign=top>A classification of group
-algebra elements having nullity one on few representations, and
-nullity zero on the rest</td>
+<td valign=top>n+4</td><td valign=top>Other representations to be considered</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>A
+classification of group algebra elements having the required nullity
+on few representations, and nullity zero on the rest</td>
 </tr>
 </table>
 <table>
@@ -5900,39 +5903,44 @@ nullity zero on the rest</td>
 </table>
 Commentary: The purpose of this script is to discover group algebra
 elements which pick out particular composition factor types in a
-representation. The goal is to discover a vector which splits a
-representation, which is in turn achieved by discovering an element of
-low nullity on the whole representation. Some similar goals can be
-achieved by the use of condensation, but this meataxe does not support
-condensation (yet). An example may make this clearer. Suppose we wish
-to split a representation, because we know there is a new composition
-factor to be found in it. Suppose further that we know that some
-already known composition factor occurs a small number of times (eg
-one or two), and we know bounds on the multiplicities of all other
-potential composition factors. This may seems like a very contrived
-situation, but in fact it is quite common, eg when one wishes to
-construct a representation explicitly in order to compute its
-indicator, and the full decomposition matrix is already known. Most
-new results obtained so far with this meataxe have fallen into this
-category. In this situation, one cannot afford to perform many
-subspace creations, or many nullspace operations. However, forming
-group algebra elements in the representation may be relatively easy,
-eg because it is a tensor product, symmetrised power or permutation
-representation. We use this program to enable us to find a group
-algebra element with nullity one on our targetted composition factor,
-and hopefully nullity zero on all others. We use null vectors from
-this element to seed our subspace calculations. Once all factors
-targetted by this element have been eliminated, we can use another
-element (again discovered using this program). In this case, the
-search is easier, because one of the composition factors has been
-eliminated from consideration. Furthermore, we can avoid expensive
-multiplications in the production of this new element, by creating it
-in the original representation, and then carrying it through the
-splitting process. This point makes it clear that it can be very
-important not to discard subspaces after the sub and quotient space
-representations have been produced. The values in paramters eight and
-onwards are of the form &lt;stem&gt;, where &lt;stem&gt;_{1,2} are the
-real files.
+representation. Such elements are sometimes called delta words,
+although the definition of a delta word is somewhat stricter. The goal
+is to discover a vector which splits a representation, which is in
+turn achieved by discovering an element of low nullity on the whole
+representation. If condensation is available, then condensation is
+normally a simpler route to obtaining given representations, however,
+this technique is also applicable to splitting condensation
+representations, for which no further condensation is available. An
+example may make this clearer. Suppose we wish to split a
+representation, because we know there is a new composition factor to
+be found in it. Suppose further that we know that some already known
+composition factor occurs a small number of times (eg one or two), and
+we know bounds on the multiplicities of all other potential
+composition factors. This may seems like a very contrived situation,
+but in fact it is quite common, eg when one wishes to construct a
+representation explicitly in order to compute its indicator, and the
+full decomposition matrix is already known. Most new results obtained
+so far with this meataxe have fallen into this category. In this
+situation, one cannot afford to perform many subspace creations, or
+many nullspace operations. However, forming group algebra elements in
+the representation may be relatively easy, eg because it is a tensor
+product, symmetrised power or permutation representation. We use this
+program to enable us to find a group algebra element with nullity one
+on our targetted composition factor, and hopefully nullity zero on all
+others. We use null vectors from this element to seed our subspace
+calculations. Once all factors targetted by this element have been
+eliminated, we can use another element (again discovered using this
+program). In this case, the search is easier, because one of the
+composition factors has been eliminated from consideration.
+Furthermore, we can avoid expensive multiplications in the production
+of this new element, by creating it in the original representation,
+and then carrying it through the splitting process. This point makes
+it clear that it can be very important not to discard subspaces after
+the sub and quotient space representations have been produced. The
+values in paramters eight and onwards are of the form &lt;stem&gt;,
+where &lt;stem&gt;_{1,2} are the real files. The other use of this
+script is to find delta words for use when constructing symmetry bases
+for condensation.
 </li>
 <li>
 <h3><a name="find_nullity_one_with_orders">find_nullity_one_with_orders</a></h3>
