@@ -1,5 +1,5 @@
 /*
- * $Id: mmat.c,v 1.5 2001/10/13 15:23:02 jon Exp $
+ * $Id: mmat.c,v 1.6 2002/01/06 16:35:48 jon Exp $
  *
  * Monster program
  * Based on Version 1 - 30th November 1998 by R.A.Parker and R.A.Wilson
@@ -11,16 +11,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 #include "mop.h"
 #include "mtx.h"
 
 static void mkvec(long pos, unsigned char *vecin)
 {
   unsigned int i;
+  assert(NULL != vecin);
   memset(vectemp, 0, 24611);
   FTOV(vectemp, pos/2, (pos+1)%2+1);
 
-  memset(vecin, 0, 24712);
+  memset(vecin, 0, VECLEN);
   ptr1=0;
   ptr2=0;
   for (i=0; i<90; i++)     FGAP(vectemp, vecin, 729, 3);
@@ -33,6 +35,7 @@ static void mkvec(long pos, unsigned char *vecin)
 static void wtrow(unsigned int row_num, unsigned char *vecout)
 {
   unsigned int i;
+  assert(NULL != vecout);
   memset(vectemp, 0, 24611);
   ptr1=0;
   ptr2=0;
@@ -46,7 +49,7 @@ static void wtrow(unsigned int row_num, unsigned char *vecout)
 
 int main(int argc, char *argv[])
 {
-  int i;
+  unsigned int i;
   suzel H, G1, G2, G3, G4;
   suzel z1, z2, z3, z4, z5, z6, z7, z8, z9;
   int type = -1;

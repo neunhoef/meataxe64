@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.40 2001/12/27 01:17:12 jon Exp $
+# $Id: makefile,v 1.41 2002/01/06 16:35:48 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -47,6 +47,7 @@ ZSB_TARGET=	zsb
 ZSP_TARGET=	zsp
 ZSPAN_TARGET=	zspan
 ZSS_TARGET=	zss
+ZSUMS_TARGET=	zsums
 ZTE_TARGET=	zte
 ZTR_TARGET=	ztr
 ZTRACE_TARGET=	ztrace
@@ -89,12 +90,13 @@ ZSL_MODULES=	add elements endian files grease header matrix memory mul primes re
 ZSP_MODULES=	clean elements endian grease header matrix memory mul primes read rows sp utils write zsp
 ZSPAN_MODULES=	elements endian header matrix memory primes read rows utils write zspan
 ZSS_MODULES=	clean elements endian grease header matrix memory primes read rows ss utils write zss
+ZSUMS_MODULES=	add clean elements endian grease header ident matrix memory mul primes read rn rows utils write zsums
 ZTE_MODULES=	elements endian header matrix memory primes read rows te utils write zte
 ZTR_MODULES=	elements endian header matrix memory primes read tr tra utils write
 ZTRACE_MODULES=	elements endian header memory primes read rows utils ztrace
 ZWORDS_MODULES=	elements endian grease header matrix memory mul primes read rows utils write zwords
 
-MODULES=	$(DTOU_MODULES) $(EAD_MODULES) $(ECT_MODULES) $(EID_MODULES) $(EIM_MODULES) $(EIP_MODULES) $(EMU_MODULES) $(ETR_MODULES) $(MON_MODULES) $(SNS_MODULES) $(SRN_MODULES) $(STOP_MODULES) $(ZAD_MODULES) $(ZCHECK_MODULES) $(ZCT_MODULES) $(ZCV_MODULES) $(ZDIFF_MODULES) $(ZEX_MODULES) $(ZID_MODULES) $(ZIP_MODULES) $(ZIV_MODULES) $(ZMU_MODULES) $(ZNOC_MODULES) $(ZNOR_MODULES) $(ZNS_MODULES) $(ZPR_MODULES) $(ZPRIME_MODULES) $(ZQS_MODULES) $(ZRE_MODULES) $(ZRN_MODULES) $(ZRNF_MODULES) $(ZSP_MODULES) $(ZSEL_MODULES) $(ZSL_MODULES) $(ZSP_MODULES) $(ZSPAN_MODULES) $(ZSS_MODULES) $(ZTE_MODULES) $(ZTR_MODULES) $(ZTRACE_MODULES) $(ZWORDS_MODULES)
+MODULES=	$(DTOU_MODULES) $(EAD_MODULES) $(ECT_MODULES) $(EID_MODULES) $(EIM_MODULES) $(EIP_MODULES) $(EMU_MODULES) $(ETR_MODULES) $(MON_MODULES) $(SNS_MODULES) $(SRN_MODULES) $(STOP_MODULES) $(ZAD_MODULES) $(ZCHECK_MODULES) $(ZCT_MODULES) $(ZCV_MODULES) $(ZDIFF_MODULES) $(ZEX_MODULES) $(ZID_MODULES) $(ZIP_MODULES) $(ZIV_MODULES) $(ZMU_MODULES) $(ZNOC_MODULES) $(ZNOR_MODULES) $(ZNS_MODULES) $(ZPR_MODULES) $(ZPRIME_MODULES) $(ZQS_MODULES) $(ZRE_MODULES) $(ZRN_MODULES) $(ZRNF_MODULES) $(ZSP_MODULES) $(ZSEL_MODULES) $(ZSL_MODULES) $(ZSP_MODULES) $(ZSPAN_MODULES) $(ZSS_MODULES) $(ZSUMS_MODULES) $(ZTE_MODULES) $(ZTR_MODULES) $(ZTRACE_MODULES) $(ZWORDS_MODULES)
 
 include dirs.txt
 
@@ -240,6 +242,9 @@ TARGET:=ZSPAN
 include targets.txt
 
 TARGET:=ZSS
+include targets.txt
+
+TARGET:=ZSUMS
 include targets.txt
 
 TARGET:=ZTE

@@ -1,5 +1,5 @@
 /*
- * $Id: tr.c,v 1.2 2001/10/16 22:55:53 jon Exp $
+ * $Id: tr.c,v 1.3 2002/01/06 16:35:48 jon Exp $
  *
  * Transpose a matrix
  *
@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "endian.h"
 #include "memory.h"
 #include "tra.h"
 
@@ -29,6 +30,7 @@ int main(int argc, const char * const argv[])
   in = argv[1];
   out = argv[2];
   memory_init(name, 0);
+  endian_init();
   if (0 == tra(in, out, name)) {
     exit(1);
   }

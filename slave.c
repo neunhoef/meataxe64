@@ -1,5 +1,5 @@
 /*
- * $Id: slave.c,v 1.6 2001/10/16 22:55:53 jon Exp $
+ * $Id: slave.c,v 1.7 2002/01/06 16:35:48 jon Exp $
  *
  * Slave for extended operations
  * Based on zsl.c     MTX6 slave version 6.0.11 7.11.98 
@@ -11,6 +11,8 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "add.h"
+#include "endian.h"
+#include "files.h"
 #include "memory.h"
 #include "mul.h"
 #include "system.h"
@@ -41,6 +43,8 @@ static unsigned int parse_line(const char *(*line_ptrs)[], unsigned int (*length
   len = strlen(line);
   while (i < len) {
     i = skip_whitespace(i, line);
+    assert(NULL != (*line_ptrs) + j);
+    assert(NULL != (*lengths) + j);
     (*line_ptrs)[j] = line + i; /* Record start of word */
     k = skip_non_white(i, line);
     if (k != i) {
@@ -70,6 +74,7 @@ int main(int argc, const char *const argv[])
   }
   init_system();
   memory_init(name, memory);
+  endian_init();
   while(1) {
     char line[MAX_LINE];
     const char *line_ptrs[MAX_LINE];
@@ -103,14 +108,27 @@ int main(int argc, const char *const argv[])
       fputs(line, output);
     }
     if (free) {
+      unsigned long size1, size2;
+      unsigned int a = strlen(argv[1]);
+      unsigned int b = strlen("free");
+      int is_kill = 1;
+      assert(strlen("done") == b);
       if (0 != strncmp(line_ptrs[2], "kill", lengths[2])) {
         fprintf(output, "%s %s", argv[1], line_ptrs[1]);
         /* Only copy back if it's not kill */
+        is_kill = 0;
       }
       copy_rest(output, input);
       fflush(output);
       fclose(output);
       fclose(input);
+      size1 = file_size(COMMAND_FILE);
+      size2 = file_size(COMMAND_COPY);
+      if (is_kill) {
+        assert(size1 == size2 + strlen(line_ptrs[0]));
+      } else {
+        assert(size1 + a == size2 + b);
+      }
       input = fopen(COMMAND_COPY, "rb");
       if (NULL == input) {
         release_lock();
@@ -127,6 +145,10 @@ int main(int argc, const char *const argv[])
       fflush(output);
       fclose(output);
       fclose(input);
+      size1 = file_size(COMMAND_FILE);
+      size2 = file_size(COMMAND_COPY);
+      assert(size1 == size2);
+      /* Straight copy, why didn't we use rename? */
       release_lock();
       if (strncmp(line_ptrs[2], "kill", lengths[2]) == 0) {
         fprintf(stderr, "Slave %s killed by free kill\n", argv[1]);
@@ -185,6 +207,9 @@ int main(int argc, const char *const argv[])
       fflush(output);
       fclose(output);
       fclose(input);
+      size1 = file_size(COMMAND_FILE);
+      size2 = file_size(COMMAND_COPY);
+      assert(size1 + b == size2 + a);
       /* Now copy to original command file */
       input = fopen(COMMAND_COPY, "rb");
       if (NULL == input) {
@@ -199,10 +224,14 @@ int main(int argc, const char *const argv[])
         exit(1);
       }
       copy_rest(output, input);
+      fflush(output);
+      fclose(output);
+      fclose(input);
+    } else {
+      /* No free job, don't worry about COMMAND_COPY */
+      fclose(output);
+      fclose(input);
     }
-    fflush(output);
-    fclose(output);
-    fclose(input);
     release_lock();
     if (0 == free) {
       just_wait(10);

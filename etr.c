@@ -1,5 +1,5 @@
 /*
- * $Id: etr.c,v 1.1 2001/10/07 18:02:56 jon Exp $
+ * $Id: etr.c,v 1.2 2002/01/06 16:35:48 jon Exp $
  *
  * Exploded transpose
  *
@@ -12,10 +12,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "tra.h"
+#include "endian.h"
 #include "files.h"
 #include "map.h"
 #include "memory.h"
+#include "tra.h"
 #include "utils.h"
 
 static const char *name = "etr";
@@ -31,6 +32,7 @@ int main(int argc,  const char *const argv[])
   unsigned int i, j;
   const char **names1, **names2;
   memory_init(name, 0);
+  endian_init();
   /******  First check the number of input arguments  */
   if (argc != 3) {
     etr_usage();

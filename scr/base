@@ -1,5 +1,5 @@
 #
-# $Id: base,v 1.1 2001/12/23 23:31:42 jon Exp $
+# $Id: base,v 1.2 2002/01/06 16:35:48 jon Exp $
 #
 # Script to to find a representation in standard base
 #
@@ -9,7 +9,7 @@
 # $3: generator b
 # $4: output filename base
 #
-# outputs will be of the form <$4>_sb__{1,2}
+# outputs will be of the form <$4>_sb_{1,2}
 # where nor is number of rows, and q is the prime power
 #
 #
@@ -55,13 +55,13 @@ rm -f ${tmp}*
 memory=200
 ok=0
 while [ $ok -eq 0 ]; do
-  nullity=`zns $e ${tmp}.0 $memory`
+  nullity=`zns $e ${tmp}.0 $memory 2>/dev/null`
   ret=$?
   if [ $ret -eq 0 ]; then
     ok=1
   elif [ $ret -eq 2 ]; then
-    let memory=`more_memory $memory`
-    echo Allocating more memory for zns, now $memory
+    let memory=`more_memory $memory 2>/dev/null`
+#   echo Allocating more memory for zns, now $memory
   else
     exit 1
   fi
@@ -72,19 +72,34 @@ if [ 1 -ne $nullity ]; then
 fi
 ok=0
 while [ 0 -eq $ok ]; do
-  zsb ${tmp}.0 ${tmp}.1 $a $b $memory
+  dim=`zsb ${tmp}.0 ${tmp}.1 $a $b $memory`
   ret=$?
-  if [ 0 -eq $ret ]; then
+  if [ 0 -eq $ret -a $dim -eq $nor ]; then
     ok=1
   elif [ $ret -eq 2 ]; then
     let memory=`more_memory $memory`
-    echo Allocating more memory for zns, now $memory
+#   echo Allocating more memory for zsb, now $memory
   else
+    if [ $dim -ne $nor -q $rt -eq 0 ]; then
+      echo Strange result from zsb giving wrong dimension
+    fi
     exit 1
   fi
 done
-ziv ${tmp}.1 ${tmp}.2
-zmu ${tmp}.1 $a ${tmp}.3
-zmu ${tmp}.3 ${tmp}.2 ${o}_sb_1
-zmu ${tmp}.1 $b ${tmp}.4
-zmu ${tmp}.4 ${tmp}.2 ${o}_sb_2
+ok=0
+while [ 0 -eq $ok ]; do
+  ziv ${tmp}.1 ${tmp}.2 $memory
+  ret=$?
+  if [ $ret -eq 2 ]; then
+    let memory=`more_memory $memory`
+  elif [ $ret -eq 0 ]; then
+    ok=1
+  else
+    echo ziv returns $ret
+    exit $ret
+  fi
+done
+zmu ${tmp}.1 $a ${tmp}.3 400
+zmu ${tmp}.3 ${tmp}.2 ${o}_sb_1 400
+zmu ${tmp}.1 $b ${tmp}.4 400
+zmu ${tmp}.4 ${tmp}.2 ${o}_sb_2 400

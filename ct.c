@@ -1,5 +1,5 @@
 /*
- * $Id: ct.c,v 1.2 2001/10/16 22:55:53 jon Exp $
+ * $Id: ct.c,v 1.3 2002/01/06 16:35:48 jon Exp $
  *
  * Count the non-zero elements in a matrix
  *
@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "count.h"
+#include "endian.h"
 
 static const char *name = "zct";
 
@@ -23,6 +24,7 @@ int main(int argc, const char * const argv[])
     ct_usage();
     exit(1);
   }
+  endian_init();
   total = count(argv[1], name);
   printf("%u\n", total);
   return 0;

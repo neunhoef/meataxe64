@@ -1,5 +1,5 @@
 /*
- * $Id: mop.h,v 1.6 2001/10/13 19:33:03 jon Exp $
+ * $Id: mop.h,v 1.7 2002/01/06 16:35:48 jon Exp $
  *
  * Monster operations for meataxe
  *
@@ -10,10 +10,11 @@
 #ifndef included__mop
 #define included__mop
 
-extern unsigned char vectemp[24712];
+#define VECLEN 24712
+extern unsigned char vectemp[VECLEN];
 extern unsigned long ptr1, ptr2;
 extern int PRINT;
-extern unsigned char  vec1[24712],vec2[24712];
+extern unsigned char vec1[VECLEN], vec2[VECLEN];
 
 #define l729 ((((729-1)/4)/sizeof(long))+1)
 #define l90 ((((90-1)/4)/sizeof(long))+1)
@@ -41,9 +42,9 @@ extern suzel A, B;
 
 extern void FTOV(unsigned char *a, unsigned int b, unsigned char c);
 
-extern void FGAP(unsigned char *d, unsigned char *e, unsigned int f, unsigned int g);
+extern void FGAP(const unsigned char *d, unsigned char *e, unsigned int f, unsigned int g);
 
-extern void FUNGAP(unsigned char *d, unsigned char *e, unsigned int f, unsigned int g);
+extern void FUNGAP(const unsigned char *d, unsigned char *e, unsigned int f, unsigned int g);
 
 extern void init(void);
 

@@ -1,5 +1,5 @@
 /*
- * $Id: zrn.c,v 1.1 2001/11/12 13:43:38 jon Exp $
+ * $Id: zrn.c,v 1.2 2002/01/06 16:35:48 jon Exp $
  *
  * Compute the rank of a matrix
  *
@@ -31,7 +31,9 @@ int main(int argc, const char * const argv[])
     memory = strtoul(argv[2], NULL, 0);
   }
   memory_init(name, memory);
-  n = rank(argv[1], name);
+  if (0 == rank(argv[1], &n, name)) {
+    exit(1);
+  }
   printf("%d\n", n);
   memory_dispose();
   return 0;

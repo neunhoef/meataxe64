@@ -1,5 +1,5 @@
 /*
- * $Id: ident.c,v 1.5 2001/11/29 01:13:09 jon Exp $
+ * $Id: ident.c,v 1.6 2002/01/06 16:35:48 jon Exp $
  *
  * Subroutine to generate identity matrix
  *
@@ -34,7 +34,6 @@ int ident(unsigned int prime, unsigned int nor, unsigned int noc,
   }
   nob = bits_of(prime);
   nod = digits_of(prime);
-  endian_init();
   h = header_create(prime, nob, nod, noc, nor);
   assert(NULL != h);
   len = header_get_len(h);

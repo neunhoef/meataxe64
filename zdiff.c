@@ -1,5 +1,5 @@
 /*
- * $Id: zdiff.c,v 1.1 2001/12/15 20:47:27 jon Exp $
+ * $Id: zdiff.c,v 1.2 2002/01/06 16:35:48 jon Exp $
  *
  * Find the differences between two matrices
  *
@@ -7,8 +7,9 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "memory.h"
 #include "diff.h"
+#include "endian.h"
+#include "memory.h"
 
 static const char *name = "zdiff";
 
@@ -29,6 +30,7 @@ int main(int argc, const char * const argv[])
   in1 = argv[1];
   in2 = argv[2];
   memory_init(name, 0);
+  endian_init();
   if (0 == diff(in1, in2, name)) {
     exit(1);
   }

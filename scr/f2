@@ -1,5 +1,5 @@
 #
-# $Id: f2,v 1.1 2001/12/01 10:46:02 jon Exp $
+# $Id: f2,v 1.2 2002/01/06 16:35:48 jon Exp $
 #
 # Script to perform A + BC + C
 #
@@ -20,7 +20,7 @@ if [ $# -ne 5 ]; then
   exit 1;
 fi
 if [ -e $1 -a -e $2 -a -e $3 ]; then
-  zmu $2 $3 ${5}_1
+  zmu $2 $3 ${5}_1 400
   if [ $? -ne 0 ]; then
     exit 1
   fi

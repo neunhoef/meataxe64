@@ -1,5 +1,5 @@
 /*
- * $Id: ead.c,v 1.5 2001/10/07 18:02:56 jon Exp $
+ * $Id: ead.c,v 1.6 2002/01/06 16:35:48 jon Exp $
  *
  * Exploded add
  *
@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "add.h"
+#include "endian.h"
 #include "files.h"
 #include "map.h"
 #include "memory.h"
@@ -33,6 +34,7 @@ int main(int argc,  const char *const argv[])
   unsigned int i, j;
   const char **names1, **names2, **names3;
   memory_init(name, 0);
+  endian_init();
   /******  First check the number of input arguments  */
   if (argc != 4) {
     ead_usage();

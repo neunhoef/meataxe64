@@ -1,5 +1,5 @@
 /*
- * $Id: mop.c,v 1.19 2001/11/07 22:35:27 jon Exp $
+ * $Id: mop.c,v 1.20 2002/01/06 16:35:48 jon Exp $
  *
  * Monster operations for meataxe
  *
@@ -14,12 +14,12 @@
 #include <assert.h>
 #include "rows.h"
 
-unsigned char vectemp[24712];
+unsigned char vectemp[VECLEN];
 unsigned long ptr1, ptr2;
 int PRINT;
-unsigned char vec1[24712], vec2[24712];
+unsigned char vec1[VECLEN], vec2[VECLEN];
 static char suz1head[8], suz2head[8];
-static unsigned char vorvec[24712];
+static unsigned char vorvec[VECLEN];
 static unsigned char s90head[12];
 static unsigned char s729head[12];
 static unsigned char s142head[12];
@@ -42,12 +42,14 @@ suzel A, B;
 static unsigned char FFRV(const unsigned char *a, unsigned int b)
 {
   unsigned char c;
+  assert(NULL != a);
   c = a[b/4];
   return (c>>(2*(3-(b%4))))&3;
 }
 static unsigned char FFRV2(const unsigned char *a, unsigned int b)
 {
   unsigned char c;
+  assert(NULL != a);
   c =  a[(b>>3)];
   return ( c >> ( 7 - (b&7) ) ) & 1;
 }
@@ -56,6 +58,7 @@ void FTOV(unsigned char *a, unsigned int b, unsigned char c)
 {
   unsigned char f;
   unsigned int d, e;
+  assert(NULL != a);
   d = b/4;
   e = 3-(b%4);
   f = a[d];
@@ -64,17 +67,21 @@ void FTOV(unsigned char *a, unsigned int b, unsigned char c)
   return;
 }
 
-void FGAP(unsigned char *d, unsigned char *e, unsigned int f, unsigned int g)
+void FGAP(const unsigned char *d, unsigned char *e, unsigned int f, unsigned int g)
 {
   unsigned int h;
+  assert(NULL != d);
+  assert(NULL != e);
   for (h = 0; h < f; h++)
     FTOV(e, ptr2++, FFRV(d, ptr1++));
   ptr2 += g;
 }
 
-void FUNGAP(unsigned char *d, unsigned char *e, unsigned int f, unsigned int g)
+void FUNGAP(const unsigned char *d, unsigned char *e, unsigned int f, unsigned int g)
 {
   unsigned int h;
+  assert(NULL != d);
+  assert(NULL != e);
   for (h = 0; h < f; h++)
     FTOV(e, ptr2++, FFRV(d, ptr1++));
   ptr1 += g;
@@ -219,6 +226,8 @@ static void rdvec(const char *filnam, unsigned char *vecin)
 {
   FILE *f;
   unsigned int i;
+  assert(NULL != filnam);
+  assert(NULL != vecin);
   f = fopen(filnam, "rb");
   if (f == NULL) {
     printf("File %s does not exist!\n", filnam);
@@ -226,7 +235,7 @@ static void rdvec(const char *filnam, unsigned char *vecin)
   }
   fread(vectemp, 1, 12, f);
   fread(vectemp, 1, 24611, f);
-  memset(vecin, 0, 24712);
+  memset(vecin, 0, VECLEN);
   ptr1 = 0;
   ptr2 = 0;
   for (i = 0; i < 90; i++)
@@ -264,6 +273,8 @@ void rdsuz1(suzel m, const char *fn)
   unsigned char *ptrc;
   unsigned int i, j;
   unsigned char c[3];
+  assert(NULL != m);
+  assert(NULL != fn);
   m->greased = 0;
   m->inout = 0;
   f = fopen(fn, "rb");
@@ -312,6 +323,7 @@ static void rdT(const char *fn)
   unsigned char c[4];
   FILE *f;
   char *ptr;
+  assert(NULL != fn);
   f = fopen(fn, "rb");
   if (f == NULL) {
     printf("File %s does not exist\n", fn);
@@ -363,6 +375,7 @@ static int grease(suzel m)
   unsigned char uc;
   char *ptc1, *ptc2, *ptc3;
   long *ptl1, *ptl2, *ptl3;
+  assert(NULL != m);
   if (m->greased == 1) return(1);
   ptl1 = m->m729;
   ptl2 = m->w729;
@@ -411,8 +424,11 @@ void vecsuz(const unsigned char *vecin, suzel m, unsigned char *vecout)
   unsigned char entry, bact;
   unsigned char *ptc1, *ptc2, *ptc3;
   unsigned int *ptl1, *ptl2, *ptl3, *ptl2w, *ptl2ww;
+  assert(NULL != vecin);
+  assert(NULL != m);
+  assert(NULL != vecout);
   if (m->greased == 0) grease(m);
-  memset(vecout, 0, 24712);
+  memset(vecout, 0, VECLEN);
   j = 0;
   ptl1 = (unsigned int *)t729;
   for (i = 0; i < 90; i++) {
@@ -516,7 +532,9 @@ void vecT(unsigned char *vecin, unsigned char *vecout)
   unsigned char *ptc1;
   unsigned int *ptl3;
 
-  memset(vecout, 0, 24712);
+  assert(NULL != vecin);
+  assert(NULL != vecout);
+  memset(vecout, 0, VECLEN);
   for (j = 0; j < 87750; j++) {
     long k = Tperm[j];
     if (k == -1) continue;
@@ -607,6 +625,9 @@ void suzmult(suzel a, suzel b, suzel c)
   unsigned char uc;
   unsigned char *ptc1, *ptc2, *ptc3;
   unsigned int *ptl1, *ptl2, *ptl2a, *ptl2w, *ptl2ww, *ptl3;
+  assert(NULL != a);
+  assert(NULL != b);
+  assert(NULL != c);
   cpsuz(b, suzwork);
 
   if (a->greased == 0) grease(a);
@@ -711,13 +732,14 @@ void suzmult(suzel a, suzel b, suzel c)
 unsigned int suzor(suzel a)
 {
   unsigned int i;
+  assert(NULL != a);
   vecsuz(vorvec, a, vec2);
   for (i = 1; i <= 119; i++) {
-    if(0 == memcmp(vec2, vorvec, 24712)) {
+    if(0 == memcmp(vec2, vorvec, VECLEN)) {
       if (PRINT == 1) printf("Order is %d\n", i);
       return(i);
     }
-    memcpy(vec1, vec2, 24712);
+    memcpy(vec1, vec2, VECLEN);
     vecsuz(vec1, a, vec2);
   }
   return(120);

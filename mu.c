@@ -1,5 +1,5 @@
 /*
- * $Id: mu.c,v 1.7 2001/10/16 22:55:53 jon Exp $
+ * $Id: mu.c,v 1.8 2002/01/06 16:35:48 jon Exp $
  *
  * Multiply two matrices to give a third
  *
@@ -8,9 +8,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "endian.h"
 #include "memory.h"
-#include "utils.h"
 #include "mul.h"
+#include "utils.h"
 
 static const char *name = "zmu";
 
@@ -37,6 +38,7 @@ int main(int argc, const char * const argv[])
     memory = strtoul(argv[4], NULL, 0);
   }
   memory_init(name, memory);
+  endian_init();
   if (0 == mul(in1, in2, out, "mu")) {
     exit(1);
   }

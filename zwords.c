@@ -1,5 +1,5 @@
 /*
- * $Id: zwords.c,v 1.1 2001/12/04 23:14:47 jon Exp $
+ * $Id: zwords.c,v 1.2 2002/01/06 16:35:48 jon Exp $
  *
  * Compute words in two matrices
  *
@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include "endian.h"
 #include "memory.h"
 #include "mul.h"
 #include "utils.h"
@@ -48,15 +49,15 @@ int main(int argc, const char * const argv[])
     fprintf(stderr, "%s: no words requested\n", name);
     exit(1);
   }
-  /* Don't worry if either is zero */
   memory_init(name, memory);
+  endian_init();
   i = 1;
   m = 0;
   j = strlen(out);
   k = j + 13;
   n += 1;
-  names = my_malloc((n) * sizeof(const char *));
-  words = my_malloc((n) * sizeof(const char *));
+  names = my_malloc(n * sizeof(const char *));
+  words = my_malloc(n * sizeof(const char *));
   words[0] = "A";
   names[0] = in1;
   while (i < n) {
@@ -67,10 +68,7 @@ int main(int argc, const char * const argv[])
     const char *chosen_letter;
     unsigned int word_len;
     sprintf(buf, "%s%d", out, i - 1);
-    a = my_malloc(k);
-    strcpy(a, buf);
-    free(buf);
-    names[i] = a;
+    names[i] = buf;
     while (1) {
       const char *word = words[cur_word];
       char letter = (0 == m) ? 'A' : 'B';

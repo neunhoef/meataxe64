@@ -1,5 +1,5 @@
 /*
- * $Id: ect.c,v 1.1 2001/10/06 23:33:12 jon Exp $
+ * $Id: ect.c,v 1.2 2002/01/06 16:35:48 jon Exp $
  *
  * Count the non-zero elements in an exploded matrix
  *
@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "endian.h"
 #include "files.h"
 #include "map.h"
 #include "count.h"
@@ -29,6 +30,7 @@ int main(int argc, const char *const argv[])
     exit(1);
   }
   input_map(name, argv[1], &col_pieces, &row_pieces, &names);
+  endian_init();
   for (i = 0; i < row_pieces; i++) {
     for (j = 0; j < col_pieces; j++) {
       ototal = total;

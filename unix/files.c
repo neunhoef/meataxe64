@@ -1,5 +1,5 @@
 /*
- * $Id: files.c,v 1.3 2001/11/07 22:35:27 jon Exp $
+ * $Id: files.c,v 1.4 2002/01/06 16:35:48 jon Exp $
  *
  * file system stuff for unix
  *
@@ -68,4 +68,15 @@ const char *pathname(const char *dirname, const char *filename)
     strcat(result, filename);
   }
   return result;
+}
+
+unsigned long file_size(const char *filename)
+{
+  struct stat buf;
+  int i = stat(filename, &buf);
+  if (i) {
+    return 0;
+  } else {
+    return buf.st_size;
+  }
 }

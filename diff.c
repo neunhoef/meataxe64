@@ -1,5 +1,5 @@
 /*
- * $Id: diff.c,v 1.1 2001/12/15 20:47:27 jon Exp $
+ * $Id: diff.c,v 1.2 2002/01/06 16:35:48 jon Exp $
  *
  * Function to find the differences between two matrices
  *
@@ -24,7 +24,6 @@ int diff(const char *m1, const char *m2, const char *name)
   const header *h1, *h2;
   unsigned int *row1, *row2;
 
-  endian_init();
   if (0 == open_and_read_binary_header(&inp1, &h1, m1, name) ||
       0 == open_and_read_binary_header(&inp2, &h2, m2, name)) {
     if (NULL != inp1) {

@@ -1,5 +1,5 @@
 /*
- * $Id: ad.c,v 1.5 2001/10/16 22:55:53 jon Exp $
+ * $Id: ad.c,v 1.6 2002/01/06 16:35:48 jon Exp $
  *
  * Add two matrices to give a third
  *
@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "endian.h"
 #include "memory.h"
 #include "add.h"
 
@@ -31,6 +32,7 @@ int main(int argc, const char * const argv[])
   in2 = argv[2];
   out = argv[3];
   memory_init(name, 0);
+  endian_init();
   if (0 == add(in1, in2, out, name)) {
     exit(1);
   }

@@ -1,5 +1,5 @@
 /*
- * $Id: rn.c,v 1.10 2001/12/15 20:47:27 jon Exp $
+ * $Id: rn.c,v 1.11 2002/01/06 16:35:48 jon Exp $
  *
  * Compute the rank of a matrix
  *
@@ -16,15 +16,16 @@
 #include "memory.h"
 #include "read.h"
 
-unsigned int rank(const char *m, const char *name)
+int rank(const char *m, unsigned int *r, const char *name)
 {
   FILE *inp;
   const header *h;
-  unsigned int prime, nob, nor, len, n, r, **mat;
+  unsigned int prime, nob, nor, len, n, **mat;
   int *map;
   grease_struct grease;
   assert(NULL != m);
   assert(NULL != name);
+  assert(NULL != r);
   if (0 == open_and_read_binary_header(&inp, &h, m, name)) {
     exit(1);
   }
@@ -33,13 +34,13 @@ unsigned int rank(const char *m, const char *name)
   nor = header_get_nor(h);
   len = header_get_len(h);
   header_free(h);
-  r = memory_rows(len, 100);
-  if (memory_rows(len, 900) < nor || r < prime) {
+  n = memory_rows(len, 100);
+  if (memory_rows(len, 900) < nor || n < prime) {
     fprintf(stderr, "%s: cannot allocate %d rows for %s, terminating\n", name, nor + prime, m);
     fclose(inp);
     exit(2);
   }
-  (void)grease_level(prime, &grease, r);
+  (void)grease_level(prime, &grease, n);
   /* Now read the matrix */
   mat = matrix_malloc(nor);
   for (n = 0; n < nor; n++) {
@@ -48,12 +49,12 @@ unsigned int rank(const char *m, const char *name)
   if (0 == endian_read_matrix(inp, mat, len, nor)) {
     fprintf(stderr, "%s: cannot read matrix for %s, terminating\n", name, m);
     fclose(inp);
-    exit(1);
+    return 0;
   }
-  echelise(mat, nor, &n, &map, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, 0, name);
+  echelise(mat, nor, r, &map, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, 0, name);
   matrix_free(mat);
   free(map);
   fclose(inp);
-  return n;
+  return 1;
 }
 

@@ -1,5 +1,5 @@
 /*
- * $Id: te.c,v 1.2 2001/12/11 01:00:44 jon Exp $
+ * $Id: te.c,v 1.3 2002/01/06 16:35:48 jon Exp $
  *
  * Function to tensor two matrices to give a third
  *
@@ -23,9 +23,9 @@ static int cleanup(FILE *inp1, FILE *inp2, FILE *outp)
 {
   if (NULL != inp1)
     fclose(inp1);
-  if (NULL != inp1)
+  if (NULL != inp2)
     fclose(inp2);
-  if (NULL != inp1)
+  if (NULL != outp)
     fclose(outp);
   return 0;
 }

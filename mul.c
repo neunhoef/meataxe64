@@ -1,5 +1,5 @@
 /*
- * $Id: mul.c,v 1.21 2001/12/23 23:31:42 jon Exp $
+ * $Id: mul.c,v 1.22 2002/01/06 16:35:48 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
@@ -31,9 +31,9 @@ static int cleanup(FILE *inp1, FILE *inp2, FILE *outp)
 {
   if (NULL != inp1)
     fclose(inp1);
-  if (NULL != inp1)
+  if (NULL != inp2)
     fclose(inp2);
-  if (NULL != inp1)
+  if (NULL != outp)
     fclose(outp);
   return 0;
 }
@@ -52,7 +52,6 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
   row_adder adder;
   row_incer incer;
   grease_struct grease;
-  endian_init();
   if (0 == open_and_read_binary_header(&inp1, &h1, m1, name) ||
       0 == open_and_read_binary_header(&inp2, &h2, m2, name)) {
     if (NULL != h1) {

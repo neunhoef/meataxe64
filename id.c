@@ -1,5 +1,5 @@
 /*
- * $Id: id.c,v 1.9 2001/10/16 22:55:53 jon Exp $: ad.c,v 1.1 2001/08/30 18:31:45 jon Exp $
+ * $Id: id.c,v 1.10 2002/01/06 16:35:48 jon Exp $: ad.c,v 1.1 2001/08/30 18:31:45 jon Exp $
  *
  * Generate identity matrix
  *
@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "endian.h"
 #include "memory.h"
 #include "ident.h"
 
@@ -32,6 +33,7 @@ int main(int argc, const char * const argv[])
   nor = strtoul(argv[2], NULL, 0);
   noc = strtoul(argv[3], NULL, 0);
   memory_init(name, 0);
+  endian_init();
   if (0 == ident(prime, nor, noc, out, name)) {
     exit(1);
   }

@@ -1,5 +1,5 @@
 #
-# $Id: split_all,v 1.2 2001/12/27 01:17:12 jon Exp $
+# $Id: split_all,v 1.3 2002/01/06 16:35:48 jon Exp $
 #
 # Script to split a representation completely
 #
@@ -34,9 +34,9 @@ if [ 1 -eq $ret ]; then
   exit 1
 elif [ 255 -eq $ret ]; then
   echo "irreducible module $a $b found"
-#
-# TODO: classify the irreducible
-#
+  new_irred $a $b
+  ret=$?
+# echo new_irred returns $ret
   exit 0
 elif [ 254 -eq $ret ]; then
   echo "unable to split module $a $b (unexpected)"

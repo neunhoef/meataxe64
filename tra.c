@@ -1,5 +1,5 @@
 /*
- * $Id: tra.c,v 1.7 2001/12/11 01:00:44 jon Exp $
+ * $Id: tra.c,v 1.8 2002/01/06 16:35:48 jon Exp $
  *
  * Function to transpose a matrix
  *
@@ -30,7 +30,6 @@ int tra(const char *m1, const char *m2, const char *name)
   assert(NULL != m1);
   assert(NULL != m2);
   assert(NULL != name);
-  endian_init();
   if (0 == open_and_read_binary_header(&input, &h1, m1, name)) {
     return 0;
   }
