@@ -1,5 +1,5 @@
 /*
- * $Id: powers.c,v 1.9 2002/07/01 11:06:30 jon Exp $
+ * $Id: powers.c,v 1.10 2002/07/05 20:43:08 jon Exp $
  *
  * Function to compute tensor powers of a matrix, from file
  *
@@ -157,7 +157,7 @@ static void make_row(unsigned int nob, unsigned int i, unsigned int j,
       unsigned int elt3 = get_element_from_row_with_params(nob, l, mask, elts_per_word, rows[i]);
       unsigned int elt4 = get_element_from_row_with_params(nob, l, mask, elts_per_word, rows[j]);
       unsigned int e1 = (*prime_operations.mul)(elt1, elt4);
-      unsigned int e2 = (*prime_operations.negate)((*prime_operations.mul)(elt2, elt3));
+      unsigned int e2 = (*prime_operations.mul)(elt2, elt3);
       unsigned int e = (*prime_operations.add)(e1, e2);
       put_element_to_row(nob, offset, row_out, e);
       offset++;

@@ -6,7 +6,6 @@ Optimise monst by reversing bit order
 Investigate better matrix multiplications
 Think about orthogonal group sign
 Implement a verbosity level for all programs, with -v <n>. Add a standard parser to deal with this
-Debug zsymsq failure on Co2 23 mod 3
 Investigate rename failure on large files from zscript
 Consider allowing maps into ztsp and ztspf
 Analyse unexpected split failure
