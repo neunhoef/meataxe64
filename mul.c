@@ -1,5 +1,5 @@
 /*
- * $Id: mul.c,v 1.3 2001/09/04 23:00:12 jon Exp $
+ * $Id: mul.c,v 1.4 2001/09/08 12:40:55 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
@@ -34,7 +34,7 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
   unsigned int ** grease_rows;
   row_ops row_operations;
   row_adder adder;
-
+  scaled_row_adder scaled_adder;
   endian_init();
   inp1 = fopen(m1, "rb");
   if (NULL == inp1) {
@@ -92,6 +92,7 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
     return 0;
   }
   adder = row_operations.adder;
+  scaled_adder = row_operations.scaled_adder;
   if (0 == grease(nob, nor1, noc1, noc2, prime, &step)) {
     fprintf(stderr, "%s: cannot compute grease level for %s, %s, terminating\n", name, m1, m2);
     fclose(inp1);
@@ -129,8 +130,8 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
     return 0;
   }
   /* Allocate the grease space */
-  if (0 == grease_allocate_rows(step, prime, nob, noc2,
-                                &grease_row_count, &grease_rows)) {
+  if (step > 1 && 0 == grease_allocate_rows(step, prime, nob, noc2,
+                                            &grease_row_count, &grease_rows)) {
     fprintf(stderr, "%s: unable to allocate grease, terminating\n", name);
     fclose(inp1);
     fclose(inp2);
@@ -142,7 +143,7 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
     unsigned int size = (step + i <= noc1) ? step : noc1 - i;
     unsigned int word_offset, bit_offset, mask;
     element_access_init(nob, i, size, &word_offset, &bit_offset, &mask);
-    if (0 == grease_make_rows(rows2, size, prime, noc2, i, &grease_rows))
+    if (step > 1 && 0 == grease_make_rows(rows2, size, prime, noc2, i, &grease_rows))
     {
       fprintf(stderr, "%s: unable to compute grease, terminating\n", name);
       fclose(inp1);
@@ -157,8 +158,14 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
         row_init(rows3[j], nob, noc2);
       }
       if (0 != elt) {
-        unsigned int *grease_row = grease_rows[elt-1];
-        if (0 == (*adder)(rows3[j], grease_row, rows3[j], noc2)) {
+        int res;
+        if (step > 1) {
+          res = (*adder)(rows3[j], grease_rows[elt-1], rows3[j], noc2);
+        } else {
+          res = (1 == elt) ? (*adder)(rows3[j], rows2[i], rows3[j], noc2) :
+              (*scaled_adder)(rows3[j], rows2[i], rows3[j], noc2, elt);
+        }
+        if (0 == res) {
           fprintf(stderr, "%s: add failed, terminating\n", name);
           fclose(inp1);
           fclose(inp2);

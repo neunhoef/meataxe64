@@ -1,5 +1,5 @@
 /*
- * $Id: add.c,v 1.4 2001/09/04 23:00:12 jon Exp $
+ * $Id: add.c,v 1.5 2001/09/08 12:40:55 jon Exp $
  *
  * Function to add two matrices to give a third
  *
@@ -27,6 +27,8 @@ int add(const char *m1, const char *m2, const char *m3, const char *name)
   unsigned int i;
   header h1, h2;
   unsigned int *row1, *row2, *row3;
+  row_ops row_operations;
+  row_adder adder;
 
   endian_init();
   inp1 = fopen(m1, "rb");
@@ -47,7 +49,7 @@ int add(const char *m1, const char *m2, const char *m3, const char *name)
     fclose(inp2);
     return 0;
   }
-  if (0 == read_text_header(inp1, &h1, m1) ||
+  if (0 == read_binary_header(inp1, &h1, m1) ||
       0 == read_binary_header(inp2, &h2, m2)) {
     fclose(inp1);
     fclose(inp2);
@@ -68,6 +70,14 @@ int add(const char *m1, const char *m2, const char *m3, const char *name)
     fclose(outp);
     return 0;
   }
+  if (0 == rows_init(prime, &row_operations)) {
+    fprintf(stderr, "%s: cannot initialise row operations for %s, %s, terminating\n", name, m1, m2);
+    fclose(inp1);
+    fclose(inp2);
+    fclose(outp);
+    return 0;
+  }
+  adder = row_operations.adder;
   if (0 == write_binary_header(outp, h1, m3)) {
     fprintf(stderr, "%s cannot write header to %s, terminating\n", name, m3);
     fclose(inp1);
@@ -99,7 +109,7 @@ int add(const char *m1, const char *m2, const char *m3, const char *name)
       fclose(outp);
       return 0;
     }
-    if (0 == row_add(row1, row2, row3, prime, nob, noc)) {
+    if (0 == (*adder)(row1, row2, row3, noc)) {
       fprintf(stderr, "%s addition not supported for %d, terminating\n", name, prime);
       fclose(inp1);
       fclose(inp2);

@@ -1,5 +1,5 @@
 /*
- * $Id: elements.c,v 1.5 2001/09/05 22:47:25 jon Exp $
+ * $Id: elements.c,v 1.6 2001/09/08 12:40:55 jon Exp $
  *
  * Element manipulation for meataxe
  *
@@ -72,8 +72,8 @@ void element_access_init(unsigned int nob, unsigned int from, unsigned int size,
   assert(0 != size);
   elts_per_word = bits_in_unsigned_int / nob;
   *word_offset = from / elts_per_word;
-  *bit_offset = from % elts_per_word;
-  assert(*bit_offset + bits <= elts_per_word);
+  *bit_offset = (from % elts_per_word) * nob;
+  assert(*bit_offset + bits <= bits_in_unsigned_int);
   *mask = (1 << bits) - 1;
 }
 

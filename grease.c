@@ -1,5 +1,5 @@
 /*
- * $Id: grease.c,v 1.2 2001/09/04 23:00:12 jon Exp $
+ * $Id: grease.c,v 1.3 2001/09/08 12:40:55 jon Exp $
  *
  * Functions to grease matrix rows
  *
@@ -19,7 +19,7 @@ static unsigned grease_table_size;
 static unsigned grease_table_rows;
 static unsigned int **grease_table;
 static int *grease_table_alloc;
-static row_ops row_operations = { NULL };
+static row_ops row_operations = { NULL, NULL };
 
 static int pow(unsigned int n, unsigned int index,
                unsigned int *res)
@@ -114,7 +114,8 @@ int grease(unsigned int nob, unsigned int nor1, unsigned int noc1,
   assert(NULL != step);
   NOT_USED(nor1);
   NOT_USED(noc2);
-  *step = grease_calc(noc1, prime, UINT_MAX, nob);
+  /* Only do this for p = 2 at present */
+  *step = (2 == prime) ? grease_calc(noc1, prime, UINT_MAX, nob) : 1;
   return 1;
 }
 

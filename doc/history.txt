@@ -4,3 +4,5 @@
 20010902 - first mu for GF2
 20010904 - first grease for GF2
 20010905 - first input for GF3
+20010906 - first add for GF3
+20010908 - first successful multiply for GF3
