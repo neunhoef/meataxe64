@@ -1,5 +1,5 @@
 /*
- * $Id: sums.c,v 1.7 2002/06/25 10:30:12 jon Exp $
+ * $Id: sums.c,v 1.8 2002/07/03 12:06:54 jon Exp $
  *
  * Function to compute linear sums of two matices
  *
@@ -220,7 +220,7 @@ int sums(const char *in1, const char *in2, const char *out,
           if (0 == rank(elts[pos], &s, name)) {
             exit(1);
           }
-          res = (*acceptor)(s, nor);
+          res = (*acceptor)(s, nor, elts[pos], elt_names[pos]);
           if (res & 1) {
             printf("%s: found element %s of nullity %d, form %s\n",
                    name, elts[pos], nor - s, elt_names[pos]);
@@ -236,6 +236,5 @@ int sums(const char *in1, const char *in2, const char *out,
     i++;
   }
   /* Failed to find a suitable element */
-  printf("Failed to find a suitable element\n");
   return 1;
 }

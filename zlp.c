@@ -1,7 +1,7 @@
 /*
- * $Id: zvp.c,v 1.3 2002/07/03 12:06:54 jon Exp $
+ * $Id: zlp.c,v 1.1 2002/07/03 12:06:54 jon Exp $
  *
- * Permute some vectors under two generators
+ * Projective (line) permute some vectors under two generators
  *
  */
 
@@ -10,9 +10,9 @@
 #include "memory.h"
 #include "vp.h"
 
-static const char *name = "zvp";
+static const char *name = "zlp";
 
-static void vp_usage(void)
+static void lp_usage(void)
 {
   fprintf(stderr, "%s: usage: %s <in_file> <out_file> <gen_a> <gen_b> <out a> <out b> [<memory>]\n", name, name);
 }
@@ -23,7 +23,7 @@ int main(int argc, const char * const argv[])
   unsigned int degree;
 
   if (7 != argc && 8 != argc) {
-    vp_usage();
+    lp_usage();
     exit(1);
   }
   endian_init();
@@ -31,7 +31,7 @@ int main(int argc, const char * const argv[])
     memory = strtoul(argv[7], NULL, 0);
   }
   memory_init(name, memory);
-  degree = permute(argv[1], argv[2], argv[3], argv[4], argv[5], argv[6], 0, name);
+  degree = permute(argv[1], argv[2], argv[3], argv[4], argv[5], argv[6], 1, name);
   printf("%d\n", degree);
   memory_dispose();
   return 0;

@@ -160,3 +160,4 @@ skew seventh
 20020701 - New faster zvp, and some script improvements
 20020702 - Made split, base and new_irred_with_orders more robust
 20020702 - Made zdiff handle maps
+20020703 - Add zfln for find least nullity, and zlp for line permute

@@ -1,5 +1,5 @@
 /*
- * $Id: sumsf.c,v 1.2 2002/06/25 10:30:12 jon Exp $
+ * $Id: sumsf.c,v 1.3 2002/07/03 12:06:54 jon Exp $
  *
  * Function to compute linear sums of two matices
  *
@@ -214,7 +214,7 @@ int sumsf(const char *in1, const char *in2, const char *out,
 */
           s = rank(elts[pos], dir, NULL, 0, 0, name);
           /* Compute rank, using external files */
-          res = (*acceptor)(s, nor);
+          res = (*acceptor)(s, nor, elts[pos], elt_names[pos]);
           if (res & 1) {
             printf("%s: found element %s of nullity %d, form %s\n",
                    name, elts[pos], nor - s, elt_names[pos]);

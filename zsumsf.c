@@ -1,5 +1,5 @@
 /*
- * $Id: zsumsf.c,v 1.1 2002/05/26 00:47:20 jon Exp $
+ * $Id: zsumsf.c,v 1.2 2002/07/03 12:06:54 jon Exp $
  *
  * Compute sums in the group algebra in two matrices
  *
@@ -10,6 +10,7 @@
 #include "endian.h"
 #include "memory.h"
 #include "sumsf.h"
+#include "utils.h"
 
 static const char *name = "zsumsf";
 
@@ -20,8 +21,10 @@ static void sumsf_usage(void)
   fprintf(stderr, "%s: usage: %s <in_file a> <in_file b> <out_file_stem> <tmp dir> <order a> <order b> <n> <nullity> [<memory>]\n", name, name);
 }
 
-static int acceptor(unsigned int rank, unsigned int nor)
+static int acceptor(unsigned int rank, unsigned int nor, const char *file, const char *form)
 {
+  NOT_USED(file);
+  NOT_USED(form);
   if (rank < nor && rank + nullity >= nor) {
     return 3;
   } else {
@@ -53,6 +56,9 @@ int main(int argc, const char * const argv[])
   endian_init();
   memory_init(name, memory);
   res = sumsf(argv[1], argv[2], argv[3], argv[4], o_a, o_b, n, 0, name, &acceptor);
+  if (0 != res) {
+    printf("Failed to find a suitable element\n");
+  }
   memory_dispose();
   return (0 != res);
 }

@@ -1,12 +1,11 @@
 /*
- * $Id: vp.c,v 1.6 2002/07/01 18:02:37 jon Exp $
+ * $Id: vp.c,v 1.7 2002/07/03 12:06:54 jon Exp $
  *
  * Function to permute some vectors under two generators
  *
  */
 
 #include "vp.h"
-#include "clean.h"
 #include "elements.h"
 #include "endian.h"
 #include "grease.h"
@@ -80,8 +79,8 @@ static unsigned int hash_fn(unsigned int *row, unsigned int len)
 }
 
 unsigned int permute(const char *in, const char *out, const char *a,
-                     const char *b, const char *a_out,
-                     const char *b_out, const char *name)
+                     const char *b, const char *a_out, const char *b_out,
+                     int projective, const char *name)
 {
   FILE *inp = NULL, *outp = NULL, *f_a = NULL, *f_b = NULL;
   const header *h_in, *h_a, *h_b;
@@ -195,6 +194,17 @@ unsigned int permute(const char *in, const char *out, const char *a,
     fprintf(stderr, "%s: unable to allocate grease, terminating\n", name);
     cleanup(inp, f_a, f_b);
   }
+  if (projective) {
+    for (d = 0; d < nor; d++) {
+      unsigned int pos;
+      unsigned int elt = first_non_zero(rows[d], nob, len, &pos);
+      NOT_USED(pos);
+      if (0 != elt && 1 != elt) {
+        elt = prime_operations.invert(elt);
+        row_operations.scaler_in_place(rows[d], len, elt);
+      }
+    }
+  }
   qsort(record_ptrs, nor, sizeof(vec *), &compar);
   while (nor < max_rows && (gen_a.nor < nor || gen_b.nor < nor)) {
     unsigned int rows_to_do = max_rows - nor;
@@ -209,7 +219,17 @@ unsigned int permute(const char *in, const char *out, const char *a,
       exit(1);
     }
     for (i = 0; i < rows_to_do; i++) {
-      unsigned int hash = hash_fn(rows[nor + i], hash_len);
+      unsigned int hash;
+      if (projective) {
+        unsigned int pos;
+        unsigned int elt = first_non_zero(rows[nor + i], nob, len, &pos);
+        NOT_USED(pos);
+        if (0 != elt && 1 != elt) {
+          elt = prime_operations.invert(elt);
+          row_operations.scaler_in_place(rows[nor + i], len, elt);
+        }
+      }
+      hash = hash_fn(rows[nor + i], hash_len);
       row_vec.hash = hash;
       row_vec.index = 0xffffffff;
       row_vec.row = rows[nor + i];

@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.63 2002/07/02 11:05:46 jon Exp $
+# $Id: makefile,v 1.64 2002/07/03 12:06:54 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -36,6 +36,7 @@ ZDIFF_TARGET=	zdiff
 ZEX_TARGET=	zex
 ZEXPORT_TARGET=	zexport
 ZFE_TARGET=	zfe
+ZFLN_TARGET=	zfln
 ZFO_TARGET=	zfo
 ZID_TARGET=	zid
 ZIMPORT_TARGET=	zimport
@@ -43,6 +44,7 @@ ZIP_TARGET=	zip
 ZIV_TARGET=	ziv
 ZIVF_TARGET=	zivf
 ZJOIN_TARGET=	zjoin
+ZLP_TARGET=	zlp
 ZLV_TARGET=	zlv
 ZMSP_TARGET=	zmsp
 ZMSPF_TARGET=	zmspf
@@ -123,6 +125,7 @@ ZDIFF_MODULES=	diff elements endian header maps memory primes read rows utils wr
 ZEX_MODULES=	elements endian exrows files header map memory primes read rows utils write zex
 ZEXPORT_MODULES=	elements endian header memory primes read rows utils write zexport
 ZFE_MODULES=	elements endian extend extend_matrix header memory primes read rows utils write zfe
+ZFLN_MODULES=	add clean elements endian grease header ident map_or_row maps matrix memory mul primes read rn rows sums utils write zfln
 ZFO_MODULES=	elements endian header maps orbit primes read rows utils write zfo
 ZID_MODULES=	id ident elements endian header maps memory primes rows utils write
 ZIMPORT_MODULES=	elements endian header memory primes read rows utils write zimport
@@ -130,6 +133,7 @@ ZIP_MODULES=	elements endian header ipp memory primes read rows utils write
 ZIV_MODULES=	clean elements endian grease header iv maps matrix memory primes read rows utils write ziv
 ZIVF_MODULES=	clean elements endian grease header ivf maps matrix memory primes read rows system utils write zivf
 ZJOIN_MODULES=	elements endian header join  map_or_row maps memory primes read rows utils write zjoin
+ZLP_MODULES=	elements endian grease header maps matrix memory mul primes read rows vp utils write zlp
 ZLV_MODULES=	elements endian header lv matrix memory primes read rows ss_map utils write zlv
 ZMSP_MODULES=	clean elements endian grease header maps matrix memory msp mul primes read rows utils write zmsp
 ZMSPF_MODULES=	clean clean_file elements endian grease header maps matrix memory mspf mul primes read rows system utils write zmspf
@@ -210,6 +214,7 @@ MODULES=	$(DTOU_MODULES) \
 	$(ZEX_MODULES) \
 	$(ZEXPORT_MODULES) \
 	$(ZFE_MODULES) \
+	$(ZFLN_MODULES) \
 	$(ZFO_MODULES) \
 	$(ZID_MODULES) \
 	$(ZIMPORT_MODULES) \
@@ -217,6 +222,7 @@ MODULES=	$(DTOU_MODULES) \
 	$(ZIV_MODULES) \
 	$(ZIVF_MODULES) \
 	$(ZJOIN_MODULES) \
+	$(ZLP_MODULES) \
 	$(ZLV_MODULES) \
 	$(ZMSP_MODULES) \
 	$(ZMSPF_MODULES) \
@@ -386,6 +392,9 @@ include targets.txt
 TARGET:=ZFE
 include targets.txt
 
+TARGET:=ZFLN
+include targets.txt
+
 TARGET:=ZFO
 include targets.txt
 
@@ -405,6 +414,9 @@ TARGET:=ZIVF
 include targets.txt
 
 TARGET:=ZJOIN
+include targets.txt
+
+TARGET:=ZLP
 include targets.txt
 
 TARGET:=ZLV

@@ -1,5 +1,5 @@
 /*
- * $Id: zsums.c,v 1.6 2002/03/24 19:44:02 jon Exp $
+ * $Id: zsums.c,v 1.7 2002/07/03 12:06:54 jon Exp $
  *
  * Compute sums in the group algebra in two matrices
  *
@@ -10,6 +10,7 @@
 #include "endian.h"
 #include "memory.h"
 #include "sums.h"
+#include "utils.h"
 
 static const char *name = "zsums";
 
@@ -20,8 +21,10 @@ static void sums_usage(void)
   fprintf(stderr, "%s: usage: %s <in_file a> <in_file b> <out_file_stem> <order a> <order b> <n> <nullity> [<memory>]\n", name, name);
 }
 
-static int acceptor(unsigned int rank, unsigned int nor)
+static int acceptor(unsigned int rank, unsigned int nor, const char *file, const char *form)
 {
+  NOT_USED(file);
+  NOT_USED(form);
   if (rank < nor && rank + nullity >= nor) {
     return 3;
   } else {
@@ -53,6 +56,9 @@ int main(int argc, const char * const argv[])
   endian_init();
   memory_init(name, memory);
   res = sums(argv[1], argv[2], argv[3], o_a, o_b, n, 0, name, &acceptor);
+  if (0 != res) {
+    printf("Failed to find a suitable element\n");
+  }
   memory_dispose();
   return (0 != res);
 }

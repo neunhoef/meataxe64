@@ -1,5 +1,5 @@
 /*
- * $Id: zrranks.c,v 1.1 2002/03/24 19:44:02 jon Exp $
+ * $Id: zrranks.c,v 1.2 2002/07/03 12:06:54 jon Exp $
  *
  * Compute restricted sums in the group algebra in two matrices finding all of given nullity
  *
@@ -10,6 +10,7 @@
 #include "endian.h"
 #include "memory.h"
 #include "sums.h"
+#include "utils.h"
 
 static const char *name = "zrranks";
 
@@ -20,8 +21,10 @@ static void rranks_usage(void)
   fprintf(stderr, "%s: usage: %s <in_file a> <in_file b> <out_file_stem> <order a> <order b> <n> <nullity> <subfield order> [<memory>]\n", name, name);
 }
 
-static int acceptor(unsigned int rank, unsigned int nor)
+static int acceptor(unsigned int rank, unsigned int nor, const char *file, const char *form)
 {
+  NOT_USED(file);
+  NOT_USED(form);
   if ((0 == nullity && rank == nor) || (rank < nor && rank + nullity >= nor)) {
     return 1;
   } else {
@@ -55,5 +58,5 @@ int main(int argc, const char * const argv[])
   memory_init(name, memory);
   res = sums(argv[1], argv[2], argv[3], o_a, o_b, n, sub_order, name, &acceptor);
   memory_dispose();
-  return (0 != res);
+  return 0;
 }
