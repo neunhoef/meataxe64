@@ -1,5 +1,5 @@
 /*
- * $Id: rows.c,v 1.16 2002/09/24 20:39:43 jon Exp $
+ * $Id: rows.c,v 1.17 2002/10/04 17:16:03 jon Exp $
  *
  * Row manipulation for meataxe
  *
@@ -91,6 +91,20 @@ static void row_inc_2(const unsigned int *row1,
   } else {
     row_inc_2_sub(row1, row2, len);
   }
+}
+
+static unsigned int row_product_2(const unsigned int *row1, const unsigned int *row2, unsigned int len)
+{
+  unsigned int res = 0;
+  while (len > 0) {
+    unsigned int prod = *(row1++) & *(row2++);
+    len--;
+    while (0 != prod) {
+      res ^= (prod & 1);
+      prod >>= 1;
+    }
+  }
+  return res;
 }
 
 #ifndef NDEBUG
@@ -621,6 +635,16 @@ void row_init(unsigned int *row, unsigned int len)
   memset(row, 0, len * sizeof(unsigned int));
 }
 
+static unsigned int unimplemented_product(const unsigned int *row1, const unsigned int *row2, unsigned int len)
+{
+  NOT_USED(row1);
+  NOT_USED(row2);
+  NOT_USED(len);
+  fprintf(stderr, "unimplemented_product called, terminating\n");
+  exit(1);
+  return 0;
+}
+
 int rows_init(unsigned int prime, row_opsp ops)
 {
   if (2 == prime) {
@@ -630,6 +654,7 @@ int rows_init(unsigned int prime, row_opsp ops)
     ops->scaled_incer = NULL; /* Should never be called */
     ops->scaler = NULL; /* Should never be called */
     ops->scaler_in_place = NULL; /* Should never be called */
+    ops->product = &row_product_2;
     return 1;
   } else if (3 == prime) {
     ops->adder = &row_add_3;
@@ -638,6 +663,7 @@ int rows_init(unsigned int prime, row_opsp ops)
     ops->scaled_incer = &scaled_row_inc_3;
     ops->scaler = &row_scale_3;
     ops->scaler_in_place = &row_scale_in_place_3;
+    ops->product = &unimplemented_product;
     return 1;
   } else if (4 == prime) {
     ops->adder = &row_add_2;
@@ -646,6 +672,7 @@ int rows_init(unsigned int prime, row_opsp ops)
     ops->scaled_incer = &scaled_row_inc_4;
     ops->scaler = &row_scale_4;
     ops->scaler_in_place = &row_scale_in_place_4;
+    ops->product = &unimplemented_product;
     return 1;
   } else if (5 == prime) {
     ops->adder = &row_add_5;
@@ -654,6 +681,7 @@ int rows_init(unsigned int prime, row_opsp ops)
     ops->scaled_incer = &scaled_row_inc_5;
     ops->scaler = &row_scale_5;
     ops->scaler_in_place = &row_scale_in_place_5;
+    ops->product = &unimplemented_product;
     return 1;
   } else {
     return 0;

@@ -1,5 +1,5 @@
 /*
- * $Id: clean.c,v 1.15 2002/06/30 21:33:14 jon Exp $
+ * $Id: clean.c,v 1.16 2002/10/04 17:16:02 jon Exp $
  *
  * Cleaning and echilisation for meataxe
  *
@@ -19,7 +19,7 @@
 
 static prime_ops prime_operations = {0, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
 
-static row_ops row_operations = {NULL, NULL, NULL, NULL, NULL, NULL};
+static row_ops row_operations = {NULL, NULL, NULL, NULL, NULL, NULL, NULL};
 
 #define LAZY_GREASE 1
 
