@@ -1,5 +1,5 @@
 /*
- * $Id: ztco.c,v 1.2 2002/10/14 19:11:51 jon Exp $
+ * $Id: ztco.c,v 1.3 2003/03/17 00:15:49 jon Exp $
  *
  * Tensor condense
  *
@@ -39,7 +39,7 @@ int main(int argc, const char * const argv[])
   mults_r = argv[3];
   irr = argv[4];
   end = argv[5];
-  left = argv[7];
+  left = argv[6];
   right = argv[7];
   out = argv[8];
   memory_init(name, memory);
