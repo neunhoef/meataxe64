@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.38 2002/10/13 22:41:39 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.39 2002/10/14 19:11:51 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -863,9 +863,6 @@ Purpose: Simple nullspace
 <td valign=top>2</td><td valign=top>Nullspace</td>
 </tr>
 <tr>
-<td valign=top>3</td><td valign=top>Optional memory size (default 200k)</td>
-</tr>
-<tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>The nullity</td>
 </tr>
 </table>
@@ -897,9 +894,6 @@ Purpose: Simple rank
 </thead>
 <tr>
 <td valign=top>1</td><td valign=top>Input matrix</td>
-</tr>
-<tr>
-<td valign=top>2</td><td valign=top>Optional memory size (default 200k)</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>The rank</td>
@@ -1129,13 +1123,10 @@ Purpose: Clean one set of vectors with another
 <td valign=top>Parameters:</td>
 </thead>
 <tr>
-<td valign=top>1</td><td valign=top>Memory available</td>
+<td valign=top>1</td><td valign=top>Clean vectors</td>
 </tr>
 <tr>
-<td valign=top>2</td><td valign=top>Clean vectors</td>
-</tr>
-<tr>
-<td valign=top>3</td><td valign=top>Vectors to be cleaned</td>
+<td valign=top>2</td><td valign=top>Vectors to be cleaned</td>
 </tr>
 <tr>
 <td valign=top>3</td><td valign=top>Output</td>
@@ -1451,16 +1442,13 @@ input parameter
 <td valign=top>3</td><td valign=top>Maximum acceptable nullity</td>
 </tr>
 <tr>
-<td valign=top>4</td><td valign=top>Memory size</td>
+<td valign=top>4</td><td valign=top>Generator 1</td>
 </tr>
 <tr>
-<td valign=top>5</td><td valign=top>Generator 1</td>
+<td valign=top>5</td><td valign=top>Order of generator 1</td>
 </tr>
 <tr>
-<td valign=top>6</td><td valign=top>Order of generator 1</td>
-</tr>
-<tr>
-<td valign=top>7-</td><td valign=top>Other generators and orders</td>
+<td valign=top>6-</td><td valign=top>Other generators and orders</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>The element, if found, plus the
@@ -1511,19 +1499,16 @@ href="#zfln">zfln</a>
 <td valign=top>3</td><td valign=top>Maximum acceptable nullity</td>
 </tr>
 <tr>
-<td valign=top>4</td><td valign=top>Memory size</td>
+<td valign=top>4</td><td valign=top>Directory for temporary files</td>
 </tr>
 <tr>
-<td valign=top>5</td><td valign=top>Directory for temporary files</td>
+<td valign=top>5</td><td valign=top>Generator 1</td>
 </tr>
 <tr>
-<td valign=top>6</td><td valign=top>Generator 1</td>
+<td valign=top>6</td><td valign=top>Order of generator 1</td>
 </tr>
 <tr>
-<td valign=top>7</td><td valign=top>Order of generator 1</td>
-</tr>
-<tr>
-<td valign=top>8-</td><td valign=top>Other generators and orders</td>
+<td valign=top>7-</td><td valign=top>Other generators and orders</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>The element, if found, plus the
@@ -1567,7 +1552,7 @@ Purpose: Find orbits under a number of permutations
 1 (the element order will do here)</td>
 </tr>
 <tr>
-<td valign=top>3</td><td valign=top>Further generators</td>
+<td valign=top>4</td><td valign=top>Further generators</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>None</td>
@@ -1706,9 +1691,6 @@ Purpose: Invert matrix
 <td valign=top>2</td><td valign=top>Output matrix (or map)</td>
 </tr>
 <tr>
-<td valign=top>3</td><td valign=top>Optional memory size (default 200k)</td>
-</tr>
-<tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>None</td>
 </tr>
 </table>
@@ -1746,9 +1728,6 @@ Purpose: Invert a matrix (or map) using intermediate files
 </tr>
 <tr>
 <td valign=top>3</td><td valign=top>Temporary (worksapce) directory</td>
-</tr>
-<tr>
-<td valign=top>4</td><td valign=top>Optional memory size (default 200k)</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>None</td>
@@ -1839,9 +1818,6 @@ Purpose: Line permute
 <td valign=top>6</td><td valign=top>Permutation for generator 2</td>
 </tr>
 <tr>
-<td valign=top>7</td><td valign=top>Optional memory size (default 200k)</td>
-</tr>
-<tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>The number of points in the orbit</td>
 </tr>
 </table>
@@ -1879,9 +1855,6 @@ Purpose: Lift vectors from a quotient space
 <td valign=top>3</td><td valign=top>The pre-images</td>
 </tr>
 <tr>
-<td valign=top>4</td><td valign=top>Optional memory size (default 200k)</td>
-</tr>
-<tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>None</td>
 </tr>
 </table>
@@ -1916,13 +1889,10 @@ Purpose: Compute a standard basis of vectors from a single seed
 <td valign=top>2</td><td valign=top>The output basis</td>
 </tr>
 <tr>
-<td valign=top>3</td><td valign=top>Memory size</td>
+<td valign=top>3</td><td valign=top>Generator 1 (matrix or permutation)</td>
 </tr>
 <tr>
-<td valign=top>4</td><td valign=top>Generator 1 (matrix or permutation)</td>
-</tr>
-<tr>
-<td valign=top>5-</td><td valign=top>Further generators (matrix or permutation)</td>
+<td valign=top>4-</td><td valign=top>Further generators (matrix or permutation)</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>The basis size</td>
@@ -1957,16 +1927,13 @@ Purpose: Compute a standard basis of vectors from a single seed
 <td valign=top>2</td><td valign=top>The output basis</td>
 </tr>
 <tr>
-<td valign=top>4</td><td valign=top>Temporary file directory</td>
+<td valign=top>3</td><td valign=top>Temporary file directory</td>
 </tr>
 <tr>
-<td valign=top>4</td><td valign=top>Memory size</td>
+<td valign=top>4</td><td valign=top>Generator 1 (matrix or permutation)</td>
 </tr>
 <tr>
-<td valign=top>5</td><td valign=top>Generator 1 (matrix or permutation)</td>
-</tr>
-<tr>
-<td valign=top>6-</td><td valign=top>Further generators (matrix or permutation)</td>
+<td valign=top>5-</td><td valign=top>Further generators (matrix or permutation)</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>The basis size</td>
@@ -2002,13 +1969,10 @@ containing a given vector.
 <td valign=top>2</td><td valign=top>The subspace</td>
 </tr>
 <tr>
-<td valign=top>3</td><td valign=top>memory to be used</td>
+<td valign=top>3</td><td valign=top>Generator 1</td>
 </tr>
 <tr>
-<td valign=top>4</td><td valign=top>Generator 1</td>
-</tr>
-<tr>
-<td valign=top>5 - *</td><td valign=top>Remaining generators</td>
+<td valign=top>4- *</td><td valign=top>Remaining generators</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>The
@@ -2052,13 +2016,10 @@ containing a given vector, and using intermediate files.
 <td valign=top>3</td><td valign=top>Directory for temporary files</td>
 </tr>
 <tr>
-<td valign=top>4</td><td valign=top>memory to be used</td>
+<td valign=top>4</td><td valign=top>Generator 1</td>
 </tr>
 <tr>
-<td valign=top>5</td><td valign=top>Generator 1</td>
-</tr>
-<tr>
-<td valign=top>6 - *</td><td valign=top>Remaining generators</td>
+<td valign=top>5- *</td><td valign=top>Remaining generators</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>The
@@ -2238,9 +2199,6 @@ Purpose: Compute the nullspace of a matrix, using intermediate files
 <td valign=top>3</td><td valign=top>A directory for temporary files</td>
 </tr>
 <tr>
-<td valign=top>4</td><td valign=top>Optional memory size (default 200k)</td>
-</tr>
-<tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>The nullity</td>
 </tr>
 </table>
@@ -2287,10 +2245,6 @@ Purpose: Permutation condense relative to an orbit file
 condensation to be done</td>
 </tr>
 <tr>
-<td valign=top>5</td><td valign=top>Optional memory size (default
-200k)</td>
-</tr>
-<tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>None</td>
 </tr>
 </table>
@@ -2332,9 +2286,6 @@ Purpose: Lift vectors from a condensed permutation representation
 <td valign=top>3</td><td valign=top>The pre-images</td>
 </tr>
 <tr>
-<td valign=top>4</td><td valign=top>Optional memory size (default 200k)</td>
-</tr>
-<tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>None</td>
 </tr>
 </table>
@@ -2366,9 +2317,6 @@ Purpose: Print a matrix or map
 </thead>
 <tr>
 <td valign=top>1</td><td valign=top>The input</td>
-</tr>
-<tr>
-<td valign=top>3</td><td valign=top>Optional memory size (default 200k)</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>The printed form of the matrix
@@ -2463,10 +2411,7 @@ Purpose: Project into quotient space
 <td valign=top>2</td><td valign=top>The vectors to be projected (may be a map)</td>
 </tr>
 <tr>
-<td valign=top>2</td><td valign=top>The result</td>
-</tr>
-<tr>
-<td valign=top>3</td><td valign=top>Optional memory size (default 200k)</td>
+<td valign=top>3</td><td valign=top>The result</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>None</td>
@@ -2511,9 +2456,6 @@ Purpose: Compute permutation representation
 </tr>
 <tr>
 <td valign=top>3</td><td valign=top>Action of the group element as a permutation</td>
-</tr>
-<tr>
-<td valign=top>4</td><td valign=top>Optional memory size (default 200k)</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>None</td>
@@ -2666,16 +2608,13 @@ Purpose: Compute the nullities of a sequence of group algebra elements
 <td valign=top>3</td><td valign=top>Maximum acceptable nullity</td>
 </tr>
 <tr>
-<td valign=top>4</td><td valign=top>Memory size</td>
+<td valign=top>4</td><td valign=top>Generator 1</td>
 </tr>
 <tr>
-<td valign=top>5</td><td valign=top>Generator 1</td>
+<td valign=top>5</td><td valign=top>Order of generator 1</td>
 </tr>
 <tr>
-<td valign=top>6</td><td valign=top>Order of generator 1</td>
-</tr>
-<tr>
-<td valign=top>7-</td><td valign=top>Other generators and orders</td>
+<td valign=top>6-</td><td valign=top>Other generators and orders</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>The elements names, the scripts
@@ -2843,9 +2782,6 @@ Purpose: Compute the rank of a matrix (or map) using intermediate files.
 <td valign=top>2</td><td valign=top>A temporary directory for workspace files</td>
 </tr>
 <tr>
-<td valign=top>3</td><td valign=top>Optional memory size (default 200k)</td>
-</tr>
-<tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>The rank</td>
 </tr>
 </table>
@@ -2888,16 +2824,13 @@ field
 <td valign=top>4</td><td valign=top>Subfield order</td>
 </tr>
 <tr>
-<td valign=top>5</td><td valign=top>Memory size</td>
+<td valign=top>5</td><td valign=top>Generator 1</td>
 </tr>
 <tr>
-<td valign=top>6</td><td valign=top>Generator 1</td>
+<td valign=top>6</td><td valign=top>Order of generator 1</td>
 </tr>
 <tr>
-<td valign=top>7</td><td valign=top>Order of generator 1</td>
-</tr>
-<tr>
-<td valign=top>8-</td><td valign=top>Other generators and orders</td>
+<td valign=top>7-</td><td valign=top>Other generators and orders</td>
 </tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>The elements names, the scripts
 to construct them, and the nullities</td>
@@ -2943,16 +2876,13 @@ Purpose: A field restricted version of <a href="#zsums">zsums</a>
 <td valign=top>4</td><td valign=top>Subfield order</td>
 </tr>
 <tr>
-<td valign=top>5</td><td valign=top>Memory size</td>
+<td valign=top>5</td><td valign=top>Generator 1</td>
 </tr>
 <tr>
-<td valign=top>6</td><td valign=top>Generator 1</td>
+<td valign=top>6</td><td valign=top>Order of generator 1</td>
 </tr>
 <tr>
-<td valign=top>7</td><td valign=top>Order of generator 1</td>
-</tr>
-<tr>
-<td valign=top>8-</td><td valign=top>Other generators and orders</td>
+<td valign=top>7-</td><td valign=top>Other generators and orders</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>The element, if found, plus the
@@ -3006,19 +2936,16 @@ Purpose: A field restricted version of <a href="#zsumsf">zsumsf</a>
 <td valign=top>4</td><td valign=top>Subfield order</td>
 </tr>
 <tr>
-<td valign=top>5</td><td valign=top>Memory size</td>
+<td valign=top>5</td><td valign=top>Temporary directory</td>
 </tr>
 <tr>
-<td valign=top>6</td><td valign=top>Temporary directory</td>
+<td valign=top>6</td><td valign=top>Generator 1</td>
 </tr>
 <tr>
-<td valign=top>7</td><td valign=top>Generator 1</td>
+<td valign=top>7</td><td valign=top>Order of generator 1</td>
 </tr>
 <tr>
-<td valign=top>8</td><td valign=top>Order of generator 1</td>
-</tr>
-<tr>
-<td valign=top>9-</td><td valign=top>Other generators and orders</td>
+<td valign=top>8-</td><td valign=top>Other generators and orders</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>The element, if found, plus the
@@ -3106,9 +3033,6 @@ Purpose: Compute a standard basis of vectors from a single seed
 <td valign=top>4</td><td valign=top>Group generator 2 (matrix or permutation)</td>
 </tr>
 <tr>
-<td valign=top>5</td><td valign=top>Optional memory size (default 200k)</td>
-</tr>
-<tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>The basis size</td>
 </tr>
 </table>
@@ -3158,9 +3082,6 @@ Purpose: A version of <a href="#zsb">zsb</a> using intermediate files
 <td valign=top>5</td><td valign=top>A temporary directory for workspace files</td>
 </tr>
 <tr>
-<td valign=top>6</td><td valign=top>Optional memory size (default 200k)</td>
-</tr>
-<tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>The basis size</td>
 </tr>
 </table>
@@ -3206,13 +3127,10 @@ Purpose: Evaluate an element of the group algebra
 <td valign=top>3</td><td valign=top>The script describing the word to be computed</td>
 </tr>
 <tr>
-<td valign=top>4</td><td valign=top>Memory size</td>
+<td valign=top>4</td><td valign=top>Group generator 1</td>
 </tr>
 <tr>
-<td valign=top>5</td><td valign=top>Group generator 1</td>
-</tr>
-<tr>
-<td valign=top>6-</td><td valign=top>other generators</td>
+<td valign=top>5-</td><td valign=top>other generators</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>None</td>
@@ -3290,7 +3208,7 @@ Purpose: Scaled identity matrix
 <td valign=top>3</td><td valign=top>Number of columns</td>
 </tr>
 <tr>
-<td valign=top>3</td><td valign=top>Scalar</td>
+<td valign=top>4</td><td valign=top>Scalar</td>
 </tr>
 <tr>
 <td valign=top>5</td><td valign=top>Output matrix</td>
@@ -3402,9 +3320,6 @@ Purpose: Skew cube
 <td valign=top>2</td><td valign=top>Output</td>
 </tr>
 <tr>
-<td valign=top>3</td><td valign=top>Optional memory size (default 200k)</td>
-</tr>
-<tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>None</td>
 </tr>
 </table>
@@ -3436,9 +3351,6 @@ Purpose: Skew fifth
 </tr>
 <tr>
 <td valign=top>2</td><td valign=top>Output</td>
-</tr>
-<tr>
-<td valign=top>3</td><td valign=top>Optional memory size (default 200k)</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>None</td>
@@ -3474,9 +3386,6 @@ Purpose: Skew fourth
 <td valign=top>2</td><td valign=top>Output</td>
 </tr>
 <tr>
-<td valign=top>3</td><td valign=top>Optional memory size (default 200k)</td>
-</tr>
-<tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>None</td>
 </tr>
 </table>
@@ -3508,9 +3417,6 @@ Purpose: Skew seventh
 </tr>
 <tr>
 <td valign=top>2</td><td valign=top>Output</td>
-</tr>
-<tr>
-<td valign=top>3</td><td valign=top>Optional memory size (default 200k)</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>None</td>
@@ -3546,9 +3452,6 @@ Purpose: Skew sixth
 <td valign=top>2</td><td valign=top>Output</td>
 </tr>
 <tr>
-<td valign=top>3</td><td valign=top>Optional memory size (default 200k)</td>
-</tr>
-<tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>None</td>
 </tr>
 </table>
@@ -3582,9 +3485,6 @@ Purpose: Skew square
 <td valign=top>2</td><td valign=top>Output</td>
 </tr>
 <tr>
-<td valign=top>3</td><td valign=top>Optional memory size (default 200k)</td>
-</tr>
-<tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>None</td>
 </tr>
 </table>
@@ -3613,9 +3513,6 @@ Purpose: Meataxe slace for exploded operations
 </thead>
 <tr>
 <td valign=top>1</td><td valign=top>The name of the slave vector</td>
-</tr>
-<tr>
-<td valign=top>2</td><td valign=top>Optional memory size (default 200k)</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>None</td>
@@ -3659,9 +3556,6 @@ containing a given vector
 </tr>
 <tr>
 <td valign=top>4</td><td valign=top>Generator 2</td>
-</tr>
-<tr>
-<td valign=top>5</td><td valign=top>Optional memory size (default 200k)</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>The subspace dimension, or if
@@ -3746,9 +3640,6 @@ containing a given vector, using intermediate files
 </tr>
 <tr>
 <td valign=top>5</td><td valign=top>Temporary directory</td>
-</tr>
-<tr>
-<td valign=top>6</td><td valign=top>Optional memory size (default 200k)</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>The subspace dimension, or if
@@ -3836,16 +3727,13 @@ parameter
 <td valign=top>3</td><td valign=top>Maximum acceptable nullity</td>
 </tr>
 <tr>
-<td valign=top>4</td><td valign=top>Memory size</td>
+<td valign=top>4</td><td valign=top>Generator 1</td>
 </tr>
 <tr>
-<td valign=top>5</td><td valign=top>Generator 1</td>
+<td valign=top>5</td><td valign=top>Order of generator 1</td>
 </tr>
 <tr>
-<td valign=top>6</td><td valign=top>Order of generator 1</td>
-</tr>
-<tr>
-<td valign=top>7-</td><td valign=top>Other generators and orders</td>
+<td valign=top>6-</td><td valign=top>Other generators and orders</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>The element, if found, plus the
@@ -3917,25 +3805,22 @@ files.
 <td valign=top>3</td><td valign=top>Maximum acceptable nullity</td>
 </tr>
 <tr>
-<td valign=top>4</td><td valign=top>Memory size</td>
+<td valign=top>4</td><td valign=top>Temporary workspace directory</td>
 </tr>
 <tr>
-<td valign=top>5</td><td valign=top>Temporary workspace directory</td>
+<td valign=top>5</td><td valign=top>Group generator 1</td>
 </tr>
 <tr>
-<td valign=top>6</td><td valign=top>Group generator 1</td>
+<td valign=top>6</td><td valign=top>Order of generator 1</td>
 </tr>
 <tr>
-<td valign=top>7</td><td valign=top>Order of generator 1</td>
+<td valign=top>7</td><td valign=top>Group generator 2</td>
 </tr>
 <tr>
-<td valign=top>8</td><td valign=top>Group generator 2</td>
+<td valign=top>8</td><td valign=top>Order of generator 2</td>
 </tr>
 <tr>
-<td valign=top>9</td><td valign=top>Order of generator 2</td>
-</tr>
-<tr>
-<td valign=top>10-</td><td valign=top>Other generators and orders</td>
+<td valign=top>9-</td><td valign=top>Other generators and orders</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>The element, if found, plus the
@@ -3977,9 +3862,6 @@ Purpose: Compute symmetric square
 </tr>
 <tr>
 <td valign=top>2</td><td valign=top>Output matrix</td>
-</tr>
-<tr>
-<td valign=top>3</td><td valign=top>Optional memory size (default 200k)</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>None</td>
@@ -4030,27 +3912,24 @@ condensation subgroup</td>
 dimensions for condensation subgroup</td>
 </tr>
 <tr>
-<td valign=top>6</td><td valign=top>Memory</td>
+<td valign=top>6</td><td valign=top>Tensor parameter 1</td>
 </tr>
 <tr>
-<td valign=top>7</td><td valign=top>Tensor parameter 1</td>
+<td valign=top>7</td><td valign=top>Tensor parameter 2</td>
 </tr>
 <tr>
-<td valign=top>8</td><td valign=top>Tensor parameter 2</td>
+<td valign=top>8</td><td valign=top>Output</td>
 </tr>
 <tr>
-<td valign=top>9</td><td valign=top>Output</td>
-</tr>
-<tr>
-<td valign=top>10</td><td valign=top>Endomorphism ring basis for first
+<td valign=top>9</td><td valign=top>Endomorphism ring basis for first
 irreducible</td>
 </tr>
 <tr>
-<td valign=top>11</td><td valign=top>Projection matrix for first
+<td valign=top>10</td><td valign=top>Projection matrix for first
 irreducible</td>
 </tr>
 <tr>
-<td valign=top>12-</td><td valign=top>Further bases and projections</td>
+<td valign=top>11-</td><td valign=top>Further bases and projections</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>None</td>
@@ -4097,20 +3976,17 @@ condensation subgroup</td>
 2</td>
 </tr>
 <tr>
-<td valign=top>4</td><td valign=top>Memory</td>
+<td valign=top>4</td><td valign=top>Input (condensed) rows</td>
 </tr>
 <tr>
-<td valign=top>5</td><td valign=top>Input (condensed) rows</td>
+<td valign=top>5</td><td valign=top>Output (uncondensed) rows</td>
 </tr>
 <tr>
-<td valign=top>6</td><td valign=top>Output (uncondensed) rows</td>
-</tr>
-<tr>
-<td valign=top>7</td><td valign=top>Endomorphism ring basis for first
+<td valign=top>6</td><td valign=top>Endomorphism ring basis for first
 irreducible</td>
 </tr>
 <tr>
-<td valign=top>8-</td><td valign=top>Further bases</td>
+<td valign=top>7-</td><td valign=top>Further bases</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>None</td>
@@ -4148,9 +4024,6 @@ Purpose: Tensor product
 </tr>
 <tr>
 <td valign=top>3</td><td valign=top>Output</td>
-</tr>
-<tr>
-<td valign=top>4</td><td valign=top>Optional memory size (default 200k)</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>None</td>
@@ -4191,13 +4064,10 @@ Purpose: Multiply a matrix by a matrix in tensor form
 <td valign=top>2</td><td valign=top>Left hand tensor matrix</td>
 </tr>
 <tr>
-<td valign=top>2</td><td valign=top>Right hand tensor matrix</td>
+<td valign=top>3</td><td valign=top>Right hand tensor matrix</td>
 </tr>
 <tr>
 <td valign=top>4</td><td valign=top>Result matrix (or map)</td>
-</tr>
-<tr>
-<td valign=top>5</td><td valign=top>Optional memory size (default 200k)</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>None</td>
@@ -4306,9 +4176,6 @@ vector form
 <td valign=top>4</td><td valign=top>Number of columns in right hand tensor</td>
 </tr>
 <tr>
-<td valign=top>5</td><td valign=top>Optional memory size (default 200k)</td>
-</tr>
-<tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>None</td>
 </tr>
 </table>
@@ -4360,9 +4227,6 @@ product.
 </tr>
 <tr>
 <td valign=top>6</td><td valign=top>Generator 2 right hand</td>
-</tr>
-<tr>
-<td valign=top>7</td><td valign=top>Optional memory size (default 200k)</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>The subspace dimension, or if
@@ -4428,9 +4292,6 @@ are given as a tensor product.
 <td valign=top>7</td><td valign=top>Temporary workspace directory</td>
 </tr>
 <tr>
-<td valign=top>8</td><td valign=top>Optional memory size (default 200k)</td>
-</tr>
-<tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>The subspace dimension, or if
 memory is exhausted, the number of rows produced at that stage</td>
 </tr>
@@ -4478,9 +4339,6 @@ Purpose: Vector permute
 <td valign=top>6</td><td valign=top>Permutation for generator 2</td>
 </tr>
 <tr>
-<td valign=top>7</td><td valign=top>Optional memory size (default 200k)</td>
-</tr>
-<tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>The number of points in the orbit</td>
 </tr>
 </table>
@@ -4524,9 +4382,6 @@ Purpose: Produce a sequence of words in the generators
 </tr>
 <tr>
 <td valign=top>5</td><td valign=top>Order of generator 2</td>
-</tr>
-<tr>
-<td valign=top>6</td><td valign=top>Optional memory size (default 200k)</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>The filenames corresponding to

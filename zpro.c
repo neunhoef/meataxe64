@@ -1,5 +1,5 @@
 /*
- * $Id: zpro.c,v 1.3 2002/07/09 09:08:12 jon Exp $
+ * $Id: zpro.c,v 1.4 2002/10/14 19:11:51 jon Exp $
  *
  * Print an orbit_set
  *
@@ -20,7 +20,7 @@ static const char *name = "zpro";
 
 static void pro_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <in_file>\n", name, name);
+  fprintf(stderr, "%s: usage: %s [-v] [-m <memory>] <in_file>\n", name, name);
 }
 
 int main(int argc, const char * const argv[])

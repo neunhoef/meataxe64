@@ -1,5 +1,5 @@
 /*
- * $Id: ip.c,v 1.15 2002/07/09 09:08:12 jon Exp $
+ * $Id: ip.c,v 1.16 2002/10/14 19:11:51 jon Exp $
  *
  * Read a matrix
  *
@@ -22,7 +22,7 @@ static const char *name = "zcv";
 
 static void ip_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <in_file> <out_file>\n", name, name);
+  fprintf(stderr, "%s: usage: %s [-v] [-m <memory>] <in_file> <out_file>\n", name, name);
 }
 
 int main(int argc, const char * const argv[])

@@ -1,5 +1,5 @@
 /*
- * $Id: sns.c,v 1.8 2002/07/09 09:08:12 jon Exp $
+ * $Id: sns.c,v 1.9 2002/10/14 19:11:51 jon Exp $
  *
  * Simple compute of the null space of a matrix
  *
@@ -21,26 +21,22 @@ static const char *name = "sns";
 
 static void rn_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <in_file> <out_file> [<memory>]\n", name, name);
+  fprintf(stderr, "%s: usage: %s [-v] [-m <memory>] <in_file> <out_file>\n", name, name);
 }
 
 int main(int argc, const char * const argv[])
 {
   unsigned int n, rank;
-  unsigned int memory = MEM_SIZE;
   FILE *inp, *outp;
   const header *h_in, *h_out;
   unsigned int prime, nob, nor, noc, len, **mat1, **mat2;
 
   argv = parse_line(argc, argv, &argc);
-  if (3 != argc && 4 != argc) {
+  if (3 != argc) {
     rn_usage();
     exit(1);
   }
   endian_init();
-  if (4 == argc) {
-    memory = strtoul(argv[3], NULL, 0);
-  }
   memory_init(name, memory);
   if (0 == open_and_read_binary_header(&inp, &h_in, argv[1], name)) {
     exit(1);

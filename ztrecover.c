@@ -1,5 +1,5 @@
 /*
- * $Id: ztrecover.c,v 1.2 2002/09/21 16:59:46 jon Exp $
+ * $Id: ztrecover.c,v 1.3 2002/10/14 19:11:51 jon Exp $
  *
  * Recover a tensor subspace
  *
@@ -22,7 +22,7 @@ static const char *name = "ztrecover";
 
 static void trecover_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <in_file> <out_file> <cols> <cols2> [<memory>]\n", name, name);
+  fprintf(stderr, "%s: usage: %s [-v] [-m <memory>] <in_file> <out_file> <cols> <cols2>\n", name, name);
 }
 
 int main(int argc, const char * const argv[])
@@ -30,7 +30,7 @@ int main(int argc, const char * const argv[])
   const char *in;
   const char *out;
   FILE *inp, *outp;
-  unsigned int memory, noc1, noc2, nor, nob, nod, prime, len2, len, len_o, *row_in, *row_out, d, **mat_rows;
+  unsigned int noc1, noc2, nor, nob, nod, prime, len2, len, len_o, *row_in, *row_out, d, **mat_rows;
   const header *h_in;
   header *h_out, *h_2;
 
@@ -47,10 +47,7 @@ int main(int argc, const char * const argv[])
     fprintf(stderr, "%s: zero columns not acceptable, terminating\n", name);
     exit(1);
   }
-  if (6 == argc) {
-    memory = strtoul(argv[5], NULL, 0);
-  }
-  memory_init(name, 0);
+  memory_init(name, memory);
   endian_init();
   if (0 == open_and_read_binary_header(&inp, &h_in, in, name)) {
     exit(1);

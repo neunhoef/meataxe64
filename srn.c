@@ -1,5 +1,5 @@
 /*
- * $Id: srn.c,v 1.8 2002/07/09 09:08:12 jon Exp $: zrn.c,v 1.1 2001/11/12 13:43:38 jon Exp $
+ * $Id: srn.c,v 1.9 2002/10/14 19:11:51 jon Exp $: zrn.c,v 1.1 2001/11/12 13:43:38 jon Exp $
  *
  * Simple compute of the rank of a matrix
  *
@@ -19,26 +19,22 @@ static const char *name = "srn";
 
 static void rn_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <in_file> [<memory>]\n", name, name);
+  fprintf(stderr, "%s: usage: %s [-v] [-m <memory>] <in_file>\n", name, name);
 }
 
 int main(int argc, const char * const argv[])
 {
   unsigned int n;
-  unsigned int memory = MEM_SIZE;
   FILE *inp;
   const header *h;
   unsigned int prime, nob, nor, len, **mat;
 
   argv = parse_line(argc, argv, &argc);
-  if (2 != argc && 3 != argc) {
+  if (2 != argc) {
     rn_usage();
     exit(1);
   }
   endian_init();
-  if (3 == argc) {
-    memory = strtoul(argv[2], NULL, 0);
-  }
   memory_init(name, memory);
   if (0 == open_and_read_binary_header(&inp, &h, argv[1], name)) {
     exit(1);

@@ -1,5 +1,5 @@
 /*
- * $Id: zprime.c,v 1.4 2002/07/09 09:08:12 jon Exp $
+ * $Id: zprime.c,v 1.5 2002/10/14 19:11:51 jon Exp $
  *
  * Print the field order from a matrix
  *
@@ -18,7 +18,7 @@ static const char *name = "zprime";
 
 static void prime_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <in_file>\n", name, name);
+  fprintf(stderr, "%s: usage: %s [-v] [-m <memory>] <in_file>\n", name, name);
 }
 
 int main(int argc, const char * const argv[])

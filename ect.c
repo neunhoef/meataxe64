@@ -1,5 +1,5 @@
 /*
- * $Id: ect.c,v 1.3 2002/07/09 09:08:12 jon Exp $
+ * $Id: ect.c,v 1.4 2002/10/14 19:11:51 jon Exp $
  *
  * Count the non-zero elements in an exploded matrix
  *
@@ -11,13 +11,14 @@
 #include "endian.h"
 #include "files.h"
 #include "map.h"
+#include "memory.h"
 #include "parse.h"
 
 static const char *name = "ect";
 
 static void ect_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <in_dir>\n", name, name);
+  fprintf(stderr, "%s: usage: %s [-v] [-m <memory>] <in_dir>\n", name, name);
 }
 
 int main(int argc, const char *const argv[])
@@ -33,6 +34,7 @@ int main(int argc, const char *const argv[])
   }
   input_map(name, argv[1], &col_pieces, &row_pieces, &names);
   endian_init();
+  memory_init(name, memory);
   for (i = 0; i < row_pieces; i++) {
     for (j = 0; j < col_pieces; j++) {
       ototal = total;

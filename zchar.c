@@ -18,7 +18,7 @@ static const char *name = "zchar";
 
 static void char_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <in_file>\n", name, name);
+  fprintf(stderr, "%s: usage: %s [-v] [-m <memory>] <in_file>\n", name, name);
 }
 
 int main(int argc, const char * const argv[])

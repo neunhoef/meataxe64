@@ -1,5 +1,5 @@
 /*
- * $Id: zsumsf.c,v 1.7 2002/10/14 08:36:36 jon Exp $
+ * $Id: zsumsf.c,v 1.8 2002/10/14 19:11:51 jon Exp $
  *
  * Compute sums in the group algebra in two matrices
  *
@@ -35,7 +35,6 @@ static int acceptor(unsigned int rank, unsigned int nor, const char *file, const
 
 int main(int argc, const char * const argv[])
 {
-  unsigned int memory = MEM_SIZE;
   unsigned int n;
   int res;
 

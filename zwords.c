@@ -1,5 +1,5 @@
 /*
- * $Id: zwords.c,v 1.3 2002/07/09 09:08:12 jon Exp $
+ * $Id: zwords.c,v 1.4 2002/10/14 19:11:51 jon Exp $
  *
  * Compute words in two matrices
  *
@@ -19,7 +19,7 @@ static const char *name = "zwords";
 
 static void words_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <in_file a> <in_file b> <out_file_stem> <order a> <order b> <n> [<memory>]\n", name, name);
+  fprintf(stderr, "%s: usage: %s [-v] [-m <memory>] <in_file a> <in_file b> <out_file_stem> <order a> <order b> <n>\n", name, name);
 }
 
 int main(int argc, const char * const argv[])
@@ -27,14 +27,13 @@ int main(int argc, const char * const argv[])
   const char *in1;
   const char *in2;
   const char *out;
-  unsigned int memory = MEM_SIZE;
   unsigned int o_a, o_b, n, i, j, k, cur_word = 0;
   int m;
   const char **names;
   const char **words;
 
   argv = parse_line(argc, argv, &argc);
-  if (7 != argc && 8 != argc) {
+  if (7 != argc) {
     words_usage();
     exit(1);
   }
@@ -44,9 +43,6 @@ int main(int argc, const char * const argv[])
   o_a = strtoul(argv[4], NULL, 0);
   o_b = strtoul(argv[5], NULL, 0);
   n = strtoul(argv[6], NULL, 0);
-  if (8 == argc) {
-    memory = strtoul(argv[7], NULL, 0);
-  }
   if (0 == n) {
     fprintf(stderr, "%s: no words requested\n", name);
     exit(1);

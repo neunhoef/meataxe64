@@ -1,5 +1,5 @@
 /*
- * $Id: zsksq.c,v 1.2 2002/07/09 09:08:12 jon Exp $
+ * $Id: zsksq.c,v 1.3 2002/10/14 19:11:51 jon Exp $
  *
  * Skew square a matrix
  *
@@ -18,25 +18,21 @@ static const char *name = "zsksq";
 
 static void sksq_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <in_file> <out_file> [<memory>]\n", name, name);
+  fprintf(stderr, "%s: usage: %s [-v] [-m <memory>] <in_file> <out_file>\n", name, name);
 }
 
 int main(int argc, const char * const argv[])
 {
   const char *in;
   const char *out;
-  unsigned int memory = MEM_SIZE;
 
   argv = parse_line(argc, argv, &argc);
-  if (3 != argc && 4 != argc) {
+  if (3 != argc) {
     sksq_usage();
     exit(1);
   }
   in = argv[1];
   out = argv[2];
-  if (4 == argc) {
-    memory = strtoul(argv[3], NULL, 0);
-  }
   endian_init();
   memory_init(name, memory);
   if (0 == skew_square(in, out, name)) {
