@@ -1,18 +1,20 @@
 #
 # unix specific fragment for building
 #
-# $Id: unix.txt,v 1.9 2002/06/25 10:30:12 jon Exp $
+# $Id: unix.txt,v 1.10 2002/11/13 19:42:49 jon Exp $
 #
 EXEEXT=
 LIBEXT=	a
 OBJEXT=	o
 DEPENDOBJEXT=	o
 DEPENDEXT=	d
+ASMOUTEXT=	S
 CC=	gcc
 DEPEND_CC=	gcc
 #REL_COMPILE_FLAGS=	-O3 -foptimize-sibling-calls -falign-loops=2 -falign-functions=2
 REL_COMPILE_FLAGS=	-O3 -finline-functions
 DEBUG_COMPILE_FLAGS=	-g
+ASMOUT_FLAGS=	-S
 LINK_FLAGS=
 REL_LINK_FLAGS=	$(LINK_FLAGS)
 DEBUG_LINK_FLAGS=	$(REL_LINK_FLAGS) $(DEBUG_COMPILE_FLAGS)

@@ -1,7 +1,7 @@
 #
 # Generic build directories
 #
-# $Id: dirs.txt,v 1.1 2001/09/27 11:45:30 jon Exp $
+# $Id: dirs.txt,v 1.2 2002/11/13 19:42:48 jon Exp $
 #
 # Modify this from the command line to change where derived files go
 #
@@ -26,5 +26,6 @@ PROFNAOBJDIR=$(OSARCHBASEDIR)/profnaobj
 PROFNABINDIR=$(OSARCHBASEDIR)/profnabin
 
 DEPENDDIR=$(OSARCHBASEDIR)/depends
+ASMOUTDIR=$(OSARCHBASEDIR)/asmout
 GENDIR=$(OSARCHBASEDIR)/gen
 GENFILES=$(GENERATED:%=$(GENDIR)/%)

@@ -1,5 +1,5 @@
 /*
- * $Id: msbf.c,v 1.6 2002/08/05 09:08:25 jon Exp $
+ * $Id: msbf.c,v 1.7 2002/11/13 19:42:49 jon Exp $
  *
  * Function to spin some vectors under multiple generators to obtain a standard base
  *
@@ -326,6 +326,7 @@ unsigned int spin(const char *in, const char *out, const char *dir,
       k += stride; /* The number we consumed */
       if (nor >= noc) {
         /* No point in more multiplies if got a full basis */
+        gen->nor = old_nor;
         break;
       }
     }
