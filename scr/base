@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: base,v 1.9 2002/07/01 18:02:37 jon Exp $
+# $Id: base,v 1.10 2002/07/02 10:58:43 jon Exp $
 #
 # Script to find a representation in standard base
 #
@@ -58,6 +58,7 @@ memory=200
 base_vectors $e $a $b $s
 ret=$?
 if [ 0 -ne $ret ]; then
+  rm -f ${tmp}*
   exit $ret
 fi
 ok=0

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: split,v 1.7 2002/06/25 10:30:12 jon Exp $
+# $Id: split,v 1.8 2002/07/02 10:58:43 jon Exp $
 #
 # Script to split a representation
 #
@@ -66,6 +66,16 @@ for i in 1 2 3 4 5 6 7 8 9 10; do
     exit 1
   fi
   split_with_element ${tmp}.1 $o 0 ${tmp}.2 $a $*
+  ret=$?
+# Only loop on nullity 0 or didn't split
+  if [ $ret -ne 253 -a $ret -ne 254 ]; then
+    rm -f ${tmp}*
+    exit $ret
+  fi
+done
+# If any generators are singular, try them
+for x in $a $*; do
+  split_with_element $x $o 0 ${tmp}.2 $a $*
   ret=$?
 # Only loop on nullity 0 or didn't split
   if [ $ret -ne 253 -a $ret -ne 254 ]; then

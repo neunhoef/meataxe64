@@ -158,3 +158,4 @@ skew seventh
 20020627 - Some efficiency improvements in clean and other uses of get_element
 20020630 - More efficiency improvements
 20020701 - New faster zvp, and some script improvements
+20020702 - Made split, base and new_irred_with_orders more robust
