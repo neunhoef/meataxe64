@@ -311,3 +311,4 @@ skew seventh
 20040612 - Remmove element_access_init from mul_in_store
 20040613 - More optimisations to mul_in_store
 20040617 - Split mul_in_store loop into main part and final part, then remove tests
+20040621 - Fix minor fault in error handling in zsymb

@@ -1,5 +1,5 @@
 /*
- * $Id: symb.c,v 1.7 2004/04/25 16:31:48 jon Exp $
+ * $Id: symb.c,v 1.8 2004/06/21 20:44:37 jon Exp $
  *
  * Function to compute a symmetry basis
  *
@@ -155,6 +155,8 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
   sprintf(name2, "%s/%s.1", dir, tmp); /* Swap between these */
   sprintf(name_o1, "%s/%s.2", dir, tmp); /* For output from the first pass */
   sprintf(name_o2, "%s/%s.3", dir, tmp); /* For output after weeding in the second pass */
+  t1.created = 0;
+  t2.created = 0;
   if (0 == spaces || 0 == space_size) {
     fprintf(stderr, "%s: no spaces expected, or zero space size, terminating\n", name);
     cleanup(NULL, 0, name1, name2, name_o1, name_o2, NULL, NULL, NULL, &t1, &t2, NULL);
@@ -255,8 +257,6 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
   f.created = 0;
   t1.next = &t2;
   t2.next = &t1;
-  t1.created = 0;
-  t2.created = 0;
   t1.f = NULL;
   t2.f = NULL;
   map = my_malloc((ech_size + space_size * nor) * sizeof(int));
