@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: dual_with_order,v 1.5 2002/07/01 18:02:37 jon Exp $
+# $Id: dual_with_order,v 1.6 2002/09/11 21:20:47 jon Exp $
 #
 # Script to dual of a matrix, given its order
 #
@@ -18,7 +18,7 @@
 . functions
 usage="$0: usage: $0 <in> <out> <order> [<memory>]"
 if [ $# -ne 3 -a $# -ne 4 ]; then
-  echo $usage
+  echo "$usage"
   exit 1;
 fi
 a=$1

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: singular_order,v 1.2 2002/07/02 16:16:16 jon Exp $: f1,v 1.2 2001/12/01 10:46:02 jon Exp $
+# $Id: singular_order,v 1.3 2002/09/11 21:20:47 jon Exp $: f1,v 1.2 2001/12/01 10:46:02 jon Exp $
 #
 # Script to compute number of distinct powers of a matrix, in a naive fashion
 # Terminates at 5
@@ -16,7 +16,7 @@
 . functions
 usage="$0: usage: $0 <in>"
 if [ $# -ne 1 ]; then
-  echo $usage
+  echo "$usage"
   exit 1;
 fi
 a=$1

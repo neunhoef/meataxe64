@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: tspin_vectors,v 1.1 2002/06/25 10:30:12 jon Exp $
+# $Id: tspin_vectors,v 1.2 2002/09/11 21:20:47 jon Exp $
 #
 # Compute subspaces, with a memory limit,
 # using tensor product generators
@@ -16,7 +16,7 @@
 . functions
 usage="$0: usage: $0 <vectors> <count> <input_stem 1> <input_stem 2> <memory> <first vector>"
 if [ $# -ne 6 ]; then
-  echo $usage
+  echo "$usage"
   exit 1
 fi
 # First to be tried

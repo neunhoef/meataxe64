@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: f6,v 1.4 2002/06/25 10:30:12 jon Exp $
+# $Id: f6,v 1.5 2002/09/11 21:20:47 jon Exp $
 #
 # Script to perform A + BC + CB
 #
@@ -17,7 +17,7 @@
 #
 usage="$0: usage: $0 <in1> <in2> <in3> <out> <stem>"
 if [ $# -ne 5 ]; then
-  echo $usage
+  echo "$usage"
   exit 1;
 fi
 if [ -e $1 -a -e $2 -a -e $3 ]; then

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: split,v 1.12 2002/09/11 10:02:28 jon Exp $
+# $Id: split,v 1.13 2002/09/11 21:20:47 jon Exp $
 #
 # Script to split a representation
 #
@@ -24,7 +24,7 @@
 . functions
 usage="$0: usage: $0 <output_stem> <a> [<other generators>]"
 if [ $# -lt 3 ]; then
-  echo $usage
+  echo "$usage"
   exit 1;
 fi
 a=$2

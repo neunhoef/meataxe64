@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: indicatef_with_element,v 1.4 2002/07/07 18:25:44 jon Exp $
+# $Id: indicatef_with_element,v 1.5 2002/09/11 21:20:47 jon Exp $
 #
 # Script to find the indicator of an irreducible representation
 # Assumes a and b in standard base form
@@ -21,7 +21,7 @@
 #
 usage="$0: usage: $0 <a> <b> <e> <a dual> <b dual> <script> <tmp directory> [<memory>]"
 if [ $# -ne 7 -a $# -ne 8 ]; then
-  echo $usage
+  echo "$usage"
   exit 1;
 fi
 . functions

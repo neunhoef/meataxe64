@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: dual_subspace,v 1.1 2002/06/25 10:30:12 jon Exp $
+# $Id: dual_subspace,v 1.2 2002/09/11 21:20:47 jon Exp $
 #
 # Script to provide a subspace from the dual subspace
 #
@@ -17,7 +17,7 @@
 . functions
 usage="$0: usage: $0 <dual subspace> <output> <memory>"
 if [ $# -ne 3 ]; then
-  echo $usage
+  echo "$usage"
   exit 1;
 fi
 i=$1

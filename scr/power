@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: power,v 1.8 2002/07/01 18:02:37 jon Exp $
+# $Id: power,v 1.9 2002/09/11 21:20:47 jon Exp $
 #
 # Script to compute a power of a matrix
 #
@@ -17,7 +17,7 @@
 #set -v
 usage="$0: usage: $0 <in> <power> <out>"
 if [ $# -ne 3 -a $# -ne 4 ]; then
-  echo $usage
+  echo "$usage"
   exit 1;
 fi
 a=$1

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: indicate_with_orders,v 1.7 2002/09/11 17:07:19 jon Exp $
+# $Id: indicate_with_orders,v 1.8 2002/09/11 21:20:47 jon Exp $
 #
 # Script to find the indicator of an irreducible representation
 # Assumes a and b in standard base form
@@ -18,7 +18,7 @@
 #
 usage="$0: usage: $0 <a> <b> <order a> <order b> [<memory>]"
 if [ $# -ne 4 -a $# -ne 5 ]; then
-  echo $usage
+  echo "$usage"
   exit 1;
 fi
 . functions
@@ -60,7 +60,7 @@ if [ $ret -ne 0 ]; then
   echo $script
   exit $ret
 fi
-indicate_with_element $a $b $e $a_d $b_d $script $memory
+indicate_with_element $e $script $memory $a $a_d $b $b_d
 ret=$?
 rm -f ${tmp}.*
 exit $ret

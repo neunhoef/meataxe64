@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: new_irredf_and_indicate_with_orders,v 1.1 2002/08/02 09:04:09 jon Exp $
+# $Id: new_irredf_and_indicate_with_orders,v 1.2 2002/09/11 21:20:47 jon Exp $
 #
 # Script to classify an irreducible representation
 #
@@ -25,7 +25,7 @@
 #
 usage="$0: usage: $0 <memory> <tmp directory> <a> <order a> <b> <order b> [<other generators and orders>]"
 if [ $# -lt 6 ]; then
-  echo $usage
+  echo "$usage"
   exit 1;
 fi
 . functions

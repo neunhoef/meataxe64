@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: indicatef_with_script,v 1.4 2002/09/09 19:23:54 jon Exp $
+# $Id: indicatef_with_script,v 1.5 2002/09/11 21:20:47 jon Exp $
 #
 # Script to find the indicator of an irreducible representation,
 # given a script describing the null generator
@@ -21,7 +21,7 @@
 #
 usage="$0: usage: $0 <a> <b> <script> <order a> <order b> <tmp directory> [<memory>]"
 if [ $# -ne 6 -a $# -ne 7 ]; then
-  echo $usage
+  echo "$usage"
   exit 1;
 fi
 . functions

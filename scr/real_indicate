@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: real_indicate,v 1.1 2002/06/25 10:30:12 jon Exp $
+# $Id: real_indicate,v 1.2 2002/09/11 21:20:47 jon Exp $
 #
 # Script to find the indicator of an irreducible representation
 # assuming it is real, and we have the standard basis conjugating
@@ -18,7 +18,7 @@
 #
 usage="$0: usage: $0 <a> <b> <sb> [<memory>]"
 if [ $# -ne 3 -a $# -ne 4 ]; then
-  echo $usage
+  echo "$usage"
   exit 1;
 fi
 . functions

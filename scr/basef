@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: basef,v 1.8 2002/07/07 18:25:44 jon Exp $
+# $Id: basef,v 1.9 2002/09/11 21:20:47 jon Exp $
 #
 # Script to find a representation in standard base
 # using intermediate files
@@ -28,7 +28,7 @@
 . functions
 usage="$0: usage: $0 <e> <output_stem> <s> <tmp directory> <memory> <a> [<other generators>]"
 if [ $# -lt 7 ]; then
-  echo $usage
+  echo "$usage"
   exit 1;
 fi
 e=$1

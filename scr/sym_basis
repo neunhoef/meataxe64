@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: sym_basis,v 1.5 2002/09/09 19:23:54 jon Exp $
+# $Id: sym_basis,v 1.6 2002/09/11 21:20:47 jon Exp $
 #
 # Script to compute a symmetry basis wrt an ordered set of irreducibles
 #
@@ -20,7 +20,7 @@
 #
 usage="$0: usage: $0 <irreducibles> <memory> <output basis> <output multiplicities> <dualise> <script> <generator 1> [<other generators>]"
 if [ $# -lt 8 ]; then
-  echo $usage
+  echo "$usage"
   exit 1;
 fi
 have_basis=0

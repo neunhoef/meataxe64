@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: find_best_nullity_with_orders,v 1.4 2002/09/11 17:07:19 jon Exp $
+# $Id: find_best_nullity_with_orders,v 1.5 2002/09/11 21:20:47 jon Exp $
 #
 # Script to find an element of best nullity in two generators
 #
@@ -20,7 +20,7 @@
 #
 usage="$0: usage: $0 <out> <memory> <a> <order a> <b> <order b> [<further generators and orders>]"
 if [ $# -lt 6 ]; then
-  echo $usage
+  echo "$usage"
   exit 1;
 fi
 . functions

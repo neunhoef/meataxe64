@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: restrict_with_orders,v 1.4 2002/07/05 17:19:22 jon Exp $
+# $Id: restrict_with_orders,v 1.5 2002/09/11 21:20:47 jon Exp $
 #
 # Script to restrict a representation from a field to a subfield
 #
@@ -24,7 +24,7 @@
 #
 usage="$0: usage: $0 <a> <b> <order a> <order b> <subfield size> <output stem> [<memory>]"
 if [ $# -ne 6 -a $# -ne 7 ]; then
-  echo $usage
+  echo "$usage"
   exit 1;
 fi
 . functions

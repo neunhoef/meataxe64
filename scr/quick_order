@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: quick_order,v 1.2 2002/07/01 18:02:37 jon Exp $: f1,v 1.2 2001/12/01 10:46:02 jon Exp $
+# $Id: quick_order,v 1.3 2002/09/11 21:20:47 jon Exp $: f1,v 1.2 2001/12/01 10:46:02 jon Exp $
 #
 # Script to compute order of a matrix, in a naive fashion
 # returning 10 if it's greater than 10
@@ -15,7 +15,7 @@
 . functions
 usage="$0: usage: $0 <in>"
 if [ $# -ne 1 ]; then
-  echo $usage
+  echo "$usage"
   exit 1;
 fi
 a=$1

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: preserves,v 1.4 2002/07/01 18:02:37 jon Exp $
+# $Id: preserves,v 1.5 2002/09/11 21:20:47 jon Exp $
 #
 # Script to check if a matrix preservers a quadratic form
 #
@@ -27,7 +27,7 @@
 . functions
 usage="$0: usage: $0 <Q> <S> <lambda> <g> <field element> [<memory>]"
 if [ $# -ne 5 -a $# -ne 6 ]; then
-  echo $usage
+  echo "$usage"
   exit 1;
 fi
 Q=$1

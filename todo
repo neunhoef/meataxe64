@@ -4,7 +4,7 @@ Documentation changes for zrand, ztco, ztcv, ztrecover
 Documentation changes for sym_basis, proj_base, sub_quot
 Consider putting memory size into argument parser
 Write span_and_spin for spins on large nullspaces
-Pass all generators into indicate
+Pass all generators into indicate and friends
 Make zsums and friends distinguish find failure from errors
 Fix find_nullity_one and friends to use better codes from zsums and friends
 Think about a restricted form of new_irred where we supply the script (only for things like sym_basis)
@@ -18,7 +18,6 @@ Think about orthogonal group sign
 Look into intermediate file version of find_best_nullity_with_orders and zfln *
 Fix zvp and zps to take less memory
 Think about better grease vector selection for making vectors
-Fix zsums use to handle zero elements
 Find a better algorithm for zsp memory. Investigate performance (1)
 Debug emu/zsl file corruption problem (2)
 Cleanup return vs exit (1)
@@ -31,4 +30,4 @@ Examine profiles from monst (1)
 Consider a more structured error return type (1)
 Convert monster generator to use new operations (2)
 Work on lattice of submodules (5)
-(19, 13/08/2002, 25/07/2002)
+(19, 30/09/2002, 11/09/2002)

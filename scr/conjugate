@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: conjugate,v 1.1 2002/07/03 12:11:46 jon Exp $
+# $Id: conjugate,v 1.2 2002/09/11 21:20:47 jon Exp $
 #
 # Script to conjugate elements into another base
 #
@@ -19,7 +19,7 @@
 . functions
 usage="$0: usage: $0 <e> <output_stem> <elements>"
 if [ $# -lt 3 ]; then
-  echo $usage
+  echo "$usage"
   exit 1;
 fi
 e=$1
