@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: new_irredf_with_script,v 1.1 2003/04/26 18:46:51 jon Exp $
+# $Id: new_irredf_with_script,v 1.2 2003/11/26 21:55:16 jon Exp $
 #
 # Script to classify an irreducible representation, given its script
 #
@@ -10,7 +10,7 @@
 # $3: script to produce the required element
 # $4: generator a
 # $5: generator b
-# $6-: other generators and orders
+# $6-: other generators
 #
 # outputs will be of the form irred/${nor}_${i}_{1,..}
 # where nor = znor $a and i is an available unused index
@@ -63,6 +63,7 @@ done
 tmp=tmp${PPID}
 e=${tmp}.1
 name=${tmp}_${nor}
+echo zscript -m $memory $e zscript.${tmp} $script $args
 zscript -m $memory $e zscript.${tmp} $script $args
 ret=$?
 rm zscript.${tmp}*
