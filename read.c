@@ -1,5 +1,5 @@
 /*
- * $Id: read.c,v 1.14 2001/11/25 12:44:33 jon Exp $
+ * $Id: read.c,v 1.15 2001/11/29 01:13:09 jon Exp $
  *
  * Read a header
  *
@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <ctype.h>
+#include "endian.h"
 #include "header.h"
 #include "primes.h"
 #include "utils.h"

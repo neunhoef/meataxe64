@@ -1,5 +1,5 @@
 /*
- * $Id: ss.c,v 1.2 2001/11/25 12:44:33 jon Exp $
+ * $Id: ss.c,v 1.3 2001/11/29 01:13:09 jon Exp $
  *
  * Function to compute subspace representation
  *
@@ -94,7 +94,7 @@ void subspace(const char *range, const char *image,
     fprintf(stderr, "%s: insufficient memory for %s, %s, %s, terminating\n",
             name, range, image, out);
     cleanup(inp1, inp2);
-    exit(1);
+    exit(2);
   }
   for (d = 0; d < nor; d++) {
     rows1[d] = memory_pointer_offset(0, d, len);
@@ -147,4 +147,7 @@ void subspace(const char *range, const char *image,
     fclose(outp);
     exit(1);
   }
+  header_free(h_in1);
+  header_free(h_in2);
+  header_free(h_out);
 }

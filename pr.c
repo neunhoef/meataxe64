@@ -1,5 +1,5 @@
 /*
- * $Id: pr.c,v 1.7 2001/11/25 12:44:33 jon Exp $
+ * $Id: pr.c,v 1.8 2001/11/29 01:13:09 jon Exp $
  *
  * Print a matrix
  *
@@ -61,6 +61,7 @@ int main(int argc, const char * const argv[])
     fclose(inp);
     exit(1);
   }
+  header_free(h);
   if (memory_rows(len, 1000) < 1) {
     fprintf(stderr, "%s: cannot allocate row for %s, terminating\n", name, in);
     fclose(inp);

@@ -1,5 +1,5 @@
 /*
- * $Id: utils.c,v 1.14 2001/11/12 13:43:38 jon Exp $
+ * $Id: utils.c,v 1.15 2001/11/29 01:13:09 jon Exp $
  *
  * Utils for meataxe
  *
@@ -199,4 +199,29 @@ int pow(unsigned int n, unsigned int index, unsigned int *res)
       return 0;
     }
   }
+}
+
+static unsigned char table[256];
+static int table_initialised = 0;
+
+static void init_table(void)
+{
+  unsigned int i;
+  for (i = 0; i < 256; i++) {
+    unsigned int j = i, k = 0, l;
+    for (l = 0; l < 8; l++) {
+      k = (k << 1) | (j & 1);
+      j >>= 1;
+    }
+    table[i] = k;
+  }
+  table_initialised = 1;
+}
+
+unsigned char convert_char(unsigned char in)
+{
+  if (0 == table_initialised) {
+    init_table();
+  }
+  return table[in];
 }

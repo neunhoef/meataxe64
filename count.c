@@ -1,5 +1,5 @@
 /*
- * $Id: count.c,v 1.4 2001/11/25 12:44:33 jon Exp $
+ * $Id: count.c,v 1.5 2001/11/29 01:13:09 jon Exp $
  *
  * Function to count the non-zero elements in a matrix
  *
@@ -38,6 +38,7 @@ unsigned int count(const char *matrix, const char *name)
   if (memory_rows(len, 1000) < 1) {
     fprintf(stderr, "%s: cannot allocate row for %s, terminating\n", name, matrix);
     fclose(input);
+    header_free(h);
     exit(1);
   }
   row = memory_pointer_offset(0, 0, len);
@@ -45,6 +46,7 @@ unsigned int count(const char *matrix, const char *name)
     if (0 == endian_read_row(input, row, len)) {
       fprintf(stderr, "%s: cannot read row %d from %s, terminating\n", name, i, matrix);
       fclose(input);
+      header_free(h);
       exit(1);
     }
     for (j = 0; j < len; j++) {
@@ -52,6 +54,7 @@ unsigned int count(const char *matrix, const char *name)
     }
   }
   fclose(input);
+  header_free(h);
   memory_dispose();
   return total;
 }

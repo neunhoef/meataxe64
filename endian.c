@@ -1,5 +1,5 @@
 /*
- * $Id: endian.c,v 1.7 2001/11/07 22:35:27 jon Exp $
+ * $Id: endian.c,v 1.8 2001/11/29 01:13:09 jon Exp $
  *
  * Endian handling for meataxe
  *
@@ -10,6 +10,17 @@
 #include <assert.h>
 #include <limits.h>
 #include "utils.h"
+
+unsigned int endian_invert(unsigned int a)
+{
+  unsigned int b = 0;
+  unsigned int i;
+  for (i = 0; i < 4; i++) {
+    b = (b << 8) | (a & 0xff);
+    a >>= 8;
+  }
+  return b;
+}
 
 static int endian_is_big = 0;
 

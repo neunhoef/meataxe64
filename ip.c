@@ -1,5 +1,5 @@
 /*
- * $Id: ip.c,v 1.9 2001/11/25 12:44:33 jon Exp $
+ * $Id: ip.c,v 1.10 2001/11/29 01:13:09 jon Exp $
  *
  * Read a matrix
  *
@@ -52,6 +52,7 @@ int main(int argc, const char * const argv[])
   }
   if (0 == open_and_write_binary_header(&outp, h, out, name)) {
     fclose(inp);
+    header_free(h);
     exit(1);
   }
   prime = header_get_prime(h);
@@ -59,6 +60,7 @@ int main(int argc, const char * const argv[])
   nod = header_get_nod(h);
   nor = header_get_nor(h);
   noc = header_get_noc(h);
+  header_free(h);
   base_mask = (1 << nob) - 1;
   for (i = 0; i < nor; i++) {
     unsigned int a = 0;

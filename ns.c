@@ -1,5 +1,5 @@
 /*
- * $Id: ns.c,v 1.4 2001/11/25 12:44:33 jon Exp $
+ * $Id: ns.c,v 1.5 2001/11/29 01:13:09 jon Exp $
  *
  * Compute the null space of a matrix
  *
@@ -40,7 +40,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *name)
     fprintf(stderr, "%s: cannot allocate %d rows for %s and %s, terminating\n",
             name, 2 * (nor + prime), m1, m2);
     fclose(inp);
-    exit(1);
+    exit(2);
   }
   (void)grease_level(prime, &grease, r);
   r = grease.level;
@@ -80,12 +80,14 @@ unsigned int nullspace(const char *m1, const char *m2, const char *name)
         if (0 == endian_write_row(outp, mat2[r], len2)) {
           fprintf(stderr, "%s cannot write row %d to %s, terminating\n", name, r, m2);
           fclose(outp);
-          return 0;
+          exit(1);
         }
       }
     }
     fclose(outp);
   }
+  header_free(h1);
+  header_free(h2);
   free(mat2);
   free(map);
   return nor - n;

@@ -1,5 +1,5 @@
 /*
- * $Id: add.c,v 1.11 2001/11/25 12:44:32 jon Exp $
+ * $Id: add.c,v 1.12 2001/11/29 01:13:09 jon Exp $
  *
  * Function to add two matrices to give a third
  *
@@ -36,6 +36,7 @@ int add(const char *m1, const char *m2, const char *m3, const char *name)
       0 == open_and_read_binary_header(&inp2, &h2, m2, name)) {
     if (NULL != inp1) {
       fclose(inp1);
+      header_free(h1);
     }
     return 0;
   }
@@ -51,18 +52,24 @@ int add(const char *m1, const char *m2, const char *m3, const char *name)
     fprintf(stderr, "%s header mismatch between %s and %s, terminating\n", name, m1, m2);
     fclose(inp1);
     fclose(inp2);
+    header_free(h1);
+    header_free(h2);
     return 0;
   }
   if (0 == rows_init(prime, &row_operations)) {
     fprintf(stderr, "%s: cannot initialise row operations for %s, %s, terminating\n", name, m1, m2);
     fclose(inp1);
     fclose(inp2);
+    header_free(h1);
+    header_free(h2);
     return 0;
   }
   incer = row_operations.incer;
   if (0 == open_and_write_binary_header(&outp, h1, m3, name)) {
     fclose(inp1);
     fclose(inp2);
+    header_free(h1);
+    header_free(h2);
     return 0;
   }
   if (memory_rows(len, 1000) < 2) {
@@ -70,6 +77,8 @@ int add(const char *m1, const char *m2, const char *m3, const char *name)
     fclose(inp1);
     fclose(inp2);
     fclose(outp);
+    header_free(h1);
+    header_free(h2);
     return 0;
   }
   row1 = memory_pointer_offset(0, 0, len);
@@ -80,6 +89,8 @@ int add(const char *m1, const char *m2, const char *m3, const char *name)
       fclose(inp1);
       fclose(inp2);
       fclose(outp);
+      header_free(h1);
+      header_free(h2);
       return 0;
     }
     if (0 == endian_read_row(inp2, row2, len)) {
@@ -87,6 +98,8 @@ int add(const char *m1, const char *m2, const char *m3, const char *name)
       fclose(inp1);
       fclose(inp2);
       fclose(outp);
+      header_free(h1);
+      header_free(h2);
       return 0;
     }
     (*incer)(row1, row2, len);
@@ -95,11 +108,15 @@ int add(const char *m1, const char *m2, const char *m3, const char *name)
       fclose(inp1);
       fclose(inp2);
       fclose(outp);
+      header_free(h1);
+      header_free(h2);
       return 0;
     }
   }
   fclose(inp1);
   fclose(inp2);
   fclose(outp);
+  header_free(h1);
+  header_free(h2);
   return 1;
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: eim.c,v 1.4 2001/11/25 12:44:33 jon Exp $
+ * $Id: eim.c,v 1.5 2001/11/29 01:13:09 jon Exp $
  *
  * implode a matrix (ie glue exploded matrices together)
  *
@@ -149,6 +149,7 @@ int main(int argc,  const char *const argv[])
     /* Now close the current set and continue */
     for (j = 0; j < col_pieces; j++) {
       fclose(inputs[j]);
+      header_free(headers[j]);
     }
   }
   fclose(output);

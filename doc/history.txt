@@ -56,3 +56,4 @@
 20011124 - Subspace splits He 2058 permutation representation
 20011125 - Started on quotient space
 20011125 - quotient space works
+20011128 - wrote split script and reduced He2058

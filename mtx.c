@@ -1,5 +1,5 @@
 /*
- * $Id: mtx.c,v 1.8 2001/11/07 22:35:27 jon Exp $
+ * $Id: mtx.c,v 1.9 2001/11/29 01:13:09 jon Exp $
  *
  * Extended row operations for monster meataxe
  *
@@ -13,7 +13,6 @@
 #include <assert.h>
 #include "endian.h"
 #include "exrows.h"
-#include "header.h"
 #include "map.h"
 #include "memory.h"
 #include "utils.h"
@@ -33,10 +32,12 @@ static void quit(const char *a)
   exit(15);
 }
 
+#if 0
 static unsigned char convert_char(unsigned char in)
 {
   return table[in];
 }
+#endif
 
 static void convert_row(unsigned int total_cols, const unsigned char *bits)
 {

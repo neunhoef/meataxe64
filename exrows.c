@@ -1,5 +1,5 @@
 /*
- * $Id: exrows.c,v 1.4 2001/11/25 12:44:33 jon Exp $
+ * $Id: exrows.c,v 1.5 2001/11/29 01:13:09 jon Exp $
  *
  * Extended row manipulation for meataxe
  *
@@ -37,6 +37,7 @@ int ex_row_put(unsigned int row_num, unsigned int total_cols, unsigned int total
       assert(NULL != h);
       (void)open_and_write_binary_header(outputs + i, h, pathname(dir, names[row * cols + i]),
                                          "monster mtx");
+      header_free(h);
     }
   }
   /* Now output the row */

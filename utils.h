@@ -1,5 +1,5 @@
 /*
- * $Id: utils.h,v 1.12 2001/11/12 13:43:38 jon Exp $
+ * $Id: utils.h,v 1.13 2001/11/29 01:13:09 jon Exp $
  *
  * Utilities for meataxe
  *
@@ -41,4 +41,8 @@ extern int get_task_line(char *line, FILE *input);
 
 extern int pow(unsigned int n, unsigned int index,
                unsigned int *res);
+
+/* Swap the bit order in a char */
+extern unsigned char convert_char(unsigned char in);
+
 #endif

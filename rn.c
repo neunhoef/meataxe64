@@ -1,5 +1,5 @@
 /*
- * $Id: rn.c,v 1.7 2001/11/25 12:44:33 jon Exp $
+ * $Id: rn.c,v 1.8 2001/11/29 01:13:09 jon Exp $
  *
  * Compute the rank of a matrix
  *
@@ -29,11 +29,12 @@ unsigned int rank(const char *m, const char *name)
   nob = header_get_nob(h);
   nor = header_get_nor(h);
   len = header_get_len(h);
+  header_free(h);
   r = memory_rows(len, 100);
   if (memory_rows(len, 900) < nor || r < prime) {
     fprintf(stderr, "%s: cannot allocate %d rows for %s, terminating\n", name, nor + prime, m);
     fclose(inp);
-    exit(1);
+    exit(2);
   }
   (void)grease_level(prime, &grease, r);
   /* Now read the matrix */

@@ -1,5 +1,5 @@
 /*
- * $Id: qs.c,v 1.2 2001/11/26 00:04:29 jon Exp $
+ * $Id: qs.c,v 1.3 2001/11/29 01:13:09 jon Exp $
  *
  * Function to compute quotient space representation
  *
@@ -84,7 +84,7 @@ void quotient(const char *range, const char *gen,
     fprintf(stderr, "%s: insufficient memory for %s, %s, %s, terminating\n",
             name, range, gen, out);
     cleanup(inp_r, inp_g);
-    exit(1);
+    exit(2);
   }
   for (d = 0; d < nor_g; d++) {
     rows1[d] = memory_pointer_offset(0, d, len);
@@ -100,6 +100,8 @@ void quotient(const char *range, const char *gen,
   fclose(inp_r);
   h_out = header_create(prime, nob, header_get_nod(h_in_r), nor_o, nor_o);
   len_o = header_get_len(h_out);
+  header_free(h_in_r);
+  header_free(h_in_g);
   assert(len >= len_o);
   map_r = my_malloc(nor_r * sizeof(int));
   map_g = my_malloc(nor_g * sizeof(int));
@@ -158,6 +160,7 @@ void quotient(const char *range, const char *gen,
   if (0 == open_and_write_binary_header(&outp, h_out, out, name)) {
     exit(1);
   }
+  header_free(h_out);
   if (0 == endian_write_matrix(outp, rows3, len_o, nor_o)) {
     fprintf(stderr, "%s: failed to write output to %s, terminating\n",
             name, out);

@@ -1,5 +1,5 @@
 /*
- * $Id: ipp.c,v 1.4 2001/11/25 12:44:33 jon Exp $
+ * $Id: ipp.c,v 1.5 2001/11/29 01:13:09 jon Exp $
  *
  * Read a permutation into a matrix
  *
@@ -74,6 +74,7 @@ int main(int argc, const char * const argv[])
     fclose(inp);
     exit(1);
   }
+  header_free(h);
   for (i = 0; i < nor; i++) {
     unsigned int j;
     row_init(row, len);

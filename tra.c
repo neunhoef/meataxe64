@@ -1,5 +1,5 @@
 /*
- * $Id: tra.c,v 1.5 2001/11/25 12:44:33 jon Exp $
+ * $Id: tra.c,v 1.6 2001/11/29 01:13:09 jon Exp $
  *
  * Function to transpose a matrix
  *
@@ -46,6 +46,7 @@ int tra(const char *m1, const char *m2, const char *name)
   if (0 == open_and_write_binary_header(&output, h2, m2, name)) {
     fprintf(stderr, "%s cannot open or write header to %s, terminating\n", name, m2);
     fclose(input);
+    header_free(h1);
     return 0;
   }
   total = memory_rows(max, 1000);
@@ -53,13 +54,15 @@ int tra(const char *m1, const char *m2, const char *name)
     fprintf(stderr, "%s cannot allocate rows for %s, %s, terminating\n", name, m1, m2);
     fclose(input);
     fclose(output);
+    header_free(h1);
+    header_free(h2);
     return 0;
   }
   t1 = total - 1;
   rows = matrix_malloc(t1);
   row1 = memory_pointer_offset(0, 0, max);
   for (i = 0; i < t1; i++) {
-      rows[i] = memory_pointer_offset(0, i + 1, max);
+    rows[i] = memory_pointer_offset(0, i + 1, max);
   }
   for (i = 0; i < noc; i += t1) {
     /* Number of output rows at once */
@@ -71,6 +74,8 @@ int tra(const char *m1, const char *m2, const char *name)
           fprintf(stderr, "%s cannot read row %d from %s, terminating\n", name, i, m1);
           fclose(input);
           fclose(output);
+          header_free(h1);
+          header_free(h2);
           return 0;
       }
       /* Now write into k output rows starting at column j */
@@ -83,6 +88,8 @@ int tra(const char *m1, const char *m2, const char *name)
       fprintf(stderr, "%s: unable to rewind %s, terminating\n", name, m1);
       fclose(input);
       fclose(output);
+      header_free(h1);
+      header_free(h2);
       return 0;
     }
     for (j = 0; j < k; j++) {
@@ -90,11 +97,15 @@ int tra(const char *m1, const char *m2, const char *name)
         fprintf(stderr, "%s cannot write row %d to %s, terminating\n", name, j, m2);
         fclose(input);
         fclose(output);
+        header_free(h1);
+        header_free(h2);
         return 0;
       }
     }
   }
   fclose(input);
   fclose(output);
+  header_free(h1);
+  header_free(h2);
   return 1;
 }

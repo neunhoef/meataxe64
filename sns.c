@@ -1,5 +1,5 @@
 /*
- * $Id: sns.c,v 1.3 2001/11/25 12:44:33 jon Exp $
+ * $Id: sns.c,v 1.4 2001/11/29 01:13:09 jon Exp $
  *
  * Simple compute of the null space of a matrix
  *
@@ -47,11 +47,15 @@ int main(int argc, const char * const argv[])
   nor = header_get_nor(h_in);
   noc = header_get_noc(h_in);
   len = header_get_len(h_in);
-  /* TODO: Handle nor != noc here */
+  if (nor != noc) {
+    fprintf(stderr, "%s: cannot non-square %s, terminating\n", name, argv[1]);
+    fclose(inp);
+    exit(1);
+  }
   if (memory_rows(len, 500) < nor) {
     fprintf(stderr, "%s: cannot allocate %d rows for %s, terminating\n", name, nor, argv[1]);
     fclose(inp);
-    exit(1);
+    exit(2);
   }
   /* Now read the matrix */
   mat1 = matrix_malloc(nor);

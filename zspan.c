@@ -1,0 +1,122 @@
+/*
+ * $Id: zspan.c,v 1.1 2001/11/29 01:13:09 jon Exp $
+ *
+ * Compute the span of a matrix
+ *
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "endian.h"
+#include "header.h"
+#include "matrix.h"
+#include "memory.h"
+#include "read.h"
+#include "rows.h"
+#include "utils.h"
+#include "write.h"
+
+static const char *name = "zspan";
+
+static void span_usage(void)
+{
+  fprintf(stderr, "%s: usage: %s <in_file> <out_file> <n>\n", name, name);
+}
+
+int main(int argc, const char * const argv[])
+{
+  const char *in;
+  const char *out;
+  FILE *inp;
+  FILE *outp;
+  unsigned int prime, nob, noc, nor, rows, len;
+  unsigned int i, vectors;
+  const header *h_in, *h_out;
+  unsigned int **mat, *row, *scalars;
+  row_ops row_operations;
+
+  if (4 != argc) {
+    span_usage();
+    exit(1);
+  }
+  in = argv[1];
+  out = argv[2];
+  vectors = strtoul(argv[3], NULL, 0);
+  if (0 == vectors) {
+    vectors = 1;
+  }
+  inp = fopen(in, "r");
+  if (0 == open_and_read_binary_header(&inp, &h_in, in, name)) {
+    fprintf(stderr, "%s: cannot open %s, terminating\n", name, in);
+    exit(1);
+  }
+  prime = header_get_prime(h_in);
+  nor = header_get_nor(h_in);
+  noc = header_get_noc(h_in);
+  nob = header_get_nob(h_in);
+  len = header_get_len(h_in);
+  if (0 == pow(prime, vectors, &rows)) {
+    fprintf(stderr, "%s: cannot compute %d ** %d, terminating\n", name, prime, vectors);
+    exit(1);
+  }
+  rows--;
+  h_out = header_create(prime, nob, header_get_nod(h_in), noc, rows);
+  if (0 == open_and_write_binary_header(&outp, h_out, out, name)) {
+    fprintf(stderr, "%s: cannot open %s, terminating\n", name, out);
+    exit(1);
+  }
+  endian_init();
+  memory_init(name, 0);
+  header_free(h_in);
+  header_free(h_out);
+  if (0 == rows_init(prime, &row_operations)) {
+    fprintf(stderr, "%s: cannot initialise row operations for %s, %s, terminating\n", name, in, out);
+    fclose(inp);
+    fclose(outp);
+  }
+  mat = matrix_malloc(vectors);
+  if (memory_rows(len, 1000) < vectors + 1) {
+    fprintf(stderr, "%s: cannot allocate %d rows for %s, terminating\n", name, vectors + 1, in);
+    exit(1);
+  }
+  for (i = 0; i < vectors; i++) {
+    mat[i] = memory_pointer_offset(0, i, len);
+  }
+  if (0 == endian_read_matrix(inp, mat, len, vectors)) {
+    fprintf(stderr, "%s: cannot read %s, terminating\n", name, in);
+    exit(1);
+  }
+  row = memory_pointer_offset(0, vectors, len);
+  scalars = my_malloc(vectors * sizeof(unsigned int));
+  memset(scalars, 0, vectors * sizeof(unsigned int));
+  for (i = 0; i < rows; i++) {
+    unsigned int j;
+    for (j = 0; j < vectors; j++) {
+      if (scalars[j] + 1 < prime) {
+        scalars[j]++;
+        break;
+      } else {
+        scalars[j] = 0;
+        /* We'll increment the next one */
+      }
+    }
+    row_init(row, len);
+    for (j = 0; j < vectors; j++) {
+      if (0 != scalars[j]) {
+        if (1 != scalars[j]) {
+          (*row_operations.scaled_incer)(mat[j], row, len, scalars[j]);
+        } else {
+          (*row_operations.incer)(mat[j], row, len);
+        }
+      }
+    }
+    if (0 == endian_write_row(outp, row, len)) {
+      fprintf(stderr, "%s: failed to write row %d to %s, terminating\n", name, i, out);
+      exit(1);
+    }
+  }
+  fclose(inp);
+  fclose(outp);
+  return 0;
+}

@@ -1,5 +1,5 @@
 /*
- * $Id: srn.c,v 1.3 2001/11/25 12:44:33 jon Exp $: zrn.c,v 1.1 2001/11/12 13:43:38 jon Exp $
+ * $Id: srn.c,v 1.4 2001/11/29 01:13:09 jon Exp $: zrn.c,v 1.1 2001/11/12 13:43:38 jon Exp $
  *
  * Simple compute of the rank of a matrix
  *
@@ -47,7 +47,7 @@ int main(int argc, const char * const argv[])
   if (memory_rows(len, 1000) < nor) {
     fprintf(stderr, "%s: cannot allocate %d rows for %s, terminating\n", name, nor, argv[1]);
     fclose(inp);
-    exit(1);
+    exit(2);
   }
   /* Now read the matrix */
   mat = matrix_malloc(nor);

@@ -1,5 +1,5 @@
 /*
- * $Id: mul.c,v 1.17 2001/11/25 12:44:33 jon Exp $
+ * $Id: mul.c,v 1.18 2001/11/29 01:13:09 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
@@ -29,9 +29,12 @@
 
 static int cleanup(FILE *inp1, FILE *inp2, FILE *outp)
 {
-  fclose(inp1);
-  fclose(inp2);
-  fclose(outp);
+  if (NULL != inp1)
+    fclose(inp1);
+  if (NULL != inp1)
+    fclose(inp2);
+  if (NULL != inp1)
+    fclose(outp);
   return 0;
 }
 
@@ -43,7 +46,7 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
   unsigned int prime, nob, noc1, nor1, len1, noc2, nor2, len2;
   unsigned int k;
   unsigned int nox1, nox2, nox3, nox;
-  const header *h1, *h2, *h3;
+  const header *h1 = NULL, *h2 = NULL, *h3 = NULL;
   unsigned int **rows1, **rows3;
   row_ops row_operations;
   row_adder adder;
@@ -52,6 +55,12 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
   endian_init();
   if (0 == open_and_read_binary_header(&inp1, &h1, m1, name) ||
       0 == open_and_read_binary_header(&inp2, &h2, m2, name)) {
+    if (NULL != h1) {
+      header_free(h1);
+    }
+    if (NULL != h2) {
+      header_free(h2);
+    }
     return cleanup(inp1, inp2, NULL);
   }
   prime = header_get_prime(h1);
@@ -66,13 +75,21 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
       header_get_nob(h2) != nob ||
       nor2 != noc1) {
     fprintf(stderr, "%s: header mismatch between %s and %s, terminating\n", name, m1, m2);
+    header_free(h1);
+    header_free(h2);
     return cleanup(inp1, inp2, NULL);
   }
   h3 = header_create(prime, nob, header_get_nod(h1), noc2, nor1);
   if (0 == open_and_write_binary_header(&outp, h3, m3, name)) {
     fprintf(stderr, "%s: cannot open or write binary header to %s, terminating\n", name, m3);
+    header_free(h1);
+    header_free(h2);
+    header_free(h3);
     return cleanup(inp1, inp2, NULL);
   }
+  header_free(h1);
+  header_free(h2);
+  header_free(h3);
   if (0 == rows_init(prime, &row_operations)) {
     fprintf(stderr, "%s: cannot initialise row operations for %s, %s, terminating\n", name, m1, m2);
     return cleanup(inp1, inp2, outp);

@@ -1,5 +1,5 @@
 /*
- * $Id: sp.c,v 1.4 2001/11/25 12:44:33 jon Exp $
+ * $Id: sp.c,v 1.5 2001/11/29 01:13:09 jon Exp $
  *
  * Function to spin some vectors under two generators
  *
@@ -106,7 +106,7 @@ unsigned int spin(const char *in, const char *out, const char *a,
     fprintf(stderr, "%s: failed to get grease for %s, %s, %s, terminating\n",
             name, in, a, b);
     cleanup(inp, f_a, f_b);
-    exit(1);
+    exit(2);
   }
   rows = matrix_malloc(max_rows);
   for (d = 0; d < max_rows; d++) {
@@ -178,6 +178,10 @@ unsigned int spin(const char *in, const char *out, const char *a,
     fclose(outp);
     exit(1);
   }
+  header_free(h_in);
+  header_free(h_a);
+  header_free(h_b);
+  header_free(h_out);
   fclose(outp);
   return nor;
 }
