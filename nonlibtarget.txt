@@ -1,0 +1,21 @@
+#
+# Generic target rules without the library
+#
+# $Id: nonlibtarget.txt,v 1.1 2004/08/28 21:12:59 jon Exp $
+#
+# generate target names plus objects
+#
+
+$(TARGET_TYPE)_OBJECTS:= $($(TARGET)_MODULES:%=$($(TARGET_TYPE)OBJDIR)/%.$(OBJEXT))
+$(TARGET_TYPE)_EXETARGET:= $($(TARGET)_TARGET:%=$($(TARGET_TYPE)BINDIR)/%$(EXEEXT))
+$(TARGET_TYPE)_TARGETS+= $($(TARGET_TYPE)_EXETARGET)
+
+# Build executable
+
+COMMAND := $($(TARGET_TYPE)_EXETARGET): $($(TARGET_TYPE)_OBJECTS) ; @echo Link $$@; rm -f $$@ || true; mkdir -p $($(TARGET_TYPE)BINDIR) || true ; $(LINK)$$@ $($(TARGET_TYPE)_LINK_FLAGS) $($(TARGET_TYPE)_OBJECTS) $($(TARGET_TYPE)_LIBS)
+
+$(COMMAND)
+
+#Add to list of things to be removed by make clean
+CLEAN_ITEMS+= $($(TARGET_TYPE)_OBJECTS) $($(TARGET_TYPE)_EXETARGET)
+
