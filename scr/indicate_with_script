@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: indicate_with_script,v 1.8 2002/09/23 13:42:43 jon Exp $
+# $Id: indicate_with_script,v 1.9 2002/10/14 17:32:07 jon Exp $
 #
 # Script to find the indicator of an irreducible representation,
 # given a script describing the null generator
@@ -67,7 +67,7 @@ done
 e=${tmp}.e
 ok=0
 while [ $ok -eq 0 ]; do
-  zscript $e ${tmp}zscript $script $memory $duals
+  zscript -m $memory $e ${tmp}zscript $script $duals
   ret=$?
   if [ $ret -eq 2 ]; then
     let memory=`more_memory $memory`

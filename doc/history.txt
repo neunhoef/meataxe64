@@ -212,3 +212,4 @@ skew seventh
 20021014 - Use -m for zmsp and zmspf
 20021014 - Use -m for ztsp and ztspf
 20021014 - Use -m for ztmu and zproj
+20021014 - Use -m for zscript
