@@ -198,3 +198,5 @@ skew seventh
 20020924 - Add zfln and find_best_nullityf_with_orders
 20020924 - Optimise row increments by searching for first non-zero (good for Gaussian elimination, whilst not harming multiplication)
 20021004 - Add some support for orthogonal group sign
+20021007 - Fixes to singular_vector
+20021012 - Add zclean. Add zsing

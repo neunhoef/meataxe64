@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.75 2002/09/24 19:54:01 jon Exp $
+# $Id: makefile,v 1.76 2002/10/12 14:17:06 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -29,6 +29,7 @@ ZAH_TARGET=	zah
 ZBASE_TARGET=	zbase
 ZCHAR_TARGET=	zchar
 ZCHECK_TARGET=	zcheck
+ZCLEAN_TARGET=	zclean
 ZCONJ_TARGET=	zconj
 ZCT_TARGET=	zct
 ZCV_TARGET=	zcv
@@ -81,6 +82,7 @@ ZSBF_TARGET=	zsbf
 ZSCRIPT_TARGET=	zscript
 ZSEL_TARGET=	zsel
 ZSID_TARGET=	zsid
+ZSING_TARGET=	zsing
 ZSKCU_TARGET=	zskcu
 ZSKFI_TARGET=	zskfi
 ZSKFO_TARGET=	zskfo
@@ -128,6 +130,7 @@ ZAH_MODULES=	elements endian files header memory parse primes read utils write z
 ZBASE_MODULES=	base clean clean_file elements endian grease header maps matrix memory parse primes read rows system utils write zbase
 ZCHAR_MODULES=	endian header parse primes read utils zchar
 ZCHECK_MODULES=	elements endian header memory parse primes read utils zcheck
+ZCLEAN_MODULES=	clean clean_vectors elements endian grease header matrix memory parse primes read rows utils write zclean
 ZCONJ_MODULES=	conj elements endian header memory parse primes read utils write zconj
 ZCT_MODULES=	count ct elements endian header memory parse primes read utils
 ZCV_MODULES=	elements endian header ip parse primes read utils write
@@ -180,6 +183,7 @@ ZSBF_MODULES=	clean clean_file elements endian grease header maps matrix memory 
 ZSCRIPT_MODULES=	add elements endian files grease header ident map_or_row maps matrix memory mul parse primes read rows scale script utils write zscript
 ZSEL_MODULES=	endian header memory parse primes read utils write zse
 ZSID_MODULES=	ident elements endian header maps memory parse primes rows utils write zsid
+ZSING_MODULES=	elements endian grease header maps matrix memory mul parse primes read rows singular utils write zsing
 ZSKCU_MODULES=	dets elements endian header matrix memory powers parse primes read rows utils write zskcu
 ZSKFI_MODULES=	dets elements endian header matrix memory powers parse primes read rows utils write zskfi
 ZSKFO_MODULES=	dets elements endian header matrix memory powers parse primes read rows utils write zskfo
@@ -227,6 +231,7 @@ MODULES=	$(DECOMP_MODULES) \
 	$(ZBASE_MODULES) \
 	$(ZCHAR_MODULES) \
 	$(ZCHECK_MODULES) \
+	$(ZCLEAN_MODULES) \
 	$(ZCONJ_MODULES) \
 	$(ZCT_MODULES) \
 	$(ZCV_MODULES) \
@@ -279,6 +284,7 @@ MODULES=	$(DECOMP_MODULES) \
 	$(ZSCRIPT_MODULES) \
 	$(ZSEL_MODULES) \
 	$(ZSID_MODULES) \
+	$(ZSING_MODULES) \
 	$(ZSKCU_MODULES) \
 	$(ZSKFI_MODULES) \
 	$(ZSKFO_MODULES) \
@@ -399,6 +405,9 @@ TARGET:=ZCHAR
 include targets.txt
 
 TARGET:=ZCHECK
+include targets.txt
+
+TARGET:=ZCLEAN
 include targets.txt
 
 TARGET:=ZCONJ
@@ -555,6 +564,9 @@ TARGET:=ZSEL
 include targets.txt
 
 TARGET:=ZSID
+include targets.txt
+
+TARGET:=ZSING
 include targets.txt
 
 TARGET:=ZSKCU

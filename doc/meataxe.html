@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.32 2002/09/24 19:54:02 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.33 2002/10/12 14:17:06 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -275,6 +275,7 @@ Output on stderr is error diagnostic information.
 <li><a href="#zchar">zchar</a></li>
 <li><a href="#zcheck">zcheck</a></li>
 <li><a href="#zconj">zconj</a></li>
+<li><a href="#zclean">zclean</a></li>
 <li><a href="#zct">zct</a></li>
 <li><a href="#zcv">zcv</a></li>
 <li><a href="#zdiag">zdiag</a></li>
@@ -1067,6 +1068,44 @@ where non-zero values have appeared off the ends of rows (which don't
 exactly fill a word). Errors are reported on stderr, however, a
 non-zero error code is only given for failures such as inability to
 read the matrix.
+</li>
+<li>
+<h3><a name="zclean">zclean</a></h3>
+Purpose: Clean one set of vectors with another
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Memory available</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Clean vectors</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>Vectors to be cleaned</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>Output</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>None</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>0</td><td valign=top>Insufficient memory</td>
+</tr>
+</table>
+Commentary: This can be used as part of finding vector space direct
+complements.
 </li>
 <li>
 <h3><a name="zconj">zconj</a></h3>
@@ -4469,6 +4508,7 @@ dimension increases.
 <li><a href="#conjugate">conjugate</a></li>
 <li><a href="#conjugatef">conjugatef</a></li>
 <li><a href="#cut_cols">cut_cols</a></li>
+<li><a href="#definite">definite</a></li>
 <li><a href="#dual">dual</a></li>
 <li><a href="#dual_subspace">dual_subspace</a></li>
 <li><a href="#dual_with_order">dual_with_order</a></li>
@@ -4490,12 +4530,14 @@ dimension increases.
 <li><a href="#find_restricted_nullity_one_with_orders">find_restricted_nullity_one_with_orders</a></li>
 <li><a href="#find_restricted_nullity_onef_with_orders">find_restricted_nullity_onef_with_orders</a></li>
 <li><a href="#functions">functions</a></li>
+<li><a href="#hyperbolic">hyperbolic</a></li>
 <li><a href="#indicate">indicate</a></li>
 <li><a href="#indicate_with_element">indicate_with_element</a></li>
 <li><a href="#indicate_with_orders">indicate_with_orders</a></li>
 <li><a href="#indicate_with_script">indicate_with_script</a></li>
 <li><a href="#indicatef_with_element">indicatef_with_element</a></li>
 <li><a href="#indicatef_with_script">indicatef_with_script</a></li>
+<li><a href="#inner_product">inner_product</a></li>
 <li><a href="#intersect">intersect</a></li>
 <li><a href="#irred">irred</a></li>
 <li><a href="#new_irred">new_irred</a></li>
@@ -4504,6 +4546,7 @@ dimension increases.
 <li><a href="#new_irred_and_indicate_with_orders">new_irred_and_indicate_with_orders</a></li>
 <li><a href="#new_irredf_and_indicate_with_orders">new_irredf_and_indicate_with_orders</a></li>
 <li><a href="#new_irredf_with_orders">new_irredf_with_orders</a></li>
+<li><a href="#norm">norm</a></li>
 <li><a href="#order">order</a></li>
 <li><a href="#power">power</a></li>
 <li><a href="#preserves">preserves</a></li>
@@ -5057,6 +5100,44 @@ Purpose: Discard columns
 </table>
 Commentary: This script is part of the mechanism for computing
 intersections. It is not expected to be invoked directly by users.
+</li>
+<li>
+<h3><a name="definite">definite</a></h3>
+Purpose: Check a quadratic form on a two space for being definite
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Memory available</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>The rows of the space</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>The quadratic form</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>None</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Space is definite</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>254</td><td valign=top>Space does not have dimension 2</td>
+</tr>
+<tr>
+<td valign=top>255</td><td valign=top>Space is hyperbolic</td>
+</tr>
+</table>
+Commentary: This script is part of the mechanism for computing
+orthogonal group signs in even dimensions
 </li>
 <li>
 <h3><a name="dual">dual</a></h3>
@@ -6017,6 +6098,45 @@ Purpose: A set of functions used as subroutines by other scripts
 Commentary: Contains no user servicable parts
 </li>
 <li>
+<h3><a name="hyperbolic">hyperbolic</a></h3>
+Purpose: Check a quadratic form on a two space for being hyperbolic
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Memory available</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>The rows of the space</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>The quadratic form</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>None</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Space is hyperbolic</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>254</td><td valign=top>Space does not have dimension 2</td>
+</tr>
+<tr>
+<td valign=top>255</td><td valign=top>Space is definite</td>
+</tr>
+</table>
+Commentary: This script is part of the mechanism for computing
+orthogonal group signs in even dimensions. It works by calling <a
+href="#definite">definite</a> and inverting the answer.
+</li>
+<li>
 <h3><a name="indicate">indicate</a></h3>
 Purpose: Compute the Frobenius-Schur indicator of a representation in
 characteristic two
@@ -6329,6 +6449,46 @@ element required, it then calls <a
 href="#indicatef_with_element">indicatef_with_element</a> to perform
 the rest of the calculation. Note that the temporary directory must
 exist, this script will not create it.
+</li>
+<li>
+<h3><a name="inner_product">inner_product</a></h3>
+Purpose: compute the inner product of two vectors or spaces with respect to a
+form
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Memory available</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>First vector or space</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>The form</td>
+</tr>
+<tr>
+<td valign=top>4</td><td valign=top>Second vector or space</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>The rank
+of the product</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient memory for workspace</td>
+</tr>
+</table>
+Commentary: This is a service script used in the calculation of
+orthogonal group signs
 </li>
 <li>
 <h3><a name="intersect">intersect</a></h3>
@@ -6746,6 +6906,42 @@ href="#zivf">zivf</a> in order to cope with situations where
 insufficient main memory is available. Otherwise, it is similar to the
 non file based version. Note that the temporary directory must exist,
 this script will not create it.
+</li>
+<li>
+<h3><a name="norm">norm</a></h3>
+Purpose: compute the norm of a vector with respect to a form
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Memory available</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Vector</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>The form</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>The rank
+of the inner product of the vector with itself (0 or 1)</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient memory for workspace</td>
+</tr>
+</table>
+Commentary: This is a service script used in the calculation of
+orthogonal group signs
 </li>
 <li>
 <h3><a name="order">order</a></h3>
