@@ -1,5 +1,5 @@
 /*
- * $Id: mop.c,v 1.15 2001/10/13 14:10:20 jon Exp $
+ * $Id: mop.c,v 1.16 2001/10/13 15:23:02 jon Exp $
  *
  * Monster operations for meataxe
  *
@@ -18,7 +18,7 @@ unsigned char vectemp[24712];
 unsigned long ptr1, ptr2;
 int PRINT;
 unsigned char vec1[24712], vec2[24712];
-static char suz1head[8], Thead[8], suz2head[8];
+static char suz1head[8], suz2head[8];
 static unsigned char orvec1[24712], orvec2[24712], vorvec[24712];
 static unsigned char s90head[12];
 static unsigned char s729head[12];
@@ -87,7 +87,9 @@ void init(void)
   unsigned long k, l, m, n;
   strncpy(suz1head, "MONSUZ01", 8);
   strncpy(suz2head, "MONSUZ02", 8);
+/*
   strncpy(Thead, "MON--T01", 8);
+*/
   vechead[0] = 2;
   vechead[1] = 0;
   vechead[2] = 0;
@@ -713,17 +715,17 @@ void suzmult(suzel a, suzel b, suzel c)
   }
 }
 
-int suzor(suzel a)
+unsigned int suzor(suzel a)
 {
   unsigned int i;
   memcpy(vec1, vorvec, 24712);
   for (i = 1; i <= 119; i++) {
     vecsuz(vec1, a, vec2);
-    memcpy(vec1, vec2, 24712);
-    if(0 == memcmp(vec1, vorvec, 24712)) {
+    if(0 == memcmp(vec2, vorvec, 24712)) {
       if (PRINT == 1) printf("Order is %d\n", i);
       return(i);
     }
+    memcpy(vec1, vec2, 24712);
   }
   return(120);
 }

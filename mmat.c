@@ -1,5 +1,5 @@
 /*
- * $Id: mmat.c,v 1.4 2001/10/11 19:07:23 jon Exp $
+ * $Id: mmat.c,v 1.5 2001/10/13 15:23:02 jon Exp $
  *
  * Monster program
  * Based on Version 1 - 30th November 1998 by R.A.Parker and R.A.Wilson
@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
 
   suzmult(z1, z2, z3);
   PRINT=1;
-  suzor(z3);
+  (void)suzor(z3);
   suzmult(z3, z3, z4);
   suzmult(z4, z4, z5);
   suzmult(z5, z5, z6);
@@ -92,10 +92,10 @@ int main(int argc, char *argv[])
   suzmult(z6, z7, z8);
   suzmult(z8, H, z9);
   suzmult(z9, z4, G1);
-  suzor(G1);
+  (void)suzor(G1);
 
   suzmult(z3, z2, z4);
-  suzor(z4);
+  (void)suzor(z4);
   suzmult(z4, z3, z5);
   suzmult(z5, z8, G2);
 
@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
   suzmult(z7, z8, z9);
   suzmult(z9, z9, z8);
   suzmult(z7, z8, G3);
-  suzor(G3);
+  (void)suzor(G3);
 
   suzmult(z4, z4, z5);
   suzmult(z4, z5, z6);
@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
   suzmult(z3, z6, G4);
 
   suzmult(G2, G4, z9);
-  suzor(z9);
+  (void)suzor(z9);
 
   for(i=0; i<196882; i++) {
     mkvec(i, vec1);
