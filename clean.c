@@ -1,5 +1,5 @@
 /*
- * $Id: clean.c,v 1.17 2003/02/28 20:04:58 jon Exp $
+ * $Id: clean.c,v 1.18 2004/02/17 22:14:19 jon Exp $
  *
  * Cleaning and echilisation for meataxe
  *
@@ -66,6 +66,7 @@ void clean(unsigned int **m1, unsigned int d1,
   while (i < d1) {
     unsigned int count; /* Actual amount we'll grease */
     unsigned int j = 0, k = 1;
+    unsigned int elt_index = len * elts_per_word, index;
     count = 0;
     grease_init_rows(&grease, prime);
     if (0 != record) {
@@ -73,18 +74,23 @@ void clean(unsigned int **m1, unsigned int d1,
     }
     /* Now insert the initial elements into grease.rows */
     while (count < grease_level && i + j < d1) {
+      int m = map[i + j];
       assert(NULL != m1[i + j]);
-      if (map[i + j] >= 0) {
+      if (m >= 0) {
         /* Only insert if a useful row */
         grease.rows[k - 1] = m1[i + j];
         if (0 != record) {
           grease_e.rows[k - 1] = m1_e[i + j];
         }
         k *= prime;
+        if ((unsigned int)m < elt_index) {
+          elt_index = m;
+        }
         count++;
       }
       j++;
     }
+    index = elt_index / elts_per_word;
 #if LAZY_GREASE
 #else
     /* Now compute grease */
@@ -98,7 +104,6 @@ void clean(unsigned int **m1, unsigned int d1,
     for (j = 0; j < d2; j++) {
       unsigned int elts = 0, l = 0;
       assert(NULL != m2[j]);
-      
       for (k = 0; k < inc; k++) {
         int m = map[i + k];
         if (m >= 0) {
@@ -109,13 +114,13 @@ void clean(unsigned int **m1, unsigned int d1,
       if (0 != elts) {
         elts = negate_elements(elts, nob, prime);
 #if LAZY_GREASE
-        grease_row_inc(&grease, len, m2[j], prime, elements_contract(elts, prime, nob));
+        grease_row_inc(&grease, len, m2[j], prime, elements_contract(elts, prime, nob), index);
 #else
         (*row_operations.incer)(grease.rows[elements_contract(elts, prime, nob) - 1], m2[j], len);
 #endif
         if (0 != record) {
 #if LAZY_GREASE
-          grease_row_inc(&grease_e, len_e, m2_e[j], prime, elements_contract(elts, prime, nob));
+          grease_row_inc(&grease_e, len_e, m2_e[j], prime, elements_contract(elts, prime, nob), 0);
 #else
           (*row_operations.incer)(grease_e.rows[elements_contract(elts, prime, nob) - 1], m2_e[j], len_e);
 #endif

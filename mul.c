@@ -1,5 +1,5 @@
 /*
- * $Id: mul.c,v 1.34 2004/02/15 10:27:17 jon Exp $
+ * $Id: mul.c,v 1.35 2004/02/17 22:14:19 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
@@ -428,7 +428,7 @@ int skip_mul_from_store(unsigned int offset, unsigned int **rows1, unsigned int 
                         grease grease, int verbose, const char *m, const char *name)
 {
   long long pos;
-  unsigned int i, j, l;
+  unsigned int i, j, l, elts_per_word;
   assert(NULL != rows1);
   assert(NULL != rows3);
   assert(NULL != inp);
@@ -456,6 +456,7 @@ int skip_mul_from_store(unsigned int offset, unsigned int **rows1, unsigned int 
     }
   } else {
     assert(0 != len); /* len may have come from m, and hence would be zero for a map */
+    (void)get_mask_and_elts(nob, &elts_per_word);
     /* Now skip rows if necessary */
     for (i = 0; i < offset; i += 1) {
       endian_skip_row(inp, len);
@@ -465,6 +466,7 @@ int skip_mul_from_store(unsigned int offset, unsigned int **rows1, unsigned int 
       unsigned int size = (grease->level + i <= noc) ? grease->level : noc - i;
       unsigned int width = size * nob;
       unsigned int word_offset, bit_offset, mask;
+      unsigned int elt_index = noc, index = 0;
       /* Read size rows from matrix 2 into rows 2 */
       /* This sets the initial rows */
       l = 1;
@@ -477,7 +479,16 @@ int skip_mul_from_store(unsigned int offset, unsigned int **rows1, unsigned int 
           fprintf(stderr, "%s: unable to read %s, terminating\n", name, m);
           return 0;
         }
+        if (nor > grease->level) {
+          unsigned int pos, elt = first_non_zero(grease->rows[l - 1], nob, len, &pos);
+          if (0 != elt && pos < elt_index) {
+            elt_index = pos;
+          }
+        }
         l *= prime;
+      }
+      if (nor > grease->level) {
+        index = elt_index / elts_per_word;
       }
       element_access_init(nob, i, size, &word_offset, &bit_offset, &mask);
       grease_init_rows(grease, prime);
@@ -488,7 +499,7 @@ int skip_mul_from_store(unsigned int offset, unsigned int **rows1, unsigned int 
           row_init(rows3[j], len);
         }
         if (0 != elt) {
-          grease_row_inc(grease, len, rows3[j], prime, contract(elt, prime, nob));
+          grease_row_inc(grease, len, rows3[j], prime, contract(elt, prime, nob), index);
         }
       }
     }
@@ -589,7 +600,7 @@ int mul_in_store(unsigned int **rows1, unsigned int **rows2, unsigned int **rows
             row_init(rows3[j], len);
           }
           if (0 != elt) {
-            grease_row_inc(grease, len, rows3[j], prime, contract(elt, prime, nob));
+            grease_row_inc(grease, len, rows3[j], prime, contract(elt, prime, nob), 0);
           }
         }
       }

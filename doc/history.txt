@@ -282,3 +282,4 @@ skew seventh
 20040131 - Made sure memory setting is always used
 20040131 - Echo failure message when find_nullity_onef_with_orders gets unexpected ret
 20040215 - Add skip_mul, plus general improvements to zsign
+20040217 - Improve grease_inc by gnoring the leading zero parts of the rows
