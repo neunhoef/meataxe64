@@ -1,5 +1,5 @@
 /*
- * $Id: mop.c,v 1.7 2001/10/11 23:02:06 jon Exp $
+ * $Id: mop.c,v 1.8 2001/10/12 07:05:32 jon Exp $
  *
  * Monster operations for meataxe
  *
@@ -177,9 +177,6 @@ void init(void)
   s3[5][6]=3;
   s3[6][5]=2;
   memset(v3[0] + 1, 0, 6 * sizeof(v3[0][1]));
-/*
-  for (i=1; i<7; i++) v3[0][i]=0;
-*/
   for (i=1; i<4; i++) {
     for (j=1; j<4; j++) {
       v3[i][j] = (3+i-j)%3 +1;
@@ -226,9 +223,6 @@ static void rdvec(const char *filnam, unsigned char *vecin)
   fread(vectemp, 1, 12, f);
   fread(vectemp, 1, 24611, f);
   memset(vecin, 0, 24712);
-/*
-  for (i=0; i<24712; i++) vecin[i]=0;
-*/
   ptr1=0;
   ptr2=0;
   for (i=0; i<90; i++)
@@ -239,11 +233,6 @@ static void rdvec(const char *filnam, unsigned char *vecin)
   FGAP(vectemp, vecin, 198, 2);
   FGAP(vectemp, vecin, 71, 1);
   fclose(f);
-}
-
-static int veccomp(unsigned char *veca, unsigned char *vecb)
-{
-  return memcmp(veca, vecb, 24712);
 }
 
 static void cpvec(unsigned char *veca, unsigned char *vecb)
@@ -514,10 +503,6 @@ void vecsuz(const unsigned char *vecin, suzel m, unsigned char *vecout)
     if (entry!=0) FTOV(vecout, k, v3[entry][bact]);
   }
   j=197552;
-/*
-  ptl4=vwork;
-  for (k=0; k<l142; k++) *(ptl4++)=0;
-*/
   memset(vwork, 0, (l142) * (sizeof(long)));
   ptl3 = m->m142;
   for (i=0; i<142; i++) {
@@ -691,10 +676,6 @@ void suzmult(suzel a, suzel b, suzel c)
   ptl1=a->m729;
   ptl3=c->m729;
   for (i=0; i<729; i++) {
-/*
-    ptl3a=ptl3;
-    for (k=0; k<l729; k++) *(ptl3a++)=0;
-*/
     memset(ptl3, 0, (l729) * (sizeof(long)));
     ptl2 = suzwork->m729;
     ptl2w = suzwork->w729;
@@ -772,13 +753,12 @@ void suzmult(suzel a, suzel b, suzel c)
 
 int suzor(suzel a)
 {
-  int i, j;
+  unsigned int i;
   cpvec(vorvec, vec1);
   for (i=1; i<=119; i++) {
     vecsuz(vec1, a, vec2);
     cpvec(vec2, vec1);
-    j=veccomp(vec1, vorvec);
-    if(j==0) {
+    if(0 == memcmp(vec1, vorvec, 24712)) {
         if (PRINT==1) printf("Order is %d\n", i);
         return(i);
     }
