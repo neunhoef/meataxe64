@@ -1,35 +1,39 @@
 #!/bin/sh
 #
-# $Id: indicatef_with_script,v 1.5 2002/09/11 21:20:47 jon Exp $
+# $Id: indicatef_with_script,v 1.6 2002/09/23 13:42:43 jon Exp $
 #
 # Script to find the indicator of an irreducible representation,
 # given a script describing the null generator
 # Assumes a and b in standard base form
 #
 # Inputs
-# $1: generator a
-# $2: generator b
-# $3: script for finding standard base generator
-# $4: order a
-# $5: order b
-# $6: temporary directory
-# $7: initial memory (optional)
+# $1: script for finding standard base generator
+# $2: initial memory
+# $3: temporary directory
+# $4: generator a
+# $5: order a
+# $6: generator b
+# $7: order b
+# $8-: other generators and orders
 #
 # Return codes
 # 1: error in parameters
 # 0: ok
 #
-usage="$0: usage: $0 <a> <b> <script> <order a> <order b> <tmp directory> [<memory>]"
-if [ $# -ne 6 -a $# -ne 7 ]; then
+usage="$0: usage: $0 <script> <memory> <tmp directory> <a> <order a> <b> <order b> [<other generators and orders>]"
+if [ $# -lt 7 ]; then
   echo "$usage"
   exit 1;
 fi
 . functions
-a=$1
-b=$2
-o_a=$4
-o_b=$5
-script=$3
+script=$1
+memory=$2
+tmp_dir=$3
+a=$4
+b=$6
+o_a=$5
+o_b=$7
+shift 3
 if [ -e $a -a -e $b ]; then
   q=`zprime $a`
   nor=`znor $a`
@@ -46,21 +50,26 @@ else
   echo "$0: missing files $a or $b"
   exit 1
 fi
-if [ $# -eq 7 ]; then
-  memory=$7
-else
-  memory=200
-fi
-tmp_dir=$6
 tmp=tmp${PPID}
-a_d=${tmp}.0
-b_d=${tmp}.1
-dual_with_order $a $a_d $o_a $memory
-dual_with_order $b $b_d $o_b $memory
-e=${tmp}.2
+i=1
+line=
+duals=
+while [ $# -gt 0 ]; do
+  if [ 1 -eq $# ]; then
+    rm -f ${tmp}.*
+    echo "$usage"
+    exit 1
+  fi
+  duals="$duals ${tmp}.$i"
+  dual_with_order $1 ${tmp}.$i $2 $memory
+  line="$line $1 ${tmp}.$i"
+  let i=$i+1
+  shift 2
+done
+e=${tmp}.e
 ok=0
 while [ $ok -eq 0 ]; do
-  zscript $e ${tmp}zscript $script $memory $a_d $b_d
+  zscript $e ${tmp}zscript $script $memory $duals
   ret=$?
   if [ $ret -eq 2 ]; then
     let memory=`more_memory $memory`
@@ -73,7 +82,7 @@ while [ $ok -eq 0 ]; do
   fi
 done
 rm ${tmp}zscript*
-indicatef_with_element $a $b $e $a_d $b_d $script $tmp_dir $memory
+indicatef_with_element $e $script $memory $tmp_dir $line
 ret=$?
 rm -f ${tmp}.*
 exit $ret

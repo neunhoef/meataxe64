@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: indicate_with_script,v 1.7 2002/09/12 11:47:28 jon Exp $
+# $Id: indicate_with_script,v 1.8 2002/09/23 13:42:43 jon Exp $
 #
 # Script to find the indicator of an irreducible representation,
 # given a script describing the null generator
@@ -8,7 +8,7 @@
 #
 # Inputs
 # $1: script for finding standard base generator
-# $2: initial memory (optional)
+# $2: initial memory
 # $3: generator a
 # $4: order a
 # $5: generator b

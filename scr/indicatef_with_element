@@ -1,36 +1,39 @@
 #!/bin/sh
 #
-# $Id: indicatef_with_element,v 1.6 2002/09/11 22:53:15 jon Exp $
+# $Id: indicatef_with_element,v 1.7 2002/09/23 13:42:43 jon Exp $
 #
 # Script to find the indicator of an irreducible representation
 # Assumes a and b in standard base form
 #
 # Inputs
-# $1: generator a
-# $2: generator b
-# $3: element to use to get null vector
-# $4: generator a in dual representation
-# $5: generator b in dual representation
-# $6: script used to create null element
-# $7: temporary directory
-# $8: initial memory (optional)
+# $1: element to use to get null vector
+# $2: script used to create null element
+# $3: initial memory
+# $4: temporary directory
+# $5: generator a
+# $6: generator a in dual representation
+# $7: generator b
+# $8: generator b in dual representation
+# $9-: other generators and duals
 #
 # Return codes
 # 1: error in parameters
 # 0: ok
 #
-usage="$0: usage: $0 <a> <b> <e> <a dual> <b dual> <script> <tmp directory> [<memory>]"
-if [ $# -ne 7 -a $# -ne 8 ]; then
+usage="$0: usage: $0 <e> <script> <memory> <tmp directory> <a> <a dual> <b> <b dual> [<other generators and duals>]"
+if [ $# -lt 8 ]; then
   echo "$usage"
   exit 1;
 fi
 . functions
-a=$1
-b=$2
-a_d=$4
-b_d=$5
-e=$3
-script=$6
+e=$1
+script=$2
+memory=$3
+tmp_dir=$4
+a=$5
+b=$7
+a_d=$6
+b_d=$8
 if [ -e $a -a -e $b -a -e $e -a -e $a_d -a -e $b_d ]; then
   q=`zprime $a`
   nor=`znor $a`
@@ -47,20 +50,27 @@ else
   echo "$0: missing files $a, $b or $e"
   exit 1
 fi
-if [ $# -eq 8 ]; then
-  memory=$8
-else
-  memory=200
-fi
-tmp_dir=$7
 tmp=tmp${PPID}
 S=${tmp}.3
 Q=${tmp}.4
 sb=${tmp}.0
-x=`basef_vectors $e $S ${tmp_dir} $memory $a_d $b_d`
+shift 4
+line=
+d_line=
+while [ $# -gt 0 ]; do
+  if [ 1 -eq $# ]; then
+    rm -f ${tmp}.*
+    echo "$usage"
+    exit 1;
+  fi
+  line="$line $1"
+  d_line="$d_line $2"
+  shift 2
+done
+x=`basef_vectors $e $S ${tmp_dir} $memory $d_line`
 ret=$?
 if [ $ret -eq 0 ]; then
-  real_indicate $S $memory $a $b
+  real_indicate $S $memory $line
   ret=$?
   rm -f ${tmp}.*
   exit $ret

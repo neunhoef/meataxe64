@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: basef_vectors,v 1.5 2002/09/11 21:20:47 jon Exp $
+# $Id: basef_vectors,v 1.6 2002/09/23 13:42:43 jon Exp $
 #
 # Script to find a representation in standard base
 # using intermediate files
@@ -22,7 +22,7 @@
 #
 #set -v
 . functions
-usage="$0: usage: $0 <e> <s> <tmp directory> <memory> <a> <b>"
+usage="$0: usage: $0 <e> <s> <tmp directory> <memory> <a> <b> [<other generators>]"
 if [ $# -lt 6 ]; then
   echo "$usage"
   exit 1;
