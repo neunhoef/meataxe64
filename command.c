@@ -197,7 +197,7 @@ void copy_rest(FILE *new, FILE *old)
 {
   char temp[1000];
   do {
-    int i = fread(temp, 1, 1000, old);
+    unsigned int i = fread(temp, 1, 1000, old);
     if (0 != i) {
       fwrite(temp, 1, i, new);
     } else {
@@ -315,7 +315,7 @@ static unsigned int skip_whitespace(unsigned int i, const char *chars)
       return i;
     } else {
       int k = chars[i];
-      if (isspace(k)) {
+      if (my_isspace(k)) {
 	++i;
       } else {
 	return i;
@@ -332,7 +332,7 @@ static unsigned int skip_non_white(unsigned int i, const char *chars)
       return i;
     } else {
       int k = chars[i];
-      if (isspace(k)) {
+      if (my_isspace(k)) {
 	return i;
       } else {
 	++i;

@@ -88,7 +88,7 @@ static void nextline(FILE *f)
 static char *get_str(FILE *f, char **name, unsigned int depth)
 {
   int c = fgetc(f);
-  if (isspace(c)) {
+  if (my_isspace(c)) {
     *name = my_malloc(depth + 1);
     (*name)[depth] = '\0';
     return *name;

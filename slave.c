@@ -1,5 +1,5 @@
 /*
- * $Id: slave.c,v 1.1 2001/09/25 22:31:58 jon Exp $
+ * $Id: slave.c,v 1.2 2001/09/26 22:04:47 jon Exp $
  *
  * Slave for extended operations
  * Based on zsl.c     MTX6 slave version 6.0.11 7.11.98 
@@ -34,7 +34,7 @@ static void slave_usage(void)
 static int readline(FILE *f)
 {
   const char *s = fgets(buf, 1000, f);
-  return (NULL != s);
+  if (s == NULL) return 1; else return 0;
 }
 
 /* Write a line of up to 1000 characters or a terminating '\n' */
@@ -49,7 +49,6 @@ static void writeline(FILE *f)
 }
 
 /* Some sort of line parsing */
-/* Only rturns non-negative ints */
 static unsigned int parse(void)
 {
   char b;
@@ -63,15 +62,14 @@ static unsigned int parse(void)
   while('\n' != b) {
     if (' ' == b && ' ' != buf1[i] && '\n' != buf1[i])
       words[j++] = &buf1[i];
-    if (((' ' == buf1[i])  || ('\n' == buf1[i])) && (' ' != b)) 
+    if ((' ' == buf1[i] || '\n' == buf1[i]) && ' ' != b) 
       buf1[i] = '\0';
     if (j > 99) break;
-      b = buf[i++];
+    b = buf[i++];
   }
   return j;
 }
 
-/* Copy a number of words into buf, separated by spaces */
 static void unparse(unsigned int wordct, FILE *f)
 {
   unsigned int i; 
@@ -130,13 +128,18 @@ int main(int argc, const char *const argv[])
 /*  copy till you find something interesting  */
     got = 0;
     while(1) {
-      if (readline(f1)) break; /* Break on EOF */
+      if (readline(f1)) {
+        printf("Breaking for EOF\n");
+        break; /* Break on EOF */
+      }
       i = parse();
       if (0 == strcmp(words[0], argv[1])) {
         /* If we find our name against a task, mark it done */
         words[0] = "done";
+        printf("Unparsing\n");
         unparse(i, f2);
         /* Write the line, then copy the rest over */
+        printf("Copying the rest\n");
         copy_rest(f2, f1);
         break; /* Leave, with no reason to recheck or do any other action */
       }

@@ -5,7 +5,7 @@
 # All rights reserved
 # Company confidential
 #
-# $Id: unix.txt,v 1.2 2001/09/12 23:13:04 jon Exp $
+# $Id: unix.txt,v 1.3 2001/09/26 22:04:47 jon Exp $
 #
 EXEEXT=
 LIBEXT= a
@@ -26,8 +26,8 @@ NA_COMPILE_FLAGS= "-DNDEBUG=1"
 LINK= $(CC) -o # terminating space
 REL_LIBS= -lm
 DEBUG_LIBS= -lmcheck
-PROF_LIBS= $(DEBUGLIBS)
-PROFNA_LIBS= $(DEBUGLIBS)
+PROF_LIBS= $(DEBUG_LIBS) -lc_p
+PROFNA_LIBS= $(PROF_LIBS)
 COMPILE_CFLAGS= -Werror -ansi -Wall -Wpointer-arith -Wwrite-strings -Winline -Waggregate-return -Wmissing-prototypes -Wnested-externs -W -Wunused -Wcast-align -Wstrict-prototypes -Wmissing-declarations -pedantic
 COMPILE= $(CC) -c -o $@
 DEP_COMPILE_CFLAGS= -MM -MG $(COMPILE_CFLAGS)
