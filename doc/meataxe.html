@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.51 2003/06/21 21:56:57 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.52 2003/08/24 12:05:12 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -4586,6 +4586,7 @@ dimension increases.
 <li><a href="#find_best_nullity_with_orders">find_best_nullity_with_orders</a></li>
 <li><a href="#find_best_nullityf_with_orders">find_best_nullityf_with_orders</a></li>
 <li><a href="#find_element">find_element</a></li>
+<li><a href="#find_irred">find_irred</a></li>
 <li><a href="#find_nullity_one_with_orders">find_nullity_one_with_orders</a></li>
 <li><a href="#find_nullity_onef_with_orders">find_nullity_onef_with_orders</a></li>
 <li><a href="#find_restricted_nullity_one_with_orders">find_restricted_nullity_one_with_orders</a></li>
@@ -4624,6 +4625,7 @@ dimension increases.
 <li><a href="#split">split</a></li>
 <li><a href="#split_all">split_all</a></li>
 <li><a href="#split_all_cond">split_all_cond</a></li>
+<li><a href="#split_all_decomp">split_all_decomp</a></li>
 <li><a href="#split_all_sub">split_all_sub</a></li>
 <li><a href="#split_with_element">split_with_element</a></li>
 <li><a href="#split_with_subspace">split_with_subspace</a></li>
@@ -5998,6 +6000,53 @@ values in paramters eight and onwards are of the form &lt;stem&gt;,
 where &lt;stem&gt;_{1,2} are the real files. The other use of this
 script is to find delta words for use when constructing symmetry bases
 for condensation.
+</li>
+<li>
+<h3><a name="find_irred">find_irred</a></h3>
+Purpose: Identify the type of an existing irreducible
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Memory</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Generator 1</td>
+</tr>
+<tr>
+<td valign=top>3-</td><td valign=top>Other generators</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top> The
+classified irreducible name for the given representation</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>254</td><td valign=top>Representation is reducible</td>
+</tr>
+<tr>
+<td valign=top>255</td><td valign=top>Irreducible not found</td>
+</tr>
+</table>
+Commentary: This script is used to classify irreducibles without going
+through the effort of searching for a generator for the standard
+basis, which in the case of representations which are not absolutely
+irreducible, can be very time consuming. Instead, the set of known
+irreducibles is searched for irreducibles of the correct degree, and
+the script for each such is used to see if it can conjugate the given
+representation into the standard form. The chief expected use of this
+script is computing the endomorphism ring for an irreducible as part
+of a tensor condensation, which requires the dual of a representation,
+in its standard form.
 </li>
 <li>
 <h3><a name="find_nullity_one_with_orders">find_nullity_one_with_orders</a></h3>
@@ -7691,13 +7740,16 @@ Purpose: Perform a single split of a representation
 <td valign=top>Parameters:</td>
 </thead>
 <tr>
-<td valign=top>1</td><td valign=top>Generator 1</td>
+<td valign=top>1</td><td valign=top>Output stem</td>
 </tr>
 <tr>
-<td valign=top>2</td><td valign=top>Generator 2</td>
+<td valign=top>2</td><td valign=top>Ignore pathology</td>
 </tr>
 <tr>
-<td valign=top>3</td><td valign=top>Stem for output file names</td>
+<td valign=top>3</td><td valign=top>Generator 1</td>
+</tr>
+<tr>
+<td valign=top>4-</td><td valign=top>Other generators</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>Information describing the split
@@ -7731,7 +7783,13 @@ determine irreducibility, it then uses <a href="#zsums">zsums</a>. It
 can therefore fail if the generators are singular. Because this script
 does a lot of searching for suitable elements, it should be used
 carefully, either on very small cases, or on cases which are known to
-split easily.
+split easily. The extra parameter ignore pathology is normally set to
+1 (true) to cause it to ignore elements with very large nullities.
+However, when splitting a representation which is completely reducible
+(eg for a condensation subgroup), these elements may be the only ones
+that can provide suitable vectors. Under these circumstances, the
+parameter ignore pathology should be set to 0, as is done by the
+driving script <a href="split_all_decomp">split_all_decomp</a>.
 </li>
 <li>
 <h3><a name="split_all">split_all</a></h3>
@@ -7824,9 +7882,57 @@ for split, since this script will continue until all pieces found are
 irreducible.
 </li>
 <li>
+<h3><a name="split_all_decomp">split_all_decomp</a></h3>
+Purpose: A driver script to call <a href="#split">split</a>
+recursively to achieve a reduction into composition factors. This
+script is specifically for condensation subgroups, where
+representations are completely reducible, and low nullity group
+algebra elements may not exist
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Stem for output file names</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Generator 1</td>
+</tr>
+<tr>
+<td valign=top>3 onwards</td><td valign=top>Other generators</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>Information describing the split
+(or lack of split)</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient memory for workspace</td>
+</tr>
+<tr>
+<td valign=top>252</td><td valign=top>Ran out out of possible elements with which to
+split</td>
+</tr>
+</table>
+Commentary: Because this script does a lot of searching for suitable
+elements, it should be used carefully, either on very small cases, or
+on cases which are known to split easily. This applies even more than
+for split, since this script will continue until all pieces found are
+irreducible.
+</li>
+<li>
 <h3><a name="split_all_sub">split_all_sub</a></h3>
-Purpose: The main code common to <a href="#split_all">split_all</a>
-and <a href="#split_all_cond">split_all_cond</a>.
+Purpose: The main code common to <a href="#split_all">split_all</a>,
+<a href="#split_all_cond">split_all_cond</a> and <a
+href="#split_all_decomp">split_all_decomp</a>.
 <table>
 <thead>
 <td valign=top>Parameters:</td>
@@ -7839,10 +7945,15 @@ and <a href="#split_all_cond">split_all_cond</a>.
 values reserved for future expansion</td>
 </tr>
 <tr>
-<td valign=top>3</td><td valign=top>Generator 1</td>
+<td valign=top>3</td><td valign=top>1 to ignore elements with
+pathologically large nullities, 0 to use them. Other values reserved
+for future expansion</td>
 </tr>
 <tr>
-<td valign=top>4 onwards</td><td valign=top>Other generators</td>
+<td valign=top>4</td><td valign=top>Generator 1</td>
+</tr>
+<tr>
+<td valign=top>5 onwards</td><td valign=top>Other generators</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: split_all_sub,v 1.5 2002/09/11 21:20:47 jon Exp $
+# $Id: split_all_sub,v 1.6 2003/08/24 12:05:12 jon Exp $
 #
 # Script to split a representation completely
 # and possibly classify the irreducibles
@@ -8,23 +8,25 @@
 # Inputs
 # $1: output filename base
 # $2: classify
-# $3: generator a
-# $4-: other generators
+# $3: ignore patholgy
+# $4: generator a
+# $5-: other generators
 #
 # Return codes
 # 1: error in parameters
 # 0: success
 # 252: ran out of possible splitters
 #
-usage="$0: usage: $0 <output_stem> <classify> <a> [<other generators>]"
-if [ $# -lt 4 ]; then
+usage="$0: usage: $0 <output_stem> <classify> <ignore pathology> <a> [<other generators>]"
+if [ $# -lt 5 ]; then
   echo "$usage"
   exit 1;
 fi
-a=$3
+a=$4
 o=$1
 c=$2
 classify=1
+path=$3
 if [ 0 -eq $c ]; then
   classify=0
 fi
@@ -32,17 +34,18 @@ nor=`znor $a`
 #
 # TODO: find a way of using a process specific temporary for stdout
 #
-shift 3
-split $o $a $* 2>/dev/null 1>poo
+shift 4
+split $o $path $a $* 2>/dev/null 1>poo
 ret=$?
 res=`grep dimension poo 2>/dev/null`
 #cat poo
-rm -f poo
 #echo res = $res, ret = $ret
 if [ 1 -eq $ret ]; then
   echo "parameter problem with module $a"
+  cat poo
   exit 1
 elif [ 255 -eq $ret ]; then
+  rm -f poo
   echo "irreducible module $a found"
   if [ 0 -ne $classify ]; then
     new_irred_and_indicate 400 $a $*
@@ -51,13 +54,16 @@ elif [ 255 -eq $ret ]; then
   fi
   exit 0
 elif [ 254 -eq $ret ]; then
+  cat poo
   echo "unable to split module $a (unexpected)"
   exit 0
 elif [ 252 -eq $ret ]; then
+  cat poo
   echo "ran out of splitters for $a"
   exit 252
 else
 # Split, so try some more
+  rm -f poo
   echo $res
   dim=`echo $res | sed -e "s/^.* dimension //g;s/,.*$//g"`
   codim=`echo $res | sed -e "s/^.*codimension //g"`
@@ -72,12 +78,12 @@ else
     let y=$y+1
     names="$names ${sub_name}_$y"
   done
-  split_all_sub ${o} $c $names
+  split_all_sub ${o} $c $path $names
   names="${quot_name}_1"
   y=1
   for x in $*; do
     let y=$y+1
     names="$names ${quot_name}_$y"
   done
-  split_all_sub ${o} $c $names
+  split_all_sub ${o} $c $path $names
 fi

@@ -1,15 +1,16 @@
 #!/bin/sh
 #
-# $Id: split,v 1.17 2002/10/14 08:36:36 jon Exp $
+# $Id: split,v 1.18 2003/08/24 12:05:12 jon Exp $
 #
 # Script to split a representation
 #
 # Inputs
 # $1: output filename base
-# $2: generator a
-# $3-: other generators
+# $2: ignore pathology
+# $3: generator a
+# $4-: other generators
 #
-# outputs will be of the form <$3>_<q>_<nor>_$x
+# outputs will be of the form <$4>_<q>_<nor>_$x
 # where nor is number of rows, and q is the prime power
 #
 #
@@ -22,14 +23,15 @@
 #
 #set -v
 . functions
-usage="$0: usage: $0 <output_stem> <a> [<other generators>]"
-if [ $# -lt 3 ]; then
+usage="$0: usage: $0 <output_stem> <ignore pathology> <a> [<other generators>]"
+if [ $# -lt 4 ]; then
   echo "$usage"
   exit 1;
 fi
-a=$2
+a=$3
 o=$1
-shift 2
+path=$2
+shift 3
 if [ -e $a ]; then
   q=`zprime $a`
   nor=`znor $a`
@@ -65,7 +67,7 @@ for i in 1 2 3 4 5 6 7 8 9 10; do
     rm -f ${tmp}*
     exit 1
   fi
-  split_with_element ${tmp}.1 $o 0 1 ${tmp}.2 $a $*
+  split_with_element ${tmp}.1 $o 0 $path ${tmp}.2 $a $*
   ret=$?
 # Only loop on nullity 0 or didn't split
   if [ $ret -ne 253 -a $ret -ne 254 ]; then
@@ -76,7 +78,7 @@ done
 # If any generators are singular, try them
 for x in $a $*; do
   echo "using $x to split"
-  split_with_element $x $o 0 1 ${tmp}.2 $a $*
+  split_with_element $x $o 0 $path ${tmp}.2 $a $*
   ret=$?
 # Only loop on nullity 0 or didn't split
   if [ $ret -ne 253 -a $ret -ne 254 ]; then

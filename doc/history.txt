@@ -270,3 +270,4 @@ skew seventh
 20030804 - Add stuff to avoid evaluating essentially the same words in sums by eliminating multiples
 20030810 - Added stuff to reduce the disc space requirements of zsums and friends
 20030817 - Fix bug in zfln where temporaries were lost
+20030824 - Add find_irred and split_all_decomp
