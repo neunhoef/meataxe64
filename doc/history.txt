@@ -216,3 +216,5 @@ skew seventh
 20021014 - Use -m throughout, and document
 20021015 - GF4 version of inner product now available
 20021015 - Indicator calculation for odd characteristics
+20021015 - GF3 and GF5 versions of inner product
+20021015 - Orthogonal group computation for all characteristics as part of indicator calculation

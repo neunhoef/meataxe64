@@ -1,5 +1,5 @@
 /*
- * $Id: sign.c,v 1.2 2002/10/14 19:11:51 jon Exp $
+ * $Id: sign.c,v 1.3 2002/10/15 14:30:44 jon Exp $
  *
  * Function compute the orthogonal group sign
  *
@@ -81,9 +81,7 @@ int sign(const char *qform, const char *bform, const char *name)
   header_free(h_inq);
   if (nor % 2 != 0) {
     fclose(qinp);
-    header_free(h_inq);
     fclose(binp);
-    header_free(h_inb);
     return 0; /* We'll call odd dimension + */
   }
   n = memory_rows(len, 100);
@@ -181,29 +179,6 @@ int sign(const char *qform, const char *bform, const char *name)
     mat[nor - 1] = row;
     clean(&sing_row1, 1, mat, nor - 1, map, NULL, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, name);
     free(map);
-#if 0
-    NOT_USED(rev_map);
-    echelise(mat, nor, &n, &map, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, 0, name);
-    if (n + 2 != nor) {
-      fclose(binp);
-      fclose(qinp);
-      matrix_free(mat);
-      free(products);
-      free(map);
-      fprintf(stderr, "%s: unexpected row reduction, terminating\n", name);
-      return 1;
-    }
-    m = 0;
-    for (n = 0; n < nor; n++) {
-      if (0 <= map[n]) {
-        unsigned int *row = mat[m];
-        mat[m] = mat[n];
-        mat[n] = row;
-        m++;
-      }
-    }
-    free(map);
-#else
     {
       int done = 0;
       unsigned int pos, elt;
@@ -226,7 +201,7 @@ int sign(const char *qform, const char *bform, const char *name)
       }
       m = 0;
       memset(rev_map, -1, noc * sizeof(int));
-      while (0 == done) {
+      while (0 == done /* && m + 1 < nor */) {
         int k, l = map[m];
         assert(0 <= l && (unsigned int)l < noc);
         k = rev_map[l];
@@ -278,10 +253,10 @@ int sign(const char *qform, const char *bform, const char *name)
         }
         m++;
       }
+      assert(1 == done);
       free(map);
       free(rev_map);
     }
-#endif
     nor -= 2;
   }
   res = singular_vector(mat, mat + noc, sing_row1, qinp,

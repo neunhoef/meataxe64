@@ -1,5 +1,5 @@
 /*
- * $Id: rows.c,v 1.18 2002/10/15 10:43:52 jon Exp $
+ * $Id: rows.c,v 1.19 2002/10/15 14:30:44 jon Exp $
  *
  * Row manipulation for meataxe
  *
@@ -292,6 +292,30 @@ static void row_scale_in_place_3(unsigned int *row,
     a = *(row);
     *(row++) = scale_mod_3(a);
   }
+}
+
+static unsigned int prod_table_3[256];
+
+static unsigned int row_product_3(const unsigned int *row1, const unsigned int *row2, unsigned int len)
+{
+  unsigned int res = 0;
+  while (len > 0) {
+    unsigned int a = *row1;
+    if (0 != a) {
+      unsigned int b = *row2;
+      while (0 != b && 0 != a) {
+        unsigned int prod = ((a & 0xf) << 4) | (b & 0xf);
+        res += prod_table_3[(prod)];
+        b >>= 4;
+        a >>= 4;
+      }
+    }
+    res %= 3;
+    len--;
+    row1++;
+    row2++;
+  }
+  return res;
 }
 
 #define ONE_BITS_4 0x55555555
@@ -653,6 +677,28 @@ static void row_scale_in_place_5(unsigned int *row,
   }
 }
 
+static unsigned int row_product_5(const unsigned int *row1, const unsigned int *row2, unsigned int len)
+{
+  unsigned int res = 0;
+  while (len > 0) {
+    unsigned int a = *row1;
+    if (0 != a) {
+      unsigned int b = *row2;
+      while (0 != b && 0 != a) {
+        unsigned int prod = (a & 0x7) * (b & 0x7);
+        res += prod;
+        b >>= 3;
+        a >>= 3;
+      }
+    }
+    res %= 5;
+    len--;
+    row1++;
+    row2++;
+  }
+  return res;
+}
+
 void row_copy(const unsigned int *row1, unsigned int *row2,
               unsigned int len)
 {
@@ -666,16 +712,6 @@ void row_init(unsigned int *row, unsigned int len)
 {
   assert(NULL != row);
   memset(row, 0, len * sizeof(unsigned int));
-}
-
-static unsigned int unimplemented_product(const unsigned int *row1, const unsigned int *row2, unsigned int len)
-{
-  NOT_USED(row1);
-  NOT_USED(row2);
-  NOT_USED(len);
-  fprintf(stderr, "unimplemented_product called, terminating\n");
-  exit(1);
-  return 0;
 }
 
 int rows_init(unsigned int prime, row_opsp ops)
@@ -706,7 +742,47 @@ int rows_init(unsigned int prime, row_opsp ops)
     ops->scaled_incer = &scaled_row_inc_3;
     ops->scaler = &row_scale_3;
     ops->scaler_in_place = &row_scale_in_place_3;
-    ops->product = &unimplemented_product;
+    ops->product = row_product_3;
+    for (i = 0; i < 256; i++) {
+      unsigned int prod = 0;
+      unsigned int j = i & 0xf;
+      unsigned int k = (i & 0xf0) >> 4;
+      while (0 != j && 0 != k) {
+        unsigned int l = j & 3;
+        unsigned int m = k & 3;
+        switch (4 * l + m) {
+        case 0x0:
+        case 0x1:
+        case 0x2:
+        case 0x3:
+        case 0x4:
+        case 0x7:
+        case 0x8:
+        case 0xb:
+        case 0xc:
+        case 0xd:
+        case 0xe:
+        case 0xf:
+          break;
+        case 0x5:
+        case 0x6:
+          prod += m;
+          prod %= 3;
+          break;
+        case 0x9:
+          prod += l;
+          prod %= 3;
+          break;
+        case 0xa:
+          prod += 1;
+          prod %= 3;
+          break;
+        }
+        j >>= 2;
+        k >>= 2;
+      }
+      prod_table_3[i] = prod;
+    }
     return 1;
   } else if (4 == prime) {
     ops->adder = &row_add_2;
@@ -715,7 +791,6 @@ int rows_init(unsigned int prime, row_opsp ops)
     ops->scaled_incer = &scaled_row_inc_4;
     ops->scaler = &row_scale_4;
     ops->scaler_in_place = &row_scale_in_place_4;
-    ops->product = &unimplemented_product;
     ops->product = &row_product_4;
     for (i = 0; i < 256; i++) {
       unsigned int prod = 0;
@@ -766,7 +841,7 @@ int rows_init(unsigned int prime, row_opsp ops)
     ops->scaled_incer = &scaled_row_inc_5;
     ops->scaler = &row_scale_5;
     ops->scaler_in_place = &row_scale_in_place_5;
-    ops->product = &unimplemented_product;
+    ops->product = &row_product_5;
     return 1;
   } else {
     return 0;

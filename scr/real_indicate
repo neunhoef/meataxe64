@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: real_indicate,v 1.4 2002/10/15 11:53:19 jon Exp $
+# $Id: real_indicate,v 1.5 2002/10/15 14:30:44 jon Exp $
 #
 # Script to find the indicator of an irreducible representation
 # assuming it is real, and we have the standard basis conjugating
@@ -87,11 +87,26 @@ if [ 2 -eq $p ]; then
     done
     if [ 1 -eq $ind ]; then
       echo indicator +
-      rm -f ${tmp}.*
-      if [ -e ${a}_+ -o -L ${a}_+ ]; then
-        rm ${a}_+
+      if [ -e ${a}_+* -o -L ${a}_+* ]; then
+        rm ${a}_+*
       fi
-      ln -s $a ${a}_+
+# Now compute the orthogonal group sign
+      zsign -m $memory $Q $S
+      ret=$?
+      if [ 0 -eq $ret ]; then
+        ln -s $a ${a}_++
+        echo group +
+      elif [ 255 -eq $ret ]; then
+        ln -s $a ${a}_+-
+        echo group -
+      elif [ 2 -eq $ret ]; then
+        ln -s $a ${a}_+
+        echo insufficient memory to compute group sign
+      else
+        rm -f ${tmp}.*
+        exit 1
+      fi
+      rm -f ${tmp}.*
       exit 0
     fi
 # Try next diagonal
@@ -139,10 +154,32 @@ else
   done
   if zdiff $S ${tmp}.0 2>/dev/null 1>&2; then
     echo indicator +
-    if [ -e ${a}_+ -o -L ${a}_+ ]; then
-      rm ${a}_+
+# Now compute the orthogonal group sign
+    if [ -e ${a}_+* -o -L ${a}_+* ]; then
+      rm ${a}_+*
     fi
-    ln -s $a ${a}_+
+    let nor2=$nor/2
+    let t=$nor2*2
+    if [ $nor -eq $t ]; then
+# Even dimensional
+      zsign -m $memory $S $S
+      ret=$?
+      if [ 0 -eq $ret ]; then
+        ln -s $a ${a}_++
+        echo group +
+      elif [ 255 -eq $ret ]; then
+        ln -s $a ${a}_+-
+        echo group -
+      elif [ 2 -eq $ret ]; then
+        ln -s $a ${a}_+
+        echo insufficient memory to compute group sign
+      else
+        rm -f ${tmp}.*
+        exit 1
+      fi
+    else
+      ln -s $a ${a}_+
+    fi
   else
     echo indicator -
     if [ -e ${a}_- -o -L ${a}_- ]; then
