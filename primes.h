@@ -1,5 +1,5 @@
 /*
- * $Id: primes.h,v 1.6 2002/02/05 19:50:56 jon Exp $
+ * $Id: primes.h,v 1.7 2002/02/27 19:06:17 jon Exp $
  *
  * Prime power manipulation for meataxe
  *
@@ -15,6 +15,7 @@ typedef unsigned int (*unary_fn)(unsigned int);
 typedef unsigned int (*binary_fn)(unsigned int, unsigned int);
 
 typedef struct {
+  unsigned int prime;
   rep_fn prime_rep;
   rep_fn decimal_rep;
   unary_fn negate;

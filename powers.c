@@ -1,11 +1,12 @@
 /*
- * $Id: powers.c,v 1.2 2002/02/12 23:10:24 jon Exp $
+ * $Id: powers.c,v 1.3 2002/02/27 19:06:17 jon Exp $
  *
  * Function to compute tensor powers of a matrix, from file
  *
  */
 
 #include "powers.h"
+#include "dets.h"
 #include "elements.h"
 #include "endian.h"
 #include "header.h"
@@ -97,15 +98,13 @@ int skew_square(const char *m1, const char *m2, const char *name)
       row_init(row_out, len_out);
       for (k = 0; k + 1 < nor_in; k++) {
         /* Along the columns of m1 */
-        unsigned int elt1 = get_element_from_row(nob, k, rows[i]);
-        unsigned int elt2 = get_element_from_row(nob, k, rows[j]);
+        unsigned int e11 = get_element_from_row(nob, k, rows[i]);
+        unsigned int e21 = get_element_from_row(nob, k, rows[j]);
         for (l = k + 1; l < nor_in; l++) {
           /* Along the columns of m1 again */
-          unsigned int elt3 = get_element_from_row(nob, l, rows[i]);
-          unsigned int elt4 = get_element_from_row(nob, l, rows[j]);
-          unsigned int e1 = (*prime_operations.mul)(elt1, elt4);
-          unsigned int e2 = (*prime_operations.negate)((*prime_operations.mul)(elt2, elt3));
-          unsigned int e = (*prime_operations.add)(e1, e2);
+          unsigned int e12 = get_element_from_row(nob, l, rows[i]);
+          unsigned int e22 = get_element_from_row(nob, l, rows[j]);
+          unsigned int e = det2(prime_operations, e11, e12, e21, e22);
           put_element_to_row(nob, offset, row_out, e);
           offset++;
         }
@@ -316,34 +315,23 @@ int skew_cube(const char *m1, const char *m2, const char *name)
         row_init(row_out, len_out);
         for (l = 0; l + 2 < nor_in; l++) {
           /* Along the columns of m1 */
-          unsigned int elt11 = get_element_from_row(nob, l, rows[i]);
-          unsigned int elt12 = get_element_from_row(nob, l, rows[j]);
-          unsigned int elt13 = get_element_from_row(nob, l, rows[k]);
+          unsigned e11 = get_element_from_row(nob, l, rows[i]);
+          unsigned e21 = get_element_from_row(nob, l, rows[j]);
+          unsigned e31 = get_element_from_row(nob, l, rows[k]);
           for (m = l + 1; m + 1 < nor_in; m++) {
             /* Along the columns of m1 again */
-            unsigned int elt21 = get_element_from_row(nob, m, rows[i]);
-            unsigned int elt22 = get_element_from_row(nob, m, rows[j]);
-            unsigned int elt23 = get_element_from_row(nob, m, rows[k]);
+            unsigned int e12 = get_element_from_row(nob, m, rows[i]);
+            unsigned int e22 = get_element_from_row(nob, m, rows[j]);
+            unsigned int e32 = get_element_from_row(nob, m, rows[k]);
             for (n = m + 1; n < nor_in; n++) {
               /* Along the columns of m1 again */
-              unsigned int elt31 = get_element_from_row(nob, n, rows[i]);
-              unsigned int elt32 = get_element_from_row(nob, n, rows[j]);
-              unsigned int elt33 = get_element_from_row(nob, n, rows[k]);
-              unsigned int e = (*prime_operations.mul)(elt22, elt33);
-              unsigned int f = (*prime_operations.negate)((*prime_operations.mul)(elt32, elt23));
-              unsigned int adj = (*prime_operations.add)(e, f);
-              unsigned int fact1 = (*prime_operations.mul)(elt11, adj);
-              unsigned int fact2, fact3, elt;
-              e = (*prime_operations.negate)((*prime_operations.mul)(elt21, elt33));
-              f = (*prime_operations.mul)(elt23, elt31);
-              adj = (*prime_operations.add)(e, f);
-              fact2 = (*prime_operations.mul)(elt12, adj);
-              e = (*prime_operations.mul)(elt21, elt32);
-              f = (*prime_operations.negate)((*prime_operations.mul)(elt22, elt31));
-              adj = (*prime_operations.add)(e, f);
-              fact3 = (*prime_operations.mul)(elt13, adj);
-              elt = (*prime_operations.add)(fact1, fact2);
-              elt = (*prime_operations.add)(elt, fact3);
+              unsigned int e13 = get_element_from_row(nob, n, rows[i]);
+              unsigned int e23 = get_element_from_row(nob, n, rows[j]);
+              unsigned int e33 = get_element_from_row(nob, n, rows[k]);
+/*
+              unsigned int elt = det3(rows, nob, prime_operations, i, l, j, m, k, n);
+*/
+              unsigned int elt = det3(prime_operations, e11, e12, e13, e21, e22, e23, e31, e32, e33);
               put_element_to_row(nob, offset, row_out, elt);
               offset++;
             }
@@ -354,6 +342,593 @@ int skew_cube(const char *m1, const char *m2, const char *name)
           fprintf(stderr, "%s: cannot write some of %s, terminating\n", name, m2);
           fclose(outp);
           return 0;
+        }
+      }
+    }
+  }
+  matrix_free(rows);
+  fclose(outp);
+  return 1;
+}
+
+int skew_fourth(const char *m1, const char *m2, const char *name)
+{
+  FILE *inp = NULL;
+  FILE *outp = NULL;
+  unsigned int prime, nob, nod, nor_in, len_in, nor_out, len_out;
+  const header *h_in = NULL, *h_out = NULL;
+  unsigned int i, i_1, i_2, i_3, i_4, j_1, j_2, j_3, j_4;
+  unsigned int **rows, *row_out;
+  prime_ops prime_operations;
+  assert(NULL != m1);
+  assert(NULL != m2);
+  assert(NULL != name);
+  if (0 == open_and_read_binary_header(&inp, &h_in, m1, name)) {
+    if (NULL != h_in) {
+      header_free(h_in);
+    }
+    return cleanup(inp, outp);
+  }
+  prime = header_get_prime(h_in);
+  nob = header_get_nob(h_in);
+  nod = header_get_nod(h_in);
+  nor_in = header_get_nor(h_in);
+  len_in = header_get_len(h_in);
+  if (nor_in != header_get_noc(h_in)) {
+    fprintf(stderr, "%s: %s is not square, terminating\n", name, m1);
+    header_free(h_in);
+    return cleanup(inp, NULL);
+  }
+  header_free(h_in);
+  if (nor_in <= 3) {
+    fprintf(stderr, "%s: %s has no skew fourth (dim <= 3), terminating\n", name, m1);
+    header_free(h_in);
+    return cleanup(inp, NULL);
+  }
+  if (0 == primes_init(prime, &prime_operations)) {
+    fprintf(stderr, "%s: Can't initialise prime operations for %s, terminating\n", name, m1);
+    return cleanup(inp, NULL);
+  }
+  nor_out = (nor_in * (nor_in - 1) * (nor_in - 2) * (nor_in - 3)) / 24;
+  h_out = header_create(prime, nob, nod, nor_out, nor_out);
+  len_out = header_get_len(h_out);
+  if (memory_rows(len_in, 900) < nor_in ||
+      memory_rows(len_out, 100) < 1) {
+    fprintf(stderr, "%s: cannot get enough memory, terminating\n", name);
+    (void) cleanup(inp, outp);
+    exit(2);
+  }
+  rows = matrix_malloc(nor_in);
+  for (i = 0; i < nor_in; i++) {
+    rows[i] = memory_pointer_offset(0, i, len_in);
+  }
+  row_out = memory_pointer(900);
+  if (0 == endian_read_matrix(inp, rows, len_in, nor_in)) {
+    fprintf(stderr, "%s: cannot read some of %s, terminating\n", name, m1);
+    return cleanup(inp, outp);
+  }
+  if (0 == open_and_write_binary_header(&outp, h_out, m2, name)) {
+    return cleanup(inp, outp);
+  }
+  fclose(inp);
+  header_free(h_out);
+  for (i_1 = 0; i_1 + 3 < nor_in; i_1++) {
+    /* Down the rows of m1 */
+    for (i_2 = i_1 + 1; i_2 + 2 < nor_in; i_2++) {
+      /* Down the rows of m1 again */
+      for (i_3 = i_2 + 1; i_3 + 1 < nor_in; i_3++) {
+        /* Down the rows of m1 again */
+        for (i_4 = i_3 + 1; i_4 < nor_in; i_4++) {
+          /* Down the rows of m1 again */
+          unsigned int offset = 0;
+          row_init(row_out, len_out);
+          for (j_1 = 0; j_1 + 3 < nor_in; j_1++) {
+            /* Along the columns of m1 */
+            unsigned int e11 = get_element_from_row(nob, j_1, rows[i_1]);
+            unsigned int e21 = get_element_from_row(nob, j_1, rows[i_2]);
+            unsigned int e31 = get_element_from_row(nob, j_1, rows[i_3]);
+            unsigned int e41 = get_element_from_row(nob, j_1, rows[i_4]);
+            for (j_2 = j_1 + 1; j_2 + 2 < nor_in; j_2++) {
+              /* Along the columns of m1 again */
+              unsigned int e12 = get_element_from_row(nob, j_2, rows[i_1]);
+              unsigned int e22 = get_element_from_row(nob, j_2, rows[i_2]);
+              unsigned int e32 = get_element_from_row(nob, j_2, rows[i_3]);
+              unsigned int e42 = get_element_from_row(nob, j_2, rows[i_4]);
+              for (j_3 = j_2 + 1; j_3 + 1 < nor_in; j_3++) {
+                /* Along the columns of m1 again */
+                unsigned int e13 = get_element_from_row(nob, j_3, rows[i_1]);
+                unsigned int e23 = get_element_from_row(nob, j_3, rows[i_2]);
+                unsigned int e33 = get_element_from_row(nob, j_3, rows[i_3]);
+                unsigned int e43 = get_element_from_row(nob, j_3, rows[i_4]);
+                for (j_4 = j_3 + 1; j_4 < nor_in; j_4++) {
+                  /* Along the columns of m1 again */
+                  unsigned int e14 = get_element_from_row(nob, j_4, rows[i_1]);
+                  unsigned int e24 = get_element_from_row(nob, j_4, rows[i_2]);
+                  unsigned int e34 = get_element_from_row(nob, j_4, rows[i_3]);
+                  unsigned int e44 = get_element_from_row(nob, j_4, rows[i_4]);
+                  unsigned int elt = det4(prime_operations, e11, e12, e13, e14,
+                                          e21, e22, e23, e24,
+                                          e31, e32, e33, e34,
+                                          e41, e42, e43, e44);
+                  put_element_to_row(nob, offset, row_out, elt);
+                  offset++;
+                }
+              }
+            }
+          }
+          assert(offset == nor_out);
+          if (0 == endian_write_row(outp, row_out, len_out)) {
+            fprintf(stderr, "%s: cannot write some of %s, terminating\n", name, m2);
+            fclose(outp);
+            return 0;
+          }
+        }
+      }
+    }
+  }
+  matrix_free(rows);
+  fclose(outp);
+  return 1;
+}
+
+int skew_fifth(const char *m1, const char *m2, const char *name)
+{
+  FILE *inp = NULL;
+  FILE *outp = NULL;
+  unsigned int prime, nob, nod, nor_in, len_in, nor_out, len_out;
+  const header *h_in = NULL, *h_out = NULL;
+  unsigned int i, i_1, i_2, i_3, i_4, i_5, j_1, j_2, j_3, j_4, j_5;
+  unsigned int **rows, *row_out;
+  prime_ops prime_operations;
+  assert(NULL != m1);
+  assert(NULL != m2);
+  assert(NULL != name);
+  if (0 == open_and_read_binary_header(&inp, &h_in, m1, name)) {
+    if (NULL != h_in) {
+      header_free(h_in);
+    }
+    return cleanup(inp, outp);
+  }
+  prime = header_get_prime(h_in);
+  nob = header_get_nob(h_in);
+  nod = header_get_nod(h_in);
+  nor_in = header_get_nor(h_in);
+  len_in = header_get_len(h_in);
+  if (nor_in != header_get_noc(h_in)) {
+    fprintf(stderr, "%s: %s is not square, terminating\n", name, m1);
+    header_free(h_in);
+    return cleanup(inp, NULL);
+  }
+  header_free(h_in);
+  if (nor_in <= 4) {
+    fprintf(stderr, "%s: %s has no skew fifth (dim <= 4), terminating\n", name, m1);
+    header_free(h_in);
+    return cleanup(inp, NULL);
+  }
+  if (0 == primes_init(prime, &prime_operations)) {
+    fprintf(stderr, "%s: Can't initialise prime operations for %s, terminating\n", name, m1);
+    return cleanup(inp, NULL);
+  }
+  nor_out = (nor_in * (nor_in - 1) * (nor_in - 2) * (nor_in - 3) * (nor_in - 4)) / 120;
+  h_out = header_create(prime, nob, nod, nor_out, nor_out);
+  len_out = header_get_len(h_out);
+  if (memory_rows(len_in, 900) < nor_in ||
+      memory_rows(len_out, 100) < 1) {
+    fprintf(stderr, "%s: cannot get enough memory, terminating\n", name);
+    (void) cleanup(inp, outp);
+    exit(2);
+  }
+  rows = matrix_malloc(nor_in);
+  for (i = 0; i < nor_in; i++) {
+    rows[i] = memory_pointer_offset(0, i, len_in);
+  }
+  row_out = memory_pointer(900);
+  if (0 == endian_read_matrix(inp, rows, len_in, nor_in)) {
+    fprintf(stderr, "%s: cannot read some of %s, terminating\n", name, m1);
+    return cleanup(inp, outp);
+  }
+  if (0 == open_and_write_binary_header(&outp, h_out, m2, name)) {
+    return cleanup(inp, outp);
+  }
+  fclose(inp);
+  header_free(h_out);
+  for (i_1 = 0; i_1 + 4 < nor_in; i_1++) {
+    /* Down the rows of m1 */
+    for (i_2 = i_1 + 1; i_2 + 3 < nor_in; i_2++) {
+      /* Down the rows of m1 again */
+      for (i_3 = i_2 + 1; i_3 + 2 < nor_in; i_3++) {
+        /* Down the rows of m1 again */
+        for (i_4 = i_3 + 1; i_4 + 1 < nor_in; i_4++) {
+          /* Down the rows of m1 again */
+          for (i_5 = i_4 + 1; i_5 < nor_in; i_5++) {
+            /* Down the rows of m1 again */
+            unsigned int offset = 0;
+            row_init(row_out, len_out);
+            for (j_1 = 0; j_1 + 4 < nor_in; j_1++) {
+              /* Along the columns of m1 */
+              unsigned int e11 = get_element_from_row(nob, j_1, rows[i_1]);
+              unsigned int e21 = get_element_from_row(nob, j_1, rows[i_2]);
+              unsigned int e31 = get_element_from_row(nob, j_1, rows[i_3]);
+              unsigned int e41 = get_element_from_row(nob, j_1, rows[i_4]);
+              unsigned int e51 = get_element_from_row(nob, j_1, rows[i_5]);
+              for (j_2 = j_1 + 1; j_2 + 3 < nor_in; j_2++) {
+                /* Along the columns of m1 again */
+                unsigned int e12 = get_element_from_row(nob, j_2, rows[i_1]);
+                unsigned int e22 = get_element_from_row(nob, j_2, rows[i_2]);
+                unsigned int e32 = get_element_from_row(nob, j_2, rows[i_3]);
+                unsigned int e42 = get_element_from_row(nob, j_2, rows[i_4]);
+                unsigned int e52 = get_element_from_row(nob, j_2, rows[i_5]);
+                for (j_3 = j_2 + 1; j_3 + 2 < nor_in; j_3++) {
+                  /* Along the columns of m1 again */
+                  unsigned int e13 = get_element_from_row(nob, j_3, rows[i_1]);
+                  unsigned int e23 = get_element_from_row(nob, j_3, rows[i_2]);
+                  unsigned int e33 = get_element_from_row(nob, j_3, rows[i_3]);
+                  unsigned int e43 = get_element_from_row(nob, j_3, rows[i_4]);
+                  unsigned int e53 = get_element_from_row(nob, j_3, rows[i_5]);
+                  for (j_4 = j_3 + 1; j_4 + 1 < nor_in; j_4++) {
+                    /* Along the columns of m1 again */
+                    unsigned int e14 = get_element_from_row(nob, j_4, rows[i_1]);
+                    unsigned int e24 = get_element_from_row(nob, j_4, rows[i_2]);
+                    unsigned int e34 = get_element_from_row(nob, j_4, rows[i_3]);
+                    unsigned int e44 = get_element_from_row(nob, j_4, rows[i_4]);
+                    unsigned int e54 = get_element_from_row(nob, j_4, rows[i_5]);
+                    for (j_5 = j_4 + 1; j_5 < nor_in; j_5++) {
+                      /* Along the columns of m1 again */
+                      unsigned int e15 = get_element_from_row(nob, j_5, rows[i_1]);
+                      unsigned int e25 = get_element_from_row(nob, j_5, rows[i_2]);
+                      unsigned int e35 = get_element_from_row(nob, j_5, rows[i_3]);
+                      unsigned int e45 = get_element_from_row(nob, j_5, rows[i_4]);
+                      unsigned int e55 = get_element_from_row(nob, j_5, rows[i_5]);
+                      unsigned int elt = det5(prime_operations,
+                                              e11, e12, e13, e14, e15,
+                                              e21, e22, e23, e24, e25,
+                                              e31, e32, e33, e34, e35,
+                                              e41, e42, e43, e44, e45,
+                                              e51, e52, e53, e54, e55);
+                      put_element_to_row(nob, offset, row_out, elt);
+                      offset++;
+                    }
+                  }
+                }
+              }
+            }
+            assert(offset == nor_out);
+            if (0 == endian_write_row(outp, row_out, len_out)) {
+              fprintf(stderr, "%s: cannot write some of %s, terminating\n", name, m2);
+              fclose(outp);
+              return 0;
+            }
+          }
+        }
+      }
+    }
+  }
+  matrix_free(rows);
+  fclose(outp);
+  return 1;
+}
+
+int skew_sixth(const char *m1, const char *m2, const char *name)
+{
+  FILE *inp = NULL;
+  FILE *outp = NULL;
+  unsigned int prime, nob, nod, nor_in, len_in, nor_out, len_out;
+  const header *h_in = NULL, *h_out = NULL;
+  unsigned int i, i_1, i_2, i_3, i_4, i_5, i_6, j_1, j_2, j_3, j_4, j_5, j_6;
+  unsigned int **rows, *row_out;
+  prime_ops prime_operations;
+  assert(NULL != m1);
+  assert(NULL != m2);
+  assert(NULL != name);
+  if (0 == open_and_read_binary_header(&inp, &h_in, m1, name)) {
+    if (NULL != h_in) {
+      header_free(h_in);
+    }
+    return cleanup(inp, outp);
+  }
+  prime = header_get_prime(h_in);
+  nob = header_get_nob(h_in);
+  nod = header_get_nod(h_in);
+  nor_in = header_get_nor(h_in);
+  len_in = header_get_len(h_in);
+  if (nor_in != header_get_noc(h_in)) {
+    fprintf(stderr, "%s: %s is not square, terminating\n", name, m1);
+    header_free(h_in);
+    return cleanup(inp, NULL);
+  }
+  header_free(h_in);
+  if (nor_in <= 5) {
+    fprintf(stderr, "%s: %s has no skew sixth (dim <= 5), terminating\n", name, m1);
+    header_free(h_in);
+    return cleanup(inp, NULL);
+  }
+  if (0 == primes_init(prime, &prime_operations)) {
+    fprintf(stderr, "%s: Can't initialise prime operations for %s, terminating\n", name, m1);
+    return cleanup(inp, NULL);
+  }
+  nor_out = (nor_in * (nor_in - 1) * (nor_in - 2) * (nor_in - 3) * (nor_in - 4) * (nor_in - 5)) / 720;
+  h_out = header_create(prime, nob, nod, nor_out, nor_out);
+  len_out = header_get_len(h_out);
+  if (memory_rows(len_in, 900) < nor_in ||
+      memory_rows(len_out, 100) < 1) {
+    fprintf(stderr, "%s: cannot get enough memory, terminating\n", name);
+    (void) cleanup(inp, outp);
+    exit(2);
+  }
+  rows = matrix_malloc(nor_in);
+  for (i = 0; i < nor_in; i++) {
+    rows[i] = memory_pointer_offset(0, i, len_in);
+  }
+  row_out = memory_pointer(900);
+  if (0 == endian_read_matrix(inp, rows, len_in, nor_in)) {
+    fprintf(stderr, "%s: cannot read some of %s, terminating\n", name, m1);
+    return cleanup(inp, outp);
+  }
+  if (0 == open_and_write_binary_header(&outp, h_out, m2, name)) {
+    return cleanup(inp, outp);
+  }
+  fclose(inp);
+  header_free(h_out);
+  for (i_1 = 0; i_1 + 5 < nor_in; i_1++) {
+    /* Down the rows of m1 */
+    for (i_2 = i_1 + 1; i_2 + 4 < nor_in; i_2++) {
+      /* Down the rows of m1 again */
+      for (i_3 = i_2 + 1; i_3 + 3 < nor_in; i_3++) {
+        /* Down the rows of m1 again */
+        for (i_4 = i_3 + 1; i_4 + 2 < nor_in; i_4++) {
+          /* Down the rows of m1 again */
+          for (i_5 = i_4 + 1; i_5 + 1 < nor_in; i_5++) {
+            /* Down the rows of m1 again */
+            for (i_6 = i_5 + 1; i_6 < nor_in; i_6++) {
+              /* Down the rows of m1 again */
+              unsigned int offset = 0;
+              row_init(row_out, len_out);
+              for (j_1 = 0; j_1 + 5 < nor_in; j_1++) {
+                /* Along the columns of m1 */
+                unsigned int e11 = get_element_from_row(nob, j_1, rows[i_1]);
+                unsigned int e21 = get_element_from_row(nob, j_1, rows[i_2]);
+                unsigned int e31 = get_element_from_row(nob, j_1, rows[i_3]);
+                unsigned int e41 = get_element_from_row(nob, j_1, rows[i_4]);
+                unsigned int e51 = get_element_from_row(nob, j_1, rows[i_5]);
+                unsigned int e61 = get_element_from_row(nob, j_1, rows[i_6]);
+                for (j_2 = j_1 + 1; j_2 + 4 < nor_in; j_2++) {
+                  /* Along the columns of m1 again */
+                  unsigned int e12 = get_element_from_row(nob, j_2, rows[i_1]);
+                  unsigned int e22 = get_element_from_row(nob, j_2, rows[i_2]);
+                  unsigned int e32 = get_element_from_row(nob, j_2, rows[i_3]);
+                  unsigned int e42 = get_element_from_row(nob, j_2, rows[i_4]);
+                  unsigned int e52 = get_element_from_row(nob, j_2, rows[i_5]);
+                  unsigned int e62 = get_element_from_row(nob, j_2, rows[i_6]);
+                  for (j_3 = j_2 + 1; j_3 + 3 < nor_in; j_3++) {
+                    /* Along the columns of m1 again */
+                    unsigned int e13 = get_element_from_row(nob, j_3, rows[i_1]);
+                    unsigned int e23 = get_element_from_row(nob, j_3, rows[i_2]);
+                    unsigned int e33 = get_element_from_row(nob, j_3, rows[i_3]);
+                    unsigned int e43 = get_element_from_row(nob, j_3, rows[i_4]);
+                    unsigned int e53 = get_element_from_row(nob, j_3, rows[i_5]);
+                    unsigned int e63 = get_element_from_row(nob, j_3, rows[i_6]);
+                    for (j_4 = j_3 + 1; j_4 + 2 < nor_in; j_4++) {
+                      /* Along the columns of m1 again */
+                      unsigned int e14 = get_element_from_row(nob, j_4, rows[i_1]);
+                      unsigned int e24 = get_element_from_row(nob, j_4, rows[i_2]);
+                      unsigned int e34 = get_element_from_row(nob, j_4, rows[i_3]);
+                      unsigned int e44 = get_element_from_row(nob, j_4, rows[i_4]);
+                      unsigned int e54 = get_element_from_row(nob, j_4, rows[i_5]);
+                      unsigned int e64 = get_element_from_row(nob, j_4, rows[i_6]);
+                      for (j_5 = j_4 + 1; j_5 + 1 < nor_in; j_5++) {
+                        /* Along the columns of m1 again */
+                        unsigned int e15 = get_element_from_row(nob, j_5, rows[i_1]);
+                        unsigned int e25 = get_element_from_row(nob, j_5, rows[i_2]);
+                        unsigned int e35 = get_element_from_row(nob, j_5, rows[i_3]);
+                        unsigned int e45 = get_element_from_row(nob, j_5, rows[i_4]);
+                        unsigned int e55 = get_element_from_row(nob, j_5, rows[i_5]);
+                        unsigned int e65 = get_element_from_row(nob, j_5, rows[i_6]);
+                        for (j_6 = j_5 + 1; j_6 < nor_in; j_6++) {
+                          /* Along the columns of m1 again */
+                          unsigned int e16 = get_element_from_row(nob, j_6, rows[i_1]);
+                          unsigned int e26 = get_element_from_row(nob, j_6, rows[i_2]);
+                          unsigned int e36 = get_element_from_row(nob, j_6, rows[i_3]);
+                          unsigned int e46 = get_element_from_row(nob, j_6, rows[i_4]);
+                          unsigned int e56 = get_element_from_row(nob, j_6, rows[i_5]);
+                          unsigned int e66 = get_element_from_row(nob, j_6, rows[i_6]);
+                          unsigned int elt = det6(prime_operations,
+                                                  e11, e12, e13, e14, e15, e16,
+                                                  e21, e22, e23, e24, e25, e26,
+                                                  e31, e32, e33, e34, e35, e36,
+                                                  e41, e42, e43, e44, e45, e46,
+                                                  e51, e52, e53, e54, e55, e56,
+                                                  e61, e62, e63, e64, e65, e66);
+                          put_element_to_row(nob, offset, row_out, elt);
+                          offset++;
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+              assert(offset == nor_out);
+              if (0 == endian_write_row(outp, row_out, len_out)) {
+                fprintf(stderr, "%s: cannot write some of %s, terminating\n", name, m2);
+                fclose(outp);
+                return 0;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  matrix_free(rows);
+  fclose(outp);
+  return 1;
+}
+
+int skew_seventh(const char *m1, const char *m2, const char *name)
+{
+  FILE *inp = NULL;
+  FILE *outp = NULL;
+  unsigned int prime, nob, nod, nor_in, len_in, nor_out, len_out;
+  const header *h_in = NULL, *h_out = NULL;
+  unsigned int i, i_1, i_2, i_3, i_4, i_5, i_6, i_7, j_1, j_2, j_3, j_4, j_5, j_6, j_7;
+  unsigned int **rows, *row_out;
+  prime_ops prime_operations;
+  assert(NULL != m1);
+  assert(NULL != m2);
+  assert(NULL != name);
+  if (0 == open_and_read_binary_header(&inp, &h_in, m1, name)) {
+    if (NULL != h_in) {
+      header_free(h_in);
+    }
+    return cleanup(inp, outp);
+  }
+  prime = header_get_prime(h_in);
+  nob = header_get_nob(h_in);
+  nod = header_get_nod(h_in);
+  nor_in = header_get_nor(h_in);
+  len_in = header_get_len(h_in);
+  if (nor_in != header_get_noc(h_in)) {
+    fprintf(stderr, "%s: %s is not square, terminating\n", name, m1);
+    header_free(h_in);
+    return cleanup(inp, NULL);
+  }
+  header_free(h_in);
+  if (nor_in <= 6) {
+    fprintf(stderr, "%s: %s has no skew sixth (dim <= 6), terminating\n", name, m1);
+    header_free(h_in);
+    return cleanup(inp, NULL);
+  }
+  if (0 == primes_init(prime, &prime_operations)) {
+    fprintf(stderr, "%s: Can't initialise prime operations for %s, terminating\n", name, m1);
+    return cleanup(inp, NULL);
+  }
+  nor_out = (nor_in * (nor_in - 1) * (nor_in - 2) * (nor_in - 3) * (nor_in - 4) * (nor_in - 5) * (nor_in - 6)) / 5040;
+  h_out = header_create(prime, nob, nod, nor_out, nor_out);
+  len_out = header_get_len(h_out);
+  if (memory_rows(len_in, 900) < nor_in ||
+      memory_rows(len_out, 100) < 1) {
+    fprintf(stderr, "%s: cannot get enough memory, terminating\n", name);
+    (void) cleanup(inp, outp);
+    exit(2);
+  }
+  rows = matrix_malloc(nor_in);
+  for (i = 0; i < nor_in; i++) {
+    rows[i] = memory_pointer_offset(0, i, len_in);
+  }
+  row_out = memory_pointer(900);
+  if (0 == endian_read_matrix(inp, rows, len_in, nor_in)) {
+    fprintf(stderr, "%s: cannot read some of %s, terminating\n", name, m1);
+    return cleanup(inp, outp);
+  }
+  if (0 == open_and_write_binary_header(&outp, h_out, m2, name)) {
+    return cleanup(inp, outp);
+  }
+  fclose(inp);
+  header_free(h_out);
+  for (i_1 = 0; i_1 + 6 < nor_in; i_1++) {
+    /* Down the rows of m1 */
+    for (i_2 = i_1 + 1; i_2 + 5 < nor_in; i_2++) {
+      /* Down the rows of m1 again */
+      for (i_3 = i_2 + 1; i_3 + 4 < nor_in; i_3++) {
+        /* Down the rows of m1 again */
+        for (i_4 = i_3 + 1; i_4 + 3 < nor_in; i_4++) {
+          /* Down the rows of m1 again */
+          for (i_5 = i_4 + 1; i_5 + 2 < nor_in; i_5++) {
+            /* Down the rows of m1 again */
+            for (i_6 = i_5 + 1; i_6 + 1 < nor_in; i_6++) {
+              /* Down the rows of m1 again */
+              for (i_7 = i_6 + 1; i_7 < nor_in; i_7++) {
+                /* Down the rows of m1 again */
+                unsigned int offset = 0;
+                row_init(row_out, len_out);
+                for (j_1 = 0; j_1 + 6 < nor_in; j_1++) {
+                  /* Along the columns of m1 */
+                  unsigned int e11 = get_element_from_row(nob, j_1, rows[i_1]);
+                  unsigned int e21 = get_element_from_row(nob, j_1, rows[i_2]);
+                  unsigned int e31 = get_element_from_row(nob, j_1, rows[i_3]);
+                  unsigned int e41 = get_element_from_row(nob, j_1, rows[i_4]);
+                  unsigned int e51 = get_element_from_row(nob, j_1, rows[i_5]);
+                  unsigned int e61 = get_element_from_row(nob, j_1, rows[i_6]);
+                  unsigned int e71 = get_element_from_row(nob, j_1, rows[i_7]);
+                  for (j_2 = j_1 + 1; j_2 + 5 < nor_in; j_2++) {
+                    /* Along the columns of m1 again */
+                    unsigned int e12 = get_element_from_row(nob, j_2, rows[i_1]);
+                    unsigned int e22 = get_element_from_row(nob, j_2, rows[i_2]);
+                    unsigned int e32 = get_element_from_row(nob, j_2, rows[i_3]);
+                    unsigned int e42 = get_element_from_row(nob, j_2, rows[i_4]);
+                    unsigned int e52 = get_element_from_row(nob, j_2, rows[i_5]);
+                    unsigned int e62 = get_element_from_row(nob, j_2, rows[i_6]);
+                    unsigned int e72 = get_element_from_row(nob, j_2, rows[i_7]);
+                    for (j_3 = j_2 + 1; j_3 + 4 < nor_in; j_3++) {
+                      /* Along the columns of m1 again */
+                      unsigned int e13 = get_element_from_row(nob, j_3, rows[i_1]);
+                      unsigned int e23 = get_element_from_row(nob, j_3, rows[i_2]);
+                      unsigned int e33 = get_element_from_row(nob, j_3, rows[i_3]);
+                      unsigned int e43 = get_element_from_row(nob, j_3, rows[i_4]);
+                      unsigned int e53 = get_element_from_row(nob, j_3, rows[i_5]);
+                      unsigned int e63 = get_element_from_row(nob, j_3, rows[i_6]);
+                      unsigned int e73 = get_element_from_row(nob, j_3, rows[i_7]);
+                      for (j_4 = j_3 + 1; j_4 + 3 < nor_in; j_4++) {
+                        /* Along the columns of m1 again */
+                        unsigned int e14 = get_element_from_row(nob, j_4, rows[i_1]);
+                        unsigned int e24 = get_element_from_row(nob, j_4, rows[i_2]);
+                        unsigned int e34 = get_element_from_row(nob, j_4, rows[i_3]);
+                        unsigned int e44 = get_element_from_row(nob, j_4, rows[i_4]);
+                        unsigned int e54 = get_element_from_row(nob, j_4, rows[i_5]);
+                        unsigned int e64 = get_element_from_row(nob, j_4, rows[i_6]);
+                        unsigned int e74 = get_element_from_row(nob, j_4, rows[i_7]);
+                        for (j_5 = j_4 + 1; j_5 + 2 < nor_in; j_5++) {
+                          /* Along the columns of m1 again */
+                          unsigned int e15 = get_element_from_row(nob, j_5, rows[i_1]);
+                          unsigned int e25 = get_element_from_row(nob, j_5, rows[i_2]);
+                          unsigned int e35 = get_element_from_row(nob, j_5, rows[i_3]);
+                          unsigned int e45 = get_element_from_row(nob, j_5, rows[i_4]);
+                          unsigned int e55 = get_element_from_row(nob, j_5, rows[i_5]);
+                          unsigned int e65 = get_element_from_row(nob, j_5, rows[i_6]);
+                          unsigned int e75 = get_element_from_row(nob, j_5, rows[i_7]);
+                          for (j_6 = j_5 + 1; j_6 + 1 < nor_in; j_6++) {
+                            /* Along the columns of m1 again */
+                            unsigned int e16 = get_element_from_row(nob, j_6, rows[i_1]);
+                            unsigned int e26 = get_element_from_row(nob, j_6, rows[i_2]);
+                            unsigned int e36 = get_element_from_row(nob, j_6, rows[i_3]);
+                            unsigned int e46 = get_element_from_row(nob, j_6, rows[i_4]);
+                            unsigned int e56 = get_element_from_row(nob, j_6, rows[i_5]);
+                            unsigned int e66 = get_element_from_row(nob, j_6, rows[i_6]);
+                            unsigned int e76 = get_element_from_row(nob, j_6, rows[i_7]);
+                            for (j_7 = j_6 + 1; j_7 < nor_in; j_7++) {
+                              /* Along the columns of m1 again */
+                              unsigned int e17 = get_element_from_row(nob, j_7, rows[i_1]);
+                              unsigned int e27 = get_element_from_row(nob, j_7, rows[i_2]);
+                              unsigned int e37 = get_element_from_row(nob, j_7, rows[i_3]);
+                              unsigned int e47 = get_element_from_row(nob, j_7, rows[i_4]);
+                              unsigned int e57 = get_element_from_row(nob, j_7, rows[i_5]);
+                              unsigned int e67 = get_element_from_row(nob, j_7, rows[i_6]);
+                              unsigned int e77 = get_element_from_row(nob, j_7, rows[i_7]);
+                              unsigned int elt = det7(prime_operations,
+                                                      e11, e12, e13, e14, e15, e16, e17,
+                                                      e21, e22, e23, e24, e25, e26, e27,
+                                                      e31, e32, e33, e34, e35, e36, e37,
+                                                      e41, e42, e43, e44, e45, e46, e47,
+                                                      e51, e52, e53, e54, e55, e56, e57,
+                                                      e61, e62, e63, e64, e65, e66, e67,
+                                                      e71, e72, e73, e74, e75, e76, e77);
+                              put_element_to_row(nob, offset, row_out, elt);
+                              offset++;
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+                assert(offset == nor_out);
+                if (0 == endian_write_row(outp, row_out, len_out)) {
+                  fprintf(stderr, "%s: cannot write some of %s, terminating\n", name, m2);
+                  fclose(outp);
+                  return 0;
+                }
+              }
+            }
+          }
         }
       }
     }

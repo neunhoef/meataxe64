@@ -1,5 +1,5 @@
 /*
- * $Id: sb.c,v 1.3 2002/02/18 20:42:49 jon Exp $
+ * $Id: sb.c,v 1.4 2002/02/27 19:06:17 jon Exp $
  *
  * Function to spin some vectors under two generators to obtain a standard base
  *
@@ -159,10 +159,15 @@ unsigned int spin(const char *in, const char *out, const char *a,
     cleanup(inp, f_a, f_b);
   }
   while (nor < max_rows && nor < noc && (gen_a.nor < nor || gen_b.nor < nor)) {
-    unsigned int rows_to_do = nor - gen->nor, rows_poss = max_rows - nor;
+    unsigned int rows_to_do = nor - gen->nor;
     unsigned int i, j, k, old_nor = nor;
     /* Ensure we don't try to do too many */
-    for (k = 0; k < rows_to_do; k += rows_poss) {
+    /* Note that the extra complexity vs sp.c */
+    /* is due to the requirement to have a guaranteed */
+    /* order of generated vectors, independent of basis or memory constraints */
+    k = 0;
+    while (k < rows_to_do) {
+      unsigned int rows_poss = max_rows - nor;
       unsigned int stride = (k + rows_poss <= rows_to_do) ? rows_poss : rows_to_do - k;
       if (0 == mul_from_store(rows1 + gen->nor, rows1 + nor, gen->f, noc, len, nob,
                               stride, prime, &grease, gen->m, name)) {
@@ -200,6 +205,8 @@ unsigned int spin(const char *in, const char *out, const char *a,
       free(new_map);
       assert(j == d);
       nor += d; /* The number of extra rows we made */
+      assert(max_rows + d == rows_poss + nor);
+      k += stride;
     }
     assert(gen->nor == old_nor);
     NOT_USED(old_nor);

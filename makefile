@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.48 2002/02/18 20:42:49 jon Exp $
+# $Id: makefile,v 1.49 2002/02/27 19:06:17 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -57,6 +57,10 @@ ZSB_TARGET=	zsb
 ZSEL_TARGET=	zsel
 ZSID_TARGET=	zsid
 ZSKCU_TARGET=	zskcu
+ZSKFI_TARGET=	zskfi
+ZSKFO_TARGET=	zskfo
+ZSKSE_TARGET=	zskse
+ZSKSI_TARGET=	zsksi
 ZSKSQ_TARGET=	zsksq
 ZSL_TARGET=	zsl
 ZSP_TARGET=	zsp
@@ -117,14 +121,18 @@ ZSAD_MODULES=	add elements endian header memory primes read rows utils write zsa
 ZSB_MODULES=	clean elements endian grease header matrix memory mul primes read rows sb utils write zsb
 ZSEL_MODULES=	endian header memory primes read utils write zse
 ZSID_MODULES=	ident elements endian header memory primes rows utils write zsid
-ZSKCU_MODULES=	elements endian header matrix memory powers primes read rows utils write zskcu
-ZSKSQ_MODULES=	elements endian header matrix memory powers primes read rows utils write zsksq
+ZSKCU_MODULES=	dets elements endian header matrix memory powers primes read rows utils write zskcu
+ZSKFI_MODULES=	dets elements endian header matrix memory powers primes read rows utils write zskfi
+ZSKFO_MODULES=	dets elements endian header matrix memory powers primes read rows utils write zskfo
+ZSKSE_MODULES=	dets elements endian header matrix memory powers primes read rows utils write zskse
+ZSKSI_MODULES=	dets elements endian header matrix memory powers primes read rows utils write zsksi
+ZSKSQ_MODULES=	dets elements endian header matrix memory powers primes read rows utils write zsksq
 ZSL_MODULES=	add elements endian files grease header matrix memory mul primes read rows slave system utils write
 ZSP_MODULES=	clean elements endian grease header matrix memory mul primes read rows sp utils write zsp
 ZSPAN_MODULES=	elements endian header matrix memory primes read rows utils write zspan
 ZSS_MODULES=	clean elements endian grease header matrix memory primes read rows ss utils write zss
 ZSUMS_MODULES=	add clean elements endian grease header ident matrix memory mul primes read rn rows sums utils write zsums
-ZSYMSQ_MODULES=	elements endian header matrix memory powers primes read rows utils write zsymsq
+ZSYMSQ_MODULES=	dets elements endian header matrix memory powers primes read rows utils write zsymsq
 ZTE_MODULES=	elements endian header matrix memory primes read rows te utils write zte
 ZTR_MODULES=	elements endian header matrix memory primes read tr tra utils write
 ZTRACE_MODULES=	elements endian header memory primes read rows utils ztrace
@@ -179,6 +187,10 @@ MODULES=	$(DTOU_MODULES) \
 	$(ZSEL_MODULES) \
 	$(ZSID_MODULES) \
 	$(ZSKCU_MODULES) \
+	$(ZSKFI_MODULES) \
+	$(ZSKFO_MODULES) \
+	$(ZSKSE_MODULES) \
+	$(ZSKSI_MODULES) \
 	$(ZSKSQ_MODULES) \
 	$(ZSL_MODULES) \
 	$(ZSP_MODULES) \
@@ -369,6 +381,18 @@ TARGET:=ZSID
 include targets.txt
 
 TARGET:=ZSKCU
+include targets.txt
+
+TARGET:=ZSKFI
+include targets.txt
+
+TARGET:=ZSKFO
+include targets.txt
+
+TARGET:=ZSKSE
+include targets.txt
+
+TARGET:=ZSKSI
 include targets.txt
 
 TARGET:=ZSKSQ

@@ -1,5 +1,5 @@
 #
-# $Id: base,v 1.3 2002/01/14 23:43:45 jon Exp $
+# $Id: base,v 1.4 2002/02/27 19:06:17 jon Exp $
 #
 # Script to to find a representation in standard base
 #
@@ -53,7 +53,6 @@ else
   exit 1
 fi
 tmp=tmp${PPID}
-rm -f ${tmp}*
 memory=200
 ok=0
 while [ $ok -eq 0 ]; do
@@ -63,7 +62,6 @@ while [ $ok -eq 0 ]; do
     ok=1
   elif [ $ret -eq 2 ]; then
     let memory=`more_memory $memory 2>/dev/null`
-#   echo Allocating more memory for zns, now $memory
   else
     rm -f ${tmp}*
     exit 1
@@ -78,15 +76,16 @@ ok=0
 while [ 0 -eq $ok ]; do
   dim=`zsb ${tmp}.0 ${tmp}.1 $a $b $memory`
   ret=$?
-  if [ 0 -eq $ret -a $dim -eq $nor ]; then
-    ok=1
+  if [ 0 -eq $ret ]; then
+    if [ $dim -eq $nor ]; then
+      ok=1
+    else
+      echo Strange result from zsb giving wrong dimension $dim vs $nor
+    fi
   elif [ $ret -eq 2 ]; then
     let memory=`more_memory $memory`
-#   echo Allocating more memory for zsb, now $memory
   else
-    if [ $dim -ne $nor -q $rt -eq 0 ]; then
-      echo Strange result from zsb giving wrong dimension
-    fi
+    echo zsb unexpectedly returns $ret
     rm -f ${tmp}*
     exit 1
   fi
@@ -100,7 +99,7 @@ while [ 0 -eq $ok ]; do
   elif [ $ret -eq 0 ]; then
     ok=1
   else
-    echo ziv returns $ret
+    echo ziv unexpectedly returns $ret
     rm -f ${tmp}*
     exit $ret
   fi

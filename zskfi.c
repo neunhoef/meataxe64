@@ -1,7 +1,7 @@
 /*
- * $Id: zskcu.c,v 1.2 2002/02/27 19:06:17 jon Exp $
+ * $Id: zskfi.c,v 1.1 2002/02/27 19:06:17 jon Exp $
  *
- * Skew cube a matrix
+ * Skew fifth a matrix
  *
  */
 
@@ -13,9 +13,9 @@
 #include "utils.h"
 #include "powers.h"
 
-static const char *name = "zskcu";
+static const char *name = "zskfi";
 
-static void skcu_usage(void)
+static void skfi_usage(void)
 {
   fprintf(stderr, "%s: usage: %s <in_file> <out_file> [<memory>]\n", name, name);
 }
@@ -27,7 +27,7 @@ int main(int argc, const char * const argv[])
   unsigned int memory = MEM_SIZE;
 
   if (3 != argc && 4 != argc) {
-    skcu_usage();
+    skfi_usage();
     exit(1);
   }
   in = argv[1];
@@ -37,7 +37,7 @@ int main(int argc, const char * const argv[])
   }
   endian_init();
   memory_init(name, memory);
-  if (0 == skew_cube(in, out, name)) {
+  if (0 == skew_fifth(in, out, name)) {
     exit(1);
   }
   memory_dispose();

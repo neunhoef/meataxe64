@@ -83,3 +83,5 @@
 20020215 - add zproj
 20020218 - add script output to sums
 20020221 - add split_with_subspace
+20020224 - add determinants, and more skew powers
+20020227 - add skew sixth and seventh, using Gaussian determinants

@@ -1,5 +1,5 @@
 #
-# $Id: split_with_vector,v 1.4 2002/02/21 20:37:21 jon Exp $
+# $Id: split_with_vector,v 1.5 2002/02/27 19:06:17 jon Exp $
 #
 # Script to split a representation given a particular vector to work from
 #
@@ -84,7 +84,7 @@ else
   rm -f ${tmp}*
   exit 254
 fi
-split_with_subspace $a ${tmp}.5 ${ss_name}_1 ${qs_name}_1
-split_with_subspace $b ${tmp}.5 ${ss_name}_2 ${qs_name}_2
+split_with_subspace $a ${tmp}.5 ${ss_name}_1 ${qs_name}_1 $memory
+split_with_subspace $b ${tmp}.5 ${ss_name}_2 ${qs_name}_2 $memory
 rm -f ${tmp}*
 exit 0

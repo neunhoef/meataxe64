@@ -1,5 +1,5 @@
 /*
- * $Id: ss.c,v 1.6 2001/12/27 01:17:12 jon Exp $
+ * $Id: ss.c,v 1.7 2002/02/27 19:06:17 jon Exp $
  *
  * Function to compute subspace representation
  * Will work entirely in RAM if possible, otherwise rereading basis file
@@ -38,7 +38,7 @@ void subspace(const char *range, const char *image,
 {
   FILE *inp1 = NULL, *inp2 = NULL, *outp = NULL;
   const header *h_in1, *h_in2, *h_out;
-  unsigned int prime, nob, noc, nor, len, len_e, max_rows, d, elt, step_i, step_j, i;
+  unsigned int prime, nob, noc, nor, nor_o, noc_o, len, len_e, max_rows, d, elt, step_i, step_j, i;
   unsigned int **rows1, **rows2, **rows3, **rows4;
   int *map;
   prime_ops prime_operations;
@@ -61,8 +61,9 @@ void subspace(const char *range, const char *image,
   nor = header_get_nor(h_in1);
   noc = header_get_noc(h_in1);
   len = header_get_len(h_in1);
+  noc_o = nor;
+  nor_o = header_get_nor(h_in2);
   if (noc != header_get_noc(h_in2) ||
-      nor != header_get_nor(h_in2) ||
       prime != header_get_prime(h_in2) ||
       nob != header_get_nob(h_in2)) {
     fprintf(stderr, "%s: incompatible parameters for %s, %s, terminating\n",
@@ -76,7 +77,7 @@ void subspace(const char *range, const char *image,
     cleanup(inp1, inp2, NULL);
     exit(1);
   }
-  h_out = header_create(prime, nob, header_get_nod(h_in1), nor, nor);
+  h_out = header_create(prime, nob, header_get_nod(h_in1), noc_o, nor_o);
   len_e = header_get_len(h_out);
   assert(header_get_len(h_in2) == len);
   assert(len >= len_e);
@@ -93,11 +94,11 @@ void subspace(const char *range, const char *image,
     exit(1);
   }
   rows1 = matrix_malloc(nor); /* range */
-  rows2 = matrix_malloc(nor); /* image */
+  rows2 = matrix_malloc(nor_o); /* image */
   rows3 = matrix_malloc(nor); /* -1 */
-  rows4 = matrix_malloc(nor); /* output */
+  rows4 = matrix_malloc(nor_o); /* output */
   max_rows = memory_rows(len, 400);
-  step_i = (max_rows > nor) ? nor : max_rows;
+  step_i = (max_rows > nor_o) ? nor_o : max_rows;
   max_rows = memory_rows(len, 60);
   step_j = (max_rows > nor) ? nor : max_rows;
   if (0 == open_and_write_binary_header(&outp, h_out, out, name)) {
@@ -115,9 +116,9 @@ void subspace(const char *range, const char *image,
     rows3[d] = memory_pointer_offset(860, d, len_e);
   }
   map = my_malloc(nor * sizeof(int));
-  for (i = 0; i < nor; i += step_i) {
+  for (i = 0; i < nor_o; i += step_i) {
     /* Step through image */
-    unsigned int j, stride_i = (i + step_i > nor) ? nor - i : step_i;
+    unsigned int j, stride_i = (i + step_i > nor_o) ? nor_o - i : step_i;
     if (0 == endian_read_matrix(inp2, rows2, len, stride_i)) {
       fprintf(stderr, "%s: failed to read rows from %s, terminating\n",
               name, range);
@@ -127,6 +128,7 @@ void subspace(const char *range, const char *image,
     for (d = 0; d < stride_i; d++) {
       row_init(rows4[d], len_e);
     }
+    /* Step through range */
     for (j = 0; j < nor; j += step_j) {
       unsigned int stride_j = (j + step_j > nor) ? nor - j : step_j;
       if (0 == endian_read_matrix(inp1, rows1, len, stride_j)) {
