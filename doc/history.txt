@@ -162,3 +162,5 @@ skew seventh
 20020702 - Made zdiff handle maps
 20020703 - Add zfln for find least nullity, and zlp for line permute
 20020703 - Add base_with_vector, base_from_vector, conjugate, find_best_nullity_with_orders
+20020704 - Remove nor == 1 restriction from ztspf
+20020705 - Apply reduced memory requirements to ztspf

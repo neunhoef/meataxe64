@@ -1,5 +1,5 @@
 /*
- * $Id: tspf.c,v 1.6 2002/07/04 22:54:18 jon Exp $
+ * $Id: tspf.c,v 1.7 2002/07/05 09:04:44 jon Exp $
  *
  * Function to spin some vectors under two generators in tensor space
  * using intermediate files in a temporary directory.
@@ -74,7 +74,7 @@ unsigned int spin(const char *in, const char *out,
   header *h_out;
   char *name_echelised = NULL;
   const char *tmp = tmp_name();
-  unsigned int prime, nob, noc, nor, noc1, nor1, noc2, nor2, len, len1, len2, len_o, max_rows, max_nor, max_len, d, clean_nor, len_in;
+  unsigned int prime, nob, noc, nor, noc1, nor1, noc2, nor2, len, len1, len2, len_o, max_rows, max_nor, max_len, d, clean_nor, len_in, size, limit;
   unsigned int **rows1, **rows2, *work_row;
   unsigned int **rows_a1, **rows_a2, **rows_b1, **rows_b2, **mat_rows, **work_rows;
   int *map;
@@ -171,13 +171,15 @@ unsigned int spin(const char *in, const char *out,
   primes_init(prime, &prime_operations);
   rows_init(prime, &row_operations);
   grease_init(&row_operations, &grease);
+  size = find_extent(max_nor, max_len);
   max_rows = memory_rows(max_len, 50);
-  if (max_rows < max_nor) {
+  if (max_rows < max_nor || size > 200) {
     fprintf(stderr, "%s: failed to allocate space for one of %s, %s, %s, %s, terminating\n",
             name, a1, b1, a2, b2);
     cleanup(inp, f_a1, f_b1, f_a2, f_b2);
     exit(2);
   }
+  limit = 900 - 4 * size;
   rows_a1 = matrix_malloc(max_nor);
   rows_b1 = matrix_malloc(max_nor);
   rows_a2 = matrix_malloc(max_nor);
@@ -187,13 +189,13 @@ unsigned int spin(const char *in, const char *out,
   gen_a.rows_2 = rows_a2;
   gen_b.rows_2 = rows_b2;
   for (d = 0; d < max_nor; d++) {
-    rows_a1[d] = memory_pointer_offset(700, d, max_len);
-    rows_b1[d] = memory_pointer_offset(750, d, max_len);
-    rows_a2[d] = memory_pointer_offset(800, d, max_len);
-    rows_b2[d] = memory_pointer_offset(850, d, max_len);
+    rows_a1[d] = memory_pointer_offset(limit, d, max_len);
+    rows_b1[d] = memory_pointer_offset(limit + size, d, max_len);
+    rows_a2[d] = memory_pointer_offset(limit + 2 * size, d, max_len);
+    rows_b2[d] = memory_pointer_offset(limit + 3 * size, d, max_len);
   }
   /* Now compute the maximum space for the subspace */
-  max_rows = memory_rows(len, 350);
+  max_rows = memory_rows(len, limit / 2);
   /* Give up if too few rows available */
   if (7 > max_rows || max_rows < 2 * (prime + 1)) {
     fprintf(stderr, "%s: failed to alocate enough memory, terminating\n",
@@ -214,7 +216,7 @@ unsigned int spin(const char *in, const char *out,
   rows2 = matrix_malloc(max_rows);
   for (d = 0; d < max_rows; d++) {
     rows1[d] = memory_pointer_offset(0, d + 1, len);
-    rows2[d] = memory_pointer_offset(350, d + 1, len);
+    rows2[d] = memory_pointer_offset(limit / 2, d + 1, len);
   }
   /* Create the temporary file */
   errno = 0;

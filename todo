@@ -1,17 +1,20 @@
 Worry about isspace failure (can't detect \n) (still occurs on RH 7.2) ctype is buggered
 Worry about return (NULL == s) code generation error
 Profile multiply (eg on 26750 for Co1) for different memory sizes
+Think about Sn and symmetrized powers
+Optimise monst by reversing bit order
 Investigate better matrix multiplications
+Think about orthogonal group sign
 Implement a verbosity level for all programs, with -v <n>. Add a standard parser to deal with this
 Debug zsymsq failure on Co2 23 mod 3
-Test memory reduction stuff in memory.c using ztsp
 Investigate rename failure on large files from zscript
 Consider allowing maps into ztsp and ztspf
 Analyse unexpected split failure
-Apply memory reduction to ztspf
-Fix zps to take less memory
+Document new scripts *
+Remove 1 == nor restriction in ztsp *
+Fix zvp and zps to take less memory
 Think about better grease vector selection for making
-Improve zsb{,f} to take multiple generators
+Improve zsb{,f} to take multiple generators and extend scripts
 Fix zsums use to handle zero elements
 Find a better algorithm for zsp memory. Investigate performance (1)
 Debug emu/zsl file corruption problem (2)
@@ -24,6 +27,5 @@ Code quality in commands, mop.c and mmat.c (2)
 Examine profiles from monst (1)
 Consider a more structured error return type (1)
 Convert monster generator to use new operations (2)
-Build lift (as introduce column?) (1)
 Work on lattice of submodules (5)
-(20, 20/07/2002, 30/06/2002)
+(19, 23/07/2002, 04/07/2002)

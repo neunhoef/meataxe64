@@ -1,5 +1,5 @@
 /*
- * $Id: tsp.c,v 1.5 2002/07/04 17:57:40 jon Exp $
+ * $Id: tsp.c,v 1.6 2002/07/05 09:04:44 jon Exp $
  *
  * Function to spin some vectors under two generators in tensor space
  *
@@ -150,7 +150,7 @@ unsigned int spin(const char *in, const char *out,
   grease_init(&row_operations, &grease);
   size = find_extent(max_nor, max_len);
   max_rows = memory_rows(max_len, size);
-  if (max_rows < max_nor || size > 20) {
+  if (max_rows < max_nor || size > 200) {
     fprintf(stderr, "%s: failed to allocate space for one of %s, %s, %s, %s, terminating\n",
             name, a1, b1, a2, b2);
     cleanup(inp, f_a1, f_b1, f_a2, f_b2);
