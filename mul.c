@@ -1,5 +1,5 @@
 /*
- * $Id: mul.c,v 1.43 2004/06/12 17:17:26 jon Exp $
+ * $Id: mul.c,v 1.44 2004/06/13 20:16:27 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
@@ -540,6 +540,7 @@ int mul_in_store(unsigned int **rows1, unsigned int **rows2, unsigned int **rows
   unsigned int word_offset = 0, bit_offset = 0;
   unsigned int elts_per_word = bits_in_unsigned_int / nob;
   unsigned int bits_per_word = elts_per_word * nob;
+  unsigned int width, mask, size;
   assert(NULL != rows1);
   assert(NULL != rows2);
   assert(NULL != rows3);
@@ -549,6 +550,9 @@ int mul_in_store(unsigned int **rows1, unsigned int **rows2, unsigned int **rows
   assert(0 != len);
   assert(NULL != grease);
   level = grease->level;
+  size = level;
+  width = level * nob;
+  mask = (1 << width) - 1;
   if (preserve_rows) {
     /* Save the grease row pointers */
     grease_rows = matrix_malloc(level);
@@ -559,30 +563,31 @@ int mul_in_store(unsigned int **rows1, unsigned int **rows2, unsigned int **rows
       l *= prime;
     }
   }
+  /* Initialise the output rows */
+  for (j = 0; j < nor; j++) {
+    row_init(rows3[j], len);
+  }
   /* We will use our element instead */
   for (i = 0; i < noc; i += level) {
-    unsigned int size = (level + i <= noc) ? level : noc - i;
-    unsigned int width = size * nob, mask = (1 << width) - 1;
     int in_word;
-    unsigned int shift = 0;
+    unsigned int shift = bits_per_word - bit_offset;
     unsigned int **rows = grease->rows - 1;
+    if (level + i > noc) {
+      size = noc - i;
+      width = size * nob;
+      mask = (1 << width) - 1;
+    }
     l = 1;
     /* Replace the initial allocated grease rows with the rows of rows2 */
     for (j = 0; j < size; j++) {
       rows[l] = rows2[i + j];
       l *= prime;
     }
-    in_word = bit_offset + width <= bits_in_unsigned_int;
-    if (0 == in_word) {
-      shift = bits_per_word - bit_offset;
-    }
+    in_word = width <= shift;
     grease_init_rows(grease, prime);
     for (j = 0; j < nor; j++) {
       unsigned int elt = (in_word) ? get_elements_in_word_from_row(rows1[j] + word_offset, bit_offset, mask) :
         get_elements_out_word_from_row(rows1[j] + word_offset, shift, bit_offset, mask);
-      if (0 == i) {
-        row_init(rows3[j], len);
-      }
       if (0 != elt) {
         grease_row_inc(grease, len, rows3[j], contract(elt, prime, nob), 0);
       }
