@@ -1,5 +1,5 @@
 /*
- * $Id: clean_vectors.c,v 1.5 2004/06/08 20:51:07 jon Exp $
+ * $Id: clean_vectors.c,v 1.6 2004/12/31 11:26:19 jon Exp $
  *
  * Clean one file of vectors with another
  *
@@ -73,6 +73,7 @@ int clean_vectors(const char *echelised, const char *vectors, const char *output
     header_free(h_in1);
     fclose(inp2);
     header_free(h_in2);
+    return 0;
   }
   nor2 = header_get_nor(h_in2);
   h_out = header_create(prime, nob, header_get_nod(h_in1), noc, nor2);
