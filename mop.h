@@ -1,5 +1,5 @@
 /*
- * $Id: mop.h,v 1.2 2001/10/11 07:47:13 jon Exp $
+ * $Id: mop.h,v 1.3 2001/10/11 23:02:06 jon Exp $
  *
  * Monster operations for meataxe
  *
@@ -74,8 +74,8 @@ extern void suzmult(suzel a, suzel b, suzel c);
 
 extern int suzor(suzel a);
 
-extern void vecsuz(unsigned char *vecin, suzel m, unsigned char *vecout);
+extern void vecsuz(const unsigned char *vecin, suzel m, unsigned char *vecout);
 
-extern void vecT(unsigned char * vecin, unsigned char * vecout);
+extern void vecT(unsigned char *vecin, unsigned char *vecout);
 
 #endif

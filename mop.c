@@ -1,5 +1,5 @@
 /*
- * $Id: mop.c,v 1.6 2001/10/11 22:39:30 jon Exp $
+ * $Id: mop.c,v 1.7 2001/10/11 23:02:06 jon Exp $
  *
  * Monster operations for meataxe
  *
@@ -34,13 +34,13 @@ unsigned char Tbact[87752];
 
 suzel A, B, C, E, suzwork;
 
-static unsigned char FFRV(unsigned char *a, unsigned long b)
+static unsigned char FFRV(const unsigned char *a, unsigned long b)
 {
   unsigned char c;
   c=a[b/4];
   return (c>>(2*(3-(b%4))))&3;
 }
-static unsigned char FFRV2(unsigned char *a, unsigned long b)
+static unsigned char FFRV2(const unsigned char *a, unsigned long b)
 {
   unsigned char c;
   c = a[(b>>3)];
@@ -176,7 +176,10 @@ void init(void)
   s3[6][4]=3;
   s3[5][6]=3;
   s3[6][5]=2;
+  memset(v3[0] + 1, 0, 6 * sizeof(v3[0][1]));
+/*
   for (i=1; i<7; i++) v3[0][i]=0;
+*/
   for (i=1; i<4; i++) {
     for (j=1; j<4; j++) {
       v3[i][j] = (3+i-j)%3 +1;
@@ -222,12 +225,17 @@ static void rdvec(const char *filnam, unsigned char *vecin)
   }
   fread(vectemp, 1, 12, f);
   fread(vectemp, 1, 24611, f);
+  memset(vecin, 0, 24712);
+/*
   for (i=0; i<24712; i++) vecin[i]=0;
+*/
   ptr1=0;
   ptr2=0;
-  for (i=0; i<90; i++)     FGAP(vectemp, vecin, 729, 3);
+  for (i=0; i<90; i++)
+    FGAP(vectemp, vecin, 729, 3);
   FGAP(vectemp, vecin, 21870, 2);
-  for (i=0; i<66; i++)     FGAP(vectemp, vecin, 162, 2);
+  for (i=0; i<66; i++)
+    FGAP(vectemp, vecin, 162, 2);
   FGAP(vectemp, vecin, 198, 2);
   FGAP(vectemp, vecin, 71, 1);
   fclose(f);
@@ -247,8 +255,7 @@ void malsuz(suzel *m)
 {
   suzel t;
   assert(NULL != m);
-  *m=(suzel)malloc(sizeof(suzex));
-  t=*m;
+  t = (suzel)malloc(sizeof(suzex));
   t->m729 = malloc(729*l729*sizeof(long));
   t->w729 = malloc(729*l729*sizeof(long));
   t->ww729 = malloc(729*l729*sizeof(long));
@@ -258,6 +265,7 @@ void malsuz(suzel *m)
   t->m142 = malloc(142*l142*sizeof(long));
   t->p32760 = malloc(32761*sizeof(long));
   t->b32760 = malloc(32761);
+  *m = t;
 }
 
 void rdsuz1(suzel m, const char *fn)
@@ -313,7 +321,7 @@ void rdsuz1(suzel m, const char *fn)
 
 static void rdT(const char *fn)
 {
-  int i;
+  unsigned int i;
   unsigned char c[4];
   FILE *f;
   char *ptr;
@@ -411,7 +419,7 @@ static int grease(suzel m)
   return(0);
 }
 
-void vecsuz(unsigned char *vecin, suzel m, unsigned char *vecout)
+void vecsuz(const unsigned char *vecin, suzel m, unsigned char *vecout)
 {
   unsigned char uc;
   unsigned long i, j, k, l;
@@ -506,8 +514,11 @@ void vecsuz(unsigned char *vecin, suzel m, unsigned char *vecout)
     if (entry!=0) FTOV(vecout, k, v3[entry][bact]);
   }
   j=197552;
+/*
   ptl4=vwork;
   for (k=0; k<l142; k++) *(ptl4++)=0;
+*/
+  memset(vwork, 0, (l142) * (sizeof(long)));
   ptl3 = m->m142;
   for (i=0; i<142; i++) {
     entry = FFRV2(vecin, j++);
@@ -680,8 +691,11 @@ void suzmult(suzel a, suzel b, suzel c)
   ptl1=a->m729;
   ptl3=c->m729;
   for (i=0; i<729; i++) {
+/*
     ptl3a=ptl3;
     for (k=0; k<l729; k++) *(ptl3a++)=0;
+*/
+    memset(ptl3, 0, (l729) * (sizeof(long)));
     ptl2 = suzwork->m729;
     ptl2w = suzwork->w729;
     ptl2ww = suzwork->ww729;
