@@ -1,5 +1,5 @@
 /*
- * $Id: sb.c,v 1.11 2002/07/09 09:08:12 jon Exp $
+ * $Id: sb.c,v 1.12 2002/07/09 12:05:37 jon Exp $
  *
  * Function to spin some vectors under two generators to obtain a standard base
  *
@@ -226,7 +226,7 @@ unsigned int spin(const char *in, const char *out, const char *a,
       free(new_map);
       assert(j == d);
       if (verbose) {
-        printf("%s: Adding %d new rows\n", name, d);
+        printf("%s: Adding %d new rows giving %d rows\n", name, d, nor + d);
       }
       nor += d; /* The number of extra rows we made */
       assert(max_rows + d == rows_poss + nor);

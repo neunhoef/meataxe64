@@ -1,5 +1,5 @@
 /*
- * $Id: mspf.c,v 1.8 2002/07/09 09:08:12 jon Exp $
+ * $Id: mspf.c,v 1.9 2002/07/09 12:05:37 jon Exp $
  *
  * Function to spin some vectors under multiple generators
  * using intermediate files in a temporary directory.
@@ -259,7 +259,7 @@ unsigned int spin(const char *in, const char *out, const char *dir,
         exit(1);
       }
       if (verbose) {
-        printf("%s: Adding %d new rows\n", name, d - nor);
+        printf("%s: Adding %d new rows giving %d rows\n", name, d - nor, d);
       }
       nor = d;
       k += stride; /* The number we consumed */

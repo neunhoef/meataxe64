@@ -1,5 +1,5 @@
 /*
- * $Id: msp.c,v 1.6 2002/07/09 09:08:12 jon Exp $
+ * $Id: msp.c,v 1.7 2002/07/09 12:05:37 jon Exp $
  *
  * Function to spin some vectors under multiple generators
  *
@@ -216,7 +216,7 @@ unsigned int spin(const char *in, const char *out,
     free(new_map);
     assert(j == d);
     if (verbose) {
-      printf("%s: Adding %d new rows\n", name, d);
+      printf("%s: Adding %d new rows giving %d rows\n", name, d, nor + d);
     }
     nor += d; /* The number of extra rows we made */
     gen = gen->next;

@@ -6,7 +6,7 @@ Think about Sn and symmetrized powers
 Optimise monst by reversing bit order
 Investigate better matrix multiplications
 Think about orthogonal group sign
-Use the verbosity level in all programs.
+Use the verbosity level in all programs. Use fflush?
 Investigate rename failure on large files from zscript
 Consider allowing maps into ztsp and ztspf
 Look into intermediate file version of find_best_nullity_with_orders *

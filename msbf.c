@@ -1,5 +1,5 @@
 /*
- * $Id: msbf.c,v 1.3 2002/07/09 09:08:12 jon Exp $
+ * $Id: msbf.c,v 1.4 2002/07/09 12:05:37 jon Exp $
  *
  * Function to spin some vectors under multiple generators to obtain a standard base
  *
@@ -297,7 +297,7 @@ unsigned int spin(const char *in, const char *out, const char *dir,
         exit(1);
       }
       if (verbose) {
-        printf("%s: Adding %d new rows\n", name, d - nor);
+        printf("%s: Adding %d new rows giving %d rows\n", name, d - nor, d);
       }
       nor = d;
       /* Extra code to deal with adding the standard basis vectors */

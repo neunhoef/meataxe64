@@ -1,5 +1,5 @@
 /*
- * $Id: tspf.c,v 1.8 2002/07/09 09:08:12 jon Exp $
+ * $Id: tspf.c,v 1.9 2002/07/09 12:05:38 jon Exp $
  *
  * Function to spin some vectors under two generators in tensor space
  * using intermediate files in a temporary directory.
@@ -367,7 +367,7 @@ unsigned int spin(const char *in, const char *out,
         exit(1);
       }
       if (verbose) {
-        printf("%s: Adding %d new rows\n", name, d - nor);
+        printf("%s: Adding %d new rows giving %d rows\n", name, d - nor, d);
       }
       nor = d;
       k += stride; /* The number we consumed */
