@@ -1,5 +1,5 @@
 /*
- * $Id: command.c,v 1.4 2001/10/09 19:36:26 jon Exp $
+ * $Id: command.c,v 1.5 2001/10/10 20:07:43 jon Exp $
  *
  * Interface to task manager (definition)
  *
@@ -58,6 +58,7 @@ static int can_start(task *task)
 {
   unsigned int i = 0;
   while(i < task->input_size) {
+    assert(task->inputs[i].type == FILE_NAME || task->inputs[i].type == RESULT);
     if (task->inputs[i++].type != FILE_NAME) {
       return 0;
     }
@@ -89,6 +90,7 @@ static void print_task(task *task)
     if (inputs[i].type == RESULT) {
       printf(" result %u of job %lu ", inputs[i].value.result.number, inputs[i].value.result.job);
     } else {
+      assert(inputs[i].type == FILE_NAME);
       switch(inputs[i].value.output.type) {
       case TEMP:
 	printf(" temporary");
@@ -145,6 +147,7 @@ static int sum_can_start(task *task)
   unsigned int j = 0;
   if (task->command == SUM) {
     while(i < task->input_size) {
+      assert(task->inputs[i].type == FILE_NAME || task->inputs[i].type == RESULT);
       if (task->inputs[i++].type == FILE_NAME) {
 	j++;
       }
@@ -245,6 +248,7 @@ static void add_task_sub(task *task, FILE *file)
       fprintf(stderr, "trying to add a task with undefined inputs\n");
       exit(1);
     } else {
+      assert(task->inputs[i].type == FILE_NAME);
       print_output_name(file, &task->inputs[i++].value.output);
     }
   }
@@ -430,8 +434,10 @@ static void process_line(const char *line, task *tasks, unsigned int size, FILE 
 		  inputs[j].value.output.type = task->outputs[number].type;
 		  inputs[j].value.output.value = task->outputs[number].value;
 		}
+              case FILE_NAME:
 		break;
 	      default:
+                assert(0);
 		break;
 	      }
 	    }
@@ -538,6 +544,7 @@ static void split(task *task1, task *tasks, unsigned int *size)
     exit(1);
   } else {
     while (i < task1->input_size) {
+      assert(inputs[i].type == FILE_NAME || inputs[i].type == RESULT);
       if (inputs[i].type == FILE_NAME) {
 	j = i;
 	break;
@@ -547,6 +554,7 @@ static void split(task *task1, task *tasks, unsigned int *size)
     };
     i++;
     while (i < task1->input_size) {
+      assert(inputs[i].type == FILE_NAME || inputs[i].type == RESULT);
       if (inputs[i].type == FILE_NAME) {
 	k = i;
 	break;

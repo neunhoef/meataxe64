@@ -1,5 +1,5 @@
 /*
- * $Id: emu.c,v 1.6 2001/10/09 19:36:26 jon Exp $
+ * $Id: emu.c,v 1.7 2001/10/10 20:07:43 jon Exp $
  *
  * Exploded multiply
  *
@@ -93,8 +93,7 @@ int main(int argc,  char **argv)
                       inputs,
                       1,
                       outputs);
-          free(inputs);
-          free(outputs);
+          /* Don't free inputs and outputs as add_command will hold onto them */
         }
         for (k = 0; k < col_pieces1; k++) {
           inputs[k].type = RESULT;
@@ -122,11 +121,9 @@ int main(int argc,  char **argv)
                     inputs,
                     1,
                     outputs);
-        free(inputs);
-        free(outputs);
+        /* Don't free inputs and outputs as add_command will hold onto them */
       }
-      free(inputs);
-      free(outputs);
+      /* Don't free inputs and outputs as add_command will hold onto them */
     }
   }
   /* Now force the answer */
