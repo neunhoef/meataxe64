@@ -1,8 +1,10 @@
 #!/bin/sh
 #
-# $Id: new_irred,v 1.11 2002/09/11 21:20:47 jon Exp $
+# $Id: new_irred,v 1.12 2004/11/24 21:42:43 jon Exp $
 #
-# Script to classify an irreducible representation
+# Script to classify an irreducible representation by
+# first trying against existing irreducibles of the same degree
+# Will only try if there is a unique such irreducible
 #
 # Inputs
 # $1: initial memory
@@ -14,7 +16,8 @@
 # 254: no nullity one element found
 # 255: existing irreducible
 #
-usage="$0: usage: $0 <memory> <a> [<other generators>]"
+name=$0
+usage="$name: usage: $name <memory> <a> [<other generators>]"
 if [ $# -lt 3 ]; then
   echo "$usage"
   exit 1;
@@ -48,6 +51,45 @@ if [ -e $a -a -e $b ]; then
 else
   echo "$0: missing files $a or $b"
   exit 1
+fi
+#
+# Try unique existing irred if it exists first
+#
+if [ -d irreds ]; then
+  # irreds exists
+  w=irreds/${nor}_0
+  if [ -f irreds/${nor}_0_1 ]; then
+    # at least one irreducible
+    irreds=`ls irreds/${nor}_*_1 | wc -l`
+    if [ 1 -eq $irreds ]; then
+      # precisely one, get its script
+      y=`ls ${w}_1_I*`
+      ret=$?
+      if [ 0 -ne $ret ]; then
+        echo "$name: failed to find irreducible script for ${w}"
+      else
+        script=`echo $y | sed -e "s?${w}_1_??g"`
+        ret=$?
+        if [ 0 -ne $ret ]; then
+          echo "$name: failed to produce irreducible script for ${w}, terminating"
+        else
+          # got the script, use it to form a standard basis
+          out=`new_irred_with_script $memory $script $*`
+          ret=$?
+          if [ 0 -ne $ret ]; then
+            echo $out
+            exit $ret
+            # Exit on existing irred or error
+          else
+            # New irreducible found, we need to do things properly
+            new=`echo $out | sed -e "s/^Found a new irreducible //g;s/ of dimension.*$//g"`
+            rm ${new}_*
+            # And try properly
+          fi
+        fi
+      fi
+    fi
+  fi
 fi
 i=0
 for x in $*; do

@@ -1,5 +1,5 @@
 /*
- * $Id: mspf.c,v 1.18 2004/09/17 17:05:29 jon Exp $
+ * $Id: mspf.c,v 1.19 2004/11/24 21:42:43 jon Exp $
  *
  * Function to spin some vectors under multiple generators
  * using intermediate files in a temporary directory.
@@ -222,7 +222,7 @@ unsigned int spinf(const char *in, const char *out, const char *dir,
     exit(1);
   }
   (void)get_mask_and_elts(nob, &elts_per_word);
-  while (nor < noc && nor < noc && unfinished(gens, argc, nor)) {
+  while (nor < noc && unfinished(gens, argc, nor)) {
     unsigned int rows_to_do = nor - gen->nor;
     unsigned int k, old_nor = nor;
     /* Ensure we don't try to do too many */
