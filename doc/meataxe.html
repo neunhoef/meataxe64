@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.30 2002/09/24 19:08:54 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.31 2002/09/24 19:21:43 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -318,6 +318,7 @@ Output on stderr is error diagnostic information.
 <li><a href="#zrnf">zrnf</a></li>
 <li><a href="#zrranks">zrranks</a></li>
 <li><a href="#zrsums">zrsums</a></li>
+<li><a href="#zrsumsf">zrsumsf</a></li>
 <li><a href="#zsad">zsad</a></li>
 <li><a href="#zsb">zsb</a></li>
 <li><a href="#zsbf">zsbf</a></li>
@@ -2850,6 +2851,72 @@ guarantee that the representation exists in the subfield, but it does
 guarantee to produce it if it exists.
 </li>
 <li>
+<h3><a name="zrsumsf">zrsumsf</a></h3>
+Purpose: A field restricted version of <a href="#zsumsf">zsumsf</a>
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Stem for creation of output file names</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Depth of search</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>Maximum acceptable nullity</td>
+</tr>
+<tr>
+<td valign=top>4</td><td valign=top>Subfield order</td>
+</tr>
+<tr>
+<td valign=top>5</td><td valign=top>Memory size</td>
+</tr>
+<tr>
+<td valign=top>6</td><td valign=top>Temporary directory</td>
+</tr>
+<tr>
+<td valign=top>7</td><td valign=top>Generator 1</td>
+</tr>
+<tr>
+<td valign=top>8</td><td valign=top>Order of generator 1</td>
+</tr>
+<tr>
+<td valign=top>9-</td><td valign=top>Other generators and orders</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>The element, if found, plus the
+script to create it</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient memory for matrix plus workspace</td>
+</tr>
+<tr>
+<td valign=top>255</td><td valign=top>No element of the required
+nullity found</td>
+</tr>
+</table>
+Commentary: This program is mainly used to find an element of nullity
+one where the coefficients of the group elements all lie in a
+subfield. If the representation itself exists in such a subfield, then
+the element produced by <a href="#zrsumsf">zrsumsf</a> will seed a
+standard base. Hence, performing the standard base using this element
+over the actual field, will produce a representation all of whose
+entries lie in the subfield, if such a representation exists. The
+discovery of an element of nullity one over the subfield does not
+guarantee that the representation exists in the subfield, but it does
+guarantee to produce it if it exists.
+</li>
+<li>
 <h3><a name="zsad">zsad</a></h3>
 Purpose: Scaled addition. The scalar applies to parameter 1
 <table>
@@ -3675,6 +3742,10 @@ script to create it</td>
 </tr>
 <tr>
 <td valign=top>2</td><td valign=top>Insufficient memory for workspace</td>
+</tr>
+<tr>
+<td valign=top>255</td><td valign=top>No element of the required
+nullity found</td>
 </tr>
 </table>
 Commentary: See <a href="#zsums">zsums</a>. The temporary files are

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: find_nullity_onef_with_orders,v 1.8 2002/09/22 10:29:46 jon Exp $
+# $Id: find_nullity_onef_with_orders,v 1.9 2002/09/24 19:21:43 jon Exp $
 #
 # Script to find an element of nullity one in two generators, using intermediate files
 #
@@ -52,9 +52,13 @@ while [ $ok -eq 0 ]; do
     cp ${name} $e
     rm -f ${tmp}*
     echo $out | sed -e "s/^.*form //g;s/ .*$//g"
-  else
+  elif [ 255 -eq $ret ]; then
     echo Failed to find an element of nullity one
     rm -f ${tmp}*
     exit 254
+  else
+    echo zsumsf unexpectedly returns $ret, terminating
+    rm -f ${tmp}*
+    exit 1
   fi
 done

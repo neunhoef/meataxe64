@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: find_restricted_nullity_onef_with_orders,v 1.1 2002/09/18 17:05:06 jon Exp $
+# $Id: find_restricted_nullity_onef_with_orders,v 1.2 2002/09/24 19:21:43 jon Exp $
 #
 # Script to find an element of nullity one in two generators in a restricted group algebra
 #
@@ -59,10 +59,14 @@ while [ $ok -eq 0 ]; do
     name=`echo $out | sed -e "s/^.*element //g;s/ of nullity.*$//g"`
     cp ${name} $e
     echo $out | sed -e "s/^.*form //g;s/ .*$//g"
-  else
+  elif [ 255 -eq $ret ]; then
     echo Failed to find an element of nullity one
     rm -f ${tmp}*
     exit 254
+  else
+    echo zrsumsf unexpectedly returns $ret, terminating
+    rm -f ${tmp}*
+    exit 1
   fi
 done
 rm -f ${tmp}*
