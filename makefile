@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.20 2001/10/13 09:00:28 jon Exp $
+# $Id: makefile,v 1.21 2001/10/16 22:55:53 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -9,8 +9,8 @@ GENERATED=
 
 .PHONY: debug rel profile profilena clean full_clean
 
-AD_TARGET=	ad
-CT_TARGET=	ct
+AD_TARGET=	zad
+CT_TARGET=	zct
 DTOU_TARGET=	dtou
 EAD_TARGET=	ead
 ECT_TARGET=	ect
@@ -18,14 +18,15 @@ EID_TARGET=	eid
 EIM_TARGET=	eim
 EMU_TARGET=	emu
 ETR_TARGET=	etr
-ID_TARGET=	id
-IP_TARGET=	ip
+ID_TARGET=	zid
+IP_TARGET=	zcv
+IPP_TARGET=	zip
 MON_TARGET=	monst
-MU_TARGET=	mu
-PR_TARGET=	pr
-SL_TARGET=	sl
+MU_TARGET=	zmu
+PR_TARGET=	zpr
+SL_TARGET=	zsl
 STOP_TARGET=	stop
-TR_TARGET=	tr
+TR_TARGET=	ztr
 ZEX_TARGET=	zex
 
 AD_MODULES=	ad add elements endian header memory primes read rows utils write
@@ -39,10 +40,11 @@ EMU_MODULES=	command emu files map memory system utils
 ETR_MODULES=	elements endian etr files header map matrix memory primes read tra utils write
 ID_MODULES=	id ident elements endian header memory primes rows utils write
 IP_MODULES=	elements endian header ip primes read utils write
+IPP_MODULES=	elements endian header ipp memory primes read rows utils write
 MON_MODULES=	endian exrows files header map memory mmat mop mtx primes rows utils write
 MU_MODULES=	elements endian grease header matrix memory mu mul primes read rows utils write
 PR_MODULES=	elements endian header memory pr primes read rows utils write
-SL_MODULES=	add command elements endian files grease header matrix memory mul primes read rows slave system utils write
+SL_MODULES=	add elements endian files grease header matrix memory mul primes read rows slave system utils write
 STOP_MODULES=	command files stop system utils
 TR_MODULES=	elements endian header matrix memory primes read tr tra utils write
 ZEX_MODULES=	elements endian exrows files header map memory primes read rows utils write zex
@@ -115,6 +117,9 @@ TARGET:=ID
 include targets.txt
 
 TARGET:=IP
+include targets.txt
+
+TARGET:=IPP
 include targets.txt
 
 TARGET:=MON

@@ -1,5 +1,5 @@
 /*
- * $Id: mu.c,v 1.6 2001/10/03 00:01:42 jon Exp $
+ * $Id: mu.c,v 1.7 2001/10/16 22:55:53 jon Exp $
  *
  * Multiply two matrices to give a third
  *
@@ -12,7 +12,7 @@
 #include "utils.h"
 #include "mul.h"
 
-static const char *name = "mu";
+static const char *name = "zmu";
 
 static void mu_usage(void)
 {

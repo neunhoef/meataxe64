@@ -1,5 +1,5 @@
 /*
- * $Id: pr.c,v 1.5 2001/09/16 20:20:39 jon Exp $
+ * $Id: pr.c,v 1.6 2001/10/16 22:55:53 jon Exp $
  *
  * Print a matrix
  *
@@ -23,7 +23,7 @@
 /* Purely for formatting purposes */
 #define BITS_PER_ROW 80
 
-static const char *name = "pr";
+static const char *name = "zpr";
 
 static void pr_usage(void)
 {

@@ -1,5 +1,5 @@
 /*
- * $Id: ad.c,v 1.4 2001/09/16 20:20:39 jon Exp $
+ * $Id: ad.c,v 1.5 2001/10/16 22:55:53 jon Exp $
  *
  * Add two matrices to give a third
  *
@@ -10,7 +10,7 @@
 #include "memory.h"
 #include "add.h"
 
-static const char *name = "ad";
+static const char *name = "zad";
 
 static void ad_usage(void)
 {

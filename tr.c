@@ -1,5 +1,5 @@
 /*
- * $Id: tr.c,v 1.1 2001/10/07 18:02:56 jon Exp $
+ * $Id: tr.c,v 1.2 2001/10/16 22:55:53 jon Exp $
  *
  * Transpose a matrix
  *
@@ -10,7 +10,7 @@
 #include "memory.h"
 #include "tra.h"
 
-static const char *name = "tr";
+static const char *name = "ztr";
 
 static void tr_usage(void)
 {

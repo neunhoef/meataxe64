@@ -1,5 +1,5 @@
 /*
- * $Id: ip.c,v 1.7 2001/09/16 20:20:39 jon Exp $
+ * $Id: ip.c,v 1.8 2001/10/16 22:55:53 jon Exp $
  *
  * Read a matrix
  *
@@ -16,7 +16,7 @@
 #include "elements.h"
 #include "endian.h"
 
-static const char *name = "ip";
+static const char *name = "zcv";
 
 static void ip_usage(void)
 {

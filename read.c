@@ -1,5 +1,5 @@
 /*
- * $Id: read.c,v 1.10 2001/10/03 23:57:33 jon Exp $
+ * $Id: read.c,v 1.11 2001/10/16 22:55:53 jon Exp $
  *
  * Read a header
  *
@@ -23,20 +23,19 @@
 
 #define LINE_LENGTH (2+6+6+6)
 
-int read_text_header(FILE *fp, const header **hp, const char *name)
+int read_text_header_items(FILE *fp, unsigned int *nod, unsigned int *prime,
+                           unsigned int *nor, unsigned int *noc, const char *name)
 {
-  unsigned int nob;
-  unsigned int nod;
-  unsigned int prime;
-  unsigned int nor;
-  unsigned int noc;
   char str[LINE_LENGTH+1];
   unsigned int j;
   int i;
   
   assert(NULL != fp);
-  assert(NULL != hp);
   assert(NULL != name);
+  assert(NULL != nod);
+  assert(NULL != prime);
+  assert(NULL != nor);
+  assert(NULL != noc);
   j = fread(str, 1, LINE_LENGTH, fp);
   if (LINE_LENGTH != j) {
     fprintf(stderr, "End of file reading '%s'\n", name);
@@ -44,22 +43,41 @@ int read_text_header(FILE *fp, const header **hp, const char *name)
   }
   i = fgetc(fp);
   while (i >= 0 && '\n' != (char)i) {
-    if (my_isspace(i))
+    if (my_isspace(i)) {
       i = fgetc(fp);
-    else
+    } else {
       break;
+    }
   }
   if ('\n' != (char)i) {
     fprintf(stderr, "Newline expected reading '%s'\n", name);
     return 0;
   }
-  nod = read_decimal(str, 2);
-  prime = read_decimal(str + 2, 6);
-  nor = read_decimal(str + 2 + 6, 6);
-  noc = read_decimal(str + 2 + 6 + 6, 6);
-  nob = bits_of(prime);
-  *hp = header_create(prime, nob, nod, noc, nor);
+  *nod = read_decimal(str, 2);
+  *prime = read_decimal(str + 2, 6);
+  *nor = read_decimal(str + 2 + 6, 6);
+  *noc = read_decimal(str + 2 + 6 + 6, 6);
   return 1;
+}
+
+int read_text_header(FILE *fp, const header **hp, const char *name)
+{
+  unsigned int nob;
+  unsigned int nod;
+  unsigned int prime;
+  unsigned int nor;
+  unsigned int noc;
+  
+  assert(NULL != fp);
+  assert(NULL != hp);
+  assert(NULL != name);
+  if (read_text_header_items(fp, &nod, &prime, &nor, &noc, name)) {
+    nob = bits_of(prime);
+    *hp = header_create(prime, nob, nod, noc, nor);
+    return 1;
+  } else {
+    return 0;
+  }
 }
 
 int read_binary_header(FILE *fp, const header **hp, const char *name)

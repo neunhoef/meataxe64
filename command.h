@@ -9,8 +9,6 @@
 
 #include<stdio.h>
 
-#define MAX_LINE 100000
-
 /* Command specifiers for potential remote operations */
 typedef enum commands
 {
@@ -101,15 +99,7 @@ extern int add_command(job, command, unsigned, input *, unsigned, output *);
 extern job get_job(void);
 extern t_uid get_tmp_id(void);
 
-extern void copy_rest(FILE *new, FILE *old);
-
 extern void copy_back(const char *new, const char *old, const char *task_name);
-
-extern int get_task_line(char *line, FILE *input);
-
-extern unsigned int skip_whitespace(unsigned int i, const char *chars);
-
-extern unsigned int skip_non_white(unsigned int i, const char *chars);
 
 extern void prepend_task(const char *task_line, const char *task_name);
 

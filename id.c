@@ -1,5 +1,5 @@
 /*
- * $Id: id.c,v 1.8 2001/10/10 23:19:42 jon Exp $: ad.c,v 1.1 2001/08/30 18:31:45 jon Exp $
+ * $Id: id.c,v 1.9 2001/10/16 22:55:53 jon Exp $: ad.c,v 1.1 2001/08/30 18:31:45 jon Exp $
  *
  * Generate identity matrix
  *
@@ -11,7 +11,7 @@
 #include "memory.h"
 #include "ident.h"
 
-static const char *name = "id";
+static const char *name = "zid";
 
 static void id_usage(void)
 {

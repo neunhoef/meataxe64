@@ -1,5 +1,5 @@
 /*
- * $Id: utils.h,v 1.9 2001/10/03 23:57:33 jon Exp $
+ * $Id: utils.h,v 1.10 2001/10/16 22:55:53 jon Exp $
  *
  * Utilities for meataxe
  *
@@ -12,6 +12,8 @@
 #include <stdio.h>
 
 #define NOT_USED(_x) (void)(_x)
+
+#define MAX_LINE 100000
 
 extern int is_a_prime_power(unsigned int);
 
@@ -27,8 +29,16 @@ extern int my_isspace(int);
 
 extern void *my_malloc(size_t);
 
-unsigned int getin(FILE *f, unsigned int a);
+extern unsigned int getin(FILE *f, unsigned int a);
 
-const char *get_str(FILE *f);
+extern const char *get_str(FILE *f);
+
+extern void copy_rest(FILE *new, FILE *old);
+
+extern unsigned int skip_whitespace(unsigned int i, const char *chars);
+
+extern unsigned int skip_non_white(unsigned int i, const char *chars);
+
+extern int get_task_line(char *line, FILE *input);
 
 #endif

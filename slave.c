@@ -1,5 +1,5 @@
 /*
- * $Id: slave.c,v 1.5 2001/10/09 19:36:26 jon Exp $
+ * $Id: slave.c,v 1.6 2001/10/16 22:55:53 jon Exp $
  *
  * Slave for extended operations
  * Based on zsl.c     MTX6 slave version 6.0.11 7.11.98 
@@ -11,7 +11,6 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "add.h"
-#include "command.h"
 #include "memory.h"
 #include "mul.h"
 #include "system.h"

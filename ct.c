@@ -1,5 +1,5 @@
 /*
- * $Id: ct.c,v 1.1 2001/10/06 23:33:12 jon Exp $
+ * $Id: ct.c,v 1.2 2001/10/16 22:55:53 jon Exp $
  *
  * Count the non-zero elements in a matrix
  *
@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include "count.h"
 
-static const char *name = "ct";
+static const char *name = "zct";
 
 static void ct_usage(void)
 {

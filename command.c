@@ -1,5 +1,5 @@
 /*
- * $Id: command.c,v 1.7 2001/10/11 22:39:30 jon Exp $
+ * $Id: command.c,v 1.8 2001/10/16 22:55:53 jon Exp $
  *
  * Interface to task manager (definition)
  *
@@ -200,19 +200,6 @@ static int consumer(task *task)
   return !(producer(task));
 }
 
-void copy_rest(FILE *new, FILE *old)
-{
-  char temp[1000];
-  do {
-    unsigned int i = fread(temp, 1, 1000, old);
-    if (0 != i) {
-      fwrite(temp, 1, i, new);
-    } else {
-      break;
-    }
-  } while (1);
-}
-
 /* Copy old back into new */
 /* Assumes lock held */
 void copy_back(const char *new, const char *old, const char *task_name)
@@ -308,57 +295,6 @@ static void add_tasks(int is_consumer, task *new_tasks[], unsigned int size)
   fclose(new);
   fclose(copy);
   release_lock();
-}
-
-int get_task_line(char *line, FILE *input)
-{
-  unsigned int i;
-  char *poo = fgets(line, MAX_LINE-1, input);
-  if (poo == NULL || strlen(line) <= 1) {
-    return 0;
-  } else {
-    i = strlen(line);
-    if (i >= MAX_LINE-2) {
-      release_lock();
-      fprintf(stderr, "Command file line too long\n");
-      exit(1);
-    }
-    return 1;
-  }
-}
-
-unsigned int skip_whitespace(unsigned int i, const char *chars)
-{
-  unsigned int j = strlen(chars);
-  while (1) {
-    if (i >= j-1) {
-      return i;
-    } else {
-      int k = chars[i];
-      if (my_isspace(k)) {
-	++i;
-      } else {
-	return i;
-      }
-    }
-  }
-}
-
-unsigned int skip_non_white(unsigned int i, const char *chars)
-{
-  unsigned int j = strlen(chars);
-  while (1) {
-    if (i >= j-1) {
-      return i;
-    } else {
-      int k = chars[i];
-      if (my_isspace(k)) {
-	return i;
-      } else {
-	++i;
-      }
-    }
-  }
 }
 
 static void read_line(const char *line, uid *uid, task_status *status)
@@ -506,7 +442,8 @@ static void update(task *tasks, unsigned int size)
 	process_line(line, tasks, size, copy, done, &new_count, &new_done);
       };
       if (count != commands) {
-	printf("Incorrect number of commands found in command file (was %lu, should be %lu)\n", count, commands);
+	fprintf(stderr, "Incorrect number of commands found in command file (was %lu, should be %lu)\n", count, commands);
+        release_lock();
 	exit(1);
       }
       if (new_count + new_done != count) {
