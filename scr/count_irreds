@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: count_irreds,v 1.1 2004/04/01 20:55:46 jon Exp $
+# $Id: count_irreds,v 1.2 2004/10/08 08:11:37 jon Exp $
 #
 # Script to count the irreducibles found in a split
 #
@@ -11,10 +11,14 @@ if [ $# -ne 2 ]; then
 fi
 irreds=$1
 log=$2
+tot=0
 for x in `ls $irreds/*_1`; do
+  z=`znor $x`
   y=`echo $x | sed -e "s?^.*irreds/?irreds/?g;s/_1$//g"`
   count=`grep $y $log | wc -l`
   if [ 0 -ne $count ]; then
     echo "$y: $count"
+    let tot=$tot+$z*$count
   fi
 done
+echo "Total dimension: $tot"
