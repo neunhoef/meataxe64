@@ -1,5 +1,5 @@
 /*
- * $Id: endian.c,v 1.9 2002/06/28 08:39:16 jon Exp $
+ * $Id: endian.c,v 1.10 2002/07/08 19:39:38 jon Exp $
  *
  * Endian handling for meataxe
  *
@@ -128,6 +128,21 @@ int endian_write_matrix(FILE *fp, unsigned int **row,
   unsigned int i;
   for (i = 0; i < nor; i++) {
     if (0 == endian_write_row(fp, row[i], len)) {
+      return 0;
+    }
+  }
+  return 1;
+}
+
+int endian_copy_matrix(FILE *inp, FILE *outp, unsigned int *row,
+                       unsigned int len, unsigned int nor)
+{
+  unsigned int i;
+  for (i = 0; i < nor; i++) {
+    if (0 == endian_read_row(inp, row, len)) {
+      return 0;
+    }
+    if (0 == endian_write_row(outp, row, len)) {
       return 0;
     }
   }

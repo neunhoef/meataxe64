@@ -1,5 +1,5 @@
 /*
- * $Id: endian.h,v 1.7 2001/11/29 01:13:09 jon Exp $
+ * $Id: endian.h,v 1.8 2002/07/08 19:39:38 jon Exp $
  *
  * Endian handling for meataxe
  *
@@ -27,6 +27,9 @@ extern int endian_read_matrix(FILE *fp, unsigned int **row,
 
 extern int endian_write_matrix(FILE *fp, unsigned int **row,
                                unsigned int len, unsigned int nor);
+
+extern int endian_copy_matrix(FILE *inp, FILE *outp, unsigned int *row,
+                              unsigned int len, unsigned int nor);
 
 extern void endian_init(void);
 
