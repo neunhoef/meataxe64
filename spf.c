@@ -1,5 +1,5 @@
 /*
- * $Id: spf.c,v 1.4 2002/06/25 10:30:12 jon Exp $
+ * $Id: spf.c,v 1.5 2002/06/27 08:21:01 jon Exp $
  *
  * Function to spin some vectors under two generators
  *
@@ -160,7 +160,7 @@ unsigned int spin(const char *in, const char *out, const char *a,
   echelised = fopen64(name_echelised, "w+b");
   if (NULL == echelised) {
     fprintf(stderr, "%s: cannot open %s, terminating\n", name, name_echelised);
-    cleanup(NULL, f_a, f_b);
+    cleanup(inp, f_a, f_b);
     exit(1);
   }
   /* Set up the map for the echelised basis */
@@ -182,6 +182,10 @@ unsigned int spin(const char *in, const char *out, const char *a,
     }
   }
   fclose(inp);
+  if (0 == clean_nor) {
+    fprintf(stderr, "%s: input set of vectors has rank 0, terminating\n", name);
+    cleanup_all(NULL, f_a, f_b, echelised, name_echelised);
+  }
   nor = clean_nor;
   /* Set up grease for multiplying */
   if (0 == grease_allocate(prime, len, &grease, 900)) {

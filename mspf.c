@@ -1,5 +1,5 @@
 /*
- * $Id: mspf.c,v 1.1 2002/06/25 10:30:12 jon Exp $
+ * $Id: mspf.c,v 1.2 2002/06/27 08:21:01 jon Exp $
  *
  * Function to spin some vectors under multiple generators
  * using intermediate files in a temporary directory.
@@ -83,10 +83,9 @@ unsigned int spin(const char *in, const char *out, const char *dir,
   header *h_out;
   char *name_echelised = NULL;
   const char *tmp = tmp_name();
-  unsigned int prime, nob, noc, nor, len, max_rows, d, i, elt;
+  unsigned int prime, nob, noc, nor, len, max_rows, d, i, clean_nor;
   unsigned int **rows1, **rows2;
-  int *map, *new_map;
-  int tmps_created = 0;
+  int *map;
   grease_struct grease;
   prime_ops prime_operations;
   row_ops row_operations;
@@ -136,8 +135,7 @@ unsigned int spin(const char *in, const char *out, const char *dir,
         noc != header_get_nor(h) ||
         (prime != header_get_prime(h) && 0 == gens[d].is_map) ||
         (nob != header_get_nob(h) && 0 == gens[d].is_map) ||
-        (nob != header_get_nob(h) && 0 == gens[d].is_map) ||
-        1 != nor) {
+        (nob != header_get_nob(h) && 0 == gens[d].is_map)) {
       fprintf(stderr, "%s: incompatible parameters for %s, %s, terminating\n",
               name, in, gen_name);
       cleanup(inp, argc, files);
@@ -156,11 +154,6 @@ unsigned int spin(const char *in, const char *out, const char *dir,
   primes_init(prime, &prime_operations);
   rows_init(prime, &row_operations);
   grease_init(&row_operations, &grease);
-  if (0 == nor) {
-    fprintf(stderr, "%s: no rows in input %s, terminating\n", name, in);
-    cleanup(inp, argc, files);
-    exit(1);
-  }
   if (0 == grease_level(prime, &grease, memory_rows(len, 100))) {
     fprintf(stderr, "%s: failed to get grease for %s, terminating\n",
             name, in);
@@ -184,52 +177,41 @@ unsigned int spin(const char *in, const char *out, const char *dir,
     rows1[d] = memory_pointer_offset(0, d, len);
     rows2[d] = memory_pointer_offset(450, d, len);
   }
-  assert(1 == nor);
-  if (0 == endian_read_matrix(inp, rows1, len, 1)) {
-    fprintf(stderr, "%s: failed to read rows from %s, terminating\n", name, in);
-    cleanup(inp, argc, files);
-    exit(1);
-  }
-  fclose(inp);
-  assert(1 == nor);
-  /* Set up the map for the echelised basis */
-  map = my_malloc(noc * sizeof(int));
-  /* And compute the first entry */
-  if (2 != prime) {
-    assert(1 == nor);
-    echelise(rows1, 1, &d, &new_map, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, 1, name);
-    /* Clean up the rows we use for basis detection, 
-     * in case of for non-identity leading non-zero entry */
-    free(new_map);
-    assert(1 == nor);
-    if (1 != d) {
-      fprintf(stderr, "%s: %s contains dependent vectors, terminating\n", name, in);
-      cleanup(NULL, argc, files);
-      exit(1);
-    }
-  }
-  assert(1 == nor);
-  elt = first_non_zero(rows1[0], nob, len, &i);
-  assert(0 != elt);
-  NOT_USED(elt);
-  map[0] = i;
-  /* Set up grease for cleaning */
-  if (0 == grease_allocate(prime, len, &grease, 900)){
-    fprintf(stderr, "%s: unable to allocate grease, terminating\n", name);
-    cleanup(inp, argc, files);
-  }
   /* Create the temporary file */
   echelised = fopen64(name_echelised, "w+b");
   if (NULL == echelised) {
     fprintf(stderr, "%s: cannot open %s, terminating\n", name, name_echelised);
-    cleanup(NULL, argc, files);
+    cleanup(inp, argc, files);
     exit(1);
   }
-  tmps_created = 1;
-  if (0 == endian_write_row(echelised, rows1[0], len)) {
-    fprintf(stderr, "%s: cannot write initial row to %s, terminating\n", name, name_echelised);
+  /* Set up the map for the echelised basis */
+  map = my_malloc(noc * sizeof(int));
+  clean_nor = 0;
+  for (i = 0; i < nor; i += max_rows) {
+    unsigned int stride = (i + max_rows > nor) ? nor - i : max_rows;
+    if (0 == endian_read_matrix(inp, rows1, len, stride)) {
+      fprintf(stderr, "%s: failed to read rows from %s, terminating\n",
+              name, in);
+      cleanup_all(inp, argc, files, echelised, name_echelised);
+      exit(1);
+    }
+    if (0 == clean_file(echelised, &clean_nor, rows1, stride, rows2, max_rows,
+                        map, NULL, 0, grease.level, prime,
+                        len, nob, 900, name)) {
+      cleanup_all(inp, argc, files, echelised, name_echelised);
+      exit(1);
+    }
+  }
+  fclose(inp);
+  if (0 == clean_nor) {
+    fprintf(stderr, "%s: input set of vectors has rank 0, terminating\n", name);
     cleanup_all(NULL, argc, files, echelised, name_echelised);
-    exit(1);
+  }
+  nor = clean_nor;
+  /* Set up grease for multiplying */
+  if (0 == grease_allocate(prime, len, &grease, 900)){
+    fprintf(stderr, "%s: unable to allocate grease, terminating\n", name);
+    cleanup_all(NULL, argc, files, echelised, name_echelised);
   }
   while (nor < noc && nor < noc && unfinished(gens, argc, nor)) {
     unsigned int rows_to_do = nor - gen->nor;
