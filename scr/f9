@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: f9,v 1.6 2002/10/13 14:16:08 jon Exp $
+# $Id: f9,v 1.7 2003/07/28 21:06:33 jon Exp $
 #
 # Script to perform A + B + CC
 #
@@ -15,16 +15,26 @@
 # 1: error in parameters
 # 0: success
 #
+. functions
 usage="$0: usage: $0 <in1> <in2> <in3> <out> <stem>"
 if [ $# -ne 5 ]; then
   echo "$usage"
   exit 1;
 fi
 if [ -e $1 -a -e $2 -a -e $3 ]; then
-  zmu -m 400 $3 $3 ${5}_1
-  if [ $? -ne 0 ]; then
-    exit 1
-  fi
+  memory=400
+  ok=0
+  while [ 0 -eq $ok ]; do
+    zmu -m $memory $3 $3 ${5}_1
+    ret=$?
+    if [ $ret -eq 0 ]; then
+      ok=1
+    elif [ $ret -eq 2 ]; then
+      let memory=`more_memory $memory 2>/dev/null`
+    else
+      exit 1
+    fi
+  done
   f1 $1 $2 ${5}_1 $4 ${5}_1
   rm ${5}_1
 else

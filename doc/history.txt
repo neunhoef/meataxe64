@@ -265,3 +265,4 @@ skew seventh
 20030720 - Fix minor bug in real_indicate on group signs for odd primes
 20030720 - Add GF9 support first version
 20030725 - Fix bug in zpco where wrong orbit size used
+20030728 - Make the f scripts retry on out of memory
