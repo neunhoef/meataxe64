@@ -1,5 +1,5 @@
 #
-# $Id: irred,v 1.1 2001/12/01 10:46:02 jon Exp $
+# $Id: irred,v 1.2 2001/12/03 00:07:48 jon Exp $
 #
 # Script to discover if a representation is irreducible
 #
@@ -69,4 +69,11 @@ fi
 #echo irred calls split_with_element
 split_with_element ${tmp}.1 ${tmp}.2 ${tmp}.3 ${o}_tra 1
 ret=$?
+if [ $ret -eq 0 ]; then
+  for x in ${o}_tra_${nor}*_1; do
+    ztr $x `echo $x | sed -e "s/_tra//g"`
+    y=`echo $x | sed -e "s/_1$/_2/g"`
+    ztr $y `echo $y | sed -e "s/_tra//g"`
+  done
+fi
 exit $ret

@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.35 2001/12/01 10:46:02 jon Exp $
+# $Id: makefile,v 1.36 2001/12/03 00:07:48 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -43,6 +43,7 @@ ZSPAN_TARGET=	zspan
 ZSS_TARGET=	zss
 ZTE_TARGET=	zte
 ZTR_TARGET=	ztr
+ZTRACE_TARGET=	ztrace
 
 DTOU_MODULES=	dtou
 EAD_MODULES=	add ead endian files header map memory primes read rows system utils write
@@ -78,8 +79,9 @@ ZSPAN_MODULES=	elements endian header matrix memory primes read rows utils write
 ZSS_MODULES=	clean elements endian grease header matrix memory primes read rows ss utils write zss
 ZTE_MODULES=	elements endian header matrix memory primes read rows te utils write zte
 ZTR_MODULES=	elements endian header matrix memory primes read tr tra utils write
+ZTRACE_MODULES=	elements endian header memory primes read rows utils ztrace
 
-MODULES=	$(DTOU_MODULES) $(EAD_MODULES) $(ECT_MODULES) $(EID_MODULES) $(EIM_MODULES) $(EIP_MODULES) $(EMU_MODULES) $(ETR_MODULES) $(MON_MODULES) $(SNS_MODULES) $(SRN_MODULES) $(STOP_MODULES) $(ZAD_MODULES) $(ZCT_MODULES) $(ZCV_MODULES) $(ZEX_MODULES) $(ZID_MODULES) $(ZIP_MODULES) $(ZMU_MODULES) $(ZNOC_MODULES) $(ZNOR_MODULES) $(ZPR_MODULES) $(ZPRIME_MODULES) $(ZRE_MODULES) $(ZRN_MODULES) $(ZNS_MODULES) $(ZQS_MODULES) $(ZSEL_MODULES) $(ZSL_MODULES) $(ZSP_MODULES) $(ZSPAN_MODULES) $(ZSS_MODULES) $(ZTE_MODULES) $(ZTR_MODULES)
+MODULES=	$(DTOU_MODULES) $(EAD_MODULES) $(ECT_MODULES) $(EID_MODULES) $(EIM_MODULES) $(EIP_MODULES) $(EMU_MODULES) $(ETR_MODULES) $(MON_MODULES) $(SNS_MODULES) $(SRN_MODULES) $(STOP_MODULES) $(ZAD_MODULES) $(ZCT_MODULES) $(ZCV_MODULES) $(ZEX_MODULES) $(ZID_MODULES) $(ZIP_MODULES) $(ZMU_MODULES) $(ZNOC_MODULES) $(ZNOR_MODULES) $(ZPR_MODULES) $(ZPRIME_MODULES) $(ZRE_MODULES) $(ZRN_MODULES) $(ZNS_MODULES) $(ZQS_MODULES) $(ZSEL_MODULES) $(ZSL_MODULES) $(ZSP_MODULES) $(ZSPAN_MODULES) $(ZSS_MODULES) $(ZTE_MODULES) $(ZTR_MODULES) $(ZTRACE_MODULES)
 
 include dirs.txt
 
@@ -216,6 +218,9 @@ TARGET:=ZTE
 include targets.txt
 
 TARGET:=ZTR
+include targets.txt
+
+TARGET:=ZTRACE
 include targets.txt
 
 debug: $(DEBUG_TARGETS)

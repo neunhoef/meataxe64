@@ -1,5 +1,5 @@
 #
-# $Id: signature,v 1.1 2001/12/02 01:35:06 jon Exp $
+# $Id: signature,v 1.2 2001/12/03 00:07:49 jon Exp $
 #
 # Script to give a signature for a representation
 #
@@ -56,14 +56,15 @@ for i in 1 2 3 4 5 6 7 8 9 10; do
   fi
   ok=0
   while [ $ok -eq 0 ]; do
-    zrn ${tmp}.1 2> /dev/null
+    zrn ${tmp}.1 $memory 2> /dev/null
     ret=$?
     if [ $ret -eq 2 ]; then
       let memory=${memory}*2
     elif [ $ret -ne 0 ]; then
       exit 1
+    else
+      ok=1
     fi
-    ok=1
   done
 done
 rm tmp*
