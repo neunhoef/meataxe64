@@ -1,5 +1,5 @@
 /*
- * $Id: zfln.c,v 1.4 2002/09/11 15:34:59 jon Exp $
+ * $Id: zfln.c,v 1.5 2002/09/24 19:08:54 jon Exp $
  *
  * Compute sums in the group algebra in two matrices finding one of lowest non-zero nullity
  * Expected to be used during computation of standard bases of irreducible but not absolutely
@@ -53,7 +53,8 @@ static int acceptor(unsigned int rank, unsigned int nor, const char *file, const
     if (rank == nor) {
       best_name = file;
       best_form = form;
-      return 3;
+      gcd = 1;
+      return 2;
     } else {
       return 0;
     }
@@ -63,11 +64,6 @@ static int acceptor(unsigned int rank, unsigned int nor, const char *file, const
       gcd = nor - rank;
       best_name = file;
       best_form = form;
-      if (1 == gcd) {
-        return 2;
-      } else {
-        return 0;
-      }
     } else {
       /* Check if this reduces the gcd */
       unsigned int new = find_gcd(gcd, nor - rank);        
@@ -82,11 +78,19 @@ static int acceptor(unsigned int rank, unsigned int nor, const char *file, const
           best_name = NULL;
           best_form = NULL;
         }
+      } else if (NULL == best_name && gcd + rank == nor) {
+        /* This element achieves a previously unachieved gcd */
+        best_name = file;
+        best_form = form;
       }
-      /* Carry on the search */
+    }
+    if (1 == gcd) {
+      return 2;
+    } else {
       return 0;
     }
   } else {
+    /* Not a candidate */
     return 0;
   }
 }
@@ -113,11 +117,16 @@ int main(int argc, const char * const argv[])
   res = sums(argv[1], n, argc - 5, argv + 5, 0, &acceptor, name);
   memory_dispose();
   if (0 != gcd && NULL != best_name) {
-    printf("%s: found element %s of nullity %d, form %s\n",
-           name, best_name, gcd, best_form);
+    if (0 == nullity) {
+      printf("%s: found element %s of nullity 0, form %s\n",
+             name, best_name, best_form);
+    } else {
+      printf("%s: found element %s of nullity %d, form %s\n",
+             name, best_name, gcd, best_form);
+    }
     return 0;
   } else {
     printf("Failed to find a suitable element\n");
-    return 1;
+    return 255;
   }
 }

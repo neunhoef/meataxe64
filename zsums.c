@@ -1,5 +1,5 @@
 /*
- * $Id: zsums.c,v 1.10 2002/09/11 15:34:59 jon Exp $
+ * $Id: zsums.c,v 1.11 2002/09/24 19:08:54 jon Exp $
  *
  * Compute sums in the group algebra in two matrices
  *
@@ -53,9 +53,9 @@ int main(int argc, const char * const argv[])
   endian_init();
   memory_init(name, memory);
   res = sums(argv[1], n, argc - 5, argv + 5, 0, &acceptor, name);
-  if (0 != res) {
+  if (255 == res) {
     printf("Failed to find a suitable element\n");
   }
   memory_dispose();
-  return (0 != res);
+  return res;
 }

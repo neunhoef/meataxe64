@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: split,v 1.15 2002/09/16 14:59:37 jon Exp $
+# $Id: split,v 1.16 2002/09/24 19:08:54 jon Exp $
 #
 # Script to split a representation
 #
@@ -144,9 +144,13 @@ while [ $ok -eq 0 ]; do
       rm -f ${tmp}*
       exit $ret
     fi
-  else
+  elif [ 255 -eq $ret ]; then
     echo "Failed to find an element of nullity <= $max_null"
     break
+  else
+    echo zsums unexpectedly returns $ret, terminating
+    rm -f ${tmp}*
+    exit 1
   fi
 done
 ok=0
@@ -166,9 +170,13 @@ while [ $ok -eq 0 ]; do
       rm -f ${tmp}*
       exit $ret
     fi
-  else
+  elif [ 255 -eq $ret ]; then
     echo "Failed to find an element of low nullity"
     break
+  else
+    echo zsums unexpectedly returns $ret, terminating
+    rm -f ${tmp}*
+    exit 1
   fi
 done
 echo trying zero
