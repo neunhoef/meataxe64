@@ -1,5 +1,5 @@
 /*
- * $Id: sns.c,v 1.9 2002/10/14 19:11:51 jon Exp $
+ * $Id: sns.c,v 1.10 2003/02/05 19:30:54 jon Exp $
  *
  * Simple compute of the null space of a matrix
  *
@@ -53,7 +53,7 @@ int main(int argc, const char * const argv[])
   noc = header_get_noc(h_in);
   len = header_get_len(h_in);
   if (nor != noc) {
-    fprintf(stderr, "%s: cannot non-square %s, terminating\n", name, argv[1]);
+    fprintf(stderr, "%s: cannot handle non-square %s, terminating\n", name, argv[1]);
     fclose(inp);
     exit(1);
   }

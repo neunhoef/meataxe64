@@ -231,3 +231,4 @@ skew seventh
 20030102 - add zdiffd and convert preserves to use it
 20030114 - new version of zdiffd distinguishing errors from failed comparison
 20030117 - fix fault in find_extent causing emmory overwrites
+20030205 - fix a number of minor faults related to sns and bad memory requests

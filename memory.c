@@ -1,5 +1,5 @@
 /*
- * $Id: memory.c,v 1.12 2003/01/17 21:19:32 jon Exp $
+ * $Id: memory.c,v 1.13 2003/02/05 19:30:54 jon Exp $
  *
  * Large memory manipulation for meataxe
  *
@@ -12,6 +12,7 @@
 #include <assert.h>
 #include <errno.h>
 #include <math.h>
+#include <limits.h>
 #include "utils.h"
 
 static unsigned int *memory = NULL;
@@ -25,12 +26,16 @@ void memory_init(const char *name, size_t size)
   extent = ((0 != size) ? size : (MEM_SIZE));
   extent /= sizeof(unsigned int);
   errno = 0;
+  if (UINT_MAX / (1000 * sizeof(unsigned int)) < extent) {
+    fprintf(stderr, "%s: memory request %u exceeds system maximum, exiting\n", name, extent * sizeof(unsigned int));
+    exit(1);
+  }
   memory = malloc(extent * 1000 * sizeof(unsigned int));
   if (NULL == memory) {
     if ( 0 != errno) {
       perror(name);
     }
-    fprintf(stderr, "%s: failed to allocate %d bytes, exiting\n", name, extent * 1000 * sizeof(unsigned int));
+    fprintf(stderr, "%s: failed to allocate %u bytes, exiting\n", name, extent * 1000 * sizeof(unsigned int));
     exit(1);
   }
 }
