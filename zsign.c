@@ -1,5 +1,5 @@
 /*
- * $Id: zsign.c,v 1.1 2002/10/12 17:40:49 jon Exp $
+ * $Id: zsign.c,v 1.2 2002/10/13 13:54:15 jon Exp $
  *
  * Compute the orthogonal group sign of a form
  *
@@ -15,7 +15,7 @@ static const char *name = "zsign";
 
 static void sign_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s  [-m <memory>] <quadratic form> <bilinear form>\n", name, name);
+  fprintf(stderr, "%s: usage: %s  [-v] [-m <memory>] <quadratic form> <bilinear form>\n", name, name);
 }
 
 int main(int argc, const char * const argv[])
