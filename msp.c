@@ -1,5 +1,5 @@
 /*
- * $Id: msp.c,v 1.10 2003/02/28 20:04:58 jon Exp $
+ * $Id: msp.c,v 1.11 2003/06/21 13:19:13 jon Exp $
  *
  * Function to spin some vectors under multiple generators
  *
@@ -92,6 +92,7 @@ unsigned int spin(const char *in, const char *out,
     files[d] = NULL;
   }
   gens[argc - 1].next = gens;
+  files[0] = NULL;
   /* Start at first generator */
   gen = gens;
   prime = header_get_prime(h_in);

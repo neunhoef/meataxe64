@@ -1,5 +1,5 @@
 /*
- * $Id: msbf.c,v 1.9 2003/02/24 18:02:43 jon Exp $
+ * $Id: msbf.c,v 1.10 2003/06/21 13:19:13 jon Exp $
  *
  * Function to spin some vectors under multiple generators to obtain a standard base
  *
@@ -114,6 +114,7 @@ unsigned int spin(const char *in, const char *out, const char *dir,
     files[d] = NULL;
   }
   gens[argc - 1].next = gens;
+  files[0] = NULL;
   /* Start at first generator */
   gen = gens;
   /* Check compatibility */

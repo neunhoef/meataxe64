@@ -1,5 +1,5 @@
 /*
- * $Id: mspf.c,v 1.13 2003/02/24 18:02:43 jon Exp $
+ * $Id: mspf.c,v 1.14 2003/06/21 13:19:13 jon Exp $
  *
  * Function to spin some vectors under multiple generators
  * using intermediate files in a temporary directory.
@@ -109,6 +109,7 @@ unsigned int spin(const char *in, const char *out, const char *dir,
     files[d] = NULL;
   }
   gens[argc - 1].next = gens;
+  files[0] = NULL;
   /* Start at first generator */
   gen = gens;
   prime = header_get_prime(h_in);
