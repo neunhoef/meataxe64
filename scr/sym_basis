@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: sym_basis,v 1.17 2003/06/29 21:27:57 jon Exp $
+# $Id: sym_basis,v 1.18 2005/03/21 21:43:56 jon Exp $
 #
 # Script to compute a symmetry basis wrt an ordered set of irreducibles
 #
@@ -9,17 +9,16 @@
 # $2: memory to be used
 # $3: the file to contain the symmetry basis
 # $4: the file of multiplicities
-# $5: whether to use the dual (0 => not, 1 => dual)
-# $6: a script for computing gamma operators
-# $7-: generators for the condensation group
+# $5: a script for computing gamma operators
+# $6-: generators for the condensation group
 #
 # Return codes
 # 1: error in parameters
 # 0: success
 # 255: an irreducible was found outside the list
 #
-usage="$0: usage: $0 <irreducibles> <memory> <output basis> <output multiplicities> <dualise> <script> <generator 1> [<other generators>]"
-if [ $# -lt 8 ]; then
+usage="$0: usage: $0 <irreducibles> <memory> <output basis> <output multiplicities> <script> <generator 1> [<other generators>]"
+if [ $# -lt 7 ]; then
   echo "$usage"
   exit 1;
 fi
@@ -29,9 +28,8 @@ irreds=$1
 memory=$2
 out=$3
 mult=$4
-dualise=$5
-script=$6
-shift 6
+script=$5
+shift 5
 gen_count=$#
 tmp=tmp${PPID}
 basis=${tmp}.31
@@ -39,45 +37,6 @@ local_basis=${tmp}.32
 cat /dev/null > $mult
 for x in `cat $irreds`; do
   w=$x
-#
-# Cope with dual here
-#
-  if [ 1 -eq $dualise ]; then
-    i=1
-    names=
-    while [ 0 -lt $i ]; do
-      if [ -e ${x}_${i} ]; then
-        names="$names ${x}_${i}"
-      else
-        break
-      fi
-      let i=$i+1
-    done
-    i=1
-    dual_names=
-    for y in $names; do
-      dual $y ${tmp}_${i} $memory
-      dual_names="$dual_names ${tmp}_${i}"
-      let i=$i+1
-    done
-    r=`new_irred $memory $dual_names`
-    ret=$?
-    if [ 0 -eq $ret ]; then
-      rm -f ${tmp}.*
-      echo "$name: new unknown dual irreducible found for ${x}, terminating"
-      exit 255
-    elif [ 1 -eq $ret ]; then
-      rm -f ${tmp}.*
-      echo "$name: $r"
-      exit 1
-    elif [ 255 -ne $ret ]; then
-      rm -f ${tmp}.*
-      echo "$name: unexpected return $ret from new_irred, terminating"
-      exit 1
-    fi
-    irr=`echo $r | sed -e "s/Existing irreducible //g;s/ found//g"`
-    w=$irr
-  fi
   wdim=`znor ${w}_1`
   y=`ls ${w}_1_I*`
   ret=$?

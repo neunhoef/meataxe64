@@ -337,3 +337,4 @@ skew seventh
 20050115 - Add checkorder
 20050212 - Fix arg check bug in check_irredf. Allow new_irredf_and_indiciate_with_orders to compute odd characteristic indicators
 20050220 - Fix bug in real_indicate in odd characteristic calling zsignf
+20050321 - Remove dualise parameter from sym_basis scripts
