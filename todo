@@ -8,7 +8,6 @@ Think about orthogonal group sign
 Implement a verbosity level for all programs, with -v <n>. Add a standard parser to deal with this
 Investigate rename failure on large files from zscript
 Consider allowing maps into ztsp and ztspf
-Analyse unexpected split failure
 Improve zsbf to take multiple generators and extend scripts for zmsbf *
 Document new scripts and programs (basef_with_vector, basef_from_vector, conjugatef) *
 Fix zvp and zps to take less memory

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: new_irred,v 1.8 2002/07/05 17:19:22 jon Exp $
+# $Id: new_irred,v 1.9 2002/07/05 22:59:42 jon Exp $
 #
 # Script to classify an irreducible representation
 #
@@ -51,14 +51,14 @@ else
 fi
 i=0
 for x in $*; do
-  order=`singular_order $x`
+  ord=`singular_order $x`
   ret=$?
   if [ 1 -eq $ret ]; then
     echo Cannot compute order of $x
     exit 1
   fi
   if [ 0 -eq $ret ]; then
-    order[$i]=$order
+    order[$i]=$ord
     y[$i]=$x
     let i=$i+1
   elif [ 255 -eq $ret ]; then
