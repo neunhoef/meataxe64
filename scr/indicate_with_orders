@@ -1,5 +1,5 @@
 #
-# $Id: indicate_with_orders,v 1.3 2002/03/31 20:55:41 jon Exp $
+# $Id: indicate_with_orders,v 1.4 2002/04/15 07:47:24 jon Exp $
 #
 # Script to find the indicator of an irreducible representation
 # Assumes a and b in standard base form
@@ -49,8 +49,10 @@ fi
 tmp=tmp${PPID}
 a_d=${tmp}.0
 b_d=${tmp}.1
-dual_with_order $a $a_d $o_a $memory
-dual_with_order $b $b_d $o_b $memory
+a_t=${tmp}.3
+b_t=${tmp}.4
+dual_with_order $a $a_d $a_t $o_a $memory
+dual_with_order $b $b_d $b_t $o_b $memory
 e=${tmp}.2
 script=`find_nullity_one_with_orders $a_d $b_d $e $o_a $o_b $memory`
 ret=$?
@@ -59,4 +61,8 @@ if [ $ret -ne 0 ]; then
   echo $script
   exit $ret
 fi
-exec indicate_with_element $a $b $e $a_d $b_d $script $memory
+indicate_with_element $a $b $e $a_d $b_d $script $memory
+ret=$?
+rm -f ${tmp}.*
+exit $ret
+

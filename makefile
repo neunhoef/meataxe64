@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.56 2002/04/10 23:33:27 jon Exp $
+# $Id: makefile,v 1.57 2002/04/15 07:47:23 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -39,6 +39,7 @@ ZID_TARGET=	zid
 ZIMPORT_TARGET=	zimport
 ZIP_TARGET=	zip
 ZIV_TARGET=	ziv
+ZIVF_TARGET=	zivf
 ZJOIN_TARGET=	zjoin
 ZMU_TARGET=	zmu
 ZNOC_TARGET=	znoc
@@ -111,7 +112,8 @@ ZFE_MODULES=	elements endian extend extend_matrix header memory primes read rows
 ZID_MODULES=	id ident elements endian header memory primes rows utils write
 ZIMPORT_MODULES=	elements endian header memory primes read rows utils write zimport
 ZIP_MODULES=	elements endian header ipp memory primes read rows utils write
-ZIV_MODULES=	clean elements endian grease header maps matrix memory primes read iv rows utils write ziv
+ZIV_MODULES=	clean elements endian grease header iv maps matrix memory primes read rows utils write ziv
+ZIVF_MODULES=	clean elements endian grease header ivf maps matrix memory primes read rows system utils write zivf
 ZJOIN_MODULES=	endian header join memory primes read utils write zjoin
 ZMU_MODULES=	elements endian grease header maps matrix memory mu mul primes read rows utils write
 ZNOC_MODULES=	endian header primes read utils znoc
@@ -185,6 +187,7 @@ MODULES=	$(DTOU_MODULES) \
 	$(ZIMPORT_MODULES) \
 	$(ZIP_MODULES) \
 	$(ZIV_MODULES) \
+	$(ZIVF_MODULES) \
 	$(ZJOIN_MODULES) \
 	$(ZMU_MODULES) \
 	$(ZNOC_MODULES) \
@@ -351,6 +354,9 @@ TARGET:=ZIP
 include targets.txt
 
 TARGET:=ZIV
+include targets.txt
+
+TARGET:=ZIVF
 include targets.txt
 
 TARGET:=ZJOIN

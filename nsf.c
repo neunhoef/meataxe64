@@ -1,5 +1,5 @@
 /*
- * $Id: nsf.c,v 1.5 2002/04/10 23:33:27 jon Exp $
+ * $Id: nsf.c,v 1.6 2002/04/15 07:47:23 jon Exp $
  *
  * Compute the nullspace of a matrix, using temporary files
  *
@@ -30,6 +30,24 @@ struct file_struct
   int created;
   file next;
 };
+
+static void cleanup(const file_struct t1, const file_struct t2, const char *name4, const char *name5)
+{
+  if (t1.created || t2.created) {
+    if (t1.created) {
+      (void)remove(t1.name);
+      (void)remove(t1.name_id);
+    }
+    if (t2.created) {
+      (void)remove(t2.name);
+      (void)remove(t2.name_id);
+    }
+  } else {
+    /* Only ident created */
+    (void)remove(name4);
+  }
+  (void)remove(name5);
+}
 
 unsigned int nullspace(const char *m1, const char *m2, const char *dir, const char *name)
 {
@@ -83,6 +101,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
   t1.created = 0;
   t2.created = 0;
   if (0 == open_and_read_binary_header(&f.f, &h, m1, name)) {
+    cleanup(t1, t2, name4, name5);
     exit(1);
   }
   prime = header_get_prime(h);
@@ -100,11 +119,13 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
   /* Create an identity */
   if (0 == ident(prime, nor, nor, 1, name4, name)) {
     fclose(f.f);
+    cleanup(t1, t2, name4, name5);
     exit(1);
   }
   if (0 == open_and_read_binary_header(&f.f_id, &h, name4, name)) {
     fclose(f.f);
     fclose(outp);
+    cleanup(t1, t2, name4, name5);
     exit(1);
   }
   len_id = header_get_len(h);
@@ -116,6 +137,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
     fclose(f.f);
     fclose(f.f_id);
     fclose(outp);
+    cleanup(t1, t2, name4, name5);
     exit(2);
   }
   (void)grease_level(prime, &grease, r);
@@ -148,6 +170,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
       fclose(in->f);
       fclose(in->f_id);
       fclose(outp);
+      cleanup(t1, t2, name4, name5);
       exit(1);
     }
     if (0 == endian_read_matrix(in->f_id, mat3, len_id, stride)) {
@@ -155,6 +178,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
       fclose(in->f);
       fclose(in->f_id);
       fclose(outp);
+      cleanup(t1, t2, name4, name5);
       exit(1);
     }
     echelise(mat1, stride, &n, &map, mat3, 1, grease.level, prime, len, nob, 900, 950, len_id, 1, name);
@@ -166,6 +190,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
           fclose(in->f);
           fclose(in->f_id);
           fclose(outp);
+          cleanup(t1, t2, name4, name5);
           exit(1);
         }
       }
@@ -181,6 +206,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
           fclose(in->f);
           fclose(in->f_id);
           fclose(outp);
+          cleanup(t1, t2, name4, name5);
           exit(1);
         }
         out->f_id = fopen64(out->name_id, "wb");
@@ -191,6 +217,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
           fclose(in->f_id);
           fclose(out->f);
           fclose(outp);
+          cleanup(t1, t2, name4, name5);
           exit(1);
         }
         for (i = 0; i < rows_remaining; i += step2) {
@@ -206,6 +233,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
             fclose(out->f);
             fclose(out->f_id);
             fclose(outp);
+            cleanup(t1, t2, name4, name5);
             exit(1);
           }
           if (0 == endian_read_matrix(in->f_id, mat4, len_id, stride2)) {
@@ -215,6 +243,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
             fclose(out->f);
             fclose(out->f_id);
             fclose(outp);
+            cleanup(t1, t2, name4, name5);
             exit(1);
           }
           clean(mat1, stride, mat2, stride2, map, mat3, mat4, 1, grease.level, prime, len, nob, 900, 950, len_id, name);
@@ -230,6 +259,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
                 fclose(out->f);
                 fclose(out->f_id);
                 fclose(outp);
+                cleanup(t1, t2, name4, name5);
                 exit(1);
               }
               if (0 == endian_write_row(out->f_id, mat4[j], len_id)) {
@@ -239,6 +269,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
                 fclose(out->f);
                 fclose(out->f_id);
                 fclose(outp);
+                cleanup(t1, t2, name4, name5);
                 exit(1);
               }
               rows_written++;
@@ -252,6 +283,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
                 fclose(out->f);
                 fclose(out->f_id);
                 fclose(outp);
+                cleanup(t1, t2, name4, name5);
                 exit(1);
               }
             }
@@ -268,12 +300,14 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
         if (rows_written > 0) {
           in->f = fopen64(in->name, "rb");
           if (NULL == in->f) {
-            fprintf(stderr, "%s: cannot open temporary output %s, terminating\n", name, in->name);
+            fprintf(stderr, "%s: cannot open temporary input %s, terminating\n", name, in->name);
+            cleanup(t1, t2, name4, name5);
             exit(1);
           }
           in->f_id = fopen64(in->name_id, "rb");
           if (NULL == in->f_id) {
-            fprintf(stderr, "%s: cannot open temporary output %s, terminating\n", name, in->name_id);
+            fprintf(stderr, "%s: cannot open temporary input %s, terminating\n", name, in->name_id);
+            cleanup(t1, t2, name4, name5);
             exit(1);
           }
         }
@@ -289,13 +323,18 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
   matrix_free(mat2);
   matrix_free(mat3);
   matrix_free(mat4);
-  if (t1.created) {
-    (void)remove(t1.name);
-    (void)remove(t1.name_id);
-  }
-  if (t2.created) {
-    (void)remove(t2.name);
-    (void)remove(t2.name_id);
+  if (t1.created || t2.created) {
+    if (t1.created) {
+      (void)remove(t1.name);
+      (void)remove(t1.name_id);
+    }
+    if (t2.created) {
+      (void)remove(t2.name);
+      (void)remove(t2.name_id);
+    }
+  } else {
+    /* Only ident created */
+    (void)remove(name4);
   }
   fclose(outp);
   if (nor > r) {
@@ -305,6 +344,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
     h_out = header_create(prime, nob, nod, nor, nor - r);
     if (0 == open_and_write_binary_header(&outp, h_out, m2, name)) {
       fprintf(stderr, "%s: cannot open output %s, terminating\n", name, m2);
+      (void)remove(name5);
       exit(1);
     }
     inp = fopen64(name5, "rb");
@@ -312,6 +352,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
       fprintf(stderr, "%s: cannot open intermediate null vector file %s, terminating\n",
               name, name5);
       fclose(outp);
+      (void)remove(name5);
       exit(1);
     }
     for (i = 0; i < nor - r; i++) {
@@ -319,12 +360,14 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
         fprintf(stderr, "%s: cannot read row from %s, terminating\n", name, name5);
         fclose(inp);
         fclose(outp);
+        (void)remove(name5);
         exit(1);
       }
       if (0 == endian_write_row(outp, row, len_id)) {
         fprintf(stderr, "%s: cannot write row to %s, terminating\n", name, m2);
         fclose(inp);
         fclose(outp);
+        (void)remove(name5);
         exit(1);
       }
     }

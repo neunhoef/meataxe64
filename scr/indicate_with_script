@@ -1,5 +1,5 @@
 #
-# $Id: indicate_with_script,v 1.1 2002/03/20 18:42:30 jon Exp $
+# $Id: indicate_with_script,v 1.2 2002/04/15 07:47:24 jon Exp $
 #
 # Script to find the indicator of an irreducible representation,
 # given a script describing the null generator
@@ -52,8 +52,10 @@ fi
 tmp=tmp${PPID}
 a_d=${tmp}.0
 b_d=${tmp}.1
-dual_with_order $a $a_d $o_a $memory
-dual_with_order $b $b_d $o_b $memory
+a_t=${tmp}.3
+b_t=${tmp}.4
+dual_with_order $a $a_d $a_t $o_a $memory
+dual_with_order $b $b_d $b_t $o_b $memory
 e=${tmp}.2
 ok=0
 while [ $ok -eq 0 ]; do
@@ -70,4 +72,8 @@ while [ $ok -eq 0 ]; do
   fi
 done
 rm ${tmp}zscript*
-exec indicate_with_element $a $b $e $a_d $b_d $script $memory
+indicate_with_element $a $b $e $a_d $b_d $script $memory
+ret=$?
+rm -f ${tmp}.*
+exit $ret
+

@@ -1,5 +1,5 @@
 /*
- * $Id: iv.c,v 1.3 2002/04/10 23:33:27 jon Exp $
+ * $Id: iv.c,v 1.4 2002/04/15 07:47:23 jon Exp $
  *
  * Invert a matrix
  *
@@ -85,7 +85,7 @@ void invert(const char *m1, const char *m2, const char *name)
     }
     echelise(mat1, nor, &n, &map1, mat2, 1, grease.level, prime, len, nob, 800, 900, len, 1, name);
     if (nor != n) {
-      fprintf(stderr, "%s matrix %s is singular with rank %d, terminating\n", name, m1, n);
+      fprintf(stderr, "%s: matrix %s is singular with rank %d, terminating\n", name, m1, n);
       fclose(outp);
       exit(1);
     }
@@ -112,7 +112,7 @@ void invert(const char *m1, const char *m2, const char *name)
     free(map1);
     for (r = 0; r < nor; r++) {
       if (0 == endian_write_row(outp, mat2[map2[r]], len)) {
-        fprintf(stderr, "%s cannot write row %d to %s, terminating\n", name, r, m2);
+        fprintf(stderr, "%s: cannot write row %d to %s, terminating\n", name, r, m2);
         fclose(outp);
         exit(1);
       }

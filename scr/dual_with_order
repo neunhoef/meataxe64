@@ -1,13 +1,14 @@
 #
-# $Id: dual_with_order,v 1.1 2002/03/20 18:42:30 jon Exp $
+# $Id: dual_with_order,v 1.2 2002/04/15 07:47:24 jon Exp $
 #
 # Script to dual of a matrix, given its order
 #
 # Inputs
 # $1: matrix
 # $2: out
-# $3: order
-# $4: memory (optional)
+# $3: transpose
+# $4: order
+# $5: memory (optional)
 #
 # Return codes
 # 1: error in parameters
@@ -15,14 +16,15 @@
 #
 #set -v
 . functions
-usage="$0: usage: $0 <in> <out> <order> [<memory>]"
-if [ $# -ne 3 -a $# -ne 4 ]; then
+usage="$0: usage: $0 <in> <out> <transpose> <order> [<memory>]"
+if [ $# -ne 4 -a $# -ne 5 ]; then
   echo $usage
   exit 1;
 fi
 a=$1
 o=$2
-o_a=$3
+tr=$3
+o_a=$4
 if [ -e $a ]; then
   q=`zprime $a`
   nor=`znor $a`
@@ -35,24 +37,23 @@ else
   echo "$0: missing file $a"
   exit 1
 fi
-if [ $# -eq 3 ]; then
+if [ $# -eq 4 ]; then
   memory=200
 else
-  memory=$4
+  memory=$5
 fi
-tmp=tmp${PPID}
-ztr $a ${tmp}.0 $memory
+ztr $a ${tr} $memory
 ret=$?
 if [ 0 -ne $ret ]; then
   exit $ret
 fi
 if [ $o_a -gt 2 ]; then
   let index=${o_a}-1
-  power ${tmp}.0 $index $o $memory
+  power ${tr} $index $o $memory
   if [ 0 -ne $ret ]; then
     exit $ret
   fi
 else
-  mv ${tmp}.0 $o
+  cp ${tr} $o
 fi
 
