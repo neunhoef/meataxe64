@@ -1,5 +1,5 @@
 /*
- * $Id: script.c,v 1.6 2002/08/26 12:29:28 jon Exp $
+ * $Id: script.c,v 1.7 2002/09/10 17:10:50 jon Exp $
  *
  * Function to compute a script in two generators
  *
@@ -32,14 +32,19 @@ static const char *new_id(const char *base)
   return res;
 }
 
-static int cleanup(FILE *inp1, FILE *inp2, FILE *outp)
+static int close_files(unsigned int s, FILE **files, const header **headers)
 {
-  if (NULL != inp1)
-    fclose(inp1);
-  if (NULL != inp2)
-    fclose(inp2);
-  if (NULL != outp)
-    fclose(outp);
+  unsigned int i;
+  assert(NULL != files);
+  assert(NULL != headers);
+  for (i = 0; i < s; i++) {
+    assert(NULL != files[i]);
+    assert(NULL != headers[i]);
+    fclose(files[i]);
+    header_free(headers[i]);
+  }
+  free(files);
+  free(headers);
   return 0;
 }
 
@@ -84,17 +89,67 @@ static const char *parse_plus(const char *script, const char **rest, unsigned in
   return res;
 }
 
-static int script_mul(const char *m1, const char *m2, const char *id, const char **out,
-                      const char *tmp, const char *script, const char *name)
+static const char *get_multiplier(unsigned int argc, const char gen, const char *const args[], const char *name)
+{
+  const char *multiplier;
+  switch(gen) {
+  case 'A':
+    multiplier = args[0];
+    if (argc >= 1) {
+      break;
+    }
+  case 'B':
+    multiplier = args[1];
+    if (argc >= 2) {
+      break;
+    }
+  case 'C':
+    multiplier = args[2];
+    if (argc >= 3) {
+      break;
+    }
+  case 'D':
+    multiplier = args[3];
+    if (argc >= 4) {
+      break;
+    }
+  case 'E':
+    multiplier = args[4];
+    if (argc >= 5) {
+      break;
+    }
+  case 'F':
+    multiplier = args[5];
+    if (argc >= 6) {
+      break;
+    }
+  case 'G':
+    multiplier = args[6];
+    if (argc >= 7) {
+      break;
+    }
+  case 'H':
+    multiplier = args[7];
+    if (argc >= 8) {
+      break;
+    }
+  default:
+    fprintf(stderr, "%s: script element '%c' is not a generator, terminating\n", name, gen);
+    multiplier =  NULL;
+  }
+  return multiplier;
+}
+
+static int script_mul(const char *id, const char **out, const char *tmp, const char *script,
+                      unsigned int argc, const char *const args[], const char *name)
 {
   char gen;
   const char *current, *new, *multiplier;
-  assert(NULL != m1);
-  assert(NULL != m2);
   assert(NULL != id);
   assert(NULL != out);
   assert(NULL != tmp);
-  assert(NULL != script);
+  assert(NULL != args);
+  assert(0 != argc);
   assert(NULL != name);
   if ('I' == *script) {
     if ('\0' != script[1]) {
@@ -110,12 +165,8 @@ static int script_mul(const char *m1, const char *m2, const char *id, const char
     fprintf(stderr, "%s: script matrix section missing, terminating\n", name);
     return 0;
   }
-  if ('A' == gen) {
-    multiplier = m1;
-  } else if ('B' == gen) {
-    multiplier = m2;
-  } else {
-    fprintf(stderr, "%s: script element '%c' is not a generator, terminating\n", name, gen);
+  multiplier = get_multiplier(argc, gen, args, name);
+  if (NULL == multiplier) {
     return 0;
   }
   if ('\0' == *script) {
@@ -130,12 +181,8 @@ static int script_mul(const char *m1, const char *m2, const char *id, const char
         fprintf(stderr, "%s: script matrix section missing, terminating\n", name);
         return 0;
       }
-      if ('A' == gen) {
-        multiplier = m1;
-      } else if ('B' == gen) {
-        multiplier = m2;
-      } else {
-        fprintf(stderr, "%s: script element '%c' is not a generator, terminating\n", name, gen);
+      multiplier = get_multiplier(argc, gen, args, name);
+      if (NULL == multiplier) {
         return 0;
       }
       new = new_id(tmp);
@@ -149,72 +196,63 @@ static int script_mul(const char *m1, const char *m2, const char *id, const char
   }
   return 1;
 }
-int exec_script(const char *m1, const char *m2, const char *m3,
-                const char *tmp, const char *script, const char *name)
+
+int exec_script(const char *out, const char *tmp, const char *script,
+                unsigned int argc, const char *const args[], const char *name)
 {
-  FILE *inp1 = NULL;
-  FILE *inp2 = NULL;
-  const header *h1, *h2;
-  unsigned int prime, nor, scalar;
+  FILE **files = NULL;
+  const header **headers;
+  unsigned int i, prime = 1, nor, scalar;
   const char *id;
   const char *current, *new, *summand, *rest;
-  int is_perm1, is_perm2, both_perm;
-  assert(NULL != m1);
-  assert(NULL != m2);
-  assert(NULL != m3);
+  int all_perm = 1;
+  assert(NULL != out);
   assert(NULL != tmp);
   assert(NULL != script);
+  assert(1 <= argc);
+  assert(NULL != args);
   assert(NULL != name);
-  if (0 == open_and_read_binary_header(&inp1, &h1, m1, name) ||
-      0 == open_and_read_binary_header(&inp2, &h2, m2, name)) {
-    if (NULL != inp1) {
-      fclose(inp1);
-      header_free(h1);
+  files = my_malloc(argc * sizeof(FILE *));
+  headers = my_malloc(argc * sizeof(const header *));
+  for (i = 0; i < argc; i++) {
+    if (0 == open_and_read_binary_header(files + i, headers + i, args[i], name)) {
+      return close_files(i, files, headers);
     }
-    return 0;
+    if (1 != header_get_prime(headers[i])) {
+      prime = header_get_prime(headers[i]);
+      all_perm = 0;
+    }
   }
-  nor = header_get_nor(h1);
-  prime = header_get_prime(h1);
-  is_perm1 = 1 == prime;
-  is_perm2 = 1 == header_get_prime(h2);
-  both_perm = is_perm1 && is_perm2; /* We'll allow this if no additions */
-  if (nor != header_get_noc(h1) ||
-      nor != header_get_noc(h1) ||
-      nor != header_get_nor(h2) ||
-      nor != header_get_noc(h2) ||
-      (0 == is_perm1 && 0 == is_perm2 && prime != header_get_prime(h2))) {
-    fprintf(stderr, "%s: unsuitable inputs %s and %s, terminating\n", name, m1, m2);
-    header_free(h1);
-    header_free(h2);
-    return cleanup(inp1, inp2, NULL);
+  nor = header_get_nor(headers[0]);
+  for (i = 0; i < argc; i++) {
+    if (nor != header_get_noc(headers[i]) ||
+        nor != header_get_nor(headers[i]) ||
+        (header_get_prime(headers[i]) != prime && header_get_prime(headers[i]) != 1)) {
+      fprintf(stderr, "%s: unsuitable input %s, terminating\n", name, args[i]);
+      return close_files(argc, files, headers);
+    }
   }
-  if (is_perm1) {
-    prime = header_get_prime(h2);
-  }
-  header_free(h1);
-  header_free(h2);
+  (void)close_files(argc, files, headers);
   id = new_id(tmp);
   summand = parse_plus(script, &rest, &scalar, prime, name);
-  if ((NULL != rest || 'I' == *summand) && both_perm) {
+  if ((NULL != rest || 'I' == *summand) && all_perm) {
     fprintf(stderr, "%s: cannot handle both generators as maps when adding, terminating\n", name);
-    header_free(h1);
-    header_free(h2);
-    return cleanup(inp1, inp2, NULL);
+    return 0;
   }
-  if (0 == both_perm && 0 == ident(prime, nor, nor, 1, id, name)) {
+  if (0 == all_perm && 0 == ident(prime, nor, nor, 1, id, name)) {
     fprintf(stderr, "%s: unable to create identity, terminating\n", name);
-    return cleanup(inp1, inp2, NULL);
+    return 0;
     /* Note, id not needed if no additions */
   }
-  if (0 == script_mul(m1, m2, id, &current, tmp, summand, name)) {
+  if (0 == script_mul(id, &current, tmp, summand, argc, args, name)) {
     fprintf(stderr, "%s: unable to create summand %s, terminating\n", name, summand);
-    return cleanup(inp1, inp2, NULL);
+    return 0;
   }
   if (1 != scalar) {
     new = new_id(tmp);
     if (0 == scale(current, new, scalar, name)) {
       fprintf(stderr, "%s: script scale of %s by %d failed, terminating\n", name, current, scalar);
-      return cleanup(inp1, inp2, NULL);
+      return 0;
     }
     current = new;
   }
@@ -222,20 +260,21 @@ int exec_script(const char *m1, const char *m2, const char *m3,
     const char *sum = new_id(tmp);
     script = rest;
     summand = parse_plus(script, &rest, &scalar, prime, name);
-    if (0 == script_mul(m1, m2, id, &new, tmp, summand, name)) {
-      fprintf(stderr, "%s: unable to create summand %s, terminating\n", name, summand);
-      return cleanup(inp1, inp2, NULL);
+    if (0 == script_mul(id, &new, tmp, summand, argc, args, name)) {
+      fprintf(stderr, "%s: unable to create summand '%s', terminating\n", name, summand);
+      return 0;
     }
     if (0 == scaled_add(new, current, sum, scalar, name)) {
       fprintf(stderr, "%s: unable to add %s and %s, terminating\n", name, current, new);
-      return cleanup(inp1, inp2, NULL);
+      return 0;
     }
     current = sum;
   }
-  if (0 == strcmp(m1, current) || 0 == strcmp(m2, current)) {
-    return scale(current, m3, 1, name);
-  } else {
-    rename(current, m3); /* Turn current summand into output */
+  for (i = 0; i < argc; i++) {
+    if (0 == strcmp(args[i], current)) {
+      return scale(current, out, 1, name);
+    }
   }
+  rename(current, out); /* Turn current summand into output */
   return 1;
 }
