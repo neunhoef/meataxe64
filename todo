@@ -3,8 +3,12 @@ Worry about return (NULL == s) code generation error
 Profile multiply (eg on 26750 for Co1) for different memory sizes
 Investigate better matrix multiplications
 Implement a verbosity level for all programs, with -v <n>. Add a standard parser to deal with this
-Reduce memory usage in ztsp for group generators
+Debug zsymsq failure on Co2 23 mod 3
+Put memory reduction stuff into memory.c
+Apply memory reduction to ztspf
 Fix zps to take less memory
+Improve zsb{,f} to take multiple generators
+Fix zsums use to handle zero elements
 Find a better algorithm for zsp memory. Investigate performance (1)
 Debug emu/zsl file corruption problem (2)
 Cleanup return vs exit (1)

@@ -161,3 +161,4 @@ skew seventh
 20020702 - Made split, base and new_irred_with_orders more robust
 20020702 - Made zdiff handle maps
 20020703 - Add zfln for find least nullity, and zlp for line permute
+20020703 - Add base_with_vector, base_from_vector, conjugate, find_best_nullity_with_orders

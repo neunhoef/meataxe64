@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: new_irred_with_orders,v 1.7 2002/07/02 16:16:16 jon Exp $
+# $Id: new_irred_with_orders,v 1.8 2002/07/03 12:11:46 jon Exp $
 #
 # Script to classify an irreducible representation
 #
@@ -66,20 +66,72 @@ fi
 #
 tmp=tmp${PPID}
 e=${tmp}.1
+name=${tmp}_${nor}
 script=`find_nullity_one_with_orders $a $b $e $o_a $o_b $memory`
 ret=$?
-if [ $ret -ne 0 ]; then
+if [ 0 -eq $ret ]; then
+  x=`base $e $a $b ${name} ${tmp}.0`
+  ret=$?
+  if [ $ret -ne 0 ]; then
+    echo base returns $ret, terminating
+    rm -f ${tmp}*
+    exit 1
+  fi
+elif [ 254 -eq $ret ]; then
+# Irreducible not absolutely irreducible
+  script=`find_best_nullity_with_orders $a $b $e $o_a $o_b $memory`
+# Find the nullspace
+  ok=0
+  while [ $ok -eq 0 ]; do
+    nullity=`zns $e ${tmp}.0 $memory 2>/dev/null`
+    ret=$?
+    if [ $ret -eq 0 ]; then
+      ok=1
+    elif [ $ret -eq 2 ]; then
+      let memory=`more_memory $memory 2>/dev/null`
+    else
+      rm -f ${tmp}*
+      exit 1
+    fi
+  done
+  if [ 0 -eq $nullity -o 1 -eq $nullity ]; then
+    echo "Unexpected result, nullity $nullity when expected > 1"
+    rm -f ${tmp}*
+    exit 1
+  fi
+# Pick two distinct elements in the span
+  zspan ${tmp}.0 ${tmp}.2 2
+  zsel ${tmp}.2 ${tmp}.2.0 0
+  zsel ${tmp}.2 ${tmp}.2.1 1
+# Produce both standard bases
+  for i in 0 1; do
+    base_from_vector ${tmp}.2.$i $a $b ${name}_sb_$i ${tmp}.3
+    ret=$?
+    if [ 0 -ne $ret ]; then
+      rm -f ${tmp}*
+      exit $ret
+    fi
+  done
+# Compare, if equal all ok, if not, fail
+  ok=0;
+  if zdiff ${name}_sb_0_1 ${name}_sb_1_1 1>/dev/null; then
+    if zdiff ${name}_sb_0_2 ${name}_sb_1_2 1>/dev/null; then
+      ok=1
+    fi
+  fi
+  if [ 0 -eq $ok ]; then
+    echo failed to produce a standard basis for $a
+#    rm -f ${tmp}*
+    exit 254
+  fi
+  for i in 1 2; do
+    mv ${name}_sb_0_$i ${name}_sb_$i
+    rm ${name}_sb_1_$i
+  done
+else
   echo $script
   rm -f ${tmp}.*
   exit $ret
-fi
-name=${tmp}_${nor}
-x=`base $e $a $b ${name} ${tmp}.0`
-ret=$?
-if [ $ret -ne 0 ]; then
-  echo base returns $ret, terminating
-  rm -f ${tmp}*
-  exit 1
 fi
 if [ ! -e irreds ]; then
   mkdir irreds
