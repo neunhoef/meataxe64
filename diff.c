@@ -1,5 +1,5 @@
 /*
- * $Id: diff.c,v 1.5 2002/06/28 08:39:16 jon Exp $
+ * $Id: diff.c,v 1.6 2002/07/02 11:05:46 jon Exp $
  *
  * Function to find the differences between two matrices
  *
@@ -13,6 +13,7 @@
 #include <errno.h>
 #include "endian.h"
 #include "header.h"
+#include "maps.h"
 #include "memory.h"
 #include "read.h"
 #include "utils.h"
@@ -39,18 +40,46 @@ int diff(const char *m1, const char *m2, const char *name)
     return 0;
   }
   prime = header_get_prime(h1);
-  if (1 == prime) {
-    fprintf(stderr, "%s: cannot handle maps, terminating\n", name);
-    fclose(inp1);
-    fclose(inp2);
-    header_free(h1);
-    header_free(h2);
-    return 0;
-  }
   nob = header_get_nob(h1);
   nor = header_get_nor(h1);
   noc = header_get_noc(h1);
   len = header_get_len(h1);
+  if (1 == prime) {
+    if (1 == header_get_prime(h2)) {
+      /* Pair of maps */
+      unsigned int *map1, *map2;
+      if (header_get_prime(h2) != prime ||
+        header_get_nob(h2) != nob ||
+          header_get_noc(h2) != noc ||
+          header_get_nor(h2) != nor) {
+        fprintf(stderr, "%s header mismatch between %s and %s, terminating\n", name, m1, m2);
+        fclose(inp1);
+        fclose(inp2);
+        header_free(h1);
+        header_free(h2);
+        return 0;
+      }
+      header_free(h1);
+      header_free(h2);
+      map1 = malloc_map(nor);
+      map2 = malloc_map(nor);
+      if (0 == read_map(inp1, nor, map1, name, m1) ||
+          0 == read_map(inp2, nor, map2, name, m2)) {
+        fclose(inp1);
+        fclose(inp2);
+        return 0;
+      }
+      fclose(inp1);
+      fclose(inp2);
+      if (0 != memcmp(map1, map2, nor * sizeof(unsigned int))) {
+        return 0;
+      } else {
+        return 1;
+      }
+    } else {
+      /* fall through to header mismatch case */
+    }
+  }
   if (header_get_prime(h2) != prime ||
       header_get_nob(h2) != nob ||
       header_get_noc(h2) != noc ||

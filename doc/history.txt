@@ -159,3 +159,4 @@ skew seventh
 20020630 - More efficiency improvements
 20020701 - New faster zvp, and some script improvements
 20020702 - Made split, base and new_irred_with_orders more robust
+20020702 - Made zdiff handle maps

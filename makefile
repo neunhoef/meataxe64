@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.62 2002/06/30 21:33:14 jon Exp $
+# $Id: makefile,v 1.63 2002/07/02 11:05:46 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -119,7 +119,7 @@ ZCONJ_MODULES=	conj elements endian header memory primes read utils write zconj
 ZCT_MODULES=	count ct elements endian header memory primes read utils
 ZCV_MODULES=	elements endian header ip primes read utils write
 ZDIAG_MODULES=	elements endian header memory primes read rows utils write zdiag
-ZDIFF_MODULES=	diff endian header memory primes read utils zdiff
+ZDIFF_MODULES=	diff elements endian header maps memory primes read rows utils write zdiff
 ZEX_MODULES=	elements endian exrows files header map memory primes read rows utils write zex
 ZEXPORT_MODULES=	elements endian header memory primes read rows utils write zexport
 ZFE_MODULES=	elements endian extend extend_matrix header memory primes read rows utils write zfe
