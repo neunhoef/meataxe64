@@ -1,5 +1,5 @@
 /*
- * $Id: tco.c,v 1.19 2004/05/06 22:46:20 jon Exp $
+ * $Id: tco.c,v 1.20 2004/06/05 22:04:17 jon Exp $
  *
  * Tensor condense one group element
  *
@@ -35,12 +35,13 @@ static void minor_tensor(unsigned int **expanded_rrows, unsigned int beta_i, uns
   unsigned int word = 0;
   unsigned int *expanded_rrow = expanded_rrows[beta_i + te_j];
   unsigned int *te_rowsr = te_rows[te_o_r];
-  unsigned int te_k, te_o_c;
+  unsigned int *expanded_lrow1 = expanded_lrow + dim_irr_j;
+  unsigned int lim = bits_in_unsigned_int - nob;
+  assert(bits_in_unsigned_int >= nob);
   row_init(te_rowsr, max_irr_len);
-  te_o_c = 0;
-  for (te_k = 0; te_k < dim_irr_j; te_k++) {
+  while (expanded_lrow < expanded_lrow1) {
     /* Columns of M */
-    unsigned int elt = expanded_lrow[te_k];
+    unsigned int elt = *expanded_lrow;
     if (0 != elt) {
       unsigned int *row = expanded_rrow + base_i; /* was rrows */
       unsigned int *row1;
@@ -53,7 +54,7 @@ static void minor_tensor(unsigned int **expanded_rrows, unsigned int beta_i, uns
         elt = *row;
         word |= elt << te_o_c_offset;
         te_o_c_offset += nob;
-        if (te_o_c_offset + nob > bits_in_unsigned_int) {
+        if (te_o_c_offset > lim) {
           te_o_c_offset = 0;
           te_rowsr[te_o_c_word] = word;
           te_o_c_word++;
@@ -63,14 +64,14 @@ static void minor_tensor(unsigned int **expanded_rrows, unsigned int beta_i, uns
       }
     } else {
       te_o_c_offset += nobj;
-      if (te_o_c_offset + nob > bits_in_unsigned_int) {
+      if (te_o_c_offset > lim) {
         te_rowsr[te_o_c_word] = word;
         te_o_c_word += te_o_c_offset / elts_per_word_nob;
         te_o_c_offset %= elts_per_word_nob;
         word = 0;
       }
     }
-    te_o_c += dim_irr_j;
+    expanded_lrow++;
   }
   te_rowsr[te_o_c_word] = word;
 }
@@ -186,6 +187,8 @@ static int cleanup(unsigned int *left_multiplicities, unsigned int *right_multip
   return 0;
 }
 
+#define GREASE_MAX 6
+
 int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const char *irr, const char *end,
               const char *left, const char *right, const char *out,
               int argc, const char *const *argv, const char *name)
@@ -202,6 +205,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
   unsigned int **expanded_lrows, **expanded_rrows;
   row_ops row_operations;
   grease_struct grease;
+  unsigned int powers[GREASE_MAX];
   assert(0 != s);
   assert(NULL != mults_l);
   assert(NULL != mults_r);
@@ -481,8 +485,8 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
                    nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, NULL,
                    NULL, NULL, p, q, h_p, h_q, s, h_o, NULL, rows, lrows, rrows);
   }
-  if (grease.level > 5) {
-    grease.level = 5; /* No point in greasing these little multiplications */
+  if (grease.level > GREASE_MAX) {
+    grease.level = GREASE_MAX; /* No point in greasing these little multiplications */
   }
   if (verbose) {
     printf("%s: using grease level %d\n", name, grease.level);
@@ -498,6 +502,11 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
     return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
                    nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, NULL,
                    NULL, NULL, p, q, h_p, h_q, s, h_o, NULL, rows, lrows, rrows);
+  }
+  j = 1;
+  for (i = 0; i < GREASE_MAX; i++) {
+    j *= prime;
+    powers[i] = j;
   }
   expanded_lrows = matrix_malloc(max_irr);
   expanded_rrows = matrix_malloc(nor_r);
@@ -604,16 +613,16 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
                     unsigned int te_o_c_word = 0;
                     unsigned int te_o_c_offset = 0;
                     unsigned int word = 0;
-                    unsigned int *expanded_rrow = expanded_rrows[beta_i + te_j];
+                    unsigned int *expanded_rrow = expanded_rrows[beta_i + te_j] + base_i;
                     unsigned int *te_rowsr = te_rows[te_o_r];
-                    unsigned int te_k, te_o_c;
+                    unsigned int *expanded_lrow1 = expanded_lrow;
+                    unsigned int *expanded_lrow2 = expanded_lrow + dim_irr_j;
                     row_init(te_rowsr, max_irr_len);
-                    te_o_c = 0;
-                    for (te_k = 0; te_k < dim_irr_j; te_k++) {
+                    while (expanded_lrow1 < expanded_lrow2) {
                       /* Columns of M */
-                      unsigned int elt = expanded_lrow[te_k];
+                      unsigned int elt = *expanded_lrow1;
                       if (0 != elt) {
-                        unsigned int *row = expanded_rrow + base_i; /* was rrows */
+                        unsigned int *row = expanded_rrow; /* was rrows */
                         unsigned int *row1;
                         if (1 != elt) {
                           (*row_operations.scaler)(row, te_row, dim_irr_j, elt);
@@ -641,7 +650,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
                           word = 0;
                         }
                       }
-                      te_o_c += dim_irr_j;
+                      expanded_lrow1++;
                     }
                     te_rowsr[te_o_c_word] = word;
 #endif
