@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.65 2002/07/05 12:43:41 jon Exp $
+# $Id: makefile,v 1.66 2002/07/07 12:10:42 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -47,6 +47,7 @@ ZJOIN_TARGET=	zjoin
 ZLP_TARGET=	zlp
 ZLV_TARGET=	zlv
 ZMSB_TARGET=	zmsb
+ZMSBF_TARGET=	zmsbf
 ZMSP_TARGET=	zmsp
 ZMSPF_TARGET=	zmspf
 ZMU_TARGET=	zmu
@@ -137,6 +138,7 @@ ZJOIN_MODULES=	elements endian header join  map_or_row maps memory primes read r
 ZLP_MODULES=	elements endian grease header maps matrix memory mul primes read rows vp utils write zlp
 ZLV_MODULES=	elements endian header lv matrix memory primes read rows ss_map utils write zlv
 ZMSB_MODULES=	clean elements endian grease header maps matrix memory msb mul primes read rows utils write zmsb
+ZMSBF_MODULES=	clean clean_file elements endian grease header maps matrix memory msbf mul primes read rows system utils write zmsbf
 ZMSP_MODULES=	clean elements endian grease header maps matrix memory msp mul primes read rows utils write zmsp
 ZMSPF_MODULES=	clean clean_file elements endian grease header maps matrix memory mspf mul primes read rows system utils write zmspf
 ZMU_MODULES=	elements endian grease header maps matrix memory mu mul primes read rows utils write
@@ -227,6 +229,7 @@ MODULES=	$(DTOU_MODULES) \
 	$(ZLP_MODULES) \
 	$(ZLV_MODULES) \
 	$(ZMSB_MODULES) \
+	$(ZMSBF_MODULES) \
 	$(ZMSP_MODULES) \
 	$(ZMSPF_MODULES) \
 	$(ZMU_MODULES) \
@@ -426,6 +429,9 @@ TARGET:=ZLV
 include targets.txt
 
 TARGET:=ZMSB
+include targets.txt
+
+TARGET:=ZMSBF
 include targets.txt
 
 TARGET:=ZMSP

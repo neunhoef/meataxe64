@@ -1,5 +1,5 @@
 /*
- * $Id: sb.c,v 1.9 2002/07/05 10:46:23 jon Exp $
+ * $Id: sb.c,v 1.10 2002/07/07 12:10:42 jon Exp $
  *
  * Function to spin some vectors under two generators to obtain a standard base
  *
@@ -165,6 +165,7 @@ unsigned int spin(const char *in, const char *out, const char *a,
   if (0 == grease_allocate(prime, len, &grease, 900)){
     fprintf(stderr, "%s: unable to allocate grease, terminating\n", name);
     cleanup(NULL, f_a, f_b);
+    exit(1);
   }
   while (nor < noc && (gen_a.nor < nor || gen_b.nor < nor)) {
     unsigned int rows_to_do = nor - gen->nor;

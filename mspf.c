@@ -1,5 +1,5 @@
 /*
- * $Id: mspf.c,v 1.5 2002/07/04 22:54:18 jon Exp $
+ * $Id: mspf.c,v 1.6 2002/07/07 12:10:42 jon Exp $
  *
  * Function to spin some vectors under multiple generators
  * using intermediate files in a temporary directory.
@@ -216,6 +216,7 @@ unsigned int spin(const char *in, const char *out, const char *dir,
   if (0 == grease_allocate(prime, len, &grease, 900)){
     fprintf(stderr, "%s: unable to allocate grease, terminating\n", name);
     cleanup_all(NULL, argc, files, echelised, name_echelised);
+    exit(1);
   }
   while (nor < noc && nor < noc && unfinished(gens, argc, nor)) {
     unsigned int rows_to_do = nor - gen->nor;

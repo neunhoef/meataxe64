@@ -167,3 +167,4 @@ skew seventh
 20020705 - Remove dependent vectors restrictions in ztsp, zmsp, zsp
 20020705 - Add zmsb and convert base_with_vector to use it
 20020705 - Add new scripts for multiple generator standard base work
+20020707 - Add zmsbf

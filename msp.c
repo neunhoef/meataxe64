@@ -1,5 +1,5 @@
 /*
- * $Id: msp.c,v 1.4 2002/07/05 09:41:32 jon Exp $
+ * $Id: msp.c,v 1.5 2002/07/07 12:10:42 jon Exp $
  *
  * Function to spin some vectors under multiple generators
  *
@@ -177,6 +177,7 @@ unsigned int spin(const char *in, const char *out,
   if (0 == grease_allocate(prime, len, &grease, 900)){
     fprintf(stderr, "%s: unable to allocate grease, terminating\n", name);
     cleanup(inp, argc, files);
+    exit(1);
   }
   while (nor < max_rows && nor < noc && unfinished(gens, argc, nor)) {
     unsigned int rows_to_do = max_rows - nor;

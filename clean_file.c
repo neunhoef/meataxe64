@@ -1,5 +1,5 @@
 /*
- * $Id: clean_file.c,v 1.2 2002/06/28 08:39:16 jon Exp $
+ * $Id: clean_file.c,v 1.3 2002/07/07 12:10:42 jon Exp $
  *
  * Cleaning and echilisation, when the already clean vectors
  * are in a file which is to be updated
@@ -30,7 +30,7 @@ int clean_file(FILE *clean_vectors, unsigned int *nor,
                unsigned int len, unsigned int nob,
                unsigned int start, const char *name)
 { 
-  unsigned int i, j, my_nor, d;
+  unsigned int i, j = 0, my_nor, d;
   int *internal_new_map;
   long long ptr;
   assert(NULL != clean_vectors);
@@ -65,53 +65,54 @@ int clean_file(FILE *clean_vectors, unsigned int *nor,
   }
   echelise(rows1, nor1, &d, &internal_new_map, NULL, 0,
            grease_level, prime, len, nob, start, 0, 0, 1, name);
-  if (0 != my_nor) {
-    ptr = 0; /* where we are in echelised */
-    for (i = 0; i < my_nor; i += nor2) {
-      unsigned int stride2 = (nor2 + i > my_nor) ? my_nor - i : nor2;
-      /* Read stride2 rows from echelised at offset ptr */
-      fseeko64(clean_vectors, ptr, SEEK_SET);
-      errno = 0;
-      if (0 == endian_read_matrix(clean_vectors, rows2, len, stride2)) {
-        if ( 0 != errno) {
-          perror(name);
+  if (0 != d) {
+    if (0 != my_nor) {
+      ptr = 0; /* where we are in echelised */
+      for (i = 0; i < my_nor; i += nor2) {
+        unsigned int stride2 = (nor2 + i > my_nor) ? my_nor - i : nor2;
+        /* Read stride2 rows from echelised at offset ptr */
+        fseeko64(clean_vectors, ptr, SEEK_SET);
+        errno = 0;
+        if (0 == endian_read_matrix(clean_vectors, rows2, len, stride2)) {
+          if ( 0 != errno) {
+            perror(name);
+          }
+          fprintf(stderr, "%s: cannot read temporary matrix, terminating\n", name);
+          return 0;
         }
-        fprintf(stderr, "%s: cannot read temporary matrix, terminating\n", name);
-        return 0;
-      }
-      /* Clean the rows we read with the newly made rows */
-      clean(rows1, nor1, rows2, stride2, internal_new_map, NULL, NULL, 0,
-            grease_level, prime, len, nob, start, 0, 0, name);
-      /* Write back the cleaned version to echelised */
-      fseeko64(clean_vectors, ptr, SEEK_SET);
-      errno = 0;
-      if (0 == endian_write_matrix(clean_vectors, rows2, len, stride2)) {
-        if ( 0 != errno) {
-          perror(name);
+        /* Clean the rows we read with the newly made rows */
+        clean(rows1, nor1, rows2, stride2, internal_new_map, NULL, NULL, 0,
+              grease_level, prime, len, nob, start, 0, 0, name);
+        /* Write back the cleaned version to echelised */
+        fseeko64(clean_vectors, ptr, SEEK_SET);
+        errno = 0;
+        if (0 == endian_write_matrix(clean_vectors, rows2, len, stride2)) {
+          if ( 0 != errno) {
+            perror(name);
+          }
+          fprintf(stderr, "%s: cannot write temporary matrix, terminating\n", name);
+          return 0;
         }
-        fprintf(stderr, "%s: cannot write temporary matrix, terminating\n", name);
-        return 0;
+        ptr = ftello64(clean_vectors);
       }
-      ptr = ftello64(clean_vectors);
     }
-  }
-  j = 0;
-  /* We put the new rows onto the end */
-  fseeko64(clean_vectors, 0, SEEK_END);
-  for (i = 0; i < nor1; i++) {
-    if (internal_new_map[i] >= 0) {
-      /* Got a useful row */
-      map[my_nor + j] = internal_new_map[i];
-      errno = 0;
-      if (0 == endian_write_row(clean_vectors, rows1[i], len)) {
-        if ( 0 != errno) {
-          perror(name);
+    /* We put the new rows onto the end */
+    fseeko64(clean_vectors, 0, SEEK_END);
+    for (i = 0; i < nor1; i++) {
+      if (internal_new_map[i] >= 0) {
+        /* Got a useful row */
+        map[my_nor + j] = internal_new_map[i];
+        errno = 0;
+        if (0 == endian_write_row(clean_vectors, rows1[i], len)) {
+          if ( 0 != errno) {
+            perror(name);
+          }
+          fprintf(stderr, "%s: failed to write to temporary matrix, terminating\n",
+                  name);
+          return 0;
         }
-        fprintf(stderr, "%s: failed to write to temporary matrix, terminating\n",
-                name);
-        return 0;
+        j++;
       }
-      j++;
     }
   }
   if (0 != record) {
