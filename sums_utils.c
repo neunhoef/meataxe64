@@ -1,5 +1,5 @@
 /*
- * $Id: sums_utils.c,v 1.2 2003/08/10 14:30:25 jon Exp $
+ * $Id: sums_utils.c,v 1.3 2004/11/06 22:32:08 jon Exp $
  *
  * Utilities for sums, sumf etc
  *
@@ -10,16 +10,63 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <limits.h>
 #include "add.h"
 #include "utils.h"
 
+char *make_elt_script(unsigned int prime_power, unsigned int cur_power,
+                      unsigned int r, unsigned int l, unsigned int i,
+                      unsigned int nod, const char **words)
+{
+  char *initial, *name;
+  assert(r < prime_power);
+  assert(l < cur_power);
+  assert(NULL != words);
+  /* First see if a recursion is required */
+  if (prime_power <= cur_power) {
+    /* Need to recurse */
+    unsigned int s, m, n;
+    n = cur_power / prime_power;
+    s = l / n;
+    m = l % n;
+    initial = make_elt_script(prime_power, n, s, m, i - 1, nod, words);
+  } else {
+    /* We're starting with I+gen */
+    assert(1 == cur_power);
+    assert(0 == l);
+    assert(1 == i);
+    initial = my_malloc(2 /* I */);
+    sprintf(initial, "%s", "I");
+  }
+  /* Now add in the current word */
+  name = my_malloc(strlen(initial) + strlen(words[i]) + nod + 2 /* + and 0 */);
+  if (0 == r) {
+    sprintf(name, "%s", initial);
+  } else {
+    sprintf(name, "%s+%d%s", initial, r, words[i]);
+  }
+  free(initial);
+  return name;
+}
+
+char *make_elt_name(const char *base, unsigned int num)
+{
+  unsigned int len = strlen(base);
+  unsigned int digits = ((CHAR_BIT) * sizeof(unsigned int) + 2) / 3;
+  /* Enought digits to print in decimal */
+  char *name = my_malloc(len + 1 + 3 + digits);
+  sprintf(name, "%s.e.%d", base, num);
+  return name;
+}
+
 int make_element(unsigned int pos, unsigned int prime, unsigned int prime_power,
-                 unsigned int i, const char **names, const char **elts, const char **elt_names , const char *name)
+                 unsigned int i, const char **names, const char *base, const char *name)
 {
   assert(pos < prime_power);
   /* prime_power = prime ** (i - 1) */
   if (0 != pos) {
     unsigned int l, r;
+    char *elt_pos, *elt_l;
     if (pos >= prime) {
       assert(prime_power >= prime * prime);
       assert(0 == prime_power % prime);
@@ -27,7 +74,7 @@ int make_element(unsigned int pos, unsigned int prime, unsigned int prime_power,
       /* Make the earlier element we need */
       l = pos % prime_power;
       i--;
-      if (0 == make_element(l, prime, prime_power, i, names, elts, elt_names, name)) {
+      if (0 == make_element(l, prime, prime_power, i, names, base, name)) {
         return 0;
       }
       if (pos >= prime_power) {
@@ -40,13 +87,19 @@ int make_element(unsigned int pos, unsigned int prime, unsigned int prime_power,
       i = 1;
       r = pos;
     }
-    if (0 == scaled_add(names[i], elts[l], elts[pos], r, name)) {
+    elt_l = make_elt_name(base, l);
+    elt_pos = make_elt_name(base, pos);
+    if (0 == scaled_add(names[i], elt_l, elt_pos, r, name)) {
+      free(elt_l);
+      free(elt_pos);
       return 0;
     }
     /* Delete any earlier element we made */
     if (pos >= prime && 0 != l) {
-      (void)remove(elts[l]);
+      (void)remove(elt_l);
     }
+    free(elt_l);
+    free(elt_pos);
   }
   return 1;
 }

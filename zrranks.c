@@ -1,5 +1,5 @@
 /*
- * $Id: zrranks.c,v 1.10 2004/01/04 21:22:50 jon Exp $
+ * $Id: zrranks.c,v 1.11 2004/11/06 22:32:08 jon Exp $
  *
  * Compute restricted sums in the group algebra in two matrices finding all of given nullity
  *
@@ -19,7 +19,7 @@ static unsigned int nullity = 0;
 
 static void rranks_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s %s <out_file_stem> <n> <nullity> <subfield order> <in_file a> <order a> <in_file b> <order b>\n", name, name, parse_usage());
+  fprintf(stderr, "%s: usage: %s %s <out_file_stem> <n> <nullity> <subfield order> <in_file a> <order a> [<other elements and orders>]\n", name, name, parse_usage());
 }
 
 static int acceptor(unsigned int rank, unsigned int nor, const char *file, const char *form)
