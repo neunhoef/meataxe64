@@ -1,5 +1,5 @@
 /*
- * $Id: rows.c,v 1.26 2004/04/28 21:55:30 jon Exp $
+ * $Id: rows.c,v 1.27 2004/06/05 21:58:53 jon Exp $
  *
  * Row manipulation for meataxe
  *
@@ -107,6 +107,7 @@ static void row_inc_2(const unsigned int *row1,
 }
 
 static unsigned char prod_table_2[0x10000];
+static int prod_table_2_init = 0;
 
 static unsigned int row_product_2(const unsigned int *row1, const unsigned int *row2, unsigned int len)
 {
@@ -1036,14 +1037,17 @@ int rows_init(unsigned int prime, row_opsp ops)
     ops->scaler = NULL; /* Should never be called */
     ops->scaler_in_place = NULL; /* Should never be called */
     ops->product = &row_product_2;
-    for (i = 0; i < 0x10000; i++) {
-      unsigned char prod = 0;
-      unsigned int j = i;
-      while (0 != j) {
-        prod ^= 1;
-        j &= (j - 1);
+    if (0 == prod_table_2_init) {
+      for (i = 0; i < 0x10000; i++) {
+        unsigned char prod = 0;
+        unsigned int j = i;
+        while (0 != j) {
+          prod ^= 1;
+          j &= (j - 1);
+        }
+        prod_table_2[i] = prod;
       }
-      prod_table_2[i] = prod;
+      prod_table_2_init = 1;
     }
     break;
   case 3:
