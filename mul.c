@@ -1,5 +1,5 @@
 /*
- * $Id: mul.c,v 1.42 2004/06/12 16:54:27 jon Exp $
+ * $Id: mul.c,v 1.43 2004/06/12 17:17:26 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
@@ -532,12 +532,14 @@ int mul_from_store(unsigned int **rows1, unsigned int **rows3,
 int mul_in_store(unsigned int **rows1, unsigned int **rows2, unsigned int **rows3,
                  unsigned int noc, unsigned int len,
                  unsigned int nob, unsigned int nor, unsigned int prime,
-                 int preserve_rows,
-                 grease grease)
+                 int preserve_rows, grease grease)
 {
   unsigned int i, j, l;
   unsigned int level;
   unsigned int **grease_rows = NULL;
+  unsigned int word_offset = 0, bit_offset = 0;
+  unsigned int elts_per_word = bits_in_unsigned_int / nob;
+  unsigned int bits_per_word = elts_per_word * nob;
   assert(NULL != rows1);
   assert(NULL != rows2);
   assert(NULL != rows3);
@@ -560,8 +562,7 @@ int mul_in_store(unsigned int **rows1, unsigned int **rows2, unsigned int **rows
   /* We will use our element instead */
   for (i = 0; i < noc; i += level) {
     unsigned int size = (level + i <= noc) ? level : noc - i;
-    unsigned int width = size * nob;
-    unsigned int word_offset, bit_offset, mask;
+    unsigned int width = size * nob, mask = (1 << width) - 1;
     int in_word;
     unsigned int shift = 0;
     unsigned int **rows = grease->rows - 1;
@@ -571,10 +572,9 @@ int mul_in_store(unsigned int **rows1, unsigned int **rows2, unsigned int **rows
       rows[l] = rows2[i + j];
       l *= prime;
     }
-    element_access_init(nob, i, size, &word_offset, &bit_offset, &mask);
     in_word = bit_offset + width <= bits_in_unsigned_int;
     if (0 == in_word) {
-      shift = ((bits_in_unsigned_int - bit_offset) / nob) * nob;
+      shift = bits_per_word - bit_offset;
     }
     grease_init_rows(grease, prime);
     for (j = 0; j < nor; j++) {
@@ -586,6 +586,11 @@ int mul_in_store(unsigned int **rows1, unsigned int **rows2, unsigned int **rows
       if (0 != elt) {
         grease_row_inc(grease, len, rows3[j], contract(elt, prime, nob), 0);
       }
+    }
+    bit_offset += width;
+    if (bit_offset >= bits_per_word) {
+      word_offset++;
+      bit_offset = 0;
     }
   }
   if (preserve_rows) {

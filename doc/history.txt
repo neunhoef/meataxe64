@@ -308,3 +308,4 @@ skew seventh
 20040606 - Remove use of maps from mul_in_store
 20040608 - Replace memset in time critical places. Stop copying grease rows unnecessarily
 20040612 - Add short row operations
+20040612 - Remmove element_access_init from mul_in_store
