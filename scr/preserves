@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: preserves,v 1.9 2003/01/14 12:04:54 jon Exp $
+# $Id: preserves,v 1.10 2003/03/17 22:23:17 jon Exp $
 #
 # Script to check if a matrix preservers a quadratic form
 #
@@ -121,13 +121,5 @@ if [ 0 -eq $f ]; then
 fi
 zdiffd -m $memory ${tmp}.2 $f
 ret=$?
-if [ 0 -eq $ret ]; then
-  rm -f ${tmp}.*
-  exit 0
-elif [ 255 -eq $ret ]; then
-  rm -f ${tmp}.*
-  exit 255
-else
-  rm -f ${tmp}.*
-  exit $ret
-fi
+rm -f ${tmp}.*
+exit $ret

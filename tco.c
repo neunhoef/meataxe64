@@ -1,5 +1,5 @@
 /*
- * $Id: tco.c,v 1.7 2003/02/24 18:02:43 jon Exp $
+ * $Id: tco.c,v 1.8 2003/03/17 22:23:17 jon Exp $
  *
  * Tensor condense one group element
  *
@@ -356,7 +356,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
   fclose(leftp);
   fclose(rightp);
   max_rows = memory_rows(len, 900 - extent_l - extent_r - extent_te - extent_end - extent_q);
-  if (max_rows < nor) {
+  if (max_rows < max_end) {
     fprintf(stderr, "%s: cannot allocate enough rows for output, terminating\n", name);
     (void)cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
                   nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, NULL, NULL,
@@ -368,8 +368,8 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
                    nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, NULL, NULL,
                    NULL, NULL, p, q, h_p, h_q, s, h_o, NULL, NULL, lrows, rrows);
   }
-  rows = matrix_malloc(nor);
-  for (i = 0; i < nor; i++) {
+  rows = matrix_malloc(max_end);
+  for (i = 0; i < max_end; i++) {
     rows[i] = memory_pointer_offset(extent_l + extent_r + extent_te + extent_end + extent_q, i, len);
   }
   te_rows = matrix_malloc(max_irr * max_irr);
@@ -453,7 +453,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
       for (beta = 0; beta < right_multiplicities[i]; beta++) {
         /* Row loop over multiplicity of Si* */
         for (j = 0; j < dim_end[i]; j++) {
-          row_init(rows[o_r + j], len);
+          row_init(rows[j], len);
         }
         o_c = 0;
         m_c = 0;
@@ -550,7 +550,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
                 for (l = 0; l < dim_end[j]; l++) {
                   unsigned int elt = get_element_from_row_with_params(nob, l, mask, elts_per_word, te_rows[k]);
                   if (0 != elt) {
-                    put_element_to_row(nob, o_c + l, rows[o_r + k], elt);
+                    put_element_to_row(nob, o_c + l, rows[k], elt);
                   }
                 }
               }
@@ -559,6 +559,19 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
           }
           m_c += left_multiplicities[j] * dim_irr_j;
           n_c += right_multiplicities[j] * dim_irr_j;
+        }
+        /* Now write out the rows we've just made */
+        if (0 == endian_write_matrix(outp, rows, len, dim_end[i])) {
+          matrix_free(te_rows);
+          matrix_free(end_rows);
+          matrix_free(q_rows);
+          grease_free(&grease);
+          free_expanded(expanded_lrows, nor_l);
+          free_expanded(expanded_rrows, nor_r);
+          free(te_row);
+          return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
+                         nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, NULL, NULL,
+                         NULL, NULL, p, q, h_p, h_q, s, h_o, outp, rows, lrows, rrows);
         }
         o_r += dim_end[i]; /* Increment output row index */
       }
@@ -573,11 +586,6 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
   free_expanded(expanded_lrows, nor_l);
   free_expanded(expanded_rrows, nor_r);
   free(te_row);
-  if (0 == endian_write_matrix(outp, rows, len, nor)) {
-    return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
-                   nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, NULL, NULL,
-                   NULL, NULL, p, q, h_p, h_q, s, h_o, outp, rows, lrows, rrows);
-  }
   (void)cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
                 nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, NULL, NULL,
                 NULL, NULL, p, q, h_p, h_q, s, h_o, outp, rows, lrows, rrows);
