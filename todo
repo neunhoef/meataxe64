@@ -1,8 +1,7 @@
 Worry about isspace failure (can't detect \n) (still occurs on RH 7.2) ctype is buggered
 Worry about return (NULL == s) code generation error
-Fix uses of zscript in group restriction scripts
-Documentation changes for zrand, ztco, ztcv, ztrecover
-Documentation changes for sym_basis, proj_base, sub_quot
+Documentation changes for zrand, ztrecover
+Documentation changes for proj_base, sub_quot
 Consider putting memory size into argument parser
 Write span_and_spin for spins on large nullspaces
 Make zsums and friends distinguish find failure from errors
@@ -10,7 +9,8 @@ Fix find_nullity_one and friends to use better codes from zsums and friends
 Fix sumsf argument order and quantity
 Profile multiply (eg on 26750 for Co1) for different memory sizes
 Profile zns on 3584.e.3 for McL for different memory sizes. Think about grease strategy.
-Think about restricting the back echelising in rnf and nsf
+Think about restricting the back echelising in rnf and nsf. Profile zrnf and zrn in best cases
+Look into intermediate file version of zrsums
 Think about Sn and symmetrized powers
 Optimise monst by reversing bit order
 Investigate better matrix multiplications

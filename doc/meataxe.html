@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.21 2002/09/12 11:47:28 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.22 2002/09/17 20:35:30 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -337,6 +337,8 @@ Output on stderr is error diagnostic information.
 <li><a href="#zsums">zsums</a></li>
 <li><a href="#zsumsf">zsumsf</a></li>
 <li><a href="#zsymsq">zsymsq</a></li>
+<li><a href="#ztco">ztco</a></li>
+<li><a href="#ztcv">ztcv</a></li>
 <li><a href="#zte">zte</a></li>
 <li><a href="#ztmu">ztmu</a></li>
 <li><a href="#ztr">ztr</a></li>
@@ -3657,6 +3659,137 @@ isomorphic to the input under the Frobenius square map. In other
 characteristics, it is a direct complement to the skew square.
 </li>
 <li>
+<h3><a name="ztco">ztco</a></h3>
+Purpose: Tensor condense
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Number of irreducibles of
+condensation subgroup</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Multiplicities of tensor parameter
+1</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>Multiplicities of tensor parameter
+2</td>
+</tr>
+<tr>
+<td valign=top>4</td><td valign=top>File of irreducible dimensions for
+condensation subgroup</td>
+</tr>
+<tr>
+<td valign=top>5</td><td valign=top>File of endomorphism ring
+dimensions for condensation subgroup</td>
+</tr>
+<tr>
+<td valign=top>6</td><td valign=top>Memory</td>
+</tr>
+<tr>
+<td valign=top>7</td><td valign=top>Tensor parameter 1</td>
+</tr>
+<tr>
+<td valign=top>8</td><td valign=top>Tensor parameter 2</td>
+</tr>
+<tr>
+<td valign=top>9</td><td valign=top>Output</td>
+</tr>
+<tr>
+<td valign=top>10</td><td valign=top>Endomorphism ring basis for first
+irreducible</td>
+</tr>
+<tr>
+<td valign=top>11</td><td valign=top>Projection matrix for first
+irreducible</td>
+</tr>
+<tr>
+<td valign=top>12-</td><td valign=top>Further bases and projections</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>None</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient workspace</td>
+</tr>
+</table>
+Commentary: This implements the direct tensor condensation algorithm,
+as described in Lux and Wiegelmann - Condensing Tensor Product
+Modules, to which the user is referred for a fuller description of
+condensation in general and tensor condensation in particular. There
+are three other parts to the whole tensor condensation system, an
+uncondense program <a href="#ztcv">ztcv</a>, a symmetry basis script
+<a href="#sym_basis">sym_basis</a> and a small script <a
+href="#qp">qp</a> to generate the basis and projection matrices.
+</li>
+<li>
+<h3><a name="ztcv">ztcv</a></h3>
+Purpose: Tensor uncondense
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Number of irreducibles of
+condensation subgroup</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Multiplicities of tensor parameter
+1</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>Multiplicities of tensor parameter
+2</td>
+</tr>
+<tr>
+<td valign=top>4</td><td valign=top>Memory</td>
+</tr>
+<tr>
+<td valign=top>5</td><td valign=top>Input (condensed) rows</td>
+</tr>
+<tr>
+<td valign=top>6</td><td valign=top>Output (uncondensed) rows</td>
+</tr>
+<tr>
+<td valign=top>7</td><td valign=top>Endomorphism ring basis for first
+irreducible</td>
+</tr>
+<tr>
+<td valign=top>8-</td><td valign=top>Further bases</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>None</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient workspace</td>
+</tr>
+</table>
+Commentary: This is the tensor uncondense section of the tensor
+condensation system. It generates rows in the full (uncondensed)
+space, with the same basis element ordering as is used by tensor
+product.
+</li>
+<li>
 <h3><a name="zte">zte</a></h3>
 Purpose: Tensor product
 <table>
@@ -4146,6 +4279,7 @@ dimension increases.
 <li><a href="#split_all_sub">split_all_sub</a></li>
 <li><a href="#split_with_element">split_with_element</a></li>
 <li><a href="#split_with_subspace">split_with_subspace</a></li>
+<li><a href="#sym_basis">sym_basis</a></li>
 <li><a href="#tensor_split_with_subspace">tensor_split_with_subspace</a></li>
 <li><a href="#tspin_vectors">tspin_vectors</a></li>
 <li><a href="#two">two</a></li>
@@ -7053,6 +7187,70 @@ representation for parameter 1</td>
 Commentary: This is really just a script to wrap up the relevant use
 of <a href="#zmu">zmu</a>, <a href="#zss">zss</a> and <a
 href="#zqs">zqs</a> for the same parameters.
+</li>
+<li>
+<h3><a name="sym_basis">sym_basis</a></h3>
+Purpose: Produce a symmetry basis with respect to a p'-subgroup
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>A file containing the names of the
+irreducibles, in the required order</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Memory</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>Output basis</td>
+</tr>
+<tr>
+<td valign=top>4</td><td valign=top>Output multiplicities</td>
+</tr>
+<tr>
+<td valign=top>5</td><td valign=top>Dualise the order (this parameter
+not yet implemented)</td>
+</tr>
+<tr>
+<td valign=top>6</td><td valign=top>Script to produce the gamma
+operator for a given irreducible and module</td>
+</tr>
+<tr>
+<td valign=top>7</td><td valign=top>First generator of condensation subgroup</td>
+</tr>
+<tr>
+<td valign=top>8-</td><td valign=top>Other generators</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>Error messages</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient memory for workspace</td>
+</tr>
+</table>
+Commentary: This script produces a symmetry basis for a given
+representation, as defined in Lux and Wiegelmann. The generators given
+generate the condensation subgroup, and the output is a basis by which
+the full group generators can be conjugated to give them relative to
+the symmetry basis, plus the file of multiplicities required by <a
+href="#ztco">ztco</a>. The dualise parameter is not implemented as its
+effect can be achieved by using the dual ordering of the irreducibles
+in parameter 1. The gamma operator script takes five or more
+parameters, specifying the generator count, the stem for the
+irreducible, the memory to be used, the output, and the generators in
+the representation for which a symmetry basis is being produced. Such
+a script is relatively easy to write when the condensation subgroup is
+a non-abelian q.p group (eg 11.5).
 </li>
 <li>
 <h3><a name="tensor_split_with_subspace">tensor_split_with_subspace</a></h3>
