@@ -1,5 +1,5 @@
 /*
- * $Id: script.c,v 1.7 2002/09/10 17:10:50 jon Exp $
+ * $Id: script.c,v 1.8 2002/11/14 22:44:39 jon Exp $
  *
  * Function to compute a script in two generators
  *
@@ -79,7 +79,7 @@ static const char *parse_plus(const char *script, const char **rest, unsigned in
     unsigned int val = strtoul(res, &rest, 0);
     if (val >= prime || 0 == val) {
       fprintf(stderr, "%s: script scalar %d exceeds field order %d or is zero, terminating\n", name, val, prime);
-      return 0;
+      return NULL;
     }
     *scalar = val;
     res = rest;
@@ -235,6 +235,9 @@ int exec_script(const char *out, const char *tmp, const char *script,
   (void)close_files(argc, files, headers);
   id = new_id(tmp);
   summand = parse_plus(script, &rest, &scalar, prime, name);
+  if (NULL == summand) {
+    return 0;
+  }
   if ((NULL != rest || 'I' == *summand) && all_perm) {
     fprintf(stderr, "%s: cannot handle both generators as maps when adding, terminating\n", name);
     return 0;
@@ -260,6 +263,9 @@ int exec_script(const char *out, const char *tmp, const char *script,
     const char *sum = new_id(tmp);
     script = rest;
     summand = parse_plus(script, &rest, &scalar, prime, name);
+    if (NULL == summand) {
+      return 0;
+    }
     if (0 == script_mul(id, &new, tmp, summand, argc, args, name)) {
       fprintf(stderr, "%s: unable to create summand '%s', terminating\n", name, summand);
       return 0;
