@@ -219,3 +219,4 @@ skew seventh
 20021015 - GF3 and GF5 versions of inner product
 20021015 - Orthogonal group computation for all characteristics as part of indicator calculation
 20021018 - Fix bug in real_indicate. Minor improvements to sign calculation
+20021027 - Added span.{c,h} and used it in zspan.c

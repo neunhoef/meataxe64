@@ -1,5 +1,5 @@
 /*
- * $Id: zspan.c,v 1.9 2002/07/09 09:08:12 jon Exp $
+ * $Id: zspan.c,v 1.10 2002/10/27 11:54:26 jon Exp $
  *
  * Compute the span of a matrix
  *
@@ -16,6 +16,7 @@
 #include "parse.h"
 #include "read.h"
 #include "rows.h"
+#include "span.h"
 #include "utils.h"
 #include "write.h"
 
@@ -32,7 +33,7 @@ int main(int argc, const char * const argv[])
   const char *out;
   FILE *inp;
   FILE *outp;
-  unsigned int prime, nob, noc, nor, rows, len, power = 1, index = 0, sum = 1;
+  unsigned int prime, nob, noc, nor, rows, len;
   unsigned int i, vectors;
   const header *h_in, *h_out;
   unsigned int **mat, *row, *scalars;
@@ -103,14 +104,8 @@ int main(int argc, const char * const argv[])
   memset(scalars, 0, vectors * sizeof(unsigned int));
   for (i = 0; i < rows; i++) {
     unsigned int j;
+    span(vectors, scalars, prime, &j);
     row_init(row, len);
-    if (i >= sum) {
-      power *= prime;
-      sum += power;
-      index++;
-      memset(scalars, 0, vectors * sizeof(unsigned int));
-    }
-    scalars[index] = 1;
     for (j = 0; j < vectors; j++) {
       if (0 != scalars[j]) {
         if (1 != scalars[j]) {
@@ -127,15 +122,6 @@ int main(int argc, const char * const argv[])
       }
       fprintf(stderr, "%s: failed to write row %d to %s, terminating\n", name, i, out);
       exit(1);
-    }
-    for (j = 0; j < index; j++) {
-      if (scalars[j] + 1 < prime) {
-        scalars[j]++;
-        break;
-      } else {
-        scalars[j] = 0;
-        /* We'll increment the next one */
-      }
     }
   }
   fclose(inp);
