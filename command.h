@@ -4,10 +4,12 @@
  *
  */
 
-#ifndef _command_h
-#define _command_h
+#ifndef included__command
+#define included__command
 
 #include<stdio.h>
+
+#define MAX_LINE 100000
 
 /* Command specifiers for potential remote operations */
 typedef enum commands
@@ -100,5 +102,11 @@ extern job get_job(void);
 extern t_uid get_tmp_id(void);
 
 extern void copy_rest(FILE *new, FILE *old);
+
+extern int get_task_line(char *line, FILE *input);
+
+extern unsigned int skip_whitespace(unsigned int i, const char *chars);
+
+extern unsigned int skip_non_white(unsigned int i, const char *chars);
 
 #endif

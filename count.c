@@ -1,5 +1,5 @@
 /*
- * $Id: count.c,v 1.1 2001/10/06 23:33:12 jon Exp $
+ * $Id: count.c,v 1.2 2001/10/07 18:02:56 jon Exp $
  *
  * Function to count the non-zero elements in a matrix
  *
@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 #include "elements.h"
 #include "endian.h"
 #include "header.h"
@@ -23,6 +24,7 @@ unsigned int count(const char *matrix, const char *name)
   unsigned total = 0;
   unsigned int *row;
 
+  assert(NULL != matrix);
   endian_init();
   memory_init(name, 0);
   input = fopen(matrix, "rb");

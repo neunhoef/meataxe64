@@ -1,5 +1,5 @@
 /*
- * $Id: map.c,v 1.1 2001/10/03 00:01:42 jon Exp $
+ * $Id: map.c,v 1.2 2001/10/07 18:02:56 jon Exp $
  *
  * Handle maps for exploded matrices
  *
@@ -26,7 +26,7 @@ void input_map(const char *name, const char *dir, unsigned int *cols,
   m = pathname(dir, "map");
   input = fopen(m, "rb");
   if (NULL == input) {
-    fprintf(stderr, "%s: cannot open input map %s", name, m);
+    fprintf(stderr, "%s: cannot open input map %s\n", name, m);
     exit(1);
   }
   row = getin(input, 6);
@@ -63,7 +63,7 @@ void output_map(const char *name, const char *dir, unsigned int cols,
   m = pathname(dir, "map");
   output = fopen(m, "wb");
   if (output == NULL) {
-    fprintf(stderr, "%s: cannot open output map %s", name, m);
+    fprintf(stderr, "%s: cannot open output map %s\n", name, m);
     exit(1);
   }
   fprintf(output, "%6u%6u\n", rows, cols);

@@ -1,5 +1,5 @@
 /*
- * $Id: eim.c,v 1.1 2001/10/06 23:33:12 jon Exp $
+ * $Id: eim.c,v 1.2 2001/10/07 18:02:56 jon Exp $
  *
  * implode a matrix (ie glue exploded matrices together)
  *
@@ -35,7 +35,7 @@ static void fail(FILE **inputs, FILE *output, unsigned int cols)
   exit(1);
 }
 
-int main(int argc,  char **argv)
+int main(int argc,  const char *const argv[])
 {
   FILE *input, *output;
   FILE **inputs;
@@ -54,7 +54,7 @@ int main(int argc,  char **argv)
   }
   memory_init(name, 0);
   /* Now get a look at the map file */
-  input_map(name, argv[1], &col_pieces, &row_pieces, &names);
+  input_map(name, argv[2], &col_pieces, &row_pieces, &names);
   /* Now determine full size */
   rows = 0;
   cols = 0;
@@ -116,8 +116,8 @@ int main(int argc,  char **argv)
   for (i = 0; i < row_pieces; i++) {
     unsigned int k;
     for (j = 0; j < col_pieces; j++) {
-      const char *piece_name = names[i * row_pieces + j];
-      inputs[j] = fopen(name, "rb");
+      const char *piece_name = pathname(argv[2], names[i * row_pieces + j]);
+      inputs[j] = fopen(piece_name, "rb");
       if (NULL == inputs[j]) {
         fprintf(stderr, "%s: cannot open %s, terminating\n", name, piece_name);
         exit(1);
@@ -134,7 +134,7 @@ int main(int argc,  char **argv)
         /*** Check for consistency on prime */
         fprintf(stderr, "%s header mismatch %d != %d or %d != %d from %s and %s, terminating\n",
                 name, nor, header_get_nor(headers[j]), prime, header_get_prime(headers[j]),
-                names[i * col_pieces], names[i * col_pieces + j]);
+                pathname(argv[2], names[i * col_pieces]), pathname(argv[2], names[i * col_pieces + j]));
         fail(inputs, output, col_pieces);
       }
     }

@@ -1,5 +1,6 @@
-/* ead.c */
 /*
+ * $Id: ead.c,v 1.5 2001/10/07 18:02:56 jon Exp $
+ *
  * Exploded add
  *
  * Three arguments

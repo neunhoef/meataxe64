@@ -1,5 +1,6 @@
-/* command.c */
 /*
+ * $Id: command.c,v 1.3 2001/10/07 18:02:56 jon Exp $
+ *
  * Interface to task manager (definition)
  *
  */
@@ -11,8 +12,6 @@
 #include "system.h"
 #include "utils.h"
 #include "command.h"
-
-#define MAX_LINE 100000
 
 #define MAX_TASKS 1000000
 static const char *task_name = NULL;
@@ -236,8 +235,6 @@ static void add_tasks(int is_consumer, task *new_tasks[], unsigned int size)
   FILE *copy;
   FILE *new, *old;
   unsigned int i;
-  printf("In add_tasks, size = %d\n", size);
-  fflush(stdout);
   wait_lock(task_name);
   copy = fopen(COMMAND_COPY, "wb");
   if (copy == NULL) {
@@ -276,21 +273,9 @@ static void add_tasks(int is_consumer, task *new_tasks[], unsigned int size)
   fclose(new);
   fclose(copy);
   release_lock();
-  printf("Leaving add_tasks\n");
-  fflush(stdout);
 }
 
-#if 0
-static void add_tasks(int is_consumer, task *new_tasks[], unsigned int size)
-{
-  unsigned int i = 0;
-  while (i < size) {
-    add_task(is_consumer, new_tasks[i++]);
-  }
-}
-#endif
-
-static int get_task_line(char *line, FILE *input)
+int get_task_line(char *line, FILE *input)
 {
   unsigned int i;
   char *poo = fgets(line, MAX_LINE-1, input);
@@ -307,7 +292,7 @@ static int get_task_line(char *line, FILE *input)
   }
 }
 
-static unsigned int skip_whitespace(unsigned int i, const char *chars)
+unsigned int skip_whitespace(unsigned int i, const char *chars)
 {
   unsigned int j = strlen(chars);
   while (1) {
@@ -324,7 +309,7 @@ static unsigned int skip_whitespace(unsigned int i, const char *chars)
   }
 }
 
-static unsigned int skip_non_white(unsigned int i, const char *chars)
+unsigned int skip_non_white(unsigned int i, const char *chars)
 {
   unsigned int j = strlen(chars);
   while (1) {
@@ -379,10 +364,6 @@ static void process_line(const char *line, task *tasks, unsigned int size, FILE 
       (*new_done)++;
       fputs(line, done);
       if (task != NULL) {
-	/*
-	printf("Updating for finished task with uid %ld\n", uid);
-	fflush(stdout);
-	*/
 	if (task->status == status) {
 	  /* No change of status */
 	  printf("Curious, status for %ld unchanged\n", uid);
@@ -462,18 +443,12 @@ static void process_line(const char *line, task *tasks, unsigned int size, FILE 
 static void update(task *tasks, unsigned int size)
 {
   unsigned long count = 0, new_count=0, new_done = 0;
-  printf("In update\n");
-  fflush(stdout);
   if (check_signal() == 0) {
     /* Command file unchanged */
-    printf("No change\n");
-    fflush(stdout);
     return;
   } else {
     FILE *input;
     /* Get the lock */
-    printf("Some change\n");
-    fflush(stdout);
     wait_lock(task_name);
     input = fopen(COMMAND_FILE, "rb");
     if (input == NULL) {
@@ -521,8 +496,6 @@ static void update(task *tasks, unsigned int size)
     }
     /* Release the lock */
     release_lock();
-    printf("Update finished\n");
-    fflush(stdout);
     return;
   }
 }
@@ -602,8 +575,6 @@ static int schedule(task *tasks, unsigned int *size, unsigned int max_commands)
   unsigned int i;
   while (1) {
     int j = 0;
-    printf("Checking splittable consumers\n");
-    fflush(stdout);
     for (i = 0; i < *size; i++) {
       task *task = tasks + i;
       if (sum_can_start(task)) {
@@ -620,15 +591,11 @@ static int schedule(task *tasks, unsigned int *size, unsigned int max_commands)
       count++;
     }
   }
-  printf("%u tasks scheduled and incomplete\n", count);
-  fflush(stdout);
   for (i = 0; i < *size; i++) {
     if (tasks[i].status == WAITING) {
       outstanding[waiting_count++] = tasks + i;
     }
   }
-  printf("%u tasks waiting\n", waiting_count);
-  fflush(stdout);
   for (i = 0; i < waiting_count; i++) {
     task *task = outstanding[i];
     if (consumer(task) && can_start(task)) {
@@ -641,8 +608,6 @@ static int schedule(task *tasks, unsigned int *size, unsigned int max_commands)
       producers_waiting[producer_count++] = task;
     }
   }
-  printf("%u producers waiting, %u consumers waiting\n", producer_count, consumer_count);
-  fflush(stdout);
   if (waiting_count == 0) {
     /* No tasks waiting to be added */
     /* See if any still in progress, if not we've finished */
@@ -663,8 +628,6 @@ static int schedule(task *tasks, unsigned int *size, unsigned int max_commands)
       return 1;
     }
   } else {
-    printf("Count = %u, max_commands = %u\n", count, max_commands);
-    fflush(stdout);
     if (count < max_commands) {
       unsigned int available = max_commands - count;
       unsigned int consumers =

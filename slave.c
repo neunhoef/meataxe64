@@ -1,5 +1,5 @@
 /*
- * $Id: slave.c,v 1.3 2001/10/03 23:57:33 jon Exp $
+ * $Id: slave.c,v 1.4 2001/10/07 18:02:56 jon Exp $
  *
  * Slave for extended operations
  * Based on zsl.c     MTX6 slave version 6.0.11 7.11.98 
@@ -15,11 +15,7 @@
 #include "memory.h"
 #include "mul.h"
 #include "system.h"
-
-char buf[1000]; 
-char buf1[1000];
-const char *words[100], *words2[100];
-char buf2[1000];
+#include "utils.h"
 
 static const char *name = "meataxe slave";
 
@@ -28,76 +24,44 @@ static void slave_usage(void)
   fprintf(stderr, "%s: usage: %s <name> [<memory>]\n", name, name);
 }
 
-/* Read a line into buf */
-/* Return 1 if we meet end of file before 1000 characters or '\n' */
-/* Otherwise return 0 */
-static int readline(FILE *f)
+static int capable(const char *cmd, unsigned int length)
 {
-  const char *s = fgets(buf, 1000, f);
-  if (s == NULL) return 1; else return 0;
+  return (strncmp(cmd, "kill", length) == 0 ||
+          strncmp(cmd, "who", length) == 0 ||
+          strncmp(cmd, "ad", length) == 0 ||
+          strncmp(cmd, "mu", length) == 0);
 }
 
-/* Write a line of up to 1000 characters or a terminating '\n' */
-static void writeline(FILE *f)
+static unsigned int parse_line(const char *(*line_ptrs)[], unsigned int (*lengths)[],
+                               const char *line)
 {
-  const char *s = strchr(buf, '\n');
-  unsigned int len, len1;
-  assert (NULL != s);
-  len = s + 1 - buf;
-  len1 = fwrite(buf, 1, len, f); /* Write including the terminating '\n' */
-  assert(len1  == len);
-}
-
-/* Some sort of line parsing */
-static unsigned int parse(void)
-{
-  char b;
-  unsigned int i, j;
-  for(i = 0; i < 1000; i++)
-    buf1[i] = buf[i];    
-  buf1[999] = '\n'; 
-  i = 0;
-  j = 0;
-  b = ' ';
-  while('\n' != b) {
-    if (' ' == b && ' ' != buf1[i] && '\n' != buf1[i])
-      words[j++] = &buf1[i];
-    if ((' ' == buf1[i] || '\n' == buf1[i]) && ' ' != b) 
-      buf1[i] = '\0';
-    if (j > 99) break;
-    b = buf[i++];
+  unsigned int i = 0, j = 0, k;
+  unsigned int len;
+  assert(NULL != line);
+  assert(NULL != line_ptrs);
+  len = strlen(line);
+  while (i < len) {
+    i = skip_whitespace(i, line);
+    (*line_ptrs)[j] = line + i; /* Record start of word */
+    k = skip_non_white(i, line);
+    if (k != i) {
+      (*lengths)[j] = k - i;
+      j++;
+      i = k;
+      /* A non-empty word */
+    } else {
+      return j;
+      /* End of line */
+    }
   }
-  return j;
+  assert(0); /* Shouldn't happen */
+  return 0;
 }
 
-static void unparse(unsigned int wordct, FILE *f)
-{
-  unsigned int i; 
-  for(i = 0; i < wordct; i++) {
-    fprintf(f, "%s ", words[i]);
-  }
-  fprintf(f, "\n");
-}
-
-static void grab(unsigned int wordct)
-{
-  unsigned int i, j;
-  const char *pt;
-  j = 0;
-  for(i = 0; i < wordct; i++) {
-    words2[i] = &buf2[j];
-    pt = words[i];
-    while('\n' != *pt && '\0' != *pt)
-      buf2[j++] = *(pt++);
-    buf2[j++] = '\0';
-  }
-}
 int main(int argc, const char *const argv[])
 {
-  unsigned int i = 0, got = 1; 
-  int cmdpar = 0;
   unsigned int memory = MEM_SIZE;
-  FILE *f1, *f2; 
+  FILE *input, *output; 
   if (2 != argc && 3 != argc) {
     slave_usage();
     exit(1);
@@ -105,126 +69,141 @@ int main(int argc, const char *const argv[])
   if (3 == argc) {
     memory = strtoul(argv[2], NULL, 0);
   }
-  memory_init(name, memory);
-  memory_init(name, 0);
   init_system();
+  memory_init(name, memory);
   while(1) {
-/*  open files   */
-    while (1) {
-      if (got || check_signal()) {
-        printf("Command file changed, checking\n");
-        fflush(stdout);
-        wait_lock(argv[1]);
-        f1 = fopen("commands", "rb");
-        if (NULL != f1) {
-          break;
-        } else {
-          release_lock();
-          just_wait(10);
-        }
-      } else {
-        printf("Command file unchanged, waiting\n");
-        fflush(stdout);
-        just_wait(1);
-      }
+    char line[MAX_LINE];
+    const char *line_ptrs[MAX_LINE];
+    unsigned int lengths[MAX_LINE];
+    unsigned int words = 0;
+    int free = 0;
+    wait_lock(argv[1]);
+    input = fopen(COMMAND_FILE, "rb");
+    if (NULL == input) {
+      /* Command file not created */
+      release_lock();
+      just_wait(10);
+      continue;
     }
-    /* By now, we have acquired a lock and opened the commands file */
-    f2 = fopen("commands1", "wb");
-/*  copy till you find something interesting  */
-    got = 0;
-    while(1) {
-      if (readline(f1)) {
-        printf("Breaking for EOF\n");
-        break; /* Break on EOF */
-      }
-      i = parse();
-      if (0 == strcmp(words[0], argv[1])) {
-        /* If we find our name against a task, mark it done */
-        words[0] = "done";
-        printf("Unparsing\n");
-        unparse(i, f2);
-        /* Write the line, then copy the rest over */
-        printf("Copying the rest\n");
-        copy_rest(f2, f1);
-        break; /* Leave, with no reason to recheck or do any other action */
-      }
-      if (0 == strcmp(words[0], "free")) {
-        printf("Slave %s - found a free command\n", argv[1]);
-        /* Command awaiting some action, can we do it? */
-        if (i > 2) {
-          if (0 == strcmp(words[2], "kill")) {
-            fclose(f1);
-            fclose(f2);
-            release_lock();
-            fprintf(stderr, "Killed by free kill\n");
-            exit(0);
-          }
-          if (0 == strcmp(words[2], "who") ||
-              0 == strcmp(words[2], "mu") ||
-              0 == strcmp(words[2], "ad")) {
-            got = 1;
-            break;
-          }
+    output = fopen(COMMAND_COPY, "wb");
+    if (NULL == output) {
+      release_lock();
+      fprintf(stderr, "Slave %s can't open %s\n, terminating\n", argv[1], COMMAND_COPY);
+      exit(1);
+    }
+    while (get_task_line(line, input)) {
+      /* Check for free command, else just copy back */
+      words = parse_line(&line_ptrs, &lengths, line);
+      if (1 <= words && 0 == strncmp(line_ptrs[0], "free", lengths[0])) {
+        if (capable(line_ptrs[2], lengths[2])) {
+          free = 1;
+          break; /* Found a free job */
         }
       }
-      writeline(f2);
+      /* Otherwise just copy the line over */
+      fputs(line, output);
     }
-/* Emerge with got = 1 <=> we found a line to process further */
-/*  look at interesting line and process it  */
-    if (1 == got) {
-      printf("Slave %s - got something\n", argv[1]);
-      grab(i);
-      printf("grab %u\n", i);
-      fflush(stdout);
-      cmdpar = i-3;
-      words[0] = argv[1];
-      unparse(i, f2);
-/*  and copy the rest of the file   */
-      printf("copy rest of file\n");
-      fflush(stdout);
-      copy_rest(f2, f1);
-    }
-/*  in any case close and copy back   */
-    fclose(f1);
-    fflush(f2);
-    fclose(f2);
-    printf("copy back\n");
-    fflush(stdout);
-    f1 = fopen("commands1", "rb");
-    f2 = fopen("commands", "wb");
-    copy_rest(f2, f1);
-    fclose(f1);
-    fflush(f2);
-    fclose(f2);
-    printf("Done\n");
-    fflush(stdout);
-    release_lock();
-    if (1 == got) {
-      if (cmdpar < 0) {
-        fprintf(stderr, "%s: not enough words on command line\n", name);
+    if (free) {
+      fprintf(output, "%s %s", argv[1], line_ptrs[1]);
+      copy_rest(output, input);
+      fflush(output);
+      fclose(output);
+      fclose(input);
+      input = fopen(COMMAND_COPY, "rb");
+      if (NULL == input) {
+        release_lock();
+        fprintf(stderr, "Slave %s can't open %s\n, terminating\n", argv[1], COMMAND_COPY);
         exit(1);
       }
-      if (0 == strcmp(words2[2], "who")) {
+      output = fopen(COMMAND_FILE, "wb");
+      if (NULL == output) {
+        release_lock();
+        fprintf(stderr, "Slave %s can't open %s\n, terminating\n", argv[1], COMMAND_FILE);
+        exit(1);
+      }
+      copy_rest(output, input);
+      fflush(output);
+      fclose(output);
+      fclose(input);
+      release_lock();
+      if (strncmp(line_ptrs[2], "kill", lengths[2]) == 0) {
+        fprintf(stderr, "Slave %s killed by free kill\n", argv[1]);
+        exit(0);
+      } else if (strncmp(line_ptrs[2], "who", lengths[2]) == 0) {
         printf("Slave %s is here\n", argv[1]);
         just_wait(30);
-      }
-      if (0 == strcmp(words2[2], "ad")) {
-        if (cmdpar != 3) {
-          fprintf(stderr, "add parameters wrong\n");
-          exit(1);
+      } else {
+        char p[3][MAX_LINE];
+        unsigned int i;
+        for (i = 0; i < 3; i++) {
+          if (i + 3 < words) {
+            strncpy(p[i], line_ptrs[i + 3], lengths[i + 3]);
+            p[i][lengths[i + 3]] = '\0';
+          }
         }
-        add(words2[3], words2[4], words2[5], name);
-      }
-      if (0 == strcmp(words2[2], "mu")) {
-        if (cmdpar != 3) {
-          fprintf(stderr, "multiply parameters wrong\n");
-          exit(1);
+        if (strncmp(line_ptrs[2], "ad", lengths[2]) == 0) {
+          if (6 != words) {
+            fprintf(stderr, "add parameters wrong\n");
+            exit(1);
+          }
+          add(p[0], p[1], p[2], name);
+        } else if (strncmp(line_ptrs[2], "mu", lengths[2]) == 0) {
+          if (6 != words) {
+            fprintf(stderr, "multiply parameters wrong\n");
+            exit(1);
+          }
+          mul(p[0], p[1], p[2], name);
+        } else {
+          assert(0);
         }
-        mul(words2[3], words2[4], words2[5], name);
       }
-/* other things go here  */
-    } else {
-        just_wait(1);
+      wait_lock(argv[1]);
+      input = fopen(COMMAND_FILE, "rb");
+      if (NULL == input) {
+        release_lock();
+        fprintf(stderr, "Slave %s can't open %s\n, terminating\n", argv[1], COMMAND_FILE);
+        exit(1);
+      }
+      output = fopen(COMMAND_COPY, "wb");
+      if (NULL == output) {
+        release_lock();
+        fprintf(stderr, "Slave %s can't open %s\n, terminating\n", argv[1], COMMAND_COPY);
+        exit(1);
+      }
+      while (get_task_line(line, input)) {
+        words = parse_line(&line_ptrs, &lengths, line);
+        if (0 != words && strncmp(argv[1], line_ptrs[0], lengths[0]) == 0) {
+          fprintf(output, "done %s", line_ptrs[1]);
+          break;
+        } else {
+          fputs(line, output);
+        }
+      }
+      copy_rest(output, input);
+      fflush(output);
+      fclose(output);
+      fclose(input);
+      /* Now copy to original command file */
+      input = fopen(COMMAND_COPY, "rb");
+      if (NULL == input) {
+        release_lock();
+        fprintf(stderr, "Slave %s can't open %s\n, terminating\n", argv[1], COMMAND_COPY);
+        exit(1);
+      }
+      output = fopen(COMMAND_FILE, "wb");
+      if (NULL == output) {
+        release_lock();
+        fprintf(stderr, "Slave %s can't open %s\n, terminating\n", argv[1], COMMAND_FILE);
+        exit(1);
+      }
+      copy_rest(output, input);
+    }
+    fflush(output);
+    fclose(output);
+    fclose(input);
+    release_lock();
+    if (0 == free) {
+      just_wait(10);
     }
   }
 }
