@@ -1,5 +1,5 @@
 /*
- * $Id: sns.c,v 1.1 2001/11/17 10:02:43 jon Exp $
+ * $Id: sns.c,v 1.2 2001/11/19 19:08:49 jon Exp $
  *
  * Simple compute of the null space of a matrix
  *
@@ -59,8 +59,8 @@ int main(int argc, const char * const argv[])
     exit(1);
   }
   /* Now read the matrix */
-  matrix_malloc(nor, (void **)&mat1);
-  matrix_malloc(nor, (void **)&mat2);
+  mat1 = matrix_malloc(nor);
+  mat2 = matrix_malloc(nor);
   for (n = 0; n < nor; n++) {
     mat1[n] = memory_pointer_offset(0, n, len);
     mat2[n] = memory_pointer_offset(500, n, len);

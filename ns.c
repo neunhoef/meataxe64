@@ -1,5 +1,5 @@
 /*
- * $Id: ns.c,v 1.1 2001/11/19 18:31:49 jon Exp $
+ * $Id: ns.c,v 1.2 2001/11/19 19:08:49 jon Exp $
  *
  * Compute the null space of a matrix
  *
@@ -56,8 +56,8 @@ unsigned int nullspace(const char *m1, const char *m2, const char *name)
     grease.level = r;
   }
   /* Now read the matrix */
-  matrix_malloc(nor, (void **)&mat1);
-  matrix_malloc(nor, (void **)&mat2);
+  mat1 = matrix_malloc(nor);
+  mat2 = matrix_malloc(nor);
   for (n = 0; n < nor; n++) {
     mat1[n] = memory_pointer_offset(0, n, len1);
     mat2[n] = memory_pointer_offset(400, n, len2);

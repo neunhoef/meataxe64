@@ -1,5 +1,5 @@
 /*
- * $Id: rn.c,v 1.5 2001/11/19 18:31:49 jon Exp $
+ * $Id: rn.c,v 1.6 2001/11/19 19:08:49 jon Exp $
  *
  * Compute the rank of a matrix
  *
@@ -43,7 +43,7 @@ unsigned int rank(const char *m, const char *name)
   }
   (void)grease_level(prime, &grease, r);
   /* Now read the matrix */
-  matrix_malloc(nor, (void **)&mat);
+  mat = matrix_malloc(nor);
   for (n = 0; n < nor; n++) {
     mat[n] = memory_pointer_offset(0, n, len);
   }

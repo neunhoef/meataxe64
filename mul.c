@@ -1,5 +1,5 @@
 /*
- * $Id: mul.c,v 1.14 2001/11/19 18:31:49 jon Exp $
+ * $Id: mul.c,v 1.15 2001/11/19 19:08:49 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
@@ -42,7 +42,6 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
   unsigned int prime, nob, noc1, nor1, len1, noc2, nor2, len2;
   unsigned int i, j, k, l;
   unsigned int nox1, nox2, nox3, nox;
-  void *t1, *t2;
   const header *h1, *h2, *h3;
   unsigned int **rows1, **rows3;
   row_ops row_operations;
@@ -119,11 +118,8 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
     fprintf(stderr, "%s: unable to allocate grease, terminating\n", name);
     return cleanup(inp1, inp2, outp);
   }
-  matrix_malloc(nox, &t1);
-  matrix_malloc(nox, &t2);
-  /* Set up pointers for rows1 and rows3 */
-  rows1 = t1;
-  rows3 = t2;
+  rows1 = matrix_malloc(nox);
+  rows3 = matrix_malloc(nox);
   for (k = 0; k < nox; k++) {
     rows1[k] = memory_pointer_offset(0, k, len1);
     rows3[k] = memory_pointer_offset(M1_SIZE + M2_SIZE, k, len2);
