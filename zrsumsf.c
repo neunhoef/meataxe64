@@ -1,5 +1,5 @@
 /*
- * $Id: zrsumsf.c,v 1.4 2002/10/14 08:36:36 jon Exp $
+ * $Id: zrsumsf.c,v 1.5 2003/08/04 20:41:57 jon Exp $
  *
  * Compute restricted sums in the group algebra in two matrices
  *
@@ -52,7 +52,7 @@ int main(int argc, const char * const argv[])
   }
   endian_init();
   memory_init(name, memory);
-  res = sumsf(argv[1], argv[5], n, argc - 6, argv + 6, sub_order, &acceptor, name);
+  res = sumsf(argv[1], argv[5], n, argc - 6, argv + 6, sub_order, &acceptor, 0, name);
   if (255 == res) {
     printf("Failed to find a suitable element\n");
   }

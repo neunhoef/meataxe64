@@ -1,5 +1,5 @@
 /*
- * $Id: zfln.c,v 1.6 2002/10/14 08:55:31 jon Exp $
+ * $Id: zfln.c,v 1.7 2003/08/04 20:41:57 jon Exp $
  *
  * Compute sums in the group algebra in two matrices finding one of lowest non-zero nullity
  * Expected to be used during computation of standard bases of irreducible but not absolutely
@@ -113,7 +113,7 @@ int main(int argc, const char * const argv[])
   }
   endian_init();
   memory_init(name, memory);
-  res = sums(argv[1], n, argc - 4, argv + 4, 0, &acceptor, name);
+  res = sums(argv[1], n, argc - 4, argv + 4, 0, &acceptor, 0, name);
   memory_dispose();
   if (0 != gcd && NULL != best_name) {
     if (0 == nullity) {

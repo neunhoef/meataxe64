@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.86 2003/07/20 18:13:53 jon Exp $
+# $Id: makefile,v 1.87 2003/08/04 20:41:57 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -144,8 +144,8 @@ ZDIFFD_MODULES=	diffd elements endian header memory parse primes read rows utils
 ZEX_MODULES=	elements endian exrows files header map memory parse primes read rows utils write zex
 ZEXPORT_MODULES=	elements endian header memory parse primes read rows utils write zexport
 ZFE_MODULES=	elements endian extend extend_matrix header memory parse primes read rows utils write zfe
-ZFLN_MODULES=	add clean elements endian grease header ident map_or_row maps matrix memory mul parse primes read rn rows sums utils write zfln
-ZFLNF_MODULES=	add clean elements endian grease header ident map_or_row maps matrix memory mul parse primes read rnf rows sumsf system utils write zflnf
+ZFLN_MODULES=	add clean elements endian grease header ident map_or_row maps matrix memory mul parse primes read rn rows sums sums_utils utils write zfln
+ZFLNF_MODULES=	add clean elements endian grease header ident map_or_row maps matrix memory mul parse primes read rnf rows sumsf sums_utils system utils write zflnf
 ZFO_MODULES=	elements endian header maps orbit parse primes read rows utils write zfo
 ZID_MODULES=	id ident elements endian header maps memory parse primes rows utils write
 ZIMPORT_MODULES=	elements endian header memory parse primes read rows utils write zimport
@@ -174,14 +174,14 @@ ZPS_MODULES=	endian header matrix memory parse primes ps read utils write zps
 ZQF_MODULES=	elements endian header memory parse primes read rows utils write zqf
 ZQS_MODULES=	clean elements endian grease header matrix memory parse primes qs read rows utils write zqs
 ZRAND_MODULES=	rand elements endian header maps memory parse primes rows utils write zrand
-ZRANKS_MODULES=	add clean elements endian grease header ident map_or_row maps matrix memory mul parse primes read rn rows sums utils write zranks
+ZRANKS_MODULES=	add clean elements endian grease header ident map_or_row maps matrix memory mul parse primes read rn rows sums sums_utils utils write zranks
 ZRE_MODULES=	elements endian header memory parse primes read utils write zre
 ZRES_MODULES=	elements endian header memory parse primes read restrict rows utils write zrestrict
 ZRN_MODULES=	clean elements endian grease header maps matrix memory parse primes read rn rows utils write zrn
 ZRNF_MODULES=	clean elements endian grease header maps matrix memory parse primes read rnf rows system utils write zrnf
-ZRRANKS_MODULES=	add clean elements endian grease header ident map_or_row maps matrix memory mul parse primes read rn rows sums utils write zrranks
-ZRSUMS_MODULES=	add clean elements endian grease header ident map_or_row maps matrix memory mul parse primes read rn rows sums utils write zrsums
-ZRSUMSF_MODULES=	add clean elements endian grease header ident map_or_row maps matrix memory mul parse primes read rnf rows sumsf system utils write zrsumsf
+ZRRANKS_MODULES=	add clean elements endian grease header ident map_or_row maps matrix memory mul parse primes read rn rows sums sums_utils utils write zrranks
+ZRSUMS_MODULES=	add clean elements endian grease header ident map_or_row maps matrix memory mul parse primes read rn rows sums sums_utils utils write zrsums
+ZRSUMSF_MODULES=	add clean elements endian grease header ident map_or_row maps matrix memory mul parse primes read rnf rows sumsf sums_utils system utils write zrsumsf
 ZSAD_MODULES=	add elements endian header map_or_row maps memory parse primes read rows utils write zsad
 ZSCRIPT_MODULES=	add elements endian files grease header ident map_or_row maps matrix memory mul parse primes read rows scale script utils write zscript
 ZSEL_MODULES=	endian header memory parse primes read utils write zse
@@ -198,8 +198,8 @@ ZSL_MODULES=	add elements endian files grease header map_or_row maps matrix memo
 ZSPAN_MODULES=	elements endian header matrix memory parse primes read rows span utils write zspan
 ZSPANMSP_MODULES=	elements endian grease header maps matrix memory mul parse primes read rows spanmsp utils write zspanmsp
 ZSS_MODULES=	elements endian header memory parse primes read rows ss ss_map utils write zss
-ZSUMS_MODULES=	add clean elements endian grease header ident map_or_row maps matrix memory mul parse primes read rn rows sums utils write zsums
-ZSUMSF_MODULES=	add clean elements endian grease header ident map_or_row maps matrix memory mul parse primes read rnf rows sumsf system utils write zsumsf
+ZSUMS_MODULES=	add clean elements endian grease header ident map_or_row maps matrix memory mul parse primes read rn rows sums sums_utils utils write zsums
+ZSUMSF_MODULES=	add clean elements endian grease header ident map_or_row maps matrix memory mul parse primes read rnf rows sumsf sums_utils system utils write zsumsf
 ZSYMB_MODULES=	clean clean_file elements endian grease header matrix maps memory mul parse primes read rows symb system utils write zsymb
 ZSYMSQ_MODULES=	dets elements endian header matrix memory powers parse primes read rows utils write zsymsq
 ZTCO_MODULES=	elements endian grease header maps matrix memory mul parse primes read rows tco utils write ztco

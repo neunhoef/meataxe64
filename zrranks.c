@@ -1,5 +1,5 @@
 /*
- * $Id: zrranks.c,v 1.7 2002/10/14 08:55:31 jon Exp $
+ * $Id: zrranks.c,v 1.8 2003/08/04 20:41:57 jon Exp $
  *
  * Compute restricted sums in the group algebra in two matrices finding all of given nullity
  *
@@ -52,7 +52,7 @@ int main(int argc, const char * const argv[])
   }
   endian_init();
   memory_init(name, memory);
-  res = sums(argv[1], n, argc - 5, argv + 5, sub_order, &acceptor, name);
+  res = sums(argv[1], n, argc - 5, argv + 5, sub_order, &acceptor, 0, name);
   memory_dispose();
   if (0 == res) {
     return 0;

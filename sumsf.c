@@ -1,5 +1,5 @@
 /*
- * $Id: sumsf.c,v 1.8 2002/09/24 19:21:43 jon Exp $
+ * $Id: sumsf.c,v 1.9 2003/08/04 20:41:57 jon Exp $
  *
  * Function to compute linear sums of two matices
  *
@@ -27,52 +27,8 @@ static void cleanup(unsigned int *orders)
   free(orders);
 }
 
-static int next_gen(unsigned int cur_gen, unsigned int max_gen, char *gen, const unsigned int *orders, const char *word)
-{
-  assert(NULL != gen);
-  assert(NULL != orders);
-  assert(NULL != word);
-  while (1) {
-    char letter;
-    unsigned int len;
-    cur_gen++;
-    if (cur_gen >= max_gen) {
-      return -1;
-    }
-    if (0 == orders[cur_gen]) {
-      continue;
-    }
-    letter = 'A' + cur_gen;
-    len = strlen(word);
-    /* Now find maximum number of occurrences of letter at end of word */
-    /* and move on if exceeds order */
-    if (NULL == strchr(word, letter)) {
-      /* No occurrence, all safe */
-      *gen = letter;
-      return cur_gen;
-    } else {
-      unsigned int pos = len;
-      /* Count occurrences at end of word */
-      while (pos > 0) {
-        if (word[pos - 1] == letter) {
-          pos--;
-        } else {
-          break;
-        }
-      }
-      if (len + 1 >= orders[cur_gen] + pos) {
-        /* we've reached the order of this element */
-        continue;
-      }
-      /* Safe to use this generator */
-      *gen = letter;
-      return cur_gen;
-    }
-  } /* while */
-}
-
 int sumsf(const char *out, const char *dir, unsigned int n, unsigned int argc, const char *const args[],
-          unsigned int sub_order, accept acceptor, const char *name)
+          unsigned int sub_order, accept acceptor, int invertible, const char *name)
 {
   char *buf;
   FILE *f;
@@ -244,21 +200,39 @@ int sumsf(const char *out, const char *dir, unsigned int n, unsigned int argc, c
         /* l != 0 mean we have 1 + old element + lambda * new element, ie at least 3 in sum */
         if (0 != l) {
           int res;
-          s = rank(elts[pos], dir, name);
-          /* Compute rank, using external files */
-          if (verbose) {
-            printf("%s: checking element %s of rank %d\n", name, elt_names[pos], s);
-            fflush(stdout);
+          int ignore = 0;
+          unsigned int j;
+          if (invertible) {
+            for (j = 0; j < argc2; j++) {
+              if (verbose) {
+                printf("%s: Checking %s with %s\n", name, buf, words[j + 1]);
+              }
+              if (ignore_word(pos, i + 1, words, j, orders[j], prime)) {
+                if (verbose) {
+                  printf("%s: Ignoring %s after checking with %s\n", name, buf, words[j + 1]);
+                }
+                ignore = 1;
+                break;
+              }
+            }
           }
-          res = (*acceptor)(s, nor, elts[pos], elt_names[pos]);
-          if (res & 1) {
-            found = 1;
-            printf("%s: found element %s of nullity %d, form %s\n",
-                   name, elts[pos], nor - s, elt_names[pos]);
-          }
-          if (res & 2) {
-            printf("%s: terminating\n", name);
-            return 0;
+          if (0 == ignore) {
+            s = rank(elts[pos], dir, name);
+            /* Compute rank, using external files */
+            if (verbose) {
+              printf("%s: checking element %s of rank %d\n", name, elt_names[pos], s);
+              fflush(stdout);
+            }
+            res = (*acceptor)(s, nor, elts[pos], elt_names[pos]);
+            if (res & 1) {
+              found = 1;
+              printf("%s: found element %s of nullity %d, form %s\n",
+                     name, elts[pos], nor - s, elt_names[pos]);
+            }
+            if (res & 2) {
+              printf("%s: terminating\n", name);
+              return 0;
+            }
           }
         }
       }
