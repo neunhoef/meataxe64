@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: indicate_with_element,v 1.5 2002/09/11 22:53:15 jon Exp $
+# $Id: indicate_with_element,v 1.6 2002/09/12 11:47:28 jon Exp $
 #
 # Script to find the indicator of an irreducible representation
 # Assumes a and b in standard base form
@@ -13,6 +13,7 @@
 # $5: generator a in dual representation
 # $6: generator b
 # $7: generator b in dual representation
+# $8-: other generators and duals
 #
 # Return codes
 # 1: error in parameters
@@ -57,6 +58,7 @@ d_line=
 args=
 while [ $# -gt 0 ]; do
   if [ 1 -eq $# ]; then
+    rm -f ${tmp}.*
     echo "$usage"
     exit 1;
   fi
@@ -68,12 +70,12 @@ done
 x=`base_vectors $e $S $d_line`
 ret=$?
 if [ $ret -eq 0 ]; then
-  real_indicate $S $memory $a $b
+  real_indicate $S $memory $line
   ret=$?
   rm -f ${tmp}.*
   exit $ret
 elif [ $ret -ne 255 ]; then
-  echo base return $ret, terminating
+  echo base_vectors return $ret, terminating
   rm -f ${tmp}.*
   exit 1
 else

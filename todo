@@ -2,9 +2,9 @@ Worry about isspace failure (can't detect \n) (still occurs on RH 7.2) ctype is 
 Worry about return (NULL == s) code generation error
 Documentation changes for zrand, ztco, ztcv, ztrecover
 Documentation changes for sym_basis, proj_base, sub_quot
+Think about indicators for non-absolutely irreducible representations
 Consider putting memory size into argument parser
 Write span_and_spin for spins on large nullspaces
-Pass all generators into indicate and friends
 Make zsums and friends distinguish find failure from errors
 Fix find_nullity_one and friends to use better codes from zsums and friends
 Think about a restricted form of new_irred where we supply the script (only for things like sym_basis)

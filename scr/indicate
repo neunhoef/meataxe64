@@ -1,27 +1,29 @@
 #!/bin/sh
 #
-# $Id: indicate,v 1.5 2002/09/11 21:20:47 jon Exp $
+# $Id: indicate,v 1.6 2002/09/12 11:47:28 jon Exp $
 #
 # Script to find the indicator of an irreducible representation
 # Assumes a and b in standard base form
 #
 # Inputs
-# $1: generator a
-# $2: generator b
-# $3: initial memory (optional)
+# $1: initial memory
+# $2: generator a
+# $3-: others generators
 #
 # Return codes
 # 1: error in parameters
 # 0: ok
 #
-usage="$0: usage: $0 <a> <b> [<memory>]"
-if [ $# -ne 2 -a $# -ne 3 ]; then
+usage="$0: usage: $0 <memory> <a> <b> [<other generators>]"
+if [ $# -lt 3 ]; then
   echo "$usage"
   exit 1;
 fi
 . functions
-a=$1
-b=$2
+memory=$1
+a=$2
+b=$3
+shift
 if [ -e $a -a -e $b ]; then
   q=`zprime $a`
   nor=`znor $a`
@@ -38,22 +40,15 @@ else
   echo "$0: missing files $a or $b"
   exit 1
 fi
-# First compute o_a and o_b
-o_a=`order $a`
-ret=$?
-if [ 0 -ne $ret ]; then
-  echo Cannot compute order of $a
-  exit 1
-fi
-o_b=`order $b`
-ret=$?
-if [ 0 -ne $ret ]; then
-  echo Cannot compute order of $b
-  exit 1
-fi
-if [ $# -eq 3 ]; then
-  memory=$3
-else
-  memory=200
-fi
-exec indicate_with_orders $a $b $o_a $o_b $memory
+# First compute orders
+line=
+for x in $*; do
+  o=`order $x`
+  ret=$?
+  if [ 0 -ne $ret ]; then
+    echo Cannot compute order of $x
+    exit 1
+  fi
+  line="$line $x $o"
+done
+exec indicate_with_orders $memory $line

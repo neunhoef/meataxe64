@@ -1,31 +1,33 @@
 #!/bin/sh
 #
-# $Id: indicate_with_orders,v 1.8 2002/09/11 21:20:47 jon Exp $
+# $Id: indicate_with_orders,v 1.9 2002/09/12 11:47:28 jon Exp $
 #
 # Script to find the indicator of an irreducible representation
 # Assumes a and b in standard base form
 #
 # Inputs
-# $1: generator a
-# $2: generator b
+# $1: initial memory
+# $2: generator a
 # $3: order a
-# $4: order b
-# $5: initial memory (optional)
+# $4: generator b
+# $5: order b
+# $6-: other generators and orders
 #
 # Return codes
 # 1: error in parameters
 # 0: ok
 #
-usage="$0: usage: $0 <a> <b> <order a> <order b> [<memory>]"
-if [ $# -ne 4 -a $# -ne 5 ]; then
+usage="$0: usage: $0 <memory> <a> <order a> <b> <order b> [<other generators and orders>]"
+if [ $# -lt 5 ]; then
   echo "$usage"
   exit 1;
 fi
 . functions
-a=$1
-b=$2
+memory=$1
+a=$2
+b=$4
 o_a=$3
-o_b=$4
+o_b=$5
 if [ -e $a -a -e $b ]; then
   q=`zprime $a`
   nor=`znor $a`
@@ -42,25 +44,32 @@ else
   echo "$0: missing files $a or $b"
   exit 1
 fi
-if [ $# -eq 5 ]; then
-  memory=$5
-else
-  memory=200
-fi
 tmp=tmp${PPID}
-a_d=${tmp}.0
-b_d=${tmp}.1
-dual_with_order $a $a_d $o_a $memory
-dual_with_order $b $b_d $o_b $memory
-e=${tmp}.2
-script=`find_nullity_one_with_orders $e $memory $a_d $o_a $b_d $o_b`
+shift 1
+i=1
+line=
+duals=
+while [ 0 -ne $# ]; do
+  if [ 1 -eq $# ]; then
+    rm -f ${tmp}.*
+    echo "$usage"
+    exit 1
+  fi
+  line="$line $1 ${tmp}.$i"
+  duals="$duals ${tmp}.$i $2"
+  dual_with_order $1 ${tmp}.$i $2 $memory
+  shift 2
+  let i=$i+1
+done
+e=${tmp}.e
+script=`find_nullity_one_with_orders $e $memory $duals`
 ret=$?
 if [ $ret -ne 0 ]; then
   rm -f ${tmp}.*
   echo $script
   exit $ret
 fi
-indicate_with_element $e $script $memory $a $a_d $b $b_d
+indicate_with_element $e $script $memory $line
 ret=$?
 rm -f ${tmp}.*
 exit $ret

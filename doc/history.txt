@@ -188,3 +188,4 @@ skew seventh
 20020911 - Start on improving zsums and friends to handle multiple generators
 20020911 - Integrate news zsums etc into scripts
 20020911 - Start to extend indicators to cope with multiple generators
+20020912 - Indicators extend to cope with multiple generators

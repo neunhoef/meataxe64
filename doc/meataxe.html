@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.20 2002/09/11 22:53:15 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.21 2002/09/12 11:47:28 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -5532,13 +5532,16 @@ characteristic two
 <td valign=top>Parameters:</td>
 </thead>
 <tr>
-<td valign=top>1</td><td valign=top>Generator 1</td>
+<td valign=top>1</td><td valign=top>Memory size</td>
 </tr>
 <tr>
-<td valign=top>2</td><td valign=top>Generator 2</td>
+<td valign=top>2</td><td valign=top>Generator 1</td>
 </tr>
 <tr>
-<td valign=top>3</td><td valign=top>Optional memory size (default 200k)</td>
+<td valign=top>3</td><td valign=top>Generator 2</td>
+</tr>
+<tr>
+<td valign=top>4-</td><td valign=top>Other generators</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>The indicator (+, - or o)</td>
@@ -5560,9 +5563,9 @@ Commentary: Indicators where the characteristic is not 2 can be
 deduced from the decomposition matrix, and so are not supported by the
 meataxe at present. In characteristic two the situation is different,
 and this is one of very few areas where condensation methods appear
-not to help. Both the script used, and the resulting indicator, are
-recorded in the names of symbolic links to the first group generator.
-All subsequent indicator calculation scripts also do this.
+not to help. The resulting indicator is recorded in the name of a
+symbolic link to the first group generator. All subsequent indicator
+calculation scripts also do this.
 </li>
 <li>
 <h3><a name="indicate_with_element">indicate_with_element</a></h3>
@@ -5626,19 +5629,22 @@ characteristic two, given the orders of the group generators.
 <td valign=top>Parameters:</td>
 </thead>
 <tr>
-<td valign=top>1</td><td valign=top>Generator 1</td>
+<td valign=top>1</td><td valign=top>Optional memory size (default 200k)</td>
 </tr>
 <tr>
-<td valign=top>2</td><td valign=top>Generator 2</td>
+<td valign=top>2</td><td valign=top>Generator 1</td>
 </tr>
 <tr>
 <td valign=top>3</td><td valign=top>Order of generator 1</td>
 </tr>
 <tr>
-<td valign=top>4</td><td valign=top>Order of generator 2</td>
+<td valign=top>4</td><td valign=top>Generator 2</td>
 </tr>
 <tr>
-<td valign=top>5</td><td valign=top>Optional memory size (default 200k)</td>
+<td valign=top>5</td><td valign=top>Order of generator 2</td>
+</tr>
+<tr>
+<td valign=top>6-</td><td valign=top>Other generators and orders</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>The indicator (+, - or o)</td>
@@ -5671,22 +5677,25 @@ of nullity one.
 <td valign=top>Parameters:</td>
 </thead>
 <tr>
-<td valign=top>1</td><td valign=top>Generator 1</td>
+<td valign=top>1</td><td valign=top>The script used to create the element of nullity one</td>
 </tr>
 <tr>
-<td valign=top>2</td><td valign=top>Generator 2</td>
+<td valign=top>2</td><td valign=top>Memory size</td>
 </tr>
 <tr>
-<td valign=top>3</td><td valign=top>The script used to create the element of nullity one</td>
+<td valign=top>3</td><td valign=top>Generator 1</td>
 </tr>
 <tr>
 <td valign=top>4</td><td valign=top>Order of generator 1</td>
 </tr>
 <tr>
-<td valign=top>5</td><td valign=top>Order of generator 2</td>
+<td valign=top>5</td><td valign=top>Generator 2</td>
 </tr>
 <tr>
-<td valign=top>6</td><td valign=top>Optional memory size (default 200k)</td>
+<td valign=top>6</td><td valign=top>Order of generator 2</td>
+</tr>
+<tr>
+<td valign=top>7-</td><td valign=top>Other generators and orders</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>The indicator (+, - or o)</td>

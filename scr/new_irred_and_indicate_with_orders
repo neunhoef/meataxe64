@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: new_irred_and_indicate_with_orders,v 1.6 2002/09/11 21:20:47 jon Exp $
+# $Id: new_irred_and_indicate_with_orders,v 1.7 2002/09/12 11:47:28 jon Exp $
 #
 # Script to classify an irreducible representation
 #
@@ -55,7 +55,20 @@ script=`echo $out | sed -e "s/^.*using script //g"`
 new_name=`echo $out | sed -e "s/^Found a new irreducible //g;s/ of dimension .*$//g"`
 if [ 0 -eq $ret ]; then
   if [ 2 -eq `zchar $a` -o 2 -eq `zchar $b` ]; then
-    indicate_with_script ${new_name}_1 ${new_name}_2 $script $o_a $o_b $memory
+    shift
+    i=1
+    line=
+    while [ $# -gt 0 ]; do
+      if [ 1 -eq $# ]; then
+        rm -f ${tmp}.*
+        echo "$usage"
+        exit 1
+      fi
+      line="$line ${new_name}_$i $2"
+      let i=$i+1
+      shift 2
+    done
+    indicate_with_script $script $memory $line
   fi
 fi
 exit 0
