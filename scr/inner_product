@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: inner_product,v 1.1 2002/10/04 17:15:06 jon Exp $
+# $Id: inner_product,v 1.2 2002/10/13 14:16:08 jon Exp $
 #
 # Script to form x S y_tra
 #
@@ -43,7 +43,7 @@ else
 fi
 # TODO: reuse temps
 tmp=tmp${PPID}
-zmu $x $S ${tmp}.0 $memory
+zmu -m $memory $x $S ${tmp}.0
 ret=$?
 if [ 0 -ne $ret ]; then
   rm -f ${tmp}.*
@@ -55,7 +55,7 @@ if [ 0 -ne $ret ]; then
   rm -f ${tmp}.*
   exit 1
 fi
-zmu ${tmp}.0 ${tmp}.1 ${tmp}.2 $memory
+zmu -m $memory ${tmp}.0 ${tmp}.1 ${tmp}.2
 ret=$?
 if [ 0 -ne $ret ]; then
   rm -f ${tmp}.*

@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.33 2002/10/12 14:17:06 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.34 2002/10/13 14:16:08 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -253,6 +253,59 @@ starting letter. Thus we have zex for explode, and eim for implode.
 <p>
 Output on stdout is expected program output, eg the rank of a matrix.
 Output on stderr is error diagnostic information.
+</p>
+<p>
+There are some parameters which are applicable to all executables.
+These also have environemnt variable setting mechanisms. Parameters on
+the command line override those in the environemnt, which in turn
+override the program defaults.
+<table>
+<thead>
+<td>
+Command line
+</td>
+<td>
+Environment variable
+</td>
+<td>
+Meaning
+</td>
+</thead>
+<tr>
+<tr>
+<td>
+-m &lt;memory&gt;
+</td>
+<td>
+mtx_memory
+</td>
+<td>
+The amount of memory to be used
+</td>
+</tr>
+<tr>
+<td>
+-q
+</td>
+<td>
+mtx_quiet
+</td>
+<td>
+Turn off verbose mode
+</td>
+</tr>
+<tr>
+<td>
+-v
+</td>
+<td>
+mtx_verbose
+</td>
+<td>
+Turn on verbose mode
+</td>
+</tr>
+</table>
 </p>
 <ol>
 <li><a href="#dtou">dtou</a></li>
@@ -2047,9 +2100,6 @@ Purpose: Multiply two matrices (or maps)
 </tr>
 <tr>
 <td valign=top>3</td><td valign=top>Result matrix (or map)</td>
-</tr>
-<tr>
-<td valign=top>4</td><td valign=top>Optional memory size (default 200k)</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>None</td>

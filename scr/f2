@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: f2,v 1.5 2002/09/11 21:20:47 jon Exp $
+# $Id: f2,v 1.6 2002/10/13 14:16:08 jon Exp $
 #
 # Script to perform A + BC + C
 #
@@ -21,7 +21,7 @@ if [ $# -ne 5 ]; then
   exit 1;
 fi
 if [ -e $1 -a -e $2 -a -e $3 ]; then
-  zmu $2 $3 ${5}_1 400
+  zmu -m 400 $2 $3 ${5}_1
   if [ $? -ne 0 ]; then
     exit 1
   fi

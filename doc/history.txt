@@ -201,3 +201,4 @@ skew seventh
 20021007 - Fixes to singular_vector
 20021012 - Add zclean. Add zsing
 20021012 - Add zsign
+20021013 - Use -m for zmu throughout all scripts

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: sym_basis,v 1.7 2002/09/19 10:51:09 jon Exp $
+# $Id: sym_basis,v 1.8 2002/10/13 14:16:08 jon Exp $
 #
 # Script to compute a symmetry basis wrt an ordered set of irreducibles
 #
@@ -152,7 +152,7 @@ for x in `cat $irreds`; do
       z=1
       names=
       for a in $*; do
-        zmu ${tmp}.3 $a ${tmp}.4 $memory
+        zmu -m $memory ${tmp}.3 $a ${tmp}.4
         zss ${tmp}.3 ${tmp}.4 ${tmp}.5_$z
         names="$names ${tmp}.5_$z"
         let z=$z+1
@@ -227,7 +227,7 @@ for x in `cat $irreds`; do
         rm -f ${tmp}.*
         exit 1
       fi
-      zmu ${tmp}.4 ${tmp}.3 ${tmp}.5
+      zmu -m $memory ${tmp}.4 ${tmp}.3 ${tmp}.5
       rm ${tmp}.4
 # ${tmp}.5 is a standard basis for this irreducible piece
       if [ 0 -eq $have_basis ]; then

@@ -1,5 +1,5 @@
 /*
- * $Id: parse.c,v 1.2 2002/10/12 14:17:06 jon Exp $
+ * $Id: parse.c,v 1.3 2002/10/13 14:16:08 jon Exp $
  *
  * Function to parse command line flags
  *
@@ -33,11 +33,11 @@ unsigned int memory = MEM_SIZE;
 static parse_element parse_table[] =
 {
   {
-    &verbose,
+    &memory,
     1,
-    nullary,
-    "-v",
-    "mtx_verbose"
+    unary,
+    "-m",
+    "mtx_memory"
   },
   {
     &verbose,
@@ -47,11 +47,11 @@ static parse_element parse_table[] =
     "mtx_quiet"
   },
   {
-    &memory,
+    &verbose,
     1,
-    unary,
-    "-m",
-    "mtx_memory"
+    nullary,
+    "-v",
+    "mtx_verbose"
   },
 };
 
