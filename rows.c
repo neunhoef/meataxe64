@@ -1,5 +1,5 @@
 /*
- * $Id: rows.c,v 1.23 2004/04/21 23:05:45 jon Exp $
+ * $Id: rows.c,v 1.24 2004/04/24 09:03:55 jon Exp $
  *
  * Row manipulation for meataxe
  *
@@ -32,13 +32,16 @@ static void row_add_2(const unsigned int *row1, const unsigned int *row2,
                      unsigned int *row3, unsigned int len)
 {
   unsigned int i, j;
+  const unsigned int *rowa;
   assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
   assert(NULL != row3);
   /* Unroll for efficiency */
   j = len / 8;
-  for (i = 0; i < j; i++) {
+  i = j * 8;
+  rowa = row1 + i;
+  while (row1 < rowa) {
     *(row3++) = *(row1++) ^ *(row2++);
     *(row3++) = *(row1++) ^ *(row2++);
     *(row3++) = *(row1++) ^ *(row2++);
@@ -48,7 +51,8 @@ static void row_add_2(const unsigned int *row1, const unsigned int *row2,
     *(row3++) = *(row1++) ^ *(row2++);
     *(row3++) = *(row1++) ^ *(row2++);
   }
-  for (i = j * 8; i < len; i++) {
+  rowa += len - i;
+  while (row1 < rowa) {
     *(row3++) = *(row1++) ^ *(row2++);
   }
 }
@@ -57,12 +61,15 @@ static void row_inc_2_sub(const unsigned int *row1,
                           unsigned int *row2, unsigned int len)
 {
   unsigned int i, j;
+  const unsigned int *rowa;
   assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
   /* Unroll for efficiency */
   j = len / 8;
-  for (i = 0; i < j; i++) {
+  i = j * 8;
+  rowa = row1 + i;
+  while (row1 < rowa) {
     *(row2++) ^= *(row1++);
     *(row2++) ^= *(row1++);
     *(row2++) ^= *(row1++);
@@ -72,7 +79,8 @@ static void row_inc_2_sub(const unsigned int *row1,
     *(row2++) ^= *(row1++);
     *(row2++) ^= *(row1++);
   }
-  for (i = j * 8; i < len; i++) {
+  rowa += len - i;
+  while (row1 < rowa) {
     *(row2++) ^= *(row1++);
   }
 }
@@ -161,12 +169,13 @@ static int check_for_3(unsigned int a)
 static void row_add_3(const unsigned int *row1, const unsigned int *row2,
                      unsigned int *row3, unsigned int len)
 {
-  unsigned int i;
+  const unsigned int *rowa;
   assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
   assert(NULL != row3);
-  for (i = 0; i < len; i++) {
+  rowa = row1 + len;
+  while (row1 < rowa) {
     unsigned int a, b, c, d, e, f, g, h;
     assert(4 == sizeof(unsigned int));
     a = *(row1++);
@@ -185,11 +194,12 @@ static void row_add_3(const unsigned int *row1, const unsigned int *row2,
 
 static void row_inc_3_sub(const unsigned int *row1, unsigned int *row2, unsigned int len)
 {
-  unsigned int i;
+  const unsigned int *rowa;
   assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
-  for (i = 0; i < len; i++) {
+  rowa = row1 + len;
+  while (row1 < rowa) {
     unsigned int a, b, c, d, e, f, g, h;
     assert(4 == sizeof(unsigned int));
     a = *(row1++);
@@ -211,14 +221,16 @@ static void row_inc_3(const unsigned int *row1,
 {
   if (len > 10) {
     /* Search for first non-zero */
-    while (len > 0) {
+    const unsigned int *rowa = row1 + len, *rowb = row1;
+    while (row1 < rowa) {
       if (0 != *row1) {
+        unsigned int len1 = row1 - rowb;
+        len -= len1;
+        row2 += len1;
         row_inc_3_sub(row1, row2, len);
         return;
       }
       row1++;
-      row2++;
-      len--;
     }
   } else {
     row_inc_3_sub(row1, row2, len);
@@ -230,14 +242,15 @@ static void row_inc_3(const unsigned int *row1,
 static void scaled_row_add_3(const unsigned int *row1, const unsigned int *row2,
                              unsigned int *row3, unsigned int len, unsigned int elt)
 {
-  unsigned int i;
+  const unsigned int *rowa;
   assert(2 == elt);
   assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
   assert(NULL != row3);
   NOT_USED(elt);
-  for (i = 0; i < len; i++) {
+  rowa = row1 + len;
+  while (row1 < rowa) {
     unsigned int a, b, c, d, e, f, g, h;
     assert(4 == sizeof(unsigned int));
     a = *(row1++);
@@ -258,13 +271,14 @@ static void scaled_row_add_3(const unsigned int *row1, const unsigned int *row2,
 static void scaled_row_inc_3_sub(const unsigned int *row1, unsigned int *row2,
                                  unsigned int len, unsigned int elt)
 {
-  unsigned int i;
+  const unsigned int *rowa;
   assert(2 == elt);
   assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
   NOT_USED(elt);
-  for (i = 0; i < len; i++) {
+  rowa = row1 + len;
+  while (row1 < rowa) {
     unsigned int a, b, c, d, e, f, g, h;
     assert(4 == sizeof(unsigned int));
     a = *(row1++);
@@ -287,14 +301,16 @@ static void scaled_row_inc_3(const unsigned int *row1, unsigned int *row2,
 {
   if (len > 10) {
     /* Search for first non-zero */
-    while (len > 0) {
+    const unsigned int *rowa = row1 + len, *rowb = row1;
+    while (row1 < rowa) {
       if (0 != *row1) {
+        unsigned int len1 = row1 - rowb;
+        len -= len1;
+        row2 += len1;
         scaled_row_inc_3_sub(row1, row2, len, elt);
         return;
       }
       row1++;
-      row2++;
-      len--;
     }
   } else {
     scaled_row_inc_3_sub(row1, row2, len, elt);
@@ -304,13 +320,14 @@ static void scaled_row_inc_3(const unsigned int *row1, unsigned int *row2,
 static void row_scale_3(const unsigned int *row1, unsigned int *row2,
                         unsigned int len, unsigned int elt)
 {
-  unsigned int i;
+  const unsigned int *rowa;
   assert(2 == elt);
   assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
   NOT_USED(elt);
-  for (i = 0; i < len; i++) {
+  rowa = row1 + len;
+  while (row1 < rowa) {
     unsigned int a;
     assert(4 == sizeof(unsigned int));
     a = *(row1++);
@@ -321,12 +338,13 @@ static void row_scale_3(const unsigned int *row1, unsigned int *row2,
 static void row_scale_in_place_3(unsigned int *row,
                                  unsigned int len, unsigned int elt)
 {
-  unsigned int i;
+  const unsigned int *rowa;
   assert(2 == elt);
   assert(0 != len);
   assert(NULL != row);
   NOT_USED(elt);
-  for (i = 0; i < len; i++) {
+  rowa = row + len;
+  while (row < rowa) {
     unsigned int a;
     assert(4 == sizeof(unsigned int));
     a = *(row);

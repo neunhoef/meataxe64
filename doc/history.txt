@@ -290,3 +290,4 @@ skew seventh
 20040411 - Fix bug in sym_basis_delta when dualising
 20040420 - Improvements to scaling in GF4
 20040421 - Improvements to add in GF3
+20040424 - Further GF3 improvements
