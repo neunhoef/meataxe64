@@ -39,3 +39,4 @@
 20011011 - More improvements to mmat and mop.c
 20011013 - Yet more monster generation work
 20011016 - Wrote input permutation
+20011019 - Wrote exploded input permutation

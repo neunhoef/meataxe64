@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.21 2001/10/16 22:55:53 jon Exp $
+# $Id: makefile,v 1.22 2001/10/18 22:59:18 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -16,6 +16,7 @@ EAD_TARGET=	ead
 ECT_TARGET=	ect
 EID_TARGET=	eid
 EIM_TARGET=	eim
+EIP_TARGET=	eip
 EMU_TARGET=	emu
 ETR_TARGET=	etr
 ID_TARGET=	zid
@@ -36,6 +37,7 @@ EAD_MODULES=	add ead endian files header map memory read rows system utils write
 ECT_MODULES=	count ect elements endian files header map memory primes read utils
 EID_MODULES=	eid elements endian exrows files header map memory primes rows utils write
 EIM_MODULES=	eim elements endian files header map memory primes read utils write
+EIP_MODULES=	eip elements endian exrows files header map memory primes read rows utils write
 EMU_MODULES=	command emu files map memory system utils
 ETR_MODULES=	elements endian etr files header map matrix memory primes read tra utils write
 ID_MODULES=	id ident elements endian header memory primes rows utils write
@@ -105,6 +107,9 @@ TARGET:=EID
 include targets.txt
 
 TARGET:=EIM
+include targets.txt
+
+TARGET:=EIP
 include targets.txt
 
 TARGET:=EMU
