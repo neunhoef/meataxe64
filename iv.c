@@ -1,5 +1,5 @@
 /*
- * $Id: iv.c,v 1.1 2001/12/15 20:47:27 jon Exp $
+ * $Id: iv.c,v 1.2 2002/01/18 21:52:23 jon Exp $
  *
  * Invert a matrix
  *
@@ -50,11 +50,6 @@ void invert(const char *m1, const char *m2, const char *name)
   }
   (void)grease_level(prime, &grease, r);
   r = grease.level;
-  (void)grease_level(prime, &grease, n);
-  if (r < grease.level) {
-    /* Choose grease level compatible with both */
-    grease.level = r;
-  }
   /* Now read the matrix */
   mat1 = matrix_malloc(nor);
   mat2 = matrix_malloc(nor);

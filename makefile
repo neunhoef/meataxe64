@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.42 2002/01/14 23:43:45 jon Exp $
+# $Id: makefile,v 1.43 2002/01/18 21:52:23 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -42,6 +42,7 @@ ZRE_TARGET=	zre
 ZRN_TARGET=	zrn
 ZRNF_TARGET=	zrnf
 ZNS_TARGET=	zns
+ZNSF_TARGET=	znsf
 ZQF_TARGET=	zqf
 ZQS_TARGET=	zqs
 ZSB_TARGET=	zsb
@@ -86,6 +87,7 @@ ZMU_MODULES=	elements endian grease header matrix memory mu mul primes read rows
 ZNOC_MODULES=	endian header primes read utils znoc
 ZNOR_MODULES=	endian header primes read utils znor
 ZNS_MODULES=	clean elements endian grease header matrix memory primes read ns rows utils write zns
+ZNSF_MODULES=	clean elements endian grease header ident matrix memory primes read nsf rows system utils write znsf
 ZPR_MODULES=	elements endian header memory pr primes read rows utils write
 ZPRIME_MODULES=	endian header primes read utils zprime
 ZQF_MODULES=	elements endian header memory primes read rows utils write zqf
@@ -106,7 +108,7 @@ ZTR_MODULES=	elements endian header matrix memory primes read tr tra utils write
 ZTRACE_MODULES=	elements endian header memory primes read rows utils ztrace
 ZWORDS_MODULES=	elements endian grease header matrix memory mul primes read rows utils write zwords
 
-MODULES=	$(DTOU_MODULES) $(EAD_MODULES) $(ECT_MODULES) $(EID_MODULES) $(EIM_MODULES) $(EIP_MODULES) $(EMU_MODULES) $(ESID_MODULES) $(ETR_MODULES) $(MON_MODULES) $(SNS_MODULES) $(SRN_MODULES) $(STOP_MODULES) $(ZAD_MODULES) $(ZCHAR_MODULES) $(ZCHECK_MODULES) $(ZCT_MODULES) $(ZCV_MODULES) $(ZDIAG_MODULES) $(ZDIFF_MODULES) $(ZEX_MODULES) $(ZID_MODULES) $(ZIP_MODULES) $(ZIV_MODULES) $(ZMU_MODULES) $(ZNOC_MODULES) $(ZNOR_MODULES) $(ZNS_MODULES) $(ZPR_MODULES) $(ZPRIME_MODULES) $(ZQF_MODULES) $(ZQS_MODULES) $(ZRE_MODULES) $(ZRN_MODULES) $(ZRNF_MODULES) $(ZSEL_MODULES) $(ZSID_MODULES) $(ZSL_MODULES) $(ZSP_MODULES) $(ZSPAN_MODULES) $(ZSS_MODULES) $(ZSUMS_MODULES) $(ZTE_MODULES) $(ZTR_MODULES) $(ZTRACE_MODULES) $(ZWORDS_MODULES)
+MODULES=	$(DTOU_MODULES) $(EAD_MODULES) $(ECT_MODULES) $(EID_MODULES) $(EIM_MODULES) $(EIP_MODULES) $(EMU_MODULES) $(ESID_MODULES) $(ETR_MODULES) $(MON_MODULES) $(SNS_MODULES) $(SRN_MODULES) $(STOP_MODULES) $(ZAD_MODULES) $(ZCHAR_MODULES) $(ZCHECK_MODULES) $(ZCT_MODULES) $(ZCV_MODULES) $(ZDIAG_MODULES) $(ZDIFF_MODULES) $(ZEX_MODULES) $(ZID_MODULES) $(ZIP_MODULES) $(ZIV_MODULES) $(ZMU_MODULES) $(ZNOC_MODULES) $(ZNOR_MODULES) $(ZNS_MODULES) $(ZNSF_MODULES) $(ZPR_MODULES) $(ZPRIME_MODULES) $(ZQF_MODULES) $(ZQS_MODULES) $(ZRE_MODULES) $(ZRN_MODULES) $(ZRNF_MODULES) $(ZSEL_MODULES) $(ZSID_MODULES) $(ZSL_MODULES) $(ZSP_MODULES) $(ZSPAN_MODULES) $(ZSS_MODULES) $(ZSUMS_MODULES) $(ZTE_MODULES) $(ZTR_MODULES) $(ZTRACE_MODULES) $(ZWORDS_MODULES)
 
 include dirs.txt
 
@@ -225,6 +227,9 @@ TARGET:=ZNOR
 include targets.txt
 
 TARGET:=ZNS
+include targets.txt
+
+TARGET:=ZNSF
 include targets.txt
 
 TARGET:=ZPR

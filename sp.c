@@ -1,5 +1,5 @@
 /*
- * $Id: sp.c,v 1.9 2001/12/27 01:17:12 jon Exp $
+ * $Id: sp.c,v 1.10 2002/01/18 21:52:23 jon Exp $
  *
  * Function to spin some vectors under two generators
  *
@@ -124,8 +124,9 @@ unsigned int spin(const char *in, const char *out, const char *a,
   }
   fclose(inp);
   map = my_malloc(max_rows * sizeof(int));
-  if (1 != nor) {
+  if (1 != nor || 2 != prime) {
     echelise(rows, nor, &d, &new_map, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, 1, name);
+    /* Clean up either for multiple rows, or non-identity leading non-zero entry */
     free(new_map);
     if (d != nor) {
       fprintf(stderr, "%s: %s contains dependent vectors, terminating\n", name, in);

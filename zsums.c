@@ -1,5 +1,5 @@
 /*
- * $Id: zsums.c,v 1.2 2002/01/14 23:43:45 jon Exp $
+ * $Id: zsums.c,v 1.3 2002/01/18 21:52:23 jon Exp $
  *
  * Compute sums in the group algebra in two matrices
  *
@@ -33,7 +33,7 @@ static unsigned int elt_num(unsigned int base, unsigned int n, unsigned int prim
 
 static void sums_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <in_file a> <in_file b> <out_file_stem> <order a> <order b> <n> [<memory>]\n", name, name);
+  fprintf(stderr, "%s: usage: %s <in_file a> <in_file b> <out_file_stem> <order a> <order b> <n> <nullity> [<memory>]\n", name, name);
 }
 
 int main(int argc, const char * const argv[])
@@ -45,14 +45,14 @@ int main(int argc, const char * const argv[])
   FILE *f;
   unsigned int memory = MEM_SIZE;
   unsigned int o_a, o_b, n, i, j, k, l, r, s, cur_word = 0, cur_power = 1;
-  unsigned int prime, nor, noc, count;
+  unsigned int prime, nor, noc, count, nullity;
   const header *h;
   int m;
   const char **names;
   const char **words;
   const char **elts;
 
-  if (7 != argc && 8 != argc) {
+  if (8 != argc && 9 != argc) {
     sums_usage();
     exit(1);
   }
@@ -62,8 +62,9 @@ int main(int argc, const char * const argv[])
   o_a = strtoul(argv[4], NULL, 0);
   o_b = strtoul(argv[5], NULL, 0);
   n = strtoul(argv[6], NULL, 0);
-  if (8 == argc) {
-    memory = strtoul(argv[7], NULL, 0);
+  nullity = strtoul(argv[7], NULL, 0);
+  if (9 == argc) {
+    memory = strtoul(argv[8], NULL, 0);
   }
   if (0 == n) {
     fprintf(stderr, "%s: no sums requested\n", name);
@@ -189,8 +190,9 @@ int main(int argc, const char * const argv[])
           if (0 == rank(elts[pos], &s, name)) {
             exit(1);
           }
-          if (s + 1 == nor) {
-            printf("%s: found element %s of nullity 1, terminating\n", name, elts[pos]);
+          if (s < nor && s + nullity >= nor) {
+            printf("%s: found element %s of nullity %d, terminating\n",
+                   name, elts[pos], nor - s);
             return 0;
           }
         }
@@ -199,6 +201,6 @@ int main(int argc, const char * const argv[])
   }
   memory_dispose();
   /* Failed to find a suitable element */
-  printf("Failed to find a nullity 1 element\n");
+  printf("Failed to find a nullity %d element\n", nullity);
   return 1;
 }

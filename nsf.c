@@ -1,11 +1,11 @@
 /*
- * $Id: rnf.c,v 1.2 2002/01/18 21:52:23 jon Exp $
+ * $Id: nsf.c,v 1.1 2002/01/18 21:52:23 jon Exp $
  *
- * Compute the rank of a matrix, using temporary files
+ * Compute the nullspace of a matrix, using temporary files
  *
  */
 
-#include "rnf.h"
+#include "nsf.h"
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
@@ -13,44 +13,67 @@
 #include "endian.h"
 #include "grease.h"
 #include "header.h"
+#include "ident.h"
 #include "matrix.h"
 #include "memory.h"
 #include "read.h"
 #include "system.h"
 #include "utils.h"
+#include "write.h"
 
 typedef struct file_struct file_struct, *file;
 
 struct file_struct
 {
-  FILE *f;
-  const char *name;
+  FILE *f, *f_id;
+  const char *name, *name_id;
   int created;
   file next;
 };
 
-unsigned int rank(const char *m, const char *dir, const char *name)
+unsigned int nullspace(const char *m1, const char *m2, const char *dir, const char *name)
 {
-  FILE *inp;
+  FILE *inp, *outp;
   const header *h;
-  unsigned int prime, nob, nor, len, n, r, **mat1, **mat2, i, rows_to_do, max_rows, step1, step2;
+  header *h_out;
+  unsigned int prime, nob, nod, nor, len, len_id, n, r, **mat1, **mat2, **mat3, **mat4,
+      i, rows_to_do, max_rows, step1, step2;
   int *map;
   grease_struct grease;
   const char *tmp = tmp_name();
-  char *name1, *name2;
+  char *name1, *name2, *name3, *name4, *name5;
   file_struct f, t1, t2;
   file in, out;
   assert(NULL != tmp);
   assert(NULL != dir);
-  assert(NULL != m);
+  assert(NULL != m1);
+  assert(NULL != m2);
+  NOT_USED(mat3);
+  NOT_USED(mat4);
+  NOT_USED(inp);
   i = strlen(tmp) + strlen(dir);
   name1 = my_malloc(i + 4);
   name2 = my_malloc(i + 4);
+  name3 = my_malloc(i + 4);
+  name4 = my_malloc(i + 4);
+  name5 = my_malloc(i + 4);
   sprintf(name1, "%s/%s.0", dir, tmp);
-  sprintf(name2, "%s/%s.1", dir, tmp);
-  f.name = m;
+  sprintf(name2, "%s/%s.1", dir, tmp); /* Two for input */
+  sprintf(name3, "%s/%s.2", dir, tmp);
+  sprintf(name4, "%s/%s.3", dir, tmp); /* Two for identity */
+  sprintf(name5, "%s/%s.4", dir, tmp); /* One for null vectors */
+  outp = fopen(name5, "wb");
+  if (NULL == outp) {
+    fprintf(stderr, "%s: cannot open intermediate null vector file %s, terminating\n",
+            name, name5);
+    exit(1);
+  }
+  f.name = m1;
+  f.name_id = name4;
   t1.name = name1;
   t2.name = name2;
+  t1.name_id = name3;
+  t2.name_id = name4;
   f.next = &t1;
   t1.next = &t2;
   t2.next = &t1;
@@ -58,20 +81,28 @@ unsigned int rank(const char *m, const char *dir, const char *name)
   out = &t1;
   t1.created = 0;
   t2.created = 0;
-  if (0 == open_and_read_binary_header(&inp, &h, m, name)) {
+  if (0 == open_and_read_binary_header(&f.f, &h, m1, name)) {
     exit(1);
   }
-  f.f = inp;
   prime = header_get_prime(h);
   nob = header_get_nob(h);
+  nod = header_get_nod(h);
   nor = header_get_nor(h);
   len = header_get_len(h);
   header_free(h);
+  /* Create an identity */
+  if (0 == ident(prime, nor, nor, 1, name4, name)) {
+    exit(1);
+  }
+  if (0 == open_and_read_binary_header(&f.f_id, &h, name4, name)) {
+    exit(1);
+  }
+  len_id = header_get_len(h);
   max_rows = memory_rows(len, 800);
   r = memory_rows(len, 100);
   if (r < prime) {
-    fprintf(stderr, "%s: cannot allocate %d rows for %s, terminating\n", name, prime, m);
-    fclose(inp);
+    fprintf(stderr, "%s: cannot allocate %d rows for %s, terminating\n", name, prime, m1);
+    fclose(f.f);
     exit(2);
   }
   (void)grease_level(prime, &grease, r);
@@ -164,5 +195,38 @@ unsigned int rank(const char *m, const char *dir, const char *name)
   if (t2.created) {
     (void)remove(t2.name);
   }
-  return r;
+  fclose(outp);
+  if (nor > r) {
+    /* Found some NULL vectors */
+    unsigned int *row;
+    row = memory_pointer(0);
+    h_out = header_create(prime, nob, nod, nor, nor - r);
+    if (0 == open_and_write_binary_header(&outp, h_out, m2, name)) {
+      fprintf(stderr, "%s: cannot open output %s, terminating\n", name, m2);
+      exit(1);
+    }
+    inp = fopen(name5, "rb");
+    if (NULL == inp) {
+      fprintf(stderr, "%s: cannot open intermediate null vector file %s, terminating\n",
+              name, name5);
+      exit(1);
+    }
+    for (i = 0; i < nor - r; i++) {
+      if (0 == endian_read_row(inp, row, len_id)) {
+        fprintf(stderr, "%s: cannot read row from %s, terminating\n", name, name5);
+        fclose(inp);
+        fclose(outp);
+        exit(1);
+      }
+      if (0 == endian_write_row(outp, row, len_id)) {
+        fprintf(stderr, "%s: cannot write row to %s, terminating\n", name, m2);
+        fclose(inp);
+        fclose(outp);
+        exit(1);
+      }
+    }
+    fclose(inp);
+    fclose(outp);
+  }
+  return nor - r;
 }

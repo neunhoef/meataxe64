@@ -1,5 +1,5 @@
 #
-# $Id: find_nullity_one,v 1.1 2002/01/14 23:43:45 jon Exp $
+# $Id: find_nullity_one,v 1.2 2002/01/18 21:52:23 jon Exp $
 #
 # Script to find an element of nullity one in two generators
 #
@@ -66,7 +66,7 @@ if [ $ok -eq 0 ]; then
     exit 1
   fi
   while [ $ok -eq 0 ]; do
-    out=`zsums $a $b ${tmp}.zsums $o_a $o_b 10 $memory`
+    out=`zsums $a $b ${tmp}.zsums $o_a $o_b 10 1 $memory`
     ret=$?
     if [ 2 -eq $ret ]; then
       let memory=`more_memory $memory`

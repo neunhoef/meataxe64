@@ -42,7 +42,7 @@ int main(int argc, const char * const argv[])
     fprintf(stderr, "%s: %s has bad prime power %d\n", name, argv[1], prime);
     exit(1);
   }
-  printf("%d\n", prime);
+  printf("%d\n", ch);
   fclose(inp);
   return 0;
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: sb.c,v 1.1 2001/12/23 23:31:42 jon Exp $
+ * $Id: sb.c,v 1.2 2002/01/18 21:52:23 jon Exp $
  *
  * Function to spin some vectors under two generators to obtain a standard base
  *
@@ -136,6 +136,17 @@ unsigned int spin(const char *in, const char *out, const char *a,
     memcpy(rows2[d], rows1[d], len * sizeof(unsigned int));
   }
   map = my_malloc(max_rows * sizeof(int));
+  if (1 != nor || 2 != prime) {
+    echelise(rows2, nor, &d, &new_map, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, 1, name);
+    /* Clean up the rows we use for basis detection, 
+     * either for multiple rows, or non-identity leading non-zero entry */
+    free(new_map);
+    if (d != nor) {
+      fprintf(stderr, "%s: %s contains dependent vectors, terminating\n", name, in);
+      cleanup(NULL, f_a, f_b);
+      exit(1);
+    }
+  }
   for (d = 0; d < nor; d++) {
     unsigned int i;
     unsigned int elt = first_non_zero(rows1[d], nob, len, &i);
