@@ -1,5 +1,5 @@
 /*
- * $Id: tsp.c,v 1.4 2002/07/03 08:52:49 jon Exp $
+ * $Id: tsp.c,v 1.5 2002/07/04 17:57:40 jon Exp $
  *
  * Function to spin some vectors under two generators in tensor space
  *
@@ -39,26 +39,6 @@ struct gen_struct
   unsigned int **rows_2;
   gen next;
 };
-
-static unsigned int find_extent(unsigned int nor, unsigned int len)
-{
-  unsigned int avail;
-  double ratio;
-  assert(0 != nor);
-  assert(0 != len);
-  avail = memory_rows(len, 10);
-  ratio = nor / ((0 == avail) ? 1 : avail);
-  avail = (unsigned int)ceil(ratio * avail);
-  if (0 == avail) {
-    avail = 1;
-  } else if (avail >= 100) {
-    avail = 99;
-  }
-  while (avail > 0 && memory_rows(len, avail) > nor) {
-    avail--;
-  }
-  return avail + 1;
-}
 
 static void cleanup(FILE *f1, FILE *f2, FILE *f3, FILE *f4, FILE *f5)
 {
