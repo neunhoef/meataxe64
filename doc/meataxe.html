@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.24 2002/09/18 16:38:38 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.25 2002/09/18 17:05:06 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -4250,6 +4250,7 @@ dimension increases.
 <li><a href="#find_nullity_one_with_orders">find_nullity_one_with_orders</a></li>
 <li><a href="#find_nullity_onef_with_orders">find_nullity_onef_with_orders</a></li>
 <li><a href="#find_restricted_nullity_one_with_orders">find_restricted_nullity_one_with_orders</a></li>
+<li><a href="#find_restricted_nullity_onef_with_orders">find_restricted_nullity_onef_with_orders</a></li>
 <li><a href="#functions">functions</a></li>
 <li><a href="#indicate">indicate</a></li>
 <li><a href="#indicate_with_element">indicate_with_element</a></li>
@@ -4272,6 +4273,7 @@ dimension increases.
 <li><a href="#quick_order">quick_order</a></li>
 <li><a href="#real_indicate">real_indicate</a></li>
 <li><a href="#restrict_with_orders">restrict_with_orders</a></li>
+<li><a href="#restrictf_with_orders">restrictf_with_orders</a></li>
 <li><a href="#rip_rank">rip_rank</a></li>
 <li><a href="#signature">signature</a></li>
 <li><a href="#singular_order">singular_order</a></li>
@@ -5650,6 +5652,63 @@ but calling <a href="#zrsums">zrsums</a> instead. See commentary on
 zrsums for rationale.
 </li>
 <li>
+<h3><a name="find_restricted_nullity_onef_with_orders">find_restricted_nullity_onef_with_orders</a></h3>
+Purpose: A version of <a
+href="#find_nullity_onef_with_orders">find_nullity_onef_with_orders</a>
+where the coefficients are restricted to a subfield
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Output</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Order of subfield</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>Memory size</td>
+</tr>
+<tr>
+<td valign=top>4</td><td valign=top>Memory size</td>
+</tr>
+<tr>
+<td valign=top>5</td><td valign=top>Generator 1</td>
+</tr>
+<tr>
+<td valign=top>6</td><td valign=top>Order of generator 1</td>
+</tr>
+<tr>
+<td valign=top>7</td><td valign=top>Generator 2</td>
+</tr>
+<tr>
+<td valign=top>8</td><td valign=top>Order of generator 2</td>
+</tr>
+<tr>
+<td valign=top>9-:</td><td valign=top>Other generators and orders</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>The script used to produce the element</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient memory for workspace</td>
+</tr>
+</table>
+Commentary: Essentially the same as <a
+href="#find_nullity_onef_with_orders">find_nullity_onef_with_orders</a>,
+but calling <a href="#zrsumsf">zrsumsf</a> instead. See commentary on
+zrsums for rationale.
+</li>
+<li>
 <h3><a name="functions">functions</a></h3>
 Purpose: A set of functions used as subroutines by other scripts
 <table>
@@ -6700,6 +6759,67 @@ restrict. From a theoretical point of view, the field necessary for
 the representation is precisely the field necessary for the character
 values, so if the character is known this again gives precise
 information.
+</li>
+<li>
+<h3><a name="restrictf_with_orders">restrictf_with_orders</a></h3>
+Purpose: Attempt to restrict a representation to a subfield
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Memory size</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Subfield order</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>Stem for output filenames</td>
+</tr>
+<tr>
+<td valign=top>4</td><td valign=top>Temporary file directory</td>
+</tr>
+<tr>
+<td valign=top>5</td><td valign=top>Generator 1</td>
+</tr>
+<tr>
+<td valign=top>6</td><td valign=top>Order generator 1</td>
+</tr>
+<tr>
+<td valign=top>7</td><td valign=top>Generator 2</td>
+</tr>
+<tr>
+<td valign=top>8</td><td valign=top>Order generator 2</td>
+</tr>
+<tr>
+<td valign=top>9-:</td><td valign=top>Other generators and orders</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>None</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient memory for workspace</td>
+</tr>
+<tr>
+<td valign=top>254</td><td valign=top>No nullity one element found over subfield</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Representation does not restrict</td>
+</tr>
+</table>
+Commentary: This script is similar to <a
+href="#restrict_with_orders">restrict_with_orders</a>, except that
+intermediate files are used to cope with insufficient memory
+requirements.
 </li>
 <li>
 <h3><a name="rip_rank">rip_rank</a></h3>

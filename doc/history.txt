@@ -192,3 +192,4 @@ skew seventh
 20020917 - Added doc for ztco, ztcv, sym_basis
 20020918 - Added zrsumsf
 20020918 - Revise restrict_with_orders to accept multiple generators
+20020918 - Add restrictf_with_orders and find_restricted_nullity_onef_with_orders

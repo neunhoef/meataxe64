@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: find_restricted_nullity_one_with_orders,v 1.7 2002/09/18 17:05:06 jon Exp $
+# $Id: find_restricted_nullity_onef_with_orders,v 1.1 2002/09/18 17:05:06 jon Exp $
 #
 # Script to find an element of nullity one in two generators in a restricted group algebra
 #
@@ -8,14 +8,15 @@
 # $1: output file name
 # $2: subfield order
 # $3: initial memory
-# $4: generator a
-# $5: order a
-# $6: generator b
-# $7: order b
-# $8-: further generators and orders
+# $4: temporary directory
+# $5: generator a
+# $6: order a
+# $7: generator b
+# $8: order b
+# $9-: further generators and orders
 #
-usage="$0: usage: $0 <out> <subfield size> <memory> <a> <order a> <b> <order b> [<other generators and orders>]"
-if [ $# -lt 7 ]; then
+usage="$0: usage: $0 <out> <subfield size> <memory> <tmp dir> <a> <order a> <b> <order b> [<other generators and orders>]"
+if [ $# -lt 8 ]; then
   echo "$usage"
   exit 1;
 fi
@@ -23,11 +24,12 @@ fi
 e=$1
 sub=$2
 memory=$3
-a=$4
-o_a=$5
-b=$6
-o_b=$7
-shift 3
+tmp_dir=$4
+a=$5
+o_a=$6
+b=$7
+o_b=$8
+shift 4
 tmp=tmp${PPID}
 ok=0
 nor=`znor $a`
@@ -48,7 +50,7 @@ while [ $# -ne 0 ]; do
 done
 depth=`max_depth $q 1023`
 while [ $ok -eq 0 ]; do
-  out=`zrsums ${tmp}.zsums $depth 1 $sub $memory $line 2>/dev/null`
+  out=`zrsumsf ${tmp}.zsums $depth 1 $sub $memory $tmp_dir $line 2>/dev/null`
   ret=$?
   if [ 2 -eq $ret ]; then
     let memory=`more_memory $memory`

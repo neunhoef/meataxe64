@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: restrict_with_orders,v 1.7 2002/09/18 17:05:06 jon Exp $
+# $Id: restrictf_with_orders,v 1.1 2002/09/18 17:05:06 jon Exp $
 #
 # Script to restrict a representation from a field to a subfield
 #
@@ -8,11 +8,12 @@
 # $1: initial memory
 # $2: subfield order
 # $3: output stem
-# $4: generator a
-# $5: order a
-# $6: generator b
-# $7: order b
-# $8-: other generators and orders
+# $4: temporary directory
+# $5: generator a
+# $6: order a
+# $7: generator b
+# $8: order b
+# $9-: other generators and orders
 #
 # outputs will be of the form <stem>_${nor}_{1,...}
 #
@@ -23,8 +24,8 @@
 # 254: no nullity one element found
 # 255: representation does not restrict
 #
-usage="$0: usage: $0 <memory> <subfield size> <output stem> <a> <order a> <b> <order b> [<other generators and orders>]"
-if [ $# -lt 7 ]; then
+usage="$0: usage: $0 <memory> <subfield size> <output stem> <tmp dir> <a> <order a> <b> <order b> [<other generators and orders>]"
+if [ $# -lt 8 ]; then
   echo "$usage"
   exit 1;
 fi
@@ -32,10 +33,11 @@ fi
 memory=$1
 sub=$2
 o=$3
-a=$4
-o_a=$5
-b=$6
-o_b=$7
+tmp_dir=$4
+a=$5
+o_a=$6
+b=$7
+o_b=$8
 if [ -e $a -a -e $b ]; then
   q=`zprime $a`
   nor=`znor $a`
@@ -52,7 +54,7 @@ else
   echo "$0: missing files $a or $b"
   exit 1
 fi
-let i=$#-3
+let i=$#-4
 let j=$i/2
 let k=$j*2
 if [ $i -ne $k ]; then
@@ -60,7 +62,7 @@ if [ $i -ne $k ]; then
   exit 1
 fi
 i=0
-shift 3
+shift 4
 line=
 while [ $i -lt $j ]; do
   rest[$i]=$1
@@ -74,7 +76,7 @@ done
 #
 tmp=tmp${PPID}
 e=${tmp}.1
-script=`find_restricted_nullity_one_with_orders $e $sub $memory $line`
+script=`find_restricted_nullity_onef_with_orders $e $sub $memory $tmp_dir $line`
 ret=$?
 if [ $ret -ne 0 ]; then
   rm -f ${tmp}.*
@@ -82,7 +84,7 @@ if [ $ret -ne 0 ]; then
   exit $ret
 fi
 name=${tmp}_${nor}
-x=`base $e ${name} ${tmp}.0 ${rest[*]}`
+x=`basef $e ${name} ${tmp}.0 $tmp_dir $memory ${rest[*]}`
 ret=$?
 if [ $ret -ne 0 ]; then
   echo base returns $ret, terminating
