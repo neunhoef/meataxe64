@@ -329,3 +329,6 @@ skew seventh
 20041124 - Changed new_irred to try existing irreds first
 20041231 - Added missing return when clean_vectors detects header mismatch
 20050101 - Remove redundant spaces in count_irreds
+20050102 - Allow zpro to handle prime not 1
+20050102 - First attempt at zfol working
+20050106 - Got zfol to handle HN 1539000 permutation representation
