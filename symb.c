@@ -1,5 +1,5 @@
 /*
- * $Id: symb.c,v 1.3 2003/06/13 22:54:10 jon Exp $
+ * $Id: symb.c,v 1.4 2003/06/14 07:58:35 jon Exp $
  *
  * Function to compute a symmetry basis
  *
@@ -291,10 +291,16 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
           /* The rows we want are those for which new_map[x] >= 0 */
           unsigned int j, k, l = 0;
           new_nor += d;
+          assert(new_nor <= space_size);
           /* Update map with new row info */
           k = sub_nor;
           for (j = 0; j < rows_to_do; j++) {
+            unsigned int *row;
             if (0 <= new_map[j]) {
+              /* Put the new row into ech_rows */
+              row = mat[rows_to_do + j];
+              mat[rows_to_do + j] = ech_rows[k];
+              ech_rows[k] = row;
               map[k++] = new_map[j];
             }
           }
@@ -329,11 +335,18 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
           }
           /* Compute new rows */
           assert(2 * l <= total_rows);
-          if (0 == mul_from_store(mat, mat + l, gen->f, gen->is_map, noc, len, nob,
-                                  l, noc, prime, &grease, verbose, gen->m, name)) {
-            fprintf(stderr, "%s: failed to multiply using %s, terminating\n", name, gen->m);
-            cleanup();
-            exit(1);
+          assert(l == spaces_per_loop * d);
+          /* We need to put the results in a safe place that won't be corrupted by
+           * when we copy in the next phase */
+          {
+            unsigned int m = (sub_nor > l) ? sub_nor : l;
+            if (0 == mul_from_store(mat, mat + m, gen->f, gen->is_map, noc, len, nob,
+                                    l, noc, prime, &grease, verbose, gen->m, name)) {
+              fprintf(stderr, "%s: failed to multiply using %s, terminating\n", name, gen->m);
+              cleanup();
+              exit(1);
+            }
+            l = m; /* Don't need l as a count any more */
           }
           errno = 0;
           t_out->f = fopen64(t_out->name, "wb");
