@@ -245,3 +245,4 @@ skew seventh
 20030329 - Hold P matrices in memory in ztco. Modify find_element to take more generators
 20030418 - Fix bug in field extend
 20030419 - Fix corresponding bug in field restrict
+20030425 - Fix bug in znsf caused by double allocation of same memory space

@@ -1,5 +1,5 @@
 /*
- * $Id: nsf.c,v 1.13 2003/02/28 20:04:58 jon Exp $
+ * $Id: nsf.c,v 1.14 2003/04/25 21:00:57 jon Exp $
  *
  * Compute the nullspace of a matrix, using temporary files
  *
@@ -162,7 +162,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
   mat4 = matrix_malloc(step2);
   for (n = 0; n < step1; n++) {
     mat1[n] = memory_pointer_offset(2 * sub, n, len);
-    mat3[n] = memory_pointer_offset(space, n, len_id);
+    mat3[n] = memory_pointer_offset(space + 2 * sub_id, n, len_id);
   }
   for (n = 0; n < step2; n++) {
     mat2[n] = memory_pointer_offset(sub, n, len);
