@@ -1,0 +1,48 @@
+#
+# $Id: dual,v 1.1 2001/12/23 23:31:42 jon Exp $
+#
+# Script to dual of a matrix
+#
+# Inputs
+# $1: matrix
+# $2: out
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+#
+#set -v
+. functions
+usage="$0: usage: $0 <in> <out>"
+if [ $# -ne 2 ]; then
+  echo $usage
+  exit 1;
+fi
+a=$1
+o=$2
+if [ -e $a ]; then
+  q=`zprime $a`
+  nor=`znor $a`
+  noc=`znoc $a`
+  if [ $nor -ne $noc ]; then
+    echo "$0: $a is not square"
+    exit 1
+  fi
+else
+  echo "$0: missing file $a"
+  exit 1
+fi
+tmp=tmp${PPID}
+ztr $a ${tmp}.0
+ok=0
+memory=200
+while [ 0 -eq $ok ]; do
+  ziv ${tmp}.0 $o $memory
+  ret=$?
+  if [ 2 -eq $ret ]; then
+    let memory=`more_memory $memory`
+  else
+    rm ${tmp}.0
+    exit $ret
+  fi  
+done

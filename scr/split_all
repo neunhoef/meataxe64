@@ -1,0 +1,62 @@
+#
+# $Id: split_all,v 1.1 2001/12/23 23:31:42 jon Exp $
+#
+# Script to split a representation completely
+#
+# Inputs
+# $1: generator a
+# $2: generator b
+# $3: output filename base
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+# 252: ran out of possible splitters
+#
+usage="$0: usage: $0 <a> <b> <output_stem>"
+if [ $# -ne 3 ]; then
+  echo $usage
+  exit 1;
+fi
+a=$1
+b=$2
+o=$3
+nor=`znor $a`
+res=`split $a $b $o 2>/dev/null | grep dimension 2>/dev/null`
+#
+# TODO: find a way to spot irreducibles as well
+# and avoid getting the return code of grep
+#
+ret=$?
+echo res = $res, ret = $ret
+if [ 1 -eq $ret ]; then
+  exit 1
+elif [ 255 -eq $ret ]; then
+  echo "irreducible module $a $b found"
+#
+# TODO: classify the irreducible
+#
+  exit 0
+elif [ 254 -eq $ret ]; then
+  echo "unable to split module $a $b (unexpected)"
+  exit 0
+elif [ 252 -eq $ret ]; then
+  echo "ran out of splitters for $a $b"
+  exit 252
+else
+# Split, so try some more
+#
+# TODO: deal with cases where splitting a representation overwrites
+# another representationwe wish to split later.
+#
+  echo $res
+  dim=`echo $res | sed -e "s/^.* dimension //g;s/,.*$//g"`
+  codim=`echo $res | sed -e "s/^.*, codimension //g"`
+  if [ $codim -eq $dim ]; then
+    split_all ${o}_${nor}_${dim}_a_{1,2} ${o}
+    split_all ${o}_${nor}_${codim}_b_{1,2} ${o}
+  else
+    split_all ${o}_${nor}_${dim}_{1,2} ${o}
+    split_all ${o}_${nor}_${codim}_{1,2} ${o}
+  fi
+fi

@@ -1,11 +1,11 @@
 /*
- * $Id: sp.c,v 1.8 2001/12/23 23:31:42 jon Exp $
+ * $Id: sb.c,v 1.1 2001/12/23 23:31:42 jon Exp $
  *
- * Function to spin some vectors under two generators
+ * Function to spin some vectors under two generators to obtain a standard base
  *
  */
 
-#include "sp.h"
+#include "sb.h"
 #include "clean.h"
 #include "elements.h"
 #include "endian.h"
@@ -50,7 +50,7 @@ unsigned int spin(const char *in, const char *out, const char *a,
   const header *h_in, *h_a, *h_b;
   header *h_out;
   unsigned int prime, nob, noc, nor, len, max_rows, d;
-  unsigned int **rows;
+  unsigned int **rows1, **rows2;
   int *map, *new_map;
   grease_struct grease;
   prime_ops prime_operations;
@@ -83,15 +83,19 @@ unsigned int spin(const char *in, const char *out, const char *a,
       prime != header_get_prime(h_a) ||
       prime != header_get_prime(h_b) ||
       nob != header_get_nob(h_a) ||
-      nob != header_get_nob(h_b)) {
-    fprintf(stderr, "%s: incompatible parameters for %s, %s, %s, terminating\n",
+      nob != header_get_nob(h_b) ||
+      1 != nor) {
+    fprintf(stderr, "%s: incompatible/bad parameters for %s, %s, %s, terminating\n",
             name, in, a, b);
     cleanup(inp, f_a, f_b);
     exit(1);
   }
   assert(header_get_len(h_a) == len);
   assert(header_get_len(h_b) == len);
-  h_out = header_create(prime, nob, header_get_nod(h_in), noc, nor);
+  h_out = header_create(prime, nob, header_get_nod(h_in), noc, noc);
+  header_free(h_in);
+  header_free(h_a);
+  header_free(h_b);
   gen_a.f = f_a;
   gen_a.m = a;
   gen_a.nor = 0;
@@ -101,41 +105,40 @@ unsigned int spin(const char *in, const char *out, const char *a,
   primes_init(prime, &prime_operations);
   rows_init(prime, &row_operations);
   grease_init(&row_operations, &grease);
-  max_rows = memory_rows(len, 900);
-  if (0 == nor) {
-    fprintf(stderr, "%s: no rows in input %s, terminating\n", name, in);
-    cleanup(inp, f_a, f_b);
-    exit(1);
-  }
+  max_rows = memory_rows(len, 450);
   if (0 == grease_level(prime, &grease, memory_rows(len, 100))) {
     fprintf(stderr, "%s: failed to get grease for %s, %s, %s, terminating\n",
             name, in, a, b);
     cleanup(inp, f_a, f_b);
     exit(2);
   }
-  rows = matrix_malloc(max_rows);
-  for (d = 0; d < max_rows; d++) {
-    rows[d] = memory_pointer_offset(0, d, len);
+  if (max_rows < noc + 1) {
+    fprintf(stderr, "%s: failed to get %d + 1 rows for %s, %s, %s, terminating\n",
+            name, noc, in, a, b);
+    cleanup(inp, f_a, f_b);
+    exit(2);
   }
-  if (0 == endian_read_matrix(inp, rows, len, nor)) {
-    fprintf(stderr, "%s: failed to read rows from %s, terminating\n", name, in);
+  max_rows = (max_rows > noc * 2) ? noc * 2 : max_rows; /* Can never need more than this */
+  rows1 = matrix_malloc(max_rows);
+  rows2 = matrix_malloc(max_rows);
+  for (d = 0; d < max_rows; d++) {
+    rows1[d] = memory_pointer_offset(0, d, len);
+    rows2[d] = memory_pointer_offset(450, d, len);
+  }
+  if (0 == endian_read_matrix(inp, rows1, len, nor)) {
+    fprintf(stderr, "%s: failed to read rows from %s, terminating\n",
+            name, in);
     cleanup(inp, f_a, f_b);
     exit(1);
   }
   fclose(inp);
-  map = my_malloc(max_rows * sizeof(int));
-  if (1 != nor) {
-    echelise(rows, nor, &d, &new_map, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, 1, name);
-    free(new_map);
-    if (d != nor) {
-      fprintf(stderr, "%s: %s contains dependent vectors, terminating\n", name, in);
-      cleanup(inp, f_a, f_b);
-      exit(1);
-    }
+  for (d = 0; d < nor; d++) {
+    memcpy(rows2[d], rows1[d], len * sizeof(unsigned int));
   }
+  map = my_malloc(max_rows * sizeof(int));
   for (d = 0; d < nor; d++) {
     unsigned int i;
-    unsigned int elt = first_non_zero(rows[d], nob, len, &i);
+    unsigned int elt = first_non_zero(rows1[d], nob, len, &i);
     assert(0 != elt);
     NOT_USED(elt);
     map[d] = i;
@@ -145,38 +148,50 @@ unsigned int spin(const char *in, const char *out, const char *a,
     cleanup(inp, f_a, f_b);
   }
   while (nor < max_rows && (gen_a.nor < nor || gen_b.nor < nor)) {
-    unsigned int rows_to_do = max_rows - nor;
-    unsigned int i, j = 0;
+    unsigned int rows_to_do = nor - gen->nor, rows_poss = max_rows - nor;
+    unsigned int i, j, k, old_nor = nor;
     /* Ensure we don't try to do too many */
-    rows_to_do = (rows_to_do + gen->nor > nor) ? (nor - gen->nor) : rows_to_do;
-    if (0 == mul_from_store(rows + gen->nor, rows + nor, gen->f, noc, len, nob,
-                            rows_to_do, prime, &grease, gen->m, name)) {
-      fprintf(stderr, "%s: failed to multiply using %s, terminating\n", name, gen->m);
-      cleanup(inp, f_a, f_b);
-      exit(1);
-    }
-    gen->nor += rows_to_do;
-    clean(rows, nor, rows + nor, rows_to_do, map, NULL, NULL, 0,
-          grease.level, prime, len, nob, 900, 0, 0, name);
-    echelise(rows + nor, rows_to_do, &d, &new_map, NULL, 0,
-             grease.level, prime, len, nob, 900, 0, 0, 1, name);
-    clean(rows + nor, rows_to_do, rows, nor, new_map, NULL, NULL, 0,
-          grease.level, prime, len, nob, 900, 0, 0, name);
-    for (i = 0; i < rows_to_do; i++) {
-      if (new_map[i] >= 0) {
-        /* Got a useful row */
-        unsigned int *row;
-        map[nor + j] = new_map[i];
-        /* Swap pointers */
-        row = rows[nor + j];
-        rows[nor + j] = rows[nor + i];
-        rows[nor + i] = row;
-        j++;
+    for (k = 0; k < rows_to_do; k += rows_poss) {
+      unsigned int stride = (k + rows_poss <= rows_to_do) ? rows_poss : rows_to_do - k;
+      if (0 == mul_from_store(rows1 + gen->nor, rows1 + nor, gen->f, noc, len, nob,
+                              stride, prime, &grease, gen->m, name)) {
+        fprintf(stderr, "%s: failed to multiply using %s, terminating\n", name, gen->m);
+        cleanup(inp, f_a, f_b);
+        exit(1);
       }
+      /* Now copy rows created to rows2 */
+      for (i = 0; i < stride; i++) {
+        memcpy(rows2[nor + i], rows1[nor + i], len * sizeof(unsigned int));
+      }
+      gen->nor += stride;
+      clean(rows2, nor, rows2 + nor, stride, map, NULL, NULL, 0,
+            grease.level, prime, len, nob, 900, 0, 0, name);
+      echelise(rows2 + nor, stride, &d, &new_map, NULL, 0,
+               grease.level, prime, len, nob, 900, 0, 0, 1, name);
+      clean(rows2 + nor, stride, rows2, nor, new_map, NULL, NULL, 0,
+            grease.level, prime, len, nob, 900, 0, 0, name);
+      j = 0;
+      for (i = 0; i < stride; i++) {
+        if (new_map[i] >= 0) {
+          /* Got a useful row */
+          unsigned int *row;
+          map[nor + j] = new_map[i];
+          /* Swap pointers */
+          row = rows1[nor + j];
+          rows1[nor + j] = rows1[nor + i];
+          rows1[nor + i] = row;
+          row = rows2[nor + j];
+          rows2[nor + j] = rows2[nor + i];
+          rows2[nor + i] = row;
+          j++;
+        }
+      }
+      free(new_map);
+      assert(j == d);
+      nor += d; /* The number of extra rows we made */
     }
-    free(new_map);
-    assert(j == d);
-    nor += d; /* The number of extra rows we made */
+    assert(gen->nor == old_nor);
+    NOT_USED(old_nor);
     gen = gen->next;
   }
   if (nor >= max_rows) {
@@ -186,21 +201,23 @@ unsigned int spin(const char *in, const char *out, const char *a,
   }
   fclose(f_a);
   fclose(f_b);
-  header_set_nor(h_out, nor);
+  if (nor != noc) {
+    fprintf(stderr, "%s: fails to spin to full space (%d, %d), terminating\n",
+            name, nor, noc);
+    exit(1);
+  }
   if (0 == open_and_write_binary_header(&outp, h_out, out, name)) {
     exit(1);
   }
-  if (0 == endian_write_matrix(outp, rows, len, nor)) {
+  if (0 == endian_write_matrix(outp, rows1, len, nor)) {
     fprintf(stderr, "%s: failed to write output to %s, terminating\n",
             name, out);
     fclose(outp);
     exit(1);
   }
-  header_free(h_in);
-  header_free(h_a);
-  header_free(h_b);
   header_free(h_out);
-  matrix_free(rows);
+  matrix_free(rows1);
+  matrix_free(rows2);
   grease_free(&grease);
   fclose(outp);
   return nor;

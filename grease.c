@@ -1,5 +1,5 @@
 /*
- * $Id: grease.c,v 1.15 2001/12/01 10:46:02 jon Exp $
+ * $Id: grease.c,v 1.16 2001/12/23 23:31:42 jon Exp $
  *
  * Functions to grease matrix rows
  *
@@ -129,13 +129,11 @@ static void split(unsigned int prime, unsigned int n,
 
 /* Compute, if necessary, grease row i */
 /* i is uncorrected for the table, so should not be zero */
-static int grease_make_row(grease grease, unsigned int i, unsigned int prime, unsigned int len)
+static void grease_make_row(grease grease, unsigned int i, unsigned int prime, unsigned int len)
 {
   unsigned int j = i - 1;
   assert(0 < i);
-  if (0 != grease->status[j]) {
-    return 1; /* Already done. This should catch scale by 1 */
-  } else {
+  if (0 == grease->status[j]) {
     unsigned int quot, rem, index;
     split(prime, i, &quot, &rem, &index);
     assert(0 != grease->status[index - 1]);
@@ -143,25 +141,24 @@ static int grease_make_row(grease grease, unsigned int i, unsigned int prime, un
       /* Scaled operation, shouldn't be by 1 */
       assert(1 != quot);
       (*grease->row_operations.scaler)(grease->rows[index - 1], grease->rows[j], len, quot);
-      return 1;
     } else {
-      int ok = (0 != grease->status[rem - 1]) || grease_make_row(grease, rem, prime, len);
       unsigned int k = index * quot - 1;
-      if (ok) {
-        if (0 == grease->status[k]) {
-          (*grease->row_operations.scaler)(grease->rows[index - 1], grease->rows[k], len, quot);
-          grease->status[k] = 1;
-        }
-        (*grease->row_operations.adder)(grease->rows[rem - 1], grease->rows[k], grease->rows[j], len);
-        grease->status[j] = 1;
+      if (0 == grease->status[rem - 1]) {
+        grease_make_row(grease, rem, prime, len);
       }
-      return ok;
+      if (0 == grease->status[k]) {
+        (*grease->row_operations.scaler)(grease->rows[index - 1], grease->rows[k], len, quot);
+        grease->status[k] = 1;
+      }
+      (*grease->row_operations.adder)(grease->rows[rem - 1], grease->rows[k], grease->rows[j], len);
+      grease->status[j] = 1;
     }
   }
 }
 
-int grease_make_rows(grease grease, unsigned int level,
-                     unsigned int prime, unsigned int len)
+#if 0
+void grease_make_rows(grease grease, unsigned int level,
+                      unsigned int prime, unsigned int len)
 {
   unsigned int i;
   unsigned int table_size = grease->size;
@@ -179,10 +176,20 @@ int grease_make_rows(grease grease, unsigned int level,
   /* Compute non-fixed rows */
   for (i = 0; i < table_size; i++) {
     if (0 == grease->status[i]) {
-      if (0 == grease_make_row(grease, i + 1, prime, len)) {
-        return 0;
-      }
+      grease_make_row(grease, i + 1, prime, len);
     }
   }
-  return 1;
+}
+#endif
+
+void grease_row_inc(grease grease, unsigned int len, unsigned int *row,
+                    unsigned int prime, unsigned int element)
+{
+  assert(NULL != row);
+  assert(NULL != grease);
+  assert(element >= 1);
+  if (0 == grease->status[element - 1]) {
+    grease_make_row(grease, element, prime, len);
+  }
+  (*grease->row_operations.incer)(grease->rows[element - 1], row, len);
 }

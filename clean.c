@@ -1,5 +1,5 @@
 /*
- * $Id: clean.c,v 1.9 2001/12/11 01:00:44 jon Exp $
+ * $Id: clean.c,v 1.10 2001/12/23 23:31:42 jon Exp $
  *
  * Cleaning and echilisation for meataxe
  *
@@ -21,6 +21,8 @@ static prime_ops prime_operations = {NULL, NULL, NULL, NULL};
 
 static row_ops row_operations = {NULL, NULL, NULL, NULL, NULL, NULL};
 
+#define LAZY_GREASE 1
+
 void clean(unsigned int **m1, unsigned int d1,
            unsigned int **m2, unsigned int d2, int *map,
            unsigned int **m1_e, unsigned int **m2_e, int record,
@@ -31,6 +33,7 @@ void clean(unsigned int **m1, unsigned int d1,
 {
   unsigned int i = 0, inc = grease_level;
   grease_struct grease, grease_e;
+  NOT_USED(name);
   assert(NULL != m1);
   assert(NULL != m2);
   assert(NULL != map);
@@ -77,12 +80,14 @@ void clean(unsigned int **m1, unsigned int d1,
       }
       j++;
     }
+#if LAZY_GREASE
+#else
     /* Now compute grease */
-    if (0 == grease_make_rows(&grease, count, prime, len) ||
-        ((0 != record) && 0 == grease_make_rows(&grease_e, count, prime, len_e))) {
-      fprintf(stderr, "%s: unable to compute grease, terminating\n", name);
-      exit(1);
+    grease_make_rows(&grease, count, prime, len);
+    if (0 != record) {
+      grease_make_rows(&grease_e, count, prime, len_e);
     }
+#endif
     inc = j;
     /* Now clean m2 with m1[i, i + inc] */
     for (j = 0; j < d2; j++) {
@@ -96,9 +101,17 @@ void clean(unsigned int **m1, unsigned int d1,
       }
       if (0 != elts) {
         elts = negate_elements(elts, nob, prime);
+#if LAZY_GREASE
+        grease_row_inc(&grease, len, m2[j], prime, elements_contract(elts, prime, nob));
+#else
         (*row_operations.incer)(grease.rows[elements_contract(elts, prime, nob) - 1], m2[j], len);
+#endif
         if (0 != record) {
+#if LAZY_GREASE
+          grease_row_inc(&grease, len_e, m2_e[j], prime, elements_contract(elts, prime, nob));
+#else
           (*row_operations.incer)(grease_e.rows[elements_contract(elts, prime, nob) - 1], m2_e[j], len_e);
+#endif
         }
       }
     } /* for */

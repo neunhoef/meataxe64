@@ -1,5 +1,5 @@
 /*
- * $Id: mul.c,v 1.20 2001/12/11 01:00:44 jon Exp $
+ * $Id: mul.c,v 1.21 2001/12/23 23:31:42 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
@@ -156,6 +156,8 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
   return 1;
 }
 
+#define LAZY_GREASE 1
+
 int mul_from_store(unsigned int **rows1, unsigned int **rows3,
                    FILE *inp, unsigned int noc, unsigned int len,
                    unsigned int nob, unsigned int nor, unsigned int prime,
@@ -193,11 +195,10 @@ int mul_from_store(unsigned int **rows1, unsigned int **rows3,
     }
     element_access_init(nob, i, size, &word_offset, &bit_offset, &mask);
     grease_init_rows(grease, prime);
-    if (0 == grease_make_rows(grease, size, prime, len)) {
-      fprintf(stderr, "%s: unable to compute grease, terminating\n", name);
-      fclose(inp);
-      return 0;
-    }
+#if LAZY_GREASE
+#else
+    grease_make_rows(grease, size, prime, len);
+#endif
     for (j = 0; j < nor; j++) {
       unsigned int *row1 = rows1[j];
       unsigned int elt = get_elements_from_row(row1 + word_offset, size * nob, bit_offset, mask);
@@ -205,7 +206,11 @@ int mul_from_store(unsigned int **rows1, unsigned int **rows3,
         row_init(rows3[j], len);
       }
       if (0 != elt) {
+#if LAZY_GREASE
+        grease_row_inc(grease, len, rows3[j], prime, contract(elt, prime, nob));
+#else
         (*row_operations.incer)(grease->rows[contract(elt, prime, nob) - 1], rows3[j], len);
+#endif
       }
     }
   }

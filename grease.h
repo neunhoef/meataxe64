@@ -1,5 +1,5 @@
 /*
- * $Id: grease.h,v 1.7 2001/11/18 16:43:45 jon Exp $
+ * $Id: grease.h,v 1.8 2001/12/23 23:31:42 jon Exp $
  *
  * Functions to grease matrix rows
  *
@@ -36,8 +36,12 @@ extern void grease_init_rows(grease grease, unsigned int prime);
 /* Free the row table and row type table */
 extern void grease_free(grease grease);
 
-/* Compute the derived rows from the nitial rows */
-extern int grease_make_rows(grease grease, unsigned int level,
-                            unsigned int prime, unsigned int len);
+/* row1 = row2 + grease_row[element], creating necessary grease rows en route */
+extern void grease_row_add(grease grease, unsigned int len, unsigned int *row1,
+                           const unsigned int *row2, unsigned int element);
+
+/* row1 += grease_row[element] , creating necessary grease rows en route */
+extern void grease_row_inc(grease grease, unsigned int len, unsigned int *row,
+                           unsigned int prime, unsigned int element);
 
 #endif
