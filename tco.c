@@ -1,5 +1,5 @@
 /*
- * $Id: tco.c,v 1.20 2004/06/05 22:04:17 jon Exp $
+ * $Id: tco.c,v 1.21 2004/06/06 09:39:34 jon Exp $
  *
  * Tensor condense one group element
  *
@@ -206,6 +206,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
   row_ops row_operations;
   grease_struct grease;
   unsigned int powers[GREASE_MAX];
+  unsigned int lim;
   assert(0 != s);
   assert(NULL != mults_l);
   assert(NULL != mults_r);
@@ -316,6 +317,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
     return 0;
   }
   nob = header_get_nob(h_l);
+  lim = bits_in_unsigned_int - nob;
   mask = get_mask_and_elts(nob, &elts_per_word);
   elts_per_word_nob = elts_per_word * nob;
   nod = header_get_nod(h_l);
@@ -633,7 +635,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
                           elt = *row;
                           word |= elt << te_o_c_offset;
                           te_o_c_offset += nob;
-                          if (te_o_c_offset + nob > bits_in_unsigned_int) {
+                          if (te_o_c_offset > lim) {
                             te_o_c_offset = 0;
                             te_rowsr[te_o_c_word] = word;
                             te_o_c_word++;
@@ -643,7 +645,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
                         }
                       } else {
                         te_o_c_offset += nobj;
-                        if (te_o_c_offset + nob > bits_in_unsigned_int) {
+                        if (te_o_c_offset > lim) {
                           te_rowsr[te_o_c_word] = word;
                           te_o_c_word += te_o_c_offset / elts_per_word_nob;
                           te_o_c_offset %= elts_per_word_nob;
