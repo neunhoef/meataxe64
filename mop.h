@@ -1,5 +1,5 @@
 /*
- * $Id: mop.h,v 1.5 2001/10/13 15:23:02 jon Exp $
+ * $Id: mop.h,v 1.6 2001/10/13 19:33:03 jon Exp $
  *
  * Monster operations for meataxe
  *
@@ -39,11 +39,11 @@ typedef struct suzy *suzel;
 
 extern suzel A, B;
 
-extern void FTOV(unsigned char *a, unsigned long b, unsigned char c);
+extern void FTOV(unsigned char *a, unsigned int b, unsigned char c);
 
-extern void FGAP(unsigned char *d, unsigned char *e, unsigned long f, unsigned long g);
+extern void FGAP(unsigned char *d, unsigned char *e, unsigned int f, unsigned int g);
 
-extern void FUNGAP(unsigned char *d, unsigned char *e, unsigned long f, unsigned long g);
+extern void FUNGAP(unsigned char *d, unsigned char *e, unsigned int f, unsigned int g);
 
 extern void init(void);
 

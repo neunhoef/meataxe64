@@ -1,5 +1,5 @@
 /*
- * $Id: mop.c,v 1.17 2001/10/13 17:49:14 jon Exp $
+ * $Id: mop.c,v 1.18 2001/10/13 19:33:03 jon Exp $
  *
  * Monster operations for meataxe
  *
@@ -19,7 +19,7 @@ unsigned long ptr1, ptr2;
 int PRINT;
 unsigned char vec1[24712], vec2[24712];
 static char suz1head[8], suz2head[8];
-static unsigned char orvec1[24712], orvec2[24712], vorvec[24712];
+static unsigned char vorvec[24712];
 static unsigned char s90head[12];
 static unsigned char s729head[12];
 static unsigned char s142head[12];
@@ -39,23 +39,23 @@ static suzel C, E, suzwork;
 
 suzel A, B;
 
-static unsigned char FFRV(const unsigned char *a, unsigned long b)
+static unsigned char FFRV(const unsigned char *a, unsigned int b)
 {
   unsigned char c;
   c = a[b/4];
   return (c>>(2*(3-(b%4))))&3;
 }
-static unsigned char FFRV2(const unsigned char *a, unsigned long b)
+static unsigned char FFRV2(const unsigned char *a, unsigned int b)
 {
   unsigned char c;
   c =  a[(b>>3)];
   return ( c >> ( 7 - (b&7) ) ) & 1;
 }
 
-void FTOV(unsigned char *a, unsigned long b, unsigned char c)
+void FTOV(unsigned char *a, unsigned int b, unsigned char c)
 {
   unsigned char f;
-  unsigned long d, e;
+  unsigned int d, e;
   d = b/4;
   e = 3-(b%4);
   f = a[d];
@@ -64,7 +64,7 @@ void FTOV(unsigned char *a, unsigned long b, unsigned char c)
   return;
 }
 
-void FGAP(unsigned char *d, unsigned char *e, unsigned long f, unsigned long g)
+void FGAP(unsigned char *d, unsigned char *e, unsigned int f, unsigned int g)
 {
   unsigned int h;
   for (h = 0; h < f; h++)
@@ -72,7 +72,7 @@ void FGAP(unsigned char *d, unsigned char *e, unsigned long f, unsigned long g)
   ptr2 += g;
 }
 
-void FUNGAP(unsigned char *d, unsigned char *e, unsigned long f, unsigned long g)
+void FUNGAP(unsigned char *d, unsigned char *e, unsigned int f, unsigned int g)
 {
   unsigned int h;
   for (h = 0; h < f; h++)
@@ -83,13 +83,9 @@ void FUNGAP(unsigned char *d, unsigned char *e, unsigned long f, unsigned long g
 void init(void)
 {
   unsigned char uc;
-  unsigned int i, j;
-  unsigned long k, l, m, n;
+  unsigned int i, j, k, l;
   strncpy(suz1head, "MONSUZ01", 8);
   strncpy(suz2head, "MONSUZ02", 8);
-/*
-  strncpy(Thead, "MON--T01", 8);
-*/
   vechead[0] = 2;
   vechead[1] = 0;
   vechead[2] = 0;
@@ -207,13 +203,13 @@ void init(void)
 
   k = 1;
   l = 65880;
-  for (n = 0; n < 21870; n++) suztab[k++] = l++;
+  for (i = 0; i < 21870; i++) suztab[k++] = l++;
   l += 2;
-  for (m = 0; m < 66; m++) {
-    for (n = 0; n < 162; n++) suztab[k++] = l++;
+  for (i = 0; i < 66; i++) {
+    for (j = 0; j < 162; j++) suztab[k++] = l++;
     l += 2;
   }
-  for (n = 0; n < 198; n++) suztab[k++] = l++;
+  for (i = 0; i < 198; i++) suztab[k++] = l++;
   rows_init(2, &operations);
 }
 
@@ -266,8 +262,7 @@ void rdsuz1(suzel m, const char *fn)
   char *ptr;
   long *ptrl;
   unsigned char *ptrc;
-  unsigned long i;
-  unsigned long j;
+  unsigned int i, j;
   unsigned char c[3];
   m->greased = 0;
   m->inout = 0;
@@ -284,7 +279,7 @@ void rdsuz1(suzel m, const char *fn)
     exit(-1);
   }
   ptrl = m->m729;
-  ptr = (char *) ptrl;
+  ptr = (char *)ptrl;
   for (i = 0; i < 729; i++) {
     fread(ptr, 1, 183, f);
     ptr += l729*sizeof(long);
@@ -359,14 +354,12 @@ void rdall(void)
   rdsuz1(C, "C.m");
   rdsuz1(E, "E.m");
   rdT("T.m");
-  rdvec("order.vec1", orvec1);
-  rdvec("order.vec2", orvec2);
   rdvec("vorder.vec", vorvec);
 }
 
 static int grease(suzel m)
 {
-  unsigned long i, j;
+  unsigned int i, j;
   unsigned char uc;
   char *ptc1, *ptc2, *ptc3;
   long *ptl1, *ptl2, *ptl3;
@@ -414,7 +407,7 @@ static int grease(suzel m)
 void vecsuz(const unsigned char *vecin, suzel m, unsigned char *vecout)
 {
   unsigned char uc;
-  unsigned long i, j, k;
+  unsigned int i, j, k;
   unsigned char entry, bact;
   unsigned char *ptc1, *ptc2, *ptc3;
   unsigned int *ptl1, *ptl2, *ptl3, *ptl2w, *ptl2ww;
@@ -518,7 +511,7 @@ void vecsuz(const unsigned char *vecin, suzel m, unsigned char *vecout)
 
 void vecT(unsigned char *vecin, unsigned char *vecout)
 {
-  unsigned long i, j, l;
+  unsigned int i, j, l;
   unsigned char entry;
   unsigned char *ptc1;
   unsigned int *ptl3;
@@ -718,9 +711,6 @@ void suzmult(suzel a, suzel b, suzel c)
 unsigned int suzor(suzel a)
 {
   unsigned int i;
-/*
-  memcpy(vec1, vorvec, 24712);
-*/
   vecsuz(vorvec, a, vec2);
   for (i = 1; i <= 119; i++) {
     if(0 == memcmp(vec2, vorvec, 24712)) {
