@@ -1,5 +1,5 @@
 /*
- * $Id: mul.c,v 1.24 2002/06/25 10:30:12 jon Exp $
+ * $Id: mul.c,v 1.25 2002/06/27 08:24:08 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
@@ -79,7 +79,6 @@ static int mul_from_maps(FILE *inp1, FILE *inp2, const header *h1, const header 
   map_free(map2);
   h3 = header_create(1, 0, 0, noc2, nor1);
   if (0 == open_and_write_binary_header(&outp, h3, m3, name)) {
-    fprintf(stderr, "%s: cannot open or write binary header to %s, terminating\n", name, m3);
     return 0;
   }
   if (0 == write_map(outp, nor1, map3, name, m3)) {
@@ -210,7 +209,6 @@ static int mul_by_map(FILE *inp1, FILE *inp2, const header *h1, const header *h2
   }
   h3 = header_create(prime, nob, nod, noc2, nor1);
   if (0 == open_and_write_binary_header(&outp, h3, m3, name)) {
-    fprintf(stderr, "%s: cannot open or write binary header to %s, terminating\n", name, m3);
     header_free(h3);
     return cleanup(inp1, NULL, NULL);
   }
@@ -308,7 +306,6 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
   header_free(h2);
   h3 = header_create(prime2, nob, header_get_nod(h1), noc2, nor1);
   if (0 == open_and_write_binary_header(&outp, h3, m3, name)) {
-    fprintf(stderr, "%s: cannot open or write binary header to %s, terminating\n", name, m3);
     header_free(h3);
     return cleanup(inp1, inp2, NULL);
   }

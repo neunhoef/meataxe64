@@ -1,5 +1,5 @@
 /*
- * $Id: qs.c,v 1.9 2002/06/25 10:30:12 jon Exp $
+ * $Id: qs.c,v 1.10 2002/06/27 08:24:08 jon Exp $
  *
  * Function to compute quotient space representation
  *
@@ -52,8 +52,6 @@ void quotient(const char *range, const char *gen,
   assert(NULL != name);
   if (0 == open_and_read_binary_header(&inp_r, &h_in_r, range, name) ||
       0 == open_and_read_binary_header(&inp_g, &h_in_g, gen, name)) {
-    fprintf(stderr, "%s: failed to read header from one of %s, %s, terminating\n",
-            name, range, gen);
     cleanup(inp_r, NULL, NULL);
     exit(1);
   }

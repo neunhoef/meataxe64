@@ -1,5 +1,5 @@
 /*
- * $Id: mspf.c,v 1.2 2002/06/27 08:21:01 jon Exp $
+ * $Id: mspf.c,v 1.3 2002/06/27 08:24:08 jon Exp $
  *
  * Function to spin some vectors under multiple generators
  * using intermediate files in a temporary directory.
@@ -98,8 +98,6 @@ unsigned int spin(const char *in, const char *out, const char *dir,
   assert(NULL != name);
   /* Open and examine the vector */
   if (0 == open_and_read_binary_header(&inp, &h_in, in, name)) {
-    fprintf(stderr, "%s: failed to open or read header from %s, terminating\n",
-            name, in);
     cleanup(inp, argc, files);
     exit(1);
   }
@@ -121,8 +119,6 @@ unsigned int spin(const char *in, const char *out, const char *dir,
     const char *gen_name = args[d];
     const header *h;
     if (0 == open_and_read_binary_header(files + d, &h, gen_name, name)) {
-      fprintf(stderr, "%s: failed to open or read header from %s, terminating\n",
-              name, gen_name);
       cleanup(inp, argc, files);
       exit(1);
     }

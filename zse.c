@@ -1,5 +1,5 @@
 /*
- * $Id: zse.c,v 1.3 2002/04/10 23:33:27 jon Exp $
+ * $Id: zse.c,v 1.4 2002/06/27 08:24:08 jon Exp $
  *
  * Select a row of a matrix
  *
@@ -41,7 +41,6 @@ int main(int argc, const char * const argv[])
   out = argv[2];
   vector = strtoul(argv[3], NULL, 0);
   if (0 == open_and_read_binary_header(&inp, &h_in, in, name)) {
-    fprintf(stderr, "%s: cannot open %s, terminating\n", name, in);
     exit(1);
   }
   prime = header_get_prime(h_in);
@@ -61,7 +60,6 @@ int main(int argc, const char * const argv[])
     exit(1);
   }
   if (0 == open_and_write_binary_header(&outp, h_out, out, name)) {
-    fprintf(stderr, "%s: cannot open %s, terminating\n", name, out);
     exit(1);
   }
   endian_init();

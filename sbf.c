@@ -1,5 +1,5 @@
 /*
- * $Id: sbf.c,v 1.5 2002/06/25 10:30:12 jon Exp $
+ * $Id: sbf.c,v 1.6 2002/06/27 08:24:08 jon Exp $
  *
  * Function to spin some vectors under two generators to obtain a standard base
  *
@@ -91,8 +91,6 @@ unsigned int spin(const char *in, const char *out, const char *a,
   if (0 == open_and_read_binary_header(&inp, &h_in, in, name) ||
       0 == open_and_read_binary_header(&f_a, &h_a, a, name) ||
       0 == open_and_read_binary_header(&f_b, &h_b, b, name)) {
-    fprintf(stderr, "%s: failed to open or read header from one of %s, %s, %s, terminating\n",
-            name, in, a, b);
     cleanup(inp, f_a, f_b);
     exit(1);
   }

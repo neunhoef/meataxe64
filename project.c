@@ -1,5 +1,5 @@
 /*
- * $Id: project.c,v 1.3 2002/06/25 10:30:12 jon Exp $
+ * $Id: project.c,v 1.4 2002/06/27 08:24:08 jon Exp $
  *
  * Function to project into quotient space representation
  *
@@ -53,8 +53,6 @@ void project(const char *range, const char *in,
   assert(NULL != name);
   if (0 == open_and_read_binary_header(&inp_r, &h_in_r, range, name) ||
       0 == open_and_read_binary_header(&inp_g, &h_in_g, in, name)) {
-    fprintf(stderr, "%s: failed to read header from one of %s, %s, terminating\n",
-            name, range, in);
     cleanup(inp_r, NULL, NULL);
     exit(1);
   }

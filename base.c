@@ -1,5 +1,5 @@
 /*
- * $Id: base.c,v 1.1 2002/06/25 10:30:12 jon Exp $
+ * $Id: base.c,v 1.2 2002/06/27 08:24:08 jon Exp $
  *
  * Form an echelised basis from one file to another
  *
@@ -52,8 +52,6 @@ unsigned int base(const char *in, const char *dir,
   assert(NULL != name);
   /* TODO: open the input, and create an empty temporary file */
   if (0 == open_and_read_binary_header(&inp, &h_in, in, name)) {
-    fprintf(stderr, "%s: failed to open or read header from of %s, terminating\n",
-            name, in);
     exit(1);
   }
   prime = header_get_prime(h_in);

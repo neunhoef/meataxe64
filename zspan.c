@@ -1,5 +1,5 @@
 /*
- * $Id: zspan.c,v 1.6 2002/04/10 23:33:27 jon Exp $
+ * $Id: zspan.c,v 1.7 2002/06/27 08:24:08 jon Exp $
  *
  * Compute the span of a matrix
  *
@@ -47,7 +47,6 @@ int main(int argc, const char * const argv[])
     vectors = 1;
   }
   if (0 == open_and_read_binary_header(&inp, &h_in, in, name)) {
-    fprintf(stderr, "%s: cannot open %s, terminating\n", name, in);
     exit(1);
   }
   prime = header_get_prime(h_in);
@@ -69,7 +68,6 @@ int main(int argc, const char * const argv[])
   rows /= (prime - 1); /* Only want projective representatives */
   h_out = header_create(prime, nob, header_get_nod(h_in), noc, rows);
   if (0 == open_and_write_binary_header(&outp, h_out, out, name)) {
-    fprintf(stderr, "%s: cannot open %s, terminating\n", name, out);
     exit(1);
   }
   endian_init();

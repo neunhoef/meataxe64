@@ -1,5 +1,5 @@
 /*
- * $Id: msp.c,v 1.1 2002/06/25 10:30:12 jon Exp $
+ * $Id: msp.c,v 1.2 2002/06/27 08:24:08 jon Exp $
  *
  * Function to spin some vectors under multiple generators
  *
@@ -80,8 +80,6 @@ unsigned int spin(const char *in, const char *out,
   assert(0 < argc);
   assert(NULL != name);
   if (0 == open_and_read_binary_header(&inp, &h_in, in, name)) {
-    fprintf(stderr, "%s: failed to open or read header from %s, terminating\n",
-            name, in);
     cleanup(inp, argc, files);
     exit(1);
   }
@@ -103,8 +101,6 @@ unsigned int spin(const char *in, const char *out,
     const char *gen_name = args[d];
     const header *h;
     if (0 == open_and_read_binary_header(files + d, &h, gen_name, name)) {
-      fprintf(stderr, "%s: failed to open or read header from %s, terminating\n",
-              name, gen_name);
       cleanup(inp, argc, files);
       exit(1);
     }

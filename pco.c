@@ -1,5 +1,5 @@
 /*
- * $Id: pco.c,v 1.1 2002/06/25 10:30:12 jon Exp $
+ * $Id: pco.c,v 1.2 2002/06/27 08:24:08 jon Exp $
  *
  * Permuation condense one group element
  *
@@ -87,7 +87,6 @@ int pcondense(const char *in1, const char *in2,
   int_row = my_malloc(nor_o * sizeof(unsigned int));
   orbit_numbers = my_malloc(nor * sizeof(unsigned int));
   if (0 == open_and_write_binary_header(&outf, outh, out, name)) {
-    fprintf(stderr, "%s: cannot open or write binary header to %s, terminating\n", name, out);
     exit(1);
   }
   memset(orbit_numbers, 0xff, nor * sizeof(unsigned int));

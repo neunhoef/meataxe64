@@ -1,5 +1,5 @@
 /*
- * $Id: nsf.c,v 1.8 2002/06/25 10:30:12 jon Exp $
+ * $Id: nsf.c,v 1.9 2002/06/27 08:24:08 jon Exp $
  *
  * Compute the nullspace of a matrix, using temporary files
  *
@@ -327,7 +327,6 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
     row = memory_pointer(0);
     h_out = header_create(prime, nob, nod, nor, nor - r);
     if (0 == open_and_write_binary_header(&outp, h_out, m2, name)) {
-      fprintf(stderr, "%s: cannot open output %s, terminating\n", name, m2);
       (void)remove(name5);
       exit(1);
     }

@@ -1,5 +1,5 @@
 /*
- * $Id: ps.c,v 1.1 2002/06/25 10:30:12 jon Exp $
+ * $Id: ps.c,v 1.2 2002/06/27 08:24:08 jon Exp $
  *
  * Function to compute permutation space representation
  *
@@ -75,8 +75,6 @@ void permutation_space(const char *range, const char *image,
   assert(NULL != name);
   if (0 == open_and_read_binary_header(&inp1, &h_in1, range, name) ||
       0 == open_and_read_binary_header(&inp2, &h_in2, image, name)) {
-    fprintf(stderr, "%s: failed to open or read header from one of %s, %s, terminating\n",
-            name, range, image);
     cleanup(inp1, inp2, NULL);
     exit(1);
   }

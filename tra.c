@@ -1,5 +1,5 @@
 /*
- * $Id: tra.c,v 1.10 2002/06/25 10:30:12 jon Exp $
+ * $Id: tra.c,v 1.11 2002/06/27 08:24:08 jon Exp $
  *
  * Function to transpose a matrix
  *
@@ -76,7 +76,6 @@ int tra(const char *m1, const char *m2, const char *name)
   /* Maximum row size */
   max = (len1 > len2) ? len1 : len2;
   if (0 == open_and_write_binary_header(&output, h2, m2, name)) {
-    fprintf(stderr, "%s cannot open or write header to %s, terminating\n", name, m2);
     fclose(input);
     header_free(h2);
     return 0;

@@ -1,5 +1,5 @@
 /*
- * $Id: rnf.c,v 1.9 2002/06/25 10:30:12 jon Exp $
+ * $Id: rnf.c,v 1.10 2002/06/27 08:24:08 jon Exp $
  *
  * Compute the rank of a matrix, using temporary files
  *
@@ -237,7 +237,6 @@ unsigned int rank(const char *m1, const char *dir, const char *m2,
     fclose(outp);
     h_out = header_create(prime, nob, nod, noc, r);
     if (0 == open_and_write_binary_header(&outp, h_out, m2, name)) {
-      fprintf(stderr, "%s: cannot open output %s, terminating\n", name, m2);
       exit(1);
     }
     inp = fopen64(name3, "rb");

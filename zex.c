@@ -1,5 +1,5 @@
 /*
- * $Id: zex.c,v 1.7 2002/06/25 10:30:12 jon Exp $
+ * $Id: zex.c,v 1.8 2002/06/27 08:24:08 jon Exp $
  *
  * explode a matrix
  *
@@ -49,7 +49,6 @@ int main(int argc,  char **argv)
     exit(1);
   }
   if (0 == open_and_read_binary_header(&input, &h, argv[1], name)) {
-    fprintf(stderr, "%s cannot open or read header from %s, terminating\n", name, argv[1]);
     exit(1);
   }
   assert(NULL != h);

@@ -1,5 +1,5 @@
 /*
- * $Id: zre.c,v 1.2 2002/04/10 23:33:27 jon Exp $
+ * $Id: zre.c,v 1.3 2002/06/27 08:24:08 jon Exp $
  *
  * Convert a matrix from new to old
  *
@@ -69,7 +69,6 @@ int main(int argc, const char * const argv[])
     exit(1);
   }
   if (0 == open_and_write_binary_header(&outp, h_out, argv[2], name)) {
-    fprintf(stderr, "%s: cannot open or write binary header to %s, terminating\n", name, argv[2]);
     exit(1);
   }
   row = memory_pointer_offset(0, 0, len);

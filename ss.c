@@ -1,5 +1,5 @@
 /*
- * $Id: ss.c,v 1.10 2002/06/25 10:30:12 jon Exp $
+ * $Id: ss.c,v 1.11 2002/06/27 08:24:08 jon Exp $
  *
  * Function to compute subspace representation
  * Uses the computed map, rather than clean/echelise
@@ -46,8 +46,6 @@ void subspace(const char *range, const char *image,
   assert(NULL != name);
   if (0 == open_and_read_binary_header(&inp1, &h_in1, range, name) ||
       0 == open_and_read_binary_header(&inp2, &h_in2, image, name)) {
-    fprintf(stderr, "%s: failed to open or read header from one of %s, %s, terminating\n",
-            name, range, image);
     cleanup(inp1, inp2, NULL);
     exit(1);
   }

@@ -1,5 +1,5 @@
 /*
- * $Id: zexport.c,v 1.5 2002/06/25 10:30:12 jon Exp $
+ * $Id: zexport.c,v 1.6 2002/06/27 08:24:08 jon Exp $
  *
  * Export matrix to old system
  *
@@ -41,7 +41,6 @@ int main(int argc, const char * const argv[])
   in = argv[1];
   out = argv[2];
   if (0 == open_and_read_binary_header(&f_in, &h_in, in, name)) {
-    fprintf(stderr, "%s: failed to open %s for input, terminating\n", name, in);
     exit(1);
   }
   prime = header_get_prime(h_in);
@@ -66,7 +65,6 @@ int main(int argc, const char * const argv[])
   in_row = memory_pointer(0);
   out_row = memory_pointer(500);
   if (0 == open_and_write_binary_header(&f_out, h_in, out, name)) {
-    fprintf(stderr, "%s: failed to open %s for output, terminating\n", name, out);
     exit(1);
   }
   for (i = 0; i < nor; i++) {

@@ -1,5 +1,5 @@
 /*
- * $Id: tmul.c,v 1.1 2002/06/25 10:30:12 jon Exp $
+ * $Id: tmul.c,v 1.2 2002/06/27 08:24:08 jon Exp $
  *
  * Function to multiply a matrix by a tensor product
  *
@@ -54,8 +54,6 @@ int tmul(const char *m1, const char *m2, const char *m3,
   if (0 == open_and_read_binary_header(&in1, &h_in, m1, name) ||
       0 == open_and_read_binary_header(&in2, &h1, m2, name) ||
       0 == open_and_read_binary_header(&in3, &h2, m3, name)) {
-    fprintf(stderr, "%s: failed to open or read header from one of %s, %s, %s, terminating\n",
-            name, m1, m2, m3);
     cleanup(in1, in2, in3);
     return 0;
   }
@@ -150,8 +148,6 @@ int tmul(const char *m1, const char *m2, const char *m3,
   }
   fclose(in3);
   if (0 == open_and_write_binary_header(&out, h_in, m4, name)) {
-    fprintf(stderr, "%s: failed to open %s for output, terminating\n",
-            name, m4);
     cleanup(in1, NULL, in3);
     return 0;
   }

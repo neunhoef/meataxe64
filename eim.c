@@ -1,5 +1,5 @@
 /*
- * $Id: eim.c,v 1.7 2002/04/10 23:33:26 jon Exp $
+ * $Id: eim.c,v 1.8 2002/06/27 08:24:08 jon Exp $
  *
  * implode a matrix (ie glue exploded matrices together)
  *
@@ -67,7 +67,6 @@ int main(int argc,  const char *const argv[])
   for (i = 0; i < col_pieces; i++) {
     matrix = pathname(argv[2], names[i]);
     if (0 == open_and_read_binary_header(&input, &h, matrix, name)) {
-      fprintf(stderr, "%s cannot open or read header from %s, terminating\n", name, matrix);
       exit(1);
     }
     assert(NULL != h);
@@ -78,7 +77,6 @@ int main(int argc,  const char *const argv[])
   for (i = 0; i < row_pieces; i++) {
     matrix = pathname(argv[2], names[i * col_pieces]);
     if (0 == open_and_read_binary_header(&input, &h, matrix, name)) {
-      fprintf(stderr, "%s cannot open or read header from %s, terminating\n", name, matrix);
       exit(1);
     }
     assert(NULL != h);
@@ -102,7 +100,6 @@ int main(int argc,  const char *const argv[])
   assert(NULL != outh);
   len = header_get_len(outh);
   if (0 == open_and_write_binary_header(&output, outh, argv[1], name)) {
-    fprintf(stderr, "%s cannot open or write header to %s, terminating\n", name, argv[1]);
     exit(1);
   }
   /* Now copy all the input matrices into the output one */
@@ -120,7 +117,6 @@ int main(int argc,  const char *const argv[])
     for (j = 0; j < col_pieces; j++) {
       const char *piece_name = pathname(argv[2], names[i * row_pieces + j]);
       if (0 == open_and_read_binary_header(inputs + j, headers + j, piece_name, name)) {
-        fprintf(stderr, "%s cannot read header from %s, terminating\n", name, piece_name);
         fail(inputs, output, j + 1);
       }
       assert(NULL != headers[j]);

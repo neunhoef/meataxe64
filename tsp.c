@@ -1,5 +1,5 @@
 /*
- * $Id: tsp.c,v 1.1 2002/06/25 10:30:12 jon Exp $
+ * $Id: tsp.c,v 1.2 2002/06/27 08:24:08 jon Exp $
  *
  * Function to spin some vectors under two generators in tensor space
  *
@@ -81,8 +81,6 @@ unsigned int spin(const char *in, const char *out,
       0 == open_and_read_binary_header(&f_a2, &h_a2, a2, name) ||
       0 == open_and_read_binary_header(&f_b1, &h_b1, b1, name) ||
       0 == open_and_read_binary_header(&f_b2, &h_b2, b2, name)) {
-    fprintf(stderr, "%s: failed to open or read header from one of %s, %s, %s, %s, %s, terminating\n",
-            name, in, a1, b1, a2, b2);
     cleanup(inp, f_a1, f_b1, f_a2, f_b2);
     exit(1);
   }

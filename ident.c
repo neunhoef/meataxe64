@@ -1,5 +1,5 @@
 /*
- * $Id: ident.c,v 1.8 2002/06/25 10:30:12 jon Exp $
+ * $Id: ident.c,v 1.9 2002/06/27 08:24:08 jon Exp $
  *
  * Subroutine to generate identity matrix
  *
@@ -37,7 +37,6 @@ int ident(unsigned int prime, unsigned int nor, unsigned int noc, unsigned int e
     }
     h = header_create(1, 0, 0, noc, nor);
     if (0 == open_and_write_binary_header(&outp, h, out, name)) {
-      fprintf(stderr, "%s: cannot open or write header to %s\n", name, out);
       header_free(h);
       return 0;
     }
@@ -72,7 +71,6 @@ int ident(unsigned int prime, unsigned int nor, unsigned int noc, unsigned int e
     len = header_get_len(h);
     assert(0 != len);
     if (0 == open_and_write_binary_header(&outp, h, out, name)) {
-      fprintf(stderr, "%s: cannot open or write header to %s\n", name, out);
       header_free(h);
       return 0;
     }
