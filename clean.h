@@ -1,5 +1,5 @@
 /*
- * $Id: clean.h,v 1.3 2001/11/16 00:12:33 jon Exp $
+ * $Id: clean.h,v 1.4 2001/11/17 10:02:43 jon Exp $
  *
  * Cleaning and echilisation for meataxe
  *
@@ -28,6 +28,10 @@ extern void echelise(unsigned int **m, unsigned int d,
 extern unsigned int simple_echelise(unsigned int **m, unsigned int d,
                                     unsigned int prime,
                                     unsigned int len, unsigned int nob);
+
+extern unsigned int simple_echelise_and_record(unsigned int **m1, unsigned int **m2,
+                                               unsigned int d, unsigned int prime,
+                                               unsigned int len, unsigned int nob);
 
 extern void clean_init(row_opsp ops);
 

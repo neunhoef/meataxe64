@@ -1,5 +1,5 @@
 /*
- * $Id: clean.c,v 1.4 2001/11/16 00:12:33 jon Exp $
+ * $Id: clean.c,v 1.5 2001/11/17 10:02:43 jon Exp $
  *
  * Cleaning and echilisation for meataxe
  *
@@ -34,39 +34,39 @@ void clean(unsigned int **m1, unsigned int d1,
   assert(NULL != m2);
   assert(NULL != d_out);
   assert(NULL != map);
+  assert(NULL != name);
+  assert(0 != d1);
+  assert(0 != d2);
+  assert(0 != prime);
+  assert(0 != nob);
+  assert(0 != len);
+  assert(0 != grease_level);
   primes_init(prime, &prime_operations);
   rows_init(prime, &row_operations);
-  if ( 0 < grease_level) {
-    grease_init(&row_operations);
-    grease_allocate_rows(grease_level, prime, len, &grease_rows, start);
-  }
+  grease_init(&row_operations);
+  grease_allocate_rows(grease_level, prime, len, &grease_rows, start);
   while (i < d1) {
     unsigned int count; /* Actual amount we'll grease */
     unsigned int j = 0, k = 1;
-    if ( 0 < grease_level) {
-      count = 0;
-      grease_init_rows(grease_level, prime);
-      /* Now insert the initial elements into grease_rows */
-      while (count < grease_level && i + j < d1) {
-        assert(NULL != m1[i + j]);
-        if (map[i + j] >= 0) {
-          grease_rows[k - 1] = m1[i + j];
-          /* Only insert if a useful row */
-          k *= prime;
-          count++;
-        }
-        j++;
+    count = 0;
+    grease_init_rows(grease_level, prime);
+    /* Now insert the initial elements into grease_rows */
+    while (count < grease_level && i + j < d1) {
+      assert(NULL != m1[i + j]);
+      if (map[i + j] >= 0) {
+        grease_rows[k - 1] = m1[i + j];
+        /* Only insert if a useful row */
+        k *= prime;
+        count++;
       }
-      /* Now compute grease */
-      if (0 == grease_make_rows(count, prime, len)) {
-        fprintf(stderr, "%s: unable to compute grease, terminating\n", name);
-        exit(1);
-      }
-      inc = j;
-    } else {
-      count = 1;
-      inc = 1;
-    } /* if */
+      j++;
+    }
+    /* Now compute grease */
+    if (0 == grease_make_rows(count, prime, len)) {
+      fprintf(stderr, "%s: unable to compute grease, terminating\n", name);
+      exit(1);
+    }
+    inc = j;
     /* Now clean m2 with m1[i, i + inc] */
     for (j = 0; j < d2; j++) {
       unsigned int elts = 0, l = 0;
@@ -78,17 +78,8 @@ void clean(unsigned int **m1, unsigned int d1,
         }
       }
       if (0 != elts) {
-        if (0 < grease_level) {
-          elts = negate_elements(elts, nob, prime);
-          (*row_operations.incer)(grease_rows[elements_contract(elts, prime, nob) - 1], m2[j], len);
-        } else {
-          elts = (*prime_operations.negate)(elts);
-          if (1 == elts) {
-            (*row_operations.incer)(m1[i], m2[j], len);
-          } else {
-            (*row_operations.scaled_adder)(m1[i], m2[j], m2[j], len, elts);
-          }
-        }
+        elts = negate_elements(elts, nob, prime);
+        (*row_operations.incer)(grease_rows[elements_contract(elts, prime, nob) - 1], m2[j], len);
       }
     } /* for */
     i += inc;
@@ -99,9 +90,7 @@ void clean(unsigned int **m1, unsigned int d1,
       dout++;
     }
   }
-  if (0 < grease_level) {
-      grease_free_rows(grease_rows);
-  }
+  grease_free_rows(grease_rows);
   *d_out = dout;
 }
 
@@ -121,16 +110,18 @@ void echelise(unsigned int **m, unsigned int d,
   assert(NULL != d_out);
   assert(NULL != map);
   assert(NULL != m_out);
+  assert(0 != d);
+  assert(0 != prime);
+  assert(0 != nob);
+  assert(0 != len);
+  assert(0 != grease_level);
   primes_init(prime, &prime_operations);
   rows_init(prime, &row_operations);
   matrix_malloc(d, (void **)&new_mat);
   bits = my_malloc(d * sizeof(int));
   new_map = my_malloc(d * sizeof(int));
-  memset(new_mat, 0, d * sizeof(void *));
+  memset(new_mat, 0, d * sizeof(unsigned int *));
   /* i counts through m. j counts through new_mat */
-  if (0 == grease_level) {
-    inc = 1;
-  }
   while (i < d) {
     unsigned int k = 0, l = 0, n;
     while (k < inc && i + l < d) {
@@ -143,9 +134,9 @@ void echelise(unsigned int **m, unsigned int d,
           if (0 != elt) {
             elt = (*prime_operations.negate)(elt);
             if (1 == elt) {
-              (*row_operations.incer)(new_mat[n], m[i + l], len);
+              (*row_operations.incer)(m[i + n], m[i + l], len);
             } else {
-              (*row_operations.scaled_adder)(new_mat[n], m[i + l], m[i + l], len, elt);
+              (*row_operations.scaled_adder)(m[i + n], m[i + l], m[i + l], len, elt);
             }
           }
         }
@@ -162,10 +153,16 @@ void echelise(unsigned int **m, unsigned int d,
         new_mat[j + k] = m[i + l];
         new_map[j + k] = pos;
         bits[i + l] = pos;
+/*
+        printf("row %d significant at %d\n", i + l, pos);
+*/
         k++;
       } else {
         /* This row not significant */
         bits[i + l] = -1;
+/*
+        printf("row %d not significant\n", i + l);
+*/
       }
       l++; /* Next input row */
     } /* while */
@@ -175,16 +172,23 @@ void echelise(unsigned int **m, unsigned int d,
       for (r = 0; r < n; r++) {
         unsigned int elt = get_element_from_row(nob, new_map[j + n], new_mat[j + r]);
         if (0 != elt) {
-          (*row_operations.incer)(new_mat[j + n], new_mat[j + r], len);
+          elt = (*prime_operations.negate)(elt);
+          if (1 == elt) {
+            (*row_operations.incer)(new_mat[j + n], new_mat[j + r], len);
+          } else {
+            (*row_operations.scaled_adder)(new_mat[j + n], new_mat[j + r], new_mat[j + r], len, elt);
+          }
         }
       }
     }
-#if 0
     /* Now clean m[0, i] with new_mat[j, j + k] */
-    clean(new_mat + j, k, m, i, &n, new_map + j, k, prime, len, nob, start, name);
-#endif
+    if (0 != i) {
+      clean(new_mat + j, k, m, i, &n, new_map + j, k, prime, len, nob, start, name);
+    }
     /* Now clean m[i + l, d] with new_mat[j, j + k] */
-    clean(new_mat + j, k, m + i + l, d - i - l, &n, new_map + j, k, prime, len, nob, start, name);
+    if (d > i + l) {
+      clean(new_mat + j, k, m + i + l, d - i - l, &n, new_map + j, k, prime, len, nob, start, name);
+    }
     i += l;
     j += k;
     dout += k;
@@ -200,9 +204,16 @@ unsigned int simple_echelise(unsigned int **m, unsigned int d,
                              unsigned int len, unsigned int nob)
 {
   unsigned int rank = 0, i = 0;
+  assert(NULL != m);
+  assert(0 != d);
+  assert(0 != prime);
+  assert(is_a_prime_power(prime));
+  assert(0 != len);
+  assert(0 != nob);
   primes_init(prime, &prime_operations);
   rows_init(prime, &row_operations);
   while (i < d) {
+    assert(NULL != m[i]);
     if (0 == row_is_zero(m[i], len)) {
       unsigned int j, k = i + 1, elt;
       rank ++;
@@ -211,6 +222,9 @@ unsigned int simple_echelise(unsigned int **m, unsigned int d,
         elt = (*prime_operations.invert)(elt);
         (*row_operations.scaler_in_place)(m[i], len, elt);
       }
+/*
+      printf("row %d significant at %d\n", i, j);
+*/
       while (k < d) {
         elt = get_element_from_row(nob, j, m[k]);
         if (0 != elt) {
@@ -219,6 +233,55 @@ unsigned int simple_echelise(unsigned int **m, unsigned int d,
             (*row_operations.incer)(m[i], m[k], len);
           } else {
             (*row_operations.scaled_adder)(m[i], m[k], m[k], len, elt);
+          }
+        }
+        k++;
+      } /* while k */
+/*
+    } else {
+      printf("row %d not significant\n", i);
+*/    } /* if */
+    i++;
+  } /* while i */
+  return rank;
+}
+
+unsigned int simple_echelise_and_record(unsigned int **m1, unsigned int **m2,
+                                        unsigned int d, unsigned int prime,
+                                        unsigned int len, unsigned int nob)
+{
+  unsigned int rank = 0, i = 0;
+  assert(NULL != m1);
+  assert(NULL != m2);
+  assert(0 != d);
+  assert(0 != prime);
+  assert(is_a_prime_power(prime));
+  assert(0 != len);
+  assert(0 != nob);
+  primes_init(prime, &prime_operations);
+  rows_init(prime, &row_operations);
+  while (i < d) {
+    assert(NULL != m1[i]);
+    assert(NULL != m2[i]);
+    if (0 == row_is_zero(m1[i], len)) {
+      unsigned int j, k = i + 1, elt;
+      rank ++;
+      elt = first_non_zero(m1[i], nob, len, &j);
+      if (1 != elt) {
+        elt = (*prime_operations.invert)(elt);
+        (*row_operations.scaler_in_place)(m1[i], len, elt);
+        (*row_operations.scaler_in_place)(m2[i], len, elt);
+      }
+      while (k < d) {
+        elt = get_element_from_row(nob, j, m1[k]);
+        if (0 != elt) {
+          elt = (*prime_operations.negate)(elt);
+          if (1 == elt) {
+            (*row_operations.incer)(m1[i], m1[k], len);
+            (*row_operations.incer)(m2[i], m2[k], len);
+          } else {
+            (*row_operations.scaled_adder)(m1[i], m1[k], m1[k], len, elt);
+            (*row_operations.scaled_adder)(m2[i], m2[k], m1[k], len, elt);
           }
         }
         k++;
