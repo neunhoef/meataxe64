@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.4 2002/07/02 16:16:17 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.5 2002/07/05 12:50:38 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -290,6 +290,7 @@ Output on stderr is error diagnostic information.
 <li><a href="#zivf">zivf</a></li>
 <li><a href="#zjoin">zjoin</a></li>
 <li><a href="#zlv">zlv</a></li>
+<li><a href="#zmsb">zmsb</a></li>
 <li><a href="#zmsp">zmsp</a></li>
 <li><a href="#zmspf">zmspf</a></li>
 <li><a href="#zmu">zmu</a></li>
@@ -1635,6 +1636,47 @@ Commentary: This process performs an inverse for <a
 href="#zproj">zproj</a>, in that it produces vectors in the original
 space which project to the given vectors, by widening the given
 vectors and inserting zeroes at the pivot columns.
+</li>
+<li>
+<h3><a name="zmsb">zmsb</a></h3>
+Purpose: Compute a standard basis of vectors from a single seed
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>The input vector</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>The output basis</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>Memory size</td>
+</tr>
+<tr>
+<td valign=top>4</td><td valign=top>Generator 1 (matrix or permutation)</td>
+</tr>
+<tr>
+<td valign=top>5-</td><td valign=top>Further generators (matrix or permutation)</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>The basis size</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient memory for two matrices plus workspace</td>
+</tr>
+</table>
+Commentary: This performs the same function as <a href="#zsb">zsb</a>,
+but can deal with more than two generators.
 </li>
 <li>
 <h3><a name="zmsp">zmsp</a></h3>
