@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: real_indicate,v 1.10 2003/07/20 18:13:19 jon Exp $
+# $Id: real_indicate,v 1.11 2003/12/31 16:46:51 jon Exp $
 #
 # Script to find the indicator of an irreducible representation
 # assuming it is real, and we have the standard basis conjugating
@@ -29,6 +29,7 @@ fi
 . functions
 S=$1
 memory=$2
+init_memory=$2
 a=$3
 b=$4
 shift 2
@@ -96,15 +97,32 @@ if [ 2 -eq $p ]; then
       fi
 # Now compute the orthogonal group sign
       ok=0
+      mem_failed=0
       while [ 0 -eq $ok ]; do
         out=`zsign -m $memory ${tmp}.8 $S 2>&1`
         ret=$?
         if [ 2 -eq $ret ]; then
           let memory=`more_memory $memory 2>/dev/null`
+          mem_failed=1
         else
           ok=1
         fi
       done
+      if [ 1 -eq mem_failed ]; then
+        if [ 0 -ne $ret -a 255 -ne $ret ]; then
+          ok=0
+          memory=$init_memory
+          while [ 0 -eq $ok ]; do
+            out=`zsignf -m $memory ${tmp}.8 $S . 2>&1`
+            ret=$?
+            if [ 2 -eq $ret ]; then
+              let memory=`more_memory $memory 2>/dev/null`
+            else
+              ok=1
+            fi
+          done
+        fi
+      fi
       if [ 0 -eq $ret ]; then
         ln -s $a ${a}_++
         echo group +
@@ -117,7 +135,7 @@ if [ 2 -eq $p ]; then
       else
         ln -s $a ${a}_+
         rm -f ${tmp}.*
-        echo zsign failed with error code $ret
+        echo $out
         exit 1
       fi
       rm -f ${tmp}.*
@@ -176,15 +194,32 @@ else
     if [ $nor -eq $t ]; then
 # Even dimensional
       ok=0
+      mem_failed=0
       while [ 0 -eq $ok ]; do
         out=`zsign -m $memory $S $S 2>&1`
         ret=$?
         if [ 2 -eq $ret ]; then
           let memory=`more_memory $memory 2>/dev/null`
+          mem_failed=1
         else
           ok=1
         fi
       done
+      if [ 1 -eq mem_failed ]; then
+        if [ 0 -ne $ret -a 255 -ne $ret ]; then
+          ok=0
+          memory=$init_memory
+          while [ 0 -eq $ok ]; do
+            out=`zsignf -m $memory ${tmp}.8 $S . 2>&1`
+            ret=$?
+            if [ 2 -eq $ret ]; then
+              let memory=`more_memory $memory 2>/dev/null`
+            else
+              ok=1
+            fi
+          done
+        fi
+      fi
       if [ 0 -eq $ret ]; then
         ln -s $a ${a}_++
         echo group +

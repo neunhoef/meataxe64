@@ -1,5 +1,5 @@
 /*
- * $Id: zspan.c,v 1.10 2002/10/27 11:54:26 jon Exp $
+ * $Id: zspan.c,v 1.11 2003/12/31 16:46:51 jon Exp $
  *
  * Compute the span of a matrix
  *
@@ -24,7 +24,7 @@ static const char *name = "zspan";
 
 static void span_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <in_file> <out_file> <n>\n", name, name);
+  fprintf(stderr, "%s: usage: %s [-v] [-m <memory>] <in_file> <out_file> <n>\n", name, name);
 }
 
 int main(int argc, const char * const argv[])

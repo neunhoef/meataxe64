@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.87 2003/08/04 20:41:57 jon Exp $
+# $Id: makefile,v 1.88 2003/12/31 16:46:51 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -84,6 +84,7 @@ ZSCRIPT_TARGET=	zscript
 ZSEL_TARGET=	zsel
 ZSID_TARGET=	zsid
 ZSIGN_TARGET=	zsign
+ZSIGNF_TARGET=	zsignf
 ZSING_TARGET=	zsing
 ZSKCU_TARGET=	zskcu
 ZSKFI_TARGET=	zskfi
@@ -187,6 +188,7 @@ ZSCRIPT_MODULES=	add elements endian files grease header ident map_or_row maps m
 ZSEL_MODULES=	endian header memory parse primes read utils write zse
 ZSID_MODULES=	ident elements endian header maps memory parse primes rows utils write zsid
 ZSIGN_MODULES=	elements endian grease header maps matrix memory mul parse primes read rows sign singular span utils write zsign
+ZSIGNF_MODULES=	elements endian grease header maps matrix memory mul parse primes read rows signf singular span system utils write zsignf
 ZSING_MODULES=	elements endian grease header maps matrix memory mul parse primes read rows singular span utils write zsing
 ZSKCU_MODULES=	dets elements endian header matrix memory powers parse primes read rows utils write zskcu
 ZSKFI_MODULES=	dets elements endian header matrix memory powers parse primes read rows utils write zskfi
@@ -290,6 +292,7 @@ MODULES=	$(CONS_MODULES) \
 	$(ZSEL_MODULES) \
 	$(ZSID_MODULES) \
 	$(ZSIGN_MODULES) \
+	$(ZSIGNF_MODULES) \
 	$(ZSING_MODULES) \
 	$(ZSKCU_MODULES) \
 	$(ZSKFI_MODULES) \
@@ -579,6 +582,9 @@ TARGET:=ZSING
 include targets.txt
 
 TARGET:=ZSIGN
+include targets.txt
+
+TARGET:=ZSIGNF
 include targets.txt
 
 TARGET:=ZSKCU

@@ -275,3 +275,4 @@ skew seventh
 20031217 - Fixed a bug in power
 20031220 - Fixed a further bug in power to do with insufficient starting memory
 20031228 - Added lift_vectors
+20031230 - Added zsignf for computation of big representation signs

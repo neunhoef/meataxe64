@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.53 2003/12/28 12:46:13 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.54 2003/12/31 16:46:51 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -382,6 +382,7 @@ Turn on verbose mode
 <li><a href="#zsel">zsel</a></li>
 <li><a href="#zsid">zsid</a></li>
 <li><a href="#zsign">zsign</a></li>
+<li><a href="#zsignf">zsignf</a></li>
 <li><a href="#zsing">zsing</a></li>
 <li><a href="#zskcu">zskcu</a></li>
 <li><a href="#zskfi">zskfi</a></li>
@@ -3308,6 +3309,56 @@ quadratic and bilinear form, as we are not interested in the exact
 values, merely in zero versus not zero. This program is cubic in
 complexity, and is somewhat slower than others in the suite of a
 similar complexity, and so should be used sparingly.
+</li>
+<li>
+<h3><a name="zsignf">zsignf</a></h3>
+Purpose: Find the orthogonal group sign with respect to a quadratic
+form and its associated bilinear form
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>The quadratic form</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>The bilinear form</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>A directory in which to create
+temporary files</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>None</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Space has sign + (ie it has a
+maximum possible size totally singular subspace)</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient memory</td>
+</tr>
+<tr>
+<td valign=top>255</td><td valign=top>Space has sign -</td>
+</tr>
+</table>
+Commentary: Spaces of odd dimension are regarded as having sign +. In
+the case of odd characteristic, the same matrix can be supplied as the
+quadratic and bilinear form, as we are not interested in the exact
+values, merely in zero versus not zero. This program is cubic in
+complexity, and is somewhat slower than others in the suite of a
+similar complexity, and so should be used sparingly. This version uses
+an intermediate file to contain the initial identity matrix which is
+gradually reduced to the smallest possible complement of a totally
+singular subspace inside its space of perpendicular vectors. It needs
+very little memory, but is slower than the in store version <a
+href="zsign">zsign</a> due to the file access.
 </li>
 <li>
 <h3><a name="zsing">zsing</a></h3>
