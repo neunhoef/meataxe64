@@ -1,5 +1,5 @@
 /*
- * $Id: ivf.c,v 1.4 2002/07/08 20:07:00 jon Exp $
+ * $Id: ivf.c,v 1.5 2002/11/19 19:09:30 jon Exp $
  *
  * Invert a matrix using intermediate files
  *
@@ -146,7 +146,18 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
       }
     }
     /* Copy input to echelised */
-    endian_copy_matrix(inp, echelised, *rows1, len, nor);
+    errno = 0;
+    if (0 == endian_copy_matrix(inp, echelised, *rows1, len, nor)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
+      fprintf(stderr, "%s: failed to read rows from %s, terminating\n",
+              name, m1);
+      fclose(inp);
+      header_free(h);
+      cleanup_all(echelised, name_echelised, id, name_id);
+      exit(1);
+    }
     fclose(inp);
     map1 = my_malloc(nor * sizeof(unsigned int));
     /* Back to start of echelised and id */

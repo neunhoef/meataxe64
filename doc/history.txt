@@ -223,3 +223,4 @@ skew seventh
 20021027 - Used new span code in singular_vector
 20021102 - Fix bug in zmsbf where memory was wrongly initialised
 20021113 - Fix false assert in zmsbf. Add assembler output option to rules.txt
+20021119 - Fix lack of error checking on endian_copy_matrix

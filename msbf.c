@@ -1,5 +1,5 @@
 /*
- * $Id: msbf.c,v 1.7 2002/11/13 19:42:49 jon Exp $
+ * $Id: msbf.c,v 1.8 2002/11/19 19:09:30 jon Exp $
  *
  * Function to spin some vectors under multiple generators to obtain a standard base
  *
@@ -357,7 +357,18 @@ unsigned int spin(const char *in, const char *out, const char *dir,
     printf("%s: Copying %d rows to output\n", name, nor);
     fflush(stdout);
   }
-  endian_copy_matrix(basis, outp, *rows1, len, nor);
+  errno = 0;
+  if (0 == endian_copy_matrix(basis, outp, *rows1, len, nor)) {
+    if ( 0 != errno) {
+      perror(name);
+    }
+    fprintf(stderr, "%s: failed to read rows from %s, terminating\n",
+            name, name_basis);
+    fclose(outp);
+    fclose(basis);
+    (void)remove(name_basis);
+    exit(1);
+  }
   fclose(outp);
   fclose(basis);
   free(files);

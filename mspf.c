@@ -1,5 +1,5 @@
 /*
- * $Id: mspf.c,v 1.11 2002/08/05 09:08:25 jon Exp $
+ * $Id: mspf.c,v 1.12 2002/11/19 19:09:30 jon Exp $
  *
  * Function to spin some vectors under multiple generators
  * using intermediate files in a temporary directory.
@@ -293,7 +293,18 @@ unsigned int spin(const char *in, const char *out, const char *dir,
     printf("%s: Copying %d rows to output\n", name, nor);
     fflush(stdout);
   }
-  endian_copy_matrix(echelised, outp, *rows1, len, nor);
+  errno = 0;
+  if (0 == endian_copy_matrix(echelised, outp, *rows1, len, nor)) {
+    if ( 0 != errno) {
+      perror(name);
+    }
+    fprintf(stderr, "%s: failed to read rows from %s, terminating\n",
+            name, name_echelised);
+    fclose(outp);
+    fclose(echelised);
+    (void)remove(name_echelised);
+    exit(1);
+  }
   fclose(outp);
   fclose(echelised);
   free(files);

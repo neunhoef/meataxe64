@@ -1,5 +1,5 @@
 /*
- * $Id: base.c,v 1.4 2002/07/08 20:06:59 jon Exp $
+ * $Id: base.c,v 1.5 2002/11/19 19:09:30 jon Exp $
  *
  * Form an echelised basis from one file to another
  *
@@ -141,7 +141,17 @@ unsigned int base(const char *in, const char *dir,
   }
   header_free(h_out);
   fseeko64(echelised, 0, SEEK_SET);
-  endian_copy_matrix(echelised, outp, *rows1, len, nor);
+  errno = 0;
+  if (0 == endian_copy_matrix(echelised, outp, *rows1, len, nor)) {
+    if ( 0 != errno) {
+      perror(name);
+    }
+    fprintf(stderr, "%s: failed to read rows from %s, terminating\n",
+            name, name_echelised);
+    fclose(outp);
+    cleanup_tmp(echelised, name_echelised);
+    exit(1);
+  }
   fclose(outp);
   cleanup_tmp(echelised, name_echelised);
   matrix_free(rows1);
