@@ -241,3 +241,4 @@ skew seventh
 20030316 - Minor simplification to preserves
 20030322 - Performance improvement to ztco by only scaling what we need
 20030323 - Remove redundant rows_init from mul_from_store and mul_in_store
+20030325 - Reduce memory requirement for left tensor in ztco
