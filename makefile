@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.80 2002/10/27 11:54:26 jon Exp $
+# $Id: makefile,v 1.81 2002/10/27 13:29:31 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -178,8 +178,8 @@ ZSAD_MODULES=	add elements endian header map_or_row maps memory parse primes rea
 ZSCRIPT_MODULES=	add elements endian files grease header ident map_or_row maps matrix memory mul parse primes read rows scale script utils write zscript
 ZSEL_MODULES=	endian header memory parse primes read utils write zse
 ZSID_MODULES=	ident elements endian header maps memory parse primes rows utils write zsid
-ZSIGN_MODULES=	elements endian grease header maps matrix memory mul parse primes read rows sign singular utils write zsign
-ZSING_MODULES=	elements endian grease header maps matrix memory mul parse primes read rows singular utils write zsing
+ZSIGN_MODULES=	elements endian grease header maps matrix memory mul parse primes read rows sign singular span utils write zsign
+ZSING_MODULES=	elements endian grease header maps matrix memory mul parse primes read rows singular span utils write zsing
 ZSKCU_MODULES=	dets elements endian header matrix memory powers parse primes read rows utils write zskcu
 ZSKFI_MODULES=	dets elements endian header matrix memory powers parse primes read rows utils write zskfi
 ZSKFO_MODULES=	dets elements endian header matrix memory powers parse primes read rows utils write zskfo

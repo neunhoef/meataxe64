@@ -1,5 +1,5 @@
 /*
- * $Id: singular.c,v 1.3 2002/10/18 11:24:28 jon Exp $
+ * $Id: singular.c,v 1.4 2002/10/27 13:29:31 jon Exp $
  *
  * Function to find a singular vector, given a quadratic form
  *
@@ -19,7 +19,7 @@
 #include "mul.h"
 #include "primes.h"
 #include "read.h"
-#include "rows.h"
+#include "span.h"
 #include "utils.h"
 #include "write.h"
 
@@ -63,6 +63,7 @@ int singular_vector(unsigned int **rows, unsigned int **work,
       */
     }
   }
+#if 0
   for (i = 0; i < nor; i++) {
     unsigned int k, l, m;
     memset(vector, 0, 3 * sizeof(unsigned int));
@@ -105,6 +106,41 @@ int singular_vector(unsigned int **rows, unsigned int **work,
     }
     power *= prime;
   }
+#else
+  memset(vector, 0, 3 * sizeof(unsigned int));
+  for (i = 0; i < nor; i++) {
+    unsigned int l, m;
+    j = 0;
+    while (j < power) {
+      unsigned int sub_prod[3], prod = 0, tmp;
+      span(nor, vector, prime, out_num);
+      for (l = 0; l < nor; l++) {
+        sub_prod[l] = 0;
+        for (m = 0; m < nor; m++) {
+          tmp = (*prime_operations.mul)(vector[m], products[m][l]);
+          sub_prod[l] = (*prime_operations.add)(tmp, sub_prod[l]);
+        }
+        tmp = (*prime_operations.mul)(sub_prod[l], vector[l]);
+        prod = (*prime_operations.add)(prod, tmp);
+      }
+      if (0 == prod) {
+        row_init(out, len);
+        for (l = 0; l < nor; l++) {
+          if (0 != vector[l]) {
+            if (1 != vector[l]) {
+              (*row_operations.scaled_incer)(rows[l], out, len, vector[l]);
+            } else {
+              (*row_operations.incer)(rows[l], out, len);
+            }
+          }
+        }
+        return 0;
+      }
+      j++;
+    }
+    power *= prime;
+  }
+#endif
   return 255;
 }
 
