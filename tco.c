@@ -1,5 +1,5 @@
 /*
- * $Id: tco.c,v 1.10 2003/03/25 19:26:08 jon Exp $
+ * $Id: tco.c,v 1.11 2003/03/29 09:32:49 jon Exp $
  *
  * Tensor condense one group element
  *
@@ -139,11 +139,11 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
   unsigned int *left_multiplicities = NULL, *right_multiplicities = NULL, *dim_irr = NULL, *dim_end = NULL;
   FILE *inp = NULL, *leftp = NULL, *rightp = NULL, *outp = NULL, **p, **q;
   unsigned int nor, nob, nod, len, prime, nor_l, noc_l, len_l, nor_r, noc_r, len_r,
-    max_rows, max_irr, max_irr_len, max_end, max_end_len, i, j, k, l;
+    max_rows, max_irr, max_irr2, max_irr_len, max_end, max_end_len, i, j, k, l;
   unsigned int *nor_p = NULL, *nor_q = NULL, *noc_p = NULL, *noc_q = NULL, *len_p = NULL, *len_q = NULL;
   const header *h_l, *h_r, *h_o, **h_p, **h_q;
-  unsigned int alpha, beta, gamma, delta, extent_l, extent_r, extent_te, extent_end, extent_q, o_r, o_c, m_r, m_c, n_r, n_c;
-  unsigned int **rows, **lrows, **rrows, **te_rows, *te_row, **end_rows, **q_rows;
+  unsigned int alpha, beta, gamma, delta, extent_l, extent_r, extent_te, extent_end, extent_q, extent_p, o_r, o_c, m_r, m_c, n_r, n_c;
+  unsigned int **rows, **lrows, **rrows, **te_rows, *te_row, **end_rows, **q_rows, **p_rows;
   unsigned int mask, elts_per_word;
   unsigned int **expanded_lrows, **expanded_rrows;
   row_ops row_operations;
@@ -234,6 +234,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
       max_end = dim_end[i];
     }
   }
+  max_irr2 = max_irr * max_irr;
   nor = 0;
   for (i = 0; i < s; i++) {
     nor += left_multiplicities[i] * right_multiplicities[i] * dim_end[i];
@@ -266,7 +267,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
   nor_r = header_get_nor(h_r);
   noc_r = header_get_noc(h_r);
   len_r = header_get_len(h_r);
-  max_irr_len = compute_len(nob, max_irr * max_irr);
+  max_irr_len = compute_len(nob, max_irr2);
   max_end_len = compute_len(nob, max_end);
   if (1 == prime || header_get_prime(h_r) != prime || 0 == is_a_prime_power(prime) ||
       nor_l != noc_l || nor_r != noc_r) {
@@ -323,10 +324,11 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
   len = header_get_len(h_o);
   extent_l = find_extent(max_irr, len_l);
   extent_r = find_extent(nor_r, len_r);
-  extent_te = find_extent(1 + max_irr * max_irr, max_irr_len);
+  extent_te = find_extent(1 + max_irr2, max_irr_len);
   extent_end = find_extent(max_end, max_end_len);
   extent_q = find_extent(max_end, max_irr_len);
-  if (extent_l + extent_r + extent_te + extent_end + extent_q >= 900) {
+  extent_p = find_extent(max_irr2 * s, max_end_len);
+  if (extent_l + extent_r + extent_te + extent_end + extent_p + extent_q >= 900) {
     fprintf(stderr, "%s: insufficient memory, terminating\n", name);
     (void)cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
                   nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, rightp,
@@ -349,7 +351,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
   header_free(h_l);
   header_free(h_r);
   fclose(rightp);
-  max_rows = memory_rows(len, 900 - extent_l - extent_r - extent_te - extent_end - extent_q);
+  max_rows = memory_rows(len, 900 - extent_l - extent_r - extent_te - extent_end - extent_p - extent_q);
   if (max_rows < max_end) {
     fprintf(stderr, "%s: cannot allocate enough rows for output, terminating\n", name);
     (void)cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
@@ -364,22 +366,40 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
   }
   rows = matrix_malloc(max_end);
   for (i = 0; i < max_end; i++) {
-    rows[i] = memory_pointer_offset(extent_l + extent_r + extent_te + extent_end + extent_q, i, len);
+    rows[i] = memory_pointer_offset(extent_l + extent_r + extent_te + extent_end + extent_p + extent_q, i, len);
   }
-  te_rows = matrix_malloc(max_irr * max_irr);
-  end_rows = matrix_malloc(max_irr * max_irr);
+  te_rows = matrix_malloc(max_irr2);
+  end_rows = matrix_malloc(max_irr2);
   q_rows = matrix_malloc(max_end);
+  p_rows = matrix_malloc(max_irr2 * s); /* Enough space for all the Pi */
   /* Rows for the partial tensor */
-  for (i = 0; i < max_irr * max_irr; i++) {
+  for (i = 0; i < max_irr2; i++) {
     te_rows[i] = memory_pointer_offset(extent_l + extent_r, i, max_irr_len);
     end_rows[i] = memory_pointer_offset(extent_l + extent_r + extent_te, i, max_end_len);
   }
   /* A workspace row for creating partial tensors in */
-  te_row = /*memory_pointer_offset(extent_l + extent_r, max_irr * max_irr, max_irr_len)*/
+  te_row = /*memory_pointer_offset(extent_l + extent_r, max_irr2, max_irr_len)*/
     my_malloc(noc_r * sizeof(unsigned int));
-  /* Rows for the product with P */
+  /* Rows for the Q matrices */
   for (i = 0; i < max_end; i++) {
     q_rows[i] = memory_pointer_offset(extent_l + extent_r + extent_te + extent_end, i, max_irr_len);
+  }
+  /* Rows for the P matrices */
+  for (i = 0; i < max_irr2 * s; i++) {
+    p_rows[i] = memory_pointer_offset(extent_l + extent_r + extent_te + extent_end + extent_q, i, max_end_len);
+  }
+  /* Now read the P matrices */
+  for (i = 0; i < s; i++) {
+    if (0 == endian_read_matrix(p[i], p_rows + i * max_irr2, len_p[i], nor_p[i])) {
+      matrix_free(te_rows);
+      matrix_free(end_rows);
+      matrix_free(q_rows);
+      matrix_free(p_rows);
+      free(te_row);
+      return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
+                     nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, NULL,
+                     NULL, NULL, p, q, h_p, h_q, s, h_o, NULL, rows, lrows, rrows);
+    }
   }
   rows_init(prime, &row_operations);
   grease_init(&row_operations, &grease);
@@ -388,6 +408,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
     matrix_free(te_rows);
     matrix_free(end_rows);
     matrix_free(q_rows);
+    matrix_free(p_rows);
     free(te_row);
     return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
                    nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, NULL,
@@ -401,6 +422,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
     matrix_free(te_rows);
     matrix_free(end_rows);
     matrix_free(q_rows);
+    matrix_free(p_rows);
     free(te_row);
     return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
                    nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, NULL,
@@ -430,6 +452,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
       matrix_free(te_rows);
       matrix_free(end_rows);
       matrix_free(q_rows);
+      matrix_free(p_rows);
       free_expanded(expanded_lrows, max_irr);
       free_expanded(expanded_rrows, nor_r);
       free(te_row);
@@ -519,12 +542,13 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
                   te_o_r++;
                 }
               }
-              if (0 == mul_from_store(te_rows, end_rows, p[j], 0/*is_map*/, dim_irr_j * dim_irr_j,
-                                      len_p[j], nob, dim_irr_i * dim_irr_i, dim_end[j], prime,
-                                      &grease, 0, argv[2 * j + 1], name)) {
+              if (0 == mul_in_store(te_rows, p_rows + j * max_irr2, end_rows, 0 /*is_map1*/, 0 /* is_map2 */, dim_irr_j * dim_irr_j,
+                                    len_p[j], nob, dim_irr_i * dim_irr_i, dim_end[j], prime,
+                                    &grease, "sub-tensor", argv[2 * j + 1], name)) {
                 matrix_free(te_rows);
                 matrix_free(end_rows);
                 matrix_free(q_rows);
+                matrix_free(p_rows);
                 grease_free(&grease);
                 free_expanded(expanded_lrows, max_irr);
                 free_expanded(expanded_rrows, nor_r);
@@ -539,6 +563,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
                 matrix_free(te_rows);
                 matrix_free(end_rows);
                 matrix_free(q_rows);
+                matrix_free(p_rows);
                 grease_free(&grease);
                 free_expanded(expanded_lrows, max_irr);
                 free_expanded(expanded_rrows, nor_r);
@@ -567,6 +592,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
           matrix_free(te_rows);
           matrix_free(end_rows);
           matrix_free(q_rows);
+          matrix_free(p_rows);
           grease_free(&grease);
           free_expanded(expanded_lrows, max_irr);
           free_expanded(expanded_rrows, nor_r);
@@ -585,6 +611,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
   matrix_free(te_rows);
   matrix_free(end_rows);
   matrix_free(q_rows);
+  matrix_free(p_rows);
   grease_free(&grease);
   free_expanded(expanded_lrows, max_irr);
   free_expanded(expanded_rrows, nor_r);

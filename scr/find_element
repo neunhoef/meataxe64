@@ -1,19 +1,19 @@
 #!/bin/sh
 #
-# $Id: find_element,v 1.5 2002/10/14 08:55:31 jon Exp $
+# $Id: find_element,v 1.6 2003/03/29 09:32:49 jon Exp $
 #
 # Script to find an element of nullity 1 on one representation
 # and if possible nullity zero on a sequence of others
 #
 # Inputs
-# $1: generator a
-# $2: generator b
+# $1: number of generators
+# $2: generator a
 # $3: order generator a
-# $4: order generator b
-# $5: depth of search
-# $6: the nullity file
-# $7: memory
-# $8: onwards, the other representations
+# $4-: other generators and orders
+# $(2+2*$1): depth of search
+# $(3+2*$1): the nullity file
+# $(4+2*$1): memory
+# $(5+2*$1): onwards, the other representations
 #
 # Return codes
 # 1: error in parameters
@@ -22,47 +22,81 @@
 #
 #set -v
 . functions
-usage="$0: usage: $0 <a> <b> <order a> <order b> <depth> <output> <memory> <other irreds>"
-if [ $# -lt 8 ]; then
+usage="$0: usage: $0 <number of generators> <a> <order a> [<other generators and orders>] <depth> <output> <memory> <other irreds>"
+if [ $# -lt 7 ]; then
   echo "$usage"
   exit 1;
 fi
-a=$1
-b=$2
-o_a=$3
-o_b=$4
-depth=$5
-out=$6
-if [ -e $a -a -e $b ]; then
-  q=`zprime $a`
-  nor=`znor $a`
-  noc=`znoc $a`
+n=$1
+let max=2*$1+5
+if [ $# -lt $max ]; then
+  echo "$usage"
+  exit 1;
+fi
+name=$0
+i=0
+line=
+shift
+while [ $i -lt $n ]; do
+  a[$i]=$1
+  line="$line $1"
+  shift
+  o_a[$i]=$1
+  line="$line $1"
+  shift
+  let i=$i+1
+done
+depth=$1
+out=$2
+memory=$3
+if [ -e ${a[0]} ]; then
+  q=`zprime ${a[0]}`
+  nor=`znor ${a[0]}`
+  noc=`znoc ${a[0]}`
   if [ $nor -ne $noc ]; then
-    echo "$0: $a is not square"
-    exit 1
-  fi
-  if [ $nor -ne `znor $b` -o $nor -ne `znoc $b` ]; then
-    echo "$0: $a and $b are not compatible"
+    echo "$name: ${a[0]} is not square"
     exit 1
   fi
 else
-  echo "$0: missing files $a or $b"
+  echo "$name: missing file (1) ${a[0]}"
   exit 1
 fi
+i=1
+while [ $i -lt $n ]; do
+  if [ -e ${a[$i]} ]; then
+    if [ $nor -ne `znor ${a[$i]}` -o $nor -ne `znoc ${a[$i]}` ]; then
+      echo "$name: ${a[0]} and ${a[$i]} are not compatible"
+      exit 1
+    fi
+  else
+    echo "$name: missing files (2) ${a[$i]}"
+    exit 1
+  fi
+  let i=$i+1
+done
 tmp=tmp${PPID}
-memory=$7
-zranks -m $memory ${tmp} $depth 1 $a $o_a $b $o_b | grep "of nullity 1" | sed -e "s/^.*element //g;s/ of nullity .*$//g" >poo
+# echo zranks -m $memory ${tmp} $depth 1 $line
+zranks -m $memory ${tmp} $depth 1 $line | grep "of nullity" > ${out}.1
+grep "of nullity 1" ${out}.1 | sed -e "s/^.*element //g;s/ of nullity .*$//g" >poo
 if [ -z "`cat poo`" ]; then
   echo No elements of nullity one found, terminating
   rm -f ${tmp}* poo
   exit 255
 fi
 echo >$out
-shift; shift; shift; shift; shift; shift; shift;
+shift 3
 while [ 1 -le $# ]; do
+  i=0
   stem=$1
+  line=
+  while [ $i -lt $n ]; do
+    let j=$i+1
+    line="$line ${stem}_$j ${o_a[$i]}"
+    i=$j
+  done
   echo $stem >>$out
-  zranks -m $memory ${tmp} $depth 10 ${stem}_1 $o_a ${stem}_2 $o_b | grep "of nullity" 1>>$out
+#  echo zranks -m $memory ${tmp} $depth 10 $line
+  zranks -m $memory ${tmp} $depth 10 $line | grep "of nullity" 1>>$out
   shift
 done
 zeros=
