@@ -1,5 +1,5 @@
 /*
- * $Id: mspf.c,v 1.6 2002/07/07 12:10:42 jon Exp $
+ * $Id: mspf.c,v 1.7 2002/07/08 20:07:00 jon Exp $
  *
  * Function to spin some vectors under multiple generators
  * using intermediate files in a temporary directory.
@@ -272,7 +272,7 @@ unsigned int spin(const char *in, const char *out, const char *dir,
   }
   header_free(h_out);
   fseeko64(echelised, 0, SEEK_SET);
-  copy_rest(outp, echelised);
+  endian_copy_matrix(echelised, outp, *rows1, len, nor);
   fclose(outp);
   fclose(echelised);
   free(files);

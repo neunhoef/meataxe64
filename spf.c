@@ -1,5 +1,5 @@
 /*
- * $Id: spf.c,v 1.9 2002/07/07 12:10:42 jon Exp $
+ * $Id: spf.c,v 1.10 2002/07/08 20:07:00 jon Exp $
  *
  * Function to spin some vectors under two generators
  *
@@ -252,7 +252,7 @@ unsigned int spin(const char *in, const char *out, const char *a,
   }
   header_free(h_out);
   fseeko64(echelised, 0, SEEK_SET);
-  copy_rest(outp, echelised);
+  endian_copy_matrix(echelised, outp, *rows1, len, nor);
   fclose(outp);
   fclose(echelised);
   matrix_free(rows1);

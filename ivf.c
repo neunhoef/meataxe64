@@ -1,5 +1,5 @@
 /*
- * $Id: ivf.c,v 1.3 2002/06/28 08:39:16 jon Exp $
+ * $Id: ivf.c,v 1.4 2002/07/08 20:07:00 jon Exp $
  *
  * Invert a matrix using intermediate files
  *
@@ -146,7 +146,7 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
       }
     }
     /* Copy input to echelised */
-    copy_rest(echelised, inp);
+    endian_copy_matrix(inp, echelised, *rows1, len, nor);
     fclose(inp);
     map1 = my_malloc(nor * sizeof(unsigned int));
     /* Back to start of echelised and id */

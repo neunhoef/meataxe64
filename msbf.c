@@ -1,5 +1,5 @@
 /*
- * $Id: msbf.c,v 1.1 2002/07/07 12:10:42 jon Exp $
+ * $Id: msbf.c,v 1.2 2002/07/08 20:07:00 jon Exp $
  *
  * Function to spin some vectors under multiple generators to obtain a standard base
  *
@@ -335,7 +335,7 @@ unsigned int spin(const char *in, const char *out, const char *dir,
   }
   header_free(h_out);
   fseeko64(basis, 0, SEEK_SET);
-  copy_rest(outp, basis);
+  endian_copy_matrix(basis, outp, *rows1, len, nor);
   fclose(outp);
   fclose(basis);
   free(files);

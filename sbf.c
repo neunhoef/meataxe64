@@ -1,5 +1,5 @@
 /*
- * $Id: sbf.c,v 1.9 2002/07/07 12:10:42 jon Exp $
+ * $Id: sbf.c,v 1.10 2002/07/08 20:07:00 jon Exp $
  *
  * Function to spin some vectors under two generators to obtain a standard base
  *
@@ -318,7 +318,7 @@ unsigned int spin(const char *in, const char *out, const char *a,
   }
   header_free(h_out);
   fseeko64(basis, 0, SEEK_SET);
-  copy_rest(outp, basis);
+  endian_copy_matrix(basis, outp, *rows1, len, nor);
   fclose(outp);
   fclose(basis);
   matrix_free(rows1);

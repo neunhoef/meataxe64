@@ -1,5 +1,5 @@
 /*
- * $Id: base.c,v 1.3 2002/06/28 08:39:16 jon Exp $
+ * $Id: base.c,v 1.4 2002/07/08 20:06:59 jon Exp $
  *
  * Form an echelised basis from one file to another
  *
@@ -141,7 +141,7 @@ unsigned int base(const char *in, const char *dir,
   }
   header_free(h_out);
   fseeko64(echelised, 0, SEEK_SET);
-  copy_rest(outp, echelised);
+  endian_copy_matrix(echelised, outp, *rows1, len, nor);
   fclose(outp);
   cleanup_tmp(echelised, name_echelised);
   matrix_free(rows1);
