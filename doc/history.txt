@@ -197,3 +197,4 @@ skew seventh
 20020924 - Sorting return codes from zsums and friends
 20020924 - Add zfln and find_best_nullityf_with_orders
 20020924 - Optimise row increments by searching for first non-zero (good for Gaussian elimination, whilst not harming multiplication)
+20021004 - Add some support for orthogonal group sign

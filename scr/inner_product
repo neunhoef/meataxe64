@@ -1,0 +1,71 @@
+#!/bin/sh
+#
+# $Id: inner_product,v 1.1 2002/10/04 17:15:06 jon Exp $
+#
+# Script to form x S y_tra
+#
+# Inputs
+# $1: initial memory
+# $2: x
+# $3: form S
+# $4: y
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+#
+# Output on stdout, the rank, 0 or 1
+#
+#set -v
+. functions
+usage="$0: usage: $0 <memory> <x> <S> <y>"
+if [ $# -ne 4 ]; then
+  echo "$usage"
+  exit 1;
+fi
+memory=$1
+x=$2
+S=$3
+y=$4
+if [ -e $S -a -e $x -a -e $y ]; then
+  prime=`zprime $S`
+  noc_x=`znoc $x`
+  noc_y=`znoc $y`
+  if [ `zprime $x` -ne $prime -o `zprime $y` -ne $prime -o `znoc $S` -ne $noc_x -o `znor $S` -ne $noc_y ]; then
+    echo parameter mismatch between $x, $y and $S
+    echo $noc_x
+    echo $noc_y
+    exit 1
+  fi
+else
+  echo "$0: missing file $x, $y or $S"
+  exit 1
+fi
+# TODO: reuse temps
+tmp=tmp${PPID}
+zmu $x $S ${tmp}.0 $memory
+ret=$?
+if [ 0 -ne $ret ]; then
+  rm -f ${tmp}.*
+  exit 1
+fi
+ztr $y ${tmp}.1 $memory
+ret=$?
+if [ 0 -ne $ret ]; then
+  rm -f ${tmp}.*
+  exit 1
+fi
+zmu ${tmp}.0 ${tmp}.1 ${tmp}.2 $memory
+ret=$?
+if [ 0 -ne $ret ]; then
+  rm -f ${tmp}.*
+  exit 1
+fi
+zrn ${tmp}.2
+ret=$?
+if [ 0 -ne $ret ]; then
+  rm -f ${tmp}.*
+  exit 1
+fi
+rm -f ${tmp}.*
+exit 0

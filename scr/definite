@@ -1,0 +1,79 @@
+#!/bin/sh
+#
+# $Id: definite,v 1.1 2002/10/04 17:15:06 jon Exp $
+#
+# Script to determine if a 2 dimensional space is definite wrt a quadratic form
+#
+# Inputs
+# $1: initial memory
+# $2: space S
+# $3: form Q
+#
+# Return codes
+# 1: error in parameters
+# 0: space is definite
+# 255: space is hyperbolic
+# 254: space had dimension not 2
+#
+# Output on stdout, the rank, 0 or 1
+#
+#set -v
+. functions
+usage="$0: usage: $0 <memory> <S> <Q>"
+if [ $# -ne 3 ]; then
+  echo "$usage"
+  exit 1;
+fi
+memory=$1
+space=$2
+form=$3
+if [ -e $space -a -e $form ]; then
+  nor=`znor $space`
+  noc=`znoc $space`
+  prime=`zprime $space`
+  if [ 2 -ne $nor ]; then
+    echo "space must be of dimension 2, terminating"
+    exit 254
+  fi
+  if [ $prime -ne `zprime $form` ]; then
+    echo "space and form must be over same field, terminating"
+    exit 1
+  fi
+  if [ $noc -ne `znor $form` -o $noc -ne `znoc $form` ]; then
+    echo "space and form must have same column size, and form must be square, terminating"
+    exit 1
+  fi
+else
+  echo "One of $space and $form not found, terminating"
+  exit 1
+fi
+tmp=tmp${PPID}
+zspan $space ${tmp}.0 2
+ret=$?
+if [ $ret -ne 0 ]; then
+  rm -f ${tmp}*
+  exit 1
+fi
+i=`znor ${tmp}.0`
+j=0
+while [ $j -lt $i ]; do
+  zsel ${tmp}.0 ${tmp}.1 $j
+  ret=$?
+  if [ $ret -ne 0 ]; then
+    rm -f ${tmp}*
+    exit 1
+  fi
+  n=`norm $memory ${tmp}.1 $form`
+  ret=$?
+  if [ $ret -ne 0 ]; then
+    rm -f ${tmp}*
+    exit 1
+  fi
+  if [ "0" == "$n" ]; then
+    rm -f ${tmp}*
+    exit 255
+  fi
+  let j=$j+1
+done
+rm -f ${tmp}*
+exit 0

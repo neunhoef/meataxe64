@@ -1,7 +1,7 @@
 Worry about isspace failure (can't detect \n) (still occurs on RH 7.2) ctype is buggered
 Worry about return (NULL == s) code generation error
 Add in use of put_element_to_row_with_params and put_element_to_clean_row_with_params *
-Documentation changes for proj_base, sub_quot
+Documentation changes for proj_base, sub_quot, definite, hyperbolic, norm, inner_product, singular_vector
 Consider putting memory size into argument parser
 Write span_and_spin for spins on large nullspaces
 Profile multiply (eg on 26750 for Co1) for different memory sizes
@@ -10,7 +10,6 @@ Think about restricting the back echelising in rnf and nsf. Profile zrnf and zrn
 Think about Sn and symmetrized powers
 Optimise monst by reversing bit order
 Investigate better matrix multiplications
-Think about orthogonal group sign
 Fix zvp and zps to take less memory
 Think about better grease vector selection for making vectors
 Find a better algorithm for zsp memory. Investigate performance (1)
