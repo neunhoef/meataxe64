@@ -1,5 +1,5 @@
 /*
- * $Id: msp.c,v 1.9 2003/02/24 18:02:43 jon Exp $
+ * $Id: msp.c,v 1.10 2003/02/28 20:04:58 jon Exp $
  *
  * Function to spin some vectors under multiple generators
  *
@@ -192,16 +192,12 @@ unsigned int spin(const char *in, const char *out,
       exit(1);
     }
     gen->nor += rows_to_do;
-    if (verbose) {
-      printf("%s: cleaning %d rows\n", name, rows_to_do);
-      fflush(stdout);
-    }
     clean(rows, nor, rows + nor, rows_to_do, map, NULL, NULL, 0,
-          grease.level, prime, len, nob, 900, 0, 0, name);
+          grease.level, prime, len, nob, 900, 0, 0, verbose, name);
     echelise(rows + nor, rows_to_do, &d, &new_map, NULL, 0,
              grease.level, prime, len, nob, 900, 0, 0, 1, name);
     clean(rows + nor, rows_to_do, rows, nor, new_map, NULL, NULL, 0,
-          grease.level, prime, len, nob, 900, 0, 0, name);
+          grease.level, prime, len, nob, 900, 0, 0, 0, name);
     for (i = 0; i < rows_to_do; i++) {
       if (new_map[i] >= 0) {
         /* Got a useful row */

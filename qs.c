@@ -1,5 +1,5 @@
 /*
- * $Id: qs.c,v 1.13 2002/10/13 16:38:07 jon Exp $
+ * $Id: qs.c,v 1.14 2003/02/28 20:04:58 jon Exp $
  *
  * Function to compute quotient space representation
  *
@@ -13,6 +13,7 @@
 #include "header.h"
 #include "matrix.h"
 #include "memory.h"
+#include "parse.h"
 #include "primes.h"
 #include "read.h"
 #include "rows.h"
@@ -218,7 +219,7 @@ void quotient(const char *range, const char *gen,
         exit(1);
       }
       clean(rows1, stride_k, rows2, stride_j, map_r + k, NULL, NULL, 0,
-            grease.level, prime, len, nob, 900, 0, 0, name);
+            grease.level, prime, len, nob, 900, 0, 0, verbose, name);
     }
     for (d = 0; d < stride_j; d++) {
       row_init(row_o, len_o);

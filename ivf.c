@@ -1,5 +1,5 @@
 /*
- * $Id: ivf.c,v 1.5 2002/11/19 19:09:30 jon Exp $
+ * $Id: ivf.c,v 1.6 2003/02/28 20:04:58 jon Exp $
  *
  * Invert a matrix using intermediate files
  *
@@ -235,7 +235,7 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
         }
         /* Clean the rows we read with the newly made rows */
         clean(rows1, stride, rows3, stride2, map1 + r, rows2, rows4, 1,
-              grease.level, prime, len, nob, 900, 950, len, name);
+              grease.level, prime, len, nob, 900, 950, len, 0, name);
         /* Write back the cleaned version to echelised and id */
         fseeko64(echelised, ptr_e1, SEEK_SET);
         fseeko64(id, ptr_i1, SEEK_SET);
@@ -275,7 +275,7 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
         }
         /* Clean the rows we read with the newly made rows */
         clean(rows1, stride, rows3, stride2, map1 + r, rows2, rows4, 1,
-              grease.level, prime, len, nob, 900, 950, len, name);
+              grease.level, prime, len, nob, 900, 950, len, 0, name);
         /* Write back the cleaned version to echelised and id */
         fseeko64(echelised, ptr_e1, SEEK_SET);
         fseeko64(id, ptr_i1, SEEK_SET);

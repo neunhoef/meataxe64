@@ -1,5 +1,5 @@
 /*
- * $Id: rnf.c,v 1.13 2002/09/16 10:24:07 jon Exp $
+ * $Id: rnf.c,v 1.14 2003/02/28 20:04:58 jon Exp $
  *
  * Compute the rank of a matrix, using temporary files
  *
@@ -17,6 +17,7 @@
 #include "maps.h"
 #include "matrix.h"
 #include "memory.h"
+#include "parse.h"
 #include "read.h"
 #include "system.h"
 #include "utils.h"
@@ -159,7 +160,7 @@ unsigned int rank(const char *m1, const char *dir, const char *name)
             cleanup(t1, t2);
             exit(1);
           }
-          clean(mat1, stride, mat2, stride2, map, NULL, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, name);
+          clean(mat1, stride, mat2, stride2, map, NULL, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, verbose, name);
           for (j = 0; j < stride2; j++) {
             if (0 == row_is_zero(mat2[j], len)) {
               errno = 0;

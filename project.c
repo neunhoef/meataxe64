@@ -1,5 +1,5 @@
 /*
- * $Id: project.c,v 1.7 2002/10/13 16:38:07 jon Exp $
+ * $Id: project.c,v 1.8 2003/02/28 20:04:58 jon Exp $
  *
  * Function to project into quotient space representation
  *
@@ -14,6 +14,7 @@
 #include "map_or_row.h"
 #include "matrix.h"
 #include "memory.h"
+#include "parse.h"
 #include "primes.h"
 #include "read.h"
 #include "rows.h"
@@ -190,7 +191,7 @@ void project(const char *range, const char *in,
         exit(1);
       }
       clean(rows1, stride_k, rows2, stride_j, map_r + k, NULL, NULL, 0,
-            grease.level, prime, len, nob, 900, 0, 0, name);
+            grease.level, prime, len, nob, 900, 0, 0, verbose, name);
     }
     for (d = 0; d < stride_j; d++) {
       row_init(row_o, len_o);

@@ -1,5 +1,5 @@
 /*
- * $Id: clean_file.c,v 1.3 2002/07/07 12:10:42 jon Exp $
+ * $Id: clean_file.c,v 1.4 2003/02/28 20:04:58 jon Exp $
  *
  * Cleaning and echilisation, when the already clean vectors
  * are in a file which is to be updated
@@ -60,7 +60,7 @@ int clean_file(FILE *clean_vectors, unsigned int *nor,
         return 0;
       }
       clean(rows2, stride, rows1, nor1, map + i, NULL, NULL, 0,
-            grease_level, prime, len, nob, start, 0, 0, name);
+            grease_level, prime, len, nob, start, 0, 0, 0, name);
     }
   }
   echelise(rows1, nor1, &d, &internal_new_map, NULL, 0,
@@ -82,7 +82,7 @@ int clean_file(FILE *clean_vectors, unsigned int *nor,
         }
         /* Clean the rows we read with the newly made rows */
         clean(rows1, nor1, rows2, stride2, internal_new_map, NULL, NULL, 0,
-              grease_level, prime, len, nob, start, 0, 0, name);
+              grease_level, prime, len, nob, start, 0, 0, 0, name);
         /* Write back the cleaned version to echelised */
         fseeko64(clean_vectors, ptr, SEEK_SET);
         errno = 0;

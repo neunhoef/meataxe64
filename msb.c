@@ -1,5 +1,5 @@
 /*
- * $Id: msb.c,v 1.5 2003/02/24 18:02:43 jon Exp $
+ * $Id: msb.c,v 1.6 2003/02/28 20:04:58 jon Exp $
  *
  * Function to spin some vectors under two generators to obtain a standard base
  *
@@ -210,18 +210,14 @@ unsigned int spin(const char *in, const char *out,
         memcpy(rows2[nor + i], rows1[nor + i], len * sizeof(unsigned int));
       }
       gen->nor += stride;
-      if (verbose) {
-        printf("%s: cleaning %d rows\n", name, stride);
-        fflush(stdout);
-      }
       clean(rows2, nor, rows2 + nor, stride, map, NULL, NULL, 0,
-            grease.level, prime, len, nob, 900, 0, 0, name);
+            grease.level, prime, len, nob, 900, 0, 0, verbose, name);
       echelise(rows2 + nor, stride, &d, &new_map, NULL, 0,
                grease.level, prime, len, nob, 900, 0, 0, 1, name);
       /* Now we know which rows are new */
       if (nor + d < noc) {
         clean(rows2 + nor, stride, rows2, nor, new_map, NULL, NULL, 0,
-              grease.level, prime, len, nob, 900, 0, 0, name);
+              grease.level, prime, len, nob, 900, 0, 0, 0, name);
       } else {
         /* No point in cleaning if we have the whole space */
         /* So force the inner loop to terminate */

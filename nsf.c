@@ -1,5 +1,5 @@
 /*
- * $Id: nsf.c,v 1.12 2003/02/10 23:20:55 jon Exp $
+ * $Id: nsf.c,v 1.13 2003/02/28 20:04:58 jon Exp $
  *
  * Compute the nullspace of a matrix, using temporary files
  *
@@ -284,7 +284,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
             cleanup(t1, t2, name5);
             exit(1);
           }
-          clean(mat1, stride, mat2, stride2, map, mat3, mat4, 1, grease.level, prime, len, nob, 0, space_id, len_id, name);
+          clean(mat1, stride, mat2, stride2, map, mat3, mat4, 1, grease.level, prime, len, nob, 0, space_id, len_id, verbose, name);
           for (j = 0; j < stride2; j++) {
             errno = 0;
             if (0 == endian_write_row(out->f, mat2[j], len)) {

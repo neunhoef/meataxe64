@@ -235,3 +235,4 @@ skew seventh
 20030210 - modify nullspace for better memory split
 20030224 - add verbosity for multiply
 20030225 - fix bug in join.c wrong header to output
+20030228 - Add verbose for all calls to clean

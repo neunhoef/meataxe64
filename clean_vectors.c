@@ -1,5 +1,5 @@
 /*
- * $Id: clean_vectors.c,v 1.1 2002/10/12 14:17:06 jon Exp $
+ * $Id: clean_vectors.c,v 1.2 2003/02/28 20:04:58 jon Exp $
  *
  * Clean one file of vectors with another
  *
@@ -18,6 +18,7 @@
 #include "header.h"
 #include "matrix.h"
 #include "memory.h"
+#include "parse.h"
 #include "primes.h"
 #include "read.h"
 #include "utils.h"
@@ -172,7 +173,7 @@ int clean_vectors(const char *echelised, const char *vectors, const char *output
         }
         map[d] = pos;
       }
-      clean(rows1, stride1, rows2, stride2, map, NULL, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, name);
+      clean(rows1, stride1, rows2, stride2, map, NULL, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, verbose, name);
     }
     if (0 == endian_write_matrix(outp, rows2, len, stride2)) {
       matrix_free(rows1);

@@ -1,5 +1,5 @@
 /*
- * $Id: tsp.c,v 1.10 2002/07/10 15:13:07 jon Exp $
+ * $Id: tsp.c,v 1.11 2003/02/28 20:04:58 jon Exp $
  *
  * Function to spin some vectors under two generators in tensor space
  *
@@ -299,16 +299,12 @@ unsigned int spin(const char *in, const char *out,
       }
     }
     gen->nor += rows_to_do;
-    if (verbose) {
-      printf("%s: cleaning %d rows\n", name, rows_to_do);
-      fflush(stdout);
-    }
     clean(rows, nor, rows + nor, rows_to_do, map, NULL, NULL, 0,
-          grease.level, prime, len, nob, 900, 0, 0, name);
+          grease.level, prime, len, nob, 900, 0, 0, verbose, name);
     echelise(rows + nor, rows_to_do, &d, &new_map, NULL, 0,
              grease.level, prime, len, nob, 900, 0, 0, 1, name);
     clean(rows + nor, rows_to_do, rows, nor, new_map, NULL, NULL, 0,
-            grease.level, prime, len, nob, 900, 0, 0, name);
+            grease.level, prime, len, nob, 900, 0, 0, 0, name);
     for (i = 0; i < rows_to_do; i++) {
       if (new_map[i] >= 0) {
         /* Got a useful row */

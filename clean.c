@@ -1,5 +1,5 @@
 /*
- * $Id: clean.c,v 1.16 2002/10/04 17:16:02 jon Exp $
+ * $Id: clean.c,v 1.17 2003/02/28 20:04:58 jon Exp $
  *
  * Cleaning and echilisation for meataxe
  *
@@ -29,7 +29,7 @@ void clean(unsigned int **m1, unsigned int d1,
            unsigned int grease_level, unsigned int prime,
            unsigned int len, unsigned int nob,
            unsigned int start, unsigned int start_e,
-           unsigned int len_e, const char *name)
+           unsigned int len_e, int verbose, const char *name)
 {
   unsigned int i = 0, inc = grease_level, mask, elts_per_word;
   grease_struct grease, grease_e;
@@ -47,6 +47,10 @@ void clean(unsigned int **m1, unsigned int d1,
   if (0 != record) {
     assert(NULL != m1_e);
     assert(NULL != m2_e);
+  }
+  if (verbose) { 
+      printf("%s: cleaning %d rows\n", name, d2);
+      fflush(stdout);
   }
   mask = get_mask_and_elts(nob, &elts_per_word);
   grease.level = grease_level;
@@ -226,14 +230,14 @@ void echelise(unsigned int **m, unsigned int d,
         if (0 != i) {
           clean(m + i, l, m, i, bits + i,
                 m_e + i, m_e, record, k, prime, len,
-                nob, start, start_e, len_e, name);
+                nob, start, start_e, len_e, 0, name);
         }
       }
       /* Now clean m[i + l, d] with m[i, i + l] */
       if (d > i + l) {
         clean(m + i, l, m + i + l, d - i - l, bits + i,
               m_e + i, m_e + i + l, record, k, prime, len,
-              nob, start, start_e, len_e, name);
+              nob, start, start_e, len_e, 0, name);
       }
     }
     i += l;
