@@ -1,7 +1,7 @@
 #
 # unix specific fragment for building
 #
-# $Id: unix.txt,v 1.4 2001/09/27 11:45:30 jon Exp $
+# $Id: unix.txt,v 1.5 2001/10/06 23:33:12 jon Exp $
 #
 EXEEXT=
 LIBEXT= a
@@ -10,9 +10,10 @@ DEPENDOBJEXT= o
 DEPENDEXT= d
 CC= gcc
 DEPEND_CC= gcc
-REL_COMPILE_FLAGS= -O3 -foptimize-sibling-calls -falign-loops=2 -falign-functions=2
+#REL_COMPILE_FLAGS= -O3 -foptimize-sibling-calls -falign-loops=2 -falign-functions=2
+REL_COMPILE_FLAGS= -O3
 DEBUG_COMPILE_FLAGS= -g
-LINK_FLAGS= -static
+LINK_FLAGS=
 REL_LINK_FLAGS= $(LINK_FLAGS)
 DEBUG_LINK_FLAGS= $(REL_LINK_FLAGS) $(DEBUG_COMPILE_FLAGS)
 PROF_COMPILE_FLAGS= -pg
@@ -20,9 +21,10 @@ PROF_LINK_FLAGS= $(DEBUG_LINK_FLAGS) $(PROF_COMPILE_FLAGS)
 PROFNA_LINK_FLAGS= $(PROF_LINK_FLAGS)
 NA_COMPILE_FLAGS= "-DNDEBUG=1"
 LINK= $(CC) -o # terminating space
-REL_LIBS= -lm
-DEBUG_LIBS= -lmcheck
-PROF_LIBS= $(DEBUG_LIBS) -lc_p
+REL_LIBS=
+DEBUG_LIBS=
+#PROF_LIBS= $(DEBUG_LIBS) -lc_p
+PROF_LIBS= $(DEBUG_LIBS) -static -lc_p
 PROFNA_LIBS= $(PROF_LIBS)
 COMPILE_CFLAGS= -Werror -ansi -Wall -Wpointer-arith -Wwrite-strings -Winline -Waggregate-return -Wmissing-prototypes -Wnested-externs -W -Wunused -Wcast-align -Wstrict-prototypes -Wmissing-declarations -pedantic
 COMPILE= $(CC) -c -o $@

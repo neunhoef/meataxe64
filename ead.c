@@ -25,7 +25,7 @@ static void ead_usage(void)
   fprintf(stderr, "%s: usage: %s <dir1> <dir2> <dir3>\n", name, name);
 }
 
-int main(int argc,  char **argv)
+int main(int argc,  const char *const argv[])
 {
   unsigned int col_pieces1, row_pieces1;
   unsigned int col_pieces2, row_pieces2;

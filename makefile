@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.15 2001/10/03 00:01:42 jon Exp $
+# $Id: makefile,v 1.16 2001/10/06 23:33:12 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -14,9 +14,12 @@ OS=unix
 ARCH=i386
 
 AD_TARGET=	ad
+CT_TARGET=	ct
 DTOU_TARGET=	dtou
 EAD_TARGET=	ead
+ECT_TARGET=	ect
 EID_TARGET=	eid
+EIM_TARGET=	eim
 EMU_TARGET=	emu
 ID_TARGET=	id
 IP_TARGET=	ip
@@ -27,8 +30,11 @@ SL_TARGET=	sl
 ZEX_TARGET=	zex
 
 AD_MODULES=	ad add elements endian header memory primes read rows utils write
+CT_MODULES=	count ct elements endian header memory primes read utils
 DTOU_MODULES=	dtou
 EAD_MODULES=	add ead endian files header map memory read rows system utils write
+ECT_MODULES=	count ect elements endian files header map memory primes read utils
+EIM_MODULES=	eim elements endian files header map memory primes read utils write
 EID_MODULES=	eid elements endian exrows files header map memory primes rows utils write
 EMU_MODULES=	command emu files map memory system utils
 ID_MODULES=	id elements endian header memory primes rows utils write
@@ -79,13 +85,22 @@ PROFNA_TARGETS:=
 TARGET:=AD
 include targets.txt
 
+TARGET:=CT
+include targets.txt
+
 TARGET:=DTOU
 include targets.txt
 
 TARGET:=EAD
 include targets.txt
 
+TARGET:=ECT
+include targets.txt
+
 TARGET:=EID
+include targets.txt
+
+TARGET:=EIM
 include targets.txt
 
 TARGET:=EMU

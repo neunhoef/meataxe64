@@ -1,7 +1,10 @@
 /*
-         zex.c   -   explode a matrix (ie chop it up, converse implode)
-	 =====       version 6.0.1 20/10/98
-*/
+ * $Id: zex.c,v 1.3 2001/10/06 23:33:12 jon Exp $
+ *
+ * explode a matrix
+ *
+ * Based on version 6.0.1 20/10/98
+ */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -49,7 +52,7 @@ int main(int argc,  char **argv)
     exit(1);
   }
   if (0 == read_binary_header(input, &h, argv[1])) {
-    fprintf(stderr, "%s cannot ead header from %s, terminating\n", name, argv[1]);
+    fprintf(stderr, "%s cannot read header from %s, terminating\n", name, argv[1]);
     exit(1);
   }
   prime = header_get_prime(h);

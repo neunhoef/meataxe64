@@ -1,5 +1,5 @@
 /*
- * $Id: elements.c,v 1.9 2001/09/20 00:00:16 jon Exp $
+ * $Id: elements.c,v 1.10 2001/10/06 23:33:12 jon Exp $
  *
  * Element manipulation for meataxe
  *
@@ -129,5 +129,19 @@ unsigned int elements_contract(unsigned int elts, unsigned int prime, unsigned i
     }
     return out;
   }
+}
+
+/* Count the non-zero elements in a word */
+unsigned int count_word(unsigned int word, unsigned int nob)
+{
+  unsigned int mask = (1 << nob) - 1;
+  unsigned int res = 0;
+  while (0 != word) {
+    if (0 != (word & mask)) {
+      res++;
+    }
+    word >>= nob;
+  }
+  return res;
 }
 

@@ -29,3 +29,6 @@
 20011001 - Abstract out map creation and extended row output
 20011002 - Created eid and used to complete check on A*A, Created zex
 20011003 - Add goals, update design. Fix funny lock files. Finish work on getin. Sort exrows. Add memory to slave
+20010905 - Remove static linking. Remove -lm and -lmcheck.
+20010905 - Remove some optimisation unavailable on RedHat 4.2
+20011006 - Write eim and ct/ect. Start on part 2 on b**3 = 1 demonstration
