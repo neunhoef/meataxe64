@@ -1,5 +1,5 @@
 /*
- * $Id: mul.c,v 1.28 2002/07/20 12:56:17 jon Exp $
+ * $Id: mul.c,v 1.29 2002/08/26 18:26:12 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
@@ -514,7 +514,7 @@ int mul_in_store(unsigned int **rows1, unsigned int **rows2, unsigned int **rows
   assert(NULL != name);
   assert(0 != noc);
   assert(0 != nob); /* nob refers to rows1 */
-  assert(0 != noc);
+  assert(0 != noc2);
   if (is_map1 && is_map2) {
     const header *h1 = header_create(1, 0, 0, noc, nor);
     const header *h2 = header_create(1, 0, 0, noc2, noc);
