@@ -1,5 +1,5 @@
 /*
- * $Id: spanmsp.c,v 1.1 2002/09/05 18:24:26 jon Exp $
+ * $Id: spanmsp.c,v 1.2 2003/02/24 18:02:43 jon Exp $
  *
  * Function to spin from a span under multiple generators until a proper subspace is found
  *
@@ -14,6 +14,7 @@
 #include "header.h"
 #include "mul.h"
 #include "primes.h"
+#include "parse.h"
 #include "read.h"
 #include "rows.h"
 #include "utils.h"
@@ -77,7 +78,7 @@ unsigned int spanmspin(const char *in, const char *out,
     int broke = 0;
     put_element_to_row(nob, i, scalar_row, 1);
     if (0 == mul_from_store(&scalar_row, &seed_row, inp, 0, nor, len, nob, 1, noc, prime,
-                            &grease, in, name)) {
+                            &grease, verbose, in, name)) {
       fprintf(stderr, "%s: failed to multiply by %s, terminating\n", name, in);
       fclose(inp);
       header_free(h_in);

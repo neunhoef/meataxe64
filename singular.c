@@ -1,5 +1,5 @@
 /*
- * $Id: singular.c,v 1.4 2002/10/27 13:29:31 jon Exp $
+ * $Id: singular.c,v 1.5 2003/02/24 18:02:43 jon Exp $
  *
  * Function to find a singular vector, given a quadratic form
  *
@@ -52,7 +52,7 @@ int singular_vector(unsigned int **rows, unsigned int **work,
     nor = 3;
   }
   if (0 == mul_from_store(rows, work, formp, 0, noc, len, nob, nor, noc, prime,
-                          grease, form, name)) {
+                          grease, 0, form, name)) {
     return 1;
   }
   for (i = 0; i < nor; i++) {

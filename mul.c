@@ -1,5 +1,5 @@
 /*
- * $Id: mul.c,v 1.31 2002/10/13 16:38:07 jon Exp $
+ * $Id: mul.c,v 1.32 2003/02/24 18:02:43 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
@@ -19,6 +19,7 @@
 #include "maps.h"
 #include "matrix.h"
 #include "memory.h"
+#include "parse.h"
 #include "primes.h"
 #include "read.h"
 #include "rows.h"
@@ -389,7 +390,7 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
         return cleanup(inp1, inp2, outp);
       }
     }
-    if (0 == mul_from_store(rows1, rows3, inp2, 0, noc1, len2, nob, rest, noc2, prime2, &grease, m2, name)) {
+    if (0 == mul_from_store(rows1, rows3, inp2, 0, noc1, len2, nob, rest, noc2, prime2, &grease, verbose, m2, name)) {
       fclose(inp2);
       fclose(outp);
       matrix_free(rows1);
@@ -424,7 +425,7 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
 int mul_from_store(unsigned int **rows1, unsigned int **rows3,
                    FILE *inp, int is_map, unsigned int noc, unsigned int len,
                    unsigned int nob, unsigned int nor, unsigned int noc_o, unsigned int prime,
-                   grease grease, const char *m, const char *name)
+                   grease grease, int verbose, const char *m, const char *name)
 {
   long long pos;
   unsigned int i, j, l;
@@ -437,6 +438,10 @@ int mul_from_store(unsigned int **rows1, unsigned int **rows3,
   assert(0 != noc);
   assert(is_a_prime_power(prime)); /* prime refers to rows1 */
   assert(0 != nob); /* nob refers to rows1 */
+  if (verbose) {
+    printf("%s: multiplying %d rows\n", name, nor);
+    fflush(stdout);
+  }
   /* Remember where we are in row 2 */
   pos = ftello64(inp);
   if (is_map) {

@@ -1,5 +1,5 @@
 /*
- * $Id: mspf.c,v 1.12 2002/11/19 19:09:30 jon Exp $
+ * $Id: mspf.c,v 1.13 2003/02/24 18:02:43 jon Exp $
  *
  * Function to spin some vectors under multiple generators
  * using intermediate files in a temporary directory.
@@ -224,10 +224,6 @@ unsigned int spin(const char *in, const char *out, const char *dir,
     unsigned int k, old_nor = nor;
     /* Ensure we don't try to do too many */
     k = 0;
-    if (verbose) {
-      printf("%s: multiplying %d rows\n", name, rows_to_do);
-      fflush(stdout);
-    }
     while (k < rows_to_do) {
       unsigned int stride = (k + max_rows <= rows_to_do) ? max_rows : rows_to_do - k;
       unsigned int step = (nor > max_rows) ? max_rows : nor;
@@ -246,7 +242,7 @@ unsigned int spin(const char *in, const char *out, const char *dir,
       }
       gen->base_ptr = ftello64(echelised); /* Reset the pointer into the existing basis for this generator */
       if (0 == mul_from_store(rows2, rows1, gen->f, gen->is_map, noc, len, nob,
-                              stride, noc, prime, &grease, gen->m, name)) {
+                              stride, noc, prime, &grease, verbose, gen->m, name)) {
         fprintf(stderr, "%s: failed to multiply using %s, terminating\n", name, gen->m);
         cleanup_all(NULL, argc, files, echelised, name_echelised);
         exit(1);

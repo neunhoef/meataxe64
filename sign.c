@@ -1,5 +1,5 @@
 /*
- * $Id: sign.c,v 1.5 2002/10/20 20:41:09 jon Exp $
+ * $Id: sign.c,v 1.6 2003/02/24 18:02:43 jon Exp $
  *
  * Function compute the orthogonal group sign
  *
@@ -132,7 +132,7 @@ int sign(const char *qform, const char *bform, const char *name)
     mat[out_num] = mat[nor - 1];
     mat[nor - 1] = row;
     if (0 == mul_from_store(&sing_row1, &sing_row2, binp, 0, noc, len, nob, 1, noc, prime,
-                            &grease, bform, name)) {
+                            &grease, 0, bform, name)) {
       fclose(binp);
       fclose(qinp);
       matrix_free(mat);

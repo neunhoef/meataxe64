@@ -1,5 +1,5 @@
 /*
- * $Id: tcv.c,v 1.6 2003/01/17 21:19:32 jon Exp $
+ * $Id: tcv.c,v 1.7 2003/02/24 18:02:43 jon Exp $
  *
  * Function to lift vectors from a tensor condensation representation
  *
@@ -284,7 +284,7 @@ int lift(unsigned int s, const char *mults_l, const char *mults_r, const char *i
           if (0 ==  mul_from_store(&inter_row_i, &inter_row_o,
                                    q[i], 0, nor_q[i], len_q[i],
                                    nob, 1, noc_q[i], prime,
-                                   &grease, argv[i], name)) {
+                                   &grease, 0, argv[i], name)) {
             return cleanup(left_multiplicities, right_multiplicities,
                            nor_q, noc_q, len_q, irr_q, inp,
                            q, h_q, s, h_i, h_o, outp);

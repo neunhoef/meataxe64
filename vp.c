@@ -1,5 +1,5 @@
 /*
- * $Id: vp.c,v 1.7 2002/07/03 12:06:54 jon Exp $
+ * $Id: vp.c,v 1.8 2003/02/24 18:02:43 jon Exp $
  *
  * Function to permute some vectors under two generators
  *
@@ -15,6 +15,7 @@
 #include "memory.h"
 #include "mul.h"
 #include "primes.h"
+#include "parse.h"
 #include "read.h"
 #include "utils.h"
 #include "write.h"
@@ -213,7 +214,7 @@ unsigned int permute(const char *in, const char *out, const char *a,
     /* Ensure we don't try to do too many */
     rows_to_do = (rows_to_do + gen->nor > nor) ? (nor - gen->nor) : rows_to_do;
     if (0 == mul_from_store(rows + gen->nor, rows + nor, gen->f, gen->is_map, noc, len, nob,
-                            rows_to_do, noc, prime, &grease, gen->m, name)) {
+                            rows_to_do, noc, prime, &grease, verbose, gen->m, name)) {
       fprintf(stderr, "%s: failed to multiply using %s, terminating\n", name, gen->m);
       cleanup(NULL, f_a, f_b);
       exit(1);

@@ -1,5 +1,5 @@
 /*
- * $Id: msb.c,v 1.4 2002/07/10 15:13:07 jon Exp $
+ * $Id: msb.c,v 1.5 2003/02/24 18:02:43 jon Exp $
  *
  * Function to spin some vectors under two generators to obtain a standard base
  *
@@ -196,15 +196,11 @@ unsigned int spin(const char *in, const char *out,
     /* is due to the requirement to have a guaranteed */
     /* order of generated vectors, independent of basis or memory constraints */
     k = 0;
-    if (verbose) {
-      printf("%s: multiplying %d rows\n", name, rows_to_do);
-      fflush(stdout);
-    }
     while (k < rows_to_do) {
       unsigned int rows_poss = max_rows - nor;
       unsigned int stride = (k + rows_poss <= rows_to_do) ? rows_poss : rows_to_do - k;
       if (0 == mul_from_store(rows1 + gen->nor, rows1 + nor, gen->f, gen->is_map, noc, len, nob,
-                              stride, noc, prime, &grease, gen->m, name)) {
+                              stride, noc, prime, &grease, verbose, gen->m, name)) {
         fprintf(stderr, "%s: failed to multiply using %s, terminating\n", name, gen->m);
         cleanup(NULL, argc, files);
         exit(1);
