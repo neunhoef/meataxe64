@@ -200,3 +200,4 @@ skew seventh
 20021004 - Add some support for orthogonal group sign
 20021007 - Fixes to singular_vector
 20021012 - Add zclean. Add zsing
+20021012 - Add zsign

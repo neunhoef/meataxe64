@@ -1,34 +1,35 @@
 /*
- * $Id: zsing.c,v 1.2 2002/10/12 17:40:49 jon Exp $
+ * $Id: zsign.c,v 1.1 2002/10/12 17:40:49 jon Exp $
  *
- * Compute a singular vector for a form on a space
+ * Compute the orthogonal group sign of a form
  *
  */
 
 #include <stdio.h>
 #include "endian.h"
 #include "memory.h"
-#include "singular.h"
+#include "sign.h"
 #include "parse.h"
 
-static const char *name = "zsing";
+static const char *name = "zsign";
 
-static void sing_usage(void)
+static void sign_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s  [-m <memory>] <space> <form> <output>\n", name, name);
+  fprintf(stderr, "%s: usage: %s  [-m <memory>] <quadratic form> <bilinear form>\n", name, name);
 }
 
 int main(int argc, const char * const argv[])
 {
   int n;
+
   argv = parse_line(argc, argv, &argc);
-  if (4 != argc) {
-    sing_usage();
+  if (3 != argc) {
+    sign_usage();
     exit(1);
   }
   endian_init();
   memory_init(name, memory);
-  n = singular(argv[1], argv[2], argv[3], name);
+  n = sign(argv[1], argv[2], name);
   memory_dispose();
   if (0 == n) {
     return 0;

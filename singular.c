@@ -1,5 +1,5 @@
 /*
- * $Id: singular.c,v 1.1 2002/10/12 14:17:06 jon Exp $
+ * $Id: singular.c,v 1.2 2002/10/12 17:40:49 jon Exp $
  *
  * Function to find a singular vector, given a quadratic form
  *
@@ -187,7 +187,11 @@ int singular(const char *space, const char *form, const char *out, const char *n
   }
   out_row = memory_pointer_offset(0, 3 + 3, len);
   /* Now read at most 3 rows of space */
+  errno = 0;
   if (0 == endian_read_matrix(inp1, mat, len, (nor > 3) ? 3 : nor)) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fclose(inp1);
     fclose(inp2);
     matrix_free(mat);
