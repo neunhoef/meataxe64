@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.31 2002/09/24 19:21:43 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.32 2002/09/24 19:54:02 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -283,6 +283,7 @@ Output on stderr is error diagnostic information.
 <li><a href="#zexport">zexport</a></li>
 <li><a href="#zfe">zfe</a></li>
 <li><a href="#zfln">zfln</a></li>
+<li><a href="#zflnf">zflnf</a></li>
 <li><a href="#zfo">zfo</a></li>
 <li><a href="#zid">zid</a></li>
 <li><a href="#zimport">zimport</a></li>
@@ -1400,6 +1401,62 @@ factor, one can hope to deduce the dimension, and hopefully also find
 an element with that dimension. The general situation in which this is
 used is either classifying irreducibles of a condensation, or
 classifying irreducibles of a condensation subgroup.
+</li>
+<li>
+<h3><a name="zflnf">zflnf</a></h3>
+Purpose: An intermediate file based version of <a
+href="#zfln">zfln</a>
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Stem for creation of output file names</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Depth of search</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>Maximum acceptable nullity</td>
+</tr>
+<tr>
+<td valign=top>4</td><td valign=top>Memory size</td>
+</tr>
+<tr>
+<td valign=top>5</td><td valign=top>Directory for temporary files</td>
+</tr>
+<tr>
+<td valign=top>6</td><td valign=top>Generator 1</td>
+</tr>
+<tr>
+<td valign=top>7</td><td valign=top>Order of generator 1</td>
+</tr>
+<tr>
+<td valign=top>8-</td><td valign=top>Other generators and orders</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>The element, if found, plus the
+script to create it</td>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient memory for matrix plus workspace</td>
+</tr>
+<tr>
+<td valign=top>255</td><td valign=top>No element of the required
+nullity found</td>
+</tr>
+</table>
+Commentary: This program is solely for use where zfln would be used if
+memory constraints permitted. It is wrapped by <a
+href="#find_best_nullityf_with_orders">find_best_nullityf_with_orders</a>
 </li>
 <li>
 <h3><a name="zfo">zfo</a></h3>
@@ -4426,6 +4483,7 @@ dimension increases.
 <li><a href="#f8">f8</a></li>
 <li><a href="#f9">f9</a></li>
 <li><a href="#find_best_nullity_with_orders">find_best_nullity_with_orders</a></li>
+<li><a href="#find_best_nullityf_with_orders">find_best_nullityf_with_orders</a></li>
 <li><a href="#find_element">find_element</a></li>
 <li><a href="#find_nullity_one_with_orders">find_nullity_one_with_orders</a></li>
 <li><a href="#find_nullity_onef_with_orders">find_nullity_onef_with_orders</a></li>
@@ -5589,6 +5647,59 @@ generators
 </tr>
 </table>
 Commentary: This is essentially a wrapper for <a href="#zfln">zfln</a>
+</li>
+<li>
+<h3><a name="find_best_nullityf_with_orders">find_best_nullityf_with_orders</a></h3>
+Purpose: Find an element of best nullity, given the orders of the
+generators
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Output</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Memory size</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>Directory for temporary files</td>
+</tr>
+<tr>
+<td valign=top>4</td><td valign=top>Generator 1</td>
+</tr>
+<tr>
+<td valign=top>5</td><td valign=top>Order of generator 1</td>
+</tr>
+<tr>
+<td valign=top>6</td><td valign=top>Generator 2</td>
+</tr>
+<tr>
+<td valign=top>7</td><td valign=top>Order of generator 2</td>
+</tr>
+<tr>
+<td valign=top>8-</td><td valign=top>Other generators and orders</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>The script used to produce the element</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient memory for workspace</td>
+</tr>
+<tr>
+<td valign=top>255</td><td valign=top>No low nullity element found</td>
+</tr>
+</table>
+Commentary: This is essentially a wrapper for <a href="#zflnf">zflnf</a>
 </li>
 <li>
 <h3><a name="find_element">find_element</a></h3>

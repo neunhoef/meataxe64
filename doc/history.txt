@@ -195,3 +195,4 @@ skew seventh
 20020918 - Add restrictf_with_orders and find_restricted_nullity_onef_with_orders
 20020923 - Added doc for zrand and ztrecover. Fix bug in ztrecover
 20020924 - Sorting return codes from zsums and friends
+20020924 - Add zfln and find_best_nullityf_with_orders

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: new_irredf_with_orders,v 1.10 2002/09/22 10:37:44 jon Exp $
+# $Id: new_irredf_with_orders,v 1.11 2002/09/24 19:54:02 jon Exp $
 #
 # Script to classify an irreducible representation
 #
@@ -105,7 +105,7 @@ elif [ 254 -eq $ret ]; then
   o_a=${o_rest[0]}
   o_b=${o_rest[1]}
 # Irreducible not absolutely irreducible
-  script=`find_best_nullity_with_orders $e $memory $line`
+  script=`find_best_nullityf_with_orders $e $memory ${tmp_dir} $line`
 # Find the nullspace
   ok=0
   while [ $ok -eq 0 ]; do

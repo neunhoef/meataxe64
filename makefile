@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.74 2002/09/18 10:47:52 jon Exp $
+# $Id: makefile,v 1.75 2002/09/24 19:54:01 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -38,6 +38,7 @@ ZEX_TARGET=	zex
 ZEXPORT_TARGET=	zexport
 ZFE_TARGET=	zfe
 ZFLN_TARGET=	zfln
+ZFLNF_TARGET=	zflnf
 ZFO_TARGET=	zfo
 ZID_TARGET=	zid
 ZIMPORT_TARGET=	zimport
@@ -136,6 +137,7 @@ ZEX_MODULES=	elements endian exrows files header map memory parse primes read ro
 ZEXPORT_MODULES=	elements endian header memory parse primes read rows utils write zexport
 ZFE_MODULES=	elements endian extend extend_matrix header memory parse primes read rows utils write zfe
 ZFLN_MODULES=	add clean elements endian grease header ident map_or_row maps matrix memory mul parse primes read rn rows sums utils write zfln
+ZFLNF_MODULES=	add clean elements endian grease header ident map_or_row maps matrix memory mul parse primes read rnf rows sumsf system utils write zflnf
 ZFO_MODULES=	elements endian header maps orbit parse primes read rows utils write zfo
 ZID_MODULES=	id ident elements endian header maps memory parse primes rows utils write
 ZIMPORT_MODULES=	elements endian header memory parse primes read rows utils write zimport
@@ -234,6 +236,7 @@ MODULES=	$(DECOMP_MODULES) \
 	$(ZEXPORT_MODULES) \
 	$(ZFE_MODULES) \
 	$(ZFLN_MODULES) \
+	$(ZFLNF_MODULES) \
 	$(ZFO_MODULES) \
 	$(ZID_MODULES) \
 	$(ZIMPORT_MODULES) \
@@ -423,6 +426,9 @@ TARGET:=ZFE
 include targets.txt
 
 TARGET:=ZFLN
+include targets.txt
+
+TARGET:=ZFLNF
 include targets.txt
 
 TARGET:=ZFO

@@ -3,8 +3,6 @@ Worry about return (NULL == s) code generation error
 Documentation changes for proj_base, sub_quot
 Consider putting memory size into argument parser
 Write span_and_spin for spins on large nullspaces
-Make zsumsf and friends distinguish find failure from errors *
-Fix find_nullity_onef and friends to use better codes from zsums and friends *
 Profile multiply (eg on 26750 for Co1) for different memory sizes
 Profile zns on 3584.e.3 for McL for different memory sizes. Think about grease strategy.
 Think about restricting the back echelising in rnf and nsf. Profile zrnf and zrn in best cases
@@ -12,7 +10,6 @@ Think about Sn and symmetrized powers
 Optimise monst by reversing bit order
 Investigate better matrix multiplications
 Think about orthogonal group sign
-Look into intermediate file version of find_best_nullity_with_orders and zfln *
 Fix zvp and zps to take less memory
 Think about better grease vector selection for making vectors
 Find a better algorithm for zsp memory. Investigate performance (1)
