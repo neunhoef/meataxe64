@@ -1,5 +1,5 @@
 /*
- * $Id: read.c,v 1.13 2001/11/07 22:35:27 jon Exp $
+ * $Id: read.c,v 1.14 2001/11/25 12:44:33 jon Exp $
  *
  * Read a header
  *
@@ -119,3 +119,24 @@ int read_binary_header(FILE *fp, const header **hp, const char *name)
   return 1;
 }
 
+int open_and_read_binary_header(FILE **inp, const header **h, const char *m, const char *name)
+{
+  FILE *in;
+  int res;
+  assert(NULL != inp);
+  assert(NULL != h);
+  assert(NULL != m);
+  in = fopen(m, "rb");
+  if (NULL == in) {
+    fprintf(stderr, "%s: cannot open %s, terminating\n", name, m);
+    return 0;
+  }
+  res = read_binary_header(in, h, m);
+  if (0 == res) {
+    fclose(in);
+    *inp = NULL;
+  } else {
+    *inp = in;
+  }
+  return res;
+}

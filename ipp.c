@@ -1,5 +1,5 @@
 /*
- * $Id: ipp.c,v 1.3 2001/11/06 22:25:40 jon Exp $
+ * $Id: ipp.c,v 1.4 2001/11/25 12:44:33 jon Exp $
  *
  * Read a permutation into a matrix
  *
@@ -56,17 +56,9 @@ int main(int argc, const char * const argv[])
     fprintf(stderr, "%s: cannot open %s, terminating\n", name, in);
     exit(1);
   }
-  outp = fopen(out, "wb");
-  if (NULL == outp) {
-    fprintf(stderr, "%s: cannot open %s, terminating\n", name, out);
-    fclose(inp);
-    exit(1);
-  }
   endian_init();
   memory_init(name, 0);
   if (0 == read_text_header_items(inp, &t1, &t2, &nor, &t3, in)) {
-    fclose(inp);
-    fclose(outp);
     exit(1);
   }
   h = header_create(prime, nob, nod, nor, nor);
@@ -74,14 +66,12 @@ int main(int argc, const char * const argv[])
   if (memory_rows(len, 1000) < 1) {
     fprintf(stderr, "%s: cannot create output row\n", name);
     fclose(inp);
-    fclose(outp);
     exit(1);
   }
   row = memory_pointer_offset(0, 0, len);
   assert(NULL != row);
-  if (0 == write_binary_header(outp, h, out)) {
+  if (0 == open_and_write_binary_header(&outp, h, out, name)) {
     fclose(inp);
-    fclose(outp);
     exit(1);
   }
   for (i = 0; i < nor; i++) {

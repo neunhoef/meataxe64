@@ -1,11 +1,11 @@
 /*
- * $Id: ss.c,v 1.2 2001/11/25 12:44:33 jon Exp $
+ * $Id: qs.c,v 1.1 2001/11/25 12:44:33 jon Exp $
  *
- * Function to compute subspace representation
+ * Function to compute quotient space representation
  *
  */
 
-#include "ss.h"
+#include "qs.h"
 #include "clean.h"
 #include "elements.h"
 #include "endian.h"
@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#if 0
 static void cleanup(FILE *f1, FILE *f2)
 {
   if (NULL != f1)
@@ -29,10 +30,28 @@ static void cleanup(FILE *f1, FILE *f2)
   if (NULL != f2)
     fclose(f2);
 }
+#endif
 
-void subspace(const char *range, const char *image,
+void quotient(const char *range, const char *gen,
               const char *out, const char *name)
 {
+  NOT_USED(range);
+  NOT_USED(gen);
+  NOT_USED(out);
+  NOT_USED(name);
+  assert(NULL != range);
+  assert(NULL != gen);
+  assert(NULL != out);
+  assert(NULL != name);
+/* TODO: Read range and gen headers, and check compatible
+ * TODO: Read range
+ * TODO: Create map on columns
+ * TODO: Create map of holes
+ * TODO: Read hole elements from generator and rearrange
+ * TODO: Clean stuff from generator
+ * TODO: Contract result and write out
+ */
+#if 0
   FILE *inp1 = NULL, *inp2 = NULL, *outp = NULL;
   const header *h_in1, *h_in2, *h_out;
   unsigned int prime, nob, noc, nor, len, len_e, max_rows, d, elt;
@@ -47,9 +66,9 @@ void subspace(const char *range, const char *image,
   assert(NULL != name);
   if (0 == open_and_read_binary_header(&inp1, &h_in1, range, name) ||
       0 == open_and_read_binary_header(&inp2, &h_in2, image, name)) {
-    fprintf(stderr, "%s: failed to open or read header from one of %s, %s, terminating\n",
+    fprintf(stderr, "%s: failed to read header from one of %s, %s, terminating\n",
             name, range, image);
-    cleanup(inp1, inp2);
+    cleanup(inp1, NULL);
     exit(1);
   }
   prime = header_get_prime(h_in1);
@@ -138,7 +157,6 @@ void subspace(const char *range, const char *image,
     }
   }
   if (0 == open_and_write_binary_header(&outp, h_out, out, name)) {
-    fclose(outp);
     exit(1);
   }
   if (0 == endian_write_matrix(outp, rows4, len_e, nor)) {
@@ -147,4 +165,5 @@ void subspace(const char *range, const char *image,
     fclose(outp);
     exit(1);
   }
+#endif
 }

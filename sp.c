@@ -1,5 +1,5 @@
 /*
- * $Id: sp.c,v 1.3 2001/11/25 00:17:19 jon Exp $
+ * $Id: sp.c,v 1.4 2001/11/25 12:44:33 jon Exp $
  *
  * Function to spin some vectors under two generators
  *
@@ -46,7 +46,7 @@ static void cleanup(FILE *f1, FILE *f2, FILE *f3)
 unsigned int spin(const char *in, const char *out, const char *a,
                   const char *b, const char *name)
 {
-  FILE *inp, *outp, *f_a, *f_b;
+  FILE *inp = NULL, *outp = NULL, *f_a = NULL, *f_b = NULL;
   const header *h_in, *h_a, *h_b;
   header *h_out;
   unsigned int prime, nob, noc, nor, len, max_rows, d;
@@ -63,19 +63,10 @@ unsigned int spin(const char *in, const char *out, const char *a,
   assert(NULL != a);
   assert(NULL != b);
   assert(NULL != name);
-  inp = fopen(in, "rb");
-  f_a = fopen(a, "rb");
-  f_b = fopen(b, "rb");
-  if (NULL == inp || NULL == f_a || NULL == f_b) {
-    fprintf(stderr, "%s: failed to open one of %s, %s, %s, %s, terminating\n",
-            name, in, out, a, b);
-    cleanup(inp, f_a, f_b);
-    exit(1);
-  }
-  if (0 == read_binary_header(inp, &h_in, name) ||
-      0 == read_binary_header(f_a, &h_a, name) ||
-      0 == read_binary_header(f_b, &h_b, name)) {
-    fprintf(stderr, "%s: failed to read header from one of %s, %s, %s, terminating\n",
+  if (0 == open_and_read_binary_header(&inp, &h_in, in, name) ||
+      0 == open_and_read_binary_header(&f_a, &h_a, a, name) ||
+      0 == open_and_read_binary_header(&f_b, &h_b, b, name)) {
+    fprintf(stderr, "%s: failed to open or read header from one of %s, %s, %s, terminating\n",
             name, in, a, b);
     cleanup(inp, f_a, f_b);
     exit(1);
@@ -161,8 +152,12 @@ unsigned int spin(const char *in, const char *out, const char *a,
     for (i = 0; i < rows_to_do; i++) {
       if (new_map[i] >= 0) {
         /* Got a useful row */
+        unsigned int *row;
         map[nor + j] = new_map[i];
-        memcpy(rows[nor + j], rows[nor + i], len * sizeof(unsigned int));
+        /* Swap pointers */
+        row = rows[nor + j];
+        rows[nor + j] = rows[nor + i];
+        rows[nor + i] = row;
         j++;
       }
     }
@@ -173,15 +168,8 @@ unsigned int spin(const char *in, const char *out, const char *a,
   }
   fclose(f_a);
   fclose(f_b);
-  outp = fopen(out, "wb");
-  if (NULL == outp) {
-    fprintf(stderr, "%s: failed to open output %s, terminating\n",
-            name, out);
-    exit(1);
-  }
   header_set_nor(h_out, nor);
-  if (0 == write_binary_header(outp, h_out, out)) {
-    fclose(outp);
+  if (0 == open_and_write_binary_header(&outp, h_out, out, name)) {
     exit(1);
   }
   if (0 == endian_write_matrix(outp, rows, len, nor)) {

@@ -1,5 +1,5 @@
 /*
- * $Id: ns.c,v 1.3 2001/11/21 01:06:29 jon Exp $
+ * $Id: ns.c,v 1.4 2001/11/25 12:44:33 jon Exp $
  *
  * Compute the null space of a matrix
  *
@@ -25,13 +25,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *name)
   unsigned int prime, nob, nor, len1, len2, n, r, **mat1, **mat2;
   int *map;
   grease_struct grease;
-  inp = fopen(m1, "rb");
-  if (NULL == inp) {
-    fprintf(stderr, "%s: cannot open %s, terminating\n", name, m1);
-    exit(1);
-  }
-  if (0 == read_binary_header(inp, &h1, m1)) {
-    fclose(inp);
+  if (0 == open_and_read_binary_header(&inp, &h1, m1, name)) {
     exit(1);
   }
   prime = header_get_prime(h1);
@@ -77,14 +71,8 @@ unsigned int nullspace(const char *m1, const char *m2, const char *name)
   free(mat1);
   if (n < nor) {
     /* Output null rows of mat2 */
-    outp = fopen(m2, "wb");
-    if (NULL == outp) {
-      fprintf(stderr, "%s: cannot open %s, terminating\n", name, m2);
-      exit(1);
-    }
     header_set_nor(h2, nor - n);
-    if (0 == write_binary_header(outp, h2, m2)) {
-      fclose(outp);
+    if (0 == open_and_write_binary_header(&outp, h2, m2, name)) {
       exit(1);
     }
     for (r = 0; r < nor; r++) {

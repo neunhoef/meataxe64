@@ -1,5 +1,5 @@
 /*
- * $Id: count.c,v 1.3 2001/11/07 22:35:27 jon Exp $
+ * $Id: count.c,v 1.4 2001/11/25 12:44:33 jon Exp $
  *
  * Function to count the non-zero elements in a matrix
  *
@@ -27,13 +27,7 @@ unsigned int count(const char *matrix, const char *name)
   assert(NULL != matrix);
   endian_init();
   memory_init(name, 0);
-  input = fopen(matrix, "rb");
-  if (NULL == input) {
-    fprintf(stderr, "%s: cannot open %s, terminating\n", name, matrix);
-    exit(1);
-  }
-  if (0 == read_binary_header(input, &h, matrix)) {
-    fclose(input);
+  if (0 == open_and_read_binary_header(&input, &h, matrix, name)) {
     exit(1);
   }
   prime = header_get_prime(h);

@@ -1,5 +1,5 @@
 /*
- * $Id: ip.c,v 1.8 2001/10/16 22:55:53 jon Exp $
+ * $Id: ip.c,v 1.9 2001/11/25 12:44:33 jon Exp $
  *
  * Read a matrix
  *
@@ -45,21 +45,13 @@ int main(int argc, const char * const argv[])
     fprintf(stderr, "%s: cannot open %s, terminating\n", name, in);
     exit(1);
   }
-  outp = fopen(out, "wb");
-  if (NULL == outp) {
-    fprintf(stderr, "%s: cannot open %s, terminating\n", name, out);
-    fclose(inp);
-    exit(1);
-  }
   endian_init();
   if (0 == read_text_header(inp, &h, in)) {
     fclose(inp);
-    fclose(outp);
     exit(1);
   }
-  if (0 == write_binary_header(outp, h, out)) {
+  if (0 == open_and_write_binary_header(&outp, h, out, name)) {
     fclose(inp);
-    fclose(outp);
     exit(1);
   }
   prime = header_get_prime(h);

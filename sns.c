@@ -1,5 +1,5 @@
 /*
- * $Id: sns.c,v 1.2 2001/11/19 19:08:49 jon Exp $
+ * $Id: sns.c,v 1.3 2001/11/25 12:44:33 jon Exp $
  *
  * Simple compute of the null space of a matrix
  *
@@ -27,8 +27,8 @@ int main(int argc, const char * const argv[])
   unsigned int n, rank;
   unsigned int memory = MEM_SIZE;
   FILE *inp, *outp;
-  header *h;
-  unsigned int prime, nob, nor, len, **mat1, **mat2;
+  const header *h_in, *h_out;
+  unsigned int prime, nob, nor, noc, len, **mat1, **mat2;
 
   if (3 != argc && 4 != argc) {
     rn_usage();
@@ -39,19 +39,14 @@ int main(int argc, const char * const argv[])
     memory = strtoul(argv[3], NULL, 0);
   }
   memory_init(name, memory);
-  inp = fopen(argv[1], "rb");
-  if (NULL == inp) {
-    fprintf(stderr, "%s: cannot open %s, terminating\n", name, argv[1]);
+  if (0 == open_and_read_binary_header(&inp, &h_in, argv[1], name)) {
     exit(1);
   }
-  if (0 == read_binary_header(inp, (const header **)&h, argv[1])) {
-    fclose(inp);
-    exit(1);
-  }
-  prime = header_get_prime(h);
-  nob = header_get_nob(h);
-  nor = header_get_nor(h);
-  len = header_get_len(h);
+  prime = header_get_prime(h_in);
+  nob = header_get_nob(h_in);
+  nor = header_get_nor(h_in);
+  noc = header_get_noc(h_in);
+  len = header_get_len(h_in);
   /* TODO: Handle nor != noc here */
   if (memory_rows(len, 500) < nor) {
     fprintf(stderr, "%s: cannot allocate %d rows for %s, terminating\n", name, nor, argv[1]);
@@ -78,16 +73,10 @@ int main(int argc, const char * const argv[])
   }
   rank = simple_echelise_and_record(mat1, mat2, nor, prime, len, nob);
   /* Now write out the rows of mat2 for which mat1 is zero */
-  outp = fopen(argv[2], "wb");
-  if (NULL == outp) {
-    fprintf(stderr, "%s: cannot open %s, terminating\n", name, argv[2]);
+  h_out = header_create(prime, nob, header_get_nod(h_in), noc, nor - rank);
+  if (0 == open_and_write_binary_header(&outp, h_out, argv[2], name)) {
     exit(1);
   }
-  if (0 == write_binary_header(outp, h, argv[2])) {
-    fclose(outp);
-    exit(1);
-  }
-  header_set_nor(h, nor - rank);
   for (n = 0; n < nor; n++) {
     if (row_is_zero(mat1[n], len)) {
       (void)endian_write_row(outp, mat2[n], len);

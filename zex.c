@@ -1,5 +1,5 @@
 /*
- * $Id: zex.c,v 1.4 2001/10/09 19:36:26 jon Exp $
+ * $Id: zex.c,v 1.5 2001/11/25 12:44:33 jon Exp $
  *
  * explode a matrix
  *
@@ -47,13 +47,8 @@ int main(int argc,  char **argv)
     fprintf(stderr, "%s: required submatrix size must be non-zero\n", name);
     exit(1);
   }
-  input = fopen(argv[1], "rb");
-  if (NULL == input) {
-    fprintf(stderr, "%s cannot open %s, terminating\n", name, argv[1]);
-    exit(1);
-  }
-  if (0 == read_binary_header(input, &h, argv[1])) {
-    fprintf(stderr, "%s cannot read header from %s, terminating\n", name, argv[1]);
+  if (0 == open_and_read_binary_header(&input, &h, argv[1], name)) {
+    fprintf(stderr, "%s cannot open or read header from %s, terminating\n", name, argv[1]);
     exit(1);
   }
   assert(NULL != h);

@@ -1,5 +1,5 @@
 /*
- * $Id: add.c,v 1.10 2001/11/07 22:35:27 jon Exp $
+ * $Id: add.c,v 1.11 2001/11/25 12:44:32 jon Exp $
  *
  * Function to add two matrices to give a third
  *
@@ -21,9 +21,9 @@
 
 int add(const char *m1, const char *m2, const char *m3, const char *name)
 {
-  FILE *inp1;
-  FILE *inp2;
-  FILE *outp;
+  FILE *inp1 = NULL;
+  FILE *inp2 = NULL;
+  FILE *outp = NULL;
   unsigned int prime, nob, noc, nor, len;
   unsigned int i;
   const header *h1, *h2;
@@ -32,29 +32,11 @@ int add(const char *m1, const char *m2, const char *m3, const char *name)
   row_incer incer;
 
   endian_init();
-  inp1 = fopen(m1, "rb");
-  if (NULL == inp1) {
-    fprintf(stderr, "%s cannot open %s, terminating\n", name, m1);
-    return 0;
-  }
-  inp2 = fopen(m2, "rb");
-  if (NULL == inp2) {
-    fprintf(stderr, "%s cannot open %s, terminating\n", name, m2);
-    fclose(inp1);
-    return 0;
-  }
-  outp = fopen(m3, "wb");
-  if (NULL == outp) {
-    fprintf(stderr, "%s cannot open %s, terminating\n", name, m3);
-    fclose(inp1);
-    fclose(inp2);
-    return 0;
-  }
-  if (0 == read_binary_header(inp1, &h1, m1) ||
-      0 == read_binary_header(inp2, &h2, m2)) {
-    fclose(inp1);
-    fclose(inp2);
-    fclose(outp);
+  if (0 == open_and_read_binary_header(&inp1, &h1, m1, name) ||
+      0 == open_and_read_binary_header(&inp2, &h2, m2, name)) {
+    if (NULL != inp1) {
+      fclose(inp1);
+    }
     return 0;
   }
   prime = header_get_prime(h1);
@@ -69,22 +51,18 @@ int add(const char *m1, const char *m2, const char *m3, const char *name)
     fprintf(stderr, "%s header mismatch between %s and %s, terminating\n", name, m1, m2);
     fclose(inp1);
     fclose(inp2);
-    fclose(outp);
     return 0;
   }
   if (0 == rows_init(prime, &row_operations)) {
     fprintf(stderr, "%s: cannot initialise row operations for %s, %s, terminating\n", name, m1, m2);
     fclose(inp1);
     fclose(inp2);
-    fclose(outp);
     return 0;
   }
   incer = row_operations.incer;
-  if (0 == write_binary_header(outp, h1, m3)) {
-    fprintf(stderr, "%s cannot write header to %s, terminating\n", name, m3);
+  if (0 == open_and_write_binary_header(&outp, h1, m3, name)) {
     fclose(inp1);
     fclose(inp2);
-    fclose(outp);
     return 0;
   }
   if (memory_rows(len, 1000) < 2) {

@@ -1,5 +1,5 @@
 /*
- * $Id: rn.c,v 1.6 2001/11/19 19:08:49 jon Exp $
+ * $Id: rn.c,v 1.7 2001/11/25 12:44:33 jon Exp $
  *
  * Compute the rank of a matrix
  *
@@ -22,13 +22,7 @@ unsigned int rank(const char *m, const char *name)
   unsigned int prime, nob, nor, len, n, r, **mat;
   int *map;
   grease_struct grease;
-  inp = fopen(m, "rb");
-  if (NULL == inp) {
-    fprintf(stderr, "%s: cannot open %s, terminating\n", name, m);
-    exit(1);
-  }
-  if (0 == read_binary_header(inp, &h, m)) {
-    fclose(inp);
+  if (0 == open_and_read_binary_header(&inp, &h, m, name)) {
     exit(1);
   }
   prime = header_get_prime(h);

@@ -1,5 +1,5 @@
 /*
- * $Id: srn.c,v 1.2 2001/11/19 19:08:49 jon Exp $: zrn.c,v 1.1 2001/11/12 13:43:38 jon Exp $
+ * $Id: srn.c,v 1.3 2001/11/25 12:44:33 jon Exp $: zrn.c,v 1.1 2001/11/12 13:43:38 jon Exp $
  *
  * Simple compute of the rank of a matrix
  *
@@ -37,13 +37,7 @@ int main(int argc, const char * const argv[])
     memory = strtoul(argv[2], NULL, 0);
   }
   memory_init(name, memory);
-  inp = fopen(argv[1], "rb");
-  if (NULL == inp) {
-    fprintf(stderr, "%s: cannot open %s, terminating\n", name, argv[1]);
-    exit(1);
-  }
-  if (0 == read_binary_header(inp, &h, argv[1])) {
-    fclose(inp);
+  if (0 == open_and_read_binary_header(&inp, &h, argv[1], name)) {
     exit(1);
   }
   prime = header_get_prime(h);

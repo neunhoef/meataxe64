@@ -1,5 +1,5 @@
 /*
- * $Id: eim.c,v 1.3 2001/10/11 07:47:13 jon Exp $
+ * $Id: eim.c,v 1.4 2001/11/25 12:44:33 jon Exp $
  *
  * implode a matrix (ie glue exploded matrices together)
  *
@@ -41,7 +41,7 @@ static void fail(FILE **inputs, FILE *output, unsigned int cols)
 
 int main(int argc,  const char *const argv[])
 {
-  FILE *input, *output;
+  FILE *input = NULL, *output = NULL;
   FILE **inputs;
   const char *matrix;
   const header *h = NULL, *outh;
@@ -64,14 +64,8 @@ int main(int argc,  const char *const argv[])
   cols = 0;
   for (i = 0; i < col_pieces; i++) {
     matrix = pathname(argv[2], names[i]);
-    input = fopen(matrix, "rb");
-    if (NULL == input) {
-      fprintf(stderr, "%s: cannot open %s, terminating\n", name, matrix);
-      exit(1);
-    }
-    if (0 == read_binary_header(input, &h, matrix)) {
-      fprintf(stderr, "%s cannot read header from %s, terminating\n", name, matrix);
-      fclose(input);
+    if (0 == open_and_read_binary_header(&input, &h, matrix, name)) {
+      fprintf(stderr, "%s cannot open or read header from %s, terminating\n", name, matrix);
       exit(1);
     }
     assert(NULL != h);
@@ -80,14 +74,8 @@ int main(int argc,  const char *const argv[])
   }
   for (i = 0; i < row_pieces; i++) {
     matrix = pathname(argv[2], names[i * col_pieces]);
-    input = fopen(matrix, "rb");
-    if (NULL == input) {
-      fprintf(stderr, "%s: cannot open %s, terminating\n", name, matrix);
-      exit(1);
-    }
-    if (0 == read_binary_header(input, &h, matrix)) {
-      fprintf(stderr, "%s cannot read header from %s, terminating\n", name, matrix);
-      fclose(input);
+    if (0 == open_and_read_binary_header(&input, &h, matrix, name)) {
+      fprintf(stderr, "%s cannot open or read header from %s, terminating\n", name, matrix);
       exit(1);
     }
     assert(NULL != h);
@@ -101,14 +89,8 @@ int main(int argc,  const char *const argv[])
   outh = header_create(prime, nob, nod, cols, rows);
   assert(NULL != outh);
   len = header_get_len(outh);
-  output = fopen(argv[1], "wb");
-  if (NULL == output) {
-    fprintf(stderr, "%s cannot open %s, terminating\n", name, argv[1]);
-    exit(1);
-  }
-  if (0 == write_binary_header(output, outh, argv[1])) {
-    fprintf(stderr, "%s cannot write header to %s, terminating\n", name, argv[1]);
-    fclose(output);
+  if (0 == open_and_write_binary_header(&output, outh, argv[1], name)) {
+    fprintf(stderr, "%s cannot open or write header to %s, terminating\n", name, argv[1]);
     exit(1);
   }
   /* Now copy all the input matrices into the output one */
@@ -125,12 +107,7 @@ int main(int argc,  const char *const argv[])
     unsigned int k;
     for (j = 0; j < col_pieces; j++) {
       const char *piece_name = pathname(argv[2], names[i * row_pieces + j]);
-      inputs[j] = fopen(piece_name, "rb");
-      if (NULL == inputs[j]) {
-        fprintf(stderr, "%s: cannot open %s, terminating\n", name, piece_name);
-        exit(1);
-      }
-      if (0 == read_binary_header(inputs[j], headers + j, piece_name)) {
+      if (0 == open_and_read_binary_header(inputs + j, headers + j, piece_name, name)) {
         fprintf(stderr, "%s cannot read header from %s, terminating\n", name, piece_name);
         fail(inputs, output, j + 1);
       }

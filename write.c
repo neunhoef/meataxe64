@@ -1,5 +1,5 @@
 /*
- * $Id: write.c,v 1.7 2001/11/07 22:35:27 jon Exp $
+ * $Id: write.c,v 1.8 2001/11/25 12:44:33 jon Exp $
  *
  * Write a header
  *
@@ -64,4 +64,27 @@ int write_binary_header(FILE *fp, const header *h, const char *name)
     return 0;
   }
   return 1;
+}
+
+int open_and_write_binary_header(FILE **outp, const header *h, const char *m, const char *name)
+{
+  FILE *out;
+  int res;
+  assert(NULL != outp);
+  assert(NULL != h);
+  assert(NULL != m);
+  out = fopen(m, "wb");
+  if (NULL == out) {
+    fprintf(stderr, "%s: cannot open %s, terminating\n", name, m);
+    return 0;
+  }
+  *outp = out;
+  res = write_binary_header(out, h, m);
+  if (0 == res) {
+    fclose(out);
+    *outp = NULL;
+  } else {
+    *outp = out;
+  }
+  return res;
 }

@@ -54,3 +54,4 @@
 20011121 - Complete first attempt at spin
 20011122 - Debug spin to work with B
 20011124 - Subspace splits He 2058 permutation representation
+20011125 - Started on quotient space

@@ -1,5 +1,5 @@
 /*
- * $Id: tra.c,v 1.4 2001/11/19 19:08:49 jon Exp $
+ * $Id: tra.c,v 1.5 2001/11/25 12:44:33 jon Exp $
  *
  * Function to transpose a matrix
  *
@@ -31,20 +31,7 @@ int tra(const char *m1, const char *m2, const char *name)
   assert(NULL != m2);
   assert(NULL != name);
   endian_init();
-  input = fopen(m1, "rb");
-  if (NULL == input) {
-    fprintf(stderr, "%s cannot open %s, terminating\n", name, m1);
-    return 0;
-  }
-  output = fopen(m2, "wb");
-  if (NULL == output) {
-    fprintf(stderr, "%s cannot open %s, terminating\n", name, m2);
-    fclose(input);
-    return 0;
-  }
-  if (0 == read_binary_header(input, &h1, m1)) {
-    fclose(input);
-    fclose(output);
+  if (0 == open_and_read_binary_header(&input, &h1, m1, name)) {
     return 0;
   }
   nob = header_get_nob(h1);
@@ -56,10 +43,9 @@ int tra(const char *m1, const char *m2, const char *name)
   len2 = header_get_len(h2);
   /* Maximum row size */
   max = (len1 > len2) ? len1 : len2;
-  if (0 == write_binary_header(output, h2, m2)) {
-    fprintf(stderr, "%s cannot write header to %s, terminating\n", name, m2);
+  if (0 == open_and_write_binary_header(&output, h2, m2, name)) {
+    fprintf(stderr, "%s cannot open or write header to %s, terminating\n", name, m2);
     fclose(input);
-    fclose(output);
     return 0;
   }
   total = memory_rows(max, 1000);

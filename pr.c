@@ -1,5 +1,5 @@
 /*
- * $Id: pr.c,v 1.6 2001/10/16 22:55:53 jon Exp $
+ * $Id: pr.c,v 1.7 2001/11/25 12:44:33 jon Exp $
  *
  * Print a matrix
  *
@@ -47,13 +47,7 @@ int main(int argc, const char * const argv[])
     exit(1);
   }
   in = argv[1];
-  inp = fopen(in, "rb");
-  if (NULL == inp) {
-    fprintf(stderr, "%s: cannot open %s, terminating\n", name, in);
-    exit(1);
-  }
-  if (0 == read_binary_header(inp, &h, in)) {
-    fclose(inp);
+  if (0 == open_and_read_binary_header(&inp, &h, in, name)) {
     exit(1);
   }
   prime = header_get_prime(h);
