@@ -1,7 +1,7 @@
 #
-# $Id: base,v 1.6 2002/03/24 19:44:02 jon Exp $
+# $Id: base,v 1.7 2002/03/31 20:55:41 jon Exp $
 #
-# Script to to find a representation in standard base
+# Script to find a representation in standard base
 #
 # Inputs
 # $1: element with which to split

@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.54 2002/03/24 19:44:02 jon Exp $
+# $Id: makefile,v 1.55 2002/03/31 20:55:41 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -72,6 +72,7 @@ ZSKSQ_TARGET=	zsksq
 ZSL_TARGET=	zsl
 ZSP_TARGET=	zsp
 ZSPAN_TARGET=	zspan
+ZSPF_TARGET=	zspf
 ZSS_TARGET=	zss
 ZSUMS_TARGET=	zsums
 ZSYMSQ_TARGET=	zsymsq
@@ -144,6 +145,7 @@ ZSKSQ_MODULES=	dets elements endian header matrix memory powers primes read rows
 ZSL_MODULES=	add elements endian files grease header matrix memory mul primes read rows slave system utils write
 ZSP_MODULES=	clean elements endian grease header matrix memory mul primes read rows sp utils write zsp
 ZSPAN_MODULES=	elements endian header matrix memory primes read rows utils write zspan
+ZSPF_MODULES=	clean elements endian grease header matrix memory mul primes read rows spf system utils write zspf
 ZSS_MODULES=	clean elements endian grease header matrix memory primes read rows ss utils write zss
 ZSUMS_MODULES=	add clean elements endian grease header ident matrix memory mul primes read rn rows sums utils write zsums
 ZSYMSQ_MODULES=	dets elements endian header matrix memory powers primes read rows utils write zsymsq
@@ -216,6 +218,7 @@ MODULES=	$(DTOU_MODULES) \
 	$(ZSL_MODULES) \
 	$(ZSP_MODULES) \
 	$(ZSPAN_MODULES) \
+	$(ZSPF_MODULES) \
 	$(ZSS_MODULES) \
 	$(ZSUMS_MODULES) \
 	$(ZSYMSQ_MODULES) \
@@ -447,6 +450,9 @@ TARGET:=ZSP
 include targets.txt
 
 TARGET:=ZSPAN
+include targets.txt
+
+TARGET:=ZSPF
 include targets.txt
 
 TARGET:=ZSS

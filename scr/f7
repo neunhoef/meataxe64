@@ -1,5 +1,5 @@
 #
-# $Id: f7,v 1.1 2001/12/01 10:46:02 jon Exp $
+# $Id: f7,v 1.2 2002/03/31 20:55:41 jon Exp $
 #
 # Script to perform A + BC + CB + B
 #
@@ -25,6 +25,7 @@ if [ -e $1 -a -e $2 -a -e $3 ]; then
     exit 1
   fi
   f6 ${5}_1 $2 $3 $4 ${5}_1
+  rm ${5}_1
 else
   echo "$0: missing files $1, $2 or $3"
   exit 1

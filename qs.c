@@ -1,5 +1,5 @@
 /*
- * $Id: qs.c,v 1.6 2002/02/18 20:42:49 jon Exp $
+ * $Id: qs.c,v 1.7 2002/03/31 20:55:41 jon Exp $
  *
  * Function to compute quotient space representation
  *
@@ -38,7 +38,7 @@ void quotient(const char *range, const char *gen,
 {
   FILE *inp_r = NULL, *inp_g = NULL, *outp = NULL;
   const header *h_in_r, *h_in_g, *h_out;
-  unsigned int prime, nob, noc, nor_r, nor_g, nor_o, len, len_o, max_rows, d, i, j, k, elt, step;
+  unsigned int prime, nob, noc, nor_r, nor_g, nor_o, len, len_o, d, i, j, k, elt, step_r, step_i;
   unsigned int **rows1, **rows2;
   int *map_r, *map_g;
   unsigned int *map_o;
@@ -85,19 +85,26 @@ void quotient(const char *range, const char *gen,
   header_free(h_in_r);
   header_free(h_in_g);
   assert(len >= len_o);
-  max_rows = memory_rows(len, 450);
-  in_store = max_rows >= nor_g;
-  step = (0 != in_store) ? nor_g : max_rows;
+  step_i = memory_rows(len, 800);
+  step_r = memory_rows(len, 100);
+  if (0 == step_r) {
+    fprintf(stderr, "%s: cannot allocate 1 row for range %s, termainting\n", name, range);
+    cleanup(inp_r, inp_g, NULL);
+    exit(1);
+  }
   if (0 == open_and_write_binary_header(&outp, h_out, out, name)) {
     cleanup(inp_r, inp_g, outp);
     exit(1);
   }
+  in_store = (step_i >= nor_g) && (step_r >= nor_r);
   header_free(h_out);
-  rows1 = matrix_malloc(step); /* range */
-  rows2 = matrix_malloc(step); /* gen */
-  for (d = 0; d < step; d++) {
-    rows1[d] = memory_pointer_offset(0, d, len);
-    rows2[d] = memory_pointer_offset(450, d, len);
+  rows1 = matrix_malloc(step_r); /* range */
+  rows2 = matrix_malloc(step_i); /* gen */
+  for (d = 0; d < step_r; d++) {
+    rows1[d] = memory_pointer_offset(800, d, len);
+  }
+  for (d = 0; d < step_i; d++) {
+    rows2[d] = memory_pointer_offset(0, d, len);
   }
   map_r = my_malloc(nor_r * sizeof(int));
   map_g = my_malloc(nor_g * sizeof(int));
@@ -106,8 +113,8 @@ void quotient(const char *range, const char *gen,
   memset(map_g, 0, nor_g * sizeof(int));
   /* Now set up the map */
   pos = ftell(inp_r); /* Where we are in the range */
-  for (i = 0; i < nor_r; i += step) {
-    unsigned int j, stride_i = (i + step <= nor_r) ? step : nor_r - i;
+  for (i = 0; i < nor_r; i += step_r) {
+    unsigned int j, stride_i = (i + step_r <= nor_r) ? step_r : nor_r - i;
     if (0 == endian_read_matrix(inp_r, rows1, len, stride_i)) {
       fprintf(stderr, "%s: failed to read rows from %s, terminating\n",
               name, range);
@@ -144,7 +151,7 @@ void quotient(const char *range, const char *gen,
   j = 0; /* Counting the significant rows from g */
   while (j < nor_o) {
     /* Read some rows from inp_g into rows2 */
-    unsigned int stride_j = (j + step <= nor_o) ? step : nor_o - j;
+    unsigned int stride_j = (j + step_i <= nor_o) ? step_i : nor_o - j;
     unsigned int *row_o = memory_pointer(900);
     for (d = 0; d < stride_j; d++) {
       while (map_o[j + d] >= i) {
@@ -164,8 +171,8 @@ void quotient(const char *range, const char *gen,
       cleanup(inp_r, inp_g, outp);
       exit(1);
     }
-    for (k = 0; k < nor_r; k += step) {
-      unsigned int stride_k = (k + step <= nor_r) ? step : nor_r - k;
+    for (k = 0; k < nor_r; k += step_r) {
+      unsigned int stride_k = (k + step_r <= nor_r) ? step_r : nor_r - k;
       if (0 == in_store && 0 == endian_read_matrix(inp_r, rows1, len, stride_k)) {
         fprintf(stderr, "%s: failed to read rows from %s, terminating\n",
                 name, range);

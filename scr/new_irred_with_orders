@@ -1,5 +1,5 @@
 #
-# $Id: new_irred_with_orders,v 1.3 2002/03/24 19:44:02 jon Exp $
+# $Id: new_irred_with_orders,v 1.4 2002/03/31 20:55:41 jon Exp $
 #
 # Script to classify an irreducible representation
 #
@@ -60,6 +60,7 @@ script=`find_nullity_one_with_orders $a $b $e $o_a $o_b $memory`
 ret=$?
 if [ $ret -ne 0 ]; then
   rm -f ${tmp}.*
+  echo $script
   exit $ret
 fi
 name=${tmp}_${nor}
@@ -69,6 +70,9 @@ if [ $ret -ne 0 ]; then
   echo base returns $ret, terminating
   rm -f ${tmp}*
   exit 1
+fi
+if [ ! -e irreds ]; then
+  mkdir irreds
 fi
 names=`ls irreds/${nor}_*_1 2>/dev/null`
 ret=$?

@@ -1,11 +1,11 @@
 /*
- * $Id: sbf.c,v 1.2 2002/03/31 20:55:41 jon Exp $
+ * $Id: spf.c,v 1.1 2002/03/31 20:55:41 jon Exp $
  *
- * Function to spin some vectors under two generators to obtain a standard base
+ * Function to spin some vectors under two generators
  *
  */
 
-#include "sbf.h"
+#include "spf.h"
 #include "clean.h"
 #include "elements.h"
 #include "endian.h"
@@ -46,16 +46,11 @@ static void cleanup(FILE *f1, FILE *f2, FILE *f3)
 }
 
 static void cleanup_all(FILE *f1, FILE *f2, FILE *f3,
-                        FILE *basis, FILE *echelised,
-                        const char *name_basis, const char *name_echelised)
+                        FILE *echelised, const char *name_echelised)
 {
-  assert(NULL != basis);
   assert(NULL != echelised);
-  assert(NULL != name_basis);
   assert(NULL != name_echelised);
-  fclose(basis);
   fclose(echelised);
-  (void)remove(name_basis);
   (void)remove(name_echelised);
   cleanup(f1, f2, f3);
 }
@@ -63,14 +58,13 @@ static void cleanup_all(FILE *f1, FILE *f2, FILE *f3,
 unsigned int spin(const char *in, const char *out, const char *a,
                   const char *b, const char *dir, const char *name)
 {
-  FILE *inp = NULL, *outp = NULL, *f_a = NULL, *f_b = NULL, *basis = NULL, *echelised = NULL;
+  FILE *inp = NULL, *outp = NULL, *f_a = NULL, *f_b = NULL, *echelised = NULL;
   const header *h_in, *h_a, *h_b;
   header *h_out;
-  char *name_basis = NULL;
   char *name_echelised = NULL;
   const char *tmp = tmp_name();
   unsigned int prime, nob, noc, nor, len, max_rows, d, i, elt;
-  unsigned int **rows1, **rows2, **rows3;
+  unsigned int **rows1, **rows2;
   int *map, *new_map;
   int tmps_created = 0;
   grease_struct grease;
@@ -131,16 +125,14 @@ unsigned int spin(const char *in, const char *out, const char *a,
   gen_b.base_ptr = 0;
   /* Create names for the temporary files */
   d = strlen(tmp) + strlen(dir);
-  name_basis = my_malloc(d + 4);
   name_echelised = my_malloc(d + 4);
-  sprintf(name_basis, "%s/%s.0", dir, tmp);
   sprintf(name_echelised, "%s/%s.1", dir, tmp);
   /* Initialise arithmetic */
   primes_init(prime, &prime_operations);
   rows_init(prime, &row_operations);
   grease_init(&row_operations, &grease);
   /* Work out how many rows we can handle in store */
-  max_rows = memory_rows(len, 300);
+  max_rows = memory_rows(len, 450);
   if (0 == grease_level(prime, &grease, memory_rows(len, 100))) {
     fprintf(stderr, "%s: failed to get grease for %s, %s, %s, terminating\n",
             name, in, a, b);
@@ -158,11 +150,9 @@ unsigned int spin(const char *in, const char *out, const char *a,
   /* Set up the pointers to the workspace rows */
   rows1 = matrix_malloc(max_rows);
   rows2 = matrix_malloc(max_rows);
-  rows3 = matrix_malloc(max_rows);
   for (d = 0; d < max_rows; d++) {
     rows1[d] = memory_pointer_offset(0, d, len);
-    rows2[d] = memory_pointer_offset(300, d, len);
-    rows3[d] = memory_pointer_offset(600, d, len);
+    rows2[d] = memory_pointer_offset(450, d, len);
   }
   assert(1 == nor);
   if (0 == endian_read_matrix(inp, rows1, len, 1)) {
@@ -173,13 +163,12 @@ unsigned int spin(const char *in, const char *out, const char *a,
   }
   fclose(inp);
   assert(1 == nor);
-  memcpy(rows2[0], rows1[0], len * sizeof(unsigned int));
-  /* Set up the map for the echelised form of the basis */
+  /* Set up the map for the echelised basis */
   map = my_malloc(noc * sizeof(int));
   /* And compute the first entry */
   if (2 != prime) {
     assert(1 == nor);
-    echelise(rows2, 1, &d, &new_map, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, 1, name);
+    echelise(rows1, 1, &d, &new_map, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, 1, name);
     /* Clean up the rows we use for basis detection, 
      * in case of for non-identity leading non-zero entry */
     free(new_map);
@@ -200,31 +189,23 @@ unsigned int spin(const char *in, const char *out, const char *a,
     fprintf(stderr, "%s: unable to allocate grease, terminating\n", name);
     cleanup(inp, f_a, f_b);
   }
-  /* Create the two temporary files */
-  basis = fopen64(name_basis, "w+b");
+  /* Create the temporary file */
   echelised = fopen64(name_echelised, "w+b");
-  if (NULL == basis || NULL == echelised) {
-    fprintf(stderr, "%s: cannot open one of %s or %s, terminating\n", name, name_basis, name_echelised);
-    if (NULL != basis) {
-      fclose(basis);
-      (void)remove(name_basis);
-    }
+  if (NULL == echelised) {
+    fprintf(stderr, "%s: cannot open %s, terminating\n", name, name_echelised);
     cleanup(NULL, f_a, f_b);
     exit(1);
   }
   tmps_created = 1;
-  if (0 == endian_write_row(basis, rows1[0], len) || 0 == endian_write_row(echelised, rows2[0], len)) {
-    fprintf(stderr, "%s: cannot write initial row to one of %s or %s, terminating\n", name, name_basis, name_echelised);
-    cleanup_all(NULL, f_a, f_b, basis, echelised, name_basis, name_echelised);
+  if (0 == endian_write_row(echelised, rows1[0], len)) {
+    fprintf(stderr, "%s: cannot write initial row to %s, terminating\n", name, name_echelised);
+    cleanup_all(NULL, f_a, f_b, echelised, name_echelised);
     exit(1);
   }
   while (nor < noc && (gen_a.nor < nor || gen_b.nor < nor)) {
     unsigned int rows_to_do = nor - gen->nor;
     unsigned int i, j, k, old_nor = nor;
     /* Ensure we don't try to do too many */
-    /* Note that the extra complexity vs sp.c */
-    /* is due to the requirement to have a guaranteed */
-    /* order of generated vectors, independent of basis or memory constraints */
     k = 0;
     while (k < rows_to_do) {
       unsigned int stride = (k + max_rows <= rows_to_do) ? max_rows : rows_to_do - k;
@@ -232,74 +213,69 @@ unsigned int spin(const char *in, const char *out, const char *a,
       long ptr;
       /* We place the rows to multiply into rows2 */
       /* and produce the product in rows1 */
-      /* Seek to correct place in basis */
-      fseek(basis, gen->base_ptr, SEEK_SET);
-      if (0 == endian_read_matrix(basis, rows2, len, stride)) {
+      /* Seek to correct place in echelised basis */
+      fseek(echelised, gen->base_ptr, SEEK_SET);
+      if (0 == endian_read_matrix(echelised, rows2, len, stride)) {
         fprintf(stderr, "%s: failed to read %d rows from %s at offset %ld, terminating\n", name, stride, gen->m, gen->base_ptr);
-        cleanup_all(NULL, f_a, f_b, basis, echelised, name_basis, name_echelised);
+        cleanup_all(NULL, f_a, f_b, echelised, name_echelised);
         exit(1);
       }
-      gen->base_ptr = ftell(basis); /* Reset the pointer into the existing basis for this generator */
+      gen->base_ptr = ftell(echelised); /* Reset the pointer into the existing basis for this generator */
       if (0 == mul_from_store(rows2, rows1, gen->f, noc, len, nob,
                               stride, prime, &grease, gen->m, name)) {
         fprintf(stderr, "%s: failed to multiply using %s, terminating\n", name, gen->m);
-        cleanup_all(NULL, f_a, f_b, basis, echelised, name_basis, name_echelised);
+        cleanup_all(NULL, f_a, f_b, echelised, name_echelised);
         exit(1);
       }
-      /* Now copy rows created to rows2, overwriting the rows we multiplied */
-      for (i = 0; i < stride; i++) {
-        memcpy(rows2[i], rows1[i], len * sizeof(unsigned int));
-      }
       gen->nor += stride;
-      /* clean rows2 with rows from echelised */
+      /* clean rows1 with rows from echelised */
       fseek(echelised, 0, SEEK_SET); /* Back to start of echelised basis */
       for (i = 0; i < nor; i += step) {
         unsigned int stride2 = (step + i > nor) ? nor - i : step;
-        if (0 == endian_read_matrix(echelised, rows3, len, stride2)) {
+        if (0 == endian_read_matrix(echelised, rows2, len, stride2)) {
           fprintf(stderr, "%s: cannot read matrix for %s, terminating\n", name, name_echelised);
-          cleanup_all(NULL, f_a, f_b, basis, echelised, name_basis, name_echelised);
+          cleanup_all(NULL, f_a, f_b, echelised, name_echelised);
           exit(1);
         }
-        clean(rows3, stride2, rows2, stride, map + i, NULL, NULL, 0,
+        clean(rows2, stride2, rows1, stride, map + i, NULL, NULL, 0,
               grease.level, prime, len, nob, 900, 0, 0, name);
       }
-      echelise(rows2, stride, &d, &new_map, NULL, 0,
+      /* Now echelise the result */
+      echelise(rows1, stride, &d, &new_map, NULL, 0,
                grease.level, prime, len, nob, 900, 0, 0, 1, name);
       ptr = 0; /* where we are in echelised */
       for (i = 0; i < nor; i += step) {
         unsigned int stride2 = (step + i > nor) ? nor - i : step;
         /* Read stride2 rows from echelised at offset ptr */
         fseek(echelised, ptr, SEEK_SET);
-        if (0 == endian_read_matrix(echelised, rows3, len, stride2)) {
+        if (0 == endian_read_matrix(echelised, rows2, len, stride2)) {
           fprintf(stderr, "%s: cannot read matrix for %s, terminating\n", name, name_echelised);
-          cleanup_all(NULL, f_a, f_b, basis, echelised, name_basis, name_echelised);
+          cleanup_all(NULL, f_a, f_b, echelised, name_echelised);
           exit(1);
         }
         /* Clean the rows we read with the newly made rows */
-        clean(rows2, stride, rows3, stride2, new_map, NULL, NULL, 0,
+        clean(rows1, stride, rows2, stride2, new_map, NULL, NULL, 0,
               grease.level, prime, len, nob, 900, 0, 0, name);
         /* Write back the cleaned version to echelised */
         fseek(echelised, ptr, SEEK_SET);
-        if (0 == endian_write_matrix(echelised, rows3, len, stride2)) {
+        if (0 == endian_write_matrix(echelised, rows2, len, stride2)) {
           fprintf(stderr, "%s: cannot write matrix for %s, terminating\n", name, name_echelised);
-          cleanup_all(NULL, f_a, f_b, basis, echelised, name_basis, name_echelised);
+          cleanup_all(NULL, f_a, f_b, echelised, name_echelised);
           exit(1);
         }
         ptr = ftell(echelised);
       }
       j = 0;
       /* We put the new rows onto the end */
-      fseek(basis, 0, SEEK_END);
       fseek(echelised, 0, SEEK_END);
       for (i = 0; i < stride; i++) {
         if (new_map[i] >= 0) {
           /* Got a useful row */
           map[nor + j] = new_map[i];
-          if (0 == endian_write_row(basis, rows1[i], len) ||
-              0 == endian_write_row(echelised, rows2[i], len)) {
-            fprintf(stderr, "%s: failed to write to one of %s, %s, terminating\n",
-                    name, name_basis, name_echelised);
-            cleanup_all(NULL, f_a, f_b, basis, echelised, name_basis, name_echelised);
+          if (0 == endian_write_row(echelised, rows1[i], len)) {
+            fprintf(stderr, "%s: failed to write to %s, terminating\n",
+                    name, name_echelised);
+            cleanup_all(NULL, f_a, f_b, echelised, name_echelised);
             exit(1);
           }
           j++;
@@ -325,15 +301,13 @@ unsigned int spin(const char *in, const char *out, const char *a,
     exit(1);
   }
   header_free(h_out);
-  fseek(basis, 0, SEEK_SET);
-  copy_rest(outp, basis);
+  fseek(echelised, 0, SEEK_SET);
+  copy_rest(outp, echelised);
   fclose(outp);
-  fclose(basis);
   fclose(echelised);
   matrix_free(rows1);
   matrix_free(rows2);
   grease_free(&grease);
-  (void)remove(name_basis);
   (void)remove(name_echelised);
   return nor;
 }

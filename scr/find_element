@@ -1,0 +1,99 @@
+#
+# $Id: find_element,v 1.1 2002/03/31 20:55:41 jon Exp $
+#
+# Script to find an element of nullity 1 on one representation
+# and if possible nullity zero on a sequence of others
+#
+# Inputs
+# $1: generator a
+# $2: generator b
+# $3: order generator a
+# $4: order generator b
+# $5: depth of search
+# $6: the nullity file
+# $7: memory
+# $8: onwards, the other representations
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+# 255: nullity not 1
+#
+#set -v
+. functions
+usage="$0: usage: $0 <a> <b> <order a> <order b> <depth> <output> <memory> <other irreds>"
+if [ $# -lt 8 ]; then
+  echo $usage
+  exit 1;
+fi
+a=$1
+b=$2
+o_a=$3
+o_b=$4
+depth=$5
+out=$6
+if [ -e $a -a -e $b ]; then
+  q=`zprime $a`
+  nor=`znor $a`
+  noc=`znoc $a`
+  if [ $nor -ne $noc ]; then
+    echo "$0: $a is not square"
+    exit 1
+  fi
+  if [ $nor -ne `znor $b` -o $nor -ne `znoc $b` ]; then
+    echo "$0: $a and $b are not compatible"
+    exit 1
+  fi
+else
+  echo "$0: missing files $a or $b"
+  exit 1
+fi
+tmp=tmp${PPID}
+memory=$7
+zranks $a $b ${tmp} $o_a $o_b $depth 1 $memory | grep "of nullity 1" | sed -e "s/^.*element //g;s/ of nullity .*$//g" >poo
+if [ -z "`cat poo`" ]; then
+  echo No elements of nullity one found, terminating
+  rm -f ${tmp}* poo
+  exit 255
+fi
+echo >$out
+shift; shift; shift; shift; shift; shift; shift;
+while [ 1 -le $# ]; do
+  stem=$1
+  echo $stem >>$out
+  zranks ${stem}_1 ${stem}_2 ${tmp} $o_a $o_b $depth 10 $memory | grep "of nullity" 1>>$out
+  shift
+done
+zeros=
+ones=
+twos=
+threes=
+fours=
+fives=
+for x in `cat poo`; do
+  size=`grep "$x " $out | wc -l`
+# echo $x: size $size
+  if [ 0 -eq $size ]; then
+    ones="$ones $x"
+  elif [ 1 -eq $size ]; then
+    twos="$twos $x"
+  elif [ 2 -eq $size ]; then
+    threes="$threes $x"
+  elif [ 3 -eq $size ]; then
+    fours="$fours $x"
+  elif [ 4 -eq $size ]; then
+    fives="$fives $x"
+  fi
+done
+echo zeroes are :- $zeroes
+echo
+echo ones are :- $ones
+echo
+echo twos are :- $twos
+echo
+echo threes are :- $threes
+echo
+echo fours are :- $fours
+echo
+echo fives are :- $fives
+rm -f poo ${tmp}*
