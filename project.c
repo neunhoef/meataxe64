@@ -1,5 +1,5 @@
 /*
- * $Id: project.c,v 1.6 2002/06/30 21:33:15 jon Exp $
+ * $Id: project.c,v 1.7 2002/10/13 16:38:07 jon Exp $
  *
  * Function to project into quotient space representation
  *
@@ -196,7 +196,7 @@ void project(const char *range, const char *in,
       row_init(row_o, len_o);
       for (k = 0; k < noc_o; k++) {
         elt = get_element_from_row_with_params(nob, map_o[k], mask, elts_per_word, rows2[d]);
-        put_element_to_row(nob, k, row_o, elt);
+        put_element_to_clean_row_with_params(nob, k, elts_per_word, row_o, elt);
       }
       errno = 0;
       if (0 == endian_write_row(outp, row_o, len_o)) {

@@ -1,5 +1,5 @@
 /*
- * $Id: ss.c,v 1.13 2002/06/30 21:33:15 jon Exp $
+ * $Id: ss.c,v 1.14 2002/10/13 16:38:07 jon Exp $
  *
  * Function to compute subspace representation
  * Uses the computed map, rather than clean/echelise
@@ -121,7 +121,7 @@ void subspace(const char *range, const char *image,
     for (j = 0; j < nor; j++) {
       assert(0 <= map[j]);
       elt = get_element_from_row_with_params(nob, map[j], mask, elts_per_word, row_in);
-      put_element_to_row(nob, j, row_out, elt);
+      put_element_to_clean_row_with_params(nob, j, elts_per_word, row_out, elt);
     }
     errno = 0;
     if (0 == endian_write_row(outp, row_out, len_e)) {

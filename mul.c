@@ -1,5 +1,5 @@
 /*
- * $Id: mul.c,v 1.30 2002/10/04 17:16:02 jon Exp $
+ * $Id: mul.c,v 1.31 2002/10/13 16:38:07 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
@@ -120,7 +120,7 @@ static int mul_row_by_map(unsigned int *row_in, unsigned int *row_out, unsigned 
       if (0 != elt2) {
         elt = (*operations->add)(elt, elt2);
       }
-      put_element_to_row(nob, k, row_out, elt);
+      put_element_to_clean_row_with_params(nob, k, elts_per_word, row_out, elt);
     }
   }
   return 1;

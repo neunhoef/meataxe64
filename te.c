@@ -1,5 +1,5 @@
 /*
- * $Id: te.c,v 1.8 2002/06/30 21:33:15 jon Exp $
+ * $Id: te.c,v 1.9 2002/10/13 16:38:07 jon Exp $
  *
  * Function to tensor two matrices to give a third
  *
@@ -184,7 +184,7 @@ int tensor(const char *m1, const char *m2, const char *m3, const char *name)
             }
             for (l = 0; l < noc2; l++) {
               elt = get_element_from_row_with_params(nob, l, mask, elts_per_word, row);
-              put_element_to_row(nob, offset + l, row_out, elt);
+              put_element_to_clean_row_with_params(nob, offset + l, elts_per_word, row_out, elt);
             }
           }
           offset += noc2;

@@ -1,5 +1,5 @@
 /*
- * $Id: conj.c,v 1.7 2002/06/30 21:33:14 jon Exp $
+ * $Id: conj.c,v 1.8 2002/10/13 16:38:07 jon Exp $
  *
  * Function to compute algebraic conjugate of a matrix, from file
  *
@@ -94,7 +94,7 @@ int conjugate(const char *m1, const char *m2, unsigned int power, const char *na
       for (j = 0; j < noc; j++) {
         unsigned int elt = get_element_from_row_with_params(nob, j, mask, elts_per_word, row);
         elt = (*ops.power)(elt, power);
-        put_element_to_row(nob, j, row, elt);
+        put_element_to_row_with_params(nob, j, mask, elts_per_word, row, elt);
       }
     }
     errno = 0;

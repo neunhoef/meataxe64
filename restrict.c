@@ -1,5 +1,5 @@
 /*
- * $Id: restrict.c,v 1.5 2002/06/30 21:33:15 jon Exp $
+ * $Id: restrict.c,v 1.6 2002/10/13 16:38:07 jon Exp $
  *
  * Function to restrict a matrix from a big field to a smaller
  *
@@ -112,7 +112,7 @@ int restrict(const char *m1, const char *m2, unsigned int q, const char *name)
         (void)cleanup(inp, outp);
         return 255;
       }
-      put_element_to_row(nob_out, j, row2, elt);
+      put_element_to_clean_row_with_params(nob_out, j, elts_per_word, row2, elt);
     }
     errno = 0;
     if (0 == endian_write_row(outp, row2, len_out)) {

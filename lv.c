@@ -1,5 +1,5 @@
 /*
- * $Id: lv.c,v 1.4 2002/06/30 21:33:14 jon Exp $
+ * $Id: lv.c,v 1.5 2002/10/13 16:38:07 jon Exp $
  *
  * Function to lift vectors from a quotient space
  *
@@ -135,7 +135,7 @@ void lift(const char *range, const char *vectors,
       if (0 == col_incs[j]) {
         /* This column is in the quotient */
         elt = get_element_from_row_with_params(nob, l, mask, elts_per_word, row_in);
-        put_element_to_row(nob, j, row_out, elt);
+        put_element_to_clean_row_with_params(nob, j, elts_per_word, row_out, elt);
         l++;
       } else {
         /* This column is not in the quotient, so leave a zero here */

@@ -1,5 +1,5 @@
 /*
- * $Id: tra.c,v 1.13 2002/06/30 21:33:15 jon Exp $
+ * $Id: tra.c,v 1.14 2002/10/13 16:38:07 jon Exp $
  *
  * Function to transpose a matrix
  *
@@ -36,7 +36,7 @@ void tra_in_store(unsigned int **rows1, unsigned int **rows2,
     for (j = 0; j < noc; j++) {
       unsigned int elt = get_element_from_row_with_params(nob, j, mask, elts_per_word, rows1[i]);
       if (elt) {
-        put_element_to_row(nob, i, rows2[j], elt);
+        put_element_to_clean_row_with_params(nob, i, elts_per_word, rows2[j], elt);
       }
     }
   }
@@ -123,7 +123,7 @@ int tra(const char *m1, const char *m2, const char *name)
         /* Write into row l of output at column j */
         unsigned int elt = get_element_from_row_with_params(nob, l, mask, elts_per_word, row1);
         if (0 != elt) {
-          put_element_to_row(nob, j, rows[l - i], elt);
+          put_element_to_clean_row_with_params(nob, j, elts_per_word, rows[l - i], elt);
         }
       }
     }

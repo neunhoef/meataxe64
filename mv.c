@@ -1,5 +1,5 @@
 /*
- * $Id: mv.c,v 1.2 2002/06/30 21:33:14 jon Exp $
+ * $Id: mv.c,v 1.3 2002/10/13 16:38:07 jon Exp $
  *
  * Function to convert rows to matrices and vv
  * Used for multiplication in tensor space
@@ -36,7 +36,7 @@ void v_to_m(unsigned int *row_in, unsigned int **rows_out,
       unsigned int k = i * nor2;
       unsigned int elt = get_element_from_row_with_params(nob, k + j, mask, elts_per_word, row_in);
       if (elt) {
-        put_element_to_row(nob, j, rows_out[i], elt);
+        put_element_to_clean_row_with_params(nob, j, elts_per_word, rows_out[i], elt);
       }
     }
   }
@@ -63,7 +63,7 @@ extern void m_to_v(unsigned int **rows_in, unsigned int *row_out,
       unsigned int k = i * noc;
       unsigned int elt = get_element_from_row_with_params(nob, j, mask, elts_per_word, rows_in[i]);
       if (elt) {
-        put_element_to_row(nob, k + j, row_out, elt);
+        put_element_to_clean_row_with_params(nob, k + j, elts_per_word, row_out, elt);
       }
     }
   }

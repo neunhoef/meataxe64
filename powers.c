@@ -1,5 +1,5 @@
 /*
- * $Id: powers.c,v 1.10 2002/07/05 20:43:08 jon Exp $
+ * $Id: powers.c,v 1.11 2002/10/13 16:38:07 jon Exp $
  *
  * Function to compute tensor powers of a matrix, from file
  *
@@ -112,7 +112,7 @@ int skew_square(const char *m1, const char *m2, const char *name)
           unsigned int e12 = get_element_from_row_with_params(nob, l, mask, elts_per_word, rows[i]);
           unsigned int e22 = get_element_from_row_with_params(nob, l, mask, elts_per_word, rows[j]);
           unsigned int e = det2(prime_operations, e11, e12, e21, e22);
-          put_element_to_row(nob, offset, row_out, e);
+          put_element_to_clean_row_with_params(nob, offset, elts_per_word, row_out, e);
           offset++;
         }
       }
@@ -159,7 +159,7 @@ static void make_row(unsigned int nob, unsigned int i, unsigned int j,
       unsigned int e1 = (*prime_operations.mul)(elt1, elt4);
       unsigned int e2 = (*prime_operations.mul)(elt2, elt3);
       unsigned int e = (*prime_operations.add)(e1, e2);
-      put_element_to_row(nob, offset, row_out, e);
+      put_element_to_clean_row_with_params(nob, offset, elts_per_word, row_out, e);
       offset++;
     }
   }
@@ -168,7 +168,7 @@ static void make_row(unsigned int nob, unsigned int i, unsigned int j,
     unsigned int elt1 = get_element_from_row_with_params(nob, k, mask, elts_per_word, rows[i]);
     unsigned int elt2 = get_element_from_row_with_params(nob, k, mask, elts_per_word, rows[j]);
     unsigned int elt3 = (*prime_operations.mul)(elt1, elt2);
-    put_element_to_row(nob, offset, row_out, elt3);
+    put_element_to_clean_row_with_params(nob, offset, elts_per_word, row_out, elt3);
     offset++;
   }
   assert(offset == nor_out);
@@ -365,7 +365,7 @@ int skew_cube(const char *m1, const char *m2, const char *name)
               unsigned int elt = det3(rows, nob, prime_operations, i, l, j, m, k, n);
 */
               unsigned int elt = det3(prime_operations, e11, e12, e13, e21, e22, e23, e31, e32, e33);
-              put_element_to_row(nob, offset, row_out, elt);
+              put_element_to_clean_row_with_params(nob, offset, elts_per_word, row_out, elt);
               offset++;
             }
           }
@@ -510,7 +510,7 @@ int skew_fourth(const char *m1, const char *m2, const char *name)
                                           e31, e32, e33, e34,
                                           e41, e42, e43, e44);
                   if (0 != elt) {
-                    put_element_to_row(nob, offset, row_out, elt);
+                    put_element_to_clean_row_with_params(nob, offset, elts_per_word, row_out, elt);
                   }
                   offset++;
                 }
@@ -681,7 +681,7 @@ int skew_fifth(const char *m1, const char *m2, const char *name)
                                               e41, e42, e43, e44, e45,
                                               e51, e52, e53, e54, e55);
                       if (0 != elt) {
-                        put_element_to_row(nob, offset, row_out, elt);
+                        put_element_to_clean_row_with_params(nob, offset, elts_per_word, row_out, elt);
                       }
                       offset++;
                     }
@@ -864,7 +864,7 @@ int skew_sixth(const char *m1, const char *m2, const char *name)
                                                   e51, e52, e53, e54, e55, e56,
                                                   e61, e62, e63, e64, e65, e66);
                           if (0 != elt) {
-                            put_element_to_row(nob, offset, row_out, elt);
+                            put_element_to_clean_row_with_params(nob, offset, elts_per_word, row_out, elt);
                           }
                           offset++;
                         }
@@ -1067,7 +1067,7 @@ int skew_seventh(const char *m1, const char *m2, const char *name)
                                                       e61, e62, e63, e64, e65, e66, e67,
                                                       e71, e72, e73, e74, e75, e76, e77);
                               if (0 != elt) {
-                                put_element_to_row(nob, offset, row_out, elt);
+                                put_element_to_clean_row_with_params(nob, offset, elts_per_word, row_out, elt);
                               }
                               offset++;
                             }

@@ -1,5 +1,5 @@
 /*
- * $Id: pco.c,v 1.3 2002/06/28 08:39:16 jon Exp $
+ * $Id: pco.c,v 1.4 2002/10/13 16:38:07 jon Exp $
  *
  * Permuation condense one group element
  *
@@ -29,7 +29,7 @@ int pcondense(const char *in1, const char *in2,
 {
   FILE *orbf, *genf, *outf;
   const header *orbh, *genh, *outh;
-  unsigned int characteristic, nor, nor_o, len, nob, i;
+  unsigned int characteristic, nor, nor_o, len, nob, i, elts_per_word;
   unsigned int *map, *row, *int_row, *orbit_numbers;
   prime_ops operations;
   orbit_set *orbits;
@@ -98,6 +98,7 @@ int pcondense(const char *in1, const char *in2,
       orbit_numbers[orb->values[j]] = i;
     }
   }
+  (void)get_mask_and_elts(nob, &elts_per_word);
   for (i = 0; i < nor_o; i++) {
     orbit *orb = orbits->orbits + i;
     unsigned int j, k;
@@ -125,7 +126,7 @@ int pcondense(const char *in1, const char *in2,
       unsigned int l = int_row[j] % characteristic;
       if ( 0 != l) {
         l = operations.mul(l, k);
-        put_element_to_row(nob, j, row, l);
+        put_element_to_clean_row_with_params(nob, j, elts_per_word, row, l);
       }
     }
     errno = 0;

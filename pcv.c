@@ -1,5 +1,5 @@
 /*
- * $Id: pcv.c,v 1.4 2002/06/30 21:33:14 jon Exp $
+ * $Id: pcv.c,v 1.5 2002/10/13 16:38:07 jon Exp $
  *
  * Function to lift vectors from a quotient space
  *
@@ -121,7 +121,7 @@ void lift(const char *range, const char *vectors,
         for (k = 0; k < orb->size; k++) {
           l = orb->values[k];
           assert(l < noc_o);
-          put_element_to_row(nob, l, row_out, elt);
+          put_element_to_clean_row_with_params(nob, l, elts_per_word, row_out, elt);
         }
       }
     }

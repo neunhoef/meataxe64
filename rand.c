@@ -1,5 +1,5 @@
 /*
- * $Id: rand.c,v 1.1 2002/07/20 12:55:21 jon Exp $
+ * $Id: rand.c,v 1.2 2002/10/13 16:38:07 jon Exp $
  *
  * Subroutine to generate a random matrix
  *
@@ -23,8 +23,7 @@
 int random(unsigned int prime, unsigned int nor, unsigned int noc,
            const char *out, const char *name)
 {
-  unsigned int nob, nod, len;
-  unsigned int i;
+  unsigned int nob, nod, len, i, elts_per_word;
   unsigned int *row;
   FILE *outp;
   const header *h;
@@ -57,12 +56,13 @@ int random(unsigned int prime, unsigned int nor, unsigned int noc,
     }
     row = memory_pointer_offset(0, 0, len);
     assert(NULL != row);
+    (void)get_mask_and_elts(nob, &elts_per_word);
     for (i = 0; i < nor; i++) {
       unsigned int j;
       row_init(row, len);
       for (j = 0; j < noc; j++) {
         unsigned int k = rand() % prime;
-        put_element_to_row(nob, j, row, k);
+        put_element_to_clean_row_with_params(nob, j, elts_per_word, row, k);
       }
       errno = 0;
       if (0 == endian_write_row(outp, row, len)) {

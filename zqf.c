@@ -1,5 +1,5 @@
 /*
- * $Id: zqf.c,v 1.4 2002/07/09 09:08:12 jon Exp $
+ * $Id: zqf.c,v 1.5 2002/10/13 16:38:07 jon Exp $
  *
  * Clear to zero the upper triangle of a matrix, including the diagonal
  * This is a utility program for computation of quadratic forms
@@ -29,7 +29,7 @@ int main(int argc, const char * const argv[])
   const char *in, *out;
   FILE *inp, *outp;
   const header *h;
-  unsigned int prime, nob, nor, noc, len, *row;
+  unsigned int prime, nob, nor, noc, len, *row, mask, elts_per_word;
 
   argv = parse_line(argc, argv, &argc);
   if (3 != argc) {
@@ -67,6 +67,7 @@ int main(int argc, const char * const argv[])
     exit(1);
   }
   header_free(h);
+  mask = get_mask_and_elts(nob, &elts_per_word);
   for (i = 0; i < nor; i++) {
     errno = 0;
     if (0 == endian_read_row(inp, row, len)) {
@@ -79,7 +80,7 @@ int main(int argc, const char * const argv[])
       exit(1);
     }
     for (j = i; j < noc; j++) {
-      put_element_to_row(nob, j, row, 0);
+      put_element_to_row_with_params(nob, j, mask, elts_per_word, row, 0);
       /* Clear upper traingle, including diagonal */
     }
     errno = 0;

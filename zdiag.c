@@ -1,5 +1,5 @@
 /*
- * $Id: zdiag.c,v 1.5 2002/07/09 09:08:12 jon Exp $
+ * $Id: zdiag.c,v 1.6 2002/10/13 16:38:07 jon Exp $
  *
  * Clear to zero the off diagonal elements of a matrix
  * This is a utility program for computation of quadratic forms
@@ -82,7 +82,7 @@ int main(int argc, const char * const argv[])
     }
     elt = get_element_from_row_with_params(nob, i, mask, elts_per_word, row);
     row_init(row, len);
-    put_element_to_row(nob, i, row, elt);
+    put_element_to_clean_row_with_params(nob, i, elts_per_word, row, elt);
     errno = 0;
     if (0 == endian_write_row(outp, row, len)) {
       if ( 0 != errno) {

@@ -1,5 +1,5 @@
 /*
- * $Id: zimport.c,v 1.7 2002/07/09 09:08:12 jon Exp $
+ * $Id: zimport.c,v 1.8 2002/10/13 16:38:07 jon Exp $
  *
  * Import matrix from old system
  *
@@ -31,7 +31,7 @@ int main(int argc, const char * const argv[])
   const char *in;
   const char *out;
   const header *h_in;
-  unsigned int prime, nob, noc, nor, eperb, i, j, *out_row, len, blen;
+  unsigned int prime, nob, noc, nor, eperb, i, j, *out_row, len, blen, elts_per_word;
   char *in_row;
   FILE *f_in;
   FILE *f_out;
@@ -70,6 +70,7 @@ int main(int argc, const char * const argv[])
   if (0 == open_and_write_binary_header(&f_out, h_in, out, name)) {
     exit(1);
   }
+  (void)get_mask_and_elts(nob, &elts_per_word);
   for (i = 0; i < nor; i++) {
     if (blen != fread(in_row, 1, blen, f_in)) {
       fprintf(stderr, "%s: failed to read row %d from %s, terminating\n", name, i, in);
@@ -78,7 +79,7 @@ int main(int argc, const char * const argv[])
     row_init(out_row, len);
     for (j = 0; j < noc; j++) {
       unsigned int elt = get_element_from_char_row(eperb, prime, j, in_row);
-      put_element_to_row(nob, j, out_row, elt);
+      put_element_to_clean_row_with_params(nob, j, elts_per_word, out_row, elt);
     }
     errno = 0;
     if (0 == endian_write_row(f_out, out_row, len)) {

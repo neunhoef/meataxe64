@@ -1,5 +1,5 @@
 /*
- * $Id: qs.c,v 1.12 2002/06/30 21:33:15 jon Exp $
+ * $Id: qs.c,v 1.13 2002/10/13 16:38:07 jon Exp $
  *
  * Function to compute quotient space representation
  *
@@ -181,7 +181,7 @@ void quotient(const char *range, const char *gen,
           }
           if (map_o[j + d] == i) {
             row_init(rows2[d], len);
-            put_element_to_row(nob, k, rows2[d], 1);
+            put_element_to_clean_row_with_params(nob, k, elts_per_word, rows2[d], 1);
           }
         } else {
           errno = 0;
@@ -226,7 +226,7 @@ void quotient(const char *range, const char *gen,
         assert(map_o[k] < noc);
         assert(map_o[k] >= k);
         elt = get_element_from_row_with_params(nob, map_o[k], mask, elts_per_word, rows2[d]);
-        put_element_to_row(nob, k, row_o, elt);
+        put_element_to_clean_row_with_params(nob, k, elts_per_word, row_o, elt);
       }
       errno = 0;
       if (0 == endian_write_row(outp, row_o, len_o)) {

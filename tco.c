@@ -1,5 +1,5 @@
 /*
- * $Id: tco.c,v 1.5 2002/09/28 15:39:31 jon Exp $
+ * $Id: tco.c,v 1.6 2002/10/13 16:38:07 jon Exp $
  *
  * Tensor condense one group element
  *
@@ -435,6 +435,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
   n_r = 0;
   for (i = 0; i < s; i++) {
     /* Row loop over distinct irreducibles of H */
+    unsigned int dim_irr_i = dim_irr[i];
     /* Read ahead q[i], only needed once */
     if (0 == endian_read_matrix(q[i], q_rows, len_q[i], nor_q[i])) {
       matrix_free(te_rows);
@@ -459,45 +460,38 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
         n_c = 0;
         for (j = 0; j < s; j++) {
           /* Column loop over distinct irreducibles of H */
+          unsigned int dim_irr_j = dim_irr[j];
           for (gamma = 0; gamma < left_multiplicities[j]; gamma++) {
-            /* Column loop over multiplicity of Si */
+            /* Column loop over multiplicity of Sj */
             for (delta = 0; delta < right_multiplicities[j]; delta++) {
-              /* Column loop over multiplicity of Si* */
+              /* Column loop over multiplicity of Sj* */
               unsigned int te_i, te_j, te_k, te_l, te_o_r, te_o_c;
+              unsigned int base_i = n_c + delta * dim_irr_j;
               te_o_r = 0;
-              for (te_i = 0; te_i < dim_irr[i]; te_i++) {
+              for (te_i = 0; te_i < dim_irr_i; te_i++) {
                 /* Rows of M */
-                for (te_j = 0; te_j < dim_irr[i]; te_j++) {
+                unsigned int *expanded_lrow = expanded_lrows[m_r + alpha * dim_irr_i + te_i] + m_c + gamma * dim_irr_j;
+                for (te_j = 0; te_j < dim_irr_i; te_j++) {
                   /* Rows of N */
                   unsigned int te_o_c_word = 0;
                   unsigned int te_o_c_offset = 0;
                   unsigned int word = 0;
+                  unsigned int *expanded_rrow = expanded_rrows[n_r + beta * dim_irr_i + te_j];
                   row_init(te_rows[te_o_r], max_irr_len);
                   te_o_c = 0;
-                  for (te_k = 0; te_k < dim_irr[j]; te_k++) {
+                  for (te_k = 0; te_k < dim_irr_j; te_k++) {
                     /* Columns of M */
-                    unsigned int elt = expanded_lrows[m_r + alpha * dim_irr[i] + te_i][m_c + gamma * dim_irr[j] + te_k];
-                    /*
-                      get_element_from_row_with_params(nob, m_c + gamma * dim_irr[j] + te_k, mask,
-                      elts_per_word, lrows[m_r + alpha * dim_irr[i] + te_i]);
-                    */
+                    unsigned int elt = expanded_lrow[te_k];
                     if (0 != elt) {
-                      unsigned int base = n_c + delta * dim_irr[j];
-                      unsigned int *row = expanded_rrows[n_r + beta * dim_irr[i] + te_j]; /* was rrows */
+                      unsigned int *row = expanded_rrow; /* was rrows */
                       if (1 != elt) {
-                        (*row_operations.scaler)(row, te_row, /* len_r */noc_r, elt);
+                        (*row_operations.scaler)(row, te_row, noc_r, elt);
                         row = te_row;
                       }
-                      row += base;
-                      for (te_l = 0; te_l < dim_irr[j]; te_l++) {
-                        /*
-                        elt = get_element_from_row_with_params(nob, n_c + delta * dim_irr[j] + te_l, mask, elts_per_word, row);
-                        */
+                      row += base_i;
+                      for (te_l = 0; te_l < dim_irr_j; te_l++) {
                         elt = row[te_l];
                         if (0 != elt) {
-                          /*
-                          put_element_to_clean_row_with_params(nob, te_o_c + te_l, elts_per_word, te_rows[te_o_r], elt);
-                          */
                           word |= elt << te_o_c_offset;
                         }
                         te_o_c_offset += nob;
@@ -509,7 +503,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
                         }
                       }
                     } else {
-                      te_o_c_offset += nob * dim_irr[j];
+                      te_o_c_offset += nob * dim_irr_j;
                       if (te_o_c_offset + nob > bits_in_unsigned_int) {
                         te_rows[te_o_r][te_o_c_word] = word;
                         te_o_c_word += te_o_c_offset / (elts_per_word * nob);
@@ -517,14 +511,14 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
                         word = 0;
                       }
                     }
-                    te_o_c += dim_irr[j];
+                    te_o_c += dim_irr_j;
                   }
                   te_rows[te_o_r][te_o_c_word] = word;
                   te_o_r++;
                 }
               }
-              if (0 == mul_from_store(te_rows, end_rows, p[j], 0/*is_map*/, dim_irr[j] * dim_irr[j],
-                                      len_p[j], nob, dim_irr[i] * dim_irr[i], dim_end[j], prime,
+              if (0 == mul_from_store(te_rows, end_rows, p[j], 0/*is_map*/, dim_irr_j * dim_irr_j,
+                                      len_p[j], nob, dim_irr_i * dim_irr_i, dim_end[j], prime,
                                       &grease, argv[2 * j + 1], name)) {
                 matrix_free(te_rows);
                 matrix_free(end_rows);
@@ -563,14 +557,14 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
               o_c += dim_end[j]; /* Increment output column index */
             }
           }
-          m_c += left_multiplicities[j] * dim_irr[j];
-          n_c += right_multiplicities[j] * dim_irr[j];
+          m_c += left_multiplicities[j] * dim_irr_j;
+          n_c += right_multiplicities[j] * dim_irr_j;
         }
         o_r += dim_end[i]; /* Increment output row index */
       }
     }
-    m_r += left_multiplicities[i] * dim_irr[i];
-    n_r += right_multiplicities[i] * dim_irr[i];
+    m_r += left_multiplicities[i] * dim_irr_i;
+    n_r += right_multiplicities[i] * dim_irr_i;
   }
   matrix_free(te_rows);
   matrix_free(end_rows);

@@ -1,5 +1,5 @@
 /*
- * $Id: exrows.c,v 1.8 2002/06/30 21:33:14 jon Exp $
+ * $Id: exrows.c,v 1.9 2002/10/13 16:38:07 jon Exp $
  *
  * Extended row manipulation for meataxe
  *
@@ -78,7 +78,8 @@ int ex_row_get(unsigned int col_pieces, FILE **inputs, const header **headers,
     }
     n = header_get_noc(headers[j]);
     while (m < n) {
-      put_element_to_row(nob, l, row1, get_element_from_row_with_params(nob, m, mask, elts_per_word, row2));            
+      put_element_to_row_with_params(nob, l, mask, elts_per_word, row1,
+                                     get_element_from_row_with_params(nob, m, mask, elts_per_word, row2));            
       m++;
       l++;
     }

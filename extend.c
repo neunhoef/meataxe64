@@ -1,5 +1,5 @@
 /*
- * $Id: extend.c,v 1.2 2002/06/30 21:33:14 jon Exp $
+ * $Id: extend.c,v 1.3 2002/10/13 16:38:07 jon Exp $
  *
  * Function to extend the field of a row
  *
@@ -27,7 +27,7 @@ int extend(const unsigned int *in, unsigned int *out,
   mask = get_mask_and_elts(in_nob, &elts_per_word);
   for (i = 0; i < noc; i++) {
     unsigned int elt = get_element_from_row_with_params(in_nob, i, mask, elts_per_word, in);
-    put_element_to_row(out_nob, i, out, elt);
+    put_element_to_row_with_params(out_nob, i, mask, elts_per_word, out, elt);
   }
   return 1;
 }
