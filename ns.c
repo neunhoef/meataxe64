@@ -1,5 +1,5 @@
 /*
- * $Id: ns.c,v 1.2 2001/11/19 19:08:49 jon Exp $
+ * $Id: ns.c,v 1.3 2001/11/21 01:06:29 jon Exp $
  *
  * Compute the null space of a matrix
  *
@@ -38,7 +38,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *name)
   nob = header_get_nob(h1);
   nor = header_get_nor(h1);
   len1 = header_get_len(h1);
-  h2 = (header *)header_create(prime, nob, header_get_nod(h1), nor, nor);
+  h2 = header_create(prime, nob, header_get_nod(h1), nor, nor);
   len2 = header_get_len(h2);
   r = memory_rows(len1, 100);
   n = memory_rows(len2, 100);

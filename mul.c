@@ -1,5 +1,5 @@
 /*
- * $Id: mul.c,v 1.15 2001/11/19 19:08:49 jon Exp $
+ * $Id: mul.c,v 1.16 2001/11/21 01:06:29 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
@@ -16,6 +16,7 @@
 #include "header.h"
 #include "matrix.h"
 #include "memory.h"
+#include "primes.h"
 #include "read.h"
 #include "rows.h"
 #include "utils.h"
@@ -40,7 +41,7 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
   FILE *inp2;
   FILE *outp;
   unsigned int prime, nob, noc1, nor1, len1, noc2, nor2, len2;
-  unsigned int i, j, k, l;
+  unsigned int k;
   unsigned int nox1, nox2, nox3, nox;
   const header *h1, *h2, *h3;
   unsigned int **rows1, **rows3;
@@ -126,49 +127,15 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
   }
   for (k = 0; k < nor1; k += nox) {
     unsigned int rest = (nor1 >= k + nox) ? nox : nor1 - k;
-    long pos;
     /* Read matrix 1 */
     if (0 == endian_read_matrix(inp1, rows1, len1, rest)) {
       fprintf(stderr, "%s: unable to read %s, terminating\n", name, m1);
       return cleanup(inp1, inp2, outp);
     }
-    /* Remember where we are in row 2 */
-    pos = ftell(inp2);
-    /* Then multiply */
-    for (i = 0; i < noc1; i += grease.level) {
-      unsigned int size = (grease.level + i <= noc1) ? grease.level : noc1 - i;
-      unsigned int word_offset, bit_offset, mask;
-      /* Read size rows from matrix 2 into rows 2 */
-      /* This sets the inital rows */
-      l = 1;
-      for (j = 0; j < size; j++) {
-        if (0 == endian_read_row(inp2, grease.rows[l - 1], len2)) {
-          fprintf(stderr, "%s: unable to read %s, terminating\n", name, m2);
-          return cleanup(inp1, inp2, outp);
-        }
-        l *= prime;
-      }
-      element_access_init(nob, i, size, &word_offset, &bit_offset, &mask);
-      grease_init_rows(&grease, prime);
-      if (0 == grease_make_rows(&grease, size, prime, len2)) {
-        fprintf(stderr, "%s: unable to compute grease, terminating\n", name);
-        return cleanup(inp1, inp2, outp);
-      }
-      for (j = 0; j < rest; j++) {
-        unsigned int *row1 = rows1[j];
-        unsigned int elt = get_elements_from_row(row1 + word_offset, size * nob, bit_offset, mask);
-        if (0 == i) {
-          row_init(rows3[j], len2);
-        }
-        if (0 != elt) {
-          (*incer)(grease.rows[contract(elt, prime, nob) - 1], rows3[j], len2);
-        }
-      }
-    }
-    /* Move back in matrix 2 */
-    if (0 != fseek(inp2, pos, SEEK_SET)) {
-      fprintf(stderr, "%s: unable to rewind %s, terminating\n", name, m2);
-      return cleanup(inp1, inp2, outp);
+    if (0 == mul_from_store(rows1, rows3, inp2, noc1, len2, nob, rest, prime, &grease, m2, name)) {
+      fclose(inp2);
+      fclose(outp);
+      return 0;
     }
     /* Write matrix 3 */
     if (0 == endian_write_matrix(outp, rows3, len2, rest)) {
@@ -182,5 +149,67 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
   fclose(inp1);
   fclose(inp2);
   fclose(outp);
+  return 1;
+}
+
+int mul_from_store(unsigned int **rows1, unsigned int **rows3,
+                   FILE *inp, unsigned int noc, unsigned int len,
+                   unsigned int nob, unsigned int nor, unsigned int prime,
+                   grease grease, const char *m, const char *name)
+{
+  long pos;
+  unsigned int i, j, l;
+  row_ops row_operations;
+  assert(NULL != inp);
+  assert(is_a_prime_power(prime));
+  assert(0 != nob);
+  assert(0 != len);
+  assert(0 != noc);
+  if (0 == rows_init(prime, &row_operations)) {
+    fprintf(stderr, "%s: cannot initialise row operations for %s, terminating\n", name, m);
+    fclose(inp);
+    return 0;
+  }
+  /* Remember where we are in row 2 */
+  pos = ftell(inp);
+  /* Then multiply */
+  for (i = 0; i < noc; i += grease->level) {
+    unsigned int size = (grease->level + i <= noc) ? grease->level : noc - i;
+    unsigned int word_offset, bit_offset, mask;
+    /* Read size rows from matrix 2 into rows 2 */
+    /* This sets the initial rows */
+    l = 1;
+    for (j = 0; j < size; j++) {
+      if (0 == endian_read_row(inp, grease->rows[l - 1], len)) {
+        fprintf(stderr, "%s: unable to read %s, terminating\n", name, m);
+        fclose(inp);
+        return 0;
+      }
+      l *= prime;
+    }
+    element_access_init(nob, i, size, &word_offset, &bit_offset, &mask);
+    grease_init_rows(grease, prime);
+    if (0 == grease_make_rows(grease, size, prime, len)) {
+      fprintf(stderr, "%s: unable to compute grease, terminating\n", name);
+      fclose(inp);
+      return 0;
+    }
+    for (j = 0; j < nor; j++) {
+      unsigned int *row1 = rows1[j];
+      unsigned int elt = get_elements_from_row(row1 + word_offset, size * nob, bit_offset, mask);
+      if (0 == i) {
+        row_init(rows3[j], len);
+      }
+      if (0 != elt) {
+        (*row_operations.incer)(grease->rows[contract(elt, prime, nob) - 1], rows3[j], len);
+      }
+    }
+  }
+  /* Move back in matrix 2 */
+  if (0 != fseek(inp, pos, SEEK_SET)) {
+    fprintf(stderr, "%s: unable to rewind %s, terminating\n", name, m);
+    fclose(inp);
+    return 0;
+  }
   return 1;
 }

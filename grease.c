@@ -1,5 +1,5 @@
 /*
- * $Id: grease.c,v 1.12 2001/11/19 19:08:49 jon Exp $
+ * $Id: grease.c,v 1.13 2001/11/21 01:06:29 jon Exp $
  *
  * Functions to grease matrix rows
  *
@@ -22,7 +22,7 @@ int grease_level(unsigned int prime, grease grease, unsigned int avail)
 {
   unsigned int i = 1, j = prime;
   assert(NULL != grease);
-  assert(is_a_prime(prime));
+  assert(is_a_prime_power(prime));
   assert(0 != avail);
   if (prime > avail + 1)
     return 0;

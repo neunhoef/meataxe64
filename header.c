@@ -1,5 +1,5 @@
 /*
- * $Id: header.c,v 1.7 2001/11/07 22:35:27 jon Exp $
+ * $Id: header.c,v 1.8 2001/11/21 01:06:29 jon Exp $
  *
  * Header manipulation
  *
@@ -128,9 +128,9 @@ void header_free(header *h)
   free(h);
 }
 
-const header *header_create(unsigned int prime, unsigned int nob,
-                     unsigned int nod, unsigned int noc,
-                     unsigned int nor)
+header *header_create(unsigned int prime, unsigned int nob,
+                      unsigned int nod, unsigned int noc,
+                      unsigned int nor)
 {
   header *h;
   int i = header_alloc(&h);

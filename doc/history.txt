@@ -49,3 +49,5 @@
 20011115 - produced simple rank
 20011116 - rn works. sns produced
 20011118 - ns produced
+20011119 - Produced mul_from_store
+20011120 - Started on in store spin
