@@ -1,5 +1,6 @@
+#!/bin/sh
 #
-# $Id: find_nullity_one_with_orders,v 1.3 2002/03/24 19:44:02 jon Exp $
+# $Id: find_nullity_one_with_orders,v 1.4 2002/06/25 10:30:12 jon Exp $
 #
 # Script to find an element of nullity one in two generators
 #
@@ -10,6 +11,11 @@
 # $4: order a
 # $5: order b
 # $6: initial memory (optional)
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+# 254: nullity not 1
 #
 usage="$0: usage: $0 <a> <b> <out> <order a> <order b> [<memory>]"
 if [ $# -ne 5 -a $# -ne 6 ]; then
@@ -33,7 +39,7 @@ nor=`znor $a`
 q=`zprime $a`
 # Try zsums
 while [ $ok -eq 0 ]; do
-  out=`zsums $a $b ${tmp}.zsums $o_a $o_b 10 1 $memory 2>/dev/null`
+  out=`zsums $a $b ${tmp}.zsums $o_a $o_b 5 1 $memory 2>/dev/null`
   ret=$?
   if [ 2 -eq $ret ]; then
     let memory=`more_memory $memory`

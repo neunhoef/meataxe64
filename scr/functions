@@ -1,5 +1,6 @@
+#!/bin/sh
 #
-# $Id: functions,v 1.4 2002/03/07 13:43:30 jon Exp $
+# $Id: functions,v 1.5 2002/06/25 10:30:12 jon Exp $
 #
 # Functions to support the meataxe scripts
 #
@@ -14,6 +15,20 @@ function more_memory()
   echo $x
 }
 
+function new_name_from_name()
+{
+  local name
+  name=$1
+  if [ -e ${name}_1 ]; then
+    x=1
+    while [ -e ${name}_${x}_1 ]; do
+      let x=$x+1
+    done
+    name=${name}_${x}
+  fi
+  echo $name
+}
+
 function new_name()
 {
   local o
@@ -24,14 +39,7 @@ function new_name()
   nor=$2
   dim=$3
   name=${o}_${nor}_${dim}
-  if [ -e ${name}_1 ]; then
-    x=1
-    while [ -e ${name}_${x}_1 ]; do
-      let x=$x+1
-    done
-    name=${name}_${x}
-  fi
-  echo $name
+  echo `new_name_from_name $name`
 }
 
 function new_irred_name()

@@ -1,5 +1,5 @@
 /*
- * $Id: mul.c,v 1.23 2002/04/10 23:33:27 jon Exp $
+ * $Id: mul.c,v 1.24 2002/06/25 10:30:12 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <limits.h>
+#include <string.h>
 #include "elements.h"
 #include "endian.h"
 #include "grease.h"
@@ -96,6 +97,15 @@ static int mul_row_by_map(unsigned int *row_in, unsigned int *row_out, unsigned 
                           unsigned int noc_o, prime_opsp operations, const char *m, const char *name)
 {
   unsigned int j;
+  assert(NULL != row_in);
+  assert(NULL != row_out);
+  assert(NULL != map);
+  assert(NULL != operations);
+  assert(NULL != m);
+  assert(0 != len);
+  assert(0 != noc);
+  assert(0 != nob);
+  assert(0 != noc_o);
   row_init(row_out, len);
   for (j = 0; j < noc; j++) {
     unsigned int elt = get_element_from_row(nob, j, row_in);
@@ -115,28 +125,47 @@ static int mul_row_by_map(unsigned int *row_in, unsigned int *row_out, unsigned 
   return 1;
 }
 
+static int store_mul_rows_by_map(unsigned int **row_in, unsigned int **row_out,
+                                 unsigned int *map,
+                                 unsigned int noc, unsigned int nor, unsigned int len, unsigned int nob,
+                                 unsigned int noc_o, prime_opsp operations,
+                                 const char *m, const char *name)
+{
+  unsigned int i;
+  assert(NULL != row_in);
+  assert(NULL != row_out);
+  assert(NULL != map);
+  assert(NULL != operations);
+  assert(NULL != name);
+  for (i = 0; i < nor; i++) {
+    if (0 == mul_row_by_map(row_in[i], row_out[i], map, noc, len, nob, noc_o, operations, m, name)) {
+      return 0;
+    }
+  }
+  return 1;
+}
+
 static int mul_rows_by_map(unsigned int **row_in, unsigned int **row_out, FILE *inp,
                            unsigned int noc, unsigned int nor, unsigned int len, unsigned int nob,
                            unsigned int noc_o, prime_opsp operations, const char *m, const char *name)
 {
-  unsigned int i, *map;
+  unsigned int *map;
+  int ret;
   assert(NULL != row_in);
   assert(NULL != row_out);
   assert(NULL != inp);
+  assert(NULL != operations);
+  assert(NULL != m);
   assert(NULL != name);
   map = malloc_map(noc);
   if (0 == read_map(inp, noc, map, m, name)) {
     map_free(map);
     return 0;
   }
-  for (i = 0; i < nor; i++) {
-    if (0 == mul_row_by_map(row_in[i], row_out[i], map, noc, len, nob, noc_o, operations, m, name)) {
-      map_free(map);
-      return 0;
-    }
-  }
+  ret = store_mul_rows_by_map(row_in, row_out, map, noc, nor, len, nob,
+                              noc_o, operations, m, name);
   map_free(map);
-  return 1;
+  return ret;
 }
 
 static int mul_by_map(FILE *inp1, FILE *inp2, const header *h1, const header *h2,
@@ -236,6 +265,10 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
   row_adder adder;
   row_incer incer;
   grease_struct grease;
+  assert(NULL != m1);
+  assert(NULL != m2);
+  assert(NULL != m3);
+  assert(NULL != name);
   if (0 == open_and_read_binary_header(&inp1, &h1, m1, name) ||
       0 == open_and_read_binary_header(&inp2, &h2, m2, name)) {
     if (NULL != h1) {
@@ -302,7 +335,7 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
   /* Compute best lazy grease given nox2 */
   if (0 == grease_level(prime2, &grease, nox2)) {
     fprintf(stderr, "%s: cannot allocate grease space, terminating\n", name);
-    exit(1);
+    exit(2);
   }
   /* Allocate the grease space */
   if (0 == grease_allocate(prime2, len2, &grease, M1_SIZE)){
@@ -379,15 +412,19 @@ int mul_from_store(unsigned int **rows1, unsigned int **rows3,
                    unsigned int nob, unsigned int nor, unsigned int noc_o, unsigned int prime,
                    grease grease, const char *m, const char *name)
 {
-  long pos;
+  long long pos;
   unsigned int i, j, l;
   row_ops row_operations;
+  assert(NULL != rows1);
+  assert(NULL != rows3);
   assert(NULL != inp);
+  assert(NULL != m);
+  assert(NULL != name);
   assert(0 != noc);
   assert(is_a_prime_power(prime)); /* prime refers to rows1 */
   assert(0 != nob); /* nob refers to rows1 */
   /* Remember where we are in row 2 */
-  pos = ftell(inp);
+  pos = ftello64(inp);
   if (is_map) {
     /* Multiply some rows by a map */
     prime_ops operations;
@@ -421,30 +458,121 @@ int mul_from_store(unsigned int **rows1, unsigned int **rows3,
       }
       element_access_init(nob, i, size, &word_offset, &bit_offset, &mask);
       grease_init_rows(grease, prime);
-#if LAZY_GREASE
-#else
-      grease_make_rows(grease, size, prime, len);
-#endif
       for (j = 0; j < nor; j++) {
         unsigned int *row1 = rows1[j];
-        unsigned int elt = get_elements_from_row(row1 + word_offset, size * nob, bit_offset, mask);
+        unsigned int elt = get_elements_from_row(row1 + word_offset, size, nob, bit_offset, mask);
         if (0 == i) {
           row_init(rows3[j], len);
         }
         if (0 != elt) {
-#if LAZY_GREASE
           grease_row_inc(grease, len, rows3[j], prime, contract(elt, prime, nob));
-#else
-          (*row_operations.incer)(grease->rows[contract(elt, prime, nob) - 1], rows3[j], len);
-#endif
         }
       }
     }
   }
   /* Move back in matrix 2 */
-  if (0 != fseek(inp, pos, SEEK_SET)) {
+  if (0 != fseeko64(inp, pos, SEEK_SET)) {
     fprintf(stderr, "%s: unable to rewind %s, terminating\n", name, m);
     return 0;
+  }
+  return 1;
+}
+
+/* If parameter 1 is a map, then then map is in rows1[0] */
+/* Similarly parameter 2 */
+int mul_in_store(unsigned int **rows1, unsigned int **rows2, unsigned int **rows3,
+                 int is_map1, int is_map2, unsigned int noc, unsigned int len,
+                 unsigned int nob, unsigned int nor, unsigned int noc2, unsigned int prime,
+                 grease grease, const char *m1, const char *m2, const char *name)
+{
+  unsigned int i, j, l;
+  row_ops row_operations;
+  assert(NULL != rows1);
+  assert(NULL != rows2);
+  assert(NULL != rows3);
+  assert(NULL != m1);
+  assert(NULL != m2);
+  assert(NULL != name);
+  assert(0 != noc);
+  assert(0 != nob); /* nob refers to rows1 */
+  assert(0 != noc);
+  if (is_map1 && is_map2) {
+    const header *h1 = header_create(1, 0, 0, noc, nor);
+    const header *h2 = header_create(1, 0, 0, noc2, noc);
+    int ret = mul_map(rows1[0], rows2[0], rows3[0], h1, h2, name);
+    header_free(h1);
+    header_free(h2);
+    return ret;
+  } else {
+    /* Either first or second parameter is not a map */
+    if (is_map2) {
+      /* Multiply some rows by a map */
+      prime_ops operations;
+      if (0 == primes_init(prime, &operations)) {
+        fprintf(stderr, "%s: cannot initialise prime operations for %s, terminating\n", name, m1);
+        return 0;
+      }
+      return store_mul_rows_by_map(rows1, rows3, rows2[0], noc, nor,
+                                   len, nob, noc2, &operations, m2, name);
+    } else if (is_map1) {
+      /* Handle left multiplication by map */
+      unsigned int *map = rows1[0];
+      for (j = 0; j < nor; j++) {
+        l = map[j];
+        row_init(rows3[j], len);
+        if (l >= noc) {
+          fprintf(stderr, "%s: map entry %d out of range (0 - %d), terminating\n", name, l, noc - 1);
+        }
+        memcpy(rows3[j], rows2[l], len * sizeof(unsigned int));
+      }
+    } else {
+      /* Neither parameter is a map */
+      unsigned int **grease_rows;
+      assert(0 != len);
+      /* len may have come from m2, and hence would be zero for a map */
+      if (0 == rows_init(prime, &row_operations)) {
+        fprintf(stderr, "%s: cannot initialise row operations for %s, terminating\n", name, m1);
+        return 0;
+      }
+      /* Save the grease row pointers */
+      grease_rows = matrix_malloc(grease->level);
+      l = 1;
+      /* Replace the initial allocated grease rows with the rows of rows2 */
+      for (j = 0; j < grease->level; j++) {
+        grease_rows[j] = grease->rows[l - 1];
+        l *= prime;
+      }
+      /* We will use our element instead */
+      for (i = 0; i < noc; i += grease->level) {
+        unsigned int size = (grease->level + i <= noc) ? grease->level : noc - i;
+        unsigned int word_offset, bit_offset, mask;
+        l = 1;
+        /* Replace the initial allocated grease rows with the rows of rows2 */
+        for (j = 0; j < size; j++) {
+          grease->rows[l - 1] = rows2[i + j];
+          l *= prime;
+        }
+        element_access_init(nob, i, size, &word_offset, &bit_offset, &mask);
+        grease_init_rows(grease, prime);
+        for (j = 0; j < nor; j++) {
+          unsigned int *row1 = rows1[j];
+          unsigned int elt = get_elements_from_row(row1 + word_offset, size, nob, bit_offset, mask);
+          if (0 == i) {
+            row_init(rows3[j], len);
+          }
+          if (0 != elt) {
+          grease_row_inc(grease, len, rows3[j], prime, contract(elt, prime, nob));
+          }
+        }
+      }
+      /* Restore the grease row pointers */
+      l = 1;
+      for (j = 0; j < grease->level; j++) {
+        grease->rows[l - 1] = grease_rows[j];
+        l *= prime;
+      }
+      matrix_free(grease_rows);
+    }
   }
   return 1;
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: zfe.c,v 1.1 2002/01/22 08:40:24 jon Exp $
+ * $Id: zfe.c,v 1.2 2002/06/25 10:30:12 jon Exp $
  *
  * Field extend a matrix
  *
@@ -11,9 +11,9 @@
 #include "endian.h"
 #include "memory.h"
 
-static const char *name = "zext";
+static const char *name = "zfe";
 
-static void ext_usage(void)
+static void fe_usage(void)
 {
   fprintf(stderr, "%s: usage: %s <in_file> <out_file> <extension>\n", name, name);
 }
@@ -25,7 +25,7 @@ int main(int argc, const char * const argv[])
   unsigned int out_prime;
 
   if (4 != argc) {
-    ext_usage();
+    fe_usage();
     exit(1);
   }
   in = argv[1];

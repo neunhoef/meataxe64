@@ -1,5 +1,6 @@
+#!/bin/sh
 #
-# $Id: intersect,v 1.4 2002/05/26 00:47:20 jon Exp $
+# $Id: intersect,v 1.5 2002/06/25 10:30:12 jon Exp $
 #
 # Script to intersect two spaces
 #

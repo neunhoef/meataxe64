@@ -1,5 +1,5 @@
 /*
- * $Id: sb.c,v 1.5 2002/04/10 23:33:27 jon Exp $
+ * $Id: sb.c,v 1.6 2002/06/25 10:30:12 jon Exp $
  *
  * Function to spin some vectors under two generators to obtain a standard base
  *
@@ -121,7 +121,6 @@ unsigned int spin(const char *in, const char *out, const char *a,
     cleanup(inp, f_a, f_b);
     exit(2);
   }
-  max_rows = (max_rows > noc * 2) ? noc * 2 : max_rows; /* Can never need more than this */
   rows1 = matrix_malloc(max_rows);
   rows2 = matrix_malloc(max_rows);
   for (d = 0; d < max_rows; d++) {
@@ -161,7 +160,7 @@ unsigned int spin(const char *in, const char *out, const char *a,
     fprintf(stderr, "%s: unable to allocate grease, terminating\n", name);
     cleanup(inp, f_a, f_b);
   }
-  while (nor < max_rows && nor < noc && (gen_a.nor < nor || gen_b.nor < nor)) {
+  while (/*nor < max_rows &&*/ nor < noc && (gen_a.nor < nor || gen_b.nor < nor)) {
     unsigned int rows_to_do = nor - gen->nor;
     unsigned int i, j, k, old_nor = nor;
     /* Ensure we don't try to do too many */
@@ -187,8 +186,16 @@ unsigned int spin(const char *in, const char *out, const char *a,
             grease.level, prime, len, nob, 900, 0, 0, name);
       echelise(rows2 + nor, stride, &d, &new_map, NULL, 0,
                grease.level, prime, len, nob, 900, 0, 0, 1, name);
-      clean(rows2 + nor, stride, rows2, nor, new_map, NULL, NULL, 0,
-            grease.level, prime, len, nob, 900, 0, 0, name);
+      /* Now we know which rows are new */
+      if (nor + d < noc) {
+        clean(rows2 + nor, stride, rows2, nor, new_map, NULL, NULL, 0,
+              grease.level, prime, len, nob, 900, 0, 0, name);
+      } else {
+        /* No point in cleaning if we have the whole space */
+        /* So force the inner loop to terminate */
+        k = rows_to_do - stride;
+        gen->nor = old_nor;
+      }
       j = 0;
       for (i = 0; i < stride; i++) {
         if (new_map[i] >= 0) {

@@ -1,5 +1,5 @@
 /*
- * $Id: extend_matrix.c,v 1.2 2002/04/10 23:33:27 jon Exp $
+ * $Id: extend_matrix.c,v 1.3 2002/06/25 10:30:12 jon Exp $
  *
  * Function to field extend a matrix
  *
@@ -33,7 +33,16 @@ int extend_matrix(const char *in, const char *out, unsigned int out_prime, const
   }
   in_prime = header_get_prime(h);
   if (1 == in_prime) {
-    fprintf(stderr, "%s: cannot handle maps, terminating\n", name);
+    /* This is just a copy */
+    if (0 == open_and_write_binary_header(&outp, h, out, name)) {
+      header_free(h);
+      fclose(inp);
+      return 0;
+    }
+    copy_rest(outp, inp);
+    fclose(inp);
+    fclose(outp);
+    header_free(h);
     return 0;
   }
   in_nob = header_get_nob(h);

@@ -1,0 +1,22 @@
+Worry about isspace failure (can't detect \n) (still occurs on RH 7.2) ctype is buggered
+Worry about return (NULL == s) code generation error
+Profile multiply (eg on 26750 for Co1) for different memory sizes
+Consider putting naming intelligence into split_with_subspace
+Investigate better matrix multiplications
+Look into memory requirements for zmu inside indicate etc (problem is power, which doesn't recover from out of memory, and mul, which exits 1 on grease allcoation failure)
+Fix zps to take less memory
+Test find_nullity_onef_with_orders (1)
+Find a better algorithm for zsp memory. Investigate performance (1)
+Debug emu/zsl file corruption problem (2)
+Cleanup return vs exit (1)
+Think about better addition for sparse rows (Test for non-zero on summands?) (1)
+Set up performance measurement for differing memory sizes at same grease level (1)
+Fix emu to recheck command file immediately if changed (1)
+Test stop program (1)
+Code quality in commands, mop.c and mmat.c (2)
+Examine profiles from monst (1)
+Consider a more structured error return type (1)
+Convert monster generator to use new operations (2)
+Build lift (as introduce column?) (1)
+Work on lattice of submodules (5)
+(22, 15/07/2002, 24/06/2002)

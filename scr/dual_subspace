@@ -1,0 +1,74 @@
+#!/bin/sh
+#
+# $Id: dual_subspace,v 1.1 2002/06/25 10:30:12 jon Exp $
+#
+# Script to provide a subspace from the dual subspace
+#
+# Inputs
+# $1: dual subspace
+# $2: output filename
+# $3: memory
+#
+# Return codes
+# 1: error in parameters
+# 0: ok
+#
+#set -v
+. functions
+usage="$0: usage: $0 <dual subspace> <output> <memory>"
+if [ $# -ne 3 ]; then
+  echo $usage
+  exit 1;
+fi
+i=$1
+o=$2
+memory=$3
+if [ -e $i ]; then
+  q=`zprime $i`
+  nor=`znor $i`
+  noc=`znoc $i`
+  if [ 1 -eq $q ]; then
+    echo "$0: $i cannot be a map"
+    exit 1
+  fi
+else
+  echo "$0: missing file $i"
+  exit 1
+fi
+tmp=tmp${PPID}
+ztr $i ${tmp}.1 $memory
+if [ $? -ne 0 ]; then
+  rm ${tmp}*
+  exit 1
+fi
+ok=0
+while [ 0 -eq $ok ]; do
+  nullity=`zns ${tmp}.1 ${tmp}.2 $memory 2>/dev/null`
+  ret=$?
+  if [ $ret -eq 0 ]; then
+    if [ ! -d tmp ]; then
+      mkdir tmp
+    fi
+    ret=$?
+    if [ 0 -ne $ret ]; then
+      echo failed to create temporary directory, terminating
+      rm -f ${tmp}*
+      exit 1
+    fi
+    zbase ${tmp}.2 tmp $o $memory
+    ret=$?
+    rm -f ${tmp}*
+    if [ 0 -ne $ret ]; then
+      echo zbase failed, terminating
+      exit 1
+    fi
+    exit 0
+  else
+    if [ $ret -eq 2 ]; then
+      let memory=`more_memory $memory`
+    else
+      rm -f ${tmp}*
+      exit 1
+    fi
+  fi
+done

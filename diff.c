@@ -1,5 +1,5 @@
 /*
- * $Id: diff.c,v 1.3 2002/04/10 23:33:26 jon Exp $
+ * $Id: diff.c,v 1.4 2002/06/25 10:30:12 jon Exp $
  *
  * Function to find the differences between two matrices
  *
@@ -21,6 +21,7 @@ int diff(const char *m1, const char *m2, const char *name)
   FILE *inp2 = NULL;
   unsigned int prime, nob, noc, nor, len;
   unsigned int i;
+  int res = 1;
   const header *h1, *h2;
   unsigned int *row1, *row2;
 
@@ -85,6 +86,7 @@ int diff(const char *m1, const char *m2, const char *name)
         if (row1[j] != row2[j]) {
           printf("%s and %s differ in row %d near offset %d, with values 0x%x and 0x%x (diffs 0x%x)\n",
                  m1, m2, i, j * (bits_in_unsigned_int / nob), row1[j], row2[j], row1[j] ^ row2[j]);
+          res = 0;
           k++;
           if (k > 10) {
             break;
@@ -95,5 +97,5 @@ int diff(const char *m1, const char *m2, const char *name)
   }
   fclose(inp1);
   fclose(inp2);
-  return 1;
+  return res;
 }

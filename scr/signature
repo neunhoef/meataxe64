@@ -1,5 +1,6 @@
+#!/bin/sh
 #
-# $Id: signature,v 1.5 2002/02/05 19:50:56 jon Exp $
+# $Id: signature,v 1.6 2002/06/25 10:30:12 jon Exp $
 #
 # Script to give a signature for a representation
 #
@@ -51,7 +52,7 @@ tmp=tmp${PPID}
 rm -f ${tmp}*
 for i in 1 2 3 4 5 6 7 8 9 10; do
   echo -n "f$i "
-  f$i $id $a $b ${tmp}.1 ${tmp}.1 1>/dev/null 2>/dev/null
+  f$i $id $a $b ${tmp}.1 ${tmp}.1 1>/dev/null
   if [ $? -ne 0 ]; then
     exit 1
   fi

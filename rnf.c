@@ -1,5 +1,5 @@
 /*
- * $Id: rnf.c,v 1.8 2002/05/26 00:47:20 jon Exp $
+ * $Id: rnf.c,v 1.9 2002/06/25 10:30:12 jon Exp $
  *
  * Compute the rank of a matrix, using temporary files
  *
@@ -13,6 +13,7 @@
 #include "endian.h"
 #include "grease.h"
 #include "header.h"
+#include "maps.h"
 #include "matrix.h"
 #include "memory.h"
 #include "read.h"
@@ -98,9 +99,14 @@ unsigned int rank(const char *m1, const char *dir, const char *m2,
   f.f = inp;
   prime = header_get_prime(h);
   if (1 == prime) {
-    fprintf(stderr, "%s: cannot handle maps, terminating\n", name);
+    if (0 == map_rank(inp, h, m1, &r, name)) {
+      fclose(inp);
+      header_free(h);
+      exit(1);
+    }
+    header_free(h);
     fclose(inp);
-    exit(1);
+    return r;
   }
   nob = header_get_nob(h);
   nor = header_get_nor(h);
@@ -132,6 +138,7 @@ unsigned int rank(const char *m1, const char *dir, const char *m2,
   if (0 != record) {
     outp = fopen64(name3, "wb");
     if (NULL == outp) {
+      fprintf(stderr, "%s: failed to open temporary file %s, terminating\n", name, name3);
       fclose(inp);
       exit(1);
     }
@@ -178,9 +185,6 @@ unsigned int rank(const char *m1, const char *dir, const char *m2,
         for (i = 0; i < rows_remaining; i += step2) {
           unsigned int stride2 = (step2 + i > rows_remaining) ? rows_remaining - i : step2;
           unsigned int j;
-#if 0
-          printf("reading rows %d to %d from %s\n", i, i + stride2, in->name);
-#endif
           if (0 == endian_read_matrix(in->f, mat2, len, stride2)) {
             fprintf(stderr, "%s: cannot read matrix for %s, terminating\n", name, in->name);
             fclose(in->f);
@@ -204,9 +208,6 @@ unsigned int rank(const char *m1, const char *dir, const char *m2,
             }
           }
         }
-#if 0
-        printf("wrote %d rows to %s\n", rows_written, out->name);
-#endif
         fclose(out->f);
         in = in->next;
         out = out->next;

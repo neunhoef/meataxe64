@@ -1,5 +1,5 @@
 /*
- * $Id: write.c,v 1.10 2002/04/10 23:33:27 jon Exp $
+ * $Id: write.c,v 1.11 2002/06/25 10:30:12 jon Exp $
  *
  * Write a header
  *
@@ -16,10 +16,6 @@
 int write_text_header(FILE *fp, const header *h)
 {
   unsigned int prime, nod, noc, nor;
-  char buf1[12];
-  char buf2[12];
-  char buf3[12];
-  char buf4[12];
 
   assert(NULL != h);
   assert(NULL != fp);
@@ -28,24 +24,11 @@ int write_text_header(FILE *fp, const header *h)
   nor = header_get_nor(h);
   noc = header_get_noc(h);
   if (1 != prime) {
-    (void)sprintf(buf1, "%2d", nod);
-    (void)sprintf(buf2, "%6d", prime);
-    (void)sprintf(buf3, "%6d", nor);
-    (void)sprintf(buf4, "%6d", noc);
+    fprintf(fp, "%2d", nod);
   } else {
-    (void)sprintf(buf1, "%2d", 12);
-    (void)sprintf(buf2, "%6d", prime);
-    (void)sprintf(buf3, "%6d", nor);
-    (void)sprintf(buf4, "%6d", 1);
+    fprintf(fp, "12");
   }
-  if (2 != fwrite(buf1, 1, 2, fp) ||
-      6 != fwrite(buf2, 1, 6, fp) ||
-      6 != fwrite(buf3, 1, 6, fp) ||
-      6 != fwrite(buf4, 1, 6, fp) ||
-      fputc('\n', fp) < 0) {
-    fprintf(stderr, "Failed to write header to text output\n");
-    return 0;
-  }
+  fprintf(fp, " %d %d %d\n", prime, nor, noc);
   return 1;
 }
 

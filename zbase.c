@@ -1,5 +1,5 @@
 /*
- * $Id: zbase.c,v 1.3 2002/02/21 20:37:21 jon Exp $
+ * $Id: zbase.c,v 1.4 2002/06/25 10:30:12 jon Exp $
  *
  * Compute a basis for a space from a set of vectors
  *
@@ -8,7 +8,7 @@
 #include <stdio.h>
 #include "endian.h"
 #include "memory.h"
-#include "rnf.h"
+#include "base.h"
 
 static const char *name = "zbase";
 
@@ -31,7 +31,7 @@ int main(int argc, const char * const argv[])
     memory = strtoul(argv[4], NULL, 0);
   }
   memory_init(name, memory);
-  n = rank(argv[1], argv[2], argv[3], 1, 1, name);
+  n = base(argv[1], argv[2], argv[3], name);
   printf("%d\n", n);
   memory_dispose();
   return 0;

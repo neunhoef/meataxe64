@@ -1,5 +1,6 @@
+#!/bin/sh
 #
-# $Id: indicatef_with_element,v 1.1 2002/05/26 00:47:20 jon Exp $
+# $Id: indicatef_with_element,v 1.2 2002/06/25 10:30:12 jon Exp $
 #
 # Script to find the indicator of an irreducible representation
 # Assumes a and b in standard base form
@@ -52,79 +53,26 @@ else
   memory=200
 fi
 tmp_dir=$7
-if [ -e ${a}_${script} -o -L ${a}_${script} ]; then
-  rm ${a}_${script}
-fi
-ln -s ${a} ${a}_${script}
 tmp=tmp${PPID}
 S=${tmp}.3
 Q=${tmp}.4
 sb=${tmp}.0
-# TODO: cut down the amount of work here, we don't need the invert, multiplies etc
-x=`basef $e $a_d $b_d $sb $S ${tmp_dir} $memory`
+x=`basef_vectors $e $a_d $b_d $S ${tmp_dir} $memory`
 ret=$?
 if [ $ret -eq 0 ]; then
-  if diff $a ${sb}_sb_1 1>/dev/null 2>&1; then
-    if diff $b ${sb}_sb_2 1>/dev/null 2>&1; then
-      if [ $nor -eq 1 ]; then
-        echo indicator +
-        rm -f ${tmp}.*
-        if [ -e ${a}_+ -o -L ${a}_+ ]; then
-          rm ${a}_+
-        fi
-        ln -s $a ${a}_+
-        exit 0
-      fi
-      zqf $S $Q
-      a_t=${tmp}.5
-      b_t=${tmp}.6
-      ztr $a $a_t $memory
-      ztr $b $b_t $memory
-      i=0
-      q=`zprime $a`
-      while [ $i -lt $q ]; do
-        zsid $q $nor $noc $i ${tmp}.7
-        zad $Q ${tmp}.7 ${tmp}.8
-        preserves ${tmp}.8 $S ${tmp}.7 $a $a_t $memory
-        ret=$?
-        if [ $ret -eq 0 ]; then
-          preserves ${tmp}.8 $S ${tmp}.7 $b $b_t $memory
-          ret=$?
-          if [ $ret -eq 0 ]; then
-            echo indicator +
-            rm -f ${tmp}.*
-            if [ -e ${a}_+ -o -L ${a}_+ ]; then
-              rm ${a}_+
-            fi
-            ln -s $a ${a}_+
-            exit 0
-          elif [ $ret -eq 1 ]; then
-            rm -f ${tmp}.*
-            exit 1
-          fi
-        elif [ $ret -eq 1 ]; then
-          rm -f ${tmp}.*
-          exit 1
-        fi
-# Try next diagonal
-        let i=$i+1
-      done
-      echo indicator -
-      rm -f ${tmp}.*
-      if [ -e ${a}_- -o -L ${a}_- ]; then
-        rm ${a}_-
-      fi
-      ln -s $a ${a}_-
-      exit 0
-    fi
-  fi
+  real_indicate $a $b $S $memory
+  ret=$?
+  rm -f ${tmp}.*
+  exit $ret
 elif [ $ret -ne 255 ]; then
   echo base return $ret, terminating
+  rm -f ${tmp}.*
   exit 1
+else
+  rm -f ${tmp}.*
+  if [ -e ${a}_o -o -L ${a}_o ]; then
+    rm ${a}_o
+  fi
+  ln -s $a ${a}_o
+  echo indicator o
 fi
-rm -f ${tmp}.*
-if [ -e ${a}_o -o -L ${a}_o ]; then
-  rm ${a}_o
-fi
-ln -s $a ${a}_o
-echo indicator o

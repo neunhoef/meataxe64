@@ -1,5 +1,5 @@
 /*
- * $Id: dets.c,v 1.2 2002/03/07 13:43:30 jon Exp $
+ * $Id: dets.c,v 1.3 2002/06/25 10:30:12 jon Exp $
  *
  * Functions to compute determinants
  *
@@ -12,10 +12,8 @@
 #include "utils.h"
 #include <assert.h>
 #include <stdio.h>
+#include <stdlib.h>
 
-#define ROW_DETS 1
-
-#if ROW_DETS
 static unsigned int det(unsigned int **rows, prime_ops prime_operations,
                         unsigned int nor)
 {
@@ -33,7 +31,7 @@ static unsigned int det(unsigned int **rows, prime_ops prime_operations,
       return 0;
     } else {
       det = (*prime_operations.mul)(det, elt);
-      elt = (*prime_operations.negate)(elt);
+      elt = (*prime_operations.invert)(elt);
       if (1 != elt) {
         (*row_operations.scaler_in_place)(rows[i], nor, elt);
       }
@@ -51,9 +49,44 @@ static unsigned int det(unsigned int **rows, prime_ops prime_operations,
       }
     }
   }
+  if (2 != prime) {
+    /* Need to factor in the sign of the permutation */
+    /* For the moment, we don't handle more than 10x10 */
+    /* This is not a practial limitation */
+    if (nor >= 10) {
+      fprintf(stderr, "Cannot handle determinants greater than 10x10\n");
+      exit(1);
+    } else {
+      unsigned int perm[10];
+      int sign = 0;
+      for (i = 0; i < nor; i++) {
+        unsigned int elt = first_non_zero(rows[i], nob, nor, &j);
+        NOT_USED(elt);
+        perm[i] = j / elts_per_word;
+      }
+      for (i = 0; i + 1< nor; i++) {
+        j = perm[i];
+        if (i != j) {
+          /* Post multiply by the cycle (i j) */
+          unsigned int k;
+          assert(j > i);
+          sign = 1 - sign;
+          for (k = i + 1; k < nor; k++) {
+            if (perm[k] == i) {
+              perm[k] = j;
+              break;
+            }
+          }
+        }
+      }
+      assert(perm[nor - 1] == nor - 1);
+      if (sign) {
+        det = (*prime_operations.negate)(det);
+      }
+    }
+  }
   return det;
 }
-#endif
 
 unsigned int det2(prime_ops prime_operations,
                   unsigned int e11, unsigned int e12,
@@ -118,7 +151,6 @@ unsigned int det4(prime_ops prime_operations,
                   unsigned int e31, unsigned int e32, unsigned int e33, unsigned int e34,
                   unsigned int e41, unsigned int e42, unsigned int e43, unsigned int e44)
 {
-#if ROW_DETS
   unsigned int r1[4];
   unsigned int r2[4];
   unsigned int r3[4];
@@ -145,18 +177,6 @@ unsigned int det4(prime_ops prime_operations,
   rows[2] = r3;
   rows[3] = r4;
   return det(rows, prime_operations, 4);
-#else
-  unsigned int e1, e2, e3, e4, f1, f2, f3, f4;
-  f1 = det3(prime_operations, e22, e23, e24, e32, e33, e34, e42, e43, e44);
-  f2 = det3(prime_operations, e21, e23, e24, e31, e33, e34, e41, e43, e44);
-  f3 = det3(prime_operations, e21, e22, e24, e31, e32, e34, e41, e42, e44);
-  f4 = det3(prime_operations, e21, e22, e23, e31, e32, e33, e41, e42, e43);
-  e1 = (*prime_operations.mul)(e11, f1);
-  e2 = (*prime_operations.negate)((*prime_operations.mul)(e12, f2));
-  e3 = (*prime_operations.mul)(e13, f3);
-  e4 = (*prime_operations.negate)((*prime_operations.mul)(e14, f4));
-  return (*prime_operations.add)((*prime_operations.add)((*prime_operations.add)(e1, e2), e3), e4);
-#endif
 }
 
 unsigned int det4_ptr(unsigned int **rows, unsigned int nob, prime_ops prime_operations,
@@ -193,7 +213,6 @@ unsigned int det5(prime_ops prime_operations,
                   unsigned int e41, unsigned int e42, unsigned int e43, unsigned int e44, unsigned int e45,
                   unsigned int e51, unsigned int e52, unsigned int e53, unsigned int e54, unsigned int e55)
 {
-#if ROW_DETS
   unsigned int r1[5];
   unsigned int r2[5];
   unsigned int r3[5];
@@ -231,20 +250,6 @@ unsigned int det5(prime_ops prime_operations,
   rows[3] = r4;
   rows[4] = r5;
   return det(rows, prime_operations, 5);
-#else
-  unsigned int f1, f2, f3, f4, f5;
-  f1 = det4(prime_operations, e22, e23, e24, e25, e32, e33, e34, e35, e42, e43, e44, e45, e52, e53, e54, e55);
-  f2 = det4(prime_operations, e21, e23, e24, e25, e31, e33, e34, e35, e41, e43, e44, e45, e51, e53, e54, e55);
-  f3 = det4(prime_operations, e21, e22, e24, e25, e31, e32, e34, e35, e41, e42, e44, e45, e51, e52, e54, e55);
-  f4 = det4(prime_operations, e21, e22, e23, e25, e31, e32, e33, e35, e41, e42, e43, e45, e51, e52, e53, e55);
-  f5 = det4(prime_operations, e21, e22, e23, e24, e31, e32, e33, e34, e41, e42, e43, e44, e51, e52, e53, e54);
-  f1 = (*prime_operations.mul)(e11, f1);
-  f2 = (*prime_operations.negate)((*prime_operations.mul)(e12, f2));
-  f3 = (*prime_operations.mul)(e13, f3);
-  f4 = (*prime_operations.negate)((*prime_operations.mul)(e14, f4));
-  f5 = (*prime_operations.mul)(e15, f5);
-  return (*prime_operations.add)((*prime_operations.add)((*prime_operations.add)((*prime_operations.add)(f1, f2), f3), f4), f5);
-#endif
 }
 
 unsigned int det5_ptr(unsigned int **rows, unsigned int nob, prime_ops prime_operations,
@@ -297,7 +302,6 @@ unsigned int det6(prime_ops prime_operations,
                   unsigned int e61, unsigned int e62, unsigned int e63, unsigned int e64, unsigned int e65, unsigned int e66
 )
 {
-#if ROW_DETS
   unsigned int r1[5];
   unsigned int r2[5];
   unsigned int r3[5];
@@ -348,22 +352,6 @@ unsigned int det6(prime_ops prime_operations,
   rows[4] = r5;
   rows[5] = r6;
   return det(rows, prime_operations, 6);
-#else
-  unsigned int f1, f2, f3, f4, f5, f6;
-  f1 = det5(prime_operations, e22, e23, e24, e25, e26, e32, e33, e34, e35, e36, e42, e43, e44, e45, e46, e52, e53, e54, e55, e56, e62, e63, e64, e65, e66);
-  f2 = det5(prime_operations, e21, e23, e24, e25, e26, e31, e33, e34, e35, e36, e41, e43, e44, e45, e46, e51, e53, e54, e55, e56, e61, e63, e64, e65, e66);
-  f3 = det5(prime_operations, e21, e22, e24, e25, e26, e31, e32, e34, e35, e36, e41, e42, e44, e45, e46, e51, e52, e54, e55, e56, e61, e62, e64, e65, e66);
-  f4 = det5(prime_operations, e21, e22, e23, e25, e26, e31, e32, e33, e35, e36, e41, e42, e43, e45, e46, e51, e52, e53, e55, e56, e61, e62, e63, e65, e66);
-  f5 = det5(prime_operations, e21, e22, e23, e24, e26, e31, e32, e33, e34, e36, e41, e42, e43, e44, e46, e51, e52, e53, e54, e56, e61, e62, e63, e64, e66);
-  f6 = det5(prime_operations, e21, e22, e23, e24, e25, e31, e32, e33, e34, e35, e41, e42, e43, e44, e45, e51, e52, e53, e54, e55, e61, e62, e63, e64, e65);
-  f1 = (*prime_operations.mul)(e11, f1);
-  f2 = (*prime_operations.negate)((*prime_operations.mul)(e12, f2));
-  f3 = (*prime_operations.mul)(e13, f3);
-  f4 = (*prime_operations.negate)((*prime_operations.mul)(e14, f4));
-  f5 = (*prime_operations.mul)(e15, f5);
-  f6 = (*prime_operations.negate)((*prime_operations.mul)(e16, f6));
-  return (*prime_operations.add)((*prime_operations.add)((*prime_operations.add)((*prime_operations.add)((*prime_operations.add)(f1, f2), f3), f4), f5), f6);
-#endif
 }
 
 unsigned int det6_ptr(unsigned int **rows, unsigned int nob, prime_ops prime_operations,
@@ -429,7 +417,6 @@ unsigned int det7(prime_ops prime_operations,
                   unsigned int e61, unsigned int e62, unsigned int e63, unsigned int e64, unsigned int e65, unsigned int e66, unsigned int e67,
                   unsigned int e71, unsigned int e72, unsigned int e73, unsigned int e74, unsigned int e75, unsigned int e76, unsigned int e77)
 {
-#if ROW_DETS
   unsigned int r1[5];
   unsigned int r2[5];
   unsigned int r3[5];
@@ -495,22 +482,6 @@ unsigned int det7(prime_ops prime_operations,
   rows[5] = r6;
   rows[6] = r7;
   return det(rows, prime_operations, 7);
-#else
-  unsigned int f1, f2, f3, f4, f5, f6;
-  f1 = det5(prime_operations, e22, e23, e24, e25, e26, e32, e33, e34, e35, e36, e42, e43, e44, e45, e46, e52, e53, e54, e55, e56, e62, e63, e64, e65, e66);
-  f2 = det5(prime_operations, e21, e23, e24, e25, e26, e31, e33, e34, e35, e36, e41, e43, e44, e45, e46, e51, e53, e54, e55, e56, e61, e63, e64, e65, e66);
-  f3 = det5(prime_operations, e21, e22, e24, e25, e26, e31, e32, e34, e35, e36, e41, e42, e44, e45, e46, e51, e52, e54, e55, e56, e61, e62, e64, e65, e66);
-  f4 = det5(prime_operations, e21, e22, e23, e25, e26, e31, e32, e33, e35, e36, e41, e42, e43, e45, e46, e51, e52, e53, e55, e56, e61, e62, e63, e65, e66);
-  f5 = det5(prime_operations, e21, e22, e23, e24, e26, e31, e32, e33, e34, e36, e41, e42, e43, e44, e46, e51, e52, e53, e54, e56, e61, e62, e63, e64, e66);
-  f6 = det5(prime_operations, e21, e22, e23, e24, e25, e31, e32, e33, e34, e35, e41, e42, e43, e44, e45, e51, e52, e53, e54, e55, e61, e62, e63, e64, e65);
-  f1 = (*prime_operations.mul)(e11, f1);
-  f2 = (*prime_operations.negate)((*prime_operations.mul)(e12, f2));
-  f3 = (*prime_operations.mul)(e13, f3);
-  f4 = (*prime_operations.negate)((*prime_operations.mul)(e14, f4));
-  f5 = (*prime_operations.mul)(e15, f5);
-  f6 = (*prime_operations.negate)((*prime_operations.mul)(e16, f6));
-  return (*prime_operations.add)((*prime_operations.add)((*prime_operations.add)((*prime_operations.add)((*prime_operations.add)(f1, f2), f3), f4), f5), f6);
-#endif
 }
 
 unsigned int det7_ptr(unsigned int **rows, unsigned int nob, prime_ops prime_operations,

@@ -1,5 +1,6 @@
+#!/bin/sh
 #
-# $Id: rip_rank,v 1.1 2002/02/05 19:50:56 jon Exp $: irred,v 1.4 2002/01/26 00:36:06 jon Exp $
+# $Id: rip_rank,v 1.2 2002/06/25 10:30:12 jon Exp $: irred,v 1.4 2002/01/26 00:36:06 jon Exp $
 #
 # Script to compute the rank of a rip off element on a representation
 #
@@ -7,7 +8,7 @@
 # $1: generator a
 # $2: generator b
 # $3: order of AB
-# #4: output element
+# $4: output element
 #
 # Return codes
 # 1: error in parameters

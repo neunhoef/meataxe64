@@ -1,5 +1,6 @@
+#!/bin/sh
 #
-# $Id: order,v 1.7 2002/02/12 23:10:25 jon Exp $: f1,v 1.2 2001/12/01 10:46:02 jon Exp $
+# $Id: order,v 1.8 2002/06/25 10:30:12 jon Exp $: f1,v 1.2 2001/12/01 10:46:02 jon Exp $
 #
 # Script to compute order of a matrix, in a naive fashion
 #
@@ -54,18 +55,23 @@ fi
 tmp=tmp${PPID}
 o=1
 ok=0
-if diff $a $id 1>/dev/null ; then
+if zdiff $a $id 1>/dev/null ; then
   echo 1
   exit 0
 fi
 t=$a
 while [ $ok -eq 0 ]; do
-  if diff $t $id 1>/dev/null ; then
+  if zdiff $t $id 1>/dev/null ; then
     echo $o
     rm -f ${tmp}*
     exit 0
   fi
   zmu $a $t ${tmp}.$o 400 1>/dev/null
+  ret=$?
+  if [ 0 -ne $ret ]; then
+    rm -f ${tmp}*
+    exit 1
+  fi
   t=${tmp}.$o
   let o=$o+1
 done

@@ -1,5 +1,5 @@
 /*
- * $Id: maps.c,v 1.1 2002/04/10 23:33:27 jon Exp $
+ * $Id: maps.c,v 1.2 2002/06/25 10:30:12 jon Exp $
  *
  * Maps from {0 .. nor-1} -> {0 .. noc-1}
  *
@@ -57,7 +57,7 @@ int read_map(FILE *inp, unsigned int nor, unsigned int *map, const char *name, c
   assert(NULL != in);
   for (i = 0; i < nor; i++) {
     if (1 != endian_read_int(&j, inp)) {
-      fprintf(stderr, "%s: failed to read entry %d from %s range, terminating\n", name, i, in);
+      fprintf(stderr, "%s: failed to read entry %d from %s, terminating\n", name, i, in);
       fclose(inp);
       return 0;
     }
@@ -75,7 +75,7 @@ int write_map(FILE *outp, unsigned int nor, unsigned int *map, const char *name,
   assert(NULL != out);
   for (i = 0; i < nor; i++) {
     if (1 != endian_write_int(map[i], outp)) {
-      fprintf(stderr, "%s: failed to read entry %d from %s, or entry out of range, terminating\n", name, i, out);
+      fprintf(stderr, "%s: failed to write entry %d to %s, or entry out of range, terminating\n", name, i, out);
       fclose(outp);
       return 0;
     }

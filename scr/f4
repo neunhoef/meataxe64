@@ -1,5 +1,6 @@
+#!/bin/sh
 #
-# $Id: f4,v 1.1 2001/12/01 10:46:02 jon Exp $
+# $Id: f4,v 1.2 2002/06/25 10:30:12 jon Exp $
 #
 # Script to perform A + CB + B
 #

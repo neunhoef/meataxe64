@@ -1,5 +1,6 @@
+#!/bin/sh
 #
-# $Id: new_irred,v 1.4 2002/03/07 13:43:30 jon Exp $
+# $Id: new_irred,v 1.5 2002/06/25 10:30:12 jon Exp $
 #
 # Script to classify an irreducible representation
 #
@@ -28,6 +29,7 @@ a=$1
 b=$2
 if [ -e $a -a -e $b ]; then
   q=`zprime $a`
+  r=`zprime $b`
   nor=`znor $a`
   noc=`znoc $a`
   if [ $nor -ne $noc ]; then
@@ -38,18 +40,26 @@ if [ -e $a -a -e $b ]; then
     echo "$0: $a and $b are not compatible"
     exit 1
   fi
+  if [ 1 -eq $q -a 1 -eq $r ]; then
+    echo "$0: representation on two maps cannot be irreducible"
+    exit 1
+  fi
+  if [ 1 -ne $q -a 1 -ne $r -a $q -ne $r ]; then
+    echo "$0: $a and $b are not compatible"
+    exit 1
+  fi
 else
   echo "$0: missing files $a or $b"
   exit 1
 fi
 # First compute o_a and o_b
-o_a=`order $a`
+o_a=`singular_order $a`
 ret=$?
 if [ 0 -ne $ret ]; then
   echo Cannot compute order of $a
   exit 1
 fi
-o_b=`order $b`
+o_b=`singular_order $b`
 ret=$?
 if [ 0 -ne $ret ]; then
   echo Cannot compute order of $b

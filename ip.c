@@ -1,5 +1,5 @@
 /*
- * $Id: ip.c,v 1.11 2002/04/10 23:33:27 jon Exp $
+ * $Id: ip.c,v 1.12 2002/06/25 10:30:12 jon Exp $
  *
  * Read a matrix
  *
@@ -66,7 +66,7 @@ int main(int argc, const char * const argv[])
     noc = nor;
     for (i = 0; i < nor; i++) {
       unsigned int j;
-      j = getin(inp, 7);
+      fscanf(inp, "%d", &j);
       if (0 == j || j > noc) {
         fprintf(stderr, "%s: %d (out of range 1 - %d) found as permutation image, terminating\n", name, j, noc);
         exit(1);

@@ -1,5 +1,5 @@
 /*
- * $Id: mmat.c,v 1.6 2002/01/06 16:35:48 jon Exp $
+ * $Id: mmat.c,v 1.7 2002/06/25 10:30:12 jon Exp $
  *
  * Monster program
  * Based on Version 1 - 30th November 1998 by R.A.Parker and R.A.Wilson
@@ -47,6 +47,13 @@ static void wtrow(unsigned int row_num, unsigned char *vecout)
   put_row(row_num, 196882, 20000, vectemp);
 }
 
+static void monst_usage(void)
+{
+  fprintf(stderr, "monst: usage: monst {a|b}\n");
+  exit(1);
+
+}
+
 int main(int argc, char *argv[])
 {
   unsigned int i;
@@ -54,12 +61,10 @@ int main(int argc, char *argv[])
   suzel z1, z2, z3, z4, z5, z6, z7, z8, z9;
   int type = -1;
   if (argc != 2) {
-    fprintf(stderr, "Incorrect number of arguments to monster\n");
-    exit(1);
+    monst_usage();
   }
   if (strcmp(argv[1], "a") != 0 && strcmp(argv[1], "b") != 0) {
-    fprintf(stderr, "Incorrect parameters to monster, should be 'a' or 'b'\n");
-    exit(1);
+    monst_usage();
   }
   type = (strcmp(argv[1], "a") == 0) ? 1 : 2;
   init();

@@ -1,0 +1,110 @@
+#!/bin/sh
+#
+# $Id: real_indicate,v 1.1 2002/06/25 10:30:12 jon Exp $
+#
+# Script to find the indicator of an irreducible representation
+# assuming it is real, and we have the standard basis conjugating
+# the dual back to the original
+#
+# Inputs
+# $1: generator a
+# $2: generator b
+# $3: the standard basis for the dual
+# $4: initial memory (optional)
+#
+# Return codes
+# 1: error in parameters
+# 0: ok
+#
+usage="$0: usage: $0 <a> <b> <sb> [<memory>]"
+if [ $# -ne 3 -a $# -ne 4 ]; then
+  echo $usage
+  exit 1;
+fi
+. functions
+a=$1
+b=$2
+S=$3
+if [ -e $a -a -e $b -a -e $S ]; then
+  nor=`znor $a`
+  if [ $nor -ne `znoc $a` ]; then
+    echo "$0: $a is not square"
+    exit 1
+  fi
+  if [ $nor -ne `znor $b` -o $nor -ne `znoc $b` -o $nor -ne `znor $S` -o $nor -ne `znoc $S` ]; then
+    echo "$0: $a, $b, $S are not compatible"
+    exit 1
+  fi
+else
+  echo "$0: missing files $a, $b or $S"
+  exit 1
+fi
+if [ $# -eq 4 ]; then
+  memory=$4
+else
+  memory=200
+fi
+tmp=tmp${PPID}
+Q=${tmp}.4
+if [ $nor -eq 1 ]; then
+  echo indicator +
+  rm -f ${tmp}.*
+  if [ -e ${a}_+ -o -L ${a}_+ ]; then
+    rm ${a}_+
+  fi
+  ln -s $a ${a}_+
+  exit 0
+fi
+zqf $S $Q
+i=0
+q=`zprime $a`
+while [ $i -lt $q ]; do
+  zsid $q $nor $nor $i ${tmp}.7
+  zad $Q ${tmp}.7 ${tmp}.8
+  preserves ${tmp}.8 $S ${tmp}.7 $a $i $memory
+  ret=$?
+  if [ $ret -eq 0 ]; then
+    preserves ${tmp}.8 $S ${tmp}.7 $b $i $memory
+    ret=$?
+    if [ $ret -eq 0 ]; then
+      echo indicator +
+      rm -f ${tmp}.*
+      if [ -e ${a}_+ -o -L ${a}_+ ]; then
+        rm ${a}_+
+      fi
+      ln -s $a ${a}_+
+      exit 0
+    elif [ $ret -eq 1 ]; then
+      rm -f ${tmp}.*
+      exit 1
+    elif [ $ret -eq 254 ]; then
+      echo indicator o
+      rm -f ${tmp}.*
+      if [ -e ${a}_o -o -L ${a}_o ]; then
+        rm ${a}_o
+      fi
+      ln -s $a ${a}_o
+      exit 0
+    fi
+  elif [ $ret -eq 1 ]; then
+    rm -f ${tmp}.*
+    exit 1
+  elif [ $ret -eq 254 ]; then
+    echo indicator o
+    rm -f ${tmp}.*
+    if [ -e ${a}_o -o -L ${a}_o ]; then
+      rm ${a}_o
+    fi
+    ln -s $a ${a}_o
+    exit 0
+  fi
+# Try next diagonal
+  let i=$i+1
+done
+echo indicator -
+rm -f ${tmp}.*
+if [ -e ${a}_- -o -L ${a}_- ]; then
+  rm ${a}_-
+fi
+ln -s $a ${a}_-
+exit 0

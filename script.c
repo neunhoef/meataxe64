@@ -1,5 +1,5 @@
 /*
- * $Id: script.c,v 1.4 2002/05/26 00:47:20 jon Exp $
+ * $Id: script.c,v 1.5 2002/06/25 10:30:12 jon Exp $
  *
  * Function to compute a script in two generators
  *
@@ -158,6 +158,7 @@ int exec_script(const char *m1, const char *m2, const char *m3,
   unsigned int prime, nor, scalar;
   const char *id;
   const char *current, *new, *summand, *rest;
+  int is_perm1, is_perm2, both_perm;
   assert(NULL != m1);
   assert(NULL != m2);
   assert(NULL != m3);
@@ -174,30 +175,39 @@ int exec_script(const char *m1, const char *m2, const char *m3,
   }
   nor = header_get_nor(h1);
   prime = header_get_prime(h1);
-  if (1 == prime) {
-    fprintf(stderr, "%s: cannot handle maps, terminating\n", name);
-    fclose(inp1);
-    header_free(h1);
-    fclose(inp2);
-    header_free(h2);
-    return 0;
-  }
-  if (0 == header_compare(h1, h2) || nor != header_get_noc(h1)) {
-    fprintf(stderr, "%s: unsuitable inputs %s and %s, terminating", name, m1, m2);
+  is_perm1 = 1 == prime;
+  is_perm2 = 1 == header_get_prime(h2);
+  both_perm = is_perm1 && is_perm2; /* We'll allow this if no additions */
+  if (nor != header_get_noc(h1) ||
+      nor != header_get_noc(h1) ||
+      nor != header_get_nor(h2) ||
+      nor != header_get_noc(h2) ||
+      (0 == is_perm1 && 0 == is_perm2 && prime != header_get_prime(h2))) {
+    fprintf(stderr, "%s: unsuitable inputs %s and %s, terminating\n", name, m1, m2);
     header_free(h1);
     header_free(h2);
     return cleanup(inp1, inp2, NULL);
+  }
+  if (is_perm1) {
+    prime = header_get_prime(h2);
   }
   header_free(h1);
   header_free(h2);
   id = new_id(tmp);
-  if (0 == ident(prime, nor, nor, 1, id, name)) {
-    fprintf(stderr, "%s: unable to create identity, terminating", name);
+  summand = parse_plus(script, &rest, &scalar, prime, name);
+  if ((NULL != rest || 'I' == *summand) && both_perm) {
+    fprintf(stderr, "%s: cannot handle both generators as maps when adding, terminating\n", name);
+    header_free(h1);
+    header_free(h2);
     return cleanup(inp1, inp2, NULL);
   }
-  summand = parse_plus(script, &rest, &scalar, prime, name);
+  if (0 == both_perm && 0 == ident(prime, nor, nor, 1, id, name)) {
+    fprintf(stderr, "%s: unable to create identity, terminating\n", name);
+    return cleanup(inp1, inp2, NULL);
+    /* Note, id not needed if no additions */
+  }
   if (0 == script_mul(m1, m2, id, &current, tmp, summand, name)) {
-    fprintf(stderr, "%s: unable to create summand %s, terminating", name, summand);
+    fprintf(stderr, "%s: unable to create summand %s, terminating\n", name, summand);
     return cleanup(inp1, inp2, NULL);
   }
   if (1 != scalar) {
@@ -213,11 +223,11 @@ int exec_script(const char *m1, const char *m2, const char *m3,
     script = rest;
     summand = parse_plus(script, &rest, &scalar, prime, name);
     if (0 == script_mul(m1, m2, id, &new, tmp, summand, name)) {
-      fprintf(stderr, "%s: unable to create summand %s, terminating", name, summand);
+      fprintf(stderr, "%s: unable to create summand %s, terminating\n", name, summand);
       return cleanup(inp1, inp2, NULL);
     }
-    if (0 == scaled_add(current, new, sum, scalar, name)) {
-      fprintf(stderr, "%s: unable to add %s and %s, terminating", name, current, new);
+    if (0 == scaled_add(new, current, sum, scalar, name)) {
+      fprintf(stderr, "%s: unable to add %s and %s, terminating\n", name, current, new);
       return cleanup(inp1, inp2, NULL);
     }
     current = sum;

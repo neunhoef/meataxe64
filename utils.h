@@ -1,5 +1,5 @@
 /*
- * $Id: utils.h,v 1.16 2002/03/10 22:45:28 jon Exp $
+ * $Id: utils.h,v 1.17 2002/06/25 10:30:12 jon Exp $
  *
  * Utilities for meataxe
  *
@@ -17,6 +17,10 @@
 
 /* Large files */
 extern FILE *fopen64(const char *, const char *);
+
+extern int fseeko64(FILE *, long long, int);
+
+extern long long ftello64(FILE *);
 
 extern unsigned int read_decimal(const char *str, unsigned int len);
 

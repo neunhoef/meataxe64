@@ -108,3 +108,49 @@ skew seventh
 20020504 - Tested and added revised algorithm for ss
 20020507 - Indicator calculation for 88000 for Co3 completes, answer +
 20020511 - Indicator claculation for 83948 for Co2 started
+20020529 - Started use at Aachen. Found scripts need #!/bin/sh Found bug in script.c with backwards parameters to scaled add
+20020529 - Add ps for permutation space
+20020531 - Add spin_vectors to replace the inappropriately named poo3.sh
+20020531 - Modify to deal with 64 bit file offsets. Lose -pedantic
+20020601 - Add map_or_row to handle reading from a map or a matrix seamlessly
+20020601 - Fix bug in get_elements_from_row failing to deal with unused section in word
+20020601 - Replace prime in usage messages with field order
+20020601 - Add permutation capability to most programs, scripts pending
+20020601 - Complete adding permutation capability to programs
+20020603 - Add permutation capability to most scripts
+20020603 - Modify preserves to use sparse matrix and transpose trick
+20020603 - Wrote initial versions of vector to matrix and matrix to vector
+20020603 - Wrote most of ztsp, tensor spin. Still needs in store mul
+20020604 - In store mul done, ztsp ready to test
+20020605 - First apparently working ztsp
+20020606 - Add base_vectors and basef_vectors to do the nullspace and spin part of standard base
+20020606 - Add real_indicate for duoing indicators of self dual representations only
+20020606 - Add version of ztspf, to investigate 132x760 for HN over GF(4)
+20020606 - Complete first pass of documentation of programs, and start on scripts
+20020607 - ztspf finds a subspace of dimension 65703 for HN over GF(2) inside 132 tensor 760.
+20020607 - Start writing ztmu to do tensor multiply (for subspace work)
+20020609 - Fix flaws in ztspf and restart 65703 for HN
+20020610 - Fix zvp to output the representations as it knows them anyway
+20020611 - Found and fixed a bug in my determinants for fields not GF(2)
+20020612 - Investigating funny output ordering from zsums, and decided to leave it
+20020612 - Optimised zsb and zsbf by early closure
+20020612 - Add real_indicate to perform the common code for non-o indicators
+20020613 - Add zfo for finding orbits under a multi-generator group
+20020613 - Add zmsp for multi-generator spin
+20020614 - Add zpco for permutation condense
+20020614 - Work to extend all splitting scripts to accept multiple generators
+20020614 - Cleaned up indicator calculations to do less work
+20020615 - Removed a number of redundant scripts
+20020615 - Find bug in sums when first both elements have order 2
+20020615 - Create split_all_cond for splitting condensations. Still classifies irreducibles, but doesn't indicate
+20020615 - First version of zmspf, spin with multiple generators and intermediate files
+20020615 - First apparently working zmspf
+20020616 - Apparently working new zbase using file cleaning
+20020617 - Lift vectors and vectors from permutation condense added
+20020618 - Modify the way split_with_element deals with dual splits
+20020618 - Find and fix two bugs in zfo
+20020619 - Fix a number of non-ANSI-isms in the source after trying out on SGI origin machine
+20020620 - Make zdiff return 1 when differences found, preparatory to replacing diff which doesn't work on large files.
+20020620 - use new zdiff in scripts
+20020620 - start converting file spinning to use clean_files interface
+20020624 - start allowing multiple module generators in intermediate file versions (spf, mspf, tspf).

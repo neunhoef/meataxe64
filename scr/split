@@ -1,14 +1,15 @@
+#!/bin/sh
 #
-# $Id: split,v 1.6 2002/03/24 19:44:02 jon Exp $
+# $Id: split,v 1.7 2002/06/25 10:30:12 jon Exp $
 #
 # Script to split a representation
 #
 # Inputs
-# $1: generator a
-# $2: generator b
-# $3: output filename base
+# $1: output filename base
+# $2: generator a
+# $3-: other generators
 #
-# outputs will be of the form <$3>_<q>_<nor>_{1,2}
+# outputs will be of the form <$3>_<q>_<nor>_$x
 # where nor is number of rows, and q is the prime power
 #
 #
@@ -21,15 +22,15 @@
 #
 #set -v
 . functions
-usage="$0: usage: $0 <a> <b> <output_stem>"
-if [ $# -ne 3 ]; then
+usage="$0: usage: $0 <output_stem> <a> [<other generators>]"
+if [ $# -lt 3 ]; then
   echo $usage
   exit 1;
 fi
-a=$1
-b=$2
-o=$3
-if [ -e $a -a -e $b ]; then
+a=$2
+o=$1
+shift 2
+if [ -e $a ]; then
   q=`zprime $a`
   nor=`znor $a`
   noc=`znoc $a`
@@ -37,13 +38,13 @@ if [ -e $a -a -e $b ]; then
     echo "$0: $a is not square"
     exit 1
   fi
-  if [ $nor -ne `znor $b` -o $nor -ne `znoc $b` ]; then
-    echo "$0: $a and $b are not compatible"
-    exit 1
-  fi
 else
-  echo "$0: missing files $a or $b"
+  echo "$0: missing file $a"
   exit 1
+fi
+if [ 1 -eq $nor ]; then
+# No point in further work on irreducibles
+  exit 255
 fi
 id=id_${q}_$nor
 if [ ! -e $id ]; then
@@ -54,8 +55,9 @@ fi
 #
 tmp=tmp${PPID}
 #
-# Try 1 + a + b
+# Try 1 + a + b etc
 #
+b=$1
 for i in 1 2 3 4 5 6 7 8 9 10; do
   echo using f$i to split
   f$i $id $a $b ${tmp}.1 ${tmp}.1
@@ -63,23 +65,24 @@ for i in 1 2 3 4 5 6 7 8 9 10; do
     rm -f ${tmp}*
     exit 1
   fi
-  split_with_element $a $b ${tmp}.1 $o 0
+  split_with_element ${tmp}.1 $o 0 ${tmp}.2 $a $*
   ret=$?
-  if [ $ret -eq 255 -o $ret -eq 0 ]; then
+# Only loop on nullity 0 or didn't split
+  if [ $ret -ne 253 -a $ret -ne 254 ]; then
     rm -f ${tmp}*
     exit $ret
   fi
 done
 echo searching for suitable element using zsums
 # First compute o_a and o_b
-o_a=`order $a`
+o_a=`singular_order $a`
 ret=$?
 if [ 0 -ne $ret ]; then
   echo Cannot compute order of $a
   rm -f ${tmp}*
   exit 1
 fi
-o_b=`order $b`
+o_b=`singular_order $b`
 ret=$?
 if [ 0 -ne $ret ]; then
   echo Cannot compute order of $b
@@ -89,14 +92,14 @@ fi
 ok=0
 memory=200
 while [ $ok -eq 0 ]; do
-  out=`zsums $a $b ${tmp}.zsums $o_a $o_b 10 5 $memory 2>/dev/null`
+  out=`zsums $a $b ${tmp}.zsums $o_a $o_b 5 5 $memory 2>/dev/null`
   ret=$?
   if [ 2 -eq $ret ]; then
     let memory=`more_memory $memory`
   elif [ 0 -eq $ret ]; then
     ok=1
     name=`echo $out | sed -e "s/^.*element //g;s/ of nullity.*$//g"`
-    split_with_element $a $b ${name} $o 0
+    split_with_element ${name} $o 0 ${tmp}.2 $a $*
     ret=$?
     if [ $ret -eq 255 -o $ret -eq 0 ]; then
       rm -f ${tmp}*

@@ -1,5 +1,5 @@
 /*
- * $Id: system.c,v 1.7 2001/12/15 20:47:27 jon Exp $
+ * $Id: system.c,v 1.8 2002/06/25 10:30:12 jon Exp $
  *
  * system dependent stuff for locking etc
  */
@@ -26,11 +26,11 @@ void wait_lock(const char *task_name)
   int retries = 100;
   char name[100];
   FILE *hitch;
-  __pid_t pid = getpid();
+  pid_t pid = getpid();
   struct hostent *h = gethostbyname("localhost");
   assert(NULL != task_name);
   assert(0 != h->h_length);
-  sprintf(name, "meataxe_lock_%u_%s", pid, h->h_name);
+  sprintf(name, "meataxe_lock_%u_%s", (unsigned int)pid, h->h_name);
   while(1) {
     retries--;
     if (retries <= 0) {
@@ -42,7 +42,7 @@ void wait_lock(const char *task_name)
       printf("Cannot create lock file hitch, retrying\n");
       fflush(stdout);
     } else {
-      fprintf(hitch, "Process %u, host %s, task %s\n", pid, h->h_name, task_name);
+      fprintf(hitch, "Process %u, host %s, task %s\n", (unsigned int)pid, h->h_name, task_name);
       fclose(hitch);
       /* Now we have our unique name, try to link to the universal name */
       if (link(name, LOCK)) {
@@ -118,7 +118,7 @@ void release_lock(void)
   }
 }
 
-static __time_t command_time = 0;
+static time_t command_time = 0;
 
 static int get_time(const char *name, time_t *time)
 {
@@ -161,8 +161,8 @@ static char buf[256];
 
 const char *tmp_name(void)
 {
-  __pid_t pid = getpid();
-  sprintf(buf, "tmp%d", pid);
+  pid_t pid = getpid();
+  sprintf(buf, "tmp%d", (unsigned int)pid);
   return buf;
 }
 

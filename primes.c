@@ -1,5 +1,5 @@
 /*
- * $Id: primes.c,v 1.10 2002/02/27 19:06:17 jon Exp $
+ * $Id: primes.c,v 1.11 2002/06/25 10:30:12 jon Exp $
  *
  * Prime manipulation for meataxe
  *
@@ -40,6 +40,12 @@ static unsigned int power_2(unsigned int elt, unsigned int n)
 static unsigned int add_2(unsigned int elt1, unsigned int elt2)
 {
   assert(2 > elt1 && 2 > elt2);
+  return elt1 ^ elt2;
+}
+
+static unsigned int add_4(unsigned int elt1, unsigned int elt2)
+{
+  assert(4 > elt1 && 4 > elt2);
   return elt1 ^ elt2;
 }
 
@@ -225,7 +231,7 @@ int primes_init(unsigned int prime, prime_opsp ops)
         ops->negate = &negate_2_power;
         ops->invert = (2 == prime) ? &invert_2 : &invert_4;
         ops->power = (2 == prime) ? &power_2 : &power_4;
-        ops->add = &add_2;
+        ops->add = (2 == prime) ? &add_2 : add_4;
         ops->mul = (2 == prime) ? &mul_2 : &mul_4;
         break;
       case 3:

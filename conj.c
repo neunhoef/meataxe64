@@ -1,5 +1,5 @@
 /*
- * $Id: conj.c,v 1.4 2002/04/10 23:33:26 jon Exp $
+ * $Id: conj.c,v 1.5 2002/06/25 10:30:12 jon Exp $
  *
  * Function to compute algebraic conjugate of a matrix, from file
  *
@@ -41,8 +41,17 @@ int conjugate(const char *m1, const char *m2, unsigned int power, const char *na
   }
   prime_power = header_get_prime(h);
   if (1 == prime_power) {
-    fprintf(stderr, "%s: cannot handle maps, terminating\n", name);
-    return cleanup(inp, outp);
+    /* This is just a copy */
+    if (0 == open_and_write_binary_header(&outp, h, m2, name)) {
+      header_free(h);
+      fclose(inp);
+      return 0;
+    }
+    copy_rest(outp, inp);
+    fclose(inp);
+    fclose(outp);
+    header_free(h);
+    return 0;
   }
   prime = prime_divisor(prime_power);
   nob = header_get_nob(h);

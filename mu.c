@@ -1,5 +1,5 @@
 /*
- * $Id: mu.c,v 1.8 2002/01/06 16:35:48 jon Exp $
+ * $Id: mu.c,v 1.9 2002/06/25 10:30:12 jon Exp $
  *
  * Multiply two matrices to give a third
  *
@@ -39,7 +39,7 @@ int main(int argc, const char * const argv[])
   }
   memory_init(name, memory);
   endian_init();
-  if (0 == mul(in1, in2, out, "mu")) {
+  if (0 == mul(in1, in2, out, name)) {
     exit(1);
   }
   memory_dispose();

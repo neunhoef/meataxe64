@@ -1,5 +1,5 @@
 /*
- * $Id: add.c,v 1.18 2002/04/10 23:33:26 jon Exp $
+ * $Id: add.c,v 1.19 2002/06/25 10:30:12 jon Exp $
  *
  * Function to add two matrices to give a third
  *
@@ -13,6 +13,7 @@
 #include "elements.h"
 #include "endian.h"
 #include "header.h"
+#include "map_or_row.h"
 #include "maps.h"
 #include "memory.h"
 #include "read.h"
@@ -106,27 +107,11 @@ static int add_sub(const char *m1, const char *m2, const char *m3, const char *n
   row1 = memory_pointer_offset(0, 0, len);
   row2 = memory_pointer_offset(0, 1, len);
   for (i = 0; i < nor; i++) {
-    if (is_perm1) {
-      if (0 == read_map_element_as_row(inp1, row1, nob, noc,  len, m1, name)) {
-        fprintf(stderr, "%s: cannot read row %d from %s, terminating\n", name, i, m1);
-        return cleanup(inp1, inp2, outp);
-      }
-    } else {
-      if (0 == endian_read_row(inp1, row1, len)) {
-        fprintf(stderr, "%s: cannot read row %d from %s, terminating\n", name, i, m1);
-        return cleanup(inp1, inp2, outp);
-      }
+    if (0 == read_row(is_perm1, inp1, row1, nob, noc, len, i, m1, name)) {
+      return cleanup(inp1, inp2, outp);
     }
-    if (is_perm2) {
-      if (0 == read_map_element_as_row(inp2, row2, nob, noc,  len, m2, name)) {
-        fprintf(stderr, "%s: cannot read row %d from %s, terminating\n", name, i, m2);
-        return cleanup(inp1, inp2, outp);
-      }
-    } else {
-      if (0 == endian_read_row(inp2, row2, len)) {
-        fprintf(stderr, "%s: cannot read row %d from %s, terminating\n", name, i, m2);
-        return cleanup(inp1, inp2, outp);
-      }
+    if (0 == read_row(is_perm2, inp2, row2, nob, noc, len, i, m2, name)) {
+      return cleanup(inp1, inp2, outp);
     }
     if (scale && 1 != elt) {
       if (0 != elt) {

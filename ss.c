@@ -1,5 +1,5 @@
 /*
- * $Id: ss.c,v 1.9 2002/05/26 00:47:20 jon Exp $
+ * $Id: ss.c,v 1.10 2002/06/25 10:30:12 jon Exp $
  *
  * Function to compute subspace representation
  * Uses the computed map, rather than clean/echelise
@@ -15,6 +15,7 @@
 #include "primes.h"
 #include "read.h"
 #include "rows.h"
+#include "ss_map.h"
 #include "utils.h"
 #include "write.h"
 #include <assert.h>
@@ -96,25 +97,9 @@ void subspace(const char *range, const char *image,
   }
   header_free(h_out);
   map = my_malloc(nor * sizeof(int));
-  /* Step through range to set up map */
-  for (i = 0; i < nor; i += 1) {
-    map[i] = -1;
-  }
-  for (i = 0; i < nor; i += 1) {
-    if (0 == endian_read_row(inp1, row_in, len)) {
-      fprintf(stderr, "%s: cannot read row from %s, terminating\n", name, range);
-      cleanup(inp1, inp2, outp);
-      exit(1);
-    }
-    elt = first_non_zero(row_in, nob, len, &j);
-    assert(0 != elt);
-    NOT_USED(elt);
-    if (map[i] >= 0) {
-      fprintf(stderr, "%s: %s is not linearly independent/echelised, terminating\n", name, range);
-      cleanup(inp1, inp2, outp);
-      exit(1);
-    }
-    map[i] = j;
+  if (0 == subspace_map(inp1, map, nor, len, nob, row_in, range, name)) {
+    cleanup(inp1, inp2, outp);
+    exit(1);
   }
   /* inp1 no longer necessary */
   fclose(inp1);
@@ -123,7 +108,7 @@ void subspace(const char *range, const char *image,
     /* Read row of image */
     if (0 == endian_read_row(inp2, row_in, len)) {
       fprintf(stderr, "%s: cannot read row from %s, terminating\n", name, image);
-      cleanup(inp1, inp2, outp);
+      cleanup(NULL, inp2, outp);
       exit(1);
     }
     /* Initialise output row */
@@ -135,8 +120,8 @@ void subspace(const char *range, const char *image,
       put_element_to_row(nob, j, row_out, elt);
     }
     if (0 == endian_write_row(outp, row_out, len_e)) {
-      fprintf(stderr, "%s: cannot read row from %s, terminating\n", name, image);
-      cleanup(inp1, inp2, outp);
+      fprintf(stderr, "%s: cannot write row to %s, terminating\n", name, out);
+      cleanup(NULL, inp2, outp);
       exit(1);
     }
   }

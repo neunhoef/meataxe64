@@ -1,5 +1,5 @@
 /*
- * $Id: zexport.c,v 1.4 2002/04/10 23:33:27 jon Exp $
+ * $Id: zexport.c,v 1.5 2002/06/25 10:30:12 jon Exp $
  *
  * Export matrix to old system
  *
@@ -30,7 +30,7 @@ int main(int argc, const char * const argv[])
   const char *out;
   const header *h_in;
   unsigned int prime, nob, noc, nor, eperb, i, j, *in_row, len, blen;
-  char *out_row;
+  unsigned int *out_row;
   FILE *f_in;
   FILE *f_out;
 
@@ -74,10 +74,10 @@ int main(int argc, const char * const argv[])
       fprintf(stderr, "%s: failed to read row %d from %s, terminating\n", name, i, in);
       exit(1);
     }
-    row_init((unsigned int *)out_row, (blen + sizeof(unsigned int) - 1) / (sizeof(unsigned int)));
+    row_init(out_row, (blen + sizeof(unsigned int) - 1) / (sizeof(unsigned int)));
     for (j = 0; j < noc; j++) {
       unsigned int elt = get_element_from_row(nob, j, in_row);
-      put_element_to_char_row(eperb, prime, j, out_row, elt);
+      put_element_to_char_row(eperb, prime, j, (char *)out_row, elt);
     }
     if (blen != fwrite(out_row, 1, blen, f_out)) {
       fprintf(stderr, "%s: failed to write row %d to %s, terminating\n", name, i, out);

@@ -1,5 +1,5 @@
 /*
- * $Id: nsf.c,v 1.7 2002/05/26 00:47:20 jon Exp $
+ * $Id: nsf.c,v 1.8 2002/06/25 10:30:12 jon Exp $
  *
  * Compute the nullspace of a matrix, using temporary files
  *
@@ -158,9 +158,6 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
     unsigned int rows_remaining = rows_to_do;
     unsigned int stride = (step1 > rows_remaining) ? rows_remaining : step1;
     unsigned int i;
-#if 0
-    printf("Looping with rank now %d\n", r);
-#endif
     if (0 == endian_read_matrix(in->f, mat1, len, stride)) {
       fprintf(stderr, "%s: cannot read matrix for %s, terminating\n", name, in->name);
       fclose(in->f);
@@ -219,9 +216,6 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
         for (i = 0; i < rows_remaining; i += step2) {
           unsigned int stride2 = (step2 + i > rows_remaining) ? rows_remaining - i : step2;
           unsigned int j;
-#if 0
-          printf("reading rows %d to %d from %s\n", i, i + stride2, in->name);
-#endif
           if (0 == endian_read_matrix(in->f, mat2, len, stride2)) {
             fprintf(stderr, "%s: cannot read matrix for %s, terminating\n", name, in->name);
             fclose(in->f);
@@ -286,9 +280,6 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
 #endif
           }
         }
-#if 0
-        printf("wrote %d rows to %s\n", rows_written, out->name);
-#endif
         fclose(out->f);
         fclose(out->f_id);
         in = in->next;

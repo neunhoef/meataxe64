@@ -1,5 +1,5 @@
 /*
- * $Id: dtou.c,v 1.3 2001/12/01 10:46:02 jon Exp $
+ * $Id: dtou.c,v 1.4 2002/06/25 10:30:12 jon Exp $
  *
  * Strip out DOS style line termination
  */
@@ -12,7 +12,7 @@ static const char *name = "dtou";
 
 static void dtou_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <in_file> <in_file>\n", name, name);
+  fprintf(stderr, "%s: usage: %s <in_file> <out_file>\n", name, name);
 }
 
 int main(int argc, const char * const argv[])

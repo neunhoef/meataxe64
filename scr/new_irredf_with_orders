@@ -1,5 +1,6 @@
+#!/bin/sh
 #
-# $Id: new_irredf_with_orders,v 1.2 2002/05/26 00:47:20 jon Exp $
+# $Id: new_irredf_with_orders,v 1.3 2002/06/25 10:30:12 jon Exp $
 #
 # Script to classify an irreducible representation
 # using intermediate files
@@ -35,6 +36,7 @@ o_b=$4
 tmp_dir=$5
 if [ -e $a -a -e $b ]; then
   q=`zprime $a`
+  r=`zprime $b`
   nor=`znor $a`
   noc=`znoc $a`
   if [ $nor -ne $noc ]; then
@@ -42,6 +44,14 @@ if [ -e $a -a -e $b ]; then
     exit 1
   fi
   if [ $nor -ne `znor $b` -o $nor -ne `znoc $b` ]; then
+    echo "$0: $a and $b are not compatible"
+    exit 1
+  fi
+  if [ 1 -eq $q -a 1 -eq $r ]; then
+    echo "$0: representation on two maps cannot be irreducible"
+    exit 1
+  fi
+  if [ 1 -ne $q -a 1 -ne $r -a $q -ne $r ]; then
     echo "$0: $a and $b are not compatible"
     exit 1
   fi
@@ -84,8 +94,8 @@ if [ $ret -eq 0 ]; then
 # Some irreds of this dimension
   for x in $names; do
     y=`echo $x | sed -e "s/_1$//g"`
-    if diff ${y}_1 ${name}_sb_1 1>/dev/null; then
-      if diff ${y}_2 ${name}_sb_2 1>/dev/null; then
+    if zdiff ${y}_1 ${name}_sb_1 1>/dev/null; then
+      if zdiff ${y}_2 ${name}_sb_2 1>/dev/null; then
         echo Existing irreducible ${y} found
         rm -f ${tmp}*
         exit 255
@@ -105,8 +115,5 @@ if [ -e ${new_name}_1_${script} -o -L ${new_name}_1_${script} ]; then
   rm ${new_name}_1_${script}
 fi
 ln -s ${new_name}_1 ${new_name}_1_${script}
-if [ `zchar ${tmp}.0` -eq 2 ]; then
-  indicatef_with_script ${new_name}_1 ${new_name}_2 $script $o_a $o_b ${tmp_dir} $memory
-fi
 rm -f ${tmp}*
 exit 0

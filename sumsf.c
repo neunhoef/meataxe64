@@ -1,5 +1,5 @@
 /*
- * $Id: sumsf.c,v 1.1 2002/05/26 00:47:20 jon Exp $
+ * $Id: sumsf.c,v 1.2 2002/06/25 10:30:12 jon Exp $
  *
  * Function to compute linear sums of two matices
  *
@@ -147,11 +147,18 @@ int sumsf(const char *in1, const char *in2, const char *out,
           /* we've reached the order of this element */
           if (0 == m) {
             m = 1;
+            /* Safe to break here, as we can't have a repeat of both letters at the end */
+            break;
           } else {
             m = 0;
+            /* Try a new word, with first letter */
+            /* This may fail if first letter has order 2 */
             cur_word++;
             assert(cur_word < i);
           }
+        } else {
+          break;
+          /* Break anyway, our append was safe */
         }
         break;
       }

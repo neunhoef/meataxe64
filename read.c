@@ -1,5 +1,5 @@
 /*
- * $Id: read.c,v 1.18 2002/04/10 23:33:27 jon Exp $
+ * $Id: read.c,v 1.19 2002/06/25 10:30:12 jon Exp $
  *
  * Read a header
  *
@@ -28,8 +28,6 @@
 int read_text_header_items(FILE *fp, unsigned int *nod, unsigned int *prime,
                            unsigned int *nor, unsigned int *noc, const char *name)
 {
-  char str[LINE_LENGTH+1];
-  unsigned int j;
   int i;
   
   assert(NULL != fp);
@@ -38,11 +36,7 @@ int read_text_header_items(FILE *fp, unsigned int *nod, unsigned int *prime,
   assert(NULL != prime);
   assert(NULL != nor);
   assert(NULL != noc);
-  j = fread(str, 1, LINE_LENGTH, fp);
-  if (LINE_LENGTH != j) {
-    fprintf(stderr, "End of file reading '%s'\n", name);
-    return 0;
-  }
+  fscanf(fp, "%d%d%d%d", nod, prime, nor, noc);
   i = fgetc(fp);
   while (i >= 0 && '\n' != (char)i) {
     if (my_isspace(i)) {
@@ -55,10 +49,6 @@ int read_text_header_items(FILE *fp, unsigned int *nod, unsigned int *prime,
     fprintf(stderr, "Newline expected reading '%s'\n", name);
     return 0;
   }
-  *nod = read_decimal(str, 2);
-  *prime = read_decimal(str + 2, 6);
-  *nor = read_decimal(str + 2 + 6, 6);
-  *noc = read_decimal(str + 2 + 6 + 6, 6);
   return 1;
 }
 
@@ -132,11 +122,13 @@ int open_and_read_binary_header(FILE **inp, const header **h, const char *m, con
   in = fopen64(m, "rb");
   if (NULL == in) {
     fprintf(stderr, "%s: cannot open %s, terminating\n", name, m);
+    *h = NULL;
     return 0;
   }
   res = read_binary_header(in, h, m);
   if (0 == res) {
     fclose(in);
+    *h = NULL;
     *inp = NULL;
   } else {
     *inp = in;

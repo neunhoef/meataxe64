@@ -1,57 +1,26 @@
+#!/bin/sh
 #
-# $Id: split_all,v 1.5 2002/02/05 19:50:56 jon Exp $
+# $Id: split_all,v 1.6 2002/06/25 10:30:12 jon Exp $
 #
 # Script to split a representation completely
 #
 # Inputs
+# $1: output filename base
 # $1: generator a
-# $2: generator b
-# $3: output filename base
+# $2-: other generators
 #
 # Return codes
 # 1: error in parameters
 # 0: success
 # 252: ran out of possible splitters
 #
-usage="$0: usage: $0 <a> <b> <output_stem>"
-if [ $# -ne 3 ]; then
+usage="$0: usage: $0 <output_stem> <generators>*"
+if [ $# -lt 3 ]; then
   echo $usage
   exit 1;
 fi
-a=$1
-b=$2
-o=$3
-nor=`znor $a`
-#
-# TODO: find a way of using a process specific temporary for stdout
-#
-split $a $b $o 2>/dev/null 1>poo
-ret=$?
-res=`grep dimension poo 2>/dev/null`
-rm poo
-#echo res = $res, ret = $ret
-if [ 1 -eq $ret ]; then
-  echo "parameter problem with module $a $b"
-  exit 1
-elif [ 255 -eq $ret ]; then
-  echo "irreducible module $a $b found"
-  new_irred $a $b
-  exit 0
-elif [ 254 -eq $ret ]; then
-  echo "unable to split module $a $b (unexpected)"
-  exit 0
-elif [ 252 -eq $ret ]; then
-  echo "ran out of splitters for $a $b"
-  exit 252
-else
-# Split, so try some more
-  echo $res
-  dim=`echo $res | sed -e "s/^.* dimension //g;s/,.*$//g"`
-  codim=`echo $res | sed -e "s/^.*codimension //g"`
-# Cope with transposes if they happen
-  sub_name=`echo $res | sed -e "s/^.* subspace //g;s/ .*$//g" | sed -e "s/_tra//g"`
-  quot_name=`echo $res | sed -e "s/^.* quotient //g;s/ .*$//g" | sed -e "s/_tra//g"`
-# echo dim=$dim, codim=$codim, sub_name=$sub_name, quot_name=$quot_name
-  split_all ${sub_name}_{1,2} ${o}
-  split_all ${quot_name}_{1,2} ${o}
-fi
+# Just a front end for split_all_sub
+stem=$1
+a=$2
+shift 2
+exec split_all_sub $stem 1 $a $*

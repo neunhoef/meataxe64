@@ -1,0 +1,92 @@
+#!/bin/sh
+#
+# $Id: base_vectors,v 1.1 2002/06/25 10:30:12 jon Exp $
+#
+# Script to find a standard base for a representation
+#
+# Inputs
+# $1: element with which to split
+# $2: generator a
+# $3: generator b
+# $4: the standard basis
+#
+#
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+# 254: reducible
+# 255: nullity not 1
+#
+#set -v
+. functions
+usage="$0: usage: $0 <e> <a> <b> <s>"
+if [ $# -ne 4 ]; then
+  echo $usage
+  exit 1;
+fi
+e=$1
+a=$2
+b=$3
+s=$4
+if [ -e $e -a -e $a -a -e $b ]; then
+  q=`zprime $a`
+  nor=`znor $a`
+  noc=`znoc $a`
+  if [ $nor -ne $noc ]; then
+    echo "$0: $a is not square"
+    exit 1
+  fi
+  if [ $nor -ne `znor $b` -o $nor -ne `znoc $b` ]; then
+    echo "$0: $a and $b are not compatible"
+    exit 1
+  fi
+  if [ $nor -ne `znoc $e` -o $nor -ne `znor $e` ]; then
+    echo "$0: $a and $e are not compatible"
+    exit 1
+  fi
+else
+  echo "$0: missing files $e, $a or $b"
+  exit 1
+fi
+tmp=tmp${PPID}
+memory=200
+ok=0
+while [ $ok -eq 0 ]; do
+  nullity=`zns $e ${tmp}.0 $memory 2>/dev/null`
+  ret=$?
+  if [ $ret -eq 0 ]; then
+    ok=1
+  elif [ $ret -eq 2 ]; then
+    let memory=`more_memory $memory 2>/dev/null`
+  else
+    rm -f ${tmp}*
+    exit 1
+  fi
+done
+if [ 1 -ne $nullity ]; then
+  echo "$e has nullity $nullity different from 1"
+  rm -f ${tmp}*
+  exit 255
+fi
+ok=0
+while [ 0 -eq $ok ]; do
+  dim=`zsb ${tmp}.0 $s $a $b $memory`
+  ret=$?
+  if [ 0 -eq $ret ]; then
+    if [ $dim -eq $nor ]; then
+      ok=1
+    else
+      echo Strange result from zsb giving wrong dimension $dim vs $nor
+      rm -f ${tmp}*
+      exit 1
+    fi
+  elif [ $ret -eq 2 ]; then
+    let memory=`more_memory $memory`
+  else
+    echo zsb unexpectedly returns $ret
+    rm -f ${tmp}*
+    exit 1
+  fi
+done
+rm -f ${tmp}*

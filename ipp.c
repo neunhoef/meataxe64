@@ -1,5 +1,5 @@
 /*
- * $Id: ipp.c,v 1.7 2002/04/10 23:33:27 jon Exp $
+ * $Id: ipp.c,v 1.8 2002/06/25 10:30:12 jon Exp $
  *
  * Read a permutation into a matrix
  *
@@ -23,7 +23,7 @@ static const char *name = "zip";
 
 static void zip_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <in_file> <out_file> <prime>\n", name, name);
+  fprintf(stderr, "%s: usage: %s <in_file> <out_file> <field order>\n", name, name);
 }
 
 int main(int argc, const char * const argv[])
@@ -78,7 +78,7 @@ int main(int argc, const char * const argv[])
   for (i = 0; i < nor; i++) {
     unsigned int j;
     row_init(row, len);
-    j = getin(inp, 7);
+    fscanf(inp, "%d", &j);
     if (0 == j || j > nor) {
       fprintf(stderr, "%s: %d (out of range 1 - %d) found as permutation image, terminating\n", name, j, nor);
       exit(1);

@@ -1,5 +1,5 @@
 /*
- * $Id: count.c,v 1.7 2002/04/10 23:33:26 jon Exp $
+ * $Id: count.c,v 1.8 2002/06/25 10:30:12 jon Exp $
  *
  * Function to count the non-zero elements in a matrix
  *
@@ -30,15 +30,15 @@ unsigned int count(const char *matrix, const char *name)
     exit(1);
   }
   prime = header_get_prime(h);
-  if (1 == prime) {
-    fprintf(stderr, "%s: cannot handle maps, terminating\n", name);
-    fclose(input);
-    header_free(h);
-    exit(1);
-  }
-  nob = header_get_nob(h);
   nor = header_get_nor(h);
   noc = header_get_noc(h);
+  if (1 == prime) {
+    /* This is easy, it's just the minimum of nor, noc */
+    fclose(input);
+    header_free(h);
+    return (nor > noc) ? noc : nor;
+  }
+  nob = header_get_nob(h);
   len = header_get_len(h);
   if (memory_rows(len, 1000) < 1) {
     fprintf(stderr, "%s: cannot allocate row for %s, terminating\n", name, matrix);

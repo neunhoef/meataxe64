@@ -1,5 +1,6 @@
+#!/bin/sh
 #
-# $Id: find_restricted_nullity_one_with_orders,v 1.1 2002/03/24 19:44:02 jon Exp $
+# $Id: find_restricted_nullity_one_with_orders,v 1.2 2002/06/25 10:30:12 jon Exp $
 #
 # Script to find an element of nullity one in two generators in a restricted group algebra
 #
@@ -35,7 +36,7 @@ nor=`znor $a`
 q=`zprime $a`
 # Try zrsums
 while [ $ok -eq 0 ]; do
-  out=`zrsums $a $b ${tmp}.zsums $o_a $o_b 10 1 $sub $memory 2>/dev/null`
+  out=`zrsums $a $b ${tmp}.zsums $o_a $o_b 5 1 $sub $memory 2>/dev/null`
   ret=$?
   if [ 2 -eq $ret ]; then
     let memory=`more_memory $memory`

@@ -1,8 +1,8 @@
 /*
- * $Id: zspf.c,v 1.2 2002/05/26 00:47:20 jon Exp $
+ * $Id: zspf.c,v 1.3 2002/06/25 10:30:12 jon Exp $
  *
- * Spin some vectors under two generators to obtain a standard base
- * using intermediate in a temporary directory
+ * Spin some vectors under two generators
+ * using intermediate files in a temporary directory
  *
  */
 

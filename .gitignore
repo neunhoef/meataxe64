@@ -26,9 +26,6 @@ _$*
 *.ln
 core
 # CVS default ignores end
-*.o
-*~
-derived*
-poo*
-todo
+derived
+install
 profiles

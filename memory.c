@@ -1,5 +1,5 @@
 /*
- * $Id: memory.c,v 1.5 2001/12/01 10:46:02 jon Exp $
+ * $Id: memory.c,v 1.6 2002/06/25 10:30:12 jon Exp $
  *
  * Large memory manipulation for meataxe
  *
@@ -50,13 +50,13 @@ void *memory_pointer_offset(unsigned int n, unsigned int i, unsigned int len)
 {
   assert(n < 1000);
   assert(0 != len);
-  assert((i + 1) * (len * 4) + n * extent <= 1000 * extent);
-  return memory + n * extent + i * len * 4;
+  assert((i + 1) * (len * sizeof(unsigned int)) + n * extent <= 1000 * extent);
+  return memory + n * extent + i * len * sizeof(unsigned int);
 }
 
 unsigned int memory_rows(unsigned int len, unsigned int size)
 {
   assert(0 != len);
   assert(1000 >= size);
-  return (size * extent) / (len * 4);
+  return (size * extent) / (len * sizeof(unsigned int));
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: pr.c,v 1.9 2002/04/10 23:33:27 jon Exp $
+ * $Id: pr.c,v 1.10 2002/06/25 10:30:12 jon Exp $
  *
  * Print a matrix
  *
@@ -27,7 +27,7 @@ static const char *name = "zpr";
 
 static void pr_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <in_file>\n", name, name);
+  fprintf(stderr, "%s: usage: %s <in_file> [<memory>]\n", name, name);
 }
 
 int main(int argc, const char * const argv[])
@@ -38,15 +38,19 @@ int main(int argc, const char * const argv[])
   unsigned int i, j;
   const header *h;
   unsigned int *row;
+  unsigned int memory = MEM_SIZE;
   prime_ops prime_operations;
 
   endian_init();
-  memory_init(name, 0);
-  if (2 != argc) {
+  if (2 != argc && 3 != argc) {
     pr_usage();
     exit(1);
   }
   in = argv[1];
+  if (3 == argc) {
+    memory = strtoul(argv[2], NULL, 0);
+  }
+  memory_init(name, memory);
   if (0 == open_and_read_binary_header(&inp, &h, in, name)) {
     exit(1);
   }

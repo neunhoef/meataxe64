@@ -1,5 +1,5 @@
 /*
- * $Id: zimport.c,v 1.3 2002/04/10 23:33:27 jon Exp $
+ * $Id: zimport.c,v 1.4 2002/06/25 10:30:12 jon Exp $
  *
  * Import matrix from old system
  *
@@ -17,9 +17,9 @@
 #include "utils.h"
 #include "write.h"
 
-static const char *name = "zexport";
+static const char *name = "zimport";
 
-static void export_usage(void)
+static void import_usage(void)
 {
   fprintf(stderr, "%s: usage: %s <in_file> <out_file>\n", name, name);
 }
@@ -35,7 +35,7 @@ int main(int argc, const char * const argv[])
   FILE *f_out;
 
   if (3 != argc) {
-    export_usage();
+    import_usage();
     exit(1);
   }
   in = argv[1];

@@ -1,5 +1,5 @@
 /*
- * $Id: esid.c,v 1.1 2002/01/14 23:43:45 jon Exp $
+ * $Id: esid.c,v 1.2 2002/06/25 10:30:12 jon Exp $
  *
  * Generate exploded scaled identity matrix
  *
@@ -22,7 +22,7 @@ static const char *name = "esid";
 
 static void sid_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <prime> <nor> <noc> <elt> <split> <out_dir>\n", name, name);
+  fprintf(stderr, "%s: usage: %s <field order> <nor> <noc> <elt> <split> <out_dir>\n", name, name);
 }
 
 int main(int argc, const char * const argv[])

@@ -1,0 +1,726 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Some new results from computational modular representation theory</title>
+</head>
+<body>
+<table>
+<tr><td>Title:</td><td>Some new results from computational modular representation theory</td></tr>
+<tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
+<tr><td>Version:</td><td>1</td></tr>
+<tr><td>Id:</td><td>$Id: talk.html,v 1.1 2002/06/25 10:30:12 jon Exp $</td></tr>
+<tr><td>Date:</td><td>20020609</td></tr>
+<tr><td>Status:</td><td>Draft</td></tr>
+</table>
+<h1>Contents</h1>
+<ol>
+<li><a href="#Rules">Rules</a></li>
+<li><a href="#History">History</a></li>
+<li><a href="#PC_rev">The PC revolution</a></li>
+<li><a href="#Results">The results</a></li>
+<li><a href="#Why">So why did we need a new meataxe</a></li>
+<li><a href="#How">How were the results achieved</a></li>
+<li><a href="#Mottos">Some meataxing mottos</a></li>
+<li><a href="#Future">Where next</a></li>
+</ol>
+<a name="Rules">
+<h1>Rules</h1>
+</a>
+<ul>
+<li>
+The talk is to be accessible
+</li>
+<li>
+There will be no derived categories, injective resolutions or sheafifications
+</li>
+<li>
+Anyone who doesn't understand either my English or the content should
+stop me and ask
+</li>
+</ul>
+<a name="History">
+<h1>History</h1>
+</a>
+<p>
+I am the co-inventor of the meataxe, along with Richard Parker. I am
+also apparently responsible for the first theoretical description of a
+technique known as condensation, a technique for which Richard coined
+the name rip off.
+</p>
+<p>
+This work was performed whilst I was studying for my PhD at Cambridge
+during the late 1970s. At that time, Cambridge had many now famous
+names, including Rob Wilson, Dave Benson, as well as the already
+famous John Thompson, John Conway and Simon Norton.
+</p>
+<p>
+The original version of the meataxe was written in IBM 370 assembler,
+and the source was kept on punched cards. The cards had a coloured
+stripe along the top, hence historical references to "the red system".
+The trick that made this work was that the IBM 370 had an exclusive or
+characters instruction, which could exclusive or between 1 and 256
+bytes into a similar sized array of bytes, all in one instruction. The
+length of the array was hard coded into the instruction, so for our
+purposes, we had to create this instruction at runtime in order to
+deal with differing sizes of vectors. Not surprisingly, our first
+system only handled GF(2).
+</p>
+<p>
+This system was used to solve three problems
+<ol>
+<li>
+The outstanding question left in Gordon James' thesis on the modular
+characters of the Mathieu groups
+</li>
+<li>
+The existence of J4
+</li>
+<li>
+The two modular characters for HS and McL for my thesis
+</li>
+</ol>
+To solve these, I had to obtain special permission from the Cambridge
+University Computing Service, in order to use more than 500kb of main
+memory, and also to use a big scratch disc, probably of about 50Mb
+capacity.
+</p>
+<p>
+The problem we didn't solve was McL mod 3. You may have noticed that
+this is omitted from my thesis, the main reason being that I was
+unable to complete it.
+</p>
+<p>
+After completing my PhD, and the work necessary to check and publish
+the Atlas, I left the academic world and obtained a job with Acorn
+Computers, working on the BBC computer. I generally felt that I was
+not as mathematically able as people like Dave and Rob, but was much
+better at programming, so horses for courses, or in this case courses
+for horses dictated I should earn my living in the IT industry.
+</p>
+<p>
+At this point I generally left the meataxe behind, as the machines now
+available to me were pre PC revolution and simply not in a position to
+provide the computing horsepower necessary for meataxe work.
+</p>
+<a name="PC_rev">
+<h1>The PC revolution</h1>
+</a>
+<p>
+As personal machines became faster and faster, it occurred to me from
+time to time that more by way of meataxing could now be done, but I
+didn't do anything about this until Autumn 1998 when Richard tracked
+me down. Cambridge were holding a symposium in honour of John Conway's
+60th birthday, and were trying to find people who had been in the
+department when Conway was there.
+</p>
+<p>
+Richard had ideas about breaking up large matrices into pieces and
+parallelising the computations to make use of multiple machines. The
+result of these meetings was the parallel multiply of the generators
+of M in 196882 dimensions over GF(2), performed over the Nikolaus
+conference weekend in 1998. Frank tells me he still has the results
+stored away on a tape.
+</p>
+<p>
+Unfortunately, from this point of view, I got another job. I took up
+the challenge again in August 2001, by which time machines had moved
+on another factor of four in all major characteristics. I rewrote a
+meataxe from scratch, with essentially no external influences, redid
+the monster multiply (which can now be done over a weekend by one
+machine), and also started looking at what seemed to be the next
+outstanding problem. Given that my only source of information as to
+what had been done was the Modular Atlas, I started on the Held group.
+</p>
+<p>
+I then emailed Rob Wilson, telling him what I'd done. He told me that
+what I had was already known, and suggested I look at the open
+indicator problems on the MOC home page. After explaining to me the
+meataxe approach to computing indicators, which only required one new
+program from me, I set to work, using my own home machines, a couple
+of Athlon 1800XPs with plenty of disc and memory.
+</p>
+<a name="Results">
+<h1>The results</h1>
+</a>
+<p>
+So far the new results (in order of computation) are:-
+<ul>
+<li>
+The indicator for 10504 for Suz mod 2 is +. This completes the
+2-modular character table for Suz.
+</li>
+<li>
+The indicator for 36938 for Co2 mod 2 is +
+</li>
+<li>
+The indicator for 88000 for Co3 mod 2 is +. This completes the
+2-modular character table for Co3.
+</li>
+<li>
+The indicator for 83948 for Co2 mod 2 is +
+</li>
+<li>
+The indicator for 25916 for ON is +. This completes the
+2-modular character table for ON.
+</li>
+<li>
+A number of new 2-modular irreducibles have been found for Co1,
+including a complex conjugate pair of degree 17952, and two orthogonal
+representations of degrees 26750 and 57200. A further representation
+of degree 148280, 156860 or 165440 is almost known. In joint work with
+Gerhard Hiss, three new irreducibles are conjectured of degree less
+than 400000.
+</li>
+<li>
+Three new 2-mdoular irreducibles for J4 have been produced, of degrees
+45472 (+) and 89947 (o).
+</li>
+<li>
+Some new 2-modular irreducibles for HN are under construction, in
+joint work with Gerhard Hiss and Juergen Mueller. So far we have a
+pair of Galois conjugate representations of degree 34352 with
+indicator +, and a further representation of degree 31086 with
+indicator +.
+</li>
+</ul>
+In all the above, considerable control input to how the answers are
+discovered has been supplied from GAP and MOC.
+</p>
+<a name="Why">
+<h1>So, why did we need a new meataxe?</h1>
+</a>
+<p>
+It's not completely clear that we did need a new meatxe. However, my
+interest was in working on one, so it was that or nothing. One might
+similalry ask "why were these results not produced using the Aachen
+meataxe?" There seem to be a number of possible reasons.
+<ol>
+<li>
+Rapid advcancement in machine capability. Perhaps it was simply not
+realised that they could be done.
+</li>
+<li>
+Conflict of interests. Perhaps other problems held more interest, eg
+the suborbits of the permutation representation of B on Fi23.
+</li>
+<li>
+A legacy of old decisions, taken for good reason at the time when the
+Aachen meataxe was designed, but which no longer apply.
+<ul>
+<li>
+<p>
+Memory vs CPU speed trade off. The present trend, as expressed in
+Moore's law, is of CPU speed, main memory and external storage all
+following similar straight lines on a log base 2 of capacity vs time
+graph, with an increment of 1 on the capacity axis every eighteen
+months. This is a statistical observation, which seems predictively
+correct so far.
+</p>
+<p>
+The main meataxe algorithms (multiplication and Gaussian elimination)
+are cubic in time but quadratic in space, so once past the break even
+point, we should always trade increased memory requirements to gain
+reduced runtimes.
+</p>
+<p>
+For example, the full indicator calculation for 83948 for Co2
+(including producing a standard base version of the representation
+first), took about 12 days. Based on this, the same calculation for
+the new almost discovered Co1 irreducible mentioned above, which is
+approximately twice as big, will take around 90 days.
+</p>
+<p>
+The quadratic storage complexity and cubic time complexity are what
+have applied pressure to produce ever more sophisticated condensation
+techniques.
+</p>
+<p>
+However, at some point in the past, there was a time when the
+quadratic factor dominated. At this point, cramming more into memory
+at some cost in runtime will have been a good idea. I believe some of
+the construction of the Aachen meataxe shows evidence of this.
+</p>
+</li>
+<li>
+<p>
+Speed of reading from peripheral memory. Many Aachen meataxe programs
+try to read data only once, and operate entirely in memory. The are a
+number of possible reasons.
+<ul>
+<li>
+A belief that this is somehow aesthetically cleaner.
+</li>
+<li>
+A belief that rereading would be slower.
+</li>
+<li>
+Ease of implementation/debugging.
+</li>
+</ul>
+</p>
+<p>
+The downsides of this are:-
+<ul>
+<li>
+A hard limit on the size of problem that can be tackled. For example,
+the Aachen standard base program tries to hold four full matrices in
+main memory at once (one for the basis vectors, one for the vectors in
+echelised form to determine if a new vector expands the basis or is
+dependent, and for for each of two generators). This made it
+impossible for Rob Wilson to confirm my indicator work for 36938 for
+Co2 on his 500Mb laptop, as the problem wanted 800Mb. Virtual memory
+does not help here.
+</li>
+<li>
+Randomly accessing data throughout memory limits the effectiveness of
+CPU caches.
+</li>
+</ul>
+</p>
+<p>
+An alternative approach is to allow rereading of data, and to use
+backing files where necessary.
+</p>
+<p>
+The upsides of this approach are:-
+<ul>
+<li>
+We can make better use of CPU caches by improving data locality
+</li>
+<li>
+We may find that some data reread is already in the disc buffer cache,
+this reducing disc activity, and if the files are remote, network
+activity.
+</li>
+<li>
+The caveat here is that we should not use NFS based workspace files
+(ie where the file is both read and written).
+</li>
+</ul>
+</p>
+</li>
+</ul>
+</li>
+</ol>
+</p>
+<a name="How">
+<h1>How were the results achieved?</h1>
+</a>
+<p>
+Well, I just wrote the programs, told them to get on with it, and
+then came back when they had finished:-)
+</p>
+<p>
+<h2>WRONG!!!</h2>
+</p>
+<p>
+If we ask a machine to compute for a few days, or even a few hours, we
+need to be sure that it's going to produce the answer. Meataxing is
+not a substitute for theory, or preparation. It's an additional tool,
+not a replacement toolbox.
+</p>
+<p>
+I will use the indicator computation of 10504 for Suz mod 2 as an
+example. The other results were obtained in similar ways, although
+most had an individual wrinkle of their own.
+</p>
+<p>
+We start with some preliminary facts about the representation we want,
+and some others we will encounter along the way.
+<ol>
+<li>
+10504 is a representation requiring GF(4). It has b21 and b45 in its
+character. GAP can tell you thhat the field of definition for these
+Atlas irrationalities is GF(4). In particular, we can't do this
+calculation with a GF(2) only meataxe.
+</li>
+<li>
+The smallest easily constructed representation containing 10504 is 110
+tensor 572, of dimension 62920. This information can be discoverd from
+GAP, and probably MOC as well. This representation, in addition to
+having b45 and b21, also has b27 in its character, which as well as
+requiring GF(4) is also complex. Hence 62920 is not self dual.
+</li>
+<li>
+The composition factors of 62920 are 6.1 + 6.110a + 6.110b + 5.142 +
+4.572a + 5.572b + 6.638 + 8.3432 + 2.4510 + 4928 + 10504a. This
+information can be obtained from GAP.
+</li>
+<li>
+An element of this representation occupies about 1Gb of disc.
+</li>
+</ol>
+</p>
+So how do we split to find the bit we want?
+<ul>
+<li>
+First approach, use condensation. I didn't have condensation available
+to me, although I did do some work of this nature to identify suitable
+vectors.
+</li>
+<li>
+Second approach, careful selection of vectors with which to split.
+This is the approach upon which I intend to elaborate.
+</li>
+</ul>
+<p>
+Suppose we have a group algebra element e (ie a formula in the group
+generators and field elements) such that:-
+<ol>
+<li>
+The nullity of e on 4928 is 1
+</li>
+<li>
+The nullity of e on the other composition factors of 62920 is zero,
+with the possible exception of 10504, where it is unknown
+</li>
+</ol>
+</p>
+<p>
+Then we have the following:-
+<ol>
+<li>
+The nullity of e on 62920 is not zero
+</li>
+<li>
+The nullity of e on 62920 is likely to be small, probably &lt;= 2.
+</li>
+<li>
+One of the null vectors of e on 62920 will generate a submodule with
+unique top composition factor 4928.
+</li>
+<li>
+If we 62920 were self dual, we could obtain an upper bound of the size
+of such a submodule. This technique was employed a lot in the Conway
+group work.
+</li>
+<li>
+Because the nullity of e on 62920 is small, we won't have to try many
+vectors. If for example, it were 2, then we would have 5 vectors
+because 5 is the number of one dimensional subspaces of a two
+dimensional vector space over GF(4) (or the number of points on the
+projective line over GF(4)).
+</li>
+</ol>
+So how do we find such an element?
+</p>
+<p>
+There are a number of stages to the process
+<ol>
+<li>
+We need instances of all the irreducibles concerned, in this case 1,
+110a, 110b, 142, 572a, 572b, 638, 3432, 4510, 4928. The Birmingham
+Atlas website provides 110, 142, 572 and 638, from which we can
+produce the conjugates. We might also consider looking at the 12
+dimensional GF(4) representation of 3.Suz. Using these, and standard
+methods of new representations from old (symmetric powers, tensor
+products, permutation representations), plus lots of GAP work, we
+obtain standard based versions of all of the above irreducibles.
+</li>
+<li>
+We now use the script find_element to search the group algebra for
+elements which have low nullity on a small number of irreducibles, and
+zero nullity on the remainder. This can take some time, however, all
+results are recorded, so we only need to perform this process once for
+the entire factorisation of 62920. Furthermore, it is time well spent
+by comparison with the time that would be wasted if we just searched
+all modules generated by the null vectors of some random group algebra
+element of high nullity. We produce this element in the 62920
+representation by adding scalar multiples of group elements produced
+by tensoring. We do not do multiplications in the 62920
+representation.
+</li>
+<li>
+Using the nullspace of this element, we hope to split the problem in
+half, and thus reduce the time complexity of each half by about a
+factor of 8.
+</li>
+<li>
+Even though only one half contains the desired irreducible, we'll
+split both, if only to record the composition factors as a check that
+we haven't messed up. Belt and braces! We also keep all subspaces
+produced, for reasons which will become clear.
+<ol>
+<li>
+Now split the subspace. In this case, we know that it has a unique top
+composition factor. Furthermore, the group algebra element we used in
+the split has non-zero nullity on it. We can produce this element in
+the subspace in the same way as we produce the group generators, which
+is most likely much cheaper than a lot of multiplications (so this is
+one reason why we keep all subspaces). We can now transpose this
+element, and the group generators, and use the null vectors to split
+the dual, then transpose back into the original.
+</li>
+<li>
+Think about the quotient. If we have more than one null vector from
+the original nullspace, project the nullspace into the quotient. If
+this produces a non-zero vector subspace, then we may be able to get a
+further split on the cheap. In the more general situation, where the
+composition factor we are targetting occurs more than once, this is a
+useful trick for finding the next instance. If we have spare vectors,
+but none gives a split, then Norton irreducibility applied to the
+original group algebra element in this quotient can help.
+</li>
+</ol>
+</li>
+<li>
+Step back, assess where we are. Don't waste time by not thinking. To
+recap, we now have three factors, a subspace, our targetted
+irreducible (4928), and a quotient. We may be able to guess which
+composition factors live where. We can now target 4510, which has
+multiplicity 2 in 62920, essentially by starting at step 2 again for
+each of the subspace and quotient. In this case, the search is easier
+as we have eliminated 4928 from our situation. If we had started with
+a repeated factor, the subsequent steps would be similar, except that
+there would be no need to reepat the search, until we had eliminated
+all instances of the repeated factor. Note also the find_element gives
+a text copy of all the nullities it found on all the representations,
+so we can repeat the search using an editor in a relatively short
+time, rather than rerunning the script.
+</li>
+<li>
+Suppose we have a new group algebra element with which we intend to
+seed further splits. We produce this element in the original tensor
+space. This will be far cheaper than lots of multiplies in the space
+in which we wish to work. I made the mistake of not doing this once
+for Co2, and found multiplies taking around a day each! Having made
+the required element in 62920, bring it through the relevant sub and
+quotient space steps, using split_with_subspace and transposing where
+necessary. Keeping a careful record of what you've done helps a lot
+here, as does giving sensible names to the files. For example,
+100320.e.3 is the element described by zsums as e.3 in 100320 space.
+100320.e.3.ns is its nullspace. 100320.e.3.ns.span is the span of the
+nullspace. 100320.e.3.ns.span.4.ss is the subspace generated by the
+fourth element of the span of the nullspace. 100320.e.3.tra.ns is the
+nullspace is the transposed 100320.e.3. I'm sure you get the picture.
+</li>
+<li>
+Compute nullspaces, split and repeat until done. At some stage it will
+cease to be worthwhile bringing group algebra elements through the
+factorisation process, because as the number of composition factors in
+each piece becomes smaller, the necessary group algebra elements
+required to split become simpler, whilst at the same time the path to
+the particular factor required becomes longer. In particular, at some
+stage we may no longer require multiplies. At this point we always
+compute the group algebra elements directly. The larger the field, the
+more likely this is.
+</li>
+<li>
+<p>
+Finally, the indicator calculation. It seems reasonable at this point
+to include a little theory. Any self dual module has a non-degenerate
+alternating or symmetric bilinear form preserved by the group.<br>
+Rearranging g.S.(g transpose) = S<br>we obtain g = S.(g transpose
+inverse).(S inverse)<br>Hence S conjugates the dual back to the
+representation.<br>But we can also obtain such a matrix from the
+standard base process, assuming that the matrices g were in standard
+base form to start with. Schur's Lemma now tells us that these
+matrices differ only by a scalar.<br>I now restrict attention to
+characteristic two.<br>So, the matrix standard base defines a
+symmetric non-degenerate bilinear form on the module.<br> In order for
+a quadratic form q to exist, we need a non-degenerate bilinear form
+such that q(x+y) = q(x) + q(y) + b(x,y), and q(xg) = q(x). Notice,
+that b(x,x) = q(2x) - 2q(x), so in characteristic 2, b is forced to be
+symplectic.<br>Note also from the above that b is unique up to scalar,
+independent of q.<br>If the characteristic were not 2, then q would be
+entirely determined by q(x) = b(x,x)/2<br>Let Q be a matrix
+representing q, so q(x) = xQ(x transpose).<br>The requirement q(x+y) =
+q(x) + q(y) + b(x,y) forces x(Q + (Q transpose))(y transpose) = b(x,y)
+for all x, y<br>ie Q + Q (transpose) = S.<br>Conversely, if we have
+such a Q, then it will be a quadratic form.<br>Now, if Q and R are two
+possible matrices, and they agree on a basis (ie xQ(x transpose) = xR(x
+transpose) for all basis vectors x), then the corresponding forms q and
+r are equal.<br>So we can choose Q to be the lower left of S, and then
+examine all possible forms simply by altering the diagonal of
+Q.<br>But the requirement q(xg) = q(x), and the fact that our basis
+vectors are all in the same orbit under G by construction means that
+the possible diagonals for Q are restricted to scalars.<br>Thus to
+find a quadratic form, we examine matrices T = aI+Q, where Q is the
+lower left of S, and a runs over the field elements.<br>The acceptance
+citerion for such a T is that its diagonal is invariant under G.<br>
+</p>
+<p>
+Th actual computation part is relatively automatic, since it involves
+no avoidable decisions. First we produce a standard base
+representation of the irreducible, using zsums to find a seed, zns to
+find its null vector, zsb to produce the basis of standard vectors,
+ziv to invert it and then zmu to conjugate the generators we have into
+the standard base. Having acquired the standard base form, we can use
+standard base to conjugagte the dual back to standard base. This gives
+us a non-singular matrix from which we attempt to derive a quadratic
+form by taking its lower left section, zero the upper triangle and
+trying various field elements on the diagonal, then seeing if the
+group preserves it. As above, we know that the diagonal is all one
+value. If we find a suitable field element, then the indicator is +,
+if not it is -. Minus indicators are rare in characteristic two.
+Intuitively, tha gap between orthogonal and complex in characteristic
+two, which is where symplectic indicators live, is small.
+</p>
+<p>
+There is an additional question, not restricted to characteristic two,
+concerning orthogonal representations in even dimensions, and that is
+the question of which orthogonal group the representation lives in.
+Again, this is a question which is often difficult to answer
+theoretically, so may be a good candidate for the meataxe.
+Algorithmically, this can be defined by picking an isotropic vector v,
+restricting to (v perp)/v and iterating, until we arrive at the last 2
+space. At this stage we need to know the isometry type of this final
+space. We have no meataxe type programs for doing this yet, indeed it
+is not clear that the above algorithm is suitable. We may need another
+trick like the basis contained in a G-orbit condition that makes the
+indicator calculation feasible. For more information on this subject,
+consult Chapter 7 of Aschbacher's Finite Group Theory, or D.E.Taylor's
+The Geometry of the Classical Groups. Another open problem in this
+area, is what relationship, if any, is there between the diagonal of
+the matrix Q above, and the sign or the corresponding orthogonal
+group.
+</p>
+</li>
+<li>
+That concludes the Suz example, but there are a small number of
+further tricks one can use.
+<ul>
+<li>
+Little use was made of duality in the Suz example, as the module was
+not self dual. For the Conway group representations, all the modules
+concerned were self dual. In this case following any split where a
+small subspace is obtained, if further factors of the same type are
+available in the quotient, then we can transpose the generators and the
+quotient image of the group algebra element seeding the split to
+obtain a corresponding dual split "at the other end of the module".
+</li>
+<li>
+Often one can end up with one large composition factor (the one
+sought), plus several small, sometimes repeated other factors. It may
+be advantageous to target all the small factors at once, using the
+script spin_vectors. Finding a suitable elemnt to provide these
+vectors is just another use of the results from find_element. By
+restricting available memory, we can force spin_vectors to find only
+small subspaces, rapidly discarding ones which grow too large. Having
+found such a subspace, split and project the null vectors into the
+quotient, and repeat until we run out of null vectors. When we have
+used all available null vectors, we have to make a decision as to
+whether to produce some more, or to work in the dual space. This is a
+judgement call, and getting it wrong can waste a lot of time. This
+situation occurred whilst producing 83948 for Co2. I had a module
+whose composition factors were 83948 + 748 + 2.230 + 6.1.
+</li>
+<li>
+The use of very large files made the ONan calculation possible. In
+this case, Juergen had a vector from a condensation which he believed
+generated the 25916 as a submodule of the permutation representation
+of ON on J1, which is of degree 2624832. From this we can calculate
+that a subspace of vectors of dimension 25916 will be about 8.5Gb.
+However, the multiplications are by permutations and hence are fast.
+We can also obtain an estimate of the cost of the Gaussian elimination
+part of the problem, since it is proportional to 25916 * 25916 *
+2624832. We can compare this with known results, eg from computing the
+nullspace the standard base element for Co3 in 88000 dimensions over
+GF(2). The number for ON is about twice that for Co3, which fits well
+with the observed result that the ON subspace computation took around
+36 hours, whereas the Co3 nullspace took order one day. After
+modifying the spin using intermediate files program to use 64 bit
+versions of ftell and fseek (which rendered the system non-ANSI
+unfortunately), I was able to perfom this computation on polaris, a P4
+based machine with about 1Gb of RAM. Producing the subspace took about
+36 hours. Computing the subspace representation of each generator took
+about 3 hours for the multiplication, and about 10 minutes for the
+subspace operation (which is quadratic). The resulting indicator
+calculation took relatively little time, as 25916 is not a large
+representation degree over GF(2).
+</li>
+</ul>
+</li>
+</ol>
+</p>
+<a name="Mottos">
+<h1>Some meataxing mottos</h1>
+</a>
+<ul>
+<li>
+Too many null vectors spoil the broth
+</li>
+<li>
+Think before you type
+</li>
+<li>
+Avoid random multiplies
+</li>
+</ul>
+<a name="Future">
+<h1>Where next?</h1>
+</a>
+<p>
+This discussion is partly about my own meataxe, and part about the
+future of computational modular representation theory in general
+<ul>
+<li>
+New facilities, condensation, other symmetrisations
+</li>
+<li>
+New and bigger problems, J4, B, M etc
+</li>
+<li>
+A miracle! The largest ordinary degree for Co1 is around 500000000.
+Suppose we have to look at something this big in order to find the
+largest 2-modular irreducible, in order to compute its indicator. This
+is about 2000 times larger than the largest case I have looked so far,
+ie 2^11. So cubic algorithmic complexity predicts we need a machine
+speed up of around 2^33. The machines I used were 2GHz, so to get this
+speed up would require about 2^4*10^18Hz clock rate. Moore's law, if
+applicable, would predict this for about 50 years from now. But such a
+clock rate would give a clock signal wavelength of around 10^-11
+metres, which is less than the width of an atom (assuming my numbers
+are right!) The storage requirement for an element expressed in this
+representation is around 2*10^16 bytes. I don't see this as a simple
+progression from where we are now, and I don't wish to depend upon
+reincarnation in order to see the result:-) So we need another break
+through, of at least the power afforded by condensation. Over to the
+clever people!
+</li>
+<li>
+<p>
+Perhaps we should look more into parallelisation, or grid computing.
+The exploded meataxe needs revisiting. I redid the exploded monster
+work last year, but found I lost a factor of about 2 versus the single
+machine version. Also, the Gaussian elimination based algorithms are
+much harder to parallelise than the pure multiplication based
+algorithms. I have an algorithm for parallel rank, but the margin is
+definitely too small to contain it. Parallel spin is about as
+unpleasant as a flat spin!
+</p>
+<p>
+Here is a rough exposition of the parallel rank computation. Let X be
+a matrix, exploded into four parts, A, B, C, D, where A and B for the
+top row, and A and C the left hand column. I have not tried to draw
+this in HTML.
+</p>
+<p>
+We begin with a standard rank computation on A, from which we derive a
+matrix E such that if A' = EA, then A' is in fully echelised form.
+This part of the computation is serial, unavoidably so as far as I can
+see. Compare this situation with exploded multiply, where we can
+immediately commence as many multiplies as we have slaves. We also
+derive a sparse matrix U, where Uij = 1 <=> A'ji is a pivot, and 0
+otherwise. We can now perform some computations in parallel. Firstly,
+form B' = EB, ie extend the elimination performed on A to the rest of
+the top row of X. Secondly produce V = CU. Then set C' = C - VA', D' =
+D - VB'. We have now completed all the work associated to the initial
+echelisation of A. We can now commence work on B'. For B', we look
+only at rows where A' is all zero, and echelise these, producing E'',
+B'', U' such that B'' = E''B', and U'' is defined analogously to the
+first stage. Now form A'' = E''A', and clean C' and D' as above. Now,
+given the r = number of non-zero rows of (A'' B''), we can recursively
+compute the rank of X as r + rank (C'' D''). There is a reasonable
+amount of parallelism in the above, but there are also serialisation
+points, rendering the algorithm not as parallelisable as for example
+multiply. Nullspace is done essenitally in the same way, but recording
+the results. Extending the above to spin introduces a further level of
+organisational complexity, and is not something I have considered
+seriously yet.
+</p>
+</li>
+</ul>
+</p>
+</body>
+</html>

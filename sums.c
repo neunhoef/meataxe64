@@ -1,5 +1,5 @@
 /*
- * $Id: sums.c,v 1.6 2002/04/10 23:33:27 jon Exp $
+ * $Id: sums.c,v 1.7 2002/06/25 10:30:12 jon Exp $
  *
  * Function to compute linear sums of two matices
  *
@@ -50,22 +50,30 @@ int sums(const char *in1, const char *in2, const char *out,
   if (0 == open_and_read_binary_header(&f, &h, in1, name)) {
     exit(1);
   }
+  fclose(f);
   prime = header_get_prime(h);
   if (1 == prime) {
-    fprintf(stderr, "%s: cannot handle maps, terminating\n", name);
-    fclose(f);
     header_free(h);
-    exit(1);
+    /* Try input 2 */
+    if (0 == open_and_read_binary_header(&f, &h, in2, name)) {
+      exit(1);
+    }
+    fclose(f);
+    prime = header_get_prime(h);
+    if (1 == prime) {
+      header_free(h);
+      fprintf(stderr, "%s: cannot handle both have both generators as permutations\n", name);
+      exit(1);
+    }
   }
   nor = header_get_nor(h);
   noc = header_get_noc(h);
   nod = header_get_nod(h); /* For printing element names */
+  header_free(h);
   if (nor != noc) {
     fprintf(stderr, "%s: %s is not square, terminating\n", name, in1);
     exit(1);
   }
-  header_free(h);
-  fclose(f);
   if (0 != sub_order) {
     if (0 != prime % sub_order) {
       fprintf(stderr, "%s: %d is not a field order, terminating\n", name, sub_order);
@@ -133,6 +141,7 @@ int sums(const char *in1, const char *in2, const char *out,
         break;
       } else {
         unsigned int pos = len;
+        /* Count occurrences at end of word */
         while (pos > 0) {
           if (word[pos - 1] == letter) {
             pos--;
@@ -144,13 +153,19 @@ int sums(const char *in1, const char *in2, const char *out,
           /* we've reached the order of this element */
           if (0 == m) {
             m = 1;
+            /* Safe to break here, as we can't have a repeat of both letters at the end */
+            break;
           } else {
             m = 0;
+            /* Try a new word, with first letter */
+            /* This may fail if first letter has order 2 */
             cur_word++;
             assert(cur_word < i);
           }
+        } else {
+          break;
+          /* Break anyway, our append was safe */
         }
-        break;
       }
     }
     /* Now cur_word is a pointer to a word we can safely append our letter to */

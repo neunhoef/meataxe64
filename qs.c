@@ -1,5 +1,5 @@
 /*
- * $Id: qs.c,v 1.8 2002/04/10 23:33:27 jon Exp $
+ * $Id: qs.c,v 1.9 2002/06/25 10:30:12 jon Exp $
  *
  * Function to compute quotient space representation
  *
@@ -44,7 +44,7 @@ void quotient(const char *range, const char *gen,
   unsigned int *map_o;
   row_ops row_operations;
   grease_struct grease;
-  long pos;
+  long long pos;
   int in_store;
   assert(NULL != range);
   assert(NULL != gen);
@@ -121,7 +121,7 @@ void quotient(const char *range, const char *gen,
   memset(map_r, 0, nor_r * sizeof(int));
   memset(map_g, 0, nor_g * sizeof(int));
   /* Now set up the map */
-  pos = ftell(inp_r); /* Where we are in the range */
+  pos = ftello64(inp_r); /* Where we are in the range */
   for (i = 0; i < nor_r; i += step_r) {
     unsigned int j, stride_i = (i + step_r <= nor_r) ? step_r : nor_r - i;
     if (0 == endian_read_matrix(inp_r, rows1, len, stride_i)) {
@@ -187,7 +187,7 @@ void quotient(const char *range, const char *gen,
       }
     }
     /* Now loop over inp_r cleaning rows2 */
-    if (0 == in_store && 0 != fseek(inp_r, pos, SEEK_SET)) {
+    if (0 == in_store && 0 != fseeko64(inp_r, pos, SEEK_SET)) {
       fprintf(stderr, "%s: failed to seek in %s, terminating\n",
                 name, range);
       cleanup(inp_r, inp_g, outp);

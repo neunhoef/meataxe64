@@ -1,5 +1,5 @@
 /*
- * $Id: project.c,v 1.2 2002/04/10 23:33:27 jon Exp $
+ * $Id: project.c,v 1.3 2002/06/25 10:30:12 jon Exp $
  *
  * Function to project into quotient space representation
  *
@@ -11,6 +11,7 @@
 #include "endian.h"
 #include "grease.h"
 #include "header.h"
+#include "map_or_row.h"
 #include "matrix.h"
 #include "memory.h"
 #include "primes.h"
@@ -38,13 +39,13 @@ void project(const char *range, const char *in,
 {
   FILE *inp_r = NULL, *inp_g = NULL, *outp = NULL;
   const header *h_in_r, *h_in_g, *h_out;
-  unsigned int prime, nob, noc_r, nor_r, nor_g, nor_o, noc_o, len, len_o, max_rows, d, i, j, k, elt, step;
+  unsigned int prime, prime_g, nob, noc_r, nor_r, nor_g, nor_o, noc_o, len, len_o, max_rows, d, i, j, k, elt, step;
   unsigned int **rows1, **rows2;
   int *map_r;
   unsigned int *map_o;
   row_ops row_operations;
   grease_struct grease;
-  long pos;
+  long long pos;
   int in_store;
   assert(NULL != range);
   assert(NULL != in);
@@ -59,7 +60,7 @@ void project(const char *range, const char *in,
   }
   prime = header_get_prime(h_in_r);
   if (1 == prime) {
-    fprintf(stderr, "%s: cannot handle maps, terminating\n", name);
+    fprintf(stderr, "%s: cannot handle map as range, terminating\n", name);
     cleanup(inp_r, inp_g, NULL);
     exit(1);
   }
@@ -68,10 +69,12 @@ void project(const char *range, const char *in,
   nor_g = header_get_nor(h_in_g);
   noc_r = header_get_noc(h_in_r);
   len = header_get_len(h_in_r);
+  prime_g = header_get_prime(h_in_g);
   /* Check cols range = cols g, prime and nob */
   if (noc_r != header_get_noc(h_in_g) ||
-      prime != header_get_prime(h_in_g) ||
-      nob != header_get_nob(h_in_g)) {
+      ((1 != prime_g) &&
+       (prime != prime_g ||
+        nob != header_get_nob(h_in_g)))) {
     fprintf(stderr, "%s: incompatible parameters for %s, %s, terminating\n",
             name, range, in);
     cleanup(inp_r, inp_g, NULL);
@@ -84,7 +87,9 @@ void project(const char *range, const char *in,
     cleanup(inp_r, inp_g, NULL);
     exit(1);
   }
-  assert(header_get_len(h_in_g) == len);
+  if (1 != prime_g) {
+    assert(header_get_len(h_in_g) == len);
+  }
   nor_o = nor_g; /* Number of output rows */
   noc_o = noc_r - nor_r; /* Number of output colums */
   h_out = header_create(prime, nob, header_get_nod(h_in_r), noc_o, nor_o);
@@ -111,7 +116,7 @@ void project(const char *range, const char *in,
   memset(map_r, 0, nor_r * sizeof(int));
   memset(map_o, 0, noc_r * sizeof(int));
   /* Now set up the map */
-  pos = ftell(inp_r); /* Where we are in the range */
+  pos = ftello64(inp_r); /* Where we are in the range */
   for (i = 0; i < nor_r; i += step) {
     unsigned int j, stride_i = (i + step <= nor_r) ? step : nor_r - i;
     if (0 == endian_read_matrix(inp_r, rows1, len, stride_i)) {
@@ -155,14 +160,15 @@ void project(const char *range, const char *in,
     unsigned int stride_j = (j + step <= nor_o) ? step : nor_o - j;
     unsigned int *row_o = memory_pointer(900);
     for (d = 0; d < stride_j; d++) {
-      if (0 == endian_read_row(inp_g, rows2[d], len)) {
+      if (0 == read_row(1 == prime_g, inp_g, rows2[d],
+                        nob, noc_r, len, d, in, name)) {
         fprintf(stderr, "%s: failed to read row from %s, terminating\n", name, in);
         fclose(inp_g);
         exit(1);
       }
     }
     /* Now loop over inp_r cleaning rows2 */
-    if (0 == in_store && 0 != fseek(inp_r, pos, SEEK_SET)) {
+    if (0 == in_store && 0 != fseeko64(inp_r, pos, SEEK_SET)) {
       fprintf(stderr, "%s: failed to seek in %s, terminating\n",
                 name, range);
       cleanup(inp_r, inp_g, outp);

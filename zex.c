@@ -1,5 +1,5 @@
 /*
- * $Id: zex.c,v 1.6 2002/04/10 23:33:27 jon Exp $
+ * $Id: zex.c,v 1.7 2002/06/25 10:30:12 jon Exp $
  *
  * explode a matrix
  *
@@ -42,6 +42,7 @@ int main(int argc,  char **argv)
     exit(1);
   }
   memory_init(name, 0);
+  endian_init();
   split = strtoul(argv[3], NULL, 0);
   if (0 == split) {
     fprintf(stderr, "%s: required submatrix size must be non-zero\n", name);

@@ -1,0 +1,83 @@
+#!/bin/sh
+#
+# $Id: split_all_sub,v 1.1 2002/06/25 10:30:12 jon Exp $
+#
+# Script to split a representation completely
+# and possibly classify the irreducibles
+#
+# Inputs
+# $1: output filename base
+# $2: classify
+# $3: generator a
+# $4-: other generators
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+# 252: ran out of possible splitters
+#
+usage="$0: usage: $0 <output_stem> <classify> <a> [<other generators>]"
+if [ $# -lt 4 ]; then
+  echo $usage
+  exit 1;
+fi
+a=$3
+o=$1
+c=$2
+classify=1
+if [ 0 -eq $c ]; then
+  classify=0
+fi
+nor=`znor $a`
+#
+# TODO: find a way of using a process specific temporary for stdout
+#
+shift 3
+split $o $a $* 2>/dev/null 1>poo
+ret=$?
+res=`grep dimension poo 2>/dev/null`
+#cat poo
+rm -f poo
+#echo res = $res, ret = $ret
+if [ 1 -eq $ret ]; then
+  echo "parameter problem with module $a"
+  exit 1
+elif [ 255 -eq $ret ]; then
+  echo "irreducible module $a found"
+  if [ 0 -ne $classify ]; then
+    new_irred_and_indicate $a $1
+  else
+    new_irred $a $1
+  fi
+  exit 0
+elif [ 254 -eq $ret ]; then
+  echo "unable to split module $a (unexpected)"
+  exit 0
+elif [ 252 -eq $ret ]; then
+  echo "ran out of splitters for $a"
+  exit 252
+else
+# Split, so try some more
+  echo $res
+  dim=`echo $res | sed -e "s/^.* dimension //g;s/,.*$//g"`
+  codim=`echo $res | sed -e "s/^.*codimension //g"`
+# Cope with transposes if they happen
+  sub_name=`echo $res | sed -e "s/^.* subspace //g;s/ .*$//g" | sed -e "s/_tra//g"`
+  quot_name=`echo $res | sed -e "s/^.* quotient //g;s/ .*$//g" | sed -e "s/_tra//g"`
+# echo dim=$dim, codim=$codim, sub_name=$sub_name, quot_name=$quot_name
+# Recurse, using same classify criterion
+  names="${sub_name}_1"
+  y=1
+  for x in $*; do
+    let y=$y+1
+    names="$names ${sub_name}_$y"
+  done
+  split_all_sub ${o} $c $names
+  names="${quot_name}_1"
+  y=1
+  for x in $*; do
+    let y=$y+1
+    names="$names ${quot_name}_$y"
+  done
+  split_all_sub ${o} $c $names
+fi

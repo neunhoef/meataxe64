@@ -1,5 +1,6 @@
+#!/bin/sh
 #
-# $Id: find_nullity_onef_with_orders,v 1.1 2002/05/26 00:47:20 jon Exp $
+# $Id: find_nullity_onef_with_orders,v 1.2 2002/06/25 10:30:12 jon Exp $
 #
 # Script to find an element of nullity one in two generators, using intermediate files
 #
@@ -35,7 +36,7 @@ nor=`znor $a`
 q=`zprime $a`
 # Try zsums
 while [ $ok -eq 0 ]; do
-  out=`zsumsf $a $b ${tmp}.zsums $dir $o_a $o_b 10 1 $memory 2>/dev/null`
+  out=`zsumsf $a $b ${tmp}.zsums $dir $o_a $o_b 5 1 $memory 2>/dev/null`
   ret=$?
   if [ 2 -eq $ret ]; then
     let memory=`more_memory $memory`

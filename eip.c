@@ -1,5 +1,5 @@
 /*
- * $Id: eip.c,v 1.3 2001/12/27 01:17:12 jon Exp $
+ * $Id: eip.c,v 1.4 2002/06/25 10:30:12 jon Exp $
  *
  * Read a permutation into an exploded matrix
  *
@@ -25,7 +25,7 @@ static const char *name = "eip";
 
 static void eip_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <in_file> <out_dir> <prime> <split>\n", name, name);
+  fprintf(stderr, "%s: usage: %s <in_file> <out_dir> <field order> <split>\n", name, name);
 }
 
 int main(int argc, const char * const argv[])
@@ -92,7 +92,7 @@ int main(int argc, const char * const argv[])
   for (i = 0; i < nor; i++) {
     unsigned int j;
     row_init(row, len);
-    j = getin(inp, 7);
+    fscanf(inp, "%d", &j);
     assert(j >= 1);
     put_element_to_row(nob, j - 1, row, 1);
     if (0 == ex_row_put(i, nor, nor, argv[2], names, split, row, outputs)) {

@@ -1,5 +1,5 @@
 /*
- * $Id: vp.c,v 1.2 2002/04/10 23:33:27 jon Exp $
+ * $Id: vp.c,v 1.3 2002/06/25 10:30:12 jon Exp $
  *
  * Function to permute some vectors under two generators
  *
@@ -11,6 +11,7 @@
 #include "endian.h"
 #include "grease.h"
 #include "header.h"
+#include "maps.h"
 #include "matrix.h"
 #include "memory.h"
 #include "mul.h"
@@ -31,6 +32,7 @@ struct gen_struct
   const char *m;
   unsigned int nor;
   int is_map;
+  unsigned int *map;
   gen next;
 };
 
@@ -55,13 +57,14 @@ static unsigned int hash_fn(unsigned int *row, unsigned int len)
 }
 
 unsigned int permute(const char *in, const char *out, const char *a,
-                     const char *b, const char *name)
+                     const char *b, const char *a_out,
+                     const char *b_out, const char *name)
 {
   FILE *inp = NULL, *outp = NULL, *f_a = NULL, *f_b = NULL;
   const header *h_in, *h_a, *h_b;
-  header *h_out;
+  header *h_out, *h_map;
   unsigned int prime, nob, noc, nor, len, max_rows, d, hash_len;
-  unsigned int **rows;
+  unsigned int **rows, *map_a, *map_b;
   unsigned int *hashes;
   grease_struct grease;
   prime_ops prime_operations;
@@ -111,6 +114,9 @@ unsigned int permute(const char *in, const char *out, const char *a,
   assert(gen_a.is_map || header_get_len(h_a) == len);
   assert(gen_b.is_map || header_get_len(h_b) == len);
   h_out = header_create(prime, nob, header_get_nod(h_in), noc, nor);
+  header_free(h_in);
+  header_free(h_a);
+  header_free(h_b);
   gen_a.f = f_a;
   gen_a.m = a;
   gen_a.nor = 0;
@@ -133,6 +139,12 @@ unsigned int permute(const char *in, const char *out, const char *a,
     exit(2);
   }
   rows = matrix_malloc(max_rows);
+  map_a = malloc_map(max_rows);
+  map_b = malloc_map(max_rows);
+  gen_a.map = map_a;
+  gen_b.map = map_b;
+  memset(map_a, 0, max_rows * sizeof(unsigned int));
+  memset(map_b, 0, max_rows * sizeof(unsigned int));
   hashes = my_malloc(max_rows * sizeof(unsigned int));
   for (d = 0; d < max_rows; d++) {
     rows[d] = memory_pointer_offset(0, d, len);
@@ -161,26 +173,33 @@ unsigned int permute(const char *in, const char *out, const char *a,
       cleanup(NULL, f_a, f_b);
       exit(1);
     }
-    gen->nor += rows_to_do;
     for (i = 0; i < rows_to_do; i++) {
       unsigned int hash = hash_fn(rows[nor + i], hash_len);
       int ok = 1;
       for (d = 0; d < nor + j; d++) {
         if (hashes[d] == hash && 0 == memcmp(rows[d], rows[nor + i], len * sizeof(unsigned int))) {
           ok = 0;
+          break;
         }
       }
       if (ok) {
         /* Got a new row */
+        /* The image of row gen->nor + i under gen is row nor + j */
         unsigned int *row;
         /* Swap pointers */
         row = rows[nor + j];
         rows[nor + j] = rows[nor + i];
         rows[nor + i] = row;
         hashes[nor + j] = hash;
+        gen->map[gen->nor + i] = nor + j;
         j++;
+      } else {
+        /* Got an existing row */
+        /* The image of row gen->nor + i under gen is d */
+        gen->map[gen->nor + i] = d;
       }
     }
+    gen->nor += rows_to_do;
     nor += j; /* The number of extra rows we made */
     gen = gen->next;
   }
@@ -201,13 +220,35 @@ unsigned int permute(const char *in, const char *out, const char *a,
     fclose(outp);
     exit(1);
   }
-  header_free(h_in);
-  header_free(h_a);
-  header_free(h_b);
+  fclose(outp);
   header_free(h_out);
   matrix_free(rows);
-  grease_free(&grease);
+  /* Now write out the maps */
+  h_map = header_create(1, 0, 0, nor, nor);
+  if (0 == open_and_write_binary_header(&outp, h_map, a_out, name)) {
+    exit(1);
+  }
+  if (0 == write_map(outp, nor, map_a, name, a_out)) {
+    fprintf(stderr, "%s: failed to write output to %s, terminating\n",
+            name, a_out);
+    fclose(outp);
+    exit(1);
+  }
   fclose(outp);
+  map_free(map_a);
+  if (0 == open_and_write_binary_header(&outp, h_map, b_out, name)) {
+    exit(1);
+  }
+  if (0 == write_map(outp, nor, map_b, name, b_out)) {
+    fprintf(stderr, "%s: failed to write output to %s, terminating\n",
+            name, b_out);
+    fclose(outp);
+    exit(1);
+  }
+  fclose(outp);
+  map_free(map_b);
+  header_free(h_map);
+  grease_free(&grease);
   free(hashes);
   return nor;
 }

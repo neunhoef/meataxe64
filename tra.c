@@ -1,5 +1,5 @@
 /*
- * $Id: tra.c,v 1.9 2002/04/10 23:33:27 jon Exp $
+ * $Id: tra.c,v 1.10 2002/06/25 10:30:12 jon Exp $
  *
  * Function to transpose a matrix
  *
@@ -11,10 +11,34 @@
 #include "endian.h"
 #include "elements.h"
 #include "header.h"
+#include "maps.h"
 #include "matrix.h"
 #include "memory.h"
 #include "read.h"
+#include "rows.h"
+#include "utils.h"
 #include "write.h"
+
+void tra_in_store(unsigned int **rows1, unsigned int **rows2,
+                  unsigned int nor, unsigned int noc,
+                  unsigned int nob, unsigned int col_len)
+{
+  unsigned int i, j;
+  assert(NULL != rows1);
+  assert(NULL != rows2);
+  for (i = 0; i < noc; i++) {
+    assert(NULL != rows2[i]);
+    row_init(rows2[i], col_len);
+  }
+  for (i = 0; i < nor; i++) {
+    for (j = 0; j < noc; j++) {
+      unsigned int elt = get_element_from_row(nob, j, rows1[i]);
+      if (elt) {
+        put_element_to_row(nob, i, rows2[j], elt);
+      }
+    }
+  }
+}
 
 int tra(const char *m1, const char *m2, const char *name)
 {
@@ -25,7 +49,7 @@ int tra(const char *m1, const char *m2, const char *name)
   const header *h1, *h2;
   unsigned int *row1;
   unsigned int **rows;
-  long pos;
+  long long pos;
 
   assert(NULL != m1);
   assert(NULL != m2);
@@ -34,34 +58,35 @@ int tra(const char *m1, const char *m2, const char *name)
     return 0;
   }
   prime = header_get_prime(h1);
-  if (1 == prime) {
-    fprintf(stderr, "%s: cannot handle maps, terminating\n", name);
-    fclose(input);
-    header_free(h1);
-    return 0;
-  }
-  nob = header_get_nob(h1);
   nor = header_get_nor(h1);
   noc = header_get_noc(h1);
+  if (1 == prime) {
+    /* Handle is a map */
+    int ret = map_iv(input, h1, m1, m2, name);
+    header_free(h1);
+    fclose(input);
+    return ret;
+  }
+  nob = header_get_nob(h1);
   len1 = header_get_len(h1);
   /* Create header for transpose */
   h2 = header_create(prime, nob, header_get_nod(h1), nor, noc);
+  header_free(h1);
   len2 = header_get_len(h2);
   /* Maximum row size */
   max = (len1 > len2) ? len1 : len2;
   if (0 == open_and_write_binary_header(&output, h2, m2, name)) {
     fprintf(stderr, "%s cannot open or write header to %s, terminating\n", name, m2);
     fclose(input);
-    header_free(h1);
+    header_free(h2);
     return 0;
   }
+  header_free(h2);
   total = memory_rows(max, 1000);
   if (total < 2) {
     fprintf(stderr, "%s cannot allocate rows for %s, %s, terminating\n", name, m1, m2);
     fclose(input);
     fclose(output);
-    header_free(h1);
-    header_free(h2);
     return 0;
   }
   t1 = total - 1;
@@ -73,29 +98,34 @@ int tra(const char *m1, const char *m2, const char *name)
   for (i = 0; i < noc; i += t1) {
     /* Number of output rows at once */
     k = (i + t1 > noc) ? noc - i : t1;
-    pos = ftell(input);
+    pos = ftello64(input);
+    /* Initialise all output rows */
+    for (j = 0; j < k; j++) {
+      row_init(rows[j], len2);
+    }
     for (j = 0; j < nor; j++) {
       /* Read one row */
       if (0 == endian_read_row(input, row1, len1)) {
           fprintf(stderr, "%s cannot read row %d from %s, terminating\n", name, i, m1);
           fclose(input);
           fclose(output);
-          header_free(h1);
-          header_free(h2);
+          matrix_free(rows);
           return 0;
       }
       /* Now write into k output rows starting at column j */
       for (l = i; l < i + k; l++) {
         /* Write into row l of output at column j */
-        put_element_to_row(nob, j, rows[l - i], get_element_from_row(nob, l, row1));
+        unsigned int elt = get_element_from_row(nob, l, row1);
+        if (0 != elt) {
+          put_element_to_row(nob, j, rows[l - i], elt);
+        }
       }
     }
-    if (0 != fseek(input, pos, SEEK_SET)) {
+    if (0 != fseeko64(input, pos, SEEK_SET)) {
       fprintf(stderr, "%s: unable to rewind %s, terminating\n", name, m1);
       fclose(input);
       fclose(output);
-      header_free(h1);
-      header_free(h2);
+      matrix_free(rows);
       return 0;
     }
     for (j = 0; j < k; j++) {
@@ -103,16 +133,13 @@ int tra(const char *m1, const char *m2, const char *name)
         fprintf(stderr, "%s cannot write row %d to %s, terminating\n", name, j, m2);
         fclose(input);
         fclose(output);
-        header_free(h1);
-        header_free(h2);
+        matrix_free(rows);
         return 0;
       }
     }
   }
   fclose(input);
   fclose(output);
-  header_free(h1);
-  header_free(h2);
   matrix_free(rows);
   return 1;
 }

@@ -1,0 +1,74 @@
+#!/bin/sh
+#
+# $Id: new_irred_and_indicate,v 1.1 2002/06/25 10:30:12 jon Exp $
+#
+# Script to classify an irreducible representation
+# and compute its indicator in characteristic two
+#
+# Inputs
+# $1: generator a
+# $2: generator b
+# $3: initial memory (optional)
+#
+# outputs will be of the form irred/${nor}_${i}_{1,2}
+# where nor = znor $a and i is an available unused index
+#
+#
+# Return codes
+# 1: error in parameters
+# 0: new irreducible
+# 254: no nullity one element found
+# 255: existing irreducible
+#
+usage="$0: usage: $0 <a> <b> [<memory>]"
+if [ $# -ne 2 -a $# -ne 3 ]; then
+  echo $usage
+  exit 1;
+fi
+. functions
+a=$1
+b=$2
+if [ -e $a -a -e $b ]; then
+  q=`zprime $a`
+  r=`zprime $b`
+  nor=`znor $a`
+  noc=`znoc $a`
+  if [ $nor -ne $noc ]; then
+    echo "$0: $a is not square"
+    exit 1
+  fi
+  if [ $nor -ne `znor $b` -o $nor -ne `znoc $b` ]; then
+    echo "$0: $a and $b are not compatible"
+    exit 1
+  fi
+  if [ 1 -eq $q -a 1 -eq $r ]; then
+    echo "$0: representation on two maps cannot be irreducible"
+    exit 1
+  fi
+  if [ 1 -ne $q -a 1 -ne $r -a $q -ne $r ]; then
+    echo "$0: $a and $b are not compatible"
+    exit 1
+  fi
+else
+  echo "$0: missing files $a or $b"
+  exit 1
+fi
+# First compute o_a and o_b
+o_a=`order $a`
+ret=$?
+if [ 0 -ne $ret ]; then
+  echo Cannot compute order of $a
+  exit 1
+fi
+o_b=`order $b`
+ret=$?
+if [ 0 -ne $ret ]; then
+  echo Cannot compute order of $b
+  exit 1
+fi
+if [ $# -eq 3 ]; then
+  memory=$3
+else
+  memory=200
+fi
+exec new_irred_and_indicate_with_orders $a $b $o_a $o_b $memory
