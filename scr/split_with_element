@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: split_with_element,v 1.13 2002/06/25 10:30:12 jon Exp $
+# $Id: split_with_element,v 1.14 2002/07/24 16:00:18 jon Exp $
 #
 # Script to split a representation given a particular element to work from
 #
@@ -8,9 +8,10 @@
 # $1: element with which to split
 # $2: output filename base
 # $3: call count to prevent looping
-# $4: name for subspace
-# $5: generator a
-# $6-: other generators
+# $4: ignore pathology (very high nullity)
+# $5: name for subspace
+# $6: generator a
+# $7-: other generators
 #
 # outputs will be of the form <$2>_<nor>_<subnor>_<x>
 # where nor is number of rows, and subnor is
@@ -25,17 +26,18 @@
 # 255: irreducible
 #
 . functions
-usage="$0: usage: $0 <e> <output_stem> <count> <subspace> <a> [<other generators>]"
-if [ $# -lt 5 ]; then
+usage="$0: usage: $0 <e> <output_stem> <count> <ignore pathology> <subspace> <a> [<other generators>]"
+if [ $# -lt 6 ]; then
   echo $usage
   exit 1;
 fi
 e=$1
 o=$2
 c=$3
-s=$4
-a=$5
-shift 5
+path=$4
+s=$5
+a=$6
+shift 6
 if [ -e $a -a -e $e ]; then
   q=`zprime $e`
   nor=`znor $a`
@@ -90,7 +92,7 @@ ok=0
 count=$nullity
 if [ $count -gt 5 ]; then
   let count2=$count*$count
-  if [ $count2 -gt $nor ]; then
+  if [ $count2 -gt $nor -a 0 -ne $path ]; then
 # Pathological element, no point in trying 
     rm -f ${tmp}*
     exit 254

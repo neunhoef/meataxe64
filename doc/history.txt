@@ -173,3 +173,4 @@ skew seventh
 20020711 - Add ztrecover for recovering tmp files in tensor spins
 20020715 - Brought new_irred_and_indicate into line with other scripts
 20020720 - Add zrand
+20020724 - Fix split_with_element to allow pathological elements

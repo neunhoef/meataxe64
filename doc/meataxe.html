@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.9 2002/07/15 17:02:57 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.10 2002/07/24 16:00:18 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -6672,13 +6672,16 @@ Purpose: Split a representation using the nullspace of a given element
 <td valign=top>3</td><td valign=top>A counter to prevent looping</td>
 </tr>
 <tr>
-<td valign=top>4</td><td valign=top>The subspace produced</td>
+<td valign=top>4</td><td valign=top>A boolean to allow or disallow pathological elements</td>
 </tr>
 <tr>
-<td valign=top>5</td><td valign=top>Generator 1</td>
+<td valign=top>5</td><td valign=top>The subspace produced</td>
 </tr>
 <tr>
-<td valign=top>6 onwards</td><td valign=top>Other generators</td>
+<td valign=top>6</td><td valign=top>Generator 1</td>
+</tr>
+<tr>
+<td valign=top>7 onwards</td><td valign=top>Other generators</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td
@@ -6713,23 +6716,30 @@ via parameter 3. If this count is not zero, then the assumption is
 that we have been called recursively, and that therefore if a single
 vector spins to the whole space then the representation is
 irreducible, as per the Norton irreducibility test. So, if this script
-is called from the command line, parameter 3 should be set to 0.
-Output files of the form
-&lt;stem&gt;_&lt;nor&gt;_&lt;subnor&gt;_{1,2,...} are produced, where
-&lt;stem&gt; is parameter 2, &lt;nor&gt; is the incoming number of
-rows, and &lt;subnor&gt; is the subspace dimension or codimension as
-appropriate. In the case where the dimension and codimension are the
-same, the subscripts _a and _b are appended after &lt;subnor&gt;. If
-the name produces a clash with an existing filename, the subscripts
-_1, _2 etc are added to &lt;stem&gt; before forming the name until a
-non-clashing name is found. This is particularly important in the case
-where this script is called from <a href="#split_all">split_all</a>,
-as a number of pieces of a representation may have been queued
-awaiting processing, and name clashes can easily occur. In the case
-where the Norton irreducibility test is invoked, a dual dual subspace
-is produced in the original using <a
-href="#dual_subspace">dual_subspace</a>. The subspace is returned via
-parameter 4.
+is called from the command line, parameter 3 should be set to 0. A
+further parameter to allow or disalow pathologically low nullities is
+passed in in parameter 4. This script regards any nullity whose square
+exceeds the dimension of the representation as bad, and will, if
+parameter 4 is set non-zero, refuse to use it to split. However, in
+some cases, all singular elements may turn out to be bad, eg a cyclic
+group of order 3 in a two dimensional representation ovr GF2. Use of
+parameter 4 can allow manual overriding of what scripts such as <a
+href=#split_all>split_all</a> and <a href=#split>split</a> do. Output
+files of the form &lt;stem&gt;_&lt;nor&gt;_&lt;subnor&gt;_{1,2,...}
+are produced, where &lt;stem&gt; is parameter 2, &lt;nor&gt; is the
+incoming number of rows, and &lt;subnor&gt; is the subspace dimension
+or codimension as appropriate. In the case where the dimension and
+codimension are the same, the subscripts _a and _b are appended after
+&lt;subnor&gt;. If the name produces a clash with an existing
+filename, the subscripts _1, _2 etc are added to &lt;stem&gt; before
+forming the name until a non-clashing name is found. This is
+particularly important in the case where this script is called from <a
+href="#split_all">split_all</a>, as a number of pieces of a
+representation may have been queued awaiting processing, and name
+clashes can easily occur. In the case where the Norton irreducibility
+test is invoked, a dual dual subspace is produced in the original
+using <a href="#dual_subspace">dual_subspace</a>. The subspace is
+returned via parameter 4.
 </li>
 <li>
 <h3><a name="split_with_subspace">split_with_subspace</a></h3>

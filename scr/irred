@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: irred,v 1.6 2002/06/25 10:30:12 jon Exp $
+# $Id: irred,v 1.7 2002/07/24 16:00:18 jon Exp $
 #
 # Script to discover if a representation is irreducible
 #
@@ -82,7 +82,7 @@ for y in $*; do
 done
 #echo irred calls split_with_element
 ok=0
-split_with_element ${tmp}.0 ${o}_tra 1 $s ${tmp}.1 ${names}
+split_with_element ${tmp}.0 ${o}_tra 1 0 $s ${tmp}.1 ${names}
 ret=$?
 rm ${tmp}*
 exit $ret

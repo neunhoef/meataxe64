@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: new_irred_with_orders,v 1.10 2002/07/15 17:02:57 jon Exp $
+# $Id: new_irred_with_orders,v 1.11 2002/07/24 16:00:18 jon Exp $
 #
 # Script to classify an irreducible representation
 #
@@ -105,7 +105,7 @@ elif [ 254 -eq $ret ]; then
 # Find the nullspace
   ok=0
   while [ $ok -eq 0 ]; do
-    nullity=`zns $e ${tmp}.0 $memory 2>/dev/null`
+    nullity=`zns $e ${tmp}.0 $memory 2>&1`
     ret=$?
     if [ $ret -eq 0 ]; then
       ok=1
@@ -113,6 +113,7 @@ elif [ 254 -eq $ret ]; then
       let memory=`more_memory $memory 2>/dev/null`
     else
       rm -f ${tmp}*
+      echo $nullity
       exit 1
     fi
   done
