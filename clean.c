@@ -1,5 +1,5 @@
 /*
- * $Id: clean.c,v 1.7 2001/11/19 18:31:48 jon Exp $
+ * $Id: clean.c,v 1.8 2001/11/25 00:17:19 jon Exp $
  *
  * Cleaning and echilisation for meataxe
  *
@@ -98,7 +98,7 @@ void clean(unsigned int **m1, unsigned int d1,
         elts = negate_elements(elts, nob, prime);
         (*row_operations.incer)(grease.rows[elements_contract(elts, prime, nob) - 1], m2[j], len);
         if (0 != record) {
-          (*row_operations.incer)(grease_e.rows[elements_contract(elts, prime, nob) - 1], m2_e[j], len);
+          (*row_operations.incer)(grease_e.rows[elements_contract(elts, prime, nob) - 1], m2_e[j], len_e);
         }
       }
     } /* for */

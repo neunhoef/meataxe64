@@ -1,5 +1,5 @@
 /*
- * $Id: sp.c,v 1.2 2001/11/22 20:04:03 jon Exp $
+ * $Id: sp.c,v 1.3 2001/11/25 00:17:19 jon Exp $
  *
  * Function to spin some vectors under two generators
  *
@@ -128,7 +128,7 @@ unsigned int spin(const char *in, const char *out, const char *a,
     exit(1);
   }
   fclose(inp);
-  map = my_malloc(max_rows * sizeof(unsigned int));
+  map = my_malloc(max_rows * sizeof(int));
   for (d = 0; d < nor; d++) {
     unsigned int i;
     unsigned int elt = first_non_zero(rows[d], nob, len, &i);

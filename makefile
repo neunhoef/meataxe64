@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.31 2001/11/22 20:04:03 jon Exp $
+# $Id: makefile,v 1.32 2001/11/25 00:17:19 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -33,6 +33,7 @@ ZRN_TARGET=	zrn
 ZNS_TARGET=	zns
 ZSL_TARGET=	zsl
 ZSP_TARGET=	zsp
+ZSS_TARGET=	zss
 ZTR_TARGET=	ztr
 
 DTOU_MODULES=	dtou
@@ -59,9 +60,10 @@ ZRN_MODULES=	clean elements endian grease header matrix memory primes read rn ro
 ZNS_MODULES=	clean elements endian grease header matrix memory primes read ns rows utils write zns
 ZSL_MODULES=	add elements endian files grease header matrix memory mul primes read rows slave system utils write
 ZSP_MODULES=	clean elements endian grease header matrix memory mul primes read rows sp utils write zsp
+ZSS_MODULES=	clean elements endian grease header matrix memory primes read rows ss utils write zss
 ZTR_MODULES=	elements endian header matrix memory primes read tr tra utils write
 
-MODULES=	$(DTOU_MODULES) $(EAD_MODULES) $(ECT_MODULES) $(EID_MODULES) $(EIM_MODULES) $(EIP_MODULES) $(EMU_MODULES) $(ETR_MODULES) $(MON_MODULES) $(SNS_MODULES) $(SRN_MODULES) $(STOP_MODULES) $(ZAD_MODULES) $(ZCT_MODULES) $(ZCV_MODULES) $(ZEX_MODULES) $(ZID_MODULES) $(ZIP_MODULES) $(ZMU_MODULES) $(ZPR_MODULES) $(ZRN_MODULES) $(ZNS_MODULES) $(ZSL_MODULES) $(ZSP_MODULES) $(ZTR_MODULES)
+MODULES=	$(DTOU_MODULES) $(EAD_MODULES) $(ECT_MODULES) $(EID_MODULES) $(EIM_MODULES) $(EIP_MODULES) $(EMU_MODULES) $(ETR_MODULES) $(MON_MODULES) $(SNS_MODULES) $(SRN_MODULES) $(STOP_MODULES) $(ZAD_MODULES) $(ZCT_MODULES) $(ZCV_MODULES) $(ZEX_MODULES) $(ZID_MODULES) $(ZIP_MODULES) $(ZMU_MODULES) $(ZPR_MODULES) $(ZRN_MODULES) $(ZNS_MODULES) $(ZSL_MODULES) $(ZSP_MODULES) $(ZSS_MODULES) $(ZTR_MODULES)
 
 include dirs.txt
 
@@ -168,6 +170,9 @@ TARGET:=ZSL
 include targets.txt
 
 TARGET:=ZSP
+include targets.txt
+
+TARGET:=ZSS
 include targets.txt
 
 TARGET:=ZTR
