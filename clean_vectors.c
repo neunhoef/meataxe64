@@ -1,5 +1,5 @@
 /*
- * $Id: clean_vectors.c,v 1.2 2003/02/28 20:04:58 jon Exp $
+ * $Id: clean_vectors.c,v 1.3 2003/03/01 10:05:05 jon Exp $
  *
  * Clean one file of vectors with another
  *
@@ -146,7 +146,7 @@ int clean_vectors(const char *echelised, const char *vectors, const char *output
       return 0;
     }
     fseeko64(inp1, ptr, SEEK_SET);
-    for (j = 0; j < nor2; j += max_rows) {
+    for (j = 0; j < nor1; j += max_rows) {
       unsigned int stride1 = (j + max_rows < nor1) ? max_rows : nor1 - j;
       if (0 == endian_read_matrix(inp1, rows1, len, stride1)) {
         matrix_free(rows1);
