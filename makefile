@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.93 2004/08/28 19:57:59 jon Exp $
+# $Id: makefile,v 1.94 2004/08/28 21:19:01 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -402,7 +402,8 @@ TARGET:=ETR
 include targets.txt
 
 TARGET:=MAKE
-include targets.txt
+TARGET_TYPE:=DEBUG
+include nonlibtarget.txt
 
 TARGET:=MON
 include targets.txt
