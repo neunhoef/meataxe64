@@ -1,5 +1,5 @@
 /*
- * $Id: qs.c,v 1.14 2003/02/28 20:04:58 jon Exp $
+ * $Id: qs.c,v 1.15 2003/07/28 21:07:31 jon Exp $
  *
  * Function to compute quotient space representation
  *
@@ -158,7 +158,7 @@ void quotient(const char *range, const char *gen,
     fprintf(stderr, "%s: failed to get grease for %s, terminating\n",
             name, range);
     cleanup(inp_r, inp_g, outp);
-    exit(1);
+    exit(2);
   }
   mask = get_mask_and_elts(nob, &elts_per_word);
   i = 0; /* Counting the rows from g */

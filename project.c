@@ -1,5 +1,5 @@
 /*
- * $Id: project.c,v 1.8 2003/02/28 20:04:58 jon Exp $
+ * $Id: project.c,v 1.9 2003/07/28 21:07:31 jon Exp $
  *
  * Function to project into quotient space representation
  *
@@ -156,7 +156,7 @@ void project(const char *range, const char *in,
     fprintf(stderr, "%s: failed to get grease for %s, terminating\n",
             name, range);
     cleanup(inp_r, inp_g, outp);
-    exit(1);
+    exit(2);
   }
   mask = get_mask_and_elts(nob, &elts_per_word);
   j = 0; /* Counting the rows from g */
