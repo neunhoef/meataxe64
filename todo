@@ -11,10 +11,9 @@ Investigate rename failure on large files from zscript
 Consider allowing maps into ztsp and ztspf
 Analyse unexpected split failure
 Document new scripts *
-Remove dependent input restriction in sp.c and msp.c *
+Improve zsb{,f} to take multiple generators and extend scripts *
 Fix zvp and zps to take less memory
-Think about better grease vector selection for making
-Improve zsb{,f} to take multiple generators and extend scripts
+Think about better grease vector selection for making vectors
 Fix zsums use to handle zero elements
 Find a better algorithm for zsp memory. Investigate performance (1)
 Debug emu/zsl file corruption problem (2)

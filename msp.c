@@ -1,5 +1,5 @@
 /*
- * $Id: msp.c,v 1.3 2002/06/28 08:39:16 jon Exp $
+ * $Id: msp.c,v 1.4 2002/07/05 09:41:32 jon Exp $
  *
  * Function to spin some vectors under multiple generators
  *
@@ -68,7 +68,7 @@ unsigned int spin(const char *in, const char *out,
   FILE *inp = NULL, *outp = NULL, **files = NULL;
   const header *h_in;
   header *h_out;
-  unsigned int prime, nob, noc, nor, len, max_rows, d;
+  unsigned int prime, nob, noc, nor, len, max_rows, d, j;
   unsigned int **rows;
   int *map, *new_map;
   grease_struct grease;
@@ -154,23 +154,26 @@ unsigned int spin(const char *in, const char *out,
   }
   fclose(inp);
   map = my_malloc(max_rows * sizeof(int));
-  if (1 != nor || 2 != prime) {
-    echelise(rows, nor, &d, &new_map, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, 1, name);
-    /* Clean up either for multiple rows, or non-identity leading non-zero entry */
-    free(new_map);
-    if (d != nor) {
-      fprintf(stderr, "%s: %s contains dependent vectors, terminating\n", name, in);
-      cleanup(NULL, argc, files);
-      exit(1);
+  echelise(rows, nor, &d, &new_map, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, 1, name);
+  if (0 == d) {
+    fprintf(stderr, "%s: %s contains no non-zero vectors, terminating\n", name, in);
+    cleanup(NULL, argc, files);
+    exit(1);
+  }
+  j = 0;
+  for (d = 0; d < nor; d++) {
+    if (new_map[d] >= 0) {
+      unsigned int *row;
+      map[j] = new_map[d];
+      /* Swap pointers */
+      row = rows[j];
+      rows[j] = rows[d];
+      rows[d] = row;
+      j++;
     }
   }
-  for (d = 0; d < nor; d++) {
-    unsigned int i;
-    unsigned int elt = first_non_zero(rows[d], nob, len, &i);
-    assert(0 != elt);
-    NOT_USED(elt);
-    map[d] = i;
-  }
+  free(new_map);
+  nor = j;
   if (0 == grease_allocate(prime, len, &grease, 900)){
     fprintf(stderr, "%s: unable to allocate grease, terminating\n", name);
     cleanup(inp, argc, files);
