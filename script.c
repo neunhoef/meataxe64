@@ -1,5 +1,5 @@
 /*
- * $Id: script.c,v 1.1 2002/03/10 22:45:28 jon Exp $
+ * $Id: script.c,v 1.2 2002/03/20 18:42:30 jon Exp $
  *
  * Function to compute a script in two generators
  *
@@ -202,6 +202,6 @@ int exec_script(const char *m1, const char *m2, const char *m3,
     }
     current = sum;
   }
-  (void)ren(current, m3); /* Trun current summand into output */
+  (void)ren(current, m3); /* Turn current summand into output */
   return 1;
 }

@@ -90,3 +90,7 @@
 20020307 - add zexport for exporting back to old meataxe
 20020309 - add zimport for importing from old meataxe
 20020310 - add zscript for computing scripts in generators
+20020313 - use zscript in indicator calculations from new_irred. Find
+several bugs in zsums
+20020320 - add restrict for reducing field of definition. Fix bugs in
+skew seventh

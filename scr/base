@@ -1,5 +1,5 @@
 #
-# $Id: base,v 1.4 2002/02/27 19:06:17 jon Exp $
+# $Id: base,v 1.5 2002/03/20 18:42:30 jon Exp $
 #
 # Script to to find a representation in standard base
 #
@@ -70,7 +70,7 @@ done
 if [ 1 -ne $nullity ]; then
   echo "$e has nullity $nullity different from 1"
   rm -f ${tmp}*
-  exit 1
+  exit 255
 fi
 ok=0
 while [ 0 -eq $ok ]; do

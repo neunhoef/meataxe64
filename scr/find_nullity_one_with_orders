@@ -1,5 +1,5 @@
 #
-# $Id: find_nullity_one_with_orders,v 1.1 2002/03/07 13:43:30 jon Exp $
+# $Id: find_nullity_one_with_orders,v 1.2 2002/03/20 18:42:30 jon Exp $
 #
 # Script to find an element of nullity one in two generators
 #
@@ -33,7 +33,6 @@ nor=`znor $a`
 q=`zprime $a`
 id=id_${q}_$nor
 if [ ! -e $id ]; then
-  echo Creating id
   zid $q $nor $nor $id
 fi
 # Try zsums
@@ -44,9 +43,9 @@ while [ $ok -eq 0 ]; do
     let memory=`more_memory $memory`
   elif [ 0 -eq $ret ]; then
     ok=1
-#   echo nullity one on $out
     name=`echo $out | sed -e "s/^.*element //g;s/ of nullity.*$//g"`
     cp ${name} $e
+    echo $out | sed -e "s/^.*form //g;s/ .*$//g"
   else
     echo Failed to find an element of nullity one
     rm -f ${tmp}*

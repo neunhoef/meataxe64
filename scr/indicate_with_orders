@@ -1,5 +1,5 @@
 #
-# $Id: indicate_with_orders,v 1.1 2002/03/07 13:43:30 jon Exp $
+# $Id: indicate_with_orders,v 1.2 2002/03/20 18:42:30 jon Exp $
 #
 # Script to find the indicator of an irreducible representation
 # Assumes a and b in standard base form
@@ -49,77 +49,13 @@ fi
 tmp=tmp${PPID}
 a_d=${tmp}.0
 b_d=${tmp}.1
-dual $a $a_d $memory
-dual $b $b_d $memory
+dual_with_order $a $a_d $o_a $memory
+dual_with_order $b $b_d $o_b $memory
 e=${tmp}.2
-find_nullity_one_with_orders $a_d $b_d $e $o_a $o_b $memory
+script=`find_nullity_one_with_orders $a_d $b_d $e $o_a $o_b $memory`
 ret=$?
 if [ $ret -ne 0 ]; then
   rm -f ${tmp}.*
   exit $ret
 fi
-S=${tmp}.3
-Q=${tmp}.4
-sb=${tmp}.0
-# TODO: cut down the amount of work here, we don't need the invert, multiplies etc
-base $e $a_d $b_d $sb $S
-if diff $a ${sb}_sb_1 1>/dev/null 2>&1; then
-  if diff $b ${sb}_sb_2 1>/dev/null 2>&1; then
-    if [ $nor -eq 1 ]; then
-      echo indicator +
-      rm -f ${tmp}.*
-      if [ -e ${a}_+ -o -L ${a}_+ ]; then
-        rm ${a}_+
-      fi
-      ln -s $a ${a}_+
-      exit 0
-    fi
-    zqf $S $Q
-    a_t=${tmp}.5
-    b_t=${tmp}.6
-    ztr $a $a_t $memory
-    ztr $b $b_t $memory
-    i=0
-    q=`zprime $a`
-    while [ $i -lt $q ]; do
-      zsid $q $nor $noc $i ${tmp}.7
-      zad $Q ${tmp}.7 ${tmp}.8
-      preserves ${tmp}.8 $S ${tmp}.7 $a $a_t $memory
-      ret=$?
-      if [ $ret -eq 0 ]; then
-        preserves ${tmp}.8 $S ${tmp}.7 $b $b_t $memory
-        ret=$?
-        if [ $ret -eq 0 ]; then
-          echo indicator +
-          rm -f ${tmp}.*
-          if [ -e ${a}_+ -o -L ${a}_+ ]; then
-            rm ${a}_+
-          fi
-          ln -s $a ${a}_+
-          exit 0
-        elif [ $ret -eq 1 ]; then
-          rm -f ${tmp}.*
-          exit 1
-        fi
-      elif [ $ret -eq 1 ]; then
-        rm -f ${tmp}.*
-        exit 1
-      fi
-# Try next diagonal
-      let i=$i+1
-    done
-    echo indicator -
-    rm -f ${tmp}.*
-    if [ -e ${a}_- -o -L ${a}_- ]; then
-      rm ${a}_-
-    fi
-    ln -s $a ${a}_-
-    exit 0
-  fi
-fi
-rm -f ${tmp}.*
-if [ -e ${a}_o -o -L ${a}_o ]; then
-  rm ${a}_o
-fi
-ln -s $a ${a}_o
-echo indicator o
+exec indicate_with_element $a $b $e $a_d $b_d $script $memory

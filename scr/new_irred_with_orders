@@ -1,5 +1,5 @@
 #
-# $Id: new_irred_with_orders,v 1.1 2002/03/07 13:43:30 jon Exp $
+# $Id: new_irred_with_orders,v 1.2 2002/03/20 18:42:30 jon Exp $
 #
 # Script to classify an irreducible representation
 #
@@ -48,7 +48,6 @@ else
 fi
 id=id_${q}_$nor
 if [ ! -e $id ]; then
-  echo Creating id
   zid $q $nor $nor $id
 fi
 if [ $# -eq 5 ]; then
@@ -61,14 +60,14 @@ fi
 #
 tmp=tmp${PPID}
 e=${tmp}.1
-find_nullity_one_with_orders $a $b $e $o_a $o_b $memory
+script=`find_nullity_one_with_orders $a $b $e $o_a $o_b $memory`
 ret=$?
 if [ $ret -ne 0 ]; then
   rm -f ${tmp}.*
   exit $ret
 fi
 name=${tmp}_${nor}
-base $e $a $b ${name} ${tmp}.0
+x=`base $e $a $b ${name} ${tmp}.0`
 ret=$?
 if [ $ret -ne 0 ]; then
   echo base returns $ret, terminating
@@ -100,7 +99,7 @@ new_name=`new_irred_name irreds/${nor}`
 mv ${name}_sb_1 ${new_name}_1
 mv ${name}_sb_2 ${new_name}_2
 if [ `zchar ${tmp}.0` -eq 2 ]; then
-  indicate_with_orders ${new_name}_1 ${new_name}_2 $o_a $o_b $memory
+  indicate_with_script ${new_name}_1 ${new_name}_2 $script $o_a $o_b $memory
 fi
 rm -f ${tmp}*
 exit 0

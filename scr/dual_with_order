@@ -1,0 +1,58 @@
+#
+# $Id: dual_with_order,v 1.1 2002/03/20 18:42:30 jon Exp $
+#
+# Script to dual of a matrix, given its order
+#
+# Inputs
+# $1: matrix
+# $2: out
+# $3: order
+# $4: memory (optional)
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+#
+#set -v
+. functions
+usage="$0: usage: $0 <in> <out> <order> [<memory>]"
+if [ $# -ne 3 -a $# -ne 4 ]; then
+  echo $usage
+  exit 1;
+fi
+a=$1
+o=$2
+o_a=$3
+if [ -e $a ]; then
+  q=`zprime $a`
+  nor=`znor $a`
+  noc=`znoc $a`
+  if [ $nor -ne $noc ]; then
+    echo "$0: $a is not square"
+    exit 1
+  fi
+else
+  echo "$0: missing file $a"
+  exit 1
+fi
+if [ $# -eq 3 ]; then
+  memory=200
+else
+  memory=$4
+fi
+tmp=tmp${PPID}
+ztr $a ${tmp}.0 $memory
+ret=$?
+if [ 0 -ne $ret ]; then
+  exit $ret
+fi
+if [ $o_a -gt 2 ]; then
+  let index=${o_a}-1
+  power ${tmp}.0 $index $o $memory
+  if [ 0 -ne $ret ]; then
+    exit $ret
+  fi
+else
+  mv ${tmp}.0 $o
+fi
+

@@ -1,5 +1,5 @@
 /*
- * $Id: sums.c,v 1.3 2002/03/09 19:18:02 jon Exp $
+ * $Id: sums.c,v 1.4 2002/03/20 18:42:30 jon Exp $
  *
  * Function to compute linear sums of two matices
  *
@@ -73,7 +73,8 @@ int sums(const char *in1, const char *in2, const char *out,
   words[0] = "A";
   names[0] = in1;
   for (l = 1; l < prime; l++) {
-    if (0 == scaled_add(elts[0], names[0], elts[l], l, name)) {
+    /* lambda names[0] + elts[0] */
+    if (0 == scaled_add(names[0], elts[0], elts[l], l, name)) {
       fprintf(stderr, "%s: scaled add failed on %s + %d * %s, terminating\n",
               name, elts[l], l, names[i - 1]);
       exit(1);
@@ -149,7 +150,8 @@ int sums(const char *in1, const char *in2, const char *out,
       for (r = 1; r < prime; r++) {
         unsigned int pos = cur_power * r + l;
         /* Range from cur_power to cur_power * prime - 1 */
-        if (0 == scaled_add(elts[l], names[i - 1], elts[pos], r, name)) {
+        /* scale names[i-1] and add to elts[l] */
+        if (0 == scaled_add(names[i - 1], elts[l], elts[pos], r, name)) {
           fprintf(stderr, "%s: scaled add failed on %s + %d * %s, terminating\n",
                   name, elts[l], r, names[i - 1]);
           exit(1);

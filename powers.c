@@ -1,5 +1,5 @@
 /*
- * $Id: powers.c,v 1.4 2002/03/07 13:43:30 jon Exp $
+ * $Id: powers.c,v 1.5 2002/03/20 18:42:30 jon Exp $
  *
  * Function to compute tensor powers of a matrix, from file
  *
@@ -60,7 +60,6 @@ int skew_square(const char *m1, const char *m2, const char *name)
   header_free(h_in);
   if (nor_in <= 1) {
     fprintf(stderr, "%s: %s has no skew square (dim <= 1), terminating\n", name, m1);
-    header_free(h_in);
     return cleanup(inp, NULL);
   }
   if (0 == primes_init(prime, &prime_operations)) {
@@ -275,7 +274,6 @@ int skew_cube(const char *m1, const char *m2, const char *name)
   header_free(h_in);
   if (nor_in <= 2) {
     fprintf(stderr, "%s: %s has no skew cube (dim <= 2), terminating\n", name, m1);
-    header_free(h_in);
     return cleanup(inp, NULL);
   }
   if (0 == primes_init(prime, &prime_operations)) {
@@ -382,7 +380,6 @@ int skew_fourth(const char *m1, const char *m2, const char *name)
   header_free(h_in);
   if (nor_in <= 3) {
     fprintf(stderr, "%s: %s has no skew fourth (dim <= 3), terminating\n", name, m1);
-    header_free(h_in);
     return cleanup(inp, NULL);
   }
   if (0 == primes_init(prime, &prime_operations)) {
@@ -524,7 +521,6 @@ int skew_fifth(const char *m1, const char *m2, const char *name)
   header_free(h_in);
   if (nor_in <= 4) {
     fprintf(stderr, "%s: %s has no skew fifth (dim <= 4), terminating\n", name, m1);
-    header_free(h_in);
     return cleanup(inp, NULL);
   }
   if (0 == primes_init(prime, &prime_operations)) {
@@ -688,7 +684,6 @@ int skew_sixth(const char *m1, const char *m2, const char *name)
   header_free(h_in);
   if (nor_in <= 5) {
     fprintf(stderr, "%s: %s has no skew sixth (dim <= 5), terminating\n", name, m1);
-    header_free(h_in);
     return cleanup(inp, NULL);
   }
   if (0 == primes_init(prime, &prime_operations)) {
@@ -862,7 +857,6 @@ int skew_seventh(const char *m1, const char *m2, const char *name)
   header_free(h_in);
   if (nor_in <= 6) {
     fprintf(stderr, "%s: %s has no skew sixth (dim <= 6), terminating\n", name, m1);
-    header_free(h_in);
     return cleanup(inp, NULL);
   }
   if (0 == primes_init(prime, &prime_operations)) {
@@ -930,7 +924,7 @@ int skew_seventh(const char *m1, const char *m2, const char *name)
                   unsigned int e41 = row4[j_1];
                   unsigned int e51 = row5[j_1];
                   unsigned int e61 = row6[j_1];
-                  unsigned int e71 = row6[j_1];
+                  unsigned int e71 = row7[j_1];
                   for (j_2 = j_1 + 1; j_2 + 5 < nor_in; j_2++) {
                     /* Along the columns of m1 again */
                     unsigned int e12 = row1[j_2];
@@ -966,7 +960,7 @@ int skew_seventh(const char *m1, const char *m2, const char *name)
                           unsigned int e45 = row4[j_5];
                           unsigned int e55 = row5[j_5];
                           unsigned int e65 = row6[j_5];
-                          unsigned int e75 = row6[j_5];
+                          unsigned int e75 = row7[j_5];
                           for (j_6 = j_5 + 1; j_6 + 1 < nor_in; j_6++) {
                             /* Along the columns of m1 again */
                             unsigned int e16 = row1[j_6];
@@ -975,7 +969,7 @@ int skew_seventh(const char *m1, const char *m2, const char *name)
                             unsigned int e46 = row4[j_6];
                             unsigned int e56 = row5[j_6];
                             unsigned int e66 = row6[j_6];
-                            unsigned int e76 = row6[j_6];
+                            unsigned int e76 = row7[j_6];
                             for (j_7 = j_6 + 1; j_7 < nor_in; j_7++) {
                               /* Along the columns of m1 again */
                               unsigned int e17 = row1[j_7];
@@ -984,7 +978,7 @@ int skew_seventh(const char *m1, const char *m2, const char *name)
                               unsigned int e47 = row4[j_7];
                               unsigned int e57 = row5[j_7];
                               unsigned int e67 = row6[j_7];
-                              unsigned int e77 = row6[j_7];
+                              unsigned int e77 = row7[j_7];
                               unsigned int elt = det7(prime_operations,
                                                       e11, e12, e13, e14, e15, e16, e17,
                                                       e21, e22, e23, e24, e25, e26, e27,
