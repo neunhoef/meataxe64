@@ -296,3 +296,4 @@ skew seventh
 20040428 - Minor improvements to GF5
 20040502 - Speed improvements mainly benefiting tensor condense
 20040503 - Reorder multiplies in tco to double speed
+20040504 - Fix faulty error message from tco

@@ -1,5 +1,5 @@
 /*
- * $Id: tco.c,v 1.15 2004/05/03 09:37:48 jon Exp $
+ * $Id: tco.c,v 1.16 2004/05/04 22:56:13 jon Exp $
  *
  * Tensor condense one group element
  *
@@ -184,7 +184,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
   fclose(inp);
   inp = fopen(mults_r, "r");
   if (NULL == inp) {
-    fprintf(stderr, "%s: failed to open right multiplicities file '%s', terminating\n", name, mults_l);
+    fprintf(stderr, "%s: failed to open right multiplicities file '%s', terminating\n", name, mults_r);
     return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
                    NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
                    NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL);
