@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: split_with_element,v 1.19 2002/10/13 20:07:20 jon Exp $
+# $Id: split_with_element,v 1.20 2002/10/14 09:20:33 jon Exp $
 #
 # Script to split a representation given a particular element to work from
 #
@@ -135,7 +135,7 @@ while [ $vector -lt $vectors ]; do
   zsel ${tmp}.3 ${tmp}.4 $vector
   mem_ok=0
   while [ 0 -eq $mem_ok ]; do
-    dim=`zmsp ${tmp}.4 $s $memory $a $* 2>/dev/null`
+    dim=`zmsp -m $memory ${tmp}.4 $s $a $* 2>/dev/null`
     ret=$?
     if [ $ret -eq 0 ]; then
       mem_ok=1

@@ -209,3 +209,4 @@ skew seventh
 20021014 - Use -m for zranks and zfln
 20021014 - Use -m for zmsb, znsf and zrnf
 20021014 - Use -m for ziv and zivf
+20021014 - Use -m for zmsp and zmspf

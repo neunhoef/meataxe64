@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: spin_vectors,v 1.3 2002/10/13 20:07:20 jon Exp $
+# $Id: spin_vectors,v 1.4 2002/10/14 09:20:33 jon Exp $
 #
 # Compute subspaces, with a memory limit
 #
@@ -51,7 +51,7 @@ while [ $x -lt $y ]; do
     if [ $rn -eq 0 ]; then
       echo vector $x is zero and so not considered
     else
-      sub=`zmsp ${tmp}.0 $vecs.$x.ss $memory $*`
+      sub=`zmsp -m $memory ${tmp}.0 $vecs.$x.ss $*`
       ret=$?
       if [ $ret -eq 0 ]; then
         echo subspace $vecs.$x.ss of size $sub found for element $x

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: sym_basis,v 1.9 2002/10/13 20:07:20 jon Exp $
+# $Id: sym_basis,v 1.10 2002/10/14 09:20:33 jon Exp $
 #
 # Script to compute a symmetry basis wrt an ordered set of irreducibles
 #
@@ -136,7 +136,7 @@ for x in `cat $irreds`; do
         fi
       fi
 # Otherwise, spin up, create subspace, do sb, add vectors
-      d=`zmsp ${tmp}.2 ${tmp}.3 $memory $*`
+      d=`zmsp -m $memory ${tmp}.2 ${tmp}.3 $*`
       ret=$?
       if [ 0 -ne $ret ]; then
         rm -f ${tmp}.*
