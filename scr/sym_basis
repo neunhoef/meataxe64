@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: sym_basis,v 1.2 2002/09/01 21:27:42 jon Exp $
+# $Id: sym_basis,v 1.3 2002/09/01 21:29:59 jon Exp $
 #
 # Script to compute a symmetry basis wrt an ordered set of irreducibles
 #
@@ -10,15 +10,16 @@
 # $3: the file to contain the symmetry basis
 # $4: the file of multiplicities
 # $5: whether to use the dual (0 => not, 1 => dual)
-# $6-: generators for the group
+# $6: a script for computing gamma operators
+# $7-: generators for the condensation group
 #
 # Return codes
 # 1: error in parameters
 # 0: success
 # 255: an irreducible was found outside the list
 #
-usage="$0: usage: $0 <irreducibles> <memory> <output basis> <output multiplicities> <dualise> <generator 1> [<other generators>]"
-if [ $# -lt 7 ]; then
+usage="$0: usage: $0 <irreducibles> <memory> <output basis> <output multiplicities> <dualise> <script> <generator 1> [<other generators>]"
+if [ $# -lt 8 ]; then
   echo $usage
   exit 1;
 fi
@@ -29,7 +30,8 @@ memory=$2
 out=$3
 mult=$4
 dualise=$5
-shift 5
+script=$6
+shift 6
 gen_count=$#
 tmp=tmp${PPID}
 basis=${tmp}.31
@@ -46,51 +48,43 @@ for x in `cat $irreds`; do
     echo "$name: failed to find irreducible script for $x, terminating"
     exit 1
   fi
-  script=`echo $y | sed -e "s?${x}_1_??g"`
-  ret=$?
-  if [ 0 -ne $ret ]; then
-    echo "$name: failed to produce irreducible script for $x, terminating"
-    exit 1
-  fi
-  zscript $1 $2 ${tmp}.0 ${tmp}.zscript $script $memory
-  ret=$?
-  if [ 0 -ne $ret ]; then
-    rm -f ${tmp}.*
-    echo "$name: failed to apply script to $1 $2, terminating"
-    exit 1
-  fi
-  rm -f ${tmp}.zscript*
-  nullity=`zns ${tmp}.0 ${tmp}.1 $memory`
-  ret=$?
-  if [ 0 -ne $ret ]; then
-    rm -f ${tmp}.*
-    echo "$name: failed to compute nullity, terminating"
-    exit 1
-  fi
-  cp ${tmp}.1 ${tmp}.0
   count=0
-  if [ $nullity -gt 0 ]; then
-    zspan ${tmp}.0 ${tmp}.1 $nullity
-    ret=$?
-    if [ 0 -ne $ret ]; then
-      rm -f ${tmp}.*
-      echo "$name: failed to span nullspace, terminating"
-      exit 1
-    fi
-    span=`znor ${tmp}.1`
-    y=0;
-    while [ $y -lt $span ]; do
-      zsel ${tmp}.1 ${tmp}.3 $y
-# Check if the vector selected is already in the space
+  gamma=${tmp}.0
+# compute the gamma operator in the generators for irreducible X
+  $script $gen_count $x $memory $gamma $*
+  ret=$?
+  if [ 0 -ne $ret ]; then
+    echo "$name: gamma operator computation failed for $x, terminating"
+    exit 1
+  fi
+# compute the image of the gamma operator
+  dim=`zbase $gamma . ${tmp}.1 $memory`
+  ret=$?
+  if [ 0 -ne $ret ]; then
+    rm -f ${tmp}.*
+    echo "$name: failed to compute dim, terminating"
+    exit 1
+  fi
+  if [ $dim -gt 0 ]; then
+    y=0
+    while [ $y -lt $dim ]; do
+      zsel ${tmp}.1 ${tmp}.2 $y
+      ret=$?
+      if [ 0 -ne $? ]; then
+        rm -f ${tmp}.*
+        echo "$name: zsel failed, terminating"
+        exit 1
+      fi
+# See if vector already in space
       if [ 0 -ne $have_basis ]; then
-        zjoin $basis ${tmp}.3 ${tmp}.4
+        zjoin $basis ${tmp}.2 ${tmp}.3
         ret=$?
         if [ 0 -ne $ret ]; then
           rm -f ${tmp}.*
           echo "$name: zjoin failed, terminating"
           exit 1
         fi
-        r=`zrn ${tmp}.4 $memory`
+        r=`zrn ${tmp}.3 $memory`
         ret=$?
         if [ 0 -ne $ret ]; then
           rm -f ${tmp}.*
@@ -104,7 +98,8 @@ for x in `cat $irreds`; do
           continue
         fi
       fi
-      d=`zmsp ${tmp}.3 ${tmp}.4 $memory $*`
+# Otherwise, spin up, create subspace, do sb, add vectors
+      d=`zmsp ${tmp}.2 ${tmp}.3 $memory $*`
       ret=$?
       if [ 0 -ne $ret ]; then
         rm -f ${tmp}.*
@@ -112,107 +107,90 @@ for x in `cat $irreds`; do
         echo "$name: failed to spin vector $y, terminating"
         exit 1
       fi
-      if [ `znor ${tmp}.4` -eq $dim ]; then
-        z=1
-        names=
-        for a in $*; do
-          zmu ${tmp}.4 $a ${tmp}.5 $memory
-          zss ${tmp}.4 ${tmp}.5 ${tmp}.6_$z
-          names="$names ${tmp}.6_$z"
-          let z=$z+1
-        done
-# Now check if the subspace is irreducible
-        zscript ${tmp}.6_1 ${tmp}.6_2 ${tmp}.7 ${tmp}.zscript $script $memory
-        ret=$?
-        rm -f ${tmp}.zscript*
-        if [ 0 -ne $ret ]; then
-          rm -f ${tmp}.*
-          echo "$name: failed to apply script to ${tmp}.6_1 ${tmp}.6_2, terminating"
-          exit 1
-        fi
-        r=`split_with_element ${tmp}.7 ${tmp}.8 0 0 ${tmp}.9 $names`
-        ret=$?
-        rm -f ${tmp}.8*
-        if [ 1 -eq $ret ]; then
-          rm -f ${tmp}.*
-          echo "$name: split_with_element failed on ${tmp}.6_1 ${tmp}.6_2, terminating"
-          exit 1
-        elif [ 253 -eq $ret ]; then
-          rm -f ${tmp}.*
-          echo "$name: split_with_element unexpectedly gives nullity 0 on ${tmp}.6_1 ${tmp}.6_2, terminating"
-          exit 1
-        elif [ 254 -eq $ret ]; then
-          rm -f ${tmp}.*
-          echo "$name: split_with_element fails to split on ${tmp}.6_1 ${tmp}.6_2, terminating"
-          exit 1
-        elif [ 0 -eq $ret ]; then
-# Split, not irreducible, so ignore
-          let y=$y+1
-          continue
-        elif [ 255 -ne $ret ]; then
-          rm -f ${tmp}.*
-          echo "$name: split_with_element unexpectedly returns $ret on ${tmp}.6_1 ${tmp}.6_2, terminating"
-          exit 1
-        fi
-        r=`new_irred $memory $names`
-        ret=$?
-        if [ 0 -eq $ret ]; then
-          rm -f ${tmp}.*
-          echo "$name: new unknown irreducible found, terminating"
-          exit 255
-        elif [ 1 -eq $ret ]; then
-          rm -f ${tmp}.*
-          echo "$name: failure in new_irred, terminating"
-          exit 1
-        elif [ 255 -ne $ret ]; then
-          rm -f ${tmp}.*
-          echo "$name: unexpected return $ret from new_irred, terminating"
-          exit 1
-        fi
-        irr=`echo $r | sed -e "s/Existing irreducible //g;s/ found//g"`
-        if [ "$irr" = "$x" ]; then
-# Need to convert our non-standard basis in ${tmp}.4 to a standard basis as per the irreducibles
-# Already have the element in ${tmp}.7
-          base_vectors ${tmp}.7 ${tmp}.8 $names
-          ret=$?
-          if [ 1 -eq $ret ]; then
-            echo "$name: base_vectors failed, terminating"
-            rm -f ${tmp}.*
-            exit 1
-          elif [ 0 -ne $ret ]; then
-            echo "$name: base_vectors unexpectedly returns $ret, terminating"
-            rm -f ${tmp}.*
-            exit 1
-          fi
-          zmu ${tmp}.8 ${tmp}.4 ${tmp}.5
-          rm ${tmp}.8
-          if [ 0 -eq $have_basis ]; then
-            cp ${tmp}.5 ${tmp}.6
-          else
-            zjoin $basis ${tmp}.5 ${tmp}.4
-            d=`zbase ${tmp}.4 . ${tmp}.6 $memory`
-          fi
-          ret=$?
-          if [ 0 -ne $ret ]; then
-            rm -f ${tmp}.*
-            echo $d
-            echo "$name: unexpected failure in zbase, terminating"
-            exit 1
-          fi
-          if [ 0 -ne $have_basis ]; then
-            if [ `znor $basis` -lt `znor ${tmp}.6` ]; then
-              zjoin $basis ${tmp}.5 ${tmp}.4
-              cp ${tmp}.4 $basis
-              let count=$count+1
-            fi
-          else
-            cp ${tmp}.5 $basis
-            let count=$count+1
-          fi
-          have_basis=1
-        fi
-        rm -f ${tmp}.7
+      if [ $d -ne `znor ${x}_1` ]; then
+        rm -f ${tmp}.*
+        echo "$name: vector $y spins to an incorrect subspace, terminating"
+        exit 1
       fi
+      z=1
+      names=
+      for a in $*; do
+        zmu ${tmp}.3 $a ${tmp}.4 $memory
+        zss ${tmp}.3 ${tmp}.4 ${tmp}.5_$z
+        names="$names ${tmp}.5_$z"
+        let z=$z+1
+      done
+      r=`new_irred $memory $names`
+      ret=$?
+      if [ 0 -eq $ret ]; then
+        rm -f ${tmp}.*
+        echo "$name: new unknown irreducible found, terminating"
+        exit 255
+      elif [ 1 -eq $ret ]; then
+        rm -f ${tmp}.*
+        echo "$name: failure in new_irred, terminating"
+        exit 1
+      elif [ 255 -ne $ret ]; then
+        rm -f ${tmp}.*
+        echo "$name: unexpected return $ret from new_irred, terminating"
+        exit 1
+      fi
+      irr=`echo $r | sed -e "s/Existing irreducible //g;s/ found//g"`
+      if [ "$irr" != "$x" ]; then
+        rm -f ${tmp}.*
+        echo "$name: vector $y spins to an incorrect subspace, terminating"
+        exit 1
+      fi
+# Need to convert our non-standard basis in ${tmp}.3 to a standard basis as per the irreducibles
+# Use the script associated with irreducible x
+      z=`ls ${x}_1_I*`
+      ret=$?
+      if [ 0 -ne $ret ]; then
+        echo "$name: failed to find irreducible script for $x, terminating"
+        exit 1
+      fi
+      script_x=`echo $z | sed -e "s?${x}_1_??g"`
+      ret=$?
+      if [ 0 -ne $ret ]; then
+        echo "$name: failed to produce irreducible script for $x, terminating"
+        exit 1
+      fi
+      zscript ${tmp}.5_1 ${tmp}.5_2 ${tmp}.6 ${tmp}.zscript $script_x $memory
+      ret=$?
+      rm -f ${tmp}.zscript*
+      if [ 0 -ne $ret ]; then
+        rm -f ${tmp}.*
+        echo "$name: failed to apply script to ${tmp}.6_1 ${tmp}.6_2, terminating"
+        exit 1
+      fi
+      base_vectors ${tmp}.6 ${tmp}.4 $names
+      ret=$?
+      if [ 1 -eq $ret ]; then
+        echo "$name: base_vectors failed, terminating"
+        rm -f ${tmp}.*
+        exit 1
+      elif [ 0 -ne $ret ]; then
+        echo "$name: base_vectors unexpectedly returns $ret, terminating"
+        rm -f ${tmp}.*
+        exit 1
+      fi
+      zmu ${tmp}.4 ${tmp}.3 ${tmp}.5
+      rm ${tmp}.4
+# ${tmp}.5 is a standard basis for this irreducible piece
+      if [ 0 -eq $have_basis ]; then
+        cp ${tmp}.5 $basis
+        have_basis=1
+      else
+        zjoin $basis ${tmp}.5 ${tmp}.4
+        cp ${tmp}.4 $basis
+      fi
+      ret=$?
+      if [ 0 -ne $ret ]; then
+        rm -f ${tmp}.*
+        echo "$name: unexpected failure in zjoin, terminating"
+        exit 1
+      fi
+      let count=$count+1
       let y=$y+1
     done
   fi
