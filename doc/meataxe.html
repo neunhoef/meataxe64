@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.57 2004/04/11 22:10:38 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.58 2004/05/12 22:20:05 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -4674,6 +4674,7 @@ dimension increases.
 <li><a href="#rip_rank">rip_rank</a></li>
 <li><a href="#signature">signature</a></li>
 <li><a href="#singular_order">singular_order</a></li>
+<li><a href="#space_split">space_split</a></li>
 <li><a href="#spin_vectors">spin_vectors</a></li>
 <li><a href="#split">split</a></li>
 <li><a href="#split_all">split_all</a></li>
@@ -7805,6 +7806,47 @@ href="#split">split</a>. The intention is that we wish, up to a limit
 of five, to determine how many distinct ranks the matrix has. This is
 really just to compute a useful number to feed to programs such as <a
 href="#zsums">zsums</a>.
+</li>
+<li>
+<h3><a name="space_split">space_split</a></h3>
+Purpose: Split a set of vectors via a subspace. Two results are
+produced, one a basis of the vectors in the subspace, and the other a
+basis completing the space, but with trivial intersection with the
+subspace.
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>The subspace</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>The vectors to be split</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>Output stem</td>
+</tr>
+<tr>
+<td valign=top>4</td><td valign=top>Optional memory size (default 400k)</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>The
+dimensions of the subspace and quotient</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+</table>
+Commentary: This script provides a means of acquiring the intersection
+of a space with a set of vectors, and a direct complement for that
+intersection within the set of vectors. The outputs are parameter3.ss
+and parameter3.proj.
 </li>
 <li>
 <h3><a name="spin_vectors">spin_vectors</a></h3>
