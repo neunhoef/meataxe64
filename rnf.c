@@ -1,5 +1,5 @@
 /*
- * $Id: rnf.c,v 1.5 2002/02/21 20:37:21 jon Exp $
+ * $Id: rnf.c,v 1.6 2002/03/07 13:43:30 jon Exp $
  *
  * Compute the rank of a matrix, using temporary files
  *
@@ -105,7 +105,7 @@ unsigned int rank(const char *m1, const char *dir, const char *m2,
   }
   r = 0; /* Rank count */
   if (0 != record) {
-    outp = fopen(name3, "wb");
+    outp = fopen64(name3, "wb");
     if (NULL == outp) {
       fclose(inp);
       exit(1);
@@ -138,7 +138,7 @@ unsigned int rank(const char *m1, const char *dir, const char *m2,
       }
       if (rows_remaining > 0) {
         unsigned int rows_written = 0;
-        out->f = fopen(out->name, "wb");
+        out->f = fopen64(out->name, "wb");
         out->created = 1;
         if (NULL == out->f) {
           fprintf(stderr, "%s: cannot open temporary output %s, terminating\n", name, out->name);
@@ -177,7 +177,7 @@ unsigned int rank(const char *m1, const char *dir, const char *m2,
         in = in->next;
         out = out->next;
         if (rows_written > 0) {
-          in->f = fopen(in->name, "rb");
+          in->f = fopen64(in->name, "rb");
           if (NULL == in->f) {
             fprintf(stderr, "%s: cannot open temporary output %s, terminating\n", name, in->name);
             exit(1);
@@ -208,7 +208,7 @@ unsigned int rank(const char *m1, const char *dir, const char *m2,
       fprintf(stderr, "%s: cannot open output %s, terminating\n", name, m2);
       exit(1);
     }
-    inp = fopen(name3, "rb");
+    inp = fopen64(name3, "rb");
     if (NULL == inp) {
       fclose(outp);
       fprintf(stderr, "%s: cannot open input %s, terminating\n",name, name3);

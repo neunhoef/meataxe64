@@ -1,5 +1,5 @@
 /*
- * $Id: mtx.c,v 1.9 2001/11/29 01:13:09 jon Exp $
+ * $Id: mtx.c,v 1.10 2002/03/07 13:43:30 jon Exp $
  *
  * Extended row operations for monster meataxe
  *
@@ -20,7 +20,6 @@
 
 static const char *name = "monst";
 static unsigned int *row;
-static unsigned char table[256];
 static int cv_initialised = 0;
 static int initialised = 0;
 static FILE **outputs;
@@ -31,13 +30,6 @@ static void quit(const char *a)
   fprintf(stderr, "error %s in program monster mtx\n", a);
   exit(15);
 }
-
-#if 0
-static unsigned char convert_char(unsigned char in)
-{
-  return table[in];
-}
-#endif
 
 static void convert_row(unsigned int total_cols, const unsigned char *bits)
 {
@@ -51,15 +43,6 @@ static void convert_row(unsigned int total_cols, const unsigned char *bits)
       quit("cannot allocate space for endian conversion");
     }
     row = memory_pointer(0);
-    /* Now build the conversion table */
-    for (i = 0; i < 256; i++) {
-      unsigned int j = i, k = 0, l;
-      for (l = 0; l < 8; l++) {
-        k = (k << 1) | (j & 1);
-        j >>= 1;
-      }
-      table[i] = k;
-    }
     cv_initialised = 1;
   }
   i = 0;

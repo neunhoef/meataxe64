@@ -1,5 +1,5 @@
 /*
- * $Id: nsf.c,v 1.2 2002/01/22 08:40:24 jon Exp $
+ * $Id: nsf.c,v 1.3 2002/03/07 13:43:30 jon Exp $
  *
  * Compute the nullspace of a matrix, using temporary files
  *
@@ -63,7 +63,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
   sprintf(name3, "%s/%s.2", dir, tmp);
   sprintf(name4, "%s/%s.3", dir, tmp); /* Two for identity */
   sprintf(name5, "%s/%s.4", dir, tmp); /* One for null vectors */
-  outp = fopen(name5, "wb");
+  outp = fopen64(name5, "wb");
   if (NULL == outp) {
     fprintf(stderr, "%s: cannot open intermediate null vector file %s, terminating\n",
             name, name5);
@@ -165,7 +165,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
       r += n;
       if (rows_remaining > 0) {
         unsigned int rows_written = 0;
-        out->f = fopen(out->name, "wb");
+        out->f = fopen64(out->name, "wb");
         if (NULL == out->f) {
           fprintf(stderr, "%s: cannot open temporary output %s, terminating\n", name, out->name);
           fclose(in->f);
@@ -173,7 +173,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
           fclose(outp);
           exit(1);
         }
-        out->f_id = fopen(out->name_id, "wb");
+        out->f_id = fopen64(out->name_id, "wb");
         out->created = 1;
         if (NULL == out->f_id) {
           fprintf(stderr, "%s: cannot open temporary output %s, terminating\n", name, out->name_id);
@@ -251,12 +251,12 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
         in = in->next;
         out = out->next;
         if (rows_written > 0) {
-          in->f = fopen(in->name, "rb");
+          in->f = fopen64(in->name, "rb");
           if (NULL == in->f) {
             fprintf(stderr, "%s: cannot open temporary output %s, terminating\n", name, in->name);
             exit(1);
           }
-          in->f_id = fopen(in->name_id, "rb");
+          in->f_id = fopen64(in->name_id, "rb");
           if (NULL == in->f_id) {
             fprintf(stderr, "%s: cannot open temporary output %s, terminating\n", name, in->name_id);
             exit(1);
@@ -292,7 +292,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
       fprintf(stderr, "%s: cannot open output %s, terminating\n", name, m2);
       exit(1);
     }
-    inp = fopen(name5, "rb");
+    inp = fopen64(name5, "rb");
     if (NULL == inp) {
       fprintf(stderr, "%s: cannot open intermediate null vector file %s, terminating\n",
               name, name5);

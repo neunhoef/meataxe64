@@ -1,5 +1,5 @@
 /*
- * $Id: zse.c,v 1.1 2001/11/29 01:13:09 jon Exp $
+ * $Id: zse.c,v 1.2 2002/03/07 13:43:30 jon Exp $
  *
  * Select a row of a matrix
  *
@@ -40,7 +40,6 @@ int main(int argc, const char * const argv[])
   in = argv[1];
   out = argv[2];
   vector = strtoul(argv[3], NULL, 0);
-  inp = fopen(in, "r");
   if (0 == open_and_read_binary_header(&inp, &h_in, in, name)) {
     fprintf(stderr, "%s: cannot open %s, terminating\n", name, in);
     exit(1);

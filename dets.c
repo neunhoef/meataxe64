@@ -1,5 +1,5 @@
 /*
- * $Id: dets.c,v 1.1 2002/02/27 19:06:17 jon Exp $
+ * $Id: dets.c,v 1.2 2002/03/07 13:43:30 jon Exp $
  *
  * Functions to compute determinants
  *
@@ -20,11 +20,12 @@ static unsigned int det(unsigned int **rows, prime_ops prime_operations,
                         unsigned int nor)
 {
   row_ops row_operations;
-  unsigned int i, j, k, det = 1, prime, nob;
+  unsigned int i, j, k, det = 1, prime, nob, elts_per_word;
   prime = prime_operations.prime;
   assert(is_a_prime_power(prime));
   assert(NULL != rows);
   nob = bits_of(prime);
+  elts_per_word = bits_in_unsigned_int / nob;
   rows_init(prime, &row_operations);
   for (i = 0; i < nor; i++) {
     unsigned int elt = first_non_zero(rows[i], nob, nor, &j);
@@ -36,8 +37,9 @@ static unsigned int det(unsigned int **rows, prime_ops prime_operations,
       if (1 != elt) {
         (*row_operations.scaler_in_place)(rows[i], nor, elt);
       }
+      j /= elts_per_word;
       for (k = i+1; k < nor; k++) {
-        elt = get_element_from_row(nob, j, rows[k]);
+        elt = rows[k][j];
         if (0 != elt) {
           elt = (*prime_operations.negate)(elt);
           if (1 != elt) {

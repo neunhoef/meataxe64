@@ -85,3 +85,6 @@
 20020221 - add split_with_subspace
 20020224 - add determinants, and more skew powers
 20020227 - add skew sixth and seventh, using Gaussian determinants
+20020302 - optimisations in new irreducible stuff
+20020303 - further memory improvements in scripts
+20020307 - add zexport for exporting back to old meataxe

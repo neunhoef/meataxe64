@@ -1,11 +1,12 @@
 #
-# $Id: dual,v 1.2 2002/01/14 23:43:45 jon Exp $
+# $Id: dual,v 1.3 2002/03/07 13:43:30 jon Exp $
 #
 # Script to dual of a matrix
 #
 # Inputs
 # $1: matrix
 # $2: out
+# $3: memory (optional)
 #
 # Return codes
 # 1: error in parameters
@@ -13,8 +14,8 @@
 #
 #set -v
 . functions
-usage="$0: usage: $0 <in> <out>"
-if [ $# -ne 2 ]; then
+usage="$0: usage: $0 <in> <out> [<memory>]"
+if [ $# -ne 2 -a $# -ne 3 ]; then
   echo $usage
   exit 1;
 fi
@@ -32,10 +33,14 @@ else
   echo "$0: missing file $a"
   exit 1
 fi
+if [ $# -eq 2 ]; then
+  memory=200
+else
+  memory=$3
+fi
 tmp=tmp${PPID}
-ztr $a ${tmp}.0
+ztr $a ${tmp}.0 $memory
 ok=0
-memory=200
 while [ 0 -eq $ok ]; do
   ziv ${tmp}.0 $o $memory 2>/dev/null
   ret=$?

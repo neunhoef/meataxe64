@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.49 2002/02/27 19:06:17 jon Exp $
+# $Id: makefile,v 1.50 2002/03/07 13:43:30 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -33,6 +33,7 @@ ZCV_TARGET=	zcv
 ZDIAG_TARGET=	zdiag
 ZDIFF_TARGET=	zdiff
 ZEX_TARGET=	zex
+ZEXPORT_TARGET=	zexport
 ZFE_TARGET=	zfe
 ZID_TARGET=	zid
 ZIP_TARGET=	zip
@@ -98,6 +99,7 @@ ZCV_MODULES=	elements endian header ip primes read utils write
 ZDIAG_MODULES=	elements endian header memory primes read rows utils write zdiag
 ZDIFF_MODULES=	diff endian header memory primes read utils zdiff
 ZEX_MODULES=	elements endian exrows files header map memory primes read rows utils write zex
+ZEXPORT_MODULES=	endian header memory primes read rows utils write zexport
 ZFE_MODULES=	elements endian extend extend_matrix header memory primes read rows utils write zfe
 ZID_MODULES=	id ident elements endian header memory primes rows utils write
 ZIP_MODULES=	elements endian header ipp memory primes read rows utils write
@@ -163,6 +165,7 @@ MODULES=	$(DTOU_MODULES) \
 	$(ZDIAG_MODULES) \
 	$(ZDIFF_MODULES) \
 	$(ZEX_MODULES) \
+	$(ZEXPORT_MODULES) \
 	$(ZFE_MODULES) \
 	$(ZID_MODULES) \
 	$(ZIP_MODULES) \
@@ -309,6 +312,9 @@ TARGET:=ZDIFF
 include targets.txt
 
 TARGET:=ZEX
+include targets.txt
+
+TARGET:=ZEXPORT
 include targets.txt
 
 TARGET:=ZFE

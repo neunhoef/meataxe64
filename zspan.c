@@ -1,5 +1,5 @@
 /*
- * $Id: zspan.c,v 1.3 2002/01/26 00:36:06 jon Exp $
+ * $Id: zspan.c,v 1.4 2002/03/07 13:43:30 jon Exp $
  *
  * Compute the span of a matrix
  *
@@ -46,7 +46,6 @@ int main(int argc, const char * const argv[])
   if (0 == vectors) {
     vectors = 1;
   }
-  inp = fopen(in, "r");
   if (0 == open_and_read_binary_header(&inp, &h_in, in, name)) {
     fprintf(stderr, "%s: cannot open %s, terminating\n", name, in);
     exit(1);

@@ -1,0 +1,55 @@
+#
+# $Id: find_nullity_one_with_orders,v 1.1 2002/03/07 13:43:30 jon Exp $
+#
+# Script to find an element of nullity one in two generators
+#
+# Inputs
+# $1: generator a
+# $2: generator b
+# $3: output file name
+# $4: order a
+# $5: order b
+# $6: initial memory (optional)
+#
+usage="$0: usage: $0 <a> <b> <out> <order a> <order b> [<memory>]"
+if [ $# -ne 5 -a $# -ne 6 ]; then
+  echo $usage
+  exit 1;
+fi
+. functions
+a=$1
+b=$2
+e=$3
+o_a=$4
+o_b=$5
+tmp=tmp${PPID}
+ok=0
+if [ $# -eq 5 ]; then
+  memory=200
+else
+  memory=$6
+fi
+nor=`znor $a`
+q=`zprime $a`
+id=id_${q}_$nor
+if [ ! -e $id ]; then
+  echo Creating id
+  zid $q $nor $nor $id
+fi
+# Try zsums
+while [ $ok -eq 0 ]; do
+  out=`zsums $a $b ${tmp}.zsums $o_a $o_b 10 1 $memory 2>/dev/null`
+  ret=$?
+  if [ 2 -eq $ret ]; then
+    let memory=`more_memory $memory`
+  elif [ 0 -eq $ret ]; then
+    ok=1
+#   echo nullity one on $out
+    name=`echo $out | sed -e "s/^.*element //g;s/ of nullity.*$//g"`
+    cp ${name} $e
+  else
+    echo Failed to find an element of nullity one
+    rm -f ${tmp}*
+    exit 254
+  fi
+done

@@ -1,5 +1,5 @@
 #
-# $Id: preserves,v 1.1 2002/01/14 23:43:45 jon Exp $
+# $Id: preserves,v 1.2 2002/03/07 13:43:30 jon Exp $
 #
 # Script to check if a matrix preservers a quadratic form
 #
@@ -9,6 +9,7 @@
 # $3: diagonal matrix for Q
 # $4: g
 # $5: g transpose
+# $6: initial memory (optional)
 #
 # Return codes
 # 1: error in parameters
@@ -17,8 +18,8 @@
 #
 #set -v
 . functions
-usage="$0: usage: $0 <Q> <S> <lambda> <g> <g transpose>"
-if [ $# -ne 5 ]; then
+usage="$0: usage: $0 <Q> <S> <lambda> <g> <g transpose> [<memory>]"
+if [ $# -ne 5 -a $# -ne 6 ]; then
   echo $usage
   exit 1;
 fi
@@ -75,11 +76,16 @@ else
   echo "$0: missing file $g_t"
   exit 1
 fi
+if [ $# -eq 6 ]; then
+  memory=$6
+else
+  memory=200
+fi
 # TODO: reuse temps
 tmp=tmp${PPID}
-zmu $g $Q ${tmp}.0
-zmu ${tmp}.0 $g_t ${tmp}.1
-ztr ${tmp}.1 ${tmp}.2
+zmu $g $Q ${tmp}.0 $memory
+zmu ${tmp}.0 $g_t ${tmp}.1 $memory
+ztr ${tmp}.1 ${tmp}.2 $memory
 zad ${tmp}.1 ${tmp}.2 ${tmp}.3
 if diff $S ${tmp}.3 2>/dev/null 1>&2; then
   zdiag ${tmp}.1 ${tmp}.4

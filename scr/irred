@@ -1,5 +1,5 @@
 #
-# $Id: irred,v 1.4 2002/01/26 00:36:06 jon Exp $
+# $Id: irred,v 1.5 2002/03/07 13:43:30 jon Exp $
 #
 # Script to discover if a representation is irreducible
 #
@@ -8,6 +8,7 @@
 # $2: generator b
 # $3: element with which to split
 # $4: output filename base
+# $5: memory (optional)
 #
 # outputs will be of the form <$3>_<q>_<nor>_{1,2}
 # where nor is number of rows, and q is the prime power
@@ -21,7 +22,7 @@
 #
 #set -v
 usage="$0: usage: $0 <a> <b> <e> <output_stem>"
-if [ $# -ne 4 ]; then
+if [ $# -ne 4 -a $# -ne 5 ]; then
   echo $usage
   exit 1;
 fi
@@ -53,17 +54,22 @@ tmp=tmp${PPID}
 #echo Using tmp stem $tmp
 ok=0
 nullity=0
-ztr $a ${tmp}.1
+if [ $# -eq 5 ]; then
+  memory=$5
+else
+  memory=200
+fi
+ztr $a ${tmp}.1 $memory
 if [ $? -ne 0 ]; then
   rm ${tmp}*
   exit 1
 fi
-ztr $b ${tmp}.2
+ztr $b ${tmp}.2 $memory
 if [ $? -ne 0 ]; then
   rm ${tmp}*
   exit 1
 fi
-ztr $e ${tmp}.3
+ztr $e ${tmp}.3 $memory
 if [ $? -ne 0 ]; then
   rm ${tmp}*
   exit 1
@@ -73,9 +79,9 @@ split_with_element ${tmp}.1 ${tmp}.2 ${tmp}.3 ${o}_tra 1
 ret=$?
 if [ $ret -eq 0 ]; then
   for x in ${o}_tra_${nor}*_1; do
-    ztr $x `echo $x | sed -e "s/_tra//g"`
+    ztr $x `echo $x | sed -e "s/_tra//g"` $memory
     y=`echo $x | sed -e "s/_1$/_2/g"`
-    ztr $y `echo $y | sed -e "s/_tra//g"`
+    ztr $y `echo $y | sed -e "s/_tra//g"` $memory
   done
 fi
 rm ${tmp}*
