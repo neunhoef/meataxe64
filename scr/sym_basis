@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: sym_basis,v 1.6 2002/09/11 21:20:47 jon Exp $
+# $Id: sym_basis,v 1.7 2002/09/19 10:51:09 jon Exp $
 #
 # Script to compute a symmetry basis wrt an ordered set of irreducibles
 #
@@ -37,24 +37,61 @@ tmp=tmp${PPID}
 basis=${tmp}.31
 cat /dev/null > $mult
 for x in `cat $irreds`; do
+  w=$x
 #
 # TODO: cope with dual here
 # TODO: dualise x, classify, reset x and then continue
 #
-  dim=`znor ${x}_1`
-  y=`ls ${x}_1_I*`
+  if [ 1 -eq $dualise ]; then
+    i=1
+    names=
+    while [ 0 -lt $i ]; do
+      if [ -e ${x}_${i} ]; then
+        names="$names ${x}_${i}"
+      else
+        break
+      fi
+      let i=$i+1
+    done
+    i=1
+    dual_names=
+    for y in $names; do
+      dual $y ${tmp}_${i} $memory
+      dual_names="$dual_names ${tmp}_${i}"
+      let i=$i+1
+    done
+    r=`new_irred $memory $dual_names`
+    ret=$?
+    if [ 0 -eq $ret ]; then
+      rm -f ${tmp}.*
+      echo "$name: new unknown dual irreducible found for ${x}, terminating"
+      exit 255
+    elif [ 1 -eq $ret ]; then
+      rm -f ${tmp}.*
+      echo "$name: failure in new_irred, terminating"
+      exit 1
+    elif [ 255 -ne $ret ]; then
+      rm -f ${tmp}.*
+      echo "$name: unexpected return $ret from new_irred, terminating"
+      exit 1
+    fi
+    irr=`echo $r | sed -e "s/Existing irreducible //g;s/ found//g"`
+    w=$irr
+  fi
+  dim=`znor ${w}_1`
+  y=`ls ${w}_1_I*`
   ret=$?
   if [ 0 -ne $ret ]; then
-    echo "$name: failed to find irreducible script for $x, terminating"
+    echo "$name: failed to find irreducible script for ${w}, terminating"
     exit 1
   fi
   count=0
   gamma=${tmp}.0
 # compute the gamma operator in the generators for irreducible X
-  $script $gen_count $x $memory $gamma $*
+  $script $gen_count ${w} $memory $gamma $*
   ret=$?
   if [ 0 -ne $ret ]; then
-    echo "$name: gamma operator computation failed for $x, terminating"
+    echo "$name: gamma operator computation failed for ${w}, terminating"
     exit 1
   fi
 # compute the image of the gamma operator
@@ -107,7 +144,7 @@ for x in `cat $irreds`; do
         echo "$name: failed to spin vector $y, terminating"
         exit 1
       fi
-      if [ $d -ne `znor ${x}_1` ]; then
+      if [ $d -ne `znor ${w}_1` ]; then
         rm -f ${tmp}.*
         echo "$name: vector $y spins to an incorrect subspace, terminating"
         exit 1
@@ -136,24 +173,24 @@ for x in `cat $irreds`; do
         exit 1
       fi
       irr=`echo $r | sed -e "s/Existing irreducible //g;s/ found//g"`
-      if [ "$irr" != "$x" ]; then
+      if [ "$irr" != "${w}" ]; then
         rm -f ${tmp}.*
         echo "$name: vector $y spins to an incorrect subspace, terminating"
         exit 1
       fi
 # Need to convert our non-standard basis in ${tmp}.3 to a standard basis as per the irreducibles
 # Use the script associated with irreducible x
-      z=`ls ${x}_1_I*`
+      z=`ls ${w}_1_I*`
       ret=$?
       if [ 0 -ne $ret ]; then
-        echo "$name: failed to find irreducible script for $x, terminating"
+        echo "$name: failed to find irreducible script for ${w}, terminating"
         rm -f ${tmp}.*
         exit 1
       fi
-      script_x=`echo $z | sed -e "s?${x}_1_??g"`
+      script_x=`echo $z | sed -e "s?${w}_1_??g"`
       ret=$?
       if [ 0 -ne $ret ]; then
-        echo "$name: failed to produce irreducible script for $x, terminating"
+        echo "$name: failed to produce irreducible script for ${w}, terminating"
         rm -f ${tmp}.*
         exit 1
       fi

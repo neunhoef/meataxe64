@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.25 2002/09/18 17:05:06 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.26 2002/09/19 10:51:09 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -7338,8 +7338,7 @@ irreducibles, in the required order</td>
 <td valign=top>4</td><td valign=top>Output multiplicities</td>
 </tr>
 <tr>
-<td valign=top>5</td><td valign=top>Dualise the order (this parameter
-not yet implemented)</td>
+<td valign=top>5</td><td valign=top>Dualise the order of irreducibles</td>
 </tr>
 <tr>
 <td valign=top>6</td><td valign=top>Script to produce the gamma
@@ -7372,9 +7371,11 @@ representation, as defined in Lux and Wiegelmann. The generators given
 generate the condensation subgroup, and the output is a basis by which
 the full group generators can be conjugated to give them relative to
 the symmetry basis, plus the file of multiplicities required by <a
-href="#ztco">ztco</a>. The dualise parameter is not implemented as its
-effect can be achieved by using the dual ordering of the irreducibles
-in parameter 1. The gamma operator script takes five or more
+href="#ztco">ztco</a>. The dualise parameter, if set to 1, indicates
+that the irreducibles in parameter 1 should be used in the dual order.
+This is required when producing a symmetry basis for the second
+parameter of a tensor product (again, see Lux and Wiegelmann for the
+reasons behind this). The gamma operator script takes five or more
 parameters, specifying the generator count, the stem for the
 irreducible, the memory to be used, the output, and the generators in
 the representation for which a symmetry basis is being produced. Such
