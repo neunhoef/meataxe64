@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: sym_basis,v 1.8 2002/10/13 14:16:08 jon Exp $
+# $Id: sym_basis,v 1.9 2002/10/13 20:07:20 jon Exp $
 #
 # Script to compute a symmetry basis wrt an ordered set of irreducibles
 #
@@ -95,7 +95,7 @@ for x in `cat $irreds`; do
     exit 1
   fi
 # compute the image of the gamma operator
-  dim=`zbase $gamma . ${tmp}.1 $memory`
+  dim=`zbase -m $memory $gamma . ${tmp}.1`
   ret=$?
   if [ 0 -ne $ret ]; then
     rm -f ${tmp}.*
@@ -121,7 +121,7 @@ for x in `cat $irreds`; do
           echo "$name: zjoin failed, terminating"
           exit 1
         fi
-        r=`zrn ${tmp}.3 $memory`
+        r=`zrn -m $memory ${tmp}.3`
         ret=$?
         if [ 0 -ne $ret ]; then
           rm -f ${tmp}.*
@@ -202,7 +202,7 @@ for x in `cat $irreds`; do
         echo "$name: failed to apply script to ${tmp}.6_1 ${tmp}.6_2, terminating"
         exit 1
       fi
-      n=`zns ${tmp}.6 ${tmp}.7 $memory`
+      n=`zns -m $memory ${tmp}.6 ${tmp}.7`
       ret=$?
       if [ 0 -ne $ret ]; then
         echo "$name: zns failed with code $ret, terminating"

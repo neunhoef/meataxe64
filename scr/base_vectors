@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: base_vectors,v 1.4 2002/09/11 21:20:47 jon Exp $
+# $Id: base_vectors,v 1.5 2002/10/13 20:07:20 jon Exp $
 #
 # Script to find a standard base for a representation
 #
@@ -49,7 +49,7 @@ memory=200
 ok=0
 shift 3
 while [ $ok -eq 0 ]; do
-  nullity=`zns $e ${tmp}.0 $memory 2>/dev/null`
+  nullity=`zns -m $memory $e ${tmp}.0 2>/dev/null`
   ret=$?
   if [ $ret -eq 0 ]; then
     ok=1

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: quick_order,v 1.4 2002/10/13 14:16:08 jon Exp $: f1,v 1.2 2001/12/01 10:46:02 jon Exp $
+# $Id: quick_order,v 1.5 2002/10/13 20:07:20 jon Exp $: f1,v 1.2 2001/12/01 10:46:02 jon Exp $
 #
 # Script to compute order of a matrix, in a naive fashion
 # returning 10 if it's greater than 10
@@ -34,7 +34,7 @@ fi
 memory=200
 ok=0
 while [ $ok -eq 0 ]; do
-  r=`zrn $a $memory 2>/dev/null`
+  r=`zrn -m $memory $a 2>/dev/null`
   ret=$?
   if [ $ret -eq 2 ]; then
     let memory=`more_memory $memory`

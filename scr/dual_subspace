@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: dual_subspace,v 1.3 2002/10/13 19:09:42 jon Exp $
+# $Id: dual_subspace,v 1.4 2002/10/13 20:07:20 jon Exp $
 #
 # Script to provide a subspace from the dual subspace
 #
@@ -43,7 +43,7 @@ if [ $? -ne 0 ]; then
 fi
 ok=0
 while [ 0 -eq $ok ]; do
-  nullity=`zns ${tmp}.1 ${tmp}.2 $memory 2>/dev/null`
+  nullity=`zns -m $memory ${tmp}.1 ${tmp}.2 2>/dev/null`
   ret=$?
   if [ $ret -eq 0 ]; then
     if [ ! -d tmp ]; then
@@ -55,7 +55,7 @@ while [ 0 -eq $ok ]; do
       rm -f ${tmp}*
       exit 1
     fi
-    zbase ${tmp}.2 tmp $o $memory
+    zbase -m $memory ${tmp}.2 tmp $o
     ret=$?
     rm -f ${tmp}*
     if [ 0 -ne $ret ]; then
