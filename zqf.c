@@ -1,5 +1,5 @@
 /*
- * $Id: zqf.c,v 1.8 2004/02/15 10:27:17 jon Exp $
+ * $Id: zqf.c,v 1.9 2004/08/21 13:22:31 jon Exp $
  *
  * Clear to zero the upper triangle of a matrix, including the diagonal
  * This is a utility program for computation of quadratic forms
@@ -7,6 +7,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <errno.h>
 #include "elements.h"
 #include "endian.h"

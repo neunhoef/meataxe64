@@ -1,11 +1,12 @@
 /*
- * $Id: zpcv.c,v 1.4 2004/01/04 21:22:50 jon Exp $
+ * $Id: zpcv.c,v 1.5 2004/08/21 13:22:31 jon Exp $
  *
  * Calculate lift from permutation condensation representation
  *
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "endian.h"
 #include "memory.h"
 #include "parse.h"

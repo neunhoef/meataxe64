@@ -1,5 +1,5 @@
 /*
- * $Id: rn.c,v 1.14 2004/04/25 16:31:48 jon Exp $
+ * $Id: rn.c,v 1.15 2004/08/21 13:22:31 jon Exp $
  *
  * Compute the rank of a matrix
  *
@@ -7,6 +7,7 @@
 
 #include "rn.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <assert.h>
 #include <errno.h>
 #include "clean.h"

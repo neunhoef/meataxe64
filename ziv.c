@@ -1,11 +1,12 @@
 /*
- * $Id: ziv.c,v 1.4 2004/01/04 21:22:50 jon Exp $
+ * $Id: ziv.c,v 1.5 2004/08/21 13:22:31 jon Exp $
  *
  * Invert a matrix
  *
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "endian.h"
 #include "iv.h"
 #include "memory.h"

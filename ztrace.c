@@ -1,11 +1,12 @@
 /*
- * $Id: ztrace.c,v 1.8 2004/01/31 13:24:51 jon Exp $
+ * $Id: ztrace.c,v 1.9 2004/08/21 13:22:32 jon Exp $
  *
  * Compute the trace of a matrix
  *
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <errno.h>
 #include "elements.h"
 #include "endian.h"

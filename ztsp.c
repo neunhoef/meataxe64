@@ -1,11 +1,12 @@
 /*
- * $Id: ztsp.c,v 1.4 2004/01/04 21:22:50 jon Exp $
+ * $Id: ztsp.c,v 1.5 2004/08/21 13:22:32 jon Exp $
  *
  * Spin some vectors under two generators in tensor space
  *
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "endian.h"
 #include "memory.h"
 #include "parse.h"

@@ -1,11 +1,12 @@
 /*
- * $Id: zrnf.c,v 1.7 2004/01/04 21:22:50 jon Exp $
+ * $Id: zrnf.c,v 1.8 2004/08/21 13:22:32 jon Exp $
  *
  * Compute the rank of a matrix, using temporary files
  *
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "endian.h"
 #include "memory.h"
 #include "parse.h"

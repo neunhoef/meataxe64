@@ -1,11 +1,12 @@
 /*
- * $Id: zsignf.c,v 1.2 2004/01/04 21:22:50 jon Exp $
+ * $Id: zsignf.c,v 1.3 2004/08/21 13:22:32 jon Exp $
  *
  * Compute the orthogonal group sign of a form using intermediate files
  *
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "endian.h"
 #include "memory.h"
 #include "signf.h"

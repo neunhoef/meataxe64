@@ -1,5 +1,5 @@
 /*
- * $Id: ns.c,v 1.11 2004/04/25 16:31:48 jon Exp $
+ * $Id: ns.c,v 1.12 2004/08/21 13:22:30 jon Exp $
  *
  * Compute the null space of a matrix
  *
@@ -7,6 +7,7 @@
 
 #include "ns.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <assert.h>
 #include <errno.h>
 #include "clean.h"

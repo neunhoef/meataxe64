@@ -1,5 +1,5 @@
 /*
- * $Id: zmsbf.c,v 1.5 2004/01/04 21:22:50 jon Exp $
+ * $Id: zmsbf.c,v 1.6 2004/08/21 13:22:31 jon Exp $
  *
  * Spin some vectors under multiple generators to obtain a standard base
  * using intermediate files in a temporary directory
@@ -7,6 +7,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "endian.h"
 #include "memory.h"
 #include "msbf.h"

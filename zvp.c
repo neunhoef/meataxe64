@@ -1,11 +1,12 @@
 /*
- * $Id: zvp.c,v 1.6 2004/01/04 21:22:50 jon Exp $
+ * $Id: zvp.c,v 1.7 2004/08/21 13:22:32 jon Exp $
  *
  * Permute some vectors under two generators
  *
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "endian.h"
 #include "memory.h"
 #include "parse.h"

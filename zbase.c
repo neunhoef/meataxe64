@@ -1,11 +1,12 @@
 /*
- * $Id: zbase.c,v 1.7 2004/01/04 21:22:50 jon Exp $
+ * $Id: zbase.c,v 1.8 2004/08/21 13:22:31 jon Exp $
  *
  * Compute a basis for a space from a set of vectors
  *
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "base.h"
 #include "endian.h"
 #include "memory.h"

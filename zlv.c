@@ -1,11 +1,12 @@
 /*
- * $Id: zlv.c,v 1.4 2004/01/04 21:22:50 jon Exp $: zss.c,v 1.1 2001/11/25 00:17:19 jon Exp $
+ * $Id: zlv.c,v 1.5 2004/08/21 13:22:31 jon Exp $: zss.c,v 1.1 2001/11/25 00:17:19 jon Exp $
  *
  * Calculate inverse quotient space representation, ie lift
  *
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "endian.h"
 #include "lv.h"
 #include "memory.h"

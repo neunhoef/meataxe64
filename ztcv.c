@@ -1,11 +1,12 @@
 /*
- * $Id: ztcv.c,v 1.3 2004/01/04 21:22:50 jon Exp $
+ * $Id: ztcv.c,v 1.4 2004/08/21 13:22:32 jon Exp $
  *
  * Calculate lift from tensor condensation representation
  *
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "endian.h"
 #include "memory.h"
 #include "parse.h"

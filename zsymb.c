@@ -1,11 +1,12 @@
 /*
- * $Id: zsymb.c,v 1.2 2004/01/04 21:22:50 jon Exp $
+ * $Id: zsymb.c,v 1.3 2004/08/21 13:22:32 jon Exp $
  *
  * Create a symmetry basis
  *
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "endian.h"
 #include "memory.h"
 #include "symb.h"

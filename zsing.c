@@ -1,11 +1,12 @@
 /*
- * $Id: zsing.c,v 1.4 2004/01/04 21:22:50 jon Exp $
+ * $Id: zsing.c,v 1.5 2004/08/21 13:22:32 jon Exp $
  *
  * Compute a singular vector for a form on a space
  *
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "endian.h"
 #include "memory.h"
 #include "singular.h"

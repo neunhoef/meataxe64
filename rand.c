@@ -1,5 +1,5 @@
 /*
- * $Id: rand.c,v 1.2 2002/10/13 16:38:07 jon Exp $
+ * $Id: rand.c,v 1.3 2004/08/21 13:22:30 jon Exp $
  *
  * Subroutine to generate a random matrix
  *
@@ -7,7 +7,6 @@
 
 #include "rand.h"
 #include <stdio.h>
-#include <stdlib.h>
 #include <assert.h>
 #include <errno.h>
 #include "elements.h"

@@ -315,3 +315,4 @@ skew seventh
 20040728 - Fix minor fault in real_indicate
 20040731 - Add ztcocon to continue a tensor condense eg to recover from an unexpected machine shutdown)
 20040814 - Add ztcocon documentation
+20040821 - Add FreeBSD port

@@ -1,11 +1,12 @@
 /*
- * $Id: zclean.c,v 1.3 2004/01/04 21:22:50 jon Exp $
+ * $Id: zclean.c,v 1.4 2004/08/21 13:22:31 jon Exp $
  *
  * Clean a set of vectors with another set
  *
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "clean_vectors.h"
 #include "endian.h"
 #include "memory.h"

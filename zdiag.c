@@ -1,5 +1,5 @@
 /*
- * $Id: zdiag.c,v 1.8 2004/01/04 21:22:50 jon Exp $
+ * $Id: zdiag.c,v 1.9 2004/08/21 13:22:31 jon Exp $
  *
  * Clear to zero the off diagonal elements of a matrix
  * This is a utility program for computation of quadratic forms
@@ -7,6 +7,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <errno.h>
 #include "elements.h"
 #include "endian.h"

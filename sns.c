@@ -1,11 +1,12 @@
 /*
- * $Id: sns.c,v 1.11 2004/01/04 21:22:50 jon Exp $
+ * $Id: sns.c,v 1.12 2004/08/21 13:22:31 jon Exp $
  *
  * Simple compute of the null space of a matrix
  *
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <errno.h>
 #include "clean.h"
 #include "endian.h"

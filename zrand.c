@@ -1,17 +1,17 @@
 /*
- * $Id: zrand.c,v 1.3 2004/01/31 13:24:51 jon Exp $
+ * $Id: zrand.c,v 1.4 2004/08/21 13:22:31 jon Exp $
  *
  * Generate random matrix
  *
  */
 
-#include <stdio.h>
+#include "rand.h"
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include "endian.h"
 #include "memory.h"
 #include "parse.h"
-#include "rand.h"
 
 static const char *name = "zrand";
 

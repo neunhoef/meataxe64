@@ -1,11 +1,12 @@
 /*
- * $Id: znsf.c,v 1.4 2004/01/04 21:22:50 jon Exp $
+ * $Id: znsf.c,v 1.5 2004/08/21 13:22:31 jon Exp $
  *
  * Compute the nullspace of a matrix, using temporary files
  *
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "endian.h"
 #include "memory.h"
 #include "nsf.h"

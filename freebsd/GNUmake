@@ -1,0 +1,9 @@
+#
+# unix specific fragment for meataxe
+#
+# $Id: GNUmake,v 1.1 2004/08/21 13:22:32 jon Exp $
+#
+
+vpath %.c $(SRCDIR)/unix
+
+include unix.txt

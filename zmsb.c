@@ -1,11 +1,12 @@
 /*
- * $Id: zmsb.c,v 1.4 2004/01/04 21:22:50 jon Exp $
+ * $Id: zmsb.c,v 1.5 2004/08/21 13:22:31 jon Exp $
  *
  * Spin some vectors under two generators to obtain a standard base
  *
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include "endian.h"
 #include "memory.h"
 #include "msb.h"
