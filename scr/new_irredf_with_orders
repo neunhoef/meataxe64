@@ -1,5 +1,5 @@
 #
-# $Id: new_irredf_with_orders,v 1.1 2002/04/15 07:47:24 jon Exp $
+# $Id: new_irredf_with_orders,v 1.2 2002/05/26 00:47:20 jon Exp $
 #
 # Script to classify an irreducible representation
 # using intermediate files
@@ -22,7 +22,7 @@
 # 254: no nullity one element found
 # 255: existing irreducible
 #
-usage="$0: usage: $0 <a> <b> <order a> <order b> [<memory>]"
+usage="$0: usage: $0 <a> <b> <order a> <order b> <tmp directory> [<memory>]"
 if [ $# -ne 5 -a $# -ne 6 ]; then
   echo $usage
   exit 1;
@@ -67,7 +67,7 @@ if [ $ret -ne 0 ]; then
   exit $ret
 fi
 name=${tmp}_${nor}
-x=`basef $e $a $b ${name} ${tmp}.0 ${tmp_dir} ${memory}`
+basef $e $a $b ${name} ${tmp}.0 ${tmp_dir} ${memory}
 ret=$?
 if [ $ret -ne 0 ]; then
   echo basef returns $ret, terminating
@@ -96,13 +96,17 @@ fi
 #
 # New irreducible found
 #
-echo Found a new irreducible of dimension ${nor}
+echo Found a new irreducible of dimension ${nor} using script $script
 new_name=`new_irred_name irreds/${nor}`
 #echo assigning new name ${new_name}
 mv ${name}_sb_1 ${new_name}_1
 mv ${name}_sb_2 ${new_name}_2
+if [ -e ${new_name}_1_${script} -o -L ${new_name}_1_${script} ]; then
+  rm ${new_name}_1_${script}
+fi
+ln -s ${new_name}_1 ${new_name}_1_${script}
 if [ `zchar ${tmp}.0` -eq 2 ]; then
-  indicate_with_script ${new_name}_1 ${new_name}_2 $script $o_a $o_b $memory
+  indicatef_with_script ${new_name}_1 ${new_name}_2 $script $o_a $o_b ${tmp_dir} $memory
 fi
 rm -f ${tmp}*
 exit 0

@@ -1,5 +1,5 @@
 /*
- * $Id: zspf.c,v 1.1 2002/03/31 20:55:41 jon Exp $
+ * $Id: zspf.c,v 1.2 2002/05/26 00:47:20 jon Exp $
  *
  * Spin some vectors under two generators to obtain a standard base
  * using intermediate in a temporary directory
@@ -9,11 +9,11 @@
 #include <stdio.h>
 #include "endian.h"
 #include "memory.h"
-#include "sbf.h"
+#include "spf.h"
 
-static const char *name = "zsbf";
+static const char *name = "zspf";
 
-static void sbf_usage(void)
+static void spf_usage(void)
 {
   fprintf(stderr, "%s: usage: %s <in_file> <out_file> <gen_a> <gen_b> <tmp dir> [<memory>]\n", name, name);
 }
@@ -24,7 +24,7 @@ int main(int argc, const char * const argv[])
   unsigned int dim;
 
   if (6 != argc && 7 != argc) {
-    sbf_usage();
+    spf_usage();
     exit(1);
   }
   endian_init();

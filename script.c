@@ -1,5 +1,5 @@
 /*
- * $Id: script.c,v 1.3 2002/04/10 23:33:27 jon Exp $
+ * $Id: script.c,v 1.4 2002/05/26 00:47:20 jon Exp $
  *
  * Function to compute a script in two generators
  *
@@ -46,31 +46,47 @@ static int cleanup(FILE *inp1, FILE *inp2, FILE *outp)
 /* Parse the incoming script up to the first plus */
 /* The result is returned, and the rest of the script is indicated in rest */
 /* rest is set to NULL if there is no plus */
-static const char *parse_plus(const char *script, const char **rest)
+static const char *parse_plus(const char *script, const char **rest, unsigned int *scalar,
+                              unsigned int prime, const char *name)
 {
   const char *plus;
+  const char *res;
   assert(NULL != script);
   assert(NULL != rest);
+  assert(NULL != name);
+  assert(NULL != scalar);
   plus = strchr(script, '+');
   if (NULL == plus) {
     *rest = NULL;
-    return script;
+    res = script;
   } else {
-    char *res;
+    char *tmp;
     unsigned int len = plus - script;
     *rest = plus + 1; /* Point after plus */
-    res = my_malloc(len + 1);
-    strncpy(res, script, len);
-    res[len] = '\0';
-    return res;
+    tmp = my_malloc(len + 1);
+    strncpy(tmp, script, len);
+    tmp[len] = '\0';
+    res = tmp;
   }
+  /* Now check for the scale */
+  if (my_isdigit(*res)) {
+    char *rest;
+    unsigned int val = strtoul(res, &rest, 0);
+    if (val >= prime || 0 == val) {
+      fprintf(stderr, "%s: script scalar %d exceeds field order %d or is zero, terminating\n", name, val, prime);
+      return 0;
+    }
+    *scalar = val;
+    res = rest;
+  } else {
+    *scalar = 1;
+  }
+  return res;
 }
 
-
-static int script_mul(const char *m1, const char *m2, const char *id, const char *out,
-                      const char *tmp, const char *script, unsigned int prime, const char *name)
+static int script_mul(const char *m1, const char *m2, const char *id, const char **out,
+                      const char *tmp, const char *script, const char *name)
 {
-  unsigned int scalar;
   char gen;
   const char *current, *new, *multiplier;
   assert(NULL != m1);
@@ -81,19 +97,12 @@ static int script_mul(const char *m1, const char *m2, const char *id, const char
   assert(NULL != script);
   assert(NULL != name);
   if ('I' == *script) {
-    assert('\0' == script[1]);
-    return scale(id, out, 1, name);
-  }
-  if (my_isdigit(*script)) {
-    char *rest;
-    scalar = strtoul(script, &rest, 0);
-    if (scalar >= prime || 0 == scalar) {
-      fprintf(stderr, "%s: script scalar %d exceeds field order %d or is zero (isdigit gives %d), terminating\n", name, scalar, prime, isdigit(*script));
+    if ('\0' != script[1]) {
+      fprintf(stderr, "%s: unexpected characters '%s' following I in script, terminating\n", name, script + 1);
       return 0;
     }
-    script = rest;
-  } else {
-    scalar = 1;
+    *out = id;
+    return 1;
   }
   gen = *script;
   script++;
@@ -109,49 +118,46 @@ static int script_mul(const char *m1, const char *m2, const char *id, const char
     fprintf(stderr, "%s: script element '%c' is not a generator, terminating\n", name, gen);
     return 0;
   }
-  current = new_id(tmp);
-  if (0 == scale(multiplier, current, scalar, name)) {
-    fprintf(stderr, "%s: script scale of %s by %d failed, terminating\n", name, multiplier, scalar);
-    return 0;
+  if ('\0' == *script) {
+    /* Only one term, just use generator */
+    *out = multiplier;
+  } else {
+    current = multiplier;
+    while ('\0' != *script) {
+      gen = *script;
+      script++;
+      if ('\0' == gen) {
+        fprintf(stderr, "%s: script matrix section missing, terminating\n", name);
+        return 0;
+      }
+      if ('A' == gen) {
+        multiplier = m1;
+      } else if ('B' == gen) {
+        multiplier = m2;
+      } else {
+        fprintf(stderr, "%s: script element '%c' is not a generator, terminating\n", name, gen);
+        return 0;
+      }
+      new = new_id(tmp);
+      if (0 == mul(current, multiplier, new, name)) {
+        fprintf(stderr, "%s: script multiplication of %s by %s failed, terminating\n", name, current, multiplier);
+        return 0;
+      }
+      current = new;
+    }
+    *out = current;
   }
-  while ('\0' != *script) {
-    gen = *script;
-    script++;
-    if ('\0' == gen) {
-      fprintf(stderr, "%s: script matrix section missing, terminating\n", name);
-      return 0;
-    }
-    if ('A' == gen) {
-      multiplier = m1;
-    } else if ('B' == gen) {
-      multiplier = m2;
-    } else {
-      fprintf(stderr, "%s: script element '%c' is not a generator, terminating\n", name, gen);
-      return 0;
-    }
-    new = new_id(tmp);
-    if (0 == mul(current, multiplier, new, name)) {
-      fprintf(stderr, "%s: script multiplication of %s by %s failed, terminating\n", name, current, multiplier);
-      return 0;
-    }
-    current = new;
-  }
-  ren(current, out);
   return 1;
 }
-
 int exec_script(const char *m1, const char *m2, const char *m3,
                 const char *tmp, const char *script, const char *name)
 {
   FILE *inp1 = NULL;
   FILE *inp2 = NULL;
   const header *h1, *h2;
-  unsigned int prime, nor;
+  unsigned int prime, nor, scalar;
   const char *id;
   const char *current, *new, *summand, *rest;
-  NOT_USED(m3);
-  NOT_USED(script);
-  NOT_USED(new);
   assert(NULL != m1);
   assert(NULL != m2);
   assert(NULL != m3);
@@ -189,27 +195,37 @@ int exec_script(const char *m1, const char *m2, const char *m3,
     fprintf(stderr, "%s: unable to create identity, terminating", name);
     return cleanup(inp1, inp2, NULL);
   }
-  summand = parse_plus(script, &rest);
-  current = new_id(tmp);
-  if (0 == script_mul(m1, m2, id, current, tmp, summand, prime, name)) {
+  summand = parse_plus(script, &rest, &scalar, prime, name);
+  if (0 == script_mul(m1, m2, id, &current, tmp, summand, name)) {
     fprintf(stderr, "%s: unable to create summand %s, terminating", name, summand);
     return cleanup(inp1, inp2, NULL);
+  }
+  if (1 != scalar) {
+    new = new_id(tmp);
+    if (0 == scale(current, new, scalar, name)) {
+      fprintf(stderr, "%s: script scale of %s by %d failed, terminating\n", name, current, scalar);
+      return cleanup(inp1, inp2, NULL);
+    }
+    current = new;
   }
   while (NULL != rest) {
     const char *sum = new_id(tmp);
     script = rest;
-    summand = parse_plus(script, &rest);
-    new = new_id(tmp);
-    if (0 == script_mul(m1, m2, id, new, tmp, summand, prime, name)) {
+    summand = parse_plus(script, &rest, &scalar, prime, name);
+    if (0 == script_mul(m1, m2, id, &new, tmp, summand, name)) {
       fprintf(stderr, "%s: unable to create summand %s, terminating", name, summand);
       return cleanup(inp1, inp2, NULL);
     }
-    if (0 == add(current, new, sum, name)) {
+    if (0 == scaled_add(current, new, sum, scalar, name)) {
       fprintf(stderr, "%s: unable to add %s and %s, terminating", name, current, new);
       return cleanup(inp1, inp2, NULL);
     }
     current = sum;
   }
-  (void)ren(current, m3); /* Turn current summand into output */
+  if (0 == strcmp(m1, current) || 0 == strcmp(m2, current)) {
+    return scale(current, m3, 1, name);
+  } else {
+    (void)ren(current, m3); /* Turn current summand into output */
+  }
   return 1;
 }

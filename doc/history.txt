@@ -101,3 +101,10 @@ skew seventh
 20020410 - Starting adding support for permutations
 20020413 - Started work on ivf, abandoning nullspace based solution
 20020414 - First working zivf
+20020422 - Add indicatef and new_irredf
+20020424 - Start first use of new_irredf in anger, on 88000 for Co3
+20020428 - Wrote zsumsf
+20020503 - Started on revised algorithm for ss
+20020504 - Tested and added revised algorithm for ss
+20020507 - Indicator calculation for 88000 for Co3 completes, answer +
+20020511 - Indicator claculation for 83948 for Co2 started

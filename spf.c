@@ -1,5 +1,5 @@
 /*
- * $Id: spf.c,v 1.2 2002/04/10 23:33:27 jon Exp $
+ * $Id: spf.c,v 1.3 2002/05/26 00:47:20 jon Exp $
  *
  * Function to spin some vectors under two generators
  *
@@ -295,12 +295,10 @@ unsigned int spin(const char *in, const char *out, const char *a,
   }
   fclose(f_a);
   fclose(f_b);
-  if (nor != noc) {
-    fprintf(stderr, "%s: fails to spin to full space (%d, %d), terminating\n",
-            name, nor, noc);
-    exit(1);
-  }
+  header_set_nor(h_out, nor);
   if (0 == open_and_write_binary_header(&outp, h_out, out, name)) {
+    fclose(echelised);
+    (void)remove(name_echelised);
     exit(1);
   }
   header_free(h_out);

@@ -1,18 +1,16 @@
 /*
- * $Id: ss.c,v 1.8 2002/04/10 23:33:27 jon Exp $
+ * $Id: ss.c,v 1.9 2002/05/26 00:47:20 jon Exp $
  *
  * Function to compute subspace representation
- * Will work entirely in RAM if possible, otherwise rereading basis file
+ * Uses the computed map, rather than clean/echelise
+ * Works entirely in RAM
  *
  */
 
 #include "ss.h"
-#include "clean.h"
 #include "elements.h"
 #include "endian.h"
-#include "grease.h"
 #include "header.h"
-#include "matrix.h"
 #include "memory.h"
 #include "primes.h"
 #include "read.h"
@@ -38,13 +36,9 @@ void subspace(const char *range, const char *image,
 {
   FILE *inp1 = NULL, *inp2 = NULL, *outp = NULL;
   const header *h_in1, *h_in2, *h_out;
-  unsigned int prime, nob, noc, nor, nor_o, noc_o, len, len_e, max_rows, d, elt, step_i, step_j, i;
-  unsigned int **rows1, **rows2, **rows3, **rows4;
+  unsigned int prime, nob, noc, nor, nor_o, noc_o, len, len_e, i, j, elt;
+  unsigned int *row_in, *row_out;
   int *map;
-  prime_ops prime_operations;
-  row_ops row_operations;
-  grease_struct grease;
-  long pos;
   assert(NULL != range);
   assert(NULL != image);
   assert(NULL != out);
@@ -82,135 +76,70 @@ void subspace(const char *range, const char *image,
     cleanup(inp1, inp2, NULL);
     exit(1);
   }
+  if (memory_rows(len, 1000) < 2) {
+    fprintf(stderr, "%s: cannot allocate space for two rows from %s, terminating\n",
+            name, range);
+    cleanup(inp1, inp2, NULL);
+    exit(1);
+  }
+  row_in = memory_pointer(0);
+  row_out = memory_pointer(500);
   h_out = header_create(prime, nob, header_get_nod(h_in1), noc_o, nor_o);
   len_e = header_get_len(h_out);
   assert(header_get_len(h_in2) == len);
   assert(len >= len_e);
   header_free(h_in1);
   header_free(h_in2);
-  pos = ftell(inp1); /* Where we are in the range */
-  primes_init(prime, &prime_operations);
-  rows_init(prime, &row_operations);
-  grease_init(&row_operations, &grease);
-  if (0 == grease_level(prime, &grease, memory_rows(len, 40))) {
-    fprintf(stderr, "%s: failed to get grease for %s, terminating\n",
-            name, range);
-    cleanup(inp1, inp2, NULL);
-    exit(1);
-  }
-  rows1 = matrix_malloc(nor); /* range */
-  rows2 = matrix_malloc(nor_o); /* image */
-  rows3 = matrix_malloc(nor); /* -1 */
-  rows4 = matrix_malloc(nor_o); /* output */
-  max_rows = memory_rows(len, 400);
-  step_i = (max_rows > nor_o) ? nor_o : max_rows;
-  max_rows = memory_rows(len, 60);
-  step_j = (max_rows > nor) ? nor : max_rows;
   if (0 == open_and_write_binary_header(&outp, h_out, out, name)) {
     cleanup(inp1, inp2, outp);
     exit(1);
   }
-  /* Set up image and output rows */
-  for (d = 0; d < step_i; d++) {
-    rows2[d] = memory_pointer_offset(0, d, len);
-    rows4[d] = memory_pointer_offset(400, d, len_e);
-  }
-  /* Set up range and -1 rows */
-  for (d = 0; d < step_j; d++) {
-    rows1[d] = memory_pointer_offset(800, d, len);
-    rows3[d] = memory_pointer_offset(860, d, len_e);
-  }
+  header_free(h_out);
   map = my_malloc(nor * sizeof(int));
-  for (i = 0; i < nor_o; i += step_i) {
-    /* Step through image */
-    unsigned int j, stride_i = (i + step_i > nor_o) ? nor_o - i : step_i;
-    if (0 == endian_read_matrix(inp2, rows2, len, stride_i)) {
-      fprintf(stderr, "%s: failed to read rows from %s, terminating\n",
-              name, range);
+  /* Step through range to set up map */
+  for (i = 0; i < nor; i += 1) {
+    map[i] = -1;
+  }
+  for (i = 0; i < nor; i += 1) {
+    if (0 == endian_read_row(inp1, row_in, len)) {
+      fprintf(stderr, "%s: cannot read row from %s, terminating\n", name, range);
       cleanup(inp1, inp2, outp);
       exit(1);
     }
-    for (d = 0; d < stride_i; d++) {
-      row_init(rows4[d], len_e);
-    }
-    /* Step through range */
-    for (j = 0; j < nor; j += step_j) {
-      unsigned int stride_j = (j + step_j > nor) ? nor - j : step_j;
-      if (0 == endian_read_matrix(inp1, rows1, len, stride_j)) {
-        fprintf(stderr, "%s: failed to read rows from %s, terminating\n",
-                name, range);
-        cleanup(inp1, inp2, outp);
-        exit(1);
-      }
-      if (0 == i) {
-        /* First time through, set up map */
-        for (d = 0; d < stride_j; d++) {
-          unsigned int i;
-          elt = first_non_zero(rows1[d], nob, len, &i);
-          assert(0 != elt);
-          NOT_USED(elt);
-          map[d + j] = i;
-        }
-      }
-      elt = (*prime_operations.negate)(1);
-      for (d = 0; d < stride_j; d++) {
-        row_init(rows3[d], len_e);
-        put_element_to_row(nob, d + j, rows3[d], elt);
-      }
-      clean(rows1, stride_j, rows2, stride_i, map + j, rows3, rows4, 1,
-            grease.level, prime, len, nob, 920, 960, len_e, name);
-#ifndef NDEBUG
-      {
-        unsigned int k, elt;
-        /* Check for bits not being cleaned, or becoming set again */
-        elt = get_element_from_row(nob, map[j], rows2[0]);
-        if (0 != elt) {
-          fprintf(stderr, "Cleaning with row %d fails to clear bit %d\n", j, map[j]);
-        }
-        for (k = 0; k < j; k++) {
-          elt = get_element_from_row(nob, map[k], rows2[0]);
-          if (0 != elt) {
-            fprintf(stderr, "Cleaning with row %d has reset bit %d\n", j, map[k]);
-          }
-        }
-      }
-#endif
-    }
-#ifndef NDEBUG
-    for (d = 0; d < stride_i; d++) {
-      if (0 == row_is_zero(rows2[d], len)) {
-        unsigned int k, l;
-        elt = first_non_zero(rows2[d], nob, len, &k);
-        l = 0;
-        while (l < nor) {
-          if (map[l] == (int)k) {
-            break;
-          }
-          l++;
-        }
-        fprintf(stderr, "Suspicious row %d not cleaned to zero, first bit position %d, from row %d\n", d +i, k, l);
-      }
-    }
-#endif
-    if (0 == endian_write_matrix(outp, rows4, len_e, stride_i)) {
-      fprintf(stderr, "%s: failed to write output to %s, terminating\n",
-              name, out);
+    elt = first_non_zero(row_in, nob, len, &j);
+    assert(0 != elt);
+    NOT_USED(elt);
+    if (map[i] >= 0) {
+      fprintf(stderr, "%s: %s is not linearly independent/echelised, terminating\n", name, range);
       cleanup(inp1, inp2, outp);
       exit(1);
     }
-    if (0 != fseek(inp1, pos, SEEK_SET)) {
-      fprintf(stderr, "%s: failed to seek in %s, terminating\n",
-                name, range);
+    map[i] = j;
+  }
+  /* inp1 no longer necessary */
+  fclose(inp1);
+  /* Now step through image computing subspace representation */
+  for (i = 0; i < nor_o; i += 1) {
+    /* Read row of image */
+    if (0 == endian_read_row(inp2, row_in, len)) {
+      fprintf(stderr, "%s: cannot read row from %s, terminating\n", name, image);
+      cleanup(inp1, inp2, outp);
+      exit(1);
+    }
+    /* Initialise output row */
+    row_init(row_out, len_e);
+    /* Set the elements */
+    for (j = 0; j < nor; j++) {
+      assert(0 <= map[j]);
+      elt = get_element_from_row(nob, map[j], row_in);
+      put_element_to_row(nob, j, row_out, elt);
+    }
+    if (0 == endian_write_row(outp, row_out, len_e)) {
+      fprintf(stderr, "%s: cannot read row from %s, terminating\n", name, image);
       cleanup(inp1, inp2, outp);
       exit(1);
     }
   }
-  matrix_free(rows1);
-  matrix_free(rows2);
-  matrix_free(rows3);
-  matrix_free(rows4);
-  fclose(inp1);
   fclose(inp2);
   fclose(outp);
-  header_free(h_out);
 }

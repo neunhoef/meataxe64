@@ -1,5 +1,5 @@
 /*
- * $Id: rnf.c,v 1.7 2002/04/10 23:33:27 jon Exp $
+ * $Id: rnf.c,v 1.8 2002/05/26 00:47:20 jon Exp $
  *
  * Compute the rank of a matrix, using temporary files
  *
@@ -29,6 +29,26 @@ struct file_struct
   int created;
   file next;
 };
+
+static void cleanup(const file_struct t1, const file_struct t2)
+{
+  if (t1.created) {
+    (void)remove(t1.name);
+  }
+  if (t2.created) {
+    (void)remove(t2.name);
+  }
+}
+
+static void cleanup_outp(int record, FILE *outp, const char *name)
+{
+  assert(NULL != outp);
+  assert(NULL != name);
+  if (record) {
+    fclose(outp);
+    (void)remove(name);
+  }
+}
 
 unsigned int rank(const char *m1, const char *dir, const char *m2,
                   int record, int full, const char *name)
@@ -122,6 +142,8 @@ unsigned int rank(const char *m1, const char *dir, const char *m2,
     if (0 == endian_read_matrix(in->f, mat1, len, stride)) {
       fprintf(stderr, "%s: cannot read matrix for %s, terminating\n", name, in->name);
       fclose(in->f);
+      cleanup_outp(record, outp, name3);
+      cleanup(t1, t2);
       exit(1);
     }
     echelise(mat1, stride, &n, &map, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, 1, name);
@@ -134,8 +156,9 @@ unsigned int rank(const char *m1, const char *dir, const char *m2,
           if (map[i] >= 0) {
             if (0 == endian_write_row(outp, mat1[i], len)) {
               fprintf(stderr, "%s: cannot write row to %s, terminating\n", name, name3);
-              fclose(inp);
-              fclose(outp);
+              fclose(in->f);
+              cleanup_outp(record, outp, name3);
+              cleanup(t1, t2);
               exit(1);
             }
           }
@@ -148,6 +171,8 @@ unsigned int rank(const char *m1, const char *dir, const char *m2,
         if (NULL == out->f) {
           fprintf(stderr, "%s: cannot open temporary output %s, terminating\n", name, out->name);
           fclose(in->f);
+          cleanup_outp(record, outp, name3);
+          cleanup(t1, t2);
           exit(1);
         }
         for (i = 0; i < rows_remaining; i += step2) {
@@ -160,6 +185,8 @@ unsigned int rank(const char *m1, const char *dir, const char *m2,
             fprintf(stderr, "%s: cannot read matrix for %s, terminating\n", name, in->name);
             fclose(in->f);
             fclose(out->f);
+            cleanup_outp(record, outp, name3);
+            cleanup(t1, t2);
             exit(1);
           }
           clean(mat1, stride, mat2, stride2, map, NULL, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, name);
@@ -169,6 +196,8 @@ unsigned int rank(const char *m1, const char *dir, const char *m2,
                 fprintf(stderr, "%s: cannot write matrix for %s, terminating\n", name, out->name);
                 fclose(in->f);
                 fclose(out->f);
+                cleanup_outp(record, outp, name3);
+                cleanup(t1, t2);
                 exit(1);
               }
               rows_written++;
@@ -185,6 +214,8 @@ unsigned int rank(const char *m1, const char *dir, const char *m2,
           in->f = fopen64(in->name, "rb");
           if (NULL == in->f) {
             fprintf(stderr, "%s: cannot open temporary output %s, terminating\n", name, in->name);
+            cleanup_outp(record, outp, name3);
+            cleanup(t1, t2);
             exit(1);
           }
         }
@@ -198,12 +229,7 @@ unsigned int rank(const char *m1, const char *dir, const char *m2,
   }
   matrix_free(mat1);
   matrix_free(mat2);
-  if (t1.created) {
-    (void)remove(t1.name);
-  }
-  if (t2.created) {
-    (void)remove(t2.name);
-  }
+  cleanup(t1, t2);
   if (0 != record) {
     unsigned int *row;
     row = memory_pointer(0);

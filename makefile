@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.57 2002/04/15 07:47:23 jon Exp $
+# $Id: makefile,v 1.58 2002/05/26 00:47:20 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -76,6 +76,7 @@ ZSPAN_TARGET=	zspan
 ZSPF_TARGET=	zspf
 ZSS_TARGET=	zss
 ZSUMS_TARGET=	zsums
+ZSUMSF_TARGET=	zsumsf
 ZSYMSQ_TARGET=	zsymsq
 ZTE_TARGET=	zte
 ZTR_TARGET=	ztr
@@ -148,8 +149,9 @@ ZSL_MODULES=	add elements endian files grease header maps matrix memory mul prim
 ZSP_MODULES=	clean elements endian grease header maps matrix memory mul primes read rows sp utils write zsp
 ZSPAN_MODULES=	elements endian header matrix memory primes read rows utils write zspan
 ZSPF_MODULES=	clean elements endian grease header maps matrix memory mul primes read rows spf system utils write zspf
-ZSS_MODULES=	clean elements endian grease header matrix memory primes read rows ss utils write zss
+ZSS_MODULES=	elements endian header memory primes read rows ss utils write zss
 ZSUMS_MODULES=	add clean elements endian grease header ident maps matrix memory mul primes read rn rows sums utils write zsums
+ZSUMSF_MODULES=	add clean elements endian grease header ident maps matrix memory mul primes read rn rows sumsf utils write zsumsf
 ZSYMSQ_MODULES=	dets elements endian header matrix memory powers primes read rows utils write zsymsq
 ZTE_MODULES=	elements endian header matrix memory primes read rows te utils write zte
 ZTR_MODULES=	elements endian header matrix memory primes read tr tra utils write
@@ -224,6 +226,7 @@ MODULES=	$(DTOU_MODULES) \
 	$(ZSPF_MODULES) \
 	$(ZSS_MODULES) \
 	$(ZSUMS_MODULES) \
+	$(ZSUMSF_MODULES) \
 	$(ZSYMSQ_MODULES) \
 	$(ZTE_MODULES) \
 	$(ZTR_MODULES) \
@@ -465,6 +468,9 @@ TARGET:=ZSS
 include targets.txt
 
 TARGET:=ZSUMS
+include targets.txt
+
+TARGET:=ZSUMSF
 include targets.txt
 
 TARGET:=ZSYMSQ

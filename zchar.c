@@ -23,7 +23,7 @@ static void char_usage(void)
 int main(int argc, const char * const argv[])
 {
   FILE *inp;
-  unsigned int prime, ch;
+  unsigned int prime, ch = 1;
   const header *h;
 
   endian_init();

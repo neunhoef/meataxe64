@@ -1,5 +1,5 @@
 /*
- * $Id: sbf.c,v 1.3 2002/04/10 23:33:27 jon Exp $
+ * $Id: sbf.c,v 1.4 2002/05/26 00:47:20 jon Exp $
  *
  * Function to spin some vectors under two generators to obtain a standard base
  *
@@ -319,12 +319,18 @@ unsigned int spin(const char *in, const char *out, const char *a,
   }
   fclose(f_a);
   fclose(f_b);
+  fclose(echelised);
+  (void)remove(name_echelised);
   if (nor != noc) {
     fprintf(stderr, "%s: fails to spin to full space (%d, %d), terminating\n",
             name, nor, noc);
+    fclose(basis);
+    (void)remove(name_basis);
     exit(1);
   }
   if (0 == open_and_write_binary_header(&outp, h_out, out, name)) {
+    fclose(basis);
+    (void)remove(name_basis);
     exit(1);
   }
   header_free(h_out);
@@ -332,11 +338,9 @@ unsigned int spin(const char *in, const char *out, const char *a,
   copy_rest(outp, basis);
   fclose(outp);
   fclose(basis);
-  fclose(echelised);
   matrix_free(rows1);
   matrix_free(rows2);
   grease_free(&grease);
   (void)remove(name_basis);
-  (void)remove(name_echelised);
   return nor;
 }

@@ -1,0 +1,208 @@
+<html>
+<head>
+<title>
+A new (2002) meataxe
+</title>
+</head>
+<body>
+<table>
+<tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
+<tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
+<tr><td>Version:</td><td>1</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.1 2002/05/26 00:47:20 jon Exp $</td></tr>
+<tr><td>Date:</td><td>20020513</td></tr>
+<tr><td>Status:</td><td>Draft</td></tr>
+</table>
+<h1>Contents</h1>
+<ol>
+<li><a href="#Preface">Preface</a>
+<li><a href="#Purpose">Purpose</a>
+<li><a href="#Structure">Structure</a>
+</ol>
+<a name="Preface">
+<h1>Preface</h1>
+</a>
+<p>
+This work arose out of a desire to build on the work originally done
+for my thesis, along with the work done towards the end of 1998. The
+thesis work was the first meataxe, collaboratively produced with
+Richard Parker, and used to solve three main problems. The first of
+these was the outstanding issue of the 2-modular characters of M24,
+left incomplete in Gordon James' thesis. The second was the completion
+of the 2-modular characters of McL, a part of my own thesis. The third
+was the final stage of the existence proof of J4, which required
+finding a 4995 dimensional submodule of the skew square of the
+conjectured 112 dimensional representation of J4 over GF(2).
+</p>
+<p>
+In 1998, I again collaborated with Richard Parker, to produce the
+beginnings of a distributed meataxe for handling larger dimensional
+problems, essentially by carving up the matrices concerned into
+submatrices, and then applying the standard operations (multiply,
+Gaussian elimination) to them. The example produced was a
+multiplication program, consisting of a m2000 work distribution
+program, and a number of slaves, and this was used to demonstrate
+multiplication of the two monster generators during the 1998 Niklaus
+conference weekend.
+</p>
+<p>
+In August 2001, I decided to revisit the 1998 work. I realised that in
+terms of a full meataxe, we had very little, and so took this as an
+opportunity to explore a new design of my own. With the exception of
+the monster generation code, everything in this meataxe is my own
+original work. Towards the end of 2001 I had enough of a meataxe to
+split permutation representations, and had computed the composition
+factors for my test case, the three permutation representations of He
+available on the Birmingham Atlas website.
+</p>
+<p>
+At the end of November 2001, I communicated with Rob Wilson at
+Birmingham, telling him what I had done and what capabilities my
+system had. He pointed out that the full table for He was known, and
+suggested that I look at some of the outstanding indicator problems on
+the MOC website at Aachen. I added the necessary extensions to my
+system, and set to work. Since starting, at the time of writing, my
+system has computed indicators for 10504 for Suz, 36398 for Co2, 88000
+for Co3, and is in the process of computing the indicator for 83948
+for Co2. It has also demonstrated the existence of and found
+indicators for 8 new 2-modular representations of Co1, and is in the
+process of finding a ninth.
+</p>
+<a name="Purpose">
+<h1>Purpose</h1>
+</a>
+<p>
+This meataxe is intended to address problems in modular representation
+theory, typically finding and proving irreducible representations,
+computing indicators and dealing with other problems where the
+representation rather than the character is under study.
+</p>
+<p>
+This meataxe is intended to be used with current and near future
+hardware and software, and to take advantage of its current and
+expected capabilities. No attempt is made to address old hardware or
+software. The existing meataxes address this area perfectly well, and
+there is little to be gained by the use of old (and almost certainly
+inadequate) systems to address current problems.
+</p>
+<p>
+With the above goals in mind, the following decisions have been taken
+in the design of this meataxe
+</p>
+<ul>
+<li>
+The external printed form as per sources on Birmingham website is
+maintained. In particular, header is a two digit nod (number of
+digits), followed by three six digit fields, the prime power, nor
+(number of rows) and noc (number of columns) (as far as I understand
+it). nod determines how many digits will be consumed per matrix entry.
+Matrices are printed at a maximum of 80 characters per line. It is my
+intention to relax the input format restrictions, which were derived
+from earlier Fortran/assembler implementations of the meataxe.
+</li>
+<li>
+Internally, all matrices are held as arrays of unsigned ints. There is
+no intentional assumption on the size of int, however, since the
+system has only been tested on Intel x86 architectures, it is likely
+that some unintentional assumptions have crept in. Field values are
+packed into ints, as bitfields, with the least significant bits
+corresponding to lower column numbers. Some wastage occurs at bitfield
+and word boundaries, if the prime power does not require a number of
+bits which is a power of two (eg 3, 5, 7, 8). This contrasts with
+meataxe 6, which appears to use unsigned chars in a bit big endian
+fashion, and does not use bitfields.
+</li>
+<li>
+Externally, binary matrices are held in essentially the same form as
+internally, except that they are always little endian. Endian
+conversion takes place on input and output. This allows different
+endian machines, eg Sparcs and PCs, to use the same binary format
+whilst achieving internal efficiency. Each binary matrix contains a
+three word header, consisting of prime power, nor, noc, in little
+endian format. Again, this is in contrast to meataxe 6. As far as I
+can tell, meataxe six did not consider the problem of a consistent
+external binary representation, and hence big and little endian
+machines would be unable to operate on the same file data.
+</li>
+<li>
+-1 is represented as p-1, and indeed all elements of GF(p) are
+represented as their integer minimal non-negative coset
+representatives.
+</li>
+<li>
+Permutations are represented (in printed form) as a list of images of
+1 ... n, rather than in cycle notation for example.
+</li>
+<li>
+Permutations are represented internally as a header with nor = range
+size, noc = image size (to allow non-bijective maps), and prime 1.
+Unfortunately, there is no way of representing this in the printed
+form.
+</li>
+<li>
+Split matrices for the extended operations system are represented as a
+directory containing a special file called map. map has two six digit
+fields as its first row, indicating respectively the number of rows
+and columns into which the matrix has been split. The remaining lines
+of map are one per row, and each entry is the name of a file
+representing that row and column position in the matrix. The names
+used are typically of the form n_m, although this is not a requirement.
+</li>
+<li>
+Return code indicates success. Return code 1 is a general failure, eg
+bad parameters, incompatible parameters etc. Return code 2 is out of
+memory, from which we may recover by rerunning with more memory. High
+value codes come only from scripts and indicate other failures which
+generally correspond to inappropriate operations, eg nullity zero when
+nullity non-zero was required.
+</li>
+<li>
+Permutations may be used in many places where matrices were required,
+and may be added and multiplied. In the case of multiply, two
+permutations multiply to give a further permutation. Two permutations
+may not be added, since the result will not be a permutation and there
+is no way of indicating the field.
+</li>
+</ul>
+<p>
+The decision to use a slightly less space efficient internal format is
+justified as follows. Accessing values from bitfields is more
+efficient than from polynomials in the field order. As the problem
+size grows, the time complexity is cubic whereas the space complexity
+is quadratic. Hence we should always trade space inefficiency for time
+efficiency, given the predictions of Moore's law, which has both
+growing at the same rate, factor two per 18 months.
+</p>
+<p>
+Similarly, the use of the machine word internally allows for the
+production of very efficient add, scale and scaled add code, dependent
+on the field order. Thus operations for low field orders, and
+particularly GF(2), can be made very efficient.
+</p>
+<a name="Structure">
+<h1>Structure</h1>
+</a>
+<p>
+This meataxe is built from two types of component. The first is the
+executable, addressing functions such as find the nullspace of this
+matrix, or add these two matrices to give a third. The second is the
+script. Scripts glue together executables, and sometimes other
+scripts, to give higher functions, such as find all the composition
+factors of this representation and keep a record of the unqiue factors
+in a standard basis, with indicators. The scripts are written in unix
+shell. The executables are written in ANSI C. Consistent compilation
+is achieved using GNU make.
+</p>
+<p>
+Executables are in turn produced by linking together modules with
+specific functions. An example of a module would be the row operations
+as required by add, multiply and Gaussian elimination. Each module has
+a C source file, and a header. An executable will also have a source
+file with no corresponding header, responsible for the very top level
+of the executable and generally doing little more than some elementary
+parameter checking and a function call to the main body of the
+executable.
+</p>
+</body>
+</html>
+

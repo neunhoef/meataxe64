@@ -1,0 +1,52 @@
+#
+# $Id: find_nullity_onef_with_orders,v 1.1 2002/05/26 00:47:20 jon Exp $
+#
+# Script to find an element of nullity one in two generators, using intermediate files
+#
+# Inputs
+# $1: generator a
+# $2: generator b
+# $3: output file name
+# $4: order a
+# $5: order b
+# $6: intermediate file directory
+# $7: initial memory (optional)
+#
+usage="$0: usage: $0 <a> <b> <out> <order a> <order b> [<memory>]"
+if [ $# -ne 6 -a $# -ne 7 ]; then
+  echo $usage
+  exit 1;
+fi
+. functions
+a=$1
+b=$2
+e=$3
+o_a=$4
+o_b=$5
+dir=$6
+tmp=tmp${PPID}
+ok=0
+if [ $# -eq 6 ]; then
+  memory=200
+else
+  memory=$7
+fi
+nor=`znor $a`
+q=`zprime $a`
+# Try zsums
+while [ $ok -eq 0 ]; do
+  out=`zsumsf $a $b ${tmp}.zsums $dir $o_a $o_b 10 1 $memory 2>/dev/null`
+  ret=$?
+  if [ 2 -eq $ret ]; then
+    let memory=`more_memory $memory`
+  elif [ 0 -eq $ret ]; then
+    ok=1
+    name=`echo $out | sed -e "s/^.*element //g;s/ of nullity.*$//g"`
+    cp ${name} $e
+    echo $out | sed -e "s/^.*form //g;s/ .*$//g"
+  else
+    echo Failed to find an element of nullity one
+    rm -f ${tmp}*
+    exit 254
+  fi
+done
