@@ -1,5 +1,5 @@
 /*
- * $Id: tspf.c,v 1.16 2004/06/08 20:51:07 jon Exp $
+ * $Id: tspf.c,v 1.17 2004/08/28 19:58:01 jon Exp $
  *
  * Function to spin some vectors under two generators in tensor space
  * using intermediate files in a temporary directory.
@@ -65,10 +65,10 @@ static void cleanup_tmp(FILE *echelised, const char *name_echelised)
   (void)remove(name_echelised);
 }
 
-unsigned int spin(const char *in, const char *out,
-                  const char *a1, const char *a2,
-                  const char *b1, const char *b2,
-                  const char *dir, const char *name)
+unsigned int tensor_spinf(const char *in, const char *out,
+                          const char *a1, const char *a2,
+                          const char *b1, const char *b2,
+                          const char *dir, const char *name)
 {
   FILE *inp = NULL, *outp = NULL, *f_a1 = NULL, *f_a2 = NULL, *f_b1 = NULL, *f_b2 = NULL, *echelised = NULL;
   const header *h_in, *h_a1, *h_a2, *h_b1, *h_b2;

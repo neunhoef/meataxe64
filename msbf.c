@@ -1,5 +1,5 @@
 /*
- * $Id: msbf.c,v 1.11 2004/04/25 16:31:48 jon Exp $
+ * $Id: msbf.c,v 1.12 2004/08/28 19:58:00 jon Exp $
  *
  * Function to spin some vectors under multiple generators to obtain a standard base
  *
@@ -79,9 +79,9 @@ static int unfinished(struct gen_struct *gens,
   return 0;
 }
 
-unsigned int spin(const char *in, const char *out, const char *dir,
-                  unsigned int argc, const char * const args[],
-                  const char *name)
+unsigned int msb_spinf(const char *in, const char *out, const char *dir,
+                       unsigned int argc, const char * const args[],
+                       const char *name)
 {
   FILE *inp = NULL, *outp = NULL, **files = NULL, *basis = NULL, *echelised = NULL;
   const header *h_in;

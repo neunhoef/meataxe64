@@ -1,5 +1,5 @@
 /*
- * $Id: ztspf.c,v 1.5 2004/08/21 13:22:32 jon Exp $
+ * $Id: ztspf.c,v 1.6 2004/08/28 19:58:01 jon Exp $
  *
  * Spin some vectors under two generators in tensor space
  * using intermediate files in a temporary directory
@@ -31,7 +31,7 @@ int main(int argc, const char * const argv[])
   }
   endian_init();
   memory_init(name, memory);
-  dim = spin(argv[1], argv[2], argv[3], argv[4], argv[5], argv[6], argv[7], name);
+  dim = tensor_spinf(argv[1], argv[2], argv[3], argv[4], argv[5], argv[6], argv[7], name);
   printf("%d\n", dim);
   memory_dispose();
   return 0;

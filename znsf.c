@@ -1,5 +1,5 @@
 /*
- * $Id: znsf.c,v 1.5 2004/08/21 13:22:31 jon Exp $
+ * $Id: znsf.c,v 1.6 2004/08/28 19:58:01 jon Exp $
  *
  * Compute the nullspace of a matrix, using temporary files
  *
@@ -30,7 +30,7 @@ int main(int argc, const char * const argv[])
   }
   endian_init();
   memory_init(name, memory);
-  n = nullspace(argv[1], argv[2], argv[3], name);
+  n = nullspacef(argv[1], argv[2], argv[3], name);
   printf("%d\n", n);
   memory_dispose();
   return 0;

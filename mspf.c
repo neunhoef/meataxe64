@@ -1,5 +1,5 @@
 /*
- * $Id: mspf.c,v 1.16 2004/04/25 16:31:48 jon Exp $
+ * $Id: mspf.c,v 1.17 2004/08/28 19:58:00 jon Exp $
  *
  * Function to spin some vectors under multiple generators
  * using intermediate files in a temporary directory.
@@ -76,8 +76,8 @@ static int unfinished(struct gen_struct *gens,
   return 0;
 }
 
-unsigned int spin(const char *in, const char *out, const char *dir,
-                  unsigned int argc, const char * const args[], const char *name)
+unsigned int spinf(const char *in, const char *out, const char *dir,
+                   unsigned int argc, const char * const args[], const char *name)
 {
   FILE *inp = NULL, *outp = NULL, **files = NULL, *echelised = NULL;
   const header *h_in;

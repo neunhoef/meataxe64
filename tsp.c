@@ -1,5 +1,5 @@
 /*
- * $Id: tsp.c,v 1.15 2004/06/08 20:51:07 jon Exp $
+ * $Id: tsp.c,v 1.16 2004/08/28 19:58:00 jon Exp $
  *
  * Function to spin some vectors under two generators in tensor space
  *
@@ -55,9 +55,9 @@ static void cleanup(FILE *f1, FILE *f2, FILE *f3, FILE *f4, FILE *f5)
     fclose(f5);
 }
 
-unsigned int spin(const char *in, const char *out,
-                  const char *a1, const char *a2,
-                  const char *b1, const char *b2, const char *name)
+unsigned int tensor_spin(const char *in, const char *out,
+                         const char *a1, const char *a2,
+                         const char *b1, const char *b2, const char *name)
 {
   FILE *inp = NULL, *outp = NULL, *f_a1 = NULL, *f_a2 = NULL, *f_b1 = NULL, *f_b2 = NULL;
   const header *h_in, *h_a1, *h_a2, *h_b1, *h_b2;

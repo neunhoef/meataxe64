@@ -1,5 +1,5 @@
 /*
- * $Id: nsf.c,v 1.16 2004/04/25 16:31:48 jon Exp $
+ * $Id: nsf.c,v 1.17 2004/08/28 19:58:00 jon Exp $
  *
  * Compute the nullspace of a matrix, using temporary files
  *
@@ -46,7 +46,7 @@ static void cleanup(const file_struct t1, const file_struct t2, const char *name
   (void)remove(name5);
 }
 
-unsigned int nullspace(const char *m1, const char *m2, const char *dir, const char *name)
+unsigned int nullspacef(const char *m1, const char *m2, const char *dir, const char *name)
 {
   FILE *inp, *outp;
   const header *h;

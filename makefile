@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.92 2004/08/22 18:24:45 jon Exp $
+# $Id: makefile,v 1.93 2004/08/28 19:57:59 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -114,7 +114,7 @@ ZTTR_TARGET=	zttr
 ZVP_TARGET=	zvp
 ZWORDS_TARGET=	zwords
 
-LIB_MODULES=	add clean clean_file clean_vectors command conj count dets diff diffd elements endian exrows extend extend_matrix files grease header ident join map map_or_row maps matrix memory mul mv orbit parse pco powers primes project ps qs rand read restrict scale script singular span spanmsp ss ss_map sums sumsf sums_utils symb system tco te tmul tra ttr utils vp write
+LIB_MODULES=	add clean clean_file clean_vectors command conj count dets diff diffd elements endian exrows extend extend_matrix files grease header ident join map map_or_row maps matrix memory msb msbf msp mspf mul mv ns nsf orbit parse pco powers primes project ps qs rand read restrict rn rnf scale script singular span spanmsp ss ss_map sums sumsf sums_utils symb system tco te tmul tra tsp tspf ttr utils vp write
 
 CONS_MODULES=	constrain
 DTOU_MODULES=	dtou
@@ -148,8 +148,8 @@ ZDIFFD_MODULES=	rows zdiffd
 ZEX_MODULES=	rows zex
 ZEXPORT_MODULES=	rows zexport
 ZFE_MODULES=	rows zfe
-ZFLN_MODULES=	rn rows zfln
-ZFLNF_MODULES=	rnf rows zflnf
+ZFLN_MODULES=	rows zfln
+ZFLNF_MODULES=	rows zflnf
 ZFO_MODULES=	rows zfo
 ZID_MODULES=	id rows
 ZIMPORT_MODULES=	rows zimport
@@ -159,15 +159,15 @@ ZIVF_MODULES=	ivf rows zivf
 ZJOIN_MODULES=	rows zjoin
 ZLP_MODULES=	rows zlp
 ZLV_MODULES=	lv rows zlv
-ZMSB_MODULES=	msb rows zmsb
-ZMSBF_MODULES=	msbf rows zmsbf
-ZMSP_MODULES=	msp rows zmsp
-ZMSPF_MODULES=	mspf rows zmspf
+ZMSB_MODULES=	rows zmsb
+ZMSBF_MODULES=	rows zmsbf
+ZMSP_MODULES=	rows zmsp
+ZMSPF_MODULES=	rows zmspf
 ZMU_MODULES=	mu rows
 ZNOC_MODULES=	znoc
 ZNOR_MODULES=	znor
-ZNS_MODULES=	ns rows zns
-ZNSF_MODULES=	nsf rows znsf
+ZNS_MODULES=	rows zns
+ZNSF_MODULES=	rows znsf
 ZPCO_MODULES=	rows zpco
 ZPCV_MODULES=	pcv rows zpcv
 ZPR_MODULES=	pr rows
@@ -178,14 +178,14 @@ ZPS_MODULES=	zps
 ZQF_MODULES=	rows zqf
 ZQS_MODULES=	rows zqs
 ZRAND_MODULES=	rows zrand
-ZRANKS_MODULES=	rn rows zranks
+ZRANKS_MODULES=	rows zranks
 ZRE_MODULES=	zre
 ZRES_MODULES=	rows zrestrict
-ZRN_MODULES=	rn rows zrn
-ZRNF_MODULES=	rnf rows zrnf
-ZRRANKS_MODULES=	rn rows zrranks
-ZRSUMS_MODULES=	rn rows zrsums
-ZRSUMSF_MODULES=	rnf rows zrsumsf
+ZRN_MODULES=	rows zrn
+ZRNF_MODULES=	rows zrnf
+ZRRANKS_MODULES=	rows zrranks
+ZRSUMS_MODULES=	rows zrsums
+ZRSUMSF_MODULES=	rows zrsumsf
 ZSAD_MODULES=	rows zsad
 ZSCRIPT_MODULES=	rows zscript
 ZSEL_MODULES=	zse
@@ -203,8 +203,8 @@ ZSL_MODULES=	rows slave
 ZSPAN_MODULES=	rows zspan
 ZSPANMSP_MODULES=	rows zspanmsp
 ZSS_MODULES=	rows zss
-ZSUMS_MODULES=	rn rows zsums
-ZSUMSF_MODULES=	rnf rows zsumsf
+ZSUMS_MODULES=	rows zsums
+ZSUMSF_MODULES=	rows zsumsf
 ZSYMB_MODULES=	rows zsymb
 ZSYMSQ_MODULES=	rows zsymsq
 ZTCO_MODULES=	rows ztco
@@ -215,8 +215,8 @@ ZTMU_MODULES=	rows ztmu
 ZTR_MODULES=	rows tr
 ZTRACE_MODULES=	rows ztrace
 ZTRECOV_MODULES=	rows ztrecover
-ZTSP_MODULES=	tsp rows ztsp
-ZTSPF_MODULES=	tspf rows ztspf
+ZTSP_MODULES=	rows ztsp
+ZTSPF_MODULES=	rows ztspf
 ZTTR_MODULES=	rows zttr
 ZVP_MODULES=	rows zvp
 ZWORDS_MODULES=	rows zwords
