@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: base,v 1.14 2002/09/11 21:20:47 jon Exp $
+# $Id: base,v 1.15 2003/04/26 18:22:03 jon Exp $
 #
 # Script to find a representation in standard base
 #
@@ -48,7 +48,6 @@ else
   echo "$0: missing files $e or $a"
   exit 1
 fi
-memory=200
 shift 4
 base_vectors $e $s $a $*
 ret=$?

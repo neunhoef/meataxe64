@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: new_irred_with_orders,v 1.17 2002/11/26 20:46:23 jon Exp $
+# $Id: new_irred_with_orders,v 1.18 2003/04/26 18:22:03 jon Exp $
 #
 # Script to classify an irreducible representation
 #
@@ -75,7 +75,7 @@ if [ 0 -eq $ret ]; then
   x=`base $e ${name} ${tmp}.0 ${rest[*]}`
   ret=$?
   if [ $ret -ne 0 ]; then
-    echo base returns $ret, terminating
+    echo $x
     rm -f ${tmp}*
     exit 1
   fi

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: indicate_with_element,v 1.7 2002/09/23 13:42:43 jon Exp $
+# $Id: indicate_with_element,v 1.8 2003/04/26 18:22:03 jon Exp $
 #
 # Script to find the indicator of an irreducible representation
 # Assumes a and b in standard base form
@@ -73,7 +73,7 @@ if [ $ret -eq 0 ]; then
   rm -f ${tmp}.*
   exit $ret
 elif [ $ret -ne 255 ]; then
-  echo base_vectors return $ret, terminating
+  echo $x
   rm -f ${tmp}.*
   exit 1
 else
