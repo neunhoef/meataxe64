@@ -272,3 +272,4 @@ skew seventh
 20030817 - Fix bug in zfln where temporaries were lost
 20030824 - Add find_irred and split_all_decomp
 20031217 - Fixed a bug where split_with_element incorrectly identified irreducibles
+20031217 - Fixed a bug in power
