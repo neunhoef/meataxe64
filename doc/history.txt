@@ -301,3 +301,4 @@ skew seventh
 20040505 - Reduce amount of tensor product made, where the multiplying column is zero
 20040506 - Correct minor bug in tco 1 x 1 matrix optimisation
 20040506 - Improvements to inner loop giving significant speed up
+20040512 - Added space_split for splitting null vectors into subspaces and quotients
