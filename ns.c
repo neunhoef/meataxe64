@@ -1,5 +1,5 @@
 /*
- * $Id: ns.c,v 1.6 2001/12/11 01:00:44 jon Exp $
+ * $Id: ns.c,v 1.7 2001/12/15 20:47:27 jon Exp $
  *
  * Compute the null space of a matrix
  *
@@ -7,6 +7,7 @@
 
 #include "ns.h"
 #include <stdio.h>
+#include <assert.h>
 #include "clean.h"
 #include "elements.h"
 #include "endian.h"
@@ -25,6 +26,9 @@ unsigned int nullspace(const char *m1, const char *m2, const char *name)
   unsigned int prime, nob, nor, len1, len2, n, r, **mat1, **mat2;
   int *map;
   grease_struct grease;
+  assert(NULL != m1);
+  assert(NULL != m2);
+  assert(NULL != name);
   if (0 == open_and_read_binary_header(&inp, &h1, m1, name)) {
     exit(1);
   }
@@ -36,6 +40,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *name)
   len2 = header_get_len(h2);
   r = memory_rows(len1, 100);
   n = memory_rows(len2, 100);
+  header_free(h1);
   if (memory_rows(len1, 400) < nor || memory_rows(len2, 400) < nor || r < prime || n < prime) {
     fprintf(stderr, "%s: cannot allocate %d rows for %s and %s, terminating\n",
             name, 2 * (nor + prime), m1, m2);
@@ -68,7 +73,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *name)
     put_element_to_row(nob, n, mat2[n], 1);
   }
   echelise(mat1, nor, &n, &map, mat2, 1, grease.level, prime, len1, nob, 800, 900, len2, 0, name);
-  free(mat1);
+  matrix_free(mat1);
   if (n < nor) {
     /* Output null rows of mat2 */
     header_set_nor(h2, nor - n);
@@ -86,9 +91,8 @@ unsigned int nullspace(const char *m1, const char *m2, const char *name)
     }
     fclose(outp);
   }
-  header_free(h1);
   header_free(h2);
   matrix_free(mat2);
-  matrix_free(map);
+  free(map);
   return nor - n;
 }

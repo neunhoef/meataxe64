@@ -1,35 +1,28 @@
 /*
- * $Id: add.c,v 1.13 2001/12/15 20:47:27 jon Exp $
+ * $Id: diff.c,v 1.1 2001/12/15 20:47:27 jon Exp $
  *
- * Function to add two matrices to give a third
+ * Function to find the differences between two matrices
  *
  */
 
-#include "add.h"
+#include "diff.h"
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
-#include <assert.h>
-#include <limits.h>
-#include "elements.h"
 #include "endian.h"
 #include "header.h"
 #include "memory.h"
 #include "read.h"
-#include "rows.h"
 #include "utils.h"
-#include "write.h"
 
-int add(const char *m1, const char *m2, const char *m3, const char *name)
+int diff(const char *m1, const char *m2, const char *name)
 {
   FILE *inp1 = NULL;
   FILE *inp2 = NULL;
-  FILE *outp = NULL;
   unsigned int prime, nob, noc, nor, len;
   unsigned int i;
   const header *h1, *h2;
   unsigned int *row1, *row2;
-  row_ops row_operations;
-  row_incer incer;
 
   endian_init();
   if (0 == open_and_read_binary_header(&inp1, &h1, m1, name) ||
@@ -56,29 +49,12 @@ int add(const char *m1, const char *m2, const char *m3, const char *name)
     header_free(h2);
     return 0;
   }
-  if (0 == rows_init(prime, &row_operations)) {
-    fprintf(stderr, "%s: cannot initialise row operations for %s, %s, terminating\n", name, m1, m2);
-    fclose(inp1);
-    fclose(inp2);
-    header_free(h1);
-    header_free(h2);
-    return 0;
-  }
-  incer = row_operations.incer;
-  if (0 == open_and_write_binary_header(&outp, h1, m3, name)) {
-    fclose(inp1);
-    fclose(inp2);
-    header_free(h1);
-    header_free(h2);
-    return 0;
-  }
   header_free(h1);
   header_free(h2);
   if (memory_rows(len, 1000) < 2) {
-    fprintf(stderr, "%s cannot allocate rows for %s, %s, %s, terminating\n", name, m1, m2, m3);
+    fprintf(stderr, "%s cannot allocate rows for %s, %s, terminating\n", name, m1, m2);
     fclose(inp1);
     fclose(inp2);
-    fclose(outp);
     return 0;
   }
   row1 = memory_pointer_offset(0, 0, len);
@@ -88,27 +64,29 @@ int add(const char *m1, const char *m2, const char *m3, const char *name)
       fprintf(stderr, "%s cannot read row %d from %s, terminating\n", name, i, m1);
       fclose(inp1);
       fclose(inp2);
-      fclose(outp);
       return 0;
     }
     if (0 == endian_read_row(inp2, row2, len)) {
       fprintf(stderr, "%s cannot read row %d from %s, terminating\n", name, i, m2);
       fclose(inp1);
       fclose(inp2);
-      fclose(outp);
       return 0;
     }
-    (*incer)(row1, row2, len);
-    if (0 == endian_write_row(outp, row2, len)) {
-      fprintf(stderr, "%s cannot write row %d to %s, terminating\n", name, i, m3);
-      fclose(inp1);
-      fclose(inp2);
-      fclose(outp);
-      return 0;
+    if (0 != memcmp(row1, row2, len * sizeof(unsigned int))) {
+      unsigned int j, k = 0;
+      for (j = 0; j < len; j++) {
+        if (row1[j] != row2[j]) {
+          printf("%s and %s differ in row %d near offset %d, with values 0x%x and 0x%x (diffs 0x%x)\n",
+                 m1, m2, i, j * (bits_in_unsigned_int / nob), row1[j], row2[j], row1[j] ^ row2[j]);
+          k++;
+          if (k > 10) {
+            break;
+          }
+        }
+      }
     }
   }
   fclose(inp1);
   fclose(inp2);
-  fclose(outp);
   return 1;
 }

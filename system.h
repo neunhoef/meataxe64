@@ -21,9 +21,7 @@ extern int check_signal(void);
 
 extern void signal(void);
 
-extern int ren(const char *old, const char *new);
-
-extern int remove(const char *file);
+extern const char *tmp_name(void);
 
 extern void init_system(void);
 

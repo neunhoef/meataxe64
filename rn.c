@@ -1,5 +1,5 @@
 /*
- * $Id: rn.c,v 1.9 2001/12/11 01:00:44 jon Exp $
+ * $Id: rn.c,v 1.10 2001/12/15 20:47:27 jon Exp $
  *
  * Compute the rank of a matrix
  *
@@ -7,6 +7,7 @@
 
 #include "rn.h"
 #include <stdio.h>
+#include <assert.h>
 #include "clean.h"
 #include "endian.h"
 #include "grease.h"
@@ -22,6 +23,8 @@ unsigned int rank(const char *m, const char *name)
   unsigned int prime, nob, nor, len, n, r, **mat;
   int *map;
   grease_struct grease;
+  assert(NULL != m);
+  assert(NULL != name);
   if (0 == open_and_read_binary_header(&inp, &h, m, name)) {
     exit(1);
   }

@@ -1,5 +1,5 @@
 /*
- * $Id: command.c,v 1.9 2001/11/07 22:35:27 jon Exp $
+ * $Id: command.c,v 1.10 2001/12/15 20:47:27 jon Exp $
  *
  * Interface to task manager (definition)
  *
@@ -11,6 +11,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <assert.h>
+#include "files.h"
 #include "system.h"
 #include "utils.h"
 

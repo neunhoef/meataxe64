@@ -1,5 +1,5 @@
 /*
- * $Id: system.c,v 1.6 2001/11/07 22:35:27 jon Exp $
+ * $Id: system.c,v 1.7 2001/12/15 20:47:27 jon Exp $
  *
  * system dependent stuff for locking etc
  */
@@ -155,6 +155,15 @@ int check_signal(void)
 
 void signal(void)
 {
+}
+
+static char buf[256];
+
+const char *tmp_name(void)
+{
+  __pid_t pid = getpid();
+  sprintf(buf, "tmp%d", pid);
+  return buf;
 }
 
 void init_system(void)
