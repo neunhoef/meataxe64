@@ -1,11 +1,11 @@
 /*
- * $Id: qs.c,v 1.6 2002/02/18 20:42:49 jon Exp $
+ * $Id: project.c,v 1.1 2002/02/18 20:42:49 jon Exp $
  *
- * Function to compute quotient space representation
+ * Function to project into quotient space representation
  *
  */
 
-#include "qs.h"
+#include "project.h"
 #include "clean.h"
 #include "elements.h"
 #include "endian.h"
@@ -33,27 +33,27 @@ static void cleanup(FILE *f1, FILE *f2, FILE *f3)
     fclose(f3);
 }
 
-void quotient(const char *range, const char *gen,
-              const char *out, const char *name)
+void project(const char *range, const char *in,
+             const char *out, const char *name)
 {
   FILE *inp_r = NULL, *inp_g = NULL, *outp = NULL;
   const header *h_in_r, *h_in_g, *h_out;
-  unsigned int prime, nob, noc, nor_r, nor_g, nor_o, len, len_o, max_rows, d, i, j, k, elt, step;
+  unsigned int prime, nob, noc_r, nor_r, nor_g, nor_o, noc_o, len, len_o, max_rows, d, i, j, k, elt, step;
   unsigned int **rows1, **rows2;
-  int *map_r, *map_g;
+  int *map_r;
   unsigned int *map_o;
   row_ops row_operations;
   grease_struct grease;
   long pos;
   int in_store;
   assert(NULL != range);
-  assert(NULL != gen);
+  assert(NULL != in);
   assert(NULL != out);
   assert(NULL != name);
   if (0 == open_and_read_binary_header(&inp_r, &h_in_r, range, name) ||
-      0 == open_and_read_binary_header(&inp_g, &h_in_g, gen, name)) {
+      0 == open_and_read_binary_header(&inp_g, &h_in_g, in, name)) {
     fprintf(stderr, "%s: failed to read header from one of %s, %s, terminating\n",
-            name, range, gen);
+            name, range, in);
     cleanup(inp_r, NULL, NULL);
     exit(1);
   }
@@ -61,49 +61,50 @@ void quotient(const char *range, const char *gen,
   nob = header_get_nob(h_in_r);
   nor_r = header_get_nor(h_in_r);
   nor_g = header_get_nor(h_in_g);
-  noc = header_get_noc(h_in_r);
+  noc_r = header_get_noc(h_in_r);
   len = header_get_len(h_in_r);
-  if (noc != header_get_noc(h_in_g) ||
-      noc != nor_g ||
+  /* Check cols range = cols g, prime and nob */
+  if (noc_r != header_get_noc(h_in_g) ||
       prime != header_get_prime(h_in_g) ||
       nob != header_get_nob(h_in_g)) {
     fprintf(stderr, "%s: incompatible parameters for %s, %s, terminating\n",
-            name, range, gen);
+            name, range, in);
     cleanup(inp_r, inp_g, NULL);
     exit(1);
   }
-  if (nor_r > noc) {
+  /* Simple check on range sensibility */
+  if (nor_r > noc_r) {
     fprintf(stderr, "%s: too many rows in %s, %s, terminating\n",
-            name, range, gen);
+            name, range, in);
     cleanup(inp_r, inp_g, NULL);
     exit(1);
   }
   assert(header_get_len(h_in_g) == len);
-  nor_o = nor_g - nor_r; /* Number of output rows and columns */
-  h_out = header_create(prime, nob, header_get_nod(h_in_r), nor_o, nor_o);
+  nor_o = nor_g; /* Number of output rows */
+  noc_o = noc_r - nor_r; /* Number of output colums */
+  h_out = header_create(prime, nob, header_get_nod(h_in_r), noc_o, nor_o);
   len_o = header_get_len(h_out);
   header_free(h_in_r);
   header_free(h_in_g);
   assert(len >= len_o);
   max_rows = memory_rows(len, 450);
   in_store = max_rows >= nor_g;
-  step = (0 != in_store) ? nor_g : max_rows;
+  step = (0 != in_store) ? noc_r : max_rows;
   if (0 == open_and_write_binary_header(&outp, h_out, out, name)) {
     cleanup(inp_r, inp_g, outp);
     exit(1);
   }
   header_free(h_out);
   rows1 = matrix_malloc(step); /* range */
-  rows2 = matrix_malloc(step); /* gen */
+  rows2 = matrix_malloc(step); /* in */
   for (d = 0; d < step; d++) {
     rows1[d] = memory_pointer_offset(0, d, len);
     rows2[d] = memory_pointer_offset(450, d, len);
   }
   map_r = my_malloc(nor_r * sizeof(int));
-  map_g = my_malloc(nor_g * sizeof(int));
-  map_o = my_malloc(nor_o * sizeof(unsigned int));
+  map_o = my_malloc(noc_r * sizeof(int));
   memset(map_r, 0, nor_r * sizeof(int));
-  memset(map_g, 0, nor_g * sizeof(int));
+  memset(map_o, 0, noc_r * sizeof(int));
   /* Now set up the map */
   pos = ftell(inp_r); /* Where we are in the range */
   for (i = 0; i < nor_r; i += step) {
@@ -119,19 +120,22 @@ void quotient(const char *range, const char *gen,
       assert(0 != elt);
       NOT_USED(elt);
       map_r[i + d] = j;
-      assert(j < nor_g);
-      assert(0 == map_g[j]);
-      map_g[j] = 1; /* Record a submodule significant row */
+      map_o[j] = 1; /* Mark this column as in the subspace */
     }
   }
-  /* Now set up the output map */
-  i = 0;
-  for (d = 0; d < nor_g; d++) {
-    if (0 == map_g[d]) {
-      map_o[i++] = d; /* Which rows of g to read */
+  j = 0;
+  for (i = 0; i < noc_r; i++) {
+    if (0 == map_o[i]) {
+      map_o[j] = i;
+      j++;
     }
   }
-  assert(i == nor_o);
+  if (j != noc_o) {
+    fprintf(stderr, "%s: rows from %s are dependent, terminating\n",
+            name, range);
+    cleanup(inp_r, inp_g, outp);
+    exit(1);
+  }
   rows_init(prime, &row_operations);
   grease_init(&row_operations, &grease);
   if (0 == grease_level(prime, &grease, memory_rows(len, 100))) {
@@ -140,21 +144,16 @@ void quotient(const char *range, const char *gen,
     cleanup(inp_r, inp_g, outp);
     exit(1);
   }
-  i = 0; /* Counting the rows from g */
-  j = 0; /* Counting the significant rows from g */
+  j = 0; /* Counting the rows from g */
   while (j < nor_o) {
     /* Read some rows from inp_g into rows2 */
     unsigned int stride_j = (j + step <= nor_o) ? step : nor_o - j;
     unsigned int *row_o = memory_pointer(900);
     for (d = 0; d < stride_j; d++) {
-      while (map_o[j + d] >= i) {
-        if (0 == endian_read_row(inp_g, rows2[d], len)) {
-          fprintf(stderr, "%s: failed to read row from %s, terminating\n", name, gen);
-          fclose(inp_g);
-          exit(1);
-        }
-        i++;
-        assert(i <= nor_g);
+      if (0 == endian_read_row(inp_g, rows2[d], len)) {
+        fprintf(stderr, "%s: failed to read row from %s, terminating\n", name, in);
+        fclose(inp_g);
+        exit(1);
       }
     }
     /* Now loop over inp_r cleaning rows2 */
@@ -177,9 +176,7 @@ void quotient(const char *range, const char *gen,
     }
     for (d = 0; d < stride_j; d++) {
       row_init(row_o, len_o);
-      for (k = 0; k < nor_o; k++) {
-        assert(map_o[k] < noc);
-        assert(map_o[k] >= k);
+      for (k = 0; k < noc_o; k++) {
         elt = get_element_from_row(nob, map_o[k], rows2[d]);
         put_element_to_row(nob, k, row_o, elt);
       }
@@ -196,7 +193,6 @@ void quotient(const char *range, const char *gen,
   fclose(inp_g);
   fclose(outp);
   free(map_r);
-  free(map_g);
   free(map_o);
   matrix_free(rows1);
   matrix_free(rows2);

@@ -1,7 +1,7 @@
 /*
- * $Id: zsums.c,v 1.5 2002/02/18 20:42:49 jon Exp $
+ * $Id: zranks.c,v 1.1 2002/02/18 20:42:49 jon Exp $
  *
- * Compute sums in the group algebra in two matrices
+ * Compute sums in the group algebra in two matrices finding all of given nullity
  *
  */
 
@@ -11,19 +11,19 @@
 #include "memory.h"
 #include "sums.h"
 
-static const char *name = "zsums";
+static const char *name = "zranks";
 
 static unsigned int nullity = 0;
 
-static void sums_usage(void)
+static void ranks_usage(void)
 {
   fprintf(stderr, "%s: usage: %s <in_file a> <in_file b> <out_file_stem> <order a> <order b> <n> <nullity> [<memory>]\n", name, name);
 }
 
 static int acceptor(unsigned int rank, unsigned int nor)
 {
-  if (rank < nor && rank + nullity >= nor) {
-    return 3;
+  if ((0 == nullity && rank == nor) || (rank < nor && rank + nullity >= nor)) {
+    return 1;
   } else {
     return 0;
   }
@@ -36,7 +36,7 @@ int main(int argc, const char * const argv[])
   int res;
 
   if (8 != argc && 9 != argc) {
-    sums_usage();
+    ranks_usage();
     exit(1);
   }
   o_a = strtoul(argv[4], NULL, 0);
@@ -47,7 +47,7 @@ int main(int argc, const char * const argv[])
     memory = strtoul(argv[8], NULL, 0);
   }
   if (0 == n) {
-    fprintf(stderr, "%s: no sums requested\n", name);
+    fprintf(stderr, "%s: no ranks requested\n", name);
     exit(1);
   }
   endian_init();

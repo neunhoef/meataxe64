@@ -79,3 +79,5 @@
 20020203 - add skew square
 20020205 - add split_with_vector
 20020212 - add sym square and skew cube
+20020213 - add zranks
+20020215 - add zproj

@@ -1,5 +1,5 @@
 /*
- * $Id: sb.c,v 1.2 2002/01/18 21:52:23 jon Exp $
+ * $Id: sb.c,v 1.3 2002/02/18 20:42:49 jon Exp $
  *
  * Function to spin some vectors under two generators to obtain a standard base
  *
@@ -158,7 +158,7 @@ unsigned int spin(const char *in, const char *out, const char *a,
     fprintf(stderr, "%s: unable to allocate grease, terminating\n", name);
     cleanup(inp, f_a, f_b);
   }
-  while (nor < max_rows && (gen_a.nor < nor || gen_b.nor < nor)) {
+  while (nor < max_rows && nor < noc && (gen_a.nor < nor || gen_b.nor < nor)) {
     unsigned int rows_to_do = nor - gen->nor, rows_poss = max_rows - nor;
     unsigned int i, j, k, old_nor = nor;
     /* Ensure we don't try to do too many */

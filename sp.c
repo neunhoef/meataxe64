@@ -1,5 +1,5 @@
 /*
- * $Id: sp.c,v 1.11 2002/01/26 00:36:06 jon Exp $
+ * $Id: sp.c,v 1.12 2002/02/18 20:42:49 jon Exp $
  *
  * Function to spin some vectors under two generators
  *
@@ -145,7 +145,7 @@ unsigned int spin(const char *in, const char *out, const char *a,
     fprintf(stderr, "%s: unable to allocate grease, terminating\n", name);
     cleanup(inp, f_a, f_b);
   }
-  while (nor < max_rows && (gen_a.nor < nor || gen_b.nor < nor)) {
+  while (nor < max_rows && nor < noc && (gen_a.nor < nor || gen_b.nor < nor)) {
     unsigned int rows_to_do = max_rows - nor;
     unsigned int i, j = 0;
     /* Ensure we don't try to do too many */

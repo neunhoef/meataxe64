@@ -1,5 +1,5 @@
 #
-# $Id: indicate,v 1.1 2002/01/14 23:43:45 jon Exp $
+# $Id: indicate,v 1.2 2002/02/18 20:42:49 jon Exp $
 #
 # Script to find the indicator of an irreducible representation
 # Assumes a and b in standard base form
@@ -58,6 +58,9 @@ if diff $a ${sb}_sb_1 1>/dev/null 2>&1; then
     if [ $nor -eq 1 ]; then
       echo indicator +
       rm -f ${tmp}.*
+      if [ ! -e ${a}_+ ]; then
+        ln -s $a ${a}_+
+      fi
       exit 0
     fi
     zqf $S $Q
@@ -78,6 +81,9 @@ if diff $a ${sb}_sb_1 1>/dev/null 2>&1; then
         if [ $ret -eq 0 ]; then
           echo indicator +
           rm -f ${tmp}.*
+          if [ ! -e ${a}_+ ]; then
+            ln -s $a ${a}_+
+          fi
           exit 0
         elif [ $ret -eq 1 ]; then
           rm -f ${tmp}.*
@@ -91,9 +97,15 @@ if diff $a ${sb}_sb_1 1>/dev/null 2>&1; then
       let i=$i+1
     done
     echo indicator -
-   rm -f ${tmp}.*
+    rm -f ${tmp}.*
+    if [ ! -e ${a}_- ]; then
+      ln -s $a ${a}_-
+    fi
     exit 0
   fi
 fi
 rm -f ${tmp}.*
+if [ ! -e ${a}_o ]; then
+  ln -s $a ${a}_o
+fi
 echo indicator o

@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.47 2002/02/12 23:10:24 jon Exp $
+# $Id: makefile,v 1.48 2002/02/18 20:42:49 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -41,15 +41,17 @@ ZJOIN_TARGET=	zjoin
 ZMU_TARGET=	zmu
 ZNOC_TARGET=	znoc
 ZNOR_TARGET=	znor
+ZNS_TARGET=	zns
+ZNSF_TARGET=	znsf
 ZPR_TARGET=	zpr
 ZPRIME_TARGET=	zprime
+ZPROJ_TARGET=	zproj
+ZQF_TARGET=	zqf
+ZQS_TARGET=	zqs
+ZRANKS_TARGET=	zranks
 ZRE_TARGET=	zre
 ZRN_TARGET=	zrn
 ZRNF_TARGET=	zrnf
-ZNS_TARGET=	zns
-ZNSF_TARGET=	znsf
-ZQF_TARGET=	zqf
-ZQS_TARGET=	zqs
 ZSAD_TARGET=	zsad
 ZSB_TARGET=	zsb
 ZSEL_TARGET=	zsel
@@ -104,8 +106,10 @@ ZNS_MODULES=	clean elements endian grease header matrix memory primes read ns ro
 ZNSF_MODULES=	clean elements endian grease header ident matrix memory primes read nsf rows system utils write znsf
 ZPR_MODULES=	elements endian header memory pr primes read rows utils write
 ZPRIME_MODULES=	endian header primes read utils zprime
+ZPROJ_MODULES=	clean elements endian grease header matrix memory primes project read rows utils write zproj
 ZQF_MODULES=	elements endian header memory primes read rows utils write zqf
 ZQS_MODULES=	clean elements endian grease header matrix memory primes qs read rows utils write zqs
+ZRANKS_MODULES=	add clean elements endian grease header ident matrix memory mul primes read rn rows sums utils write zranks
 ZRE_MODULES=	elements endian header memory primes read utils write zre
 ZRN_MODULES=	clean elements endian grease header matrix memory primes read rn rows utils zrn
 ZRNF_MODULES=	clean elements endian grease header matrix memory primes read rnf rows system utils write zrnf
@@ -119,7 +123,7 @@ ZSL_MODULES=	add elements endian files grease header matrix memory mul primes re
 ZSP_MODULES=	clean elements endian grease header matrix memory mul primes read rows sp utils write zsp
 ZSPAN_MODULES=	elements endian header matrix memory primes read rows utils write zspan
 ZSS_MODULES=	clean elements endian grease header matrix memory primes read rows ss utils write zss
-ZSUMS_MODULES=	add clean elements endian grease header ident matrix memory mul primes read rn rows utils write zsums
+ZSUMS_MODULES=	add clean elements endian grease header ident matrix memory mul primes read rn rows sums utils write zsums
 ZSYMSQ_MODULES=	elements endian header matrix memory powers primes read rows utils write zsymsq
 ZTE_MODULES=	elements endian header matrix memory primes read rows te utils write zte
 ZTR_MODULES=	elements endian header matrix memory primes read tr tra utils write
@@ -163,8 +167,10 @@ MODULES=	$(DTOU_MODULES) \
 	$(ZNSF_MODULES) \
 	$(ZPR_MODULES) \
 	$(ZPRIME_MODULES) \
+	$(ZPROJ_MODULES) \
 	$(ZQF_MODULES) \
 	$(ZQS_MODULES) \
+	$(ZRANKS_MODULES) \
 	$(ZRE_MODULES) \
 	$(ZRN_MODULES) \
 	$(ZRNF_MODULES) \
@@ -329,10 +335,16 @@ include targets.txt
 TARGET:=ZPRIME
 include targets.txt
 
+TARGET:=ZPROJ
+include targets.txt
+
 TARGET:=ZQF
 include targets.txt
 
 TARGET:=ZQS
+include targets.txt
+
+TARGET:=ZRANKS
 include targets.txt
 
 TARGET:=ZRE
