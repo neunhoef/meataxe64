@@ -1,5 +1,5 @@
 /*
- * $Id: msp.c,v 1.5 2002/07/07 12:10:42 jon Exp $
+ * $Id: msp.c,v 1.6 2002/07/09 09:08:12 jon Exp $
  *
  * Function to spin some vectors under multiple generators
  *
@@ -14,6 +14,7 @@
 #include "matrix.h"
 #include "memory.h"
 #include "mul.h"
+#include "parse.h"
 #include "primes.h"
 #include "read.h"
 #include "utils.h"
@@ -184,6 +185,9 @@ unsigned int spin(const char *in, const char *out,
     unsigned int i, j = 0;
     /* Ensure we don't try to do too many */
     rows_to_do = (rows_to_do + gen->nor > nor) ? (nor - gen->nor) : rows_to_do;
+    if (verbose) {
+      printf("%s: multiplying %d rows\n", name, rows_to_do);
+    }
     if (0 == mul_from_store(rows + gen->nor, rows + nor, gen->f, gen->is_map, noc, len, nob,
                             rows_to_do, noc, prime, &grease, gen->m, name)) {
       fprintf(stderr, "%s: failed to multiply using %s, terminating\n", name, gen->m);
@@ -211,6 +215,9 @@ unsigned int spin(const char *in, const char *out,
     }
     free(new_map);
     assert(j == d);
+    if (verbose) {
+      printf("%s: Adding %d new rows\n", name, d);
+    }
     nor += d; /* The number of extra rows we made */
     gen = gen->next;
   }
@@ -225,6 +232,9 @@ unsigned int spin(const char *in, const char *out,
   header_set_nor(h_out, nor);
   if (0 == open_and_write_binary_header(&outp, h_out, out, name)) {
     exit(1);
+  }
+  if (verbose) {
+    printf("%s: Writing %d rows to output\n", name, nor);
   }
   errno = 0;
   if (0 == endian_write_matrix(outp, rows, len, nor)) {

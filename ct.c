@@ -1,5 +1,5 @@
 /*
- * $Id: ct.c,v 1.3 2002/01/06 16:35:48 jon Exp $
+ * $Id: ct.c,v 1.4 2002/07/09 09:08:12 jon Exp $
  *
  * Count the non-zero elements in a matrix
  *
@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include "count.h"
 #include "endian.h"
+#include "parse.h"
 
 static const char *name = "zct";
 
@@ -20,6 +21,7 @@ static void ct_usage(void)
 int main(int argc, const char * const argv[])
 {
   unsigned int total;
+  argv = parse_line(argc, argv, &argc);
   if (2 != argc) {
     ct_usage();
     exit(1);

@@ -1,5 +1,5 @@
 /*
- * $Id: zrn.c,v 1.2 2002/01/06 16:35:48 jon Exp $
+ * $Id: zrn.c,v 1.3 2002/07/09 09:08:12 jon Exp $
  *
  * Compute the rank of a matrix
  *
@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include "endian.h"
 #include "memory.h"
+#include "parse.h"
 #include "rn.h"
 
 static const char *name = "zrn";
@@ -22,6 +23,7 @@ int main(int argc, const char * const argv[])
   unsigned int n;
   unsigned int memory = MEM_SIZE;
 
+  argv = parse_line(argc, argv, &argc);
   if (2 != argc && 3 != argc) {
     rn_usage();
     exit(1);

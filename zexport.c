@@ -1,5 +1,5 @@
 /*
- * $Id: zexport.c,v 1.8 2002/06/30 21:33:15 jon Exp $
+ * $Id: zexport.c,v 1.9 2002/07/09 09:08:12 jon Exp $
  *
  * Export matrix to old system
  *
@@ -13,6 +13,7 @@
 #include "elements.h"
 #include "header.h"
 #include "memory.h"
+#include "parse.h"
 #include "read.h"
 #include "rows.h"
 #include "utils.h"
@@ -35,6 +36,7 @@ int main(int argc, const char * const argv[])
   FILE *f_in;
   FILE *f_out;
 
+  argv = parse_line(argc, argv, &argc);
   if (3 != argc) {
     export_usage();
     exit(1);

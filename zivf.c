@@ -1,5 +1,5 @@
 /*
- * $Id: zivf.c,v 1.1 2002/04/15 07:47:23 jon Exp $
+ * $Id: zivf.c,v 1.2 2002/07/09 09:08:12 jon Exp $
  *
  * Invert a matrix
  *
@@ -9,6 +9,7 @@
 #include "endian.h"
 #include "ivf.h"
 #include "memory.h"
+#include "parse.h"
 
 static const char *name = "zivf";
 
@@ -21,6 +22,7 @@ int main(int argc, const char * const argv[])
 {
   unsigned int memory = MEM_SIZE;
 
+  argv = parse_line(argc, argv, &argc);
   if (4 != argc && 5 != argc) {
     ivf_usage();
     exit(1);

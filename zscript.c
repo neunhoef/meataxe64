@@ -1,5 +1,5 @@
 /*
- * $Id: zscript.c,v 1.1 2002/03/10 22:45:28 jon Exp $
+ * $Id: zscript.c,v 1.2 2002/07/09 09:08:12 jon Exp $
  *
  * Compute a script in two generators
  *
@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include "endian.h"
 #include "memory.h"
+#include "parse.h"
 #include "script.h"
 
 static const char *name = "zscript";
@@ -27,6 +28,7 @@ int main(int argc, const char * const argv[])
   const char *script;
   unsigned int memory = MEM_SIZE;
 
+  argv = parse_line(argc, argv, &argc);
   if (6 != argc && 7 != argc) {
     script_usage();
     exit(1);

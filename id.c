@@ -1,5 +1,5 @@
 /*
- * $Id: id.c,v 1.12 2002/06/25 10:30:12 jon Exp $: ad.c,v 1.1 2001/08/30 18:31:45 jon Exp $
+ * $Id: id.c,v 1.13 2002/07/09 09:08:12 jon Exp $: ad.c,v 1.1 2001/08/30 18:31:45 jon Exp $
  *
  * Generate identity matrix
  *
@@ -9,8 +9,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include "endian.h"
-#include "memory.h"
 #include "ident.h"
+#include "memory.h"
+#include "parse.h"
 
 static const char *name = "zid";
 
@@ -24,6 +25,7 @@ int main(int argc, const char * const argv[])
   const char *out;
   unsigned int prime, noc, nor;
 
+  argv = parse_line(argc, argv, &argc);
   if (5 != argc) {
     id_usage();
     exit(1);

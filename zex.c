@@ -1,5 +1,5 @@
 /*
- * $Id: zex.c,v 1.9 2002/06/28 08:39:16 jon Exp $
+ * $Id: zex.c,v 1.10 2002/07/09 09:08:12 jon Exp $
  *
  * explode a matrix
  *
@@ -16,6 +16,7 @@
 #include "header.h"
 #include "map.h"
 #include "memory.h"
+#include "parse.h"
 #include "read.h"
 #include "utils.h"
 
@@ -26,7 +27,7 @@ static void zex_usage(void)
   fprintf(stderr, "%s: usage: %s <mat> <dir> <int>\n", name, name);
 }
 
-int main(int argc,  char **argv)
+int main(int argc,  const char *const argv[])
 {
   FILE *input;
   unsigned int split;
@@ -38,6 +39,7 @@ int main(int argc,  char **argv)
   unsigned int i;
   FILE **outputs;
   unsigned int *row;
+  argv = parse_line(argc, argv, &argc);
   if (4 != argc) {
     zex_usage();
     exit(1);

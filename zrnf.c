@@ -1,5 +1,5 @@
 /*
- * $Id: zrnf.c,v 1.3 2002/02/21 20:37:21 jon Exp $
+ * $Id: zrnf.c,v 1.4 2002/07/09 09:08:12 jon Exp $
  *
  * Compute the rank of a matrix, using temporary files
  *
@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include "endian.h"
 #include "memory.h"
+#include "parse.h"
 #include "rnf.h"
 
 static const char *name = "zrnf";
@@ -22,6 +23,7 @@ int main(int argc, const char * const argv[])
   unsigned int n;
   unsigned int memory = MEM_SIZE;
 
+  argv = parse_line(argc, argv, &argc);
   if (3 != argc && 4 != argc) {
     rnf_usage();
     exit(1);

@@ -1,5 +1,5 @@
 /*
- * $Id: zvp.c,v 1.3 2002/07/03 12:06:54 jon Exp $
+ * $Id: zvp.c,v 1.4 2002/07/09 09:08:12 jon Exp $
  *
  * Permute some vectors under two generators
  *
@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include "endian.h"
 #include "memory.h"
+#include "parse.h"
 #include "vp.h"
 
 static const char *name = "zvp";
@@ -22,6 +23,7 @@ int main(int argc, const char * const argv[])
   unsigned int memory = MEM_SIZE;
   unsigned int degree;
 
+  argv = parse_line(argc, argv, &argc);
   if (7 != argc && 8 != argc) {
     vp_usage();
     exit(1);

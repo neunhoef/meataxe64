@@ -1,5 +1,5 @@
 /*
- * $Id: zrestrict.c,v 1.1 2002/03/20 18:42:30 jon Exp $
+ * $Id: zrestrict.c,v 1.2 2002/07/09 09:08:12 jon Exp $
  *
  * Restrict a matrix to a subfield
  *
@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include "endian.h"
 #include "memory.h"
+#include "parse.h"
 #include "restrict.h"
 
 static const char *name = "zrestrict";
@@ -24,6 +25,7 @@ int main(int argc, const char * const argv[])
   const char *out;
   unsigned int q, r;
 
+  argv = parse_line(argc, argv, &argc);
   if (4 != argc) {
     restrict_usage();
     exit(1);

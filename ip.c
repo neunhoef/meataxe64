@@ -1,5 +1,5 @@
 /*
- * $Id: ip.c,v 1.14 2002/06/28 08:39:16 jon Exp $
+ * $Id: ip.c,v 1.15 2002/07/09 09:08:12 jon Exp $
  *
  * Read a matrix
  *
@@ -10,12 +10,13 @@
 #include <assert.h>
 #include <limits.h>
 #include <errno.h>
-#include "header.h"
-#include "utils.h"
-#include "read.h"
-#include "write.h"
 #include "elements.h"
 #include "endian.h"
+#include "header.h"
+#include "parse.h"
+#include "read.h"
+#include "utils.h"
+#include "write.h"
 
 static const char *name = "zcv";
 
@@ -35,6 +36,7 @@ int main(int argc, const char * const argv[])
   unsigned int base_mask;
   const header *h;
 
+  argv = parse_line(argc, argv, &argc);
   if (3 != argc) {
     ip_usage();
     exit(1);

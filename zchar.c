@@ -10,6 +10,7 @@
 #include <assert.h>
 #include "endian.h"
 #include "header.h"
+#include "parse.h"
 #include "primes.h"
 #include "read.h"
 
@@ -27,6 +28,7 @@ int main(int argc, const char * const argv[])
   const header *h;
 
   endian_init();
+  argv = parse_line(argc, argv, &argc);
   if (2 != argc) {
     char_usage();
     exit(1);

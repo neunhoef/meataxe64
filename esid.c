@@ -1,5 +1,5 @@
 /*
- * $Id: esid.c,v 1.2 2002/06/25 10:30:12 jon Exp $
+ * $Id: esid.c,v 1.3 2002/07/09 09:08:12 jon Exp $
  *
  * Generate exploded scaled identity matrix
  *
@@ -14,6 +14,7 @@
 #include "files.h"
 #include "map.h"
 #include "memory.h"
+#include "parse.h"
 #include "primes.h"
 #include "rows.h"
 #include "utils.h"
@@ -36,6 +37,7 @@ int main(int argc, const char * const argv[])
   const char **names;
   FILE **outputs;
 
+  argv = parse_line(argc, argv, &argc);
   if (7 != argc) {
     sid_usage();
     exit(1);

@@ -1,5 +1,5 @@
 /*
- * $Id: ipp.c,v 1.10 2002/06/28 08:39:16 jon Exp $
+ * $Id: ipp.c,v 1.11 2002/07/09 09:08:12 jon Exp $
  *
  * Read a permutation into a matrix
  *
@@ -14,6 +14,7 @@
 #include "endian.h"
 #include "header.h"
 #include "memory.h"
+#include "parse.h"
 #include "primes.h"
 #include "read.h"
 #include "rows.h"
@@ -39,6 +40,7 @@ int main(int argc, const char * const argv[])
   const header *h;
   unsigned int *row;
 
+  argv = parse_line(argc, argv, &argc);
   if (4 != argc) {
     zip_usage();
     exit(1);

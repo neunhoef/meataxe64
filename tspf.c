@@ -1,5 +1,5 @@
 /*
- * $Id: tspf.c,v 1.7 2002/07/05 09:04:44 jon Exp $
+ * $Id: tspf.c,v 1.8 2002/07/09 09:08:12 jon Exp $
  *
  * Function to spin some vectors under two generators in tensor space
  * using intermediate files in a temporary directory.
@@ -16,6 +16,7 @@
 #include "memory.h"
 #include "mul.h"
 #include "mv.h"
+#include "parse.h"
 #include "primes.h"
 #include "read.h"
 #include "tra.h"
@@ -319,6 +320,9 @@ unsigned int spin(const char *in, const char *out,
     unsigned int k, old_nor = nor;
     /* Ensure we don't try to do too many */
     k = 0;
+    if (verbose) {
+      printf("%s: multiplying %d rows\n", name, rows_to_do);
+    }
     while (k < rows_to_do) {
       unsigned int stride = (k + max_rows <= rows_to_do) ? max_rows : rows_to_do - k;
       unsigned int step = (nor > max_rows) ? max_rows : nor;
@@ -362,6 +366,9 @@ unsigned int spin(const char *in, const char *out,
         cleanup_tmp(echelised, name_echelised);
         exit(1);
       }
+      if (verbose) {
+        printf("%s: Adding %d new rows\n", name, d - nor);
+      }
       nor = d;
       k += stride; /* The number we consumed */
     }
@@ -382,6 +389,9 @@ unsigned int spin(const char *in, const char *out,
   header_free(h_b2);
   header_free(h_out);
   fseeko64(echelised, 0, SEEK_SET);
+  if (verbose) {
+    printf("%s: Copying %d rows to output\n", name, nor);
+  }
   for (d = 0; d < nor; d++) {
     errno = 0;
     if (0 == endian_read_row(echelised, work_row, len)) {

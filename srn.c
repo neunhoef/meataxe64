@@ -1,5 +1,5 @@
 /*
- * $Id: srn.c,v 1.7 2002/06/28 08:39:16 jon Exp $: zrn.c,v 1.1 2001/11/12 13:43:38 jon Exp $
+ * $Id: srn.c,v 1.8 2002/07/09 09:08:12 jon Exp $: zrn.c,v 1.1 2001/11/12 13:43:38 jon Exp $
  *
  * Simple compute of the rank of a matrix
  *
@@ -12,6 +12,7 @@
 #include "clean.h"
 #include "header.h"
 #include "matrix.h"
+#include "parse.h"
 #include "read.h"
 
 static const char *name = "srn";
@@ -29,6 +30,7 @@ int main(int argc, const char * const argv[])
   const header *h;
   unsigned int prime, nob, nor, len, **mat;
 
+  argv = parse_line(argc, argv, &argc);
   if (2 != argc && 3 != argc) {
     rn_usage();
     exit(1);

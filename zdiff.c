@@ -1,5 +1,5 @@
 /*
- * $Id: zdiff.c,v 1.3 2002/06/25 10:30:12 jon Exp $
+ * $Id: zdiff.c,v 1.4 2002/07/09 09:08:12 jon Exp $
  *
  * Find the differences between two matrices
  *
@@ -10,6 +10,7 @@
 #include "diff.h"
 #include "endian.h"
 #include "memory.h"
+#include "parse.h"
 
 static const char *name = "zdiff";
 
@@ -23,6 +24,7 @@ int main(int argc, const char * const argv[])
   const char *in1;
   const char *in2;
 
+  argv = parse_line(argc, argv, &argc);
   if (3 != argc) {
     diff_usage();
     exit(1);

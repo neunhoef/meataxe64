@@ -1,5 +1,5 @@
 /*
- * $Id: sns.c,v 1.7 2002/06/28 08:39:16 jon Exp $
+ * $Id: sns.c,v 1.8 2002/07/09 09:08:12 jon Exp $
  *
  * Simple compute of the null space of a matrix
  *
@@ -7,12 +7,13 @@
 
 #include <stdio.h>
 #include <errno.h>
+#include "clean.h"
 #include "endian.h"
 #include "elements.h"
-#include "memory.h"
-#include "clean.h"
 #include "header.h"
 #include "matrix.h"
+#include "memory.h"
+#include "parse.h"
 #include "read.h"
 #include "write.h"
 
@@ -31,6 +32,7 @@ int main(int argc, const char * const argv[])
   const header *h_in, *h_out;
   unsigned int prime, nob, nor, noc, len, **mat1, **mat2;
 
+  argv = parse_line(argc, argv, &argc);
   if (3 != argc && 4 != argc) {
     rn_usage();
     exit(1);

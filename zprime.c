@@ -1,5 +1,5 @@
 /*
- * $Id: zprime.c,v 1.3 2002/04/10 23:33:27 jon Exp $
+ * $Id: zprime.c,v 1.4 2002/07/09 09:08:12 jon Exp $
  *
  * Print the field order from a matrix
  *
@@ -10,6 +10,7 @@
 #include <assert.h>
 #include "endian.h"
 #include "header.h"
+#include "parse.h"
 #include "primes.h"
 #include "read.h"
 
@@ -27,6 +28,7 @@ int main(int argc, const char * const argv[])
   const header *h;
 
   endian_init();
+  argv = parse_line(argc, argv, &argc);
   if (2 != argc) {
     prime_usage();
     exit(1);

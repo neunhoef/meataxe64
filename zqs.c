@@ -1,5 +1,5 @@
 /*
- * $Id: zqs.c,v 1.1 2001/11/25 12:44:33 jon Exp $: zss.c,v 1.1 2001/11/25 00:17:19 jon Exp $
+ * $Id: zqs.c,v 1.2 2002/07/09 09:08:12 jon Exp $: zss.c,v 1.1 2001/11/25 00:17:19 jon Exp $
  *
  * Calculate quotient space representation
  *
@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include "endian.h"
 #include "memory.h"
+#include "parse.h"
 #include "qs.h"
 
 static const char *name = "zqs";
@@ -21,6 +22,7 @@ int main(int argc, const char * const argv[])
 {
   unsigned int memory = MEM_SIZE;
 
+  argv = parse_line(argc, argv, &argc);
   if (4 != argc && 5 != argc) {
     qs_usage();
     exit(1);

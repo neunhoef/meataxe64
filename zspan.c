@@ -1,5 +1,5 @@
 /*
- * $Id: zspan.c,v 1.8 2002/06/28 08:39:16 jon Exp $
+ * $Id: zspan.c,v 1.9 2002/07/09 09:08:12 jon Exp $
  *
  * Compute the span of a matrix
  *
@@ -13,6 +13,7 @@
 #include "header.h"
 #include "matrix.h"
 #include "memory.h"
+#include "parse.h"
 #include "read.h"
 #include "rows.h"
 #include "utils.h"
@@ -37,6 +38,7 @@ int main(int argc, const char * const argv[])
   unsigned int **mat, *row, *scalars;
   row_ops row_operations;
 
+  argv = parse_line(argc, argv, &argc);
   if (4 != argc) {
     span_usage();
     exit(1);

@@ -1,5 +1,5 @@
 /*
- * $Id: zfe.c,v 1.2 2002/06/25 10:30:12 jon Exp $
+ * $Id: zfe.c,v 1.3 2002/07/09 09:08:12 jon Exp $
  *
  * Field extend a matrix
  *
@@ -7,9 +7,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "extend_matrix.h"
 #include "endian.h"
+#include "extend_matrix.h"
 #include "memory.h"
+#include "parse.h"
 
 static const char *name = "zfe";
 
@@ -24,6 +25,7 @@ int main(int argc, const char * const argv[])
   const char *out;
   unsigned int out_prime;
 
+  argv = parse_line(argc, argv, &argc);
   if (4 != argc) {
     fe_usage();
     exit(1);

@@ -1,5 +1,5 @@
 /*
- * $Id: zsp.c,v 1.3 2001/12/27 01:17:12 jon Exp $
+ * $Id: zsp.c,v 1.4 2002/07/09 09:08:12 jon Exp $
  *
  * Spin some vectors under two generators
  *
@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include "endian.h"
 #include "memory.h"
+#include "parse.h"
 #include "sp.h"
 
 static const char *name = "zsp";
@@ -22,6 +23,7 @@ int main(int argc, const char * const argv[])
   unsigned int memory = MEM_SIZE;
   unsigned int dim;
 
+  argv = parse_line(argc, argv, &argc);
   if (5 != argc && 6 != argc) {
     sp_usage();
     exit(1);

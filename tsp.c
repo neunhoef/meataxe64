@@ -1,5 +1,5 @@
 /*
- * $Id: tsp.c,v 1.7 2002/07/05 09:32:51 jon Exp $
+ * $Id: tsp.c,v 1.8 2002/07/09 09:08:12 jon Exp $
  *
  * Function to spin some vectors under two generators in tensor space
  *
@@ -15,6 +15,7 @@
 #include "memory.h"
 #include "mul.h"
 #include "mv.h"
+#include "parse.h"
 #include "primes.h"
 #include "read.h"
 #include "tra.h"
@@ -275,6 +276,9 @@ unsigned int spin(const char *in, const char *out,
     unsigned int i, j = 0;
     /* Ensure we don't try to do too many */
     rows_to_do = (rows_to_do + gen->nor > nor) ? (nor - gen->nor) : rows_to_do;
+    if (verbose) {
+      printf("%s: multiplying %d rows\n", name, rows_to_do);
+    }
     for (i = 0; i < rows_to_do; i++) {
       create_pointers(rows[gen->nor + i], mat_rows, nor1, len2, prime);
       if (0 == mul_in_store(mat_rows, gen->rows_2, work_rows,
@@ -314,6 +318,9 @@ unsigned int spin(const char *in, const char *out,
     }
     free(new_map);
     assert(j == d);
+    if (verbose) {
+      printf("%s: Adding %d new rows\n", name, d);
+    }
     nor += d; /* The number of extra rows we made */
     gen = gen->next;
   }
@@ -327,6 +334,9 @@ unsigned int spin(const char *in, const char *out,
     exit(1);
   }
   len = header_get_len(h_out);
+  if (verbose) {
+    printf("%s: Writing %d rows to output\n", name, nor);
+  }
   for (d = 0; d < nor; d++) {
     create_pointers(rows[d], mat_rows, nor1, len2, prime);
     m_to_v(mat_rows, work_row, nor1, noc2, prime);

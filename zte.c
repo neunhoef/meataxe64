@@ -1,5 +1,5 @@
 /*
- * $Id: zte.c,v 1.2 2002/02/05 19:50:56 jon Exp $
+ * $Id: zte.c,v 1.3 2002/07/09 09:08:12 jon Exp $
  *
  * Tensor two matrices to give a third
  *
@@ -10,8 +10,9 @@
 #include <string.h>
 #include "endian.h"
 #include "memory.h"
-#include "utils.h"
+#include "parse.h"
 #include "te.h"
+#include "utils.h"
 
 static const char *name = "zte";
 
@@ -27,6 +28,7 @@ int main(int argc, const char * const argv[])
   const char *out;
   unsigned int memory = MEM_SIZE;
 
+  argv = parse_line(argc, argv, &argc);
   if (4 != argc && 5 != argc) {
     te_usage();
     exit(1);

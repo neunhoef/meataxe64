@@ -1,5 +1,5 @@
 /*
- * $Id: zsad.c,v 1.2 2002/03/20 18:42:30 jon Exp $
+ * $Id: zsad.c,v 1.3 2002/07/09 09:08:12 jon Exp $
  *
  * Add a matrix and a scaled matrix to give a third
  *
@@ -7,9 +7,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "add.h"
 #include "endian.h"
 #include "memory.h"
-#include "add.h"
+#include "parse.h"
 
 static const char *name = "zsad";
 
@@ -26,6 +27,7 @@ int main(int argc, const char * const argv[])
   const char *out;
   unsigned int scalar;
 
+  argv = parse_line(argc, argv, &argc);
   if (5 != argc) {
     sad_usage();
     exit(1);

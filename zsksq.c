@@ -1,5 +1,5 @@
 /*
- * $Id: zsksq.c,v 1.1 2002/02/05 19:50:56 jon Exp $
+ * $Id: zsksq.c,v 1.2 2002/07/09 09:08:12 jon Exp $
  *
  * Skew square a matrix
  *
@@ -10,8 +10,9 @@
 #include <string.h>
 #include "endian.h"
 #include "memory.h"
-#include "utils.h"
+#include "parse.h"
 #include "powers.h"
+#include "utils.h"
 
 static const char *name = "zsksq";
 
@@ -26,6 +27,7 @@ int main(int argc, const char * const argv[])
   const char *out;
   unsigned int memory = MEM_SIZE;
 
+  argv = parse_line(argc, argv, &argc);
   if (3 != argc && 4 != argc) {
     sksq_usage();
     exit(1);

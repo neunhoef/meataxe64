@@ -1,5 +1,5 @@
 /*
- * $Id: znsf.c,v 1.1 2002/01/18 21:52:23 jon Exp $
+ * $Id: znsf.c,v 1.2 2002/07/09 09:08:12 jon Exp $
  *
  * Compute the nullspace of a matrix, using temporary files
  *
@@ -9,6 +9,7 @@
 #include "endian.h"
 #include "memory.h"
 #include "nsf.h"
+#include "parse.h"
 
 static const char *name = "znsf";
 
@@ -22,6 +23,7 @@ int main(int argc, const char * const argv[])
   unsigned int n;
   unsigned int memory = MEM_SIZE;
 
+  argv = parse_line(argc, argv, &argc);
   if (4 != argc && 5 != argc) {
     nsf_usage();
     exit(1);

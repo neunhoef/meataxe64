@@ -1,5 +1,5 @@
 /*
- * $Id: msbf.c,v 1.2 2002/07/08 20:07:00 jon Exp $
+ * $Id: msbf.c,v 1.3 2002/07/09 09:08:12 jon Exp $
  *
  * Function to spin some vectors under multiple generators to obtain a standard base
  *
@@ -15,6 +15,7 @@
 #include "matrix.h"
 #include "memory.h"
 #include "mul.h"
+#include "parse.h"
 #include "primes.h"
 #include "read.h"
 #include "system.h"
@@ -257,6 +258,9 @@ unsigned int spin(const char *in, const char *out, const char *dir,
     /* is due to the requirement to have a guaranteed */
     /* order of generated vectors, independent of basis or memory constraints */
     k = 0;
+    if (verbose) {
+      printf("%s: multiplying %d rows\n", name, rows_to_do);
+    }
     while (k < rows_to_do) {
       unsigned int stride = (k + max_rows <= rows_to_do) ? max_rows : rows_to_do - k;
       unsigned int step = (nor > max_rows) ? max_rows : nor;
@@ -291,6 +295,9 @@ unsigned int spin(const char *in, const char *out, const char *dir,
                           len, nob, 900, name)) {
         cleanup_all(NULL, argc, files, basis, echelised, name_basis, name_echelised);
         exit(1);
+      }
+      if (verbose) {
+        printf("%s: Adding %d new rows\n", name, d - nor);
       }
       nor = d;
       /* Extra code to deal with adding the standard basis vectors */
@@ -335,6 +342,9 @@ unsigned int spin(const char *in, const char *out, const char *dir,
   }
   header_free(h_out);
   fseeko64(basis, 0, SEEK_SET);
+  if (verbose) {
+    printf("%s: Copying %d rows to output\n", name, nor);
+  }
   endian_copy_matrix(basis, outp, *rows1, len, nor);
   fclose(outp);
   fclose(basis);

@@ -1,5 +1,5 @@
 /*
- * $Id: ad.c,v 1.6 2002/01/06 16:35:48 jon Exp $
+ * $Id: ad.c,v 1.7 2002/07/09 09:08:12 jon Exp $
  *
  * Add two matrices to give a third
  *
@@ -7,9 +7,10 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "add.h"
 #include "endian.h"
 #include "memory.h"
-#include "add.h"
+#include "parse.h"
 
 static const char *name = "zad";
 
@@ -24,6 +25,7 @@ int main(int argc, const char * const argv[])
   const char *in2;
   const char *out;
 
+  argv = parse_line(argc, argv, &argc);
   if (4 != argc) {
     ad_usage();
     exit(1);

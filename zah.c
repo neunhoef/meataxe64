@@ -1,5 +1,5 @@
 /*
- * $Id: zah.c,v 1.4 2002/06/28 08:39:16 jon Exp $
+ * $Id: zah.c,v 1.5 2002/07/09 09:08:12 jon Exp $
  *
  * Add a header to en intermediate file matrix
  * Essentially a disaster recovery program
@@ -15,6 +15,7 @@
 #include "files.h"
 #include "header.h"
 #include "memory.h"
+#include "parse.h"
 #include "read.h"
 #include "utils.h"
 #include "write.h"
@@ -37,6 +38,7 @@ int main(int argc, const char * const argv[])
   long long ptr;
   const header *h;
 
+  argv = parse_line(argc, argv, &argc);
   if (4 != argc && 5 != argc) {
     ah_usage();
     exit(1);

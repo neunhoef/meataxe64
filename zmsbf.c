@@ -1,5 +1,5 @@
 /*
- * $Id: zmsbf.c,v 1.1 2002/07/07 12:10:42 jon Exp $
+ * $Id: zmsbf.c,v 1.2 2002/07/09 09:08:12 jon Exp $
  *
  * Spin some vectors under multiple generators to obtain a standard base
  * using intermediate files in a temporary directory
@@ -10,6 +10,7 @@
 #include "endian.h"
 #include "memory.h"
 #include "msbf.h"
+#include "parse.h"
 
 static const char *name = "zmsbf";
 
@@ -23,6 +24,7 @@ int main(int argc, const char * const argv[])
   unsigned int memory = MEM_SIZE;
   unsigned int dim;
 
+  argv = parse_line(argc, argv, &argc);
   if (6 > argc) {
     msbf_usage();
     exit(1);

@@ -1,5 +1,5 @@
 /*
- * $Id: emu.c,v 1.8 2001/10/11 07:47:13 jon Exp $
+ * $Id: emu.c,v 1.9 2002/07/09 09:08:12 jon Exp $
  *
  * Exploded multiply
  *
@@ -20,8 +20,9 @@
 #include "files.h"
 #include "map.h"
 #include "memory.h"
-#include "utils.h"
+#include "parse.h"
 #include "system.h"
+#include "utils.h"
 
 static const char *name = "emu";
 
@@ -38,6 +39,7 @@ int main(int argc,  const char *const argv[])
   const char **names1, **names2, **names3;
   t_uid *tmp_ids;
   job *jobs;
+  argv = parse_line(argc, argv, &argc);
   memory_init(name, 0);
   init_system();
   if (argc != 6) {

@@ -1,5 +1,5 @@
 /*
- * $Id: zlp.c,v 1.1 2002/07/03 12:06:54 jon Exp $
+ * $Id: zlp.c,v 1.2 2002/07/09 09:08:12 jon Exp $
  *
  * Projective (line) permute some vectors under two generators
  *
@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include "endian.h"
 #include "memory.h"
+#include "parse.h"
 #include "vp.h"
 
 static const char *name = "zlp";
@@ -22,6 +23,7 @@ int main(int argc, const char * const argv[])
   unsigned int memory = MEM_SIZE;
   unsigned int degree;
 
+  argv = parse_line(argc, argv, &argc);
   if (7 != argc && 8 != argc) {
     lp_usage();
     exit(1);

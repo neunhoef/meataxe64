@@ -1,5 +1,5 @@
 /*
- * $Id: mu.c,v 1.9 2002/06/25 10:30:12 jon Exp $
+ * $Id: mu.c,v 1.10 2002/07/09 09:08:12 jon Exp $
  *
  * Multiply two matrices to give a third
  *
@@ -11,6 +11,7 @@
 #include "endian.h"
 #include "memory.h"
 #include "mul.h"
+#include "parse.h"
 #include "utils.h"
 
 static const char *name = "zmu";
@@ -27,6 +28,7 @@ int main(int argc, const char * const argv[])
   const char *out;
   unsigned int memory = MEM_SIZE;
 
+  argv = parse_line(argc, argv, &argc);
   if (4 != argc && 5 != argc) {
     mu_usage();
     exit(1);

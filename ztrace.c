@@ -1,5 +1,5 @@
 /*
- * $Id: ztrace.c,v 1.4 2002/06/30 21:33:15 jon Exp $
+ * $Id: ztrace.c,v 1.5 2002/07/09 09:08:12 jon Exp $
  *
  * Compute the trace of a matrix
  *
@@ -11,6 +11,7 @@
 #include "endian.h"
 #include "header.h"
 #include "memory.h"
+#include "parse.h"
 #include "primes.h"
 #include "read.h"
 #include "rows.h"
@@ -35,6 +36,7 @@ int main(int argc, const char * const argv[])
 
   endian_init();
   memory_init(name, 0);
+  argv = parse_line(argc, argv, &argc);
   if (2 != argc) {
     trace_usage();
     exit(1);

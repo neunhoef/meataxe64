@@ -1,5 +1,5 @@
 /*
- * $Id: slave.c,v 1.9 2002/06/28 08:39:16 jon Exp $
+ * $Id: slave.c,v 1.10 2002/07/09 09:08:12 jon Exp $
  *
  * Slave for extended operations
  * Based on zsl.c     MTX6 slave version 6.0.11 7.11.98 
@@ -16,6 +16,7 @@
 #include "files.h"
 #include "memory.h"
 #include "mul.h"
+#include "parse.h"
 #include "system.h"
 #include "utils.h"
 
@@ -34,7 +35,7 @@ static int capable(const char *cmd, unsigned int length)
           strncmp(cmd, "mu", length) == 0);
 }
 
-static unsigned int parse_line(const char *(*line_ptrs)[], unsigned int (*lengths)[],
+static unsigned int parse_cmd_line(const char *(*line_ptrs)[], unsigned int (*lengths)[],
                                const char *line)
 {
   unsigned int i = 0, j = 0, k;
@@ -66,6 +67,7 @@ int main(int argc, const char *const argv[])
 {
   unsigned int memory = MEM_SIZE;
   FILE *input, *output; 
+  argv = parse_line(argc, argv, &argc);
   if (2 != argc && 3 != argc) {
     slave_usage();
     exit(1);
@@ -102,7 +104,7 @@ int main(int argc, const char *const argv[])
     }
     while (get_task_line(line, input)) {
       /* Check for free command, else just copy back */
-      words = parse_line(&line_ptrs, &lengths, line);
+      words = parse_cmd_line(&line_ptrs, &lengths, line);
       if (1 <= words && 0 == strncmp(line_ptrs[0], "free", lengths[0])) {
         if (capable(line_ptrs[2], lengths[2])) {
           free = 1;
@@ -218,7 +220,7 @@ int main(int argc, const char *const argv[])
         exit(1);
       }
       while (get_task_line(line, input)) {
-        words = parse_line(&line_ptrs, &lengths, line);
+        words = parse_cmd_line(&line_ptrs, &lengths, line);
         if (0 != words && strncmp(argv[1], line_ptrs[0], lengths[0]) == 0) {
           fprintf(output, "done %s", line_ptrs[1]);
           break;

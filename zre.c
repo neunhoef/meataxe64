@@ -1,5 +1,5 @@
 /*
- * $Id: zre.c,v 1.4 2002/06/28 08:39:16 jon Exp $
+ * $Id: zre.c,v 1.5 2002/07/09 09:08:12 jon Exp $
  *
  * Convert a matrix from new to old
  *
@@ -15,6 +15,7 @@
 #include "endian.h"
 #include "header.h"
 #include "memory.h"
+#include "parse.h"
 #include "primes.h"
 #include "read.h"
 #include "rows.h"
@@ -40,6 +41,7 @@ int main(int argc, const char * const argv[])
 
   endian_init();
   memory_init(name, 0);
+  argv = parse_line(argc, argv, &argc);
   if (3 != argc) {
     re_usage();
     exit(1);

@@ -1,5 +1,5 @@
 /*
- * $Id: zrsums.c,v 1.2 2002/07/03 12:06:54 jon Exp $
+ * $Id: zrsums.c,v 1.3 2002/07/09 09:08:12 jon Exp $
  *
  * Compute restricted sums in the group algebra in two matrices
  *
@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include "endian.h"
 #include "memory.h"
+#include "parse.h"
 #include "sums.h"
 #include "utils.h"
 
@@ -38,6 +39,7 @@ int main(int argc, const char * const argv[])
   unsigned int o_a, o_b, n, sub_order;
   int res;
 
+  argv = parse_line(argc, argv, &argc);
   if (9 != argc && 10 != argc) {
     rsums_usage();
     exit(1);

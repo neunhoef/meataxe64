@@ -1,5 +1,5 @@
 /*
- * $Id: eim.c,v 1.9 2002/06/28 08:39:16 jon Exp $
+ * $Id: eim.c,v 1.10 2002/07/09 09:08:12 jon Exp $
  *
  * implode a matrix (ie glue exploded matrices together)
  *
@@ -17,6 +17,7 @@
 #include "header.h"
 #include "memory.h"
 #include "map.h"
+#include "parse.h"
 #include "primes.h"
 #include "read.h"
 #include "utils.h"
@@ -55,6 +56,7 @@ int main(int argc,  const char *const argv[])
   unsigned int rows, cols;
   unsigned int i, j;
   const char **names;
+  argv = parse_line(argc, argv, &argc);
   if (3 != argc) {
     eim_usage();
     exit(1);

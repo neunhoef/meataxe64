@@ -1,5 +1,5 @@
 /*
- * $Id: zproj.c,v 1.1 2002/02/18 20:42:49 jon Exp $
+ * $Id: zproj.c,v 1.2 2002/07/09 09:08:12 jon Exp $
  *
  * Project into quotient space representation
  *
@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include "endian.h"
 #include "memory.h"
+#include "parse.h"
 #include "project.h"
 
 static const char *name = "zproj";
@@ -21,6 +22,7 @@ int main(int argc, const char * const argv[])
 {
   unsigned int memory = MEM_SIZE;
 
+  argv = parse_line(argc, argv, &argc);
   if (4 != argc && 5 != argc) {
     proj_usage();
     exit(1);

@@ -1,5 +1,5 @@
 /*
- * $Id: zpro.c,v 1.2 2002/06/27 07:31:58 jon Exp $
+ * $Id: zpro.c,v 1.3 2002/07/09 09:08:12 jon Exp $
  *
  * Print an orbit_set
  *
@@ -11,6 +11,7 @@
 #include "endian.h"
 #include "header.h"
 #include "orbit.h"
+#include "parse.h"
 #include "read.h"
 #include "utils.h"
 #include "write.h"
@@ -30,6 +31,7 @@ int main(int argc, const char * const argv[])
   const header *h;
   orbit_set *orbits;
   endian_init();
+  argv = parse_line(argc, argv, &argc);
   if (2 != argc) {
     pro_usage();
     exit(1);

@@ -1,5 +1,5 @@
 /*
- * $Id: zdiag.c,v 1.4 2002/06/30 21:33:15 jon Exp $
+ * $Id: zdiag.c,v 1.5 2002/07/09 09:08:12 jon Exp $
  *
  * Clear to zero the off diagonal elements of a matrix
  * This is a utility program for computation of quadratic forms
@@ -12,6 +12,7 @@
 #include "endian.h"
 #include "memory.h"
 #include "header.h"
+#include "parse.h"
 #include "read.h"
 #include "rows.h"
 #include "write.h"
@@ -31,6 +32,7 @@ int main(int argc, const char * const argv[])
   const header *h;
   unsigned int prime, nob, nor, noc, len, elt, *row, mask, elts_per_word;
 
+  argv = parse_line(argc, argv, &argc);
   if (3 != argc) {
     diag_usage();
     exit(1);

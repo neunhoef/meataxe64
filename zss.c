@@ -1,5 +1,5 @@
 /*
- * $Id: zss.c,v 1.1 2001/11/25 00:17:19 jon Exp $
+ * $Id: zss.c,v 1.2 2002/07/09 09:08:12 jon Exp $
  *
  * Calculate subspace representation
  *
@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include "endian.h"
 #include "memory.h"
+#include "parse.h"
 #include "ss.h"
 
 static const char *name = "zss";
@@ -21,6 +22,7 @@ int main(int argc, const char * const argv[])
 {
   unsigned int memory = MEM_SIZE;
 
+  argv = parse_line(argc, argv, &argc);
   if (4 != argc && 5 != argc) {
     ss_usage();
     exit(1);

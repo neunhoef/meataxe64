@@ -1,5 +1,5 @@
 /*
- * $Id: zlv.c,v 1.1 2002/06/25 10:30:12 jon Exp $: zss.c,v 1.1 2001/11/25 00:17:19 jon Exp $
+ * $Id: zlv.c,v 1.2 2002/07/09 09:08:12 jon Exp $: zss.c,v 1.1 2001/11/25 00:17:19 jon Exp $
  *
  * Calculate inverse quotient space representation, ie lift
  *
@@ -7,8 +7,9 @@
 
 #include <stdio.h>
 #include "endian.h"
-#include "memory.h"
 #include "lv.h"
+#include "memory.h"
+#include "parse.h"
 
 static const char *name = "zlv";
 
@@ -21,6 +22,7 @@ int main(int argc, const char * const argv[])
 {
   unsigned int memory = MEM_SIZE;
 
+  argv = parse_line(argc, argv, &argc);
   if (4 != argc && 5 != argc) {
     lv_usage();
     exit(1);

@@ -1,5 +1,5 @@
 /*
- * $Id: tr.c,v 1.4 2002/03/07 13:43:30 jon Exp $
+ * $Id: tr.c,v 1.5 2002/07/09 09:08:12 jon Exp $
  *
  * Transpose a matrix
  *
@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include "endian.h"
 #include "memory.h"
+#include "parse.h"
 #include "tra.h"
 
 static const char *name = "ztr";
@@ -24,6 +25,7 @@ int main(int argc, const char * const argv[])
   const char *out;
   unsigned int memory = MEM_SIZE;
 
+  argv = parse_line(argc, argv, &argc);
   if (3 != argc && 4 != argc) {
     tr_usage();
     exit(1);

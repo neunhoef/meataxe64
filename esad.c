@@ -1,5 +1,5 @@
 /*
- * $Id: esad.c,v 1.1 2002/02/05 19:50:56 jon Exp $
+ * $Id: esad.c,v 1.2 2002/07/09 09:08:12 jon Exp $
  *
  * Exploded scaled add
  *
@@ -18,6 +18,7 @@
 #include "files.h"
 #include "map.h"
 #include "memory.h"
+#include "parse.h"
 #include "utils.h"
 
 static const char *name = "esad";
@@ -33,6 +34,7 @@ int main(int argc,  const char *const argv[])
   unsigned int col_pieces2, row_pieces2;
   unsigned int i, j, scalar;
   const char **names1, **names2, **names3;
+  argv = parse_line(argc, argv, &argc);
   memory_init(name, 0);
   endian_init();
   /******  First check the number of input arguments  */

@@ -1,5 +1,5 @@
 /*
- * $Id: etr.c,v 1.3 2002/06/25 10:30:12 jon Exp $
+ * $Id: etr.c,v 1.4 2002/07/09 09:08:12 jon Exp $
  *
  * Exploded transpose
  *
@@ -16,6 +16,7 @@
 #include "files.h"
 #include "map.h"
 #include "memory.h"
+#include "parse.h"
 #include "tra.h"
 #include "utils.h"
 
@@ -31,6 +32,7 @@ int main(int argc,  const char *const argv[])
   unsigned int col_pieces, row_pieces;
   unsigned int i, j;
   const char **names1, **names2;
+  argv = parse_line(argc, argv, &argc);
   memory_init(name, 0);
   endian_init();
   /******  First check the number of input arguments  */

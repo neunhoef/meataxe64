@@ -1,5 +1,5 @@
 /*
- * $Id: zfo.c,v 1.2 2002/06/28 08:39:16 jon Exp $
+ * $Id: zfo.c,v 1.3 2002/07/09 09:08:12 jon Exp $
  *
  * Find the orbits under multiple generators
  *
@@ -13,6 +13,7 @@
 #include "header.h"
 #include "maps.h"
 #include "orbit.h"
+#include "parse.h"
 #include "read.h"
 #include "utils.h"
 #include "write.h"
@@ -35,6 +36,7 @@ int main(int argc, const char * const argv[])
   orbit **orb_ptr;
   orbit orb;
   endian_init();
+  argv = parse_line(argc, argv, &argc);
   if (4 > argc) {
     fo_usage();
     exit(1);

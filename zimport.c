@@ -1,5 +1,5 @@
 /*
- * $Id: zimport.c,v 1.6 2002/06/28 08:39:16 jon Exp $
+ * $Id: zimport.c,v 1.7 2002/07/09 09:08:12 jon Exp $
  *
  * Import matrix from old system
  *
@@ -13,6 +13,7 @@
 #include "elements.h"
 #include "header.h"
 #include "memory.h"
+#include "parse.h"
 #include "read.h"
 #include "rows.h"
 #include "utils.h"
@@ -35,6 +36,7 @@ int main(int argc, const char * const argv[])
   FILE *f_in;
   FILE *f_out;
 
+  argv = parse_line(argc, argv, &argc);
   if (3 != argc) {
     import_usage();
     exit(1);

@@ -1,5 +1,5 @@
 /*
- * $Id: zsums.c,v 1.7 2002/07/03 12:06:54 jon Exp $
+ * $Id: zsums.c,v 1.8 2002/07/09 09:08:12 jon Exp $
  *
  * Compute sums in the group algebra in two matrices
  *
@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include "endian.h"
 #include "memory.h"
+#include "parse.h"
 #include "sums.h"
 #include "utils.h"
 
@@ -38,6 +39,7 @@ int main(int argc, const char * const argv[])
   unsigned int o_a, o_b, n;
   int res;
 
+  argv = parse_line(argc, argv, &argc);
   if (8 != argc && 9 != argc) {
     sums_usage();
     exit(1);

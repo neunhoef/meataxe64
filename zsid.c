@@ -9,8 +9,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include "endian.h"
-#include "memory.h"
 #include "ident.h"
+#include "memory.h"
+#include "parse.h"
 
 static const char *name = "zsid";
 
@@ -24,6 +25,7 @@ int main(int argc, const char * const argv[])
   const char *out;
   unsigned int prime, noc, nor, elt;
 
+  argv = parse_line(argc, argv, &argc);
   if (6 != argc) {
     sid_usage();
     exit(1);

@@ -1,5 +1,5 @@
 /*
- * $Id: eip.c,v 1.6 2002/06/28 08:39:16 jon Exp $
+ * $Id: eip.c,v 1.7 2002/07/09 09:08:12 jon Exp $
  *
  * Read a permutation into an exploded matrix
  *
@@ -16,6 +16,7 @@
 #include "header.h"
 #include "map.h"
 #include "memory.h"
+#include "parse.h"
 #include "primes.h"
 #include "read.h"
 #include "rows.h"
@@ -44,6 +45,7 @@ int main(int argc, const char * const argv[])
   const header *h;
   unsigned int *row;
 
+  argv = parse_line(argc, argv, &argc);
   if (5 != argc) {
     eip_usage();
     exit(1);

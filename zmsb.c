@@ -1,5 +1,5 @@
 /*
- * $Id: zmsb.c,v 1.1 2002/07/05 12:43:41 jon Exp $
+ * $Id: zmsb.c,v 1.2 2002/07/09 09:08:12 jon Exp $
  *
  * Spin some vectors under two generators to obtain a standard base
  *
@@ -9,6 +9,7 @@
 #include "endian.h"
 #include "memory.h"
 #include "msb.h"
+#include "parse.h"
 
 static const char *name = "zmsb";
 
@@ -22,6 +23,7 @@ int main(int argc, const char * const argv[])
   unsigned int memory = MEM_SIZE;
   unsigned int dim;
 
+  argv = parse_line(argc, argv, &argc);
   if (5 > argc) {
     msb_usage();
     exit(1);

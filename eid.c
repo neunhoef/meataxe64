@@ -1,5 +1,5 @@
 /*
- * $Id: eid.c,v 1.4 2002/06/25 10:30:12 jon Exp $
+ * $Id: eid.c,v 1.5 2002/07/09 09:08:12 jon Exp $
  *
  * Generate exploded identity matrix
  *
@@ -14,6 +14,7 @@
 #include "files.h"
 #include "map.h"
 #include "memory.h"
+#include "parse.h"
 #include "primes.h"
 #include "rows.h"
 #include "utils.h"
@@ -37,6 +38,7 @@ int main(int argc, const char * const argv[])
   char *ptr;
   FILE **outputs;
 
+  argv = parse_line(argc, argv, &argc);
   if (6 != argc) {
     id_usage();
     exit(1);

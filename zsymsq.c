@@ -1,5 +1,5 @@
 /*
- * $Id: zsymsq.c,v 1.1 2002/02/12 23:10:24 jon Exp $
+ * $Id: zsymsq.c,v 1.2 2002/07/09 09:08:12 jon Exp $
  *
  * Symmetric square a matrix
  *
@@ -10,8 +10,9 @@
 #include <string.h>
 #include "endian.h"
 #include "memory.h"
-#include "utils.h"
+#include "parse.h"
 #include "powers.h"
+#include "utils.h"
 
 static const char *name = "zsymsq";
 
@@ -26,6 +27,7 @@ int main(int argc, const char * const argv[])
   const char *out;
   unsigned int memory = MEM_SIZE;
 
+  argv = parse_line(argc, argv, &argc);
   if (3 != argc && 4 != argc) {
     symsq_usage();
     exit(1);

@@ -1,5 +1,5 @@
 /*
- * $Id: znoc.c,v 1.1 2001/11/29 01:13:09 jon Exp $
+ * $Id: znoc.c,v 1.2 2002/07/09 09:08:12 jon Exp $
  *
  * Print the number of columns of a matrix
  *
@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include "endian.h"
 #include "header.h"
+#include "parse.h"
 #include "read.h"
 
 static const char *name = "znoc";
@@ -25,6 +26,7 @@ int main(int argc, const char * const argv[])
   const header *h;
 
   endian_init();
+  argv = parse_line(argc, argv, &argc);
   if (2 != argc) {
     noc_usage();
     exit(1);

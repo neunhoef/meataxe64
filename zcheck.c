@@ -1,5 +1,5 @@
 /*
- * $Id: zcheck.c,v 1.4 2002/06/30 21:33:15 jon Exp $
+ * $Id: zcheck.c,v 1.5 2002/07/09 09:08:12 jon Exp $
  *
  * Check no non-zero values off ends of rows
  *
@@ -13,6 +13,7 @@
 #include "endian.h"
 #include "header.h"
 #include "memory.h"
+#include "parse.h"
 #include "read.h"
 #include "utils.h"
 
@@ -30,6 +31,7 @@ int main(int argc, const char * const argv[])
   const header *h;
   unsigned int prime, nob, noc, nor, len, *row, i, j, mask, elts_per_word;
 
+  argv = parse_line(argc, argv, &argc);
   if (2 != argc) {
     check_usage();
     exit(1);

@@ -1,5 +1,5 @@
 /*
- * $Id: zwords.c,v 1.2 2002/01/06 16:35:48 jon Exp $
+ * $Id: zwords.c,v 1.3 2002/07/09 09:08:12 jon Exp $
  *
  * Compute words in two matrices
  *
@@ -12,6 +12,7 @@
 #include "endian.h"
 #include "memory.h"
 #include "mul.h"
+#include "parse.h"
 #include "utils.h"
 
 static const char *name = "zwords";
@@ -32,6 +33,7 @@ int main(int argc, const char * const argv[])
   const char **names;
   const char **words;
 
+  argv = parse_line(argc, argv, &argc);
   if (7 != argc && 8 != argc) {
     words_usage();
     exit(1);

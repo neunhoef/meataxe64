@@ -1,14 +1,15 @@
 /*
- * $Id: zbase.c,v 1.4 2002/06/25 10:30:12 jon Exp $
+ * $Id: zbase.c,v 1.5 2002/07/09 09:08:12 jon Exp $
  *
  * Compute a basis for a space from a set of vectors
  *
  */
 
 #include <stdio.h>
+#include "base.h"
 #include "endian.h"
 #include "memory.h"
-#include "base.h"
+#include "parse.h"
 
 static const char *name = "zbase";
 
@@ -22,6 +23,7 @@ int main(int argc, const char * const argv[])
   unsigned int n;
   unsigned int memory = MEM_SIZE;
 
+  argv = parse_line(argc, argv, &argc);
   if (4 != argc && 5 != argc) {
     base_usage();
     exit(1);

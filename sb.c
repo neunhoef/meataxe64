@@ -1,5 +1,5 @@
 /*
- * $Id: sb.c,v 1.10 2002/07/07 12:10:42 jon Exp $
+ * $Id: sb.c,v 1.11 2002/07/09 09:08:12 jon Exp $
  *
  * Function to spin some vectors under two generators to obtain a standard base
  *
@@ -14,6 +14,7 @@
 #include "matrix.h"
 #include "memory.h"
 #include "mul.h"
+#include "parse.h"
 #include "primes.h"
 #include "read.h"
 #include "utils.h"
@@ -175,6 +176,9 @@ unsigned int spin(const char *in, const char *out, const char *a,
     /* is due to the requirement to have a guaranteed */
     /* order of generated vectors, independent of basis or memory constraints */
     k = 0;
+    if (verbose) {
+      printf("%s: multiplying %d rows\n", name, rows_to_do);
+    }
     while (k < rows_to_do) {
       unsigned int rows_poss = max_rows - nor;
       unsigned int stride = (k + rows_poss <= rows_to_do) ? rows_poss : rows_to_do - k;
@@ -221,6 +225,9 @@ unsigned int spin(const char *in, const char *out, const char *a,
       }
       free(new_map);
       assert(j == d);
+      if (verbose) {
+        printf("%s: Adding %d new rows\n", name, d);
+      }
       nor += d; /* The number of extra rows we made */
       assert(max_rows + d == rows_poss + nor);
       k += stride;
@@ -243,6 +250,9 @@ unsigned int spin(const char *in, const char *out, const char *a,
   }
   if (0 == open_and_write_binary_header(&outp, h_out, out, name)) {
     exit(1);
+  }
+  if (verbose) {
+    printf("%s: Writing %d rows to output\n", name, nor);
   }
   errno = 0;
   if (0 == endian_write_matrix(outp, rows1, len, nor)) {

@@ -1,5 +1,5 @@
 /*
- * $Id: pr.c,v 1.13 2002/06/30 21:33:15 jon Exp $
+ * $Id: pr.c,v 1.14 2002/07/09 09:08:12 jon Exp $
  *
  * Print a matrix
  *
@@ -15,6 +15,7 @@
 #include "endian.h"
 #include "header.h"
 #include "memory.h"
+#include "parse.h"
 #include "primes.h"
 #include "read.h"
 #include "rows.h"
@@ -43,6 +44,7 @@ int main(int argc, const char * const argv[])
   prime_ops prime_operations;
 
   endian_init();
+  argv = parse_line(argc, argv, &argc);
   if (2 != argc && 3 != argc) {
     pr_usage();
     exit(1);

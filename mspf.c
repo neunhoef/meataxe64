@@ -1,5 +1,5 @@
 /*
- * $Id: mspf.c,v 1.7 2002/07/08 20:07:00 jon Exp $
+ * $Id: mspf.c,v 1.8 2002/07/09 09:08:12 jon Exp $
  *
  * Function to spin some vectors under multiple generators
  * using intermediate files in a temporary directory.
@@ -15,6 +15,7 @@
 #include "matrix.h"
 #include "memory.h"
 #include "mul.h"
+#include "parse.h"
 #include "primes.h"
 #include "read.h"
 #include "system.h"
@@ -223,6 +224,9 @@ unsigned int spin(const char *in, const char *out, const char *dir,
     unsigned int k, old_nor = nor;
     /* Ensure we don't try to do too many */
     k = 0;
+    if (verbose) {
+      printf("%s: multiplying %d rows\n", name, rows_to_do);
+    }
     while (k < rows_to_do) {
       unsigned int stride = (k + max_rows <= rows_to_do) ? max_rows : rows_to_do - k;
       unsigned int step = (nor > max_rows) ? max_rows : nor;
@@ -254,6 +258,9 @@ unsigned int spin(const char *in, const char *out, const char *dir,
         cleanup_all(NULL, argc, files, echelised, name_echelised);
         exit(1);
       }
+      if (verbose) {
+        printf("%s: Adding %d new rows\n", name, d - nor);
+      }
       nor = d;
       k += stride; /* The number we consumed */
     }
@@ -272,6 +279,9 @@ unsigned int spin(const char *in, const char *out, const char *dir,
   }
   header_free(h_out);
   fseeko64(echelised, 0, SEEK_SET);
+  if (verbose) {
+    printf("%s: Copying %d rows to output\n", name, nor);
+  }
   endian_copy_matrix(echelised, outp, *rows1, len, nor);
   fclose(outp);
   fclose(echelised);

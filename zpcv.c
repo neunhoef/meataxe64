@@ -1,5 +1,5 @@
 /*
- * $Id: zpcv.c,v 1.1 2002/06/25 10:30:12 jon Exp $
+ * $Id: zpcv.c,v 1.2 2002/07/09 09:08:12 jon Exp $
  *
  * Calculate lift from permutation condensation representation
  *
@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include "endian.h"
 #include "memory.h"
+#include "parse.h"
 #include "pcv.h"
 
 static const char *name = "zpcv";
@@ -21,6 +22,7 @@ int main(int argc, const char * const argv[])
 {
   unsigned int memory = MEM_SIZE;
 
+  argv = parse_line(argc, argv, &argc);
   if (4 != argc && 5 != argc) {
     pcv_usage();
     exit(1);

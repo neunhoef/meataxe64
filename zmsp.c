@@ -1,5 +1,5 @@
 /*
- * $Id: zmsp.c,v 1.1 2002/06/25 10:30:12 jon Exp $
+ * $Id: zmsp.c,v 1.2 2002/07/09 09:08:12 jon Exp $
  *
  * Spin some vectors under multiple generators
  *
@@ -9,6 +9,7 @@
 #include "endian.h"
 #include "memory.h"
 #include "msp.h"
+#include "parse.h"
 
 static const char *name = "zmsp";
 
@@ -22,6 +23,7 @@ int main(int argc, const char * const argv[])
   unsigned int memory = MEM_SIZE;
   unsigned int dim;
 
+  argv = parse_line(argc, argv, &argc);
   if (5 > argc) {
     msp_usage();
     exit(1);

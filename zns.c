@@ -1,5 +1,5 @@
 /*
- * $Id: zns.c,v 1.1 2001/11/19 18:31:49 jon Exp $
+ * $Id: zns.c,v 1.2 2002/07/09 09:08:12 jon Exp $
  *
  * Compute the null space of a matrix
  *
@@ -9,6 +9,7 @@
 #include "endian.h"
 #include "memory.h"
 #include "ns.h"
+#include "parse.h"
 
 static const char *name = "zns";
 
@@ -22,6 +23,7 @@ int main(int argc, const char * const argv[])
   unsigned int n;
   unsigned int memory = MEM_SIZE;
 
+  argv = parse_line(argc, argv, &argc);
   if (3 != argc && 4 != argc) {
     ns_usage();
     exit(1);
