@@ -1,5 +1,5 @@
 /*
- * $Id: rows.c,v 1.7 2001/09/12 23:13:04 jon Exp $
+ * $Id: rows.c,v 1.8 2001/09/18 23:15:46 jon Exp $
  *
  * Row manipulation for meataxe
  *
@@ -36,6 +36,33 @@ static int row_add_2(const unsigned int *row1, const unsigned int *row2,
   }
   for (i = j * 8; i < row_words; i++) {
     *(row3++) = *(row1++) ^ *(row2++);
+  }
+  return 1;
+}
+
+static int row_inc_2(const unsigned int *row1,
+                     unsigned int *row2, unsigned int len)
+{
+  unsigned int row_words;
+  unsigned int i, j;
+  assert(0 != len);
+  assert(NULL != row1);
+  assert(NULL != row2);
+  row_words = len / sizeof(unsigned int);
+  /* Unroll for efficiency */
+  j = row_words / 8;
+  for (i = 0; i < j; i++) {
+    *(row2++) ^= *(row1++);
+    *(row2++) ^= *(row1++);
+    *(row2++) ^= *(row1++);
+    *(row2++) ^= *(row1++);
+    *(row2++) ^= *(row1++);
+    *(row2++) ^= *(row1++);
+    *(row2++) ^= *(row1++);
+    *(row2++) ^= *(row1++);
+  }
+  for (i = j * 8; i < row_words; i++) {
+    *(row2++) ^= *(row1++);
   }
   return 1;
 }
@@ -87,6 +114,11 @@ static int row_add_3(const unsigned int *row1, const unsigned int *row2,
   return 1;
 }
 
+static int row_inc_3(const unsigned int *row1, unsigned int *row2, unsigned int len)
+{
+  return row_add_3(row1, row2, row2, len);
+}
+
 static int scaled_row_add_3(const unsigned int *row1, const unsigned int *row2,
                             unsigned int *row3, unsigned int len, unsigned int elt)
 {
@@ -129,6 +161,11 @@ static int row_add_4(const unsigned int *row1, const unsigned int *row2,
     *(row3++) = *(row1++) ^ *(row2++);
   }
   return 1;
+}
+
+static int row_inc_4(const unsigned int *row1, unsigned int *row2, unsigned int len)
+{
+  return row_add_4(row1, row2, row2, len);
 }
 
 static int scaled_row_add_4(const unsigned int *row1, const unsigned int *row2,
@@ -209,6 +246,11 @@ static int row_add_5(const unsigned int *row1, const unsigned int *row2,
   return 1;
 }
 
+static int row_inc_5(const unsigned int *row1, unsigned int *row2, unsigned int len)
+{
+  return row_add_5(row1, row2, row2, len);
+}
+
 static int scaled_row_add_5(const unsigned int *row1, const unsigned int *row2,
                             unsigned int *row3, unsigned int len, unsigned int elt)
 {
@@ -271,13 +313,6 @@ void row_copy(const unsigned int *row1, unsigned int *row2,
   memcpy(row2, row1, len);
 }
 
-int row_malloc(unsigned int len, unsigned int **row)
-{
-  assert(NULL != row);
-  *row = malloc(len);
-  return (NULL != *row);
-}
-
 void row_init(unsigned int *row, unsigned int len)
 {
   assert(NULL != row);
@@ -288,18 +323,22 @@ int rows_init(unsigned int prime, row_opsp ops)
 {
   if (2 == prime) {
     ops->adder = &row_add_2;
+    ops->incer = &row_inc_2;
     ops->scaled_adder = NULL; /* Should never be called */
     return 1;
   } else if (3 == prime) {
     ops->adder = &row_add_3;
+    ops->incer = &row_inc_3;
     ops->scaled_adder = &scaled_row_add_3;
     return 1;
   } else if (4 == prime) {
     ops->adder = &row_add_4;
+    ops->incer = &row_inc_4;
     ops->scaled_adder = &scaled_row_add_4;
     return 1;
   } else if (5 == prime) {
     ops->adder = &row_add_5;
+    ops->incer = &row_inc_5;
     ops->scaled_adder = &scaled_row_add_5;
     return 1;
   } else {

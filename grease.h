@@ -1,5 +1,5 @@
 /*
- * $Id: grease.h,v 1.3 2001/09/12 23:13:04 jon Exp $
+ * $Id: grease.h,v 1.4 2001/09/18 23:15:46 jon Exp $
  *
  * Functions to grease matrix rows
  *
@@ -8,17 +8,20 @@
 #ifndef included__grease
 #define included__grease
 
-extern int grease(unsigned int nob, unsigned int nor1, unsigned int noc1,
-                  unsigned int noc2, unsigned int prime, unsigned int *step);
+#include "rows.h"
 
-extern int grease_make_rows(unsigned int **rows_in, unsigned int size,
-                            unsigned int prime, unsigned int len,
-                            unsigned int col_index,
-                            unsigned int ***rows_out);
+extern int grease(unsigned int nob, unsigned int prime,
+                  unsigned int *step, unsigned int avail);
+
+extern int grease_make_rows(unsigned int size,
+                            unsigned int prime, unsigned int len);
 
 extern int grease_allocate_rows(unsigned int size,
                                 unsigned int prime, unsigned int len,
-                                unsigned int *grease_row_count,
-                                unsigned int ***rows_out);
+                                unsigned int ***rows_out, unsigned int start);
+
+extern void grease_free_rows(unsigned int **rows);
+
+extern void grease_init(row_opsp ops);
 
 #endif

@@ -1,5 +1,5 @@
 /*
- * $Id: mtx.c,v 1.2 2001/09/16 10:05:44 jon Exp $
+ * $Id: mtx.c,v 1.3 2001/09/18 23:15:46 jon Exp $
  *
  * Extended row operations for monster meataxe
  *
@@ -13,23 +13,19 @@
 #include "write.h"
 #include "mtx.h"
 
-typedef unsigned long ELT;
-
-typedef unsigned char * VPTR;
-
 static int initialised = 0;
 static FILE **outputs;
 static unsigned long *spaces;
 
-static void quit(const char * a)
+static void quit(const char *a)
 {
-  printf("error %s in program monster mtx\n",a);
+  fprintf(stderr, "error %s in program monster mtx\n", a);
   exit(15);
 }
 
 static void *mymalloc(unsigned long siz)
 {
-  void * a = (void *)malloc(siz);
+  void *a = (void *)malloc(siz);
   if (NULL == a) {
     fprintf(stderr, "mymalloc fails to obtain %ld bytes\n", siz);
     quit("mymalloc failed");
@@ -48,9 +44,9 @@ void put_row(unsigned int row_num, unsigned int total_rows, unsigned int split_s
   unsigned int rows = cols;
   unsigned int i, j;
   if (!initialised) {
-    FILE *output = fopen("map", "wb");
+    FILE *output = fopen("map", "w");
     initialised = 1;
-    if (output == NULL) {
+    if (NULL == output) {
       quit("Cannot open map file");
     }
     spaces = mymalloc(cols * sizeof(unsigned long));
@@ -82,7 +78,7 @@ void put_row(unsigned int row_num, unsigned int total_rows, unsigned int split_s
   }
   /* Now output the row */
   for (i = 0; i < cols; i++) {
-    VPTR v = (VPTR)(bits + (i * split_size) / 8);
+    unsigned char *v = bits + (i * split_size) / 8;
     (void)endian_write_row(outputs[i], (const unsigned int *)v, spaces[i]);
   }
   /* Now close files if last row for this set */

@@ -1,5 +1,5 @@
 /*
- * $Id: id.c,v 1.4 2001/09/16 20:20:39 jon Exp $: ad.c,v 1.1 2001/08/30 18:31:45 jon Exp $
+ * $Id: id.c,v 1.5 2001/09/18 23:15:46 jon Exp $: ad.c,v 1.1 2001/08/30 18:31:45 jon Exp $
  *
  * Generate identity matrix
  *
@@ -38,7 +38,7 @@ int main(int argc, const char * const argv[])
   }
   out = argv[4];
   if (0 == read_decimal(argv[1], strlen(argv[1]), &prime)) {
-    fprintf(stderr, "Failed to read prime from command line\n");
+    fprintf(stderr, "%s: failed to read prime from command line\n", name);
     return 0;
   }
   if (0 == is_a_prime_power(prime)) {

@@ -1,5 +1,5 @@
 /*
- * $Id: memory.c,v 1.1 2001/09/16 20:20:39 jon Exp $
+ * $Id: memory.c,v 1.2 2001/09/18 23:15:46 jon Exp $
  *
  * Large memory manipulation for meataxe
  *
@@ -16,7 +16,7 @@ static unsigned char *memory = NULL;
 static size_t extent = 0;
 
 /* Initialise the memory system with given size */
-/* If a size of 0 is given, the default value MEM_SIZE * (1 << 20) is used */
+/* If a size of 0 is given, the default value MEM_SIZE * 1000 is used */
 void memory_init(const char *name, size_t size)
 {
   extent = ((0 != size) ? size : (MEM_SIZE));

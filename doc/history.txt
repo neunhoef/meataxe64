@@ -13,3 +13,7 @@
 20010913 - Made mul work row by row on matrix 2. Imported monster generator and cleaned it up
 20010914 - More clean up, tested monster generation
 20010916 - Added names to all programs, wrote memory handling and added it to all but mul
+20010918 - Discovered B GF2 multiplication goes much faster in less memory (caching issues)
+20010918 - Same for M, best was about 400k memory
+20010918 - Redid all of mu and grease in terms of new memory strategy
+20010918 - Added row incrementers and shaved more time off
