@@ -1,0 +1,110 @@
+#!/bin/sh
+#
+# $Id: check_irred,v 1.1 2003/04/26 16:55:46 jon Exp $
+#
+# Script to check a representation is irreducible
+#
+# Inputs
+# $1: initial memory
+# $2: script
+# $3-: generators
+#
+# Return codes
+# 1: error in parameters
+# 0: irreducible
+# 254: nullity 0
+# 255: reducible
+#
+usage="$0: usage: $0 <memory> <script> <a> [<other generators>]"
+if [ $# -lt 4 ]; then
+  echo "$usage"
+  exit 1;
+fi
+. functions
+memory=$1
+script=$2
+shift 2
+a=$1
+b=$2
+if [ -e $a -a -e $b ]; then
+  q=`zprime $a`
+  r=`zprime $b`
+  nor=`znor $a`
+  noc=`znoc $a`
+  if [ $nor -ne $noc ]; then
+    echo "$0: $a is not square"
+    exit 1
+  fi
+  if [ $nor -ne `znor $b` -o $nor -ne `znoc $b` ]; then
+    echo "$0: $a and $b are not compatible"
+    exit 1
+  fi
+  if [ 1 -eq $q -a 1 -eq $r ]; then
+    echo "$0: representation on two maps cannot be irreducible"
+    exit 1
+  fi
+  if [ 1 -ne $q -a 1 -ne $r -a $q -ne $r ]; then
+    echo "$0: $a and $b are not compatible"
+    exit 1
+  fi
+else
+  echo "$0: missing files $a or $b"
+  exit 1
+fi
+tmp=tmp${PPID}
+e=${tmp}.1
+zscript -m $memory $e zscript.${tmp} $script $*
+ret=$?
+rm -f zscript.${tmp}*
+if [ 0 -ne $ret ]; then
+  rm -f ${tmp}*
+  exit $ret
+fi
+ztr -m $memory $e ${tmp}.2
+ret=$?
+if [ 0 -ne $ret ]; then
+  rm -f ${tmp}*
+  exit $ret
+fi
+nullity=`zns -m $memory ${tmp}.2 ${tmp}.3`
+ret=$?
+if [ 0 -ne $ret ]; then
+  echo $nullity
+  rm -f ${tmp}*
+  exit $ret
+fi
+if [ 0 -eq $nullity ]; then
+  echo $script gives nullity 0
+  rm -f ${tmp}*
+  exit 254
+fi
+zsel ${tmp}.3 ${tmp}.4 0
+ret=$?
+if [ 0 -ne $ret ]; then
+  rm -f ${tmp}*
+  exit $ret
+fi
+line=
+i=5
+for x in $*; do
+  ztr -m $memory $x ${tmp}.$i
+  ret=$?
+  if [ 0 -ne $ret ]; then
+    rm -f ${tmp}*
+    exit $ret
+  fi
+  line="$line ${tmp}.$i"
+  let i=$i+1
+done
+out=`zmsp -m $memory ${tmp}.4 ${tmp}.4.out $line`
+ret=$?
+rm -f ${tmp}*
+if [ 0 -ne $ret ]; then
+  echo $out
+  exit $ret
+fi
+if [ $nor -eq $out ]; then
+  exit 0
+else
+  exit 255
+fi

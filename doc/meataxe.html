@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.42 2003/01/14 12:04:54 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.43 2003/04/26 16:55:46 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -4509,6 +4509,8 @@ dimension increases.
 <li><a href="#basef_from_vector">basef_from_vector</a></li>
 <li><a href="#basef_vectors">basef_vectors</a></li>
 <li><a href="#basef_with_vector">basef_with_vector</a></li>
+<li><a href="#check_irred">check_irred</a></li>
+<li><a href="#check_irredf">check_irredf</a></li>
 <li><a href="#conjugate">conjugate</a></li>
 <li><a href="#conjugatef">conjugatef</a></li>
 <li><a href="#cut_cols">cut_cols</a></li>
@@ -4989,6 +4991,100 @@ Commentary: A version of <a
 href="#base_with_vector">base_with_vector</a> using intermediate
 files. Generally, users are not expected to invoke this script
 directly.
+</li>
+<li>
+<h3><a name="check_irred">check_irred</a></h3>
+Purpose: Check a suspected irreducible really is irreducible
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Memory</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Script</td>
+</tr>
+<tr>
+<td valign=top>3-</td><td valign=top>Generators</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>None</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Irreducible</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient memory for workspace</td>
+</tr>
+<tr>
+<td valign=top>254</td><td valign=top>Nullity 0</td>
+</tr>
+<tr>
+<td valign=top>255</td><td valign=top>Reducible</td>
+</tr>
+</table>
+Commentary: This script is to automate the dual part of the Norton
+irreducibility test. A typical scenario would be to create an
+irreducible representation as a quotient of a subspace, using
+generating vectors given by tensor condensation, then classify and
+find the indicator for the irreducible, then use the expression
+seeding the standard base as parameter 2 along with the algebra
+generators after classification. The classification has already
+performed one half of the Norton irreducibility test, and this script
+performs the dual half.
+</li>
+<li>
+<h3><a name="check_irredf">check_irredf</a></h3>
+Purpose: Check a suspected irreducible really is irreducible
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Memory</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Script</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>Directory for temporary files</td>
+</tr>
+<tr>
+<td valign=top>4-</td><td valign=top>Generators</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>None</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Irreducible</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient memory for workspace</td>
+</tr>
+<tr>
+<td valign=top>254</td><td valign=top>Nullity 0</td>
+</tr>
+<tr>
+<td valign=top>255</td><td valign=top>Reducible</td>
+</tr>
+</table>
+Commentary: This is a version of <a
+href="#check_irred">check_irred</a> using intermediate files for the
+nullspace and spin parts, which can therefore handle larger
+representations than <a href="#check_irred">check_irred</a>.
 </li>
 <li>
 <h3><a name="conjugate">conjugate</a></h3>
