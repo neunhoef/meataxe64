@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.2 2001/08/30 18:31:45 jon Exp $
+# $Id: makefile,v 1.3 2001/08/30 23:13:38 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -15,14 +15,16 @@ ARCH= i386
 
 AD_TARGET=	ad
 IP_TARGET=	ip
+MU_TARGET=	mu
 PR_TARGET=	pr
 DTOU_TARGET=	dtou
 
 TARGETS=	$(IP_TARGET) $(DTOU_TARGET)
 
-IP_MODULES=	elements endian header ip primes read utils write 
-AD_MODULES=	ad add elements endian header primes read rows utils write 
-PR_MODULES=	elements endian header pr primes read utils write 
+IP_MODULES=	elements endian header ip primes read utils write
+AD_MODULES=	ad add elements endian header primes read rows utils write
+MU_MODULES=	mu mul elements endian header primes read rows utils write
+PR_MODULES=	elements endian header pr primes read utils write
 DTOU_MODULES=	dtou
 
 MODULES=	$(IP_MODULES) $(DTOU_MODULES)
@@ -86,55 +88,18 @@ PROFTARGETS:=
 PROFNATARGETS:=
 
 TARGET:=AD
-TARGET_TYPE:=REL
-include targets.txt
-
-TARGET_TYPE:=DEBUG
-include targets.txt
-
-TARGET_TYPE:=PROF
-include targets.txt
-
-TARGET_TYPE:=PROFNA
 include targets.txt
 
 TARGET:=IP
-TARGET_TYPE:=REL
 include targets.txt
 
-TARGET_TYPE:=DEBUG
-include targets.txt
-
-TARGET_TYPE:=PROF
-include targets.txt
-
-TARGET_TYPE:=PROFNA
+TARGET:=MU
 include targets.txt
 
 TARGET:=PR
-TARGET_TYPE:=REL
-include targets.txt
-
-TARGET_TYPE:=DEBUG
-include targets.txt
-
-TARGET_TYPE:=PROF
-include targets.txt
-
-TARGET_TYPE:=PROFNA
 include targets.txt
 
 TARGET:=DTOU
-TARGET_TYPE:=REL
-include targets.txt
-
-TARGET_TYPE:=DEBUG
-include targets.txt
-
-TARGET_TYPE:=PROF
-include targets.txt
-
-TARGET_TYPE:=PROFNA
 include targets.txt
 
 debug: $(DEBUGTARGETS)

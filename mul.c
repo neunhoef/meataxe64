@@ -1,7 +1,7 @@
 /*
- * $Id: add.c,v 1.2 2001/08/30 23:13:38 jon Exp $
+ * $Id: mul.c,v 1.1 2001/08/30 23:13:38 jon Exp $
  *
- * Function to add two matrices to give a third
+ * Function to multiply two matrices to give a third
  *
  */
 
@@ -16,16 +16,16 @@
 #include "elements.h"
 #include "endian.h"
 #include "rows.h"
-#include "add.h"
+#include "mul.h"
 
-int add(const char *m1, const char *m2, const char *m3)
+int mul(const char *m1, const char *m2, const char *m3)
 {
   FILE *inp1;
   FILE *inp2;
   FILE *outp;
-  unsigned int prime, nob, noc, nor;
+  unsigned int prime, nob, noc1, nor1, noc2;
   unsigned int i;
-  header h1, h2;
+  header h1, h2, h3;
   unsigned int *row1, *row2, *row3;
   unsigned int row_words;
   unsigned int row_chars;
@@ -59,21 +59,28 @@ int add(const char *m1, const char *m2, const char *m3)
   }
   prime = header_get_prime(h1);
   nob = header_get_nob(h1);
-  nor = header_get_nor(h1);
-  noc = header_get_noc(h1);
+  nor1 = header_get_nor(h1);
+  noc1 = header_get_noc(h1);
+  noc2 = header_get_noc(h2);
   if (header_get_prime(h2) != prime ||
       header_get_nob(h2) != nob ||
-      header_get_noc(h2) != noc ||
-      header_get_nor(h2) != nor) {
+      header_get_nor(h2) != noc1) {
     fprintf(stderr, "ad: header mismatch between %s and %s, terminating\n", m1, m2);
     fclose(inp1);
     fclose(inp2);
     fclose(outp);
     return 0;
   }
-  write_binary_header(outp, h1, m3);
+  h3 = header_create(prime, nob, header_get_nod(h1), noc2, nor1);
+  write_binary_header(outp, h3, m3);
+  /* Compute best grease */
+  /* Affine, projective, code */
+  /* Initialise grease */
+  /* Allocate input rows, output rows, input matrix */
+  /* Then multiply */
+  /* Sort out prime operations structs */
   elts_per_word = bits_in_unsigned_int / nob;
-  row_words = (noc + elts_per_word - 1) / elts_per_word;
+  row_words = (noc1 + elts_per_word - 1) / elts_per_word;
   row_chars = row_words * sizeof(unsigned int);
   row1 = malloc(row_chars);
   row2 = malloc(row_chars);
@@ -85,29 +92,29 @@ int add(const char *m1, const char *m2, const char *m3)
     fclose(outp);
     return 0;
   }
-  for (i = 0; i < nor; i++) {
-    if (0 == endian_read_row(inp1, row1, nob, noc)) {
+  for (i = 0; i < nor1; i++) {
+    if (0 == endian_read_row(inp1, row1, nob, noc1)) {
       fprintf(stderr, "ad: cannot read row %d from %s, terminating\n", i, m1);
       fclose(inp1);
       fclose(inp2);
       fclose(outp);
       return 0;
     }
-    if (0 == endian_read_row(inp2, row2, nob, noc)) {
+    if (0 == endian_read_row(inp2, row2, nob, noc1)) {
       fprintf(stderr, "ad: cannot read row %d from %s, terminating\n", i, m2);
       fclose(inp1);
       fclose(inp2);
       fclose(outp);
       return 0;
     }
-    if (0 == row_add(row1, row2, row3, prime, nob, noc)) {
+    if (0 == row_add(row1, row2, row3, prime, nob, noc1)) {
       fprintf(stderr, "ad: addition not supported for %d, terminating\n", prime);
       fclose(inp1);
       fclose(inp2);
       fclose(outp);
       return 0;
     }
-    if (0 == endian_write_row(outp, row3, nob, noc)) {
+    if (0 == endian_write_row(outp, row3, nob, noc1)) {
       fprintf(stderr, "ad: cannot write row %d to %s, terminating\n", i, m3);
       fclose(inp1);
       fclose(inp2);

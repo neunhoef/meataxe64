@@ -1,5 +1,5 @@
 /*
- * $Id: read.c,v 1.2 2001/08/30 18:31:45 jon Exp $
+ * $Id: read.c,v 1.3 2001/08/30 23:13:38 jon Exp $
  *
  * Read a header
  *
@@ -97,6 +97,8 @@ int read_text_header(const FILE *fp, header *hp, const char *name)
   while (i >= 0 && '\n' != (char)i) {
     if (isspace(i))
       i = fgetc((FILE *)fp);
+    else
+      break;
   }
   if ('\n' != (char)i) {
     fprintf(stderr, "Newline expected reading '%s', terminating\n", name);
