@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: power,v 1.7 2002/06/25 10:30:12 jon Exp $
+# $Id: power,v 1.8 2002/07/01 18:02:37 jon Exp $
 #
 # Script to compute a power of a matrix
 #
@@ -74,6 +74,14 @@ while [ $n -gt 0 ]; do
   let m=$m/2
   if [ $n -ne 0 -a $n -ge $m ]; then
     zmu $res ${tmp}.$l ${tmp}.$k $memory
+    ret=$?
+    if [ 2 -eq $ret ]; then
+      let memory=`more_memory $memory`
+      continue
+    elif [ 0 -ne $ret ]; then
+      rm -f ${tmp}.*
+      exit $ret
+    fi
     res=${tmp}.$k
     let k=$k+1
     let n=$n-$m

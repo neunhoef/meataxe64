@@ -1,5 +1,5 @@
 /*
- * $Id: vp.c,v 1.5 2002/06/28 08:39:16 jon Exp $
+ * $Id: vp.c,v 1.6 2002/07/01 18:02:37 jon Exp $
  *
  * Function to permute some vectors under two generators
  *
@@ -24,6 +24,28 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
+
+typedef struct vec_struct
+{
+  unsigned int index;
+  unsigned int hash;
+  unsigned int *row;
+} vec;
+
+static unsigned int row_len = 0;
+
+static int compar(const void *e1, const void *e2)
+{
+  vec **v1 = (vec **)e1;
+  vec **v2 = (vec **)e2;
+  unsigned int h1 = (*v1)->hash;
+  unsigned int h2 = (*v2)->hash;
+  if (h1 != h2) {
+    return (h1 < h2) ? -1 : 1;
+  }
+  /* Hashes equal */
+  return memcmp((*v1)->row, (*v2)->row, row_len * sizeof(unsigned int));
+}
 
 typedef struct gen_struct *gen;
 
@@ -71,6 +93,7 @@ unsigned int permute(const char *in, const char *out, const char *a,
   prime_ops prime_operations;
   row_ops row_operations;
   struct gen_struct gen_a, gen_b, *gen = &gen_a;
+  vec *records, **record_ptrs;
   gen_a.next = &gen_b;
   gen_b.next = &gen_a;
   assert(NULL != in);
@@ -91,6 +114,7 @@ unsigned int permute(const char *in, const char *out, const char *a,
   noc = header_get_noc(h_in);
   nor = header_get_nor(h_in);
   len = header_get_len(h_in);
+  row_len = len;
   if (noc != header_get_noc(h_a) ||
       noc != header_get_nor(h_a) ||
       noc != header_get_noc(h_b) ||
@@ -145,8 +169,11 @@ unsigned int permute(const char *in, const char *out, const char *a,
   memset(map_a, 0, max_rows * sizeof(unsigned int));
   memset(map_b, 0, max_rows * sizeof(unsigned int));
   hashes = my_malloc(max_rows * sizeof(unsigned int));
+  records = my_malloc(max_rows * sizeof(vec));
+  record_ptrs = my_malloc(max_rows * sizeof(vec *));
   for (d = 0; d < max_rows; d++) {
     rows[d] = memory_pointer_offset(0, d, len);
+    record_ptrs[d] = records + d;
   }
   errno = 0;
   if (0 == endian_read_matrix(inp, rows, len, nor)) {
@@ -160,14 +187,19 @@ unsigned int permute(const char *in, const char *out, const char *a,
   fclose(inp);
   for (d = 0; d < nor; d++) {
     hashes[d] = hash_fn(rows[d], hash_len);
+    records[d].hash = hashes[d];
+    records[d].index = d;
+    records[d].row = rows[d];
   }
   if (0 == grease_allocate(prime, len, &grease, 900)){
     fprintf(stderr, "%s: unable to allocate grease, terminating\n", name);
     cleanup(inp, f_a, f_b);
   }
+  qsort(record_ptrs, nor, sizeof(vec *), &compar);
   while (nor < max_rows && (gen_a.nor < nor || gen_b.nor < nor)) {
     unsigned int rows_to_do = max_rows - nor;
     unsigned int i, j = 0;
+    vec row_vec, **found_row, *row_vec_ptr = &row_vec;
     /* Ensure we don't try to do too many */
     rows_to_do = (rows_to_do + gen->nor > nor) ? (nor - gen->nor) : rows_to_do;
     if (0 == mul_from_store(rows + gen->nor, rows + nor, gen->f, gen->is_map, noc, len, nob,
@@ -178,14 +210,11 @@ unsigned int permute(const char *in, const char *out, const char *a,
     }
     for (i = 0; i < rows_to_do; i++) {
       unsigned int hash = hash_fn(rows[nor + i], hash_len);
-      int ok = 1;
-      for (d = 0; d < nor + j; d++) {
-        if (hashes[d] == hash && 0 == memcmp(rows[d], rows[nor + i], len * sizeof(unsigned int))) {
-          ok = 0;
-          break;
-        }
-      }
-      if (ok) {
+      row_vec.hash = hash;
+      row_vec.index = 0xffffffff;
+      row_vec.row = rows[nor + i];
+      found_row = bsearch(&row_vec_ptr, record_ptrs, nor, sizeof(vec *), &compar);
+      if (NULL == found_row) {
         /* Got a new row */
         /* The image of row gen->nor + i under gen is row nor + j */
         unsigned int *row;
@@ -195,15 +224,18 @@ unsigned int permute(const char *in, const char *out, const char *a,
         rows[nor + i] = row;
         hashes[nor + j] = hash;
         gen->map[gen->nor + i] = nor + j;
+        row_vec.index = nor + j;
+        records[nor + j] = row_vec;
         j++;
       } else {
         /* Got an existing row */
-        /* The image of row gen->nor + i under gen is d */
-        gen->map[gen->nor + i] = d;
+        gen->map[gen->nor + i] = (*found_row)->index;
       }
     }
     gen->nor += rows_to_do;
     nor += j; /* The number of extra rows we made */
+    /* Now sort the new rows in */
+    qsort(record_ptrs, nor, sizeof(vec *), &compar);
     gen = gen->next;
   }
   if (nor >= max_rows) {

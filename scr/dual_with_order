@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: dual_with_order,v 1.4 2002/06/30 21:33:15 jon Exp $
+# $Id: dual_with_order,v 1.5 2002/07/01 18:02:37 jon Exp $
 #
 # Script to dual of a matrix, given its order
 #
@@ -58,7 +58,7 @@ if [ $o_a -gt 2 ]; then
   fi
 else
   cp ${tr} $o
+  ret=$?
 fi
 rm -f ${tmp}*
-exit 0
-
+exit $ret

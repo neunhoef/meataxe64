@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: dual,v 1.6 2002/06/30 21:33:15 jon Exp $
+# $Id: dual,v 1.7 2002/07/01 18:02:37 jon Exp $
 #
 # Script to dual of a matrix
 #
@@ -58,5 +58,3 @@ while [ 0 -eq $ok ]; do
     exit $ret
   fi  
 done
-rm -f ${tmp}*
-exit 0

@@ -2,10 +2,8 @@ Worry about isspace failure (can't detect \n) (still occurs on RH 7.2) ctype is 
 Worry about return (NULL == s) code generation error
 Profile multiply (eg on 26750 for Co1) for different memory sizes
 Investigate better matrix multiplications
-Look into memory requirements for zmu inside indicate etc (problem is power, which doesn't recover from out of memory, and mul, which exits 1 on grease allcoation failure)
 Implement a verbosity level for all programs, with -v <n>. Add a standard parser to deal with this
-Look into failures causing silly indicators
-Check return codes more thoroughly in scripts
+Reduce memory usage in ztsp for group generators
 Fix zps to take less memory
 Find a better algorithm for zsp memory. Investigate performance (1)
 Debug emu/zsl file corruption problem (2)

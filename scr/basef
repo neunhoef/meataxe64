@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: basef,v 1.5 2002/06/25 10:30:12 jon Exp $
+# $Id: basef,v 1.6 2002/07/01 18:02:37 jon Exp $
 #
 # Script to find a representation in standard base
 # using intermediate files
@@ -79,4 +79,6 @@ zmu $s $a ${tmp}.3 $memory
 zmu ${tmp}.3 ${tmp}.2 ${o}_sb_1 $memory
 zmu $s $b ${tmp}.4 $memory
 zmu ${tmp}.4 ${tmp}.2 ${o}_sb_2 $memory
+ret=$?
 rm -f ${tmp}*
+exit $ret

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: preserves,v 1.3 2002/06/25 10:30:12 jon Exp $
+# $Id: preserves,v 1.4 2002/07/01 18:02:37 jon Exp $
 #
 # Script to check if a matrix preservers a quadratic form
 #
@@ -87,19 +87,55 @@ else
 fi
 # TODO: reuse temps
 tmp=tmp${PPID}
-zmu $g $Q ${tmp}.0 $memory
+ok=1
+while [ 1 -eq $ok ]; do
+  zmu $g $Q ${tmp}.0 $memory
+  ret=$?
+  if [ 2 -eq $ret ]; then
+    let memory=`more_memory $memory`
+  elif [ 0 -ne $ret ]; then
+    rm -f ${tmp}.*
+    exit 1
+  fi
+  ok=0
+done
 ztr ${tmp}.0 ${tmp}.1 $memory
+ret=$?
+if [ 0 -ne $ret ]; then
+  rm -f ${tmp}.*
+  exit $ret
+fi
 zmu $g ${tmp}.1 ${tmp}.2 $memory
+ret=$?
+if [ 0 -ne $ret ]; then
+  rm -f ${tmp}.*
+  exit $ret
+fi
 if [ 0 -eq $f ]; then
 # This test is only necessary for once for the entire search
   ztr ${tmp}.2 ${tmp}.3 $memory
+  ret=$?
+  if [ 0 -ne $ret ]; then
+    rm -f ${tmp}.*
+    exit $ret
+  fi
   zad ${tmp}.2 ${tmp}.3 ${tmp}.4
+  ret=$?
+  if [ 0 -ne $ret ]; then
+    rm -f ${tmp}.*
+    exit $ret
+  fi
   if ! zdiff $S ${tmp}.4 2>/dev/null 1>&2; then
     rm -f ${tmp}.*
     exit 254
   fi
 fi
 zdiag ${tmp}.2 ${tmp}.4
+ret=$?
+if [ 0 -ne $ret ]; then
+  rm -f ${tmp}.*
+  exit $ret
+fi
 if zdiff $L ${tmp}.4 2>/dev/null 1>&2; then
   rm -f ${tmp}.*
   exit 0
