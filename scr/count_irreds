@@ -1,0 +1,20 @@
+#!/bin/sh
+#
+# $Id: count_irreds,v 1.1 2004/04/01 20:55:46 jon Exp $
+#
+# Script to count the irreducibles found in a split
+#
+usage="$0: usage: $0 <irreds> <log>"
+if [ $# -ne 2 ]; then
+  echo "$usage"
+  exit 1
+fi
+irreds=$1
+log=$2
+for x in `ls $irreds/*_1`; do
+  y=`echo $x | sed -e "s?^.*irreds/?irreds/?g;s/_1$//g"`
+  count=`grep $y $log | wc -l`
+  if [ 0 -ne $count ]; then
+    echo "$y: $count"
+  fi
+done

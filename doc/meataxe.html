@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.55 2004/02/15 10:27:17 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.56 2004/04/01 20:55:46 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -4620,6 +4620,7 @@ dimension increases.
 <li><a href="#check_irredf">check_irredf</a></li>
 <li><a href="#conjugate">conjugate</a></li>
 <li><a href="#conjugatef">conjugatef</a></li>
+<li><a href="#count_irreds">count_irreds</a></li>
 <li><a href="#cut_cols">cut_cols</a></li>
 <li><a href="#dual">dual</a></li>
 <li><a href="#dual_subspace">dual_subspace</a></li>
@@ -5284,6 +5285,39 @@ Purpose: Conjugate some elements, given an invertible matrix
 Commentary: This script is a version of <a
 href="#conjugate">conjugate<a/> using intermediate files. Generally,
 users are not expected to invoke this script directly.
+</li>
+<li>
+<li>
+<h3><a name="count_irreds">count_irreds</a></h3>
+Purpose: Count the irreducibles found by <a
+href="#split_all">split_all</a> and similar scripts
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>The directory of irreducibles to
+be searched for</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>A file countaining the output of
+<a href="#split_all">split_all</a> or similar</td>
+</tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>The
+irreducibles with their multiplicities. Multiplicities of zero are
+omitted</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>Non zero</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+</table>
+Commentary: This script is just for user convenience
 </li>
 <li>
 <h3><a name="cut_cols">cut_cols</a></h3>

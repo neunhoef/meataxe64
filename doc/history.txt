@@ -286,3 +286,4 @@ skew seventh
 20040221 - Use skip_mul in msp and mspf
 20040329 - Fix slow skew powers and memory corruption bug in ztco
 20040330 - Fix further fault in ztco with very low memory
+20040401 - Added count_irreds
