@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: find_best_nullityf_with_orders,v 1.1 2002/09/24 19:54:02 jon Exp $
+# $Id: find_best_nullityf_with_orders,v 1.2 2002/10/14 08:55:31 jon Exp $
 #
 # Script to find an element of best nullity in two generators
 #
@@ -46,7 +46,7 @@ for x in $a $b $*; do
 done
 depth=`max_depth $q 1023`
 while [ $ok -eq 0 ]; do
-  out=`zflnf ${tmp}.zsums $depth $nor $memory $dir $* 2>/dev/null`
+  out=`zflnf -m $memory ${tmp}.zsums $depth $nor $dir $* 2>/dev/null`
   ret=$?
   if [ 2 -eq $ret ]; then
     let memory=`more_memory $memory`

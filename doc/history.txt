@@ -206,3 +206,4 @@ skew seventh
 20021013 - Use -m for ztr throughout all scripts
 20021013 - Use -m for zrn, zns, zbase throughout all scripts
 20021014 - Use -m for zsums and friends
+20021015 - Use -m for zranks and zfln
