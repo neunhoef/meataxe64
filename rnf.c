@@ -1,5 +1,5 @@
 /*
- * $Id: rnf.c,v 1.12 2002/07/08 17:39:14 jon Exp $
+ * $Id: rnf.c,v 1.13 2002/09/16 10:24:07 jon Exp $
  *
  * Compute the rank of a matrix, using temporary files
  *
@@ -42,48 +42,25 @@ static void cleanup(const file_struct t1, const file_struct t2)
   }
 }
 
-static void cleanup_outp(int record, FILE *outp, const char *name)
+unsigned int rank(const char *m1, const char *dir, const char *name)
 {
-  assert(NULL != outp);
-  assert(NULL != name);
-  if (record) {
-    fclose(outp);
-    (void)remove(name);
-  }
-}
-
-unsigned int rank(const char *m1, const char *dir, const char *m2,
-                  int record, int full, const char *name)
-{
-  FILE *inp, *outp;
+  FILE *inp;
   const header *h;
-  header *h_out;
   unsigned int prime, nob, nod, noc, nor, len, n, r, **mat1, **mat2, i, rows_to_do, max_rows, step1, step2;
   int *map;
   grease_struct grease;
   const char *tmp = tmp_name();
-  char *name1, *name2, *name3 = NULL;
+  char *name1, *name2;
   file_struct f, t1, t2;
   file in, out;
   assert(NULL != tmp);
   assert(NULL != dir);
   assert(NULL != m1);
-  assert((0 == record && NULL == m2) ||
-         (0 != record && NULL != m2));
-  NOT_USED(full);
   i = strlen(tmp) + strlen(dir);
   name1 = my_malloc(i + 4);
   name2 = my_malloc(i + 4);
   sprintf(name1, "%s/%s.0", dir, tmp);
   sprintf(name2, "%s/%s.1", dir, tmp);
-  if (0 == record) {
-    NOT_USED(name3);
-    NOT_USED(outp);
-    full = 0; /* No point in back cleaning if we don't record */
-  } else {
-    name3 = my_malloc(i + 4);
-    sprintf(name3, "%s/%s.2", dir, tmp);
-  }
   f.name = m1;
   t1.name = name1;
   t2.name = name2;
@@ -136,18 +113,6 @@ unsigned int rank(const char *m1, const char *dir, const char *m2,
     mat2[n] = memory_pointer_offset(800, n, len);
   }
   r = 0; /* Rank count */
-  if (0 != record) {
-    errno = 0;
-    outp = fopen64(name3, "wb");
-    if (NULL == outp) {
-      if ( 0 != errno) {
-        perror(name);
-      }
-      fprintf(stderr, "%s: failed to open temporary file %s, terminating\n", name, name3);
-      fclose(inp);
-      exit(1);
-    }
-  }
   while (rows_to_do > 0) {
     unsigned int rows_remaining = rows_to_do;
     unsigned int stride = (step1 > rows_remaining) ? rows_remaining : step1;
@@ -158,7 +123,6 @@ unsigned int rank(const char *m1, const char *dir, const char *m2,
       }
       fprintf(stderr, "%s: cannot read matrix for %s, terminating\n", name, in->name);
       fclose(in->f);
-      cleanup_outp(record, outp, name3);
       cleanup(t1, t2);
       exit(1);
     }
@@ -167,23 +131,6 @@ unsigned int rank(const char *m1, const char *dir, const char *m2,
     if (0 != n) {
       /* Some addition to the rank */
       r += n;
-      if (0 != record) {
-        for (i = 0; i < stride; i++) {
-          if (map[i] >= 0) {
-            errno = 0;
-            if (0 == endian_write_row(outp, mat1[i], len)) {
-              if ( 0 != errno) {
-                perror(name);
-              }
-              fprintf(stderr, "%s: cannot write row to %s, terminating\n", name, name3);
-              fclose(in->f);
-              cleanup_outp(record, outp, name3);
-              cleanup(t1, t2);
-              exit(1);
-            }
-          }
-        }
-      }
       if (rows_remaining > 0) {
         unsigned int rows_written = 0;
         errno = 0;
@@ -195,7 +142,6 @@ unsigned int rank(const char *m1, const char *dir, const char *m2,
           }
           fprintf(stderr, "%s: cannot open temporary output %s, terminating\n", name, out->name);
           fclose(in->f);
-          cleanup_outp(record, outp, name3);
           cleanup(t1, t2);
           exit(1);
         }
@@ -210,7 +156,6 @@ unsigned int rank(const char *m1, const char *dir, const char *m2,
             fprintf(stderr, "%s: cannot read matrix for %s, terminating\n", name, in->name);
             fclose(in->f);
             fclose(out->f);
-            cleanup_outp(record, outp, name3);
             cleanup(t1, t2);
             exit(1);
           }
@@ -225,7 +170,6 @@ unsigned int rank(const char *m1, const char *dir, const char *m2,
                 fprintf(stderr, "%s: cannot write matrix for %s, terminating\n", name, out->name);
                 fclose(in->f);
                 fclose(out->f);
-                cleanup_outp(record, outp, name3);
                 cleanup(t1, t2);
                 exit(1);
               }
@@ -245,7 +189,6 @@ unsigned int rank(const char *m1, const char *dir, const char *m2,
               perror(name);
             }
             fprintf(stderr, "%s: cannot open temporary output %s, terminating\n", name, in->name);
-            cleanup_outp(record, outp, name3);
             cleanup(t1, t2);
             exit(1);
           }
@@ -261,49 +204,5 @@ unsigned int rank(const char *m1, const char *dir, const char *m2,
   matrix_free(mat1);
   matrix_free(mat2);
   cleanup(t1, t2);
-  if (0 != record) {
-    unsigned int *row;
-    row = memory_pointer(0);
-    fclose(outp);
-    h_out = header_create(prime, nob, nod, noc, r);
-    if (0 == open_and_write_binary_header(&outp, h_out, m2, name)) {
-      exit(1);
-    }
-    errno = 0;
-    inp = fopen64(name3, "rb");
-    if (NULL == inp) {
-      if ( 0 != errno) {
-        perror(name);
-      }
-      fclose(outp);
-      fprintf(stderr, "%s: cannot open input %s, terminating\n",name, name3);
-      exit(1);
-    }
-    for (i = 0; i < r; i++) {
-      errno = 0;
-      if (0 == endian_read_row(inp, row, len)) {
-        if ( 0 != errno) {
-          perror(name);
-        }
-        fprintf(stderr, "%s: cannot read row from %s, terminating\n", name, name3);
-        fclose(inp);
-        fclose(outp);
-        exit(1);
-      }
-      errno = 0;
-      if (0 == endian_write_row(outp, row, len)) {
-        if ( 0 != errno) {
-          perror(name);
-        }
-        fprintf(stderr, "%s: cannot write row to %s, terminating\n", name, m2);
-        fclose(inp);
-        fclose(outp);
-        exit(1);
-      }
-    }
-    fclose(inp);
-    fclose(outp);
-    (void)remove(name3);
-  }
   return r;
 }

@@ -1,0 +1,12 @@
+#!/bin/sh
+#
+# $Id: pwr,v 1.1 2002/09/16 10:24:07 jon Exp $
+#
+# Emulate Aachen meataxe pwr
+#
+usage="$0: usage: $0 <power> <in> <out>"
+if [ $# -ne 3 -a $# -ne 4 ]; then
+  echo "$usage"
+  exit 1;
+fi
+power $2 $1 $3
