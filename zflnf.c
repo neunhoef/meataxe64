@@ -1,5 +1,5 @@
 /*
- * $Id: zflnf.c,v 1.6 2004/01/04 21:22:50 jon Exp $
+ * $Id: zflnf.c,v 1.7 2004/11/18 15:29:44 jon Exp $
  *
  * Compute sums in the group algebra in two matrices finding one of lowest non-zero nullity
  * Expected to be used during computation of standard bases of irreducible but not absolutely
@@ -9,12 +9,15 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <limits.h>
 #include <assert.h>
 #include "endian.h"
 #include "memory.h"
 #include "parse.h"
 #include "sumsf.h"
+#include "sums_utils.h"
+#include "utils.h"
 
 static const char *name = "zflnf";
 
@@ -22,12 +25,18 @@ static unsigned int nullity = 0;
 
 static unsigned int gcd = 0;
 
-static const char *best_name = NULL;
-static const char *best_form = NULL;
+static char *best_name = NULL;
+static char *best_form = NULL;
 
 static void fln_usage(void)
 {
   fprintf(stderr, "%s: usage: %s %s <out_file_stem> <n> <nullity> <tmp dir> <in_file a> <order a> <in_file b> <order b>\n", name, name, parse_usage());
+}
+
+static void copy_names(const char *file, const char *form)
+{
+  copy_string(&best_name, file);
+  copy_string(&best_form, form);
 }
 
 static unsigned int find_gcd(unsigned int a, unsigned int b)
@@ -51,8 +60,7 @@ static int acceptor(unsigned int rank, unsigned int nor, const char *file, const
   assert(NULL != form);
   if (0 == nullity) {
     if (rank == nor) {
-      best_name = file;
-      best_form = form;
+      copy_names(file, form);
       gcd = 1;
       return 2;
     } else {
@@ -62,8 +70,7 @@ static int acceptor(unsigned int rank, unsigned int nor, const char *file, const
     if (0 == gcd) {
       /* First possible candidate */
       gcd = nor - rank;
-      best_name = file;
-      best_form = form;
+      copy_names(file, form);
     } else {
       /* Check if this reduces the gcd */
       unsigned int new = find_gcd(gcd, nor - rank);        
@@ -72,16 +79,14 @@ static int acceptor(unsigned int rank, unsigned int nor, const char *file, const
         gcd = new;
         /* See if this element worked */
         if (rank + gcd == nor) {
-          best_name = file;
-          best_form = form;
+          copy_names(file, form);
         } else {
           best_name = NULL;
           best_form = NULL;
         }
       } else if (NULL == best_name && gcd + rank == nor) {
         /* This element achieves a previously unachieved gcd */
-        best_name = file;
-        best_form = form;
+        copy_names(file, form);
       }
     }
     if (1 == gcd) {

@@ -325,3 +325,4 @@ skew seventh
 20041002 - Made dual_subspace use znsf to cope with larger subspaces
 20041008 - Make count_irreds report the total dimension
 20041106 - Changed sums and sumsf so as not to allocate very large arrays
+20041115 - Chnaged zfln and zflnf to remember the file and script

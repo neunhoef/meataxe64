@@ -1,5 +1,5 @@
 /*
- * $Id: sums_utils.h,v 1.3 2004/11/06 22:32:08 jon Exp $
+ * $Id: sums_utils.h,v 1.4 2004/11/18 15:29:44 jon Exp $
  *
  * Utilities for sums, sumf etc
  *
@@ -7,6 +7,9 @@
 
 #ifndef included__sums_utils
 #define included__sums_utils
+
+/* Copy a string, discarding the old version if not NULL */
+extern void copy_string(char **out, const char *in);
 
 /* Generate an element script from its index */
 extern char *make_elt_script(unsigned int prime_power, unsigned int cur_power,

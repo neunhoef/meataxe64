@@ -1,5 +1,5 @@
 /*
- * $Id: sums_utils.c,v 1.3 2004/11/06 22:32:08 jon Exp $
+ * $Id: sums_utils.c,v 1.4 2004/11/18 15:29:44 jon Exp $
  *
  * Utilities for sums, sumf etc
  *
@@ -13,6 +13,19 @@
 #include <limits.h>
 #include "add.h"
 #include "utils.h"
+
+void copy_string(char **out, const char *in)
+{
+  unsigned int len;
+  assert(NULL != in);
+  assert(NULL != out);
+  if (NULL != *out) {
+    free(*out);
+  }
+  len = strlen(in);
+  *out = my_malloc(len + 1);
+  strcpy(*out, in);
+}
 
 char *make_elt_script(unsigned int prime_power, unsigned int cur_power,
                       unsigned int r, unsigned int l, unsigned int i,
