@@ -1,7 +1,7 @@
 #
 # unix specific fragment for building
 #
-# $Id: unix.txt,v 1.5 2001/10/06 23:33:12 jon Exp $
+# $Id: unix.txt,v 1.6 2001/10/09 19:36:26 jon Exp $
 #
 EXEEXT=
 LIBEXT= a
@@ -27,6 +27,6 @@ DEBUG_LIBS=
 PROF_LIBS= $(DEBUG_LIBS) -static -lc_p
 PROFNA_LIBS= $(PROF_LIBS)
 COMPILE_CFLAGS= -Werror -ansi -Wall -Wpointer-arith -Wwrite-strings -Winline -Waggregate-return -Wmissing-prototypes -Wnested-externs -W -Wunused -Wcast-align -Wstrict-prototypes -Wmissing-declarations -pedantic
-COMPILE= $(CC) -c -o $@
+COMPILE= $(CC) -c -o # terminating space
 DEP_COMPILE_CFLAGS= -MM -MG $(COMPILE_CFLAGS)
 

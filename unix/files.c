@@ -1,5 +1,5 @@
 /*
- * $Id: files.c,v 1.1 2001/09/30 21:49:19 jon Exp $
+ * $Id: files.c,v 1.2 2001/10/09 19:36:26 jon Exp $
  *
  * file system stuff for unix
  *
@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #include "utils.h"
@@ -15,6 +16,7 @@
 
 int remove(const char *file)
 {
+  assert(NULL != file);
   return (unlink(file));
 }
 
@@ -52,7 +54,7 @@ int ren(const char *old, const char *new)
 
 static int is_absolute(const char *filename)
 {
-  return (filename != NULL) && ((*filename == '/') || memcmp(filename+1, ":\\", 2) == 0);
+  return (NULL != filename) && (('/' == *filename) || memcmp(filename+1, ":\\", 2) == 0);
 }
 
 const char *pathname(const char *dirname, const char *filename)

@@ -1,5 +1,5 @@
 /*
- * $Id: emu.c,v 1.5 2001/10/03 00:01:42 jon Exp $
+ * $Id: emu.c,v 1.6 2001/10/09 19:36:26 jon Exp $
  *
  * Exploded multiply
  *
@@ -40,15 +40,13 @@ int main(int argc,  char **argv)
   memory_init(name, 0);
   printf("emu starting\n");
   init_system();
-  /******  First check the number of input arguments  */
   if (argc != 6) {
     emu_usage();
     exit(1);
   }
-  /* Now get a look at the map file */
   limit = strtoul(argv[5], NULL, 0);
   init_tasks(limit, argv[4], "emu");
-  /* Now get a look at the map file */
+  /* Now look at the map file */
   input_map(name, argv[1], &col_pieces1, &row_pieces1, &names1);
   input_map(name, argv[2], &col_pieces2, &row_pieces2, &names2);
   if (col_pieces1 != row_pieces2) {
@@ -95,6 +93,8 @@ int main(int argc,  char **argv)
                       inputs,
                       1,
                       outputs);
+          free(inputs);
+          free(outputs);
         }
         for (k = 0; k < col_pieces1; k++) {
           inputs[k].type = RESULT;
@@ -122,7 +122,11 @@ int main(int argc,  char **argv)
                     inputs,
                     1,
                     outputs);
+        free(inputs);
+        free(outputs);
       }
+      free(inputs);
+      free(outputs);
     }
   }
   /* Now force the answer */

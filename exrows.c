@@ -1,5 +1,5 @@
 /*
- * $Id: exrows.c,v 1.2 2001/10/03 23:57:32 jon Exp $
+ * $Id: exrows.c,v 1.3 2001/10/09 19:36:26 jon Exp $
  *
  * Extended row manipulation for meataxe
  *
@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <limits.h>
+#include <assert.h>
 #include "endian.h"
 #include "files.h"
 #include "header.h"
@@ -20,6 +21,10 @@ int ex_row_put(unsigned int row_num, unsigned int total_cols, unsigned int total
 {
   unsigned int i;
   unsigned int cols;
+  assert(NULL != dir);
+  assert(NULL != names);
+  assert(NULL != row);
+  assert(NULL != outputs);
   split_size = ((split_size + bits_in_unsigned_int - 1)/ bits_in_unsigned_int) * bits_in_unsigned_int;
   cols = (total_cols + split_size - 1) / split_size;
   if (row_num % split_size == 0) {
@@ -29,6 +34,7 @@ int ex_row_put(unsigned int row_num, unsigned int total_cols, unsigned int total
     for(i = 0; i < cols; i++) {
       unsigned int noc = ((i+1) * split_size <= total_cols) ? split_size : total_cols - i * split_size;
       const header *h = header_create(2, 1, 1, noc, nor);
+      assert(NULL != h);
       outputs[i] = fopen(pathname(dir, names[row * cols + i]), "wb");
       (void)write_binary_header(outputs[i], h, "monster mtx");
     }

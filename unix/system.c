@@ -1,5 +1,5 @@
 /*
- * $Id: system.c,v 1.4 2001/10/03 23:57:33 jon Exp $
+ * $Id: system.c,v 1.5 2001/10/09 19:36:26 jon Exp $
  *
  * system dependent stuff for locking etc
  */
@@ -25,29 +25,25 @@ void wait_lock(const char *task_name)
 {
   int retries = 100;
   char name[100];
-  FILE *foo;
+  FILE *hitch;
   __pid_t pid = getpid();
   struct hostent *h = gethostbyname("localhost");
+  assert(NULL != task_name);
   assert(0 != h->h_length);
   sprintf(name, "meataxe_lock_%u_%s", pid, h->h_name);
   while(1) {
     retries--;
     if (retries <= 0) {
-      printf("lock acquisition failed, exiting\n");
-      fflush(stdout);
+      fprintf(stderr, "lock acquisition failed, exiting\n");
       exit(1);
     }
-#if 0
-    printf("Acquiring lock\n");
-#endif
-    fflush(stdout);
-    foo = fopen(name, "wb");
-    if (foo == NULL) {
+    hitch = fopen(name, "wb");
+    if (NULL == hitch) {
       printf("Cannot create lock file hitch, retrying\n");
       fflush(stdout);
     } else {
-      fprintf(foo, "Process %u, host %s, task %s\n", pid, h->h_name, task_name);
-      fclose(foo);
+      fprintf(hitch, "Process %u, host %s, task %s\n", pid, h->h_name, task_name);
+      fclose(hitch);
       /* Now we have our unique name, try to link to the universal name */
       if (link(name, LOCK)) {
 	/* Some sort of error */
@@ -74,10 +70,6 @@ void wait_lock(const char *task_name)
 	/* Check NFS isn't lying */
 	struct stat buf;
 	int i = stat(name, &buf);
-#if 0
-	printf("link succeeded, checking stat\n");
-#endif
-	fflush(stdout);
 	if (i) {
 	  /* Failed to stat hitch file */
 	  printf("stat failed on hitch file, restarting lock\n");
@@ -100,18 +92,10 @@ void wait_lock(const char *task_name)
   }
   unlink(name);
   /* If unlink fails here we don't really care */
-#if 0
-  printf("Acquired lock\n");
-#endif
-  fflush(stdout);
 }
 
 void release_lock(void)
 {
-#if 0
-  printf("Releasing lock\n");
-#endif
-  fflush(stdout);
   if (remove(LOCK)) {
     printf("Release lock failed\n");
     fflush(stdout);
@@ -126,18 +110,11 @@ void release_lock(void)
     case ENOMEM:
     case EROFS:
       printf("Lock file fault %d (%s)\n", errno, strerror(errno));
-      fflush(stdout);
-      exit(1);
     default:
       printf("Unexpected error %d (%s) deleting lock file\n", errno, strerror(errno));
-      fflush(stdout);
-      exit(1);
     }
-  } else {
-#if 0
-    printf("Released lock\n");
-#endif
     fflush(stdout);
+    exit(1);
   }
 }
 

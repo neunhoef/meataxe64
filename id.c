@@ -1,5 +1,5 @@
 /*
- * $Id: id.c,v 1.6 2001/10/03 00:01:42 jon Exp $: ad.c,v 1.1 2001/08/30 18:31:45 jon Exp $
+ * $Id: id.c,v 1.7 2001/10/09 19:36:26 jon Exp $: ad.c,v 1.1 2001/08/30 18:31:45 jon Exp $
  *
  * Generate identity matrix
  *
@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 #include "elements.h"
 #include "endian.h"
 #include "header.h"
@@ -49,11 +50,12 @@ int main(int argc, const char * const argv[])
   endian_init();
   memory_init(name, 0);
   outp = fopen(out, "wb");
-  if (0 == outp) {
+  if (NULL == outp) {
     fprintf(stderr, "%s: cannot open %s\n", name, out);
     exit(1);
   }
   h = header_create(prime, nob, nod, noc, nor);
+  assert(NULL != h);
   len = header_get_len(h);
   if (0 == write_binary_header(outp, h, out)) {
     fprintf(stderr, "%s: cannot write header\n", name);

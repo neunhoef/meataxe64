@@ -1,5 +1,5 @@
 /*
- * $Id: mop.c,v 1.2 2001/09/16 10:05:44 jon Exp $
+ * $Id: mop.c,v 1.3 2001/10/09 19:36:26 jon Exp $
  *
  * Monster operations for meataxe
  *
@@ -248,22 +248,11 @@ static int veccomp(unsigned char *veca, unsigned char * vecb)
 {
   return memcmp(veca, vecb, 24712);
 }
+
 static void cpvec(unsigned char *veca, unsigned char *vecb)
 {
   (void)memcpy(vecb, veca, 24712);
 }
-
-/*
-static int addvec(char *veca, char *vecb, char *vecc)
-{
-    int i;
-    char *ptc1,*ptc2,*ptc3;
-    ptc1=veca;
-    ptc2=vecb;
-    ptc3=vecc;
-    for (i=0;i<24712;i++) *(ptc3++) = *(ptc1++)^*(ptc2++);
-}
-*/
 
 void malsuz(suzel  * m)
 {

@@ -1,5 +1,5 @@
 /*
- * $Id: slave.c,v 1.4 2001/10/07 18:02:56 jon Exp $
+ * $Id: slave.c,v 1.5 2001/10/09 19:36:26 jon Exp $
  *
  * Slave for extended operations
  * Based on zsl.c     MTX6 slave version 6.0.11 7.11.98 
@@ -104,7 +104,10 @@ int main(int argc, const char *const argv[])
       fputs(line, output);
     }
     if (free) {
-      fprintf(output, "%s %s", argv[1], line_ptrs[1]);
+      if (0 != strncmp(line_ptrs[2], "kill", lengths[2])) {
+        fprintf(output, "%s %s", argv[1], line_ptrs[1]);
+        /* Only copy back if it's not kill */
+      }
       copy_rest(output, input);
       fflush(output);
       fclose(output);

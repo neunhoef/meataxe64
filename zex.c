@@ -1,5 +1,5 @@
 /*
- * $Id: zex.c,v 1.3 2001/10/06 23:33:12 jon Exp $
+ * $Id: zex.c,v 1.4 2001/10/09 19:36:26 jon Exp $
  *
  * explode a matrix
  *
@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 #include "map.h"
 #include "endian.h"
 #include "exrows.h"
@@ -55,6 +56,7 @@ int main(int argc,  char **argv)
     fprintf(stderr, "%s cannot read header from %s, terminating\n", name, argv[1]);
     exit(1);
   }
+  assert(NULL != h);
   prime = header_get_prime(h);
   nob = header_get_nob(h);
   nor = header_get_nor(h);

@@ -1,5 +1,5 @@
 /*
- * $Id: utils.c,v 1.9 2001/10/03 23:57:33 jon Exp $
+ * $Id: utils.c,v 1.10 2001/10/09 19:36:26 jon Exp $
  *
  * Utils for meataxe
  *
@@ -17,7 +17,7 @@ unsigned int bits_in_unsigned_int = CHAR_BIT * sizeof(unsigned int);
 
 int my_isspace(int i)
 {
-    return (i == ' ') || (i == 9) || (i == 10) || (i == 13);
+  return (i == ' ') || (i == 9) || (i == 10) || (i == 13);
 }
 
 static int is_prime(unsigned int j)

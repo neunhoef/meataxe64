@@ -1,17 +1,13 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.17 2001/10/07 18:02:56 jon Exp $
+# $Id: makefile,v 1.18 2001/10/09 19:36:26 jon Exp $
 #
 all: debug rel profile profilena
 
 GENERATED=
 
 .PHONY: debug rel profile profilena clean full_clean
-
-# Default arch and os, can be overridden by command line
-OS=unix
-ARCH=i386
 
 AD_TARGET=	ad
 CT_TARGET=	ct
@@ -28,6 +24,7 @@ MON_TARGET=	monst
 MU_TARGET=	mu
 PR_TARGET=	pr
 SL_TARGET=	sl
+STOP_TARGET=	stop
 TR_TARGET=	tr
 ZEX_TARGET=	zex
 
@@ -36,8 +33,8 @@ CT_MODULES=	count ct elements endian header memory primes read utils
 DTOU_MODULES=	dtou
 EAD_MODULES=	add ead endian files header map memory read rows system utils write
 ECT_MODULES=	count ect elements endian files header map memory primes read utils
-EIM_MODULES=	eim elements endian files header map memory primes read utils write
 EID_MODULES=	eid elements endian exrows files header map memory primes rows utils write
+EIM_MODULES=	eim elements endian files header map memory primes read utils write
 EMU_MODULES=	command emu files map memory system utils
 ETR_MODULES=	elements endian etr files header map matrix memory primes read tra utils write
 ID_MODULES=	id elements endian header memory primes rows utils write
@@ -46,10 +43,11 @@ MON_MODULES=	endian exrows files header map memory mmat mop mtx primes utils wri
 MU_MODULES=	elements endian grease header matrix memory mu mul primes read rows utils write
 PR_MODULES=	elements endian header memory pr primes read rows utils write
 SL_MODULES=	add command elements endian files grease header matrix memory mul primes read rows slave system utils write
+STOP_MODULES=	command files stop system utils
 TR_MODULES=	elements endian header matrix memory primes read tr tra utils write
 ZEX_MODULES=	elements endian exrows files header map memory primes read rows utils write zex
 
-MODULES=	$(AD_MODULES) $(DTOU_MODULES) $(EAD_MODULES) $(EID_MODULES) $(EMU_MODULES) $(ID_MODULES) $(IP_MODULES) $(MON_MODULES) $(MU_MODULES) $(PR_MODULES) $(SL_MODULES) $(ZEX_MODULES)
+MODULES=	$(AD_MODULES) $(CT_MODULES) $(DTOU_MODULES) $(EAD_MODULES) $(ECT_MODULES) $(EID_MODULES) $(EIM_MODULES) $(EMU_MODULES) $(ETR_MODULES) $(ID_MODULES) $(IP_MODULES) $(MON_MODULES) $(MU_MODULES) $(PR_MODULES) $(SL_MODULES) $(STOP_MODULES) $(TR_MODULES) $(ZEX_MODULES)
 
 include dirs.txt
 
@@ -75,8 +73,8 @@ endif
 endif
 
 # Make search paths for source
-vpath %.c . $(SRCDIR) $(SRCDIR)/$(OS) $(GENDIR)
-vpath %.h . $(SRCDIR) $(SRCDIR)/$(OS) $(GENDIR)
+vpath %.c $(SRCDIR) $(SRCDIR)/$(OS) $(GENDIR)
+vpath %.h $(SRCDIR) $(SRCDIR)/$(OS) $(GENDIR)
 
 # Parameterically generate the link commands
 CLEAN_ITEMS:=$(DEPENDS) $(GENFILES)
@@ -129,6 +127,9 @@ TARGET:=PR
 include targets.txt
 
 TARGET:=SL
+include targets.txt
+
+TARGET:=STOP
 include targets.txt
 
 TARGET:=TR

@@ -1,5 +1,5 @@
 /*
- * $Id: command.c,v 1.3 2001/10/07 18:02:56 jon Exp $
+ * $Id: command.c,v 1.4 2001/10/09 19:36:26 jon Exp $
  *
  * Interface to task manager (definition)
  *
@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <ctype.h>
+#include <assert.h>
 #include "system.h"
 #include "utils.h"
 #include "command.h"
@@ -203,6 +204,32 @@ void copy_rest(FILE *new, FILE *old)
       break;
     }
   } while (1);
+}
+
+/* Copy old back into new */
+/* Assumes lock held */
+void copy_back(const char *new, const char *old, const char *task_name)
+{
+  FILE *input, *output;
+  assert(NULL != new);
+  assert(NULL != old);
+  assert(NULL != task_name);
+  input = fopen(old, "rb");
+  if (NULL == input) {
+    release_lock();
+    fprintf(stderr, "Slave %s can't open %s\n, terminating\n", task_name, old);
+    exit(1);
+  }
+  output = fopen(new, "wb");
+  if (NULL == output) {
+    release_lock();
+    fprintf(stderr, "Slave %s can't open %s\n, terminating\n", task_name, new);
+    exit(1);
+  }
+  copy_rest(output, input);
+  fflush(output);
+  fclose(output);
+  fclose(input);
 }
 
 static void add_task_sub(task *task, FILE *file)
@@ -684,6 +711,69 @@ int add_command(job job, command command, unsigned int input_size, input *inputs
   }
   return 0;
 }
+
+void prepend_task(const char *task_line, const char *task_name)
+{
+  FILE *input, *output;
+  assert(NULL != task_line);
+  wait_lock(task_name);
+  do {
+    input = fopen(COMMAND_FILE, "rb");
+    if (NULL == input) {
+      /* Command file not created */
+      release_lock();
+      just_wait(10);
+      continue;
+    }
+    output = fopen(COMMAND_COPY, "wb");
+    if (NULL == output) {
+      release_lock();
+      fprintf(stderr, "Slave %s can't open %s\n, terminating\n", task_name, COMMAND_COPY);
+      exit(1);
+    }
+    fprintf(output, "%s\n", task_line);
+    copy_rest(output, input);
+    fflush(output);
+    fclose(output);
+    fclose(input);
+    /* Now copy to back original command file */
+    copy_back(COMMAND_FILE, COMMAND_COPY, task_name);
+    break;
+  } while (1);
+  release_lock();
+}
+
+void append_task(const char *task_line, const char *task_name)
+{
+  FILE *input, *output;
+  assert(NULL != task_line);
+  wait_lock(task_name);
+  do {
+    input = fopen(COMMAND_FILE, "rb");
+    if (NULL == input) {
+      /* Command file not created */
+      release_lock();
+      just_wait(10);
+      continue;
+    }
+    output = fopen(COMMAND_COPY, "wb");
+    if (NULL == output) {
+      release_lock();
+      fprintf(stderr, "Slave %s can't open %s\n, terminating\n", task_name, COMMAND_COPY);
+      exit(1);
+    }
+    copy_rest(output, input);
+    fprintf(output, "%s\n", task_line);
+    fflush(output);
+    fclose(output);
+    fclose(input);
+    /* Now copy to back original command file */
+    copy_back(COMMAND_FILE, COMMAND_COPY, task_name);
+    break;
+  } while (1);
+  release_lock();
+}
+
 
 void init_tasks(unsigned int max, const char *dir, const char *name)
 {

@@ -1,7 +1,7 @@
 #
 # Generic build rules
 #
-# $Id: rules.txt,v 1.3 2001/09/27 11:45:30 jon Exp $
+# $Id: rules.txt,v 1.4 2001/10/09 19:36:26 jon Exp $
 #
 
 # Cancel builtin rules
@@ -11,25 +11,25 @@
 $(RELOBJDIR)/%.$(OBJEXT): %.c
 	@echo Release compile $<
 	-@mkdir -p $(RELOBJDIR)
-	@$(COMPILE) $< $(REL_COMPILE_FLAGS) $(COMPILE_CFLAGS) $(NA_COMPILE_FLAGS) $(INCLUDES) $(DEFINES)
+	@$(COMPILE)$@ $< $(REL_COMPILE_FLAGS) $(COMPILE_CFLAGS) $(NA_COMPILE_FLAGS) $(INCLUDES) $(DEFINES)
 
 # Debug objects from C source
 $(DEBUGOBJDIR)/%.$(OBJEXT): %.c
 	@echo Debug compile $<
 	-@mkdir -p $(DEBUGOBJDIR)
-	@$(COMPILE) $< $(DEBUG_COMPILE_FLAGS) $(COMPILE_CFLAGS) $(INCLUDES) $(DEFINES)
+	@$(COMPILE)$@ $< $(DEBUG_COMPILE_FLAGS) $(COMPILE_CFLAGS) $(INCLUDES) $(DEFINES)
 
 # Profile objects from C source
 $(PROFOBJDIR)/%.$(OBJEXT): %.c
 	@echo Profile compile $<
 	-@mkdir -p $(PROFOBJDIR)
-	@$(COMPILE) $< $(DEBUG_COMPILE_FLAGS) $(PROF_COMPILE_FLAGS) $(COMPILE_CFLAGS) $(INCLUDES) $(DEFINES)
+	@$(COMPILE)$@ $< $(DEBUG_COMPILE_FLAGS) $(PROF_COMPILE_FLAGS) $(COMPILE_CFLAGS) $(INCLUDES) $(DEFINES)
 
 # No assert profile objects from C source
 $(PROFNAOBJDIR)/%.$(OBJEXT): %.c
 	@echo Profile no assert compile $<
 	-@mkdir -p $(PROFNAOBJDIR)
-	@$(COMPILE) $< $(DEBUG_COMPILE_FLAGS) $(PROF_COMPILE_FLAGS) $(NA_COMPILE_FLAGS) $(COMPILE_CFLAGS) $(INCLUDES) $(DEFINES)
+	@$(COMPILE)$@ $< $(DEBUG_COMPILE_FLAGS) $(PROF_COMPILE_FLAGS) $(NA_COMPILE_FLAGS) $(COMPILE_CFLAGS) $(INCLUDES) $(DEFINES)
 
 # Dependencies from C source
 $(DEPENDDIR)/%.$(DEPENDEXT): %.c
