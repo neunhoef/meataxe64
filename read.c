@@ -1,5 +1,5 @@
 /*
- * $Id: read.c,v 1.19 2002/06/25 10:30:12 jon Exp $
+ * $Id: read.c,v 1.20 2002/06/27 07:31:58 jon Exp $
  *
  * Read a header
  *
@@ -26,11 +26,12 @@
 #define LINE_LENGTH (2+6+6+6)
 
 int read_text_header_items(FILE *fp, unsigned int *nod, unsigned int *prime,
-                           unsigned int *nor, unsigned int *noc, const char *name)
+                           unsigned int *nor, unsigned int *noc, const char *file, const char *name)
 {
   int i;
   
   assert(NULL != fp);
+  assert(NULL != file);
   assert(NULL != name);
   assert(NULL != nod);
   assert(NULL != prime);
@@ -46,13 +47,13 @@ int read_text_header_items(FILE *fp, unsigned int *nod, unsigned int *prime,
     }
   }
   if ('\n' != (char)i) {
-    fprintf(stderr, "Newline expected reading '%s'\n", name);
+    fprintf(stderr, "%s: newline expected reading '%s'\n", name, file);
     return 0;
   }
   return 1;
 }
 
-int read_text_header(FILE *fp, const header **hp, const char *name)
+int read_text_header(FILE *fp, const header **hp, const char *file, const char *name)
 {
   unsigned int nob;
   unsigned int nod;
@@ -62,8 +63,9 @@ int read_text_header(FILE *fp, const header **hp, const char *name)
   
   assert(NULL != fp);
   assert(NULL != hp);
+  assert(NULL != file);
   assert(NULL != name);
-  if (read_text_header_items(fp, &nod, &prime, &nor, &noc, name)) {
+  if (read_text_header_items(fp, &nod, &prime, &nor, &noc, file, name)) {
     nob = bits_of(prime);
     *hp = header_create(prime, nob, nod, noc, nor);
     return 1;
@@ -72,7 +74,7 @@ int read_text_header(FILE *fp, const header **hp, const char *name)
   }
 }
 
-int read_binary_header(FILE *fp, const header **hp, const char *name)
+int read_binary_header(FILE *fp, const header **hp, const char *file, const char *name)
 {
   header *h;
   unsigned int nob;
@@ -83,19 +85,20 @@ int read_binary_header(FILE *fp, const header **hp, const char *name)
   
   assert(NULL != hp);
   assert(NULL != fp);
+  assert(NULL != file);
   assert(NULL != name);
   if (0 == header_alloc(&h)) {
-    fprintf(stderr, "Failed to allocate header for binary input %s\n", name);
+    fprintf(stderr, "%s: failed to allocate header for binary input %s\n", name, file);
     return 0;
   }
   if (1 != endian_read_int(&prime, fp) ||
       1 != endian_read_int(&nor, fp) ||
       1 != endian_read_int(&noc, fp)) {
-    fprintf(stderr, "Failed to read header from binary input %s\n", name);
+    fprintf(stderr, "%s: failed to read header from binary input %s\n", name, file);
     return 0;
   }
   if (1 != prime && 0 == is_a_prime_power(prime)) {
-    fprintf(stderr, "Prime power or 1 expected, found %d while reading %s\n", prime, name);
+    fprintf(stderr, "%s: prime power or 1 expected, found %d while reading %s\n", name, prime, file);
     return 0;
   }
   nod = digits_of(prime);
@@ -119,13 +122,14 @@ int open_and_read_binary_header(FILE **inp, const header **h, const char *m, con
   assert(NULL != inp);
   assert(NULL != h);
   assert(NULL != m);
+  assert(NULL != name);
   in = fopen64(m, "rb");
   if (NULL == in) {
     fprintf(stderr, "%s: cannot open %s, terminating\n", name, m);
     *h = NULL;
     return 0;
   }
-  res = read_binary_header(in, h, m);
+  res = read_binary_header(in, h, m, name);
   if (0 == res) {
     fclose(in);
     *h = NULL;

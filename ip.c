@@ -1,5 +1,5 @@
 /*
- * $Id: ip.c,v 1.12 2002/06/25 10:30:12 jon Exp $
+ * $Id: ip.c,v 1.13 2002/06/27 07:31:58 jon Exp $
  *
  * Read a matrix
  *
@@ -46,7 +46,7 @@ int main(int argc, const char * const argv[])
     exit(1);
   }
   endian_init();
-  if (0 == read_text_header(inp, &h, in)) {
+  if (0 == read_text_header(inp, &h, in, name)) {
     fclose(inp);
     exit(1);
   }

@@ -1,5 +1,5 @@
 /*
- * $Id: zah.c,v 1.1 2002/06/27 07:20:24 jon Exp $
+ * $Id: zah.c,v 1.2 2002/06/27 07:31:58 jon Exp $
  *
  * Add a header to en intermediate file matrix
  * Essentially a disaster recovery program
@@ -58,7 +58,7 @@ int main(int argc, const char * const argv[])
     fclose(text_inp);
     exit(1);
   }
-  if (0 == read_text_header(text_inp, &h, text_in)) {
+  if (0 == read_text_header(text_inp, &h, text_in, name)) {
     fclose(text_inp);
     fclose(inp);
     exit(1);

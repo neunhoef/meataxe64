@@ -1,5 +1,5 @@
 /*
- * $Id: pr.c,v 1.10 2002/06/25 10:30:12 jon Exp $
+ * $Id: pr.c,v 1.11 2002/06/27 07:31:58 jon Exp $
  *
  * Print a matrix
  *
@@ -60,7 +60,7 @@ int main(int argc, const char * const argv[])
   nor = header_get_nor(h);
   noc = header_get_noc(h);
   len = header_get_len(h);
-  if (0 == write_text_header(stdout, h)) {
+  if (0 == write_text_header(stdout, h, name)) {
     fprintf(stderr, "%s: cannot write text header, terminating\n", name);
     fclose(inp);
     exit(1);

@@ -1,5 +1,5 @@
 /*
- * $Id: eip.c,v 1.4 2002/06/25 10:30:12 jon Exp $
+ * $Id: eip.c,v 1.5 2002/06/27 07:31:58 jon Exp $
  *
  * Read a permutation into an exploded matrix
  *
@@ -68,7 +68,7 @@ int main(int argc, const char * const argv[])
   }
   endian_init();
   memory_init(name, 0);
-  if (0 == read_text_header_items(inp, &t1, &t2, &nor, &t3, in)) {
+  if (0 == read_text_header_items(inp, &t1, &t2, &nor, &t3, in, name)) {
     fclose(inp);
     exit(1);
   }

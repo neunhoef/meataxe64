@@ -1,5 +1,5 @@
 /*
- * $Id: write.c,v 1.11 2002/06/25 10:30:12 jon Exp $
+ * $Id: write.c,v 1.12 2002/06/27 07:31:58 jon Exp $
  *
  * Write a header
  *
@@ -13,12 +13,14 @@
 #include "utils.h"
 #include "endian.h"
 
-int write_text_header(FILE *fp, const header *h)
+int write_text_header(FILE *fp, const header *h, const char *name)
 {
   unsigned int prime, nod, noc, nor;
 
   assert(NULL != h);
   assert(NULL != fp);
+  assert(NULL != name);
+  NOT_USED(name);
   prime = header_get_prime(h);
   nod = header_get_nod(h);
   nor = header_get_nor(h);
@@ -32,7 +34,7 @@ int write_text_header(FILE *fp, const header *h)
   return 1;
 }
 
-int write_binary_header(FILE *fp, const header *h, const char *name)
+int write_binary_header(FILE *fp, const header *h, const char *file, const char *name)
 {
   unsigned int prime;
   unsigned int nor;
@@ -41,6 +43,7 @@ int write_binary_header(FILE *fp, const header *h, const char *name)
   assert(NULL != h);
   assert(NULL != fp);
   assert(NULL != name);
+  assert(NULL != file);
   prime = header_get_prime(h);
   nor = header_get_nor(h);
   noc = header_get_noc(h);
@@ -48,7 +51,7 @@ int write_binary_header(FILE *fp, const header *h, const char *name)
   if (1 != endian_write_int(prime, fp) ||
       1 != endian_write_int(nor, fp) ||
       1 != endian_write_int(noc, fp)) {
-    fprintf(stderr, "Failed to write header to binary output %s\n", name);
+    fprintf(stderr, "%s: failed to write header to binary output %s\n", name, file);
     return 0;
   }
   return 1;
@@ -67,7 +70,7 @@ int open_and_write_binary_header(FILE **outp, const header *h, const char *m, co
     return 0;
   }
   *outp = out;
-  res = write_binary_header(out, h, m);
+  res = write_binary_header(out, h, m, name);
   if (0 == res) {
     fclose(out);
     *outp = NULL;

@@ -1,5 +1,5 @@
 /*
- * $Id: zpro.c,v 1.1 2002/06/25 10:30:12 jon Exp $
+ * $Id: zpro.c,v 1.2 2002/06/27 07:31:58 jon Exp $
  *
  * Print an orbit_set
  *
@@ -53,7 +53,7 @@ int main(int argc, const char * const argv[])
     exit(1);
   }
   fclose(inp);
-  if (0 == write_text_header(stdout, h)) {
+  if (0 == write_text_header(stdout, h, name)) {
     fprintf(stderr, "%s: cannot write text header, terminating\n", name);
     header_free(h);
     fclose(inp);
