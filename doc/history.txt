@@ -322,3 +322,4 @@ skew seventh
 20040828 - Add means to rebuild library without rebuilding everything
 20040917 - Improved verbosity in multiply and spin
 20040919 - Fix bug in space_split whereby subspace vectors were still in original space
+20041002 - Made dual_subspace use znsf to cope with larger subspaces

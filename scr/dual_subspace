@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: dual_subspace,v 1.5 2002/11/29 19:19:01 jon Exp $
+# $Id: dual_subspace,v 1.6 2004/10/02 20:29:15 jon Exp $
 #
 # Script to provide a subspace from the dual subspace
 #
@@ -41,20 +41,20 @@ if [ $? -ne 0 ]; then
   rm ${tmp}*
   exit 1
 fi
+if [ ! -d tmp ]; then
+  mkdir tmp
+fi
+ret=$?
+if [ 0 -ne $ret ]; then
+  echo failed to create temporary directory, terminating
+  rm -f ${tmp}*
+  exit 1
+fi
 ok=0
 while [ 0 -eq $ok ]; do
-  nullity=`zns -m $memory ${tmp}.1 ${tmp}.2 2>&1`
+  nullity=`znsf -m $memory ${tmp}.1 ${tmp}.2 tmp 2>&1`
   ret=$?
   if [ $ret -eq 0 ]; then
-    if [ ! -d tmp ]; then
-      mkdir tmp
-    fi
-    ret=$?
-    if [ 0 -ne $ret ]; then
-      echo failed to create temporary directory, terminating
-      rm -f ${tmp}*
-      exit 1
-    fi
     zbase -m $memory ${tmp}.2 tmp $o
     ret=$?
     rm -f ${tmp}*
