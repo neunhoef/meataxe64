@@ -1,5 +1,5 @@
 /*
- * $Id: sign.c,v 1.4 2002/10/18 11:24:28 jon Exp $
+ * $Id: sign.c,v 1.5 2002/10/20 20:41:09 jon Exp $
  *
  * Function compute the orthogonal group sign
  *
@@ -11,7 +11,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include "clean.h"
 #include "elements.h"
 #include "endian.h"
 #include "grease.h"
@@ -33,9 +32,6 @@ int sign(const char *qform, const char *bform, const char *name)
   unsigned int prime, nob, nor, noc, len, n, **mat;
   unsigned int *sing_row1, *sing_row2, *products, *row, out_num;
   int res;
-#if 0
-  int *map;
-#endif
   grease_struct grease;
   prime_ops prime_operations;
   row_ops row_operations;
@@ -177,106 +173,11 @@ int sign(const char *qform, const char *bform, const char *name)
       }
       n++;
     }
-#if 0
-    echelise(&sing_row1, 1, &n, &map, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, 0, name);
-    if (1 != n) {
-      fclose(binp);
-      fclose(qinp);
-      matrix_free(mat);
-      free(products);
-      free(map);
-      fprintf(stderr, "%s: singular vector is zero, terminating\n", name);
-      return 1;
-    }
-#endif
     /* Now remove mat[res] as this isn't a null vector */
     assert(nor > 3);
     row = mat[res];
     mat[res] = mat[nor - 2];
     mat[nor - 2] = row;
-#if 0
-    clean(&sing_row1, 1, mat, nor - 1, map, NULL, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, name);
-    free(map);
-    {
-      int done = 0;
-      unsigned int pos, elt, *elts, m;
-      int *rev_map;
-      /* Compute the map for the given rows */
-      map = my_malloc((nor - 1) * sizeof(int));
-      rev_map = my_malloc(noc * sizeof(int));
-      elts = my_malloc((nor - 1) * sizeof(unsigned int));
-      for (n = 0; n + 1 < nor; n++) {
-        elt = first_non_zero(mat[n], nob, len, &pos);
-        if (0 == elt) {
-          /* Row cleaned out by sing_row1 */
-          done = 1;
-          row = mat[n];
-          mat[n] = mat[nor - 2];
-          mat[nor - 2] = row;
-        } else {
-          elts[n] = elt;
-          map[n] = pos;
-        }
-      }
-      m = 0;
-      memset(rev_map, -1, noc * sizeof(int));
-      while (0 == done /* && m + 1 < nor */) {
-        int k, l = map[m];
-        assert(0 <= l && (unsigned int)l < noc);
-        k = rev_map[l];
-        if (k < 0) {
-          /* New first non zero */
-          rev_map[l] = m;
-        } else {
-          /* Repeated first_non_zero */
-          /* Loop subtracting out stuff from this row until zero or new */
-          while (k >= 0) {
-            /* First check mat[k] is echelised */
-            assert((unsigned int)k < nor - 1);
-            elt = elts[k];
-            assert(0 != elt);
-            if (1 != elt) {
-              /* Scale row k by inverse of elts[k] */
-              elt = (*prime_operations.invert)(elt);
-              (*row_operations.scaler_in_place)(mat[k], len, elt);
-            }
-            /* Now subtract out a multiple of mat[k] from mat[m] */
-            elt = elts[m];
-            assert(0 != elt);
-            elt = (*prime_operations.negate)(elt);
-            if (1 == elt) {
-              (*row_operations.incer)(mat[k], mat[m], len);
-            } else {
-              (*row_operations.scaled_incer)(mat[k], mat[m], len, elt);
-            }
-            /* Now recheck mat[m] */
-            elt = first_non_zero(mat[m], nob, len, &pos);
-            if (0 == elt) {
-              /* Found a zero row, swap and finish */
-              row = mat[m];
-              mat[m] = mat[nor - 2];
-              mat[nor - 2] = row;
-              done = 1;
-              break;
-            } else {
-              /* Non-zero entry, check for new */
-              elts[m] = elt;
-              map[m] = pos;
-              k = rev_map[pos];
-              if (k < 0) {
-                rev_map[pos] = m;
-                break;
-              }
-            }
-          }
-        }
-        m++;
-      }
-      assert(1 == done);
-      free(map);
-      free(rev_map);
-    }
-#endif
     nor -= 2;
   }
   res = singular_vector(mat, mat + noc, sing_row1, &out_num, qinp,
