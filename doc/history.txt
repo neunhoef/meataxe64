@@ -252,3 +252,4 @@ skew seventh
 20030426 - Add new_irredf_with_script
 20030426 - Minor improvements in indicatef_with_element, new_irredf_with_orders, restrictf_with_orders
 20030428 - Fix further bug in znsf with non-square matrices
+20030516 - Fix minor bug in check_irredf documentation and add text output

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: check_irredf,v 1.1 2003/04/26 16:55:46 jon Exp $
+# $Id: check_irredf,v 1.2 2003/05/16 17:49:53 jon Exp $
 #
 # Script to check a representation is irreducible
 #
@@ -16,7 +16,7 @@
 # 254: nullity 0
 # 255: reducible
 #
-usage="$0: usage: $0 <memory> <script> <temp dir>> <a> [<other generators>]"
+usage="$0: usage: $0 <memory> <script> <temp dir> <a> [<other generators>]"
 if [ $# -lt 4 ]; then
   echo "$usage"
   exit 1;
@@ -106,7 +106,9 @@ if [ 0 -ne $ret ]; then
   exit $ret
 fi
 if [ $nor -eq $out ]; then
+  echo irreducible
   exit 0
 else
+  echo not irreducible
   exit 255
 fi
