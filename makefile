@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.50 2002/03/07 13:43:30 jon Exp $
+# $Id: makefile,v 1.51 2002/03/09 19:18:02 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -36,6 +36,7 @@ ZEX_TARGET=	zex
 ZEXPORT_TARGET=	zexport
 ZFE_TARGET=	zfe
 ZID_TARGET=	zid
+ZIMPORT_TARGET=	zimport
 ZIP_TARGET=	zip
 ZIV_TARGET=	ziv
 ZJOIN_TARGET=	zjoin
@@ -99,9 +100,10 @@ ZCV_MODULES=	elements endian header ip primes read utils write
 ZDIAG_MODULES=	elements endian header memory primes read rows utils write zdiag
 ZDIFF_MODULES=	diff endian header memory primes read utils zdiff
 ZEX_MODULES=	elements endian exrows files header map memory primes read rows utils write zex
-ZEXPORT_MODULES=	endian header memory primes read rows utils write zexport
+ZEXPORT_MODULES=	elements endian header memory primes read rows utils write zexport
 ZFE_MODULES=	elements endian extend extend_matrix header memory primes read rows utils write zfe
 ZID_MODULES=	id ident elements endian header memory primes rows utils write
+ZIMPORT_MODULES=	elements endian header memory primes read rows utils write zimport
 ZIP_MODULES=	elements endian header ipp memory primes read rows utils write
 ZIV_MODULES=	clean elements endian grease header matrix memory primes read iv rows utils write ziv
 ZJOIN_MODULES=	endian header join memory primes read utils write zjoin
@@ -168,6 +170,7 @@ MODULES=	$(DTOU_MODULES) \
 	$(ZEXPORT_MODULES) \
 	$(ZFE_MODULES) \
 	$(ZID_MODULES) \
+	$(ZIMPORT_MODULES) \
 	$(ZIP_MODULES) \
 	$(ZIV_MODULES) \
 	$(ZJOIN_MODULES) \
@@ -321,6 +324,9 @@ TARGET:=ZFE
 include targets.txt
 
 TARGET:=ZID
+include targets.txt
+
+TARGET:=ZIMPORT
 include targets.txt
 
 TARGET:=ZIP

@@ -1,5 +1,5 @@
 /*
- * $Id: sums.c,v 1.2 2002/02/21 20:37:21 jon Exp $
+ * $Id: sums.c,v 1.3 2002/03/09 19:18:02 jon Exp $
  *
  * Function to compute linear sums of two matices
  *
@@ -52,7 +52,7 @@ int sums(const char *in1, const char *in2, const char *out,
   j = strlen(out);
   k = j + 13;
   n += 1;
-  if (0 == pow(prime, n, &count)) {
+  if (0 == int_pow(prime, n, &count)) {
     fprintf(stderr, "%s: too many elements requested (%d ** %d), terminating\n", name, prime, n);
     exit(1);
   }

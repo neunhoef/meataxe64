@@ -1,5 +1,5 @@
 /*
- * $Id: utils.c,v 1.16 2002/01/14 23:43:45 jon Exp $
+ * $Id: utils.c,v 1.17 2002/03/09 19:18:02 jon Exp $
  *
  * Utils for meataxe
  *
@@ -181,7 +181,7 @@ int get_task_line(char *line, FILE *input)
   }
 }
 
-int pow(unsigned int n, unsigned int index, unsigned int *res)
+int int_pow(unsigned int n, unsigned int index, unsigned int *res)
 {
   assert(0 != n);
   if (0 == index) {
@@ -191,7 +191,7 @@ int pow(unsigned int n, unsigned int index, unsigned int *res)
     *res = n;
     return 1;
   } else {
-    if (0 != pow(n, index-1, res)) {
+    if (0 != int_pow(n, index-1, res)) {
       if (*res < (UINT_MAX / n)) {
         *res *= n;
         return 1;

@@ -1,5 +1,5 @@
 /*
- * $Id: grease.c,v 1.16 2001/12/23 23:31:42 jon Exp $
+ * $Id: grease.c,v 1.17 2002/03/09 19:18:02 jon Exp $
  *
  * Functions to grease matrix rows
  *
@@ -49,7 +49,7 @@ int grease_allocate(unsigned int prime, unsigned int len,
   assert(0 != grease->level);
   assert(0 != len);
   assert(0 != prime);
-  if (0 == pow(prime, grease->level, &q_n)) {
+  if (0 == int_pow(prime, grease->level, &q_n)) {
     return 0;
   }
   grease->size = q_n - 1;

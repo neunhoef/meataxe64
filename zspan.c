@@ -1,5 +1,5 @@
 /*
- * $Id: zspan.c,v 1.4 2002/03/07 13:43:30 jon Exp $
+ * $Id: zspan.c,v 1.5 2002/03/09 19:18:02 jon Exp $
  *
  * Compute the span of a matrix
  *
@@ -55,7 +55,7 @@ int main(int argc, const char * const argv[])
   noc = header_get_noc(h_in);
   nob = header_get_nob(h_in);
   len = header_get_len(h_in);
-  if (0 == pow(prime, vectors, &rows)) {
+  if (0 == int_pow(prime, vectors, &rows)) {
     fprintf(stderr, "%s: cannot compute %d ** %d, terminating\n", name, prime, vectors);
     exit(1);
   }

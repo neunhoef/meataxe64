@@ -1,5 +1,5 @@
 /*
- * $Id: header.c,v 1.9 2001/11/29 01:13:09 jon Exp $
+ * $Id: header.c,v 1.10 2002/03/09 19:18:02 jon Exp $
  *
  * Header manipulation
  *
@@ -11,6 +11,7 @@
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include "primes.h"
 #include "utils.h"
 
@@ -22,6 +23,8 @@ struct header_struct
   unsigned int nor;	/* The number of rows */
   unsigned int noc;	/* The number of columns */
   unsigned int len;	/* The number of words in a row */
+  unsigned int blen;	/* The number of bytes required for a row for old meataxe */
+  unsigned int eperb;	/* The number of elements per byte for old meataxe */
 };
 
 unsigned int header_get_prime(const header *h)
@@ -109,6 +112,51 @@ void header_set_len(header *h)
   h->len = get_len(h->nob, h->noc);
 }
 
+static unsigned int get_eperb(unsigned int prime, unsigned int nob)
+{
+  if (0 == prime % 2) {
+    return (CHAR_BIT) / nob;
+  } else {
+    double log2 = log(2);
+    double logq = log(prime);
+    return ((CHAR_BIT) * log2) / logq;
+  }
+}
+
+unsigned int header_get_eperb(const header *h)
+{
+  assert(NULL != h);
+  assert(get_eperb(h->prime, h->nob) == h->eperb);
+  return h->eperb;
+}
+
+void header_set_eperb(header *h)
+{
+  assert(NULL != h);
+  assert(0 != h->nob);
+  h->eperb = get_eperb(h->prime, h->nob);
+}
+
+static unsigned int get_blen(const header *h)
+{
+  assert(get_eperb(h->prime, h->nob) == h->eperb);
+  return (h->noc + h->eperb - 1) / h->eperb;
+}
+
+unsigned int header_get_blen(const header *h)
+{
+  assert(NULL != h);
+  assert(get_blen(h) == h->blen);
+  return h->blen;
+}
+
+void header_set_blen(header *h)
+{
+  assert(NULL != h);
+  assert(0 != h->nob);
+  h->blen = get_blen(h);
+}
+
 int header_alloc(header **h)
 {
   header *h1 = malloc(sizeof(*h1));
@@ -143,5 +191,7 @@ header *header_create(unsigned int prime, unsigned int nob,
   header_set_noc(h, noc);
   header_set_nor(h, nor);
   header_set_len(h);
+  header_set_eperb(h);
+  header_set_blen(h);
   return h;
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: elements.c,v 1.14 2002/02/27 19:06:17 jon Exp $
+ * $Id: elements.c,v 1.15 2002/03/09 19:18:02 jon Exp $
  *
  * Element manipulation for meataxe
  *
@@ -63,6 +63,26 @@ unsigned int get_element_from_row(unsigned int nob, unsigned int index,
   return res;
 }
 
+unsigned int get_element_from_char_row(unsigned int eperb, unsigned int prime,
+                                       unsigned int index, const char *row)
+{
+  unsigned int char_offset;
+  unsigned int field;
+  unsigned int word;
+  unsigned int i = 0;
+  assert(0 != eperb);
+  assert(NULL != row);
+  assert(0 != prime);
+  char_offset = index / eperb;
+  field = (eperb - 1 - (index % eperb));
+  word = row[char_offset];
+  while (i < field) {
+    word /= prime;
+    i++;
+  }
+  return word % prime;
+}
+
 void element_access_init(unsigned int nob, unsigned int from, unsigned int size,
                          unsigned int *word_offset, unsigned int *bit_offset,
                          unsigned int *mask)
@@ -109,6 +129,30 @@ void put_element_to_row(unsigned int nob, unsigned int index,
   elt = elt << bit_offset;
   word = (word & (mask ^ 0xffffffff)) | elt;
   row[word_offset] = word;
+}
+
+void put_element_to_char_row(unsigned int eperb, unsigned int prime,
+                             unsigned int index, char *row, unsigned int elt)
+{
+  unsigned int char_offset;
+  unsigned int field;
+  unsigned int word;
+  unsigned int i = 0, q = 1, n, m;
+  assert(0 != eperb);
+  assert(0 != prime);
+  assert(NULL != row);
+  assert(elt < prime);
+  char_offset = index / eperb;
+  field = (eperb - 1 - (index % eperb));
+  word = row[char_offset];
+  while (i < field) {
+    q *= prime;
+    i++;
+  }
+  m = (1 == q) ? 0 : word % q;
+  n = word / (q * prime);
+  word = n * (q * prime) + elt * q + m;
+  row[char_offset] = word;
 }
 
 /* Convert bit field representation to power series */

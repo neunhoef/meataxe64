@@ -1,5 +1,5 @@
 /*
- * $Id: read.c,v 1.16 2002/03/07 13:43:30 jon Exp $
+ * $Id: read.c,v 1.17 2002/03/09 19:18:02 jon Exp $
  *
  * Read a header
  *
@@ -116,6 +116,8 @@ int read_binary_header(FILE *fp, const header **hp, const char *name)
   header_set_nor(h, nor);
   header_set_noc(h, noc);
   header_set_len(h);
+  header_set_eperb(h);
+  header_set_blen(h);
   *hp = h;
   return 1;
 }

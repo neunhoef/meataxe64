@@ -1,5 +1,5 @@
 /*
- * $Id: conj.c,v 1.2 2002/02/21 20:37:21 jon Exp $
+ * $Id: conj.c,v 1.3 2002/03/09 19:18:02 jon Exp $
  *
  * Function to compute algebraic conjugate of a matrix, from file
  *
@@ -63,7 +63,7 @@ int conjugate(const char *m1, const char *m2, unsigned int power, const char *na
   index = prime_index(prime_power, prime);
   power = power % index;
   row = memory_pointer_offset(0, 0, len);
-  (void)pow(prime, power, &power); /* Convert from index to power */
+  (void)int_pow(prime, power, &power); /* Convert from index to power */
   for (i = 0; i < nor; i++) {
     if (0 == endian_read_row(inp, row, len)) {
       fprintf(stderr, "%s cannot read row %d from %s, terminating\n", name, i, m1);
