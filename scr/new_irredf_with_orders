@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: new_irredf_with_orders,v 1.8 2002/09/11 21:20:47 jon Exp $
+# $Id: new_irredf_with_orders,v 1.9 2002/09/22 10:29:46 jon Exp $
 #
 # Script to classify an irreducible representation
 #
@@ -59,10 +59,12 @@ if [ $i -ne $k ]; then
 fi
 i=0
 shift 2
+line=
 while [ $i -lt $j ]; do
   rest[$i]=$1
   o_rest[$i]=$2
   let i=$i+1
+  line="$line $1 $2"
   shift 2
 done
 #
@@ -80,7 +82,7 @@ while [ $i -lt $j -a 0 -eq $ok ]; do
     o_a=${o_rest[$k]}
     b=${rest[$i]}
     o_b=${o_rest[$i]}
-    script=`find_nullity_onef_with_orders $a $b $e $o_a $o_b $tmp_dir $memory`
+    script=`find_nullity_onef_with_orders $e $memory $tmp_dir $line`
     ret=$?
     if [ 0 -eq $ret ]; then
       ok=1
