@@ -1,8 +1,8 @@
 #!/bin/sh
 #
-# $Id: find_element,v 1.6 2003/03/29 09:32:49 jon Exp $
+# $Id: find_element,v 1.7 2003/05/27 21:53:23 jon Exp $
 #
-# Script to find an element of nullity 1 on one representation
+# Script to find an element of given nullity on one representation
 # and if possible nullity zero on a sequence of others
 #
 # Inputs
@@ -11,24 +11,24 @@
 # $3: order generator a
 # $4-: other generators and orders
 # $(2+2*$1): depth of search
-# $(3+2*$1): the nullity file
-# $(4+2*$1): memory
-# $(5+2*$1): onwards, the other representations
+# $(3+2*$1): the nullity to be found
+# $(4+2*$1): the nullity file
+# $(5+2*$1): memory
+# $(6+2*$1): onwards, the other representations
 #
 # Return codes
 # 1: error in parameters
 # 0: success
-# 255: nullity not 1
 #
 #set -v
 . functions
-usage="$0: usage: $0 <number of generators> <a> <order a> [<other generators and orders>] <depth> <output> <memory> <other irreds>"
-if [ $# -lt 7 ]; then
+usage="$0: usage: $0 <number of generators> <a> <order a> [<other generators and orders>] <depth> <nullity> <output> <memory> <other irreds>"
+if [ $# -lt 8 ]; then
   echo "$usage"
   exit 1;
 fi
 n=$1
-let max=2*$1+5
+let max=2*$1+6
 if [ $# -lt $max ]; then
   echo "$usage"
   exit 1;
@@ -47,8 +47,9 @@ while [ $i -lt $n ]; do
   let i=$i+1
 done
 depth=$1
-out=$2
-memory=$3
+nullity=$2
+out=$3
+memory=$4
 if [ -e ${a[0]} ]; then
   q=`zprime ${a[0]}`
   nor=`znor ${a[0]}`
@@ -76,15 +77,15 @@ while [ $i -lt $n ]; do
 done
 tmp=tmp${PPID}
 # echo zranks -m $memory ${tmp} $depth 1 $line
-zranks -m $memory ${tmp} $depth 1 $line | grep "of nullity" > ${out}.1
-grep "of nullity 1" ${out}.1 | sed -e "s/^.*element //g;s/ of nullity .*$//g" >poo
+zranks -m $memory ${tmp} $depth $nullity $line | grep "of nullity" > ${out}.1
+grep "of nullity $nullity" ${out}.1 | sed -e "s/^.*element //g;s/ of nullity .*$//g" >poo
 if [ -z "`cat poo`" ]; then
-  echo No elements of nullity one found, terminating
+  echo No elements of nullity $nullity found, terminating
   rm -f ${tmp}* poo
   exit 255
 fi
 echo >$out
-shift 3
+shift 4
 while [ 1 -le $# ]; do
   i=0
   stem=$1
