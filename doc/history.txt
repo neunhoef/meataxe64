@@ -214,3 +214,4 @@ skew seventh
 20021014 - Use -m for ztmu and zproj
 20021014 - Use -m for zscript
 20021014 - Use -m throughout, and document
+20021015 - GF4 version of inner product now available

@@ -1,6 +1,7 @@
 Worry about isspace failure (can't detect \n) (still occurs on RH 7.2) ctype is buggered
 Worry about return (NULL == s) code generation error
 Documentation changes for proj_base, sub_quot
+Write non GF2 inner products
 Incorporate zsign into indicate
 Extend indicate to handle odd primes
 Think about better use of grease for ztmu
