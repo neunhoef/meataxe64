@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: real_indicate,v 1.9 2003/01/14 12:04:54 jon Exp $
+# $Id: real_indicate,v 1.10 2003/07/20 18:13:19 jon Exp $
 #
 # Script to find the indicator of an irreducible representation
 # assuming it is real, and we have the standard basis conjugating
@@ -97,7 +97,7 @@ if [ 2 -eq $p ]; then
 # Now compute the orthogonal group sign
       ok=0
       while [ 0 -eq $ok ]; do
-        out=`zsign -m $memory ${tmp}.8 $S 2>/dev/null`
+        out=`zsign -m $memory ${tmp}.8 $S 2>&1`
         ret=$?
         if [ 2 -eq $ret ]; then
           let memory=`more_memory $memory 2>/dev/null`
@@ -175,8 +175,16 @@ else
     let t=$nor2*2
     if [ $nor -eq $t ]; then
 # Even dimensional
-      zsign -m $memory $S $S
-      ret=$?
+      ok=0
+      while [ 0 -eq $ok ]; do
+        out=`zsign -m $memory $S $S 2>&1`
+        ret=$?
+        if [ 2 -eq $ret ]; then
+          let memory=`more_memory $memory 2>/dev/null`
+        else
+          ok=1
+        fi
+      done
       if [ 0 -eq $ret ]; then
         ln -s $a ${a}_++
         echo group +
@@ -188,6 +196,7 @@ else
         echo insufficient memory to compute group sign
       else
         rm -f ${tmp}.*
+        echo $out
         exit 1
       fi
     else

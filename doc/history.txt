@@ -262,3 +262,4 @@ skew seventh
 20030621 - Added tra_in_situ for use by tsp and tmu
 20030628 - Fixed ztspf to be able to work without reading all of second argument
 20030629 - Fixed sym_basis to use zsymb
+20030720 - Fix minor bug in real_indicate on group signs for odd primes
