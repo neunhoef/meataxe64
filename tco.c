@@ -1,5 +1,5 @@
 /*
- * $Id: tco.c,v 1.8 2003/03/17 22:23:17 jon Exp $
+ * $Id: tco.c,v 1.9 2003/03/22 22:02:38 jon Exp $
  *
  * Tensor condense one group element
  *
@@ -483,12 +483,11 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
                     /* Columns of M */
                     unsigned int elt = expanded_lrow[te_k];
                     if (0 != elt) {
-                      unsigned int *row = expanded_rrow; /* was rrows */
+                      unsigned int *row = expanded_rrow + base_i; /* was rrows */
                       if (1 != elt) {
-                        (*row_operations.scaler)(row, te_row, noc_r, elt);
+                        (*row_operations.scaler)(row, te_row, dim_irr_j, elt);
                         row = te_row;
                       }
-                      row += base_i;
                       for (te_l = 0; te_l < dim_irr_j; te_l++) {
                         elt = row[te_l];
                         if (0 != elt) {

@@ -239,3 +239,4 @@ skew seventh
 20030301 - Fix bug in clean_vectors
 20030316 - Fix argument bug in ztco, and reduce memory requirement in tco.c
 20030316 - Minor simplification to preserves
+20030322 - Performance improvement to ztco by only scaling what we need

@@ -1,9 +1,12 @@
 Look into compiling with CPU specific optimisations (-march=pentium4)
 Worry about isspace failure (can't detect \n) (still occurs on RH 7.2) ctype is buggered
 Worry about return (NULL == s) code generation error
+Think about reading all p matrices at start for tco and using mul_in_store throughout
 Documentation changes for proj_base, sub_quot
 Think about better instruction ordering for rows.c
 Think about better use of grease for ztmu
+Optimise ztmu
+Write zsignf
 Write span_and_spin for spins on large nullspaces
 Profile multiply (eg on 26750 for Co1) for different memory sizes
 Profile zns on 3584.e.3 for McL for different memory sizes. Think about grease strategy.
@@ -24,4 +27,3 @@ Examine profiles from monst (1)
 Consider a more structured error return type (1)
 Convert monster generator to use new operations (2)
 Work on lattice of submodules (5)
-(18, 12/10/2002, 24/09/2002)
