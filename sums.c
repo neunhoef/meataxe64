@@ -1,5 +1,5 @@
 /*
- * $Id: sums.c,v 1.10 2002/09/11 10:02:28 jon Exp $
+ * $Id: sums.c,v 1.11 2002/09/11 15:34:59 jon Exp $
  *
  * Function to compute linear sums of two matices
  *
@@ -21,81 +21,144 @@
 #include "rn.h"
 #include "utils.h"
 
+static void cleanup(unsigned int *orders)
+{
+  assert(NULL != orders);
+  free(orders);
+}
+
+static int next_gen(unsigned int cur_gen, unsigned int max_gen, char *gen, const unsigned int *orders, const char *word)
+{
+  assert(NULL != gen);
+  assert(NULL != orders);
+  assert(NULL != word);
+  while (1) {
+    char letter;
+    unsigned int len;
+    cur_gen++;
+    if (cur_gen >= max_gen) {
+      return -1;
+    }
+    if (0 == orders[cur_gen]) {
+      continue;
+    }
+    letter = 'A' + cur_gen;
+    len = strlen(word);
+    /* Now find maximum number of occurrences of letter at end of word */
+    /* and move on if exceeds order */
+    if (NULL == strchr(word, letter)) {
+      /* No occurrence, all safe */
+      *gen = letter;
+      return cur_gen;
+    } else {
+      unsigned int pos = len;
+      /* Count occurrences at end of word */
+      while (pos > 0) {
+        if (word[pos - 1] == letter) {
+          pos--;
+        } else {
+          break;
+        }
+      }
+      if (len + 1 >= orders[cur_gen] + pos) {
+        /* we've reached the order of this element */
+        continue;
+      }
+      /* Safe to use this generator */
+      *gen = letter;
+      return cur_gen;
+    }
+  } /* while */
+}
+
 int sums(const char *out, unsigned int n, unsigned int argc, const char *const args[],
          unsigned int sub_order, accept acceptor, const char *name)
 {
   char *buf;
-  const char *in1 = args[0], *in2 = args[2];
   FILE *f;
+  unsigned int *orders;
+  unsigned int argc2 = argc / 2;
   unsigned int i, j, k, l, r, s, cur_word = 0, cur_power = 1, base_prime;
-  unsigned int prime, nod, nor, noc, count;
-  unsigned int o_a = strtoul(args[1], NULL, 0), o_b = strtoul(args[3], NULL, 0);
+  unsigned int prime = 1, nod = 0, nor = 0, noc = 0, count;
+  unsigned int o_a, o_b;
   const header *h;
   int m;
   const char **names;
   const char **words;
   const char **elts;
   const char **elt_names;
+  const char *gen_names[] = { "A", "B", "C", "D", "E", "F", "G", "H" };
 
-  assert(NULL != in1);
-  assert(NULL != in2);
   assert(NULL != out);
   assert(NULL != args);
-  assert(0 != argc);
-  NOT_USED(argc);
+  assert(2 < argc && 0 == argc % 2);
+  if (argc2 > 8) {
+    fprintf(stderr, "%s: too many generators (%d), terminating\n", name, argc2);
+    exit(1);
+  }
+  orders = my_malloc(argc2 * sizeof(unsigned int));
+  for (i = 0; i < argc2; i++) {
+    orders[i] = strtoul(args[1 + 2 * i], NULL, 0);
+  }
+  o_a = orders[0];
+  o_b = orders[1];
   if (0 == o_a || 0 == o_b || 0 == n) {
     fprintf(stderr, "%s: unexpected zero in order of a, order of b or n, terminating\n", name);
+    cleanup(orders);
     exit(1);
   }
   if (0 != sub_order && 0 == is_a_prime_power(sub_order)) {
     fprintf(stderr, "%s: bad value %d for subfield order, terminating\n", name, sub_order);
+    cleanup(orders);
     exit(1);
   }
-  if (0 == open_and_read_binary_header(&f, &h, in1, name)) {
-    exit(1);
-  }
-  fclose(f);
-  prime = header_get_prime(h);
-  if (1 == prime) {
-    header_free(h);
-    /* Try input 2 */
-    if (0 == open_and_read_binary_header(&f, &h, in2, name)) {
+  for (i = 0; i < argc2; i++) {
+    if (0 == open_and_read_binary_header(&f, &h, args[2 * i], name)) {
+      cleanup(orders);
       exit(1);
     }
     fclose(f);
-    prime = header_get_prime(h);
-    if (1 == prime) {
+    if (1 != header_get_prime(h)) {
+      prime = header_get_prime(h);
+      nor = header_get_nor(h);
+      noc = header_get_noc(h);
+      nod = header_get_nod(h); /* For printing element names */
       header_free(h);
-      fprintf(stderr, "%s: cannot handle both have both generators as permutations\n", name);
-      exit(1);
+      break;
     }
+    header_free(h);
   }
-  nor = header_get_nor(h);
-  noc = header_get_noc(h);
-  nod = header_get_nod(h); /* For printing element names */
-  header_free(h);
+  if (1 == prime) {
+    fprintf(stderr, "%s: cannot handle both have both generators as permutations\n", name);
+    cleanup(orders);
+    exit(1);
+  }
   if (nor != noc) {
-    fprintf(stderr, "%s: %s is not square, terminating\n", name, in1);
+    fprintf(stderr, "%s: %s is not square, terminating\n", name, args[2 * i]);
+    cleanup(orders);
     exit(1);
   }
   if (0 != sub_order) {
     if (0 != prime % sub_order) {
       fprintf(stderr, "%s: %d is not a field order, terminating\n", name, sub_order);
+      cleanup(orders);
       exit(1);
     }
     base_prime = prime_divisor(prime);
     if (0 != prime_index(prime, base_prime) % prime_index(sub_order, base_prime)) {
       fprintf(stderr, "%s: %d is not a sub field order for %d, terminating\n", name, sub_order, prime);
+      cleanup(orders);
       exit(1);
     }
   }
   i = 1;
-  m = 0;
+  m = -1;
   j = strlen(out);
   k = j + 13;
   n += 1;
   if (0 == int_pow((0 != sub_order) ? sub_order : prime, n, &count)) {
     fprintf(stderr, "%s: too many elements requested (%d ** %d), terminating\n", name, prime, n);
+    cleanup(orders);
     exit(1);
   }
   names = my_malloc((n + 1) * sizeof(const char *));
@@ -109,13 +172,15 @@ int sums(const char *out, unsigned int n, unsigned int argc, const char *const a
   }
   if (0 == ident(prime, nor, noc, 1, elts[0], name)) {
     fprintf(stderr, "%s: cannot write identity, terminating\n", name);
+    cleanup(orders);
     exit(1);
   }
   elt_names[0] = "I";
   words[0] = "";
   names[0] = "I";
-  names[1] = in1;
-  names[2] = in2;
+  for (j = 0; j < argc2; j++) {
+    names[j + 1] = args[2 * j];
+  }
   if (0 != sub_order) {
     prime = sub_order; /* Restrict to subfield if requested */
   }
@@ -125,7 +190,8 @@ int sums(const char *out, unsigned int n, unsigned int argc, const char *const a
     const char *c;
     const char *chosen_letter;
     unsigned int word_len;
-    if (i > 2) {
+    char letter;
+    if (i > argc2) {
       buf = my_malloc(2 * k);
       sprintf(buf, "%s%d", out, i - 1);
       names[i] = buf;
@@ -135,55 +201,29 @@ int sums(const char *out, unsigned int n, unsigned int argc, const char *const a
 */
     while (1) {
       const char *word = words[cur_word];
-      char letter = (0 == m) ? 'A' : 'B';
-      unsigned int order = (0 == m) ? o_a : o_b;
-      unsigned int len = strlen(word);
-      /* Now find maximum number of occurrences of letter at end of word */
-      /* and move on if exceeds order */
-      if (NULL == strchr(word, letter)) {
-        /* No occurrence, all safe */
+      m = next_gen(m, argc2, &letter, orders, word);
+      if (m >= 0) {
         break;
       } else {
-        unsigned int pos = len;
-        /* Count occurrences at end of word */
-        while (pos > 0) {
-          if (word[pos - 1] == letter) {
-            pos--;
-          } else {
-            break;
-          }
-        }
-        if (len + 1 >= order + pos) {
-          /* we've reached the order of this element */
-          if (0 == m) {
-            m = 1;
-            /* Safe to break here, as we can't have a repeat of both letters at the end */
-            break;
-          } else {
-            m = 0;
-            /* Try a new word, with first letter */
-            /* This may fail if first letter has order 2 */
-            cur_word++;
-            assert(cur_word < i);
-          }
-        } else {
-          break;
-          /* Break anyway, our append was safe */
-        }
+        m = -1;
+        /* Try a new word, with the first letter */
+        cur_word++;
+        assert(cur_word < i);
       }
-    }
+    } /* while */
     /* Now cur_word is a pointer to a word we can safely append our letter to */
     assert(cur_word < i);
-    chosen_letter = (0 == m) ? "A" : "B";
+    chosen_letter = gen_names[m];
     word_len = strlen(words[cur_word]);
     a = my_malloc(2 * word_len + 2);
     strcpy(a, words[cur_word]);
     strcat(a, chosen_letter);
     words[i] = a;
     c = names[cur_word];
-    b = (0 == m) ? in1 : in2;
+    b = args[2 * m];
     if (0 != word_len) {
       if (0 == mul(c, b, names[i], "zsums")) {
+        cleanup(orders);
         exit(1);
       }
 /*
@@ -191,12 +231,6 @@ int sums(const char *out, unsigned int n, unsigned int argc, const char *const a
     } else {
       printf("No multiplication required to produce %s\n", names[i]);
 */
-    }
-    if (0 == m) {
-      m = 1;
-    } else {
-      m = 0;
-      cur_word++;
     }
     /* Now compute the sums we require, and their ranks */
     for (l = 0; l < cur_power; l++) {
@@ -213,6 +247,7 @@ int sums(const char *out, unsigned int n, unsigned int argc, const char *const a
 /*
           printf("Scaled add %s(%s) + %d.%s(%s) giving %s(%s)\n", elts[l], elt_names[l], r, names[i], words[i], elts[pos], elt_names[pos]);
 */
+          cleanup(orders);
           exit(1);
         }
         /* l != 0 mean we have 1 + old element + lambda * new element, ie at least 3 in sum */
@@ -222,6 +257,7 @@ int sums(const char *out, unsigned int n, unsigned int argc, const char *const a
           printf("Checking rank of %s(%s)\n", elts[pos], elt_names[pos]);
 */
           if (0 == rank(elts[pos], &s, name)) {
+            cleanup(orders);
             exit(1);
           }
           if (verbose) {

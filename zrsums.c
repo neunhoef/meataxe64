@@ -1,5 +1,5 @@
 /*
- * $Id: zrsums.c,v 1.4 2002/09/11 10:02:28 jon Exp $
+ * $Id: zrsums.c,v 1.5 2002/09/11 15:34:59 jon Exp $
  *
  * Compute restricted sums in the group algebra in two matrices
  *
@@ -40,7 +40,7 @@ int main(int argc, const char * const argv[])
   int res;
 
   argv = parse_line(argc, argv, &argc);
-  if (10 != argc) {
+  if (10 > argc || 0 != argc % 2) {
     rsums_usage();
     exit(1);
   }
