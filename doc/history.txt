@@ -321,3 +321,4 @@ skew seventh
 20040828 - Gave rank, spin etc unique names so they can be added to the library
 20040828 - Add means to rebuild library without rebuilding everything
 20040917 - Improved verbosity in multiply and spin
+20040919 - Fix bug in space_split whereby subspace vectors were still in original space
