@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: new_irred,v 1.9 2002/07/05 22:59:42 jon Exp $
+# $Id: new_irred,v 1.10 2002/09/07 13:00:22 jon Exp $
 #
 # Script to classify an irreducible representation
 #
@@ -62,6 +62,7 @@ for x in $*; do
     y[$i]=$x
     let i=$i+1
   elif [ 255 -eq $ret ]; then
+    zero=$x
     continue
   else
     echo singular_order returns unexpected code $ret
@@ -74,4 +75,7 @@ while [ $j -lt $i ]; do
   line="$line ${y[$j]} ${order[$j]}"
   let j=$j+1
 done
+if [ 1 -eq $i ]; then
+  line="$line $zero 1"
+fi
 exec new_irred_with_orders $memory $line
