@@ -1,5 +1,5 @@
 #
-# $Id: order,v 1.6 2002/01/14 23:43:45 jon Exp $: f1,v 1.2 2001/12/01 10:46:02 jon Exp $
+# $Id: order,v 1.7 2002/02/12 23:10:25 jon Exp $: f1,v 1.2 2001/12/01 10:46:02 jon Exp $
 #
 # Script to compute order of a matrix, in a naive fashion
 #
@@ -39,6 +39,7 @@ while [ $ok -eq 0 ]; do
   elif [ $ret -eq 0 ]; then
     ok=1
   else
+    echo "rank failed on $a, exiting"
     exit 1
   fi
 done

@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.46 2002/02/05 19:50:56 jon Exp $
+# $Id: makefile,v 1.47 2002/02/12 23:10:24 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -54,13 +54,14 @@ ZSAD_TARGET=	zsad
 ZSB_TARGET=	zsb
 ZSEL_TARGET=	zsel
 ZSID_TARGET=	zsid
-ZSL_TARGET=	zsl
+ZSKCU_TARGET=	zskcu
 ZSKSQ_TARGET=	zsksq
-ZSB_TARGET=	zsb
+ZSL_TARGET=	zsl
 ZSP_TARGET=	zsp
 ZSPAN_TARGET=	zspan
 ZSS_TARGET=	zss
 ZSUMS_TARGET=	zsums
+ZSYMSQ_TARGET=	zsymsq
 ZTE_TARGET=	zte
 ZTR_TARGET=	ztr
 ZTRACE_TARGET=	ztrace
@@ -112,12 +113,14 @@ ZSAD_MODULES=	add elements endian header memory primes read rows utils write zsa
 ZSB_MODULES=	clean elements endian grease header matrix memory mul primes read rows sb utils write zsb
 ZSEL_MODULES=	endian header memory primes read utils write zse
 ZSID_MODULES=	ident elements endian header memory primes rows utils write zsid
+ZSKCU_MODULES=	elements endian header matrix memory powers primes read rows utils write zskcu
 ZSKSQ_MODULES=	elements endian header matrix memory powers primes read rows utils write zsksq
 ZSL_MODULES=	add elements endian files grease header matrix memory mul primes read rows slave system utils write
 ZSP_MODULES=	clean elements endian grease header matrix memory mul primes read rows sp utils write zsp
 ZSPAN_MODULES=	elements endian header matrix memory primes read rows utils write zspan
 ZSS_MODULES=	clean elements endian grease header matrix memory primes read rows ss utils write zss
 ZSUMS_MODULES=	add clean elements endian grease header ident matrix memory mul primes read rn rows utils write zsums
+ZSYMSQ_MODULES=	elements endian header matrix memory powers primes read rows utils write zsymsq
 ZTE_MODULES=	elements endian header matrix memory primes read rows te utils write zte
 ZTR_MODULES=	elements endian header matrix memory primes read tr tra utils write
 ZTRACE_MODULES=	elements endian header memory primes read rows utils ztrace
@@ -169,12 +172,14 @@ MODULES=	$(DTOU_MODULES) \
 	$(ZSB_MODULES) \
 	$(ZSEL_MODULES) \
 	$(ZSID_MODULES) \
+	$(ZSKCU_MODULES) \
 	$(ZSKSQ_MODULES) \
 	$(ZSL_MODULES) \
 	$(ZSP_MODULES) \
 	$(ZSPAN_MODULES) \
 	$(ZSS_MODULES) \
 	$(ZSUMS_MODULES) \
+	$(ZSYMSQ_MODULES) \
 	$(ZTE_MODULES) \
 	$(ZTR_MODULES) \
 	$(ZTRACE_MODULES) \
@@ -351,6 +356,9 @@ include targets.txt
 TARGET:=ZSID
 include targets.txt
 
+TARGET:=ZSKCU
+include targets.txt
+
 TARGET:=ZSKSQ
 include targets.txt
 
@@ -367,6 +375,9 @@ TARGET:=ZSS
 include targets.txt
 
 TARGET:=ZSUMS
+include targets.txt
+
+TARGET:=ZSYMSQ
 include targets.txt
 
 TARGET:=ZTE

@@ -78,3 +78,4 @@
 20020202 - add algebraic conjugate
 20020203 - add skew square
 20020205 - add split_with_vector
+20020212 - add sym square and skew cube
