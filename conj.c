@@ -1,5 +1,5 @@
 /*
- * $Id: conj.c,v 1.6 2002/06/28 08:39:16 jon Exp $
+ * $Id: conj.c,v 1.7 2002/06/30 21:33:14 jon Exp $
  *
  * Function to compute algebraic conjugate of a matrix, from file
  *
@@ -33,7 +33,7 @@ int conjugate(const char *m1, const char *m2, unsigned int power, const char *na
 {
   FILE *inp = NULL;
   FILE *outp = NULL;
-  unsigned int prime_power, prime, index, nob, noc, nor, len;
+  unsigned int prime_power, prime, index, nob, noc, nor, len, mask, elts_per_word;
   unsigned int i;
   const header *h;
   unsigned int *row;
@@ -70,6 +70,7 @@ int conjugate(const char *m1, const char *m2, unsigned int power, const char *na
     return 0;
   }
   header_free(h);
+  mask = get_mask_and_elts(nob, &elts_per_word);
   if (memory_rows(len, 1000) < 1) {
     fprintf(stderr, "%s: cannot allocate row for %s, %s, terminating\n", name, m1, m2);
     return cleanup(inp, outp);
@@ -91,7 +92,7 @@ int conjugate(const char *m1, const char *m2, unsigned int power, const char *na
     if ( 1 != power) {
       unsigned int j;
       for (j = 0; j < noc; j++) {
-        unsigned int elt = get_element_from_row(nob, j, row);
+        unsigned int elt = get_element_from_row_with_params(nob, j, mask, elts_per_word, row);
         elt = (*ops.power)(elt, power);
         put_element_to_row(nob, j, row, elt);
       }

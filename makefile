@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.61 2002/06/27 08:28:22 jon Exp $
+# $Id: makefile,v 1.62 2002/06/30 21:33:14 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -172,7 +172,7 @@ ZSPAN_MODULES=	elements endian header matrix memory primes read rows utils write
 ZSPF_MODULES=	clean clean_file elements endian grease header maps matrix memory mul primes read rows spf system utils write zspf
 ZSS_MODULES=	elements endian header memory primes read rows ss ss_map utils write zss
 ZSUMS_MODULES=	add clean elements endian grease header ident map_or_row maps matrix memory mul primes read rn rows sums utils write zsums
-ZSUMSF_MODULES=	add clean elements endian grease header ident map_or_row maps matrix memory mul primes read rn rows sumsf utils write zsumsf
+ZSUMSF_MODULES=	add clean elements endian grease header ident map_or_row maps matrix memory mul primes read rnf rows sumsf system utils write zsumsf
 ZSYMSQ_MODULES=	dets elements endian header matrix memory powers primes read rows utils write zsymsq
 ZTE_MODULES=	elements endian header map_or_row maps matrix memory primes read rows te utils write zte
 ZTMU_MODULES=	elements endian grease header maps matrix memory mul mv primes read rows tmul tra utils write ztmu

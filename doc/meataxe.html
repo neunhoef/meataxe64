@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.2 2002/06/25 10:30:12 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.3 2002/06/30 21:33:15 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -270,6 +270,7 @@ Output on stderr is error diagnostic information.
 <li><a href="#srn">srn</a></li>
 <li><a href="#stop">stop</a></li>
 <li><a href="#zad">zad</a></li>
+<li><a href="#zah">zah</a></li>
 <li><a href="#zbase">zbase</a></li>
 <li><a href="#zchar">zchar</a></li>
 <li><a href="#zcheck">zcheck</a></li>
@@ -918,6 +919,45 @@ dimension. Either matrix may be replaced by a permutation subject to
 the row and column constraints. It is not possible to add two
 permutations (however, multiplying one of them by an identity matrix
 will deliver a matrix, which can then be added to the other).
+</li>
+<li>
+<h3><a name="zah">zah</a></h3>
+Purpose: Add header
+<table>
+<thead>
+<tr>
+<td valign=top>Parameters:</td>
+</tr>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Input header</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Input matrix</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>Output matrix</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>None</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+</table>
+Commentary: This is a recovery program, intended for recovering
+intermediate files produced by the file based programs such as <a
+href="#zmspf">zmspf</a> in the case that they might be useful. Aheader
+in the correct format for <a href="#zcv">zcv</a> should be provided in
+parameter one descriing the contents of parameter 2. Some rudimentary
+consistency checks are performed, but in the end, caveat emptor
+applies. For use by experts only.
 </li>
 <li>
 <h3><a name="zbase">zbase</a></h3>
@@ -4189,10 +4229,7 @@ Purpose: Form the dual of a generator of a representation
 <td valign=top>2</td><td valign=top>Output</td>
 </tr>
 <tr>
-<td valign=top>3</td><td valign=top>Transpose of input</td>
-</tr>
-<tr>
-<td valign=top>4</td><td valign=top>Optional memory size (default 200k)</td>
+<td valign=top>3</td><td valign=top>Optional memory size (default 200k)</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>None</td>
@@ -4283,13 +4320,10 @@ multiplication to perform the inversion
 <td valign=top>2</td><td valign=top>Output</td>
 </tr>
 <tr>
-<td valign=top>3</td><td valign=top>Transpose of input</td>
+<td valign=top>3</td><td valign=top>Element order</td>
 </tr>
 <tr>
-<td valign=top>4</td><td valign=top>Element order</td>
-</tr>
-<tr>
-<td valign=top>5</td><td valign=top>Optional memory size (default 200k)</td>
+<td valign=top>4</td><td valign=top>Optional memory size (default 200k)</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>None</td>

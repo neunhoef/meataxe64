@@ -1,5 +1,5 @@
 /*
- * $Id: project.c,v 1.5 2002/06/28 08:39:16 jon Exp $
+ * $Id: project.c,v 1.6 2002/06/30 21:33:15 jon Exp $
  *
  * Function to project into quotient space representation
  *
@@ -40,7 +40,7 @@ void project(const char *range, const char *in,
 {
   FILE *inp_r = NULL, *inp_g = NULL, *outp = NULL;
   const header *h_in_r, *h_in_g, *h_out;
-  unsigned int prime, prime_g, nob, noc_r, nor_r, nor_g, nor_o, noc_o, len, len_o, max_rows, d, i, j, k, elt, step;
+  unsigned int prime, prime_g, nob, noc_r, nor_r, nor_g, nor_o, noc_o, len, len_o, max_rows, d, i, j, k, elt, step, mask, elts_per_word;
   unsigned int **rows1, **rows2;
   int *map_r;
   unsigned int *map_o;
@@ -157,6 +157,7 @@ void project(const char *range, const char *in,
     cleanup(inp_r, inp_g, outp);
     exit(1);
   }
+  mask = get_mask_and_elts(nob, &elts_per_word);
   j = 0; /* Counting the rows from g */
   while (j < nor_o) {
     /* Read some rows from inp_g into rows2 */
@@ -194,7 +195,7 @@ void project(const char *range, const char *in,
     for (d = 0; d < stride_j; d++) {
       row_init(row_o, len_o);
       for (k = 0; k < noc_o; k++) {
-        elt = get_element_from_row(nob, map_o[k], rows2[d]);
+        elt = get_element_from_row_with_params(nob, map_o[k], mask, elts_per_word, rows2[d]);
         put_element_to_row(nob, k, row_o, elt);
       }
       errno = 0;

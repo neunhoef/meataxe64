@@ -1,5 +1,5 @@
 /*
- * $Id: mv.c,v 1.1 2002/06/25 10:30:12 jon Exp $
+ * $Id: mv.c,v 1.2 2002/06/30 21:33:14 jon Exp $
  *
  * Function to convert rows to matrices and vv
  * Used for multiplication in tensor space
@@ -20,12 +20,13 @@ void v_to_m(unsigned int *row_in, unsigned int **rows_out,
             unsigned int prime)
 {
   const header *h;
-  unsigned int i, j, len, nob;
+  unsigned int i, j, len, nob, mask, elts_per_word;
   assert(NULL != row_in);
   assert(NULL != rows_out);
   assert(is_a_prime_power(prime));
   /* Form a header describing the output matrix */
   nob = bits_of(prime);
+  mask = get_mask_and_elts(nob, &elts_per_word);
   /* Create a header for rows with nor2 columns, and nor1 rows */
   h = header_create(prime, nob, digits_of(prime), nor2, nor1);
   len = header_get_len(h);
@@ -33,7 +34,7 @@ void v_to_m(unsigned int *row_in, unsigned int **rows_out,
     row_init(rows_out[i], len);
     for (j = 0; j < nor2; j++) {
       unsigned int k = i * nor2;
-      unsigned int elt = get_element_from_row(nob, k + j, row_in);
+      unsigned int elt = get_element_from_row_with_params(nob, k + j, mask, elts_per_word, row_in);
       if (elt) {
         put_element_to_row(nob, j, rows_out[i], elt);
       }
@@ -47,19 +48,20 @@ extern void m_to_v(unsigned int **rows_in, unsigned int *row_out,
                    unsigned int prime)
 {
   const header *h;
-  unsigned int i, j, len, nob;
+  unsigned int i, j, len, nob, mask, elts_per_word;
   assert(NULL != rows_in);
   assert(NULL != row_out);
   assert(is_a_prime_power(prime));
   /* Form a header describing the output matrix */
   nob = bits_of(prime);
+  mask = get_mask_and_elts(nob, &elts_per_word);
   h = header_create(prime, nob, digits_of(prime), nor * noc, 1);
   len = header_get_len(h);
   row_init(row_out, len);
   for (i = 0; i < nor; i++) {
     for (j = 0; j < noc; j++) {
       unsigned int k = i * noc;
-      unsigned int elt = get_element_from_row(nob, j, rows_in[i]);
+      unsigned int elt = get_element_from_row_with_params(nob, j, mask, elts_per_word, rows_in[i]);
       if (elt) {
         put_element_to_row(nob, k + j, row_out, elt);
       }

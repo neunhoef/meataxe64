@@ -1,5 +1,5 @@
 /*
- * $Id: zexport.c,v 1.7 2002/06/28 08:39:16 jon Exp $
+ * $Id: zexport.c,v 1.8 2002/06/30 21:33:15 jon Exp $
  *
  * Export matrix to old system
  *
@@ -30,7 +30,7 @@ int main(int argc, const char * const argv[])
   const char *in;
   const char *out;
   const header *h_in;
-  unsigned int prime, nob, noc, nor, eperb, i, j, *in_row, len, blen;
+  unsigned int prime, nob, noc, nor, eperb, i, j, *in_row, len, blen, mask, elts_per_word;
   unsigned int *out_row;
   FILE *f_in;
   FILE *f_out;
@@ -68,6 +68,7 @@ int main(int argc, const char * const argv[])
   if (0 == open_and_write_binary_header(&f_out, h_in, out, name)) {
     exit(1);
   }
+  mask = get_mask_and_elts(nob, &elts_per_word);
   for (i = 0; i < nor; i++) {
     errno = 0;
     if (0 == endian_read_row(f_in, in_row, len)) {
@@ -79,7 +80,7 @@ int main(int argc, const char * const argv[])
     }
     row_init(out_row, (blen + sizeof(unsigned int) - 1) / (sizeof(unsigned int)));
     for (j = 0; j < noc; j++) {
-      unsigned int elt = get_element_from_row(nob, j, in_row);
+      unsigned int elt = get_element_from_row_with_params(nob, j, mask, elts_per_word, in_row);
       put_element_to_char_row(eperb, prime, j, (char *)out_row, elt);
     }
     if (blen != fwrite(out_row, 1, blen, f_out)) {

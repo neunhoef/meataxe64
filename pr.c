@@ -1,5 +1,5 @@
 /*
- * $Id: pr.c,v 1.12 2002/06/28 08:39:16 jon Exp $
+ * $Id: pr.c,v 1.13 2002/06/30 21:33:15 jon Exp $
  *
  * Print a matrix
  *
@@ -36,7 +36,7 @@ int main(int argc, const char * const argv[])
   const char *in;
   FILE *inp;
   unsigned int prime, nod, noc, nor, nob, len;
-  unsigned int i, j;
+  unsigned int i, j, mask, elts_per_word;
   const header *h;
   unsigned int *row;
   unsigned int memory = MEM_SIZE;
@@ -82,6 +82,7 @@ int main(int argc, const char * const argv[])
       printf("%12d\n", j + 1);
     }
   } else {
+    mask = get_mask_and_elts(nob, &elts_per_word);
     if (memory_rows(len, 1000) < 1) {
       fprintf(stderr, "%s: cannot allocate row for %s, terminating\n", name, in);
       fclose(inp);
@@ -109,7 +110,7 @@ int main(int argc, const char * const argv[])
         char buf[12];
         unsigned int k;
         m = j; /* To survive the loop */
-        e = get_element_from_row(nob, j, row);
+        e = get_element_from_row_with_params(nob, j, mask, elts_per_word, row);
         if (0 == (*prime_operations.decimal_rep)(&e)) {
           fprintf(stderr, "%s: cannot convert %d with prime %d from %s, terminating\n", name, e, prime, in);
           fclose(inp);

@@ -1,5 +1,5 @@
 /*
- * $Id: tra.c,v 1.12 2002/06/28 08:39:16 jon Exp $
+ * $Id: tra.c,v 1.13 2002/06/30 21:33:15 jon Exp $
  *
  * Function to transpose a matrix
  *
@@ -24,16 +24,17 @@ void tra_in_store(unsigned int **rows1, unsigned int **rows2,
                   unsigned int nor, unsigned int noc,
                   unsigned int nob, unsigned int col_len)
 {
-  unsigned int i, j;
+  unsigned int i, j, mask, elts_per_word;
   assert(NULL != rows1);
   assert(NULL != rows2);
   for (i = 0; i < noc; i++) {
     assert(NULL != rows2[i]);
     row_init(rows2[i], col_len);
   }
+  mask = get_mask_and_elts(nob, &elts_per_word);
   for (i = 0; i < nor; i++) {
     for (j = 0; j < noc; j++) {
-      unsigned int elt = get_element_from_row(nob, j, rows1[i]);
+      unsigned int elt = get_element_from_row_with_params(nob, j, mask, elts_per_word, rows1[i]);
       if (elt) {
         put_element_to_row(nob, i, rows2[j], elt);
       }
@@ -46,7 +47,7 @@ int tra(const char *m1, const char *m2, const char *name)
   FILE *input;
   FILE *output;
   unsigned int nob, noc, nor, prime, len1, len2, max, total, t1;
-  unsigned int i, j, k, l;
+  unsigned int i, j, k, l, mask, elts_per_word;
   const header *h1, *h2;
   unsigned int *row1;
   unsigned int **rows;
@@ -95,6 +96,7 @@ int tra(const char *m1, const char *m2, const char *name)
   for (i = 0; i < t1; i++) {
     rows[i] = memory_pointer_offset(0, i + 1, max);
   }
+  mask = get_mask_and_elts(nob, &elts_per_word);
   for (i = 0; i < noc; i += t1) {
     /* Number of output rows at once */
     k = (i + t1 > noc) ? noc - i : t1;
@@ -119,7 +121,7 @@ int tra(const char *m1, const char *m2, const char *name)
       /* Now write into k output rows starting at column j */
       for (l = i; l < i + k; l++) {
         /* Write into row l of output at column j */
-        unsigned int elt = get_element_from_row(nob, l, row1);
+        unsigned int elt = get_element_from_row_with_params(nob, l, mask, elts_per_word, row1);
         if (0 != elt) {
           put_element_to_row(nob, j, rows[l - i], elt);
         }

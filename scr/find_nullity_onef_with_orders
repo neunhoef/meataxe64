@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: find_nullity_onef_with_orders,v 1.2 2002/06/25 10:30:12 jon Exp $
+# $Id: find_nullity_onef_with_orders,v 1.3 2002/06/30 21:33:15 jon Exp $
 #
 # Script to find an element of nullity one in two generators, using intermediate files
 #
@@ -13,7 +13,7 @@
 # $6: intermediate file directory
 # $7: initial memory (optional)
 #
-usage="$0: usage: $0 <a> <b> <out> <order a> <order b> [<memory>]"
+usage="$0: usage: $0 <a> <b> <out> <order a> <order b> <tmp dir> [<memory>]"
 if [ $# -ne 6 -a $# -ne 7 ]; then
   echo $usage
   exit 1;

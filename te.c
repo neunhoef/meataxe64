@@ -1,5 +1,5 @@
 /*
- * $Id: te.c,v 1.7 2002/06/28 08:39:16 jon Exp $
+ * $Id: te.c,v 1.8 2002/06/30 21:33:15 jon Exp $
  *
  * Function to tensor two matrices to give a third
  *
@@ -38,7 +38,7 @@ int tensor(const char *m1, const char *m2, const char *m3, const char *name)
   FILE *inp1 = NULL;
   FILE *inp2 = NULL;
   FILE *outp = NULL;
-  unsigned int prime, nob, nod, noc1, nor1, len1, noc2, nor2, len2, noc3, nor3, len3;
+  unsigned int prime, nob, nod, noc1, nor1, len1, noc2, nor2, len2, noc3, nor3, len3, mask, elts_per_word;
   const header *h1 = NULL, *h2 = NULL, *h3 = NULL;
   unsigned int i, j, k, l;
   unsigned int **rows1, **rows2, *row_out, *row_copy;
@@ -110,6 +110,7 @@ int tensor(const char *m1, const char *m2, const char *m3, const char *name)
     nob = (is_perm1) ? header_get_nob(h2) : header_get_nob(h1);
     nod = (is_perm1) ? header_get_nod(h2) : header_get_nod(h1);
     prime = (is_perm1) ? header_get_prime(h2) : header_get_prime(h1);
+    mask = get_mask_and_elts(nob, &elts_per_word);
     if (is_perm1) {
       const header *h = header_create(prime, nob, nod, noc1, nor1);
       len1 = header_get_len(h);
@@ -174,7 +175,7 @@ int tensor(const char *m1, const char *m2, const char *m3, const char *name)
         row_init(row_out, len3);
         for (k = 0; k < noc1; k++) {
           /* Along the columns of m1 */
-          unsigned int elt = get_element_from_row(nob, k, rows1[i]);
+          unsigned int elt = get_element_from_row_with_params(nob, k, mask, elts_per_word, rows1[i]);
           if ( 0 != elt) {
             unsigned int *row = rows2[j];
             if (1 != elt) {
@@ -182,7 +183,7 @@ int tensor(const char *m1, const char *m2, const char *m3, const char *name)
               row = row_copy;
             }
             for (l = 0; l < noc2; l++) {
-              elt = get_element_from_row(nob, l, row);
+              elt = get_element_from_row_with_params(nob, l, mask, elts_per_word, row);
               put_element_to_row(nob, offset + l, row_out, elt);
             }
           }

@@ -1,5 +1,5 @@
 /*
- * $Id: dets.c,v 1.3 2002/06/25 10:30:12 jon Exp $
+ * $Id: dets.c,v 1.4 2002/06/30 21:33:14 jon Exp $
  *
  * Functions to compute determinants
  *
@@ -102,12 +102,13 @@ unsigned int det2_ptr(unsigned int **rows, unsigned int nob, prime_ops prime_ope
                   unsigned int row_i1, unsigned int col_i1,
                   unsigned int row_i2, unsigned int col_i2)
 {
-  unsigned int e11, e21, e12, e22;
+  unsigned int e11, e21, e12, e22, mask, elts_per_word;
   assert(NULL != rows);
-  e11 = get_element_from_row(nob, col_i1, rows[row_i1]);
-  e22 = get_element_from_row(nob, col_i2, rows[row_i2]);
-  e21 = get_element_from_row(nob, col_i1, rows[row_i2]);
-  e12 = get_element_from_row(nob, col_i2, rows[row_i1]);
+  mask = get_mask_and_elts(nob, &elts_per_word);
+  e11 = get_element_from_row_with_params(nob, col_i1, mask, elts_per_word, rows[row_i1]);
+  e22 = get_element_from_row_with_params(nob, col_i2, mask, elts_per_word, rows[row_i2]);
+  e21 = get_element_from_row_with_params(nob, col_i1, mask, elts_per_word, rows[row_i2]);
+  e12 = get_element_from_row_with_params(nob, col_i2, mask, elts_per_word, rows[row_i1]);
   return det2(prime_operations, e11, e12, e21, e22);
 }
 
@@ -131,17 +132,18 @@ unsigned int det3_ptr(unsigned int **rows, unsigned int nob, prime_ops prime_ope
                       unsigned int row_i2, unsigned int col_i2,
                       unsigned int row_i3, unsigned int col_i3)
 {
-  unsigned int e11, e12, e13, e21, e22, e23, e31, e32, e33;
+  unsigned int e11, e12, e13, e21, e22, e23, e31, e32, e33, mask, elts_per_word;
   assert(NULL != rows);
-  e11 = get_element_from_row(nob, col_i1, rows[row_i1]);
-  e12 = get_element_from_row(nob, col_i2, rows[row_i1]);
-  e13 = get_element_from_row(nob, col_i3, rows[row_i1]);
-  e21 = get_element_from_row(nob, col_i1, rows[row_i2]);
-  e22 = get_element_from_row(nob, col_i2, rows[row_i2]);
-  e23 = get_element_from_row(nob, col_i3, rows[row_i2]);
-  e31 = get_element_from_row(nob, col_i1, rows[row_i3]);
-  e32 = get_element_from_row(nob, col_i2, rows[row_i3]);
-  e33 = get_element_from_row(nob, col_i3, rows[row_i3]);
+  mask = get_mask_and_elts(nob, &elts_per_word);
+  e11 = get_element_from_row_with_params(nob, col_i1, mask, elts_per_word, rows[row_i1]);
+  e12 = get_element_from_row_with_params(nob, col_i2, mask, elts_per_word, rows[row_i1]);
+  e13 = get_element_from_row_with_params(nob, col_i3, mask, elts_per_word, rows[row_i1]);
+  e21 = get_element_from_row_with_params(nob, col_i1, mask, elts_per_word, rows[row_i2]);
+  e22 = get_element_from_row_with_params(nob, col_i2, mask, elts_per_word, rows[row_i2]);
+  e23 = get_element_from_row_with_params(nob, col_i3, mask, elts_per_word, rows[row_i2]);
+  e31 = get_element_from_row_with_params(nob, col_i1, mask, elts_per_word, rows[row_i3]);
+  e32 = get_element_from_row_with_params(nob, col_i2, mask, elts_per_word, rows[row_i3]);
+  e33 = get_element_from_row_with_params(nob, col_i3, mask, elts_per_word, rows[row_i3]);
   return det3(prime_operations, e11, e12, e13, e21, e22, e23, e31, e32, e33);
 }
 
@@ -185,24 +187,25 @@ unsigned int det4_ptr(unsigned int **rows, unsigned int nob, prime_ops prime_ope
                       unsigned int row_i3, unsigned int col_i3,
                       unsigned int row_i4, unsigned int col_i4)
 {
-  unsigned int e11, e12, e13, e14, e21, e22, e23, e24, e31, e32, e33, e34, e41, e42, e43, e44;
+  unsigned int e11, e12, e13, e14, e21, e22, e23, e24, e31, e32, e33, e34, e41, e42, e43, e44, mask, elts_per_word;
   assert(NULL != rows);
-  e11 = get_element_from_row(nob, col_i1, rows[row_i1]);
-  e12 = get_element_from_row(nob, col_i2, rows[row_i1]);
-  e13 = get_element_from_row(nob, col_i3, rows[row_i1]);
-  e14 = get_element_from_row(nob, col_i4, rows[row_i1]);
-  e21 = get_element_from_row(nob, col_i1, rows[row_i2]);
-  e22 = get_element_from_row(nob, col_i2, rows[row_i2]);
-  e23 = get_element_from_row(nob, col_i3, rows[row_i2]);
-  e24 = get_element_from_row(nob, col_i4, rows[row_i2]);
-  e31 = get_element_from_row(nob, col_i1, rows[row_i3]);
-  e32 = get_element_from_row(nob, col_i2, rows[row_i3]);
-  e33 = get_element_from_row(nob, col_i3, rows[row_i3]);
-  e34 = get_element_from_row(nob, col_i4, rows[row_i3]);
-  e41 = get_element_from_row(nob, col_i1, rows[row_i4]);
-  e42 = get_element_from_row(nob, col_i2, rows[row_i4]);
-  e43 = get_element_from_row(nob, col_i3, rows[row_i4]);
-  e44 = get_element_from_row(nob, col_i4, rows[row_i4]);
+  mask = get_mask_and_elts(nob, &elts_per_word);
+  e11 = get_element_from_row_with_params(nob, col_i1, mask, elts_per_word, rows[row_i1]);
+  e12 = get_element_from_row_with_params(nob, col_i2, mask, elts_per_word, rows[row_i1]);
+  e13 = get_element_from_row_with_params(nob, col_i3, mask, elts_per_word, rows[row_i1]);
+  e14 = get_element_from_row_with_params(nob, col_i4, mask, elts_per_word, rows[row_i1]);
+  e21 = get_element_from_row_with_params(nob, col_i1, mask, elts_per_word, rows[row_i2]);
+  e22 = get_element_from_row_with_params(nob, col_i2, mask, elts_per_word, rows[row_i2]);
+  e23 = get_element_from_row_with_params(nob, col_i3, mask, elts_per_word, rows[row_i2]);
+  e24 = get_element_from_row_with_params(nob, col_i4, mask, elts_per_word, rows[row_i2]);
+  e31 = get_element_from_row_with_params(nob, col_i1, mask, elts_per_word, rows[row_i3]);
+  e32 = get_element_from_row_with_params(nob, col_i2, mask, elts_per_word, rows[row_i3]);
+  e33 = get_element_from_row_with_params(nob, col_i3, mask, elts_per_word, rows[row_i3]);
+  e34 = get_element_from_row_with_params(nob, col_i4, mask, elts_per_word, rows[row_i3]);
+  e41 = get_element_from_row_with_params(nob, col_i1, mask, elts_per_word, rows[row_i4]);
+  e42 = get_element_from_row_with_params(nob, col_i2, mask, elts_per_word, rows[row_i4]);
+  e43 = get_element_from_row_with_params(nob, col_i3, mask, elts_per_word, rows[row_i4]);
+  e44 = get_element_from_row_with_params(nob, col_i4, mask, elts_per_word, rows[row_i4]);
   return det4(prime_operations, e11, e12, e13, e14, e21, e22, e23, e24, e31, e32, e33, e34, e41, e42, e43, e44);
 }
 
@@ -259,33 +262,34 @@ unsigned int det5_ptr(unsigned int **rows, unsigned int nob, prime_ops prime_ope
                       unsigned int row_i4, unsigned int col_i4,
                       unsigned int row_i5, unsigned int col_i5)
 {
-  unsigned int e11, e12, e13, e14, e15, e21, e22, e23, e24, e25, e31, e32, e33, e34, e35, e41, e42, e43, e44, e45, e51, e52, e53, e54, e55;
+  unsigned int e11, e12, e13, e14, e15, e21, e22, e23, e24, e25, e31, e32, e33, e34, e35, e41, e42, e43, e44, e45, e51, e52, e53, e54, e55, mask, elts_per_word;
   assert(NULL != rows);
-  e11 = get_element_from_row(nob, col_i1, rows[row_i1]);
-  e12 = get_element_from_row(nob, col_i2, rows[row_i1]);
-  e13 = get_element_from_row(nob, col_i3, rows[row_i1]);
-  e14 = get_element_from_row(nob, col_i4, rows[row_i1]);
-  e15 = get_element_from_row(nob, col_i5, rows[row_i1]);
-  e21 = get_element_from_row(nob, col_i1, rows[row_i2]);
-  e22 = get_element_from_row(nob, col_i2, rows[row_i2]);
-  e23 = get_element_from_row(nob, col_i3, rows[row_i2]);
-  e24 = get_element_from_row(nob, col_i4, rows[row_i2]);
-  e25 = get_element_from_row(nob, col_i5, rows[row_i2]);
-  e31 = get_element_from_row(nob, col_i1, rows[row_i3]);
-  e32 = get_element_from_row(nob, col_i2, rows[row_i3]);
-  e33 = get_element_from_row(nob, col_i3, rows[row_i3]);
-  e34 = get_element_from_row(nob, col_i4, rows[row_i3]);
-  e35 = get_element_from_row(nob, col_i5, rows[row_i3]);
-  e41 = get_element_from_row(nob, col_i1, rows[row_i4]);
-  e42 = get_element_from_row(nob, col_i2, rows[row_i4]);
-  e43 = get_element_from_row(nob, col_i3, rows[row_i4]);
-  e44 = get_element_from_row(nob, col_i4, rows[row_i4]);
-  e45 = get_element_from_row(nob, col_i5, rows[row_i4]);
-  e51 = get_element_from_row(nob, col_i1, rows[row_i5]);
-  e52 = get_element_from_row(nob, col_i2, rows[row_i5]);
-  e53 = get_element_from_row(nob, col_i3, rows[row_i5]);
-  e54 = get_element_from_row(nob, col_i4, rows[row_i5]);
-  e55 = get_element_from_row(nob, col_i5, rows[row_i5]);
+  mask = get_mask_and_elts(nob, &elts_per_word);
+  e11 = get_element_from_row_with_params(nob, col_i1, mask, elts_per_word, rows[row_i1]);
+  e12 = get_element_from_row_with_params(nob, col_i2, mask, elts_per_word, rows[row_i1]);
+  e13 = get_element_from_row_with_params(nob, col_i3, mask, elts_per_word, rows[row_i1]);
+  e14 = get_element_from_row_with_params(nob, col_i4, mask, elts_per_word, rows[row_i1]);
+  e15 = get_element_from_row_with_params(nob, col_i5, mask, elts_per_word, rows[row_i1]);
+  e21 = get_element_from_row_with_params(nob, col_i1, mask, elts_per_word, rows[row_i2]);
+  e22 = get_element_from_row_with_params(nob, col_i2, mask, elts_per_word, rows[row_i2]);
+  e23 = get_element_from_row_with_params(nob, col_i3, mask, elts_per_word, rows[row_i2]);
+  e24 = get_element_from_row_with_params(nob, col_i4, mask, elts_per_word, rows[row_i2]);
+  e25 = get_element_from_row_with_params(nob, col_i5, mask, elts_per_word, rows[row_i2]);
+  e31 = get_element_from_row_with_params(nob, col_i1, mask, elts_per_word, rows[row_i3]);
+  e32 = get_element_from_row_with_params(nob, col_i2, mask, elts_per_word, rows[row_i3]);
+  e33 = get_element_from_row_with_params(nob, col_i3, mask, elts_per_word, rows[row_i3]);
+  e34 = get_element_from_row_with_params(nob, col_i4, mask, elts_per_word, rows[row_i3]);
+  e35 = get_element_from_row_with_params(nob, col_i5, mask, elts_per_word, rows[row_i3]);
+  e41 = get_element_from_row_with_params(nob, col_i1, mask, elts_per_word, rows[row_i4]);
+  e42 = get_element_from_row_with_params(nob, col_i2, mask, elts_per_word, rows[row_i4]);
+  e43 = get_element_from_row_with_params(nob, col_i3, mask, elts_per_word, rows[row_i4]);
+  e44 = get_element_from_row_with_params(nob, col_i4, mask, elts_per_word, rows[row_i4]);
+  e45 = get_element_from_row_with_params(nob, col_i5, mask, elts_per_word, rows[row_i4]);
+  e51 = get_element_from_row_with_params(nob, col_i1, mask, elts_per_word, rows[row_i5]);
+  e52 = get_element_from_row_with_params(nob, col_i2, mask, elts_per_word, rows[row_i5]);
+  e53 = get_element_from_row_with_params(nob, col_i3, mask, elts_per_word, rows[row_i5]);
+  e54 = get_element_from_row_with_params(nob, col_i4, mask, elts_per_word, rows[row_i5]);
+  e55 = get_element_from_row_with_params(nob, col_i5, mask, elts_per_word, rows[row_i5]);
   return det5(prime_operations, e11, e12, e13, e14, e15,
               e21, e22, e23, e24, e25,
               e31, e32, e33, e34, e35,
@@ -362,44 +366,45 @@ unsigned int det6_ptr(unsigned int **rows, unsigned int nob, prime_ops prime_ope
                       unsigned int row_i5, unsigned int col_i5,
                       unsigned int row_i6, unsigned int col_i6)
 {
-  unsigned int e11, e12, e13, e14, e15, e16, e21, e22, e23, e24, e25, e26, e31, e32, e33, e34, e35, e36, e41, e42, e43, e44, e45, e46, e51, e52, e53, e54, e55, e56, e61, e62, e63, e64, e65, e66;
+  unsigned int e11, e12, e13, e14, e15, e16, e21, e22, e23, e24, e25, e26, e31, e32, e33, e34, e35, e36, e41, e42, e43, e44, e45, e46, e51, e52, e53, e54, e55, e56, e61, e62, e63, e64, e65, e66, mask, elts_per_word;
   assert(NULL != rows);
-  e11 = get_element_from_row(nob, col_i1, rows[row_i1]);
-  e12 = get_element_from_row(nob, col_i2, rows[row_i1]);
-  e13 = get_element_from_row(nob, col_i3, rows[row_i1]);
-  e14 = get_element_from_row(nob, col_i4, rows[row_i1]);
-  e15 = get_element_from_row(nob, col_i5, rows[row_i1]);
-  e16 = get_element_from_row(nob, col_i6, rows[row_i1]);
-  e21 = get_element_from_row(nob, col_i1, rows[row_i2]);
-  e22 = get_element_from_row(nob, col_i2, rows[row_i2]);
-  e23 = get_element_from_row(nob, col_i3, rows[row_i2]);
-  e24 = get_element_from_row(nob, col_i4, rows[row_i2]);
-  e25 = get_element_from_row(nob, col_i5, rows[row_i2]);
-  e26 = get_element_from_row(nob, col_i6, rows[row_i2]);
-  e31 = get_element_from_row(nob, col_i1, rows[row_i3]);
-  e32 = get_element_from_row(nob, col_i2, rows[row_i3]);
-  e33 = get_element_from_row(nob, col_i3, rows[row_i3]);
-  e34 = get_element_from_row(nob, col_i4, rows[row_i3]);
-  e35 = get_element_from_row(nob, col_i5, rows[row_i3]);
-  e36 = get_element_from_row(nob, col_i6, rows[row_i3]);
-  e41 = get_element_from_row(nob, col_i1, rows[row_i4]);
-  e42 = get_element_from_row(nob, col_i2, rows[row_i4]);
-  e43 = get_element_from_row(nob, col_i3, rows[row_i4]);
-  e44 = get_element_from_row(nob, col_i4, rows[row_i4]);
-  e45 = get_element_from_row(nob, col_i5, rows[row_i4]);
-  e46 = get_element_from_row(nob, col_i6, rows[row_i4]);
-  e51 = get_element_from_row(nob, col_i1, rows[row_i5]);
-  e52 = get_element_from_row(nob, col_i2, rows[row_i5]);
-  e53 = get_element_from_row(nob, col_i3, rows[row_i5]);
-  e54 = get_element_from_row(nob, col_i4, rows[row_i5]);
-  e55 = get_element_from_row(nob, col_i5, rows[row_i5]);
-  e56 = get_element_from_row(nob, col_i6, rows[row_i5]);
-  e61 = get_element_from_row(nob, col_i1, rows[row_i6]);
-  e62 = get_element_from_row(nob, col_i2, rows[row_i6]);
-  e63 = get_element_from_row(nob, col_i3, rows[row_i6]);
-  e64 = get_element_from_row(nob, col_i4, rows[row_i6]);
-  e65 = get_element_from_row(nob, col_i5, rows[row_i6]);
-  e66 = get_element_from_row(nob, col_i6, rows[row_i6]);
+  mask = get_mask_and_elts(nob, &elts_per_word);
+  e11 = get_element_from_row_with_params(nob, col_i1, mask, elts_per_word, rows[row_i1]);
+  e12 = get_element_from_row_with_params(nob, col_i2, mask, elts_per_word, rows[row_i1]);
+  e13 = get_element_from_row_with_params(nob, col_i3, mask, elts_per_word, rows[row_i1]);
+  e14 = get_element_from_row_with_params(nob, col_i4, mask, elts_per_word, rows[row_i1]);
+  e15 = get_element_from_row_with_params(nob, col_i5, mask, elts_per_word, rows[row_i1]);
+  e16 = get_element_from_row_with_params(nob, col_i6, mask, elts_per_word, rows[row_i1]);
+  e21 = get_element_from_row_with_params(nob, col_i1, mask, elts_per_word, rows[row_i2]);
+  e22 = get_element_from_row_with_params(nob, col_i2, mask, elts_per_word, rows[row_i2]);
+  e23 = get_element_from_row_with_params(nob, col_i3, mask, elts_per_word, rows[row_i2]);
+  e24 = get_element_from_row_with_params(nob, col_i4, mask, elts_per_word, rows[row_i2]);
+  e25 = get_element_from_row_with_params(nob, col_i5, mask, elts_per_word, rows[row_i2]);
+  e26 = get_element_from_row_with_params(nob, col_i6, mask, elts_per_word, rows[row_i2]);
+  e31 = get_element_from_row_with_params(nob, col_i1, mask, elts_per_word, rows[row_i3]);
+  e32 = get_element_from_row_with_params(nob, col_i2, mask, elts_per_word, rows[row_i3]);
+  e33 = get_element_from_row_with_params(nob, col_i3, mask, elts_per_word, rows[row_i3]);
+  e34 = get_element_from_row_with_params(nob, col_i4, mask, elts_per_word, rows[row_i3]);
+  e35 = get_element_from_row_with_params(nob, col_i5, mask, elts_per_word, rows[row_i3]);
+  e36 = get_element_from_row_with_params(nob, col_i6, mask, elts_per_word, rows[row_i3]);
+  e41 = get_element_from_row_with_params(nob, col_i1, mask, elts_per_word, rows[row_i4]);
+  e42 = get_element_from_row_with_params(nob, col_i2, mask, elts_per_word, rows[row_i4]);
+  e43 = get_element_from_row_with_params(nob, col_i3, mask, elts_per_word, rows[row_i4]);
+  e44 = get_element_from_row_with_params(nob, col_i4, mask, elts_per_word, rows[row_i4]);
+  e45 = get_element_from_row_with_params(nob, col_i5, mask, elts_per_word, rows[row_i4]);
+  e46 = get_element_from_row_with_params(nob, col_i6, mask, elts_per_word, rows[row_i4]);
+  e51 = get_element_from_row_with_params(nob, col_i1, mask, elts_per_word, rows[row_i5]);
+  e52 = get_element_from_row_with_params(nob, col_i2, mask, elts_per_word, rows[row_i5]);
+  e53 = get_element_from_row_with_params(nob, col_i3, mask, elts_per_word, rows[row_i5]);
+  e54 = get_element_from_row_with_params(nob, col_i4, mask, elts_per_word, rows[row_i5]);
+  e55 = get_element_from_row_with_params(nob, col_i5, mask, elts_per_word, rows[row_i5]);
+  e56 = get_element_from_row_with_params(nob, col_i6, mask, elts_per_word, rows[row_i5]);
+  e61 = get_element_from_row_with_params(nob, col_i1, mask, elts_per_word, rows[row_i6]);
+  e62 = get_element_from_row_with_params(nob, col_i2, mask, elts_per_word, rows[row_i6]);
+  e63 = get_element_from_row_with_params(nob, col_i3, mask, elts_per_word, rows[row_i6]);
+  e64 = get_element_from_row_with_params(nob, col_i4, mask, elts_per_word, rows[row_i6]);
+  e65 = get_element_from_row_with_params(nob, col_i5, mask, elts_per_word, rows[row_i6]);
+  e66 = get_element_from_row_with_params(nob, col_i6, mask, elts_per_word, rows[row_i6]);
   return det6(prime_operations, e11, e12, e13, e14, e15, e16,
               e21, e22, e23, e24, e25, e26,
               e31, e32, e33, e34, e35, e36,
@@ -493,57 +498,58 @@ unsigned int det7_ptr(unsigned int **rows, unsigned int nob, prime_ops prime_ope
                       unsigned int row_i6, unsigned int col_i6,
                       unsigned int row_i7, unsigned int col_i7)
 {
-  unsigned int e11, e12, e13, e14, e15, e16, e17, e21, e22, e23, e24, e25, e26, e27, e31, e32, e33, e34, e35, e36, e37, e41, e42, e43, e44, e45, e46, e47, e51, e52, e53, e54, e55, e56, e57, e61, e62, e63, e64, e65, e66, e67, e71, e72, e73, e74, e75, e76, e77;
+  unsigned int e11, e12, e13, e14, e15, e16, e17, e21, e22, e23, e24, e25, e26, e27, e31, e32, e33, e34, e35, e36, e37, e41, e42, e43, e44, e45, e46, e47, e51, e52, e53, e54, e55, e56, e57, e61, e62, e63, e64, e65, e66, e67, e71, e72, e73, e74, e75, e76, e77, mask, elts_per_word;
   assert(NULL != rows);
-  e11 = get_element_from_row(nob, col_i1, rows[row_i1]);
-  e12 = get_element_from_row(nob, col_i2, rows[row_i1]);
-  e13 = get_element_from_row(nob, col_i3, rows[row_i1]);
-  e14 = get_element_from_row(nob, col_i4, rows[row_i1]);
-  e15 = get_element_from_row(nob, col_i5, rows[row_i1]);
-  e16 = get_element_from_row(nob, col_i6, rows[row_i1]);
-  e17 = get_element_from_row(nob, col_i7, rows[row_i1]);
-  e21 = get_element_from_row(nob, col_i1, rows[row_i2]);
-  e22 = get_element_from_row(nob, col_i2, rows[row_i2]);
-  e23 = get_element_from_row(nob, col_i3, rows[row_i2]);
-  e24 = get_element_from_row(nob, col_i4, rows[row_i2]);
-  e25 = get_element_from_row(nob, col_i5, rows[row_i2]);
-  e26 = get_element_from_row(nob, col_i6, rows[row_i2]);
-  e27 = get_element_from_row(nob, col_i7, rows[row_i2]);
-  e31 = get_element_from_row(nob, col_i1, rows[row_i3]);
-  e32 = get_element_from_row(nob, col_i2, rows[row_i3]);
-  e33 = get_element_from_row(nob, col_i3, rows[row_i3]);
-  e34 = get_element_from_row(nob, col_i4, rows[row_i3]);
-  e35 = get_element_from_row(nob, col_i5, rows[row_i3]);
-  e36 = get_element_from_row(nob, col_i6, rows[row_i3]);
-  e37 = get_element_from_row(nob, col_i7, rows[row_i3]);
-  e41 = get_element_from_row(nob, col_i1, rows[row_i4]);
-  e42 = get_element_from_row(nob, col_i2, rows[row_i4]);
-  e43 = get_element_from_row(nob, col_i3, rows[row_i4]);
-  e44 = get_element_from_row(nob, col_i4, rows[row_i4]);
-  e45 = get_element_from_row(nob, col_i5, rows[row_i4]);
-  e46 = get_element_from_row(nob, col_i6, rows[row_i4]);
-  e47 = get_element_from_row(nob, col_i7, rows[row_i4]);
-  e51 = get_element_from_row(nob, col_i1, rows[row_i5]);
-  e52 = get_element_from_row(nob, col_i2, rows[row_i5]);
-  e53 = get_element_from_row(nob, col_i3, rows[row_i5]);
-  e54 = get_element_from_row(nob, col_i4, rows[row_i5]);
-  e55 = get_element_from_row(nob, col_i5, rows[row_i5]);
-  e56 = get_element_from_row(nob, col_i6, rows[row_i5]);
-  e57 = get_element_from_row(nob, col_i7, rows[row_i5]);
-  e61 = get_element_from_row(nob, col_i1, rows[row_i6]);
-  e62 = get_element_from_row(nob, col_i2, rows[row_i6]);
-  e63 = get_element_from_row(nob, col_i3, rows[row_i6]);
-  e64 = get_element_from_row(nob, col_i4, rows[row_i6]);
-  e65 = get_element_from_row(nob, col_i5, rows[row_i6]);
-  e66 = get_element_from_row(nob, col_i6, rows[row_i6]);
-  e67 = get_element_from_row(nob, col_i7, rows[row_i6]);
-  e71 = get_element_from_row(nob, col_i1, rows[row_i7]);
-  e72 = get_element_from_row(nob, col_i2, rows[row_i7]);
-  e73 = get_element_from_row(nob, col_i3, rows[row_i7]);
-  e74 = get_element_from_row(nob, col_i4, rows[row_i7]);
-  e75 = get_element_from_row(nob, col_i5, rows[row_i7]);
-  e76 = get_element_from_row(nob, col_i6, rows[row_i7]);
-  e77 = get_element_from_row(nob, col_i7, rows[row_i7]);
+  mask = get_mask_and_elts(nob, &elts_per_word);
+  e11 = get_element_from_row_with_params(nob, col_i1, mask, elts_per_word, rows[row_i1]);
+  e12 = get_element_from_row_with_params(nob, col_i2, mask, elts_per_word, rows[row_i1]);
+  e13 = get_element_from_row_with_params(nob, col_i3, mask, elts_per_word, rows[row_i1]);
+  e14 = get_element_from_row_with_params(nob, col_i4, mask, elts_per_word, rows[row_i1]);
+  e15 = get_element_from_row_with_params(nob, col_i5, mask, elts_per_word, rows[row_i1]);
+  e16 = get_element_from_row_with_params(nob, col_i6, mask, elts_per_word, rows[row_i1]);
+  e17 = get_element_from_row_with_params(nob, col_i7, mask, elts_per_word, rows[row_i1]);
+  e21 = get_element_from_row_with_params(nob, col_i1, mask, elts_per_word, rows[row_i2]);
+  e22 = get_element_from_row_with_params(nob, col_i2, mask, elts_per_word, rows[row_i2]);
+  e23 = get_element_from_row_with_params(nob, col_i3, mask, elts_per_word, rows[row_i2]);
+  e24 = get_element_from_row_with_params(nob, col_i4, mask, elts_per_word, rows[row_i2]);
+  e25 = get_element_from_row_with_params(nob, col_i5, mask, elts_per_word, rows[row_i2]);
+  e26 = get_element_from_row_with_params(nob, col_i6, mask, elts_per_word, rows[row_i2]);
+  e27 = get_element_from_row_with_params(nob, col_i7, mask, elts_per_word, rows[row_i2]);
+  e31 = get_element_from_row_with_params(nob, col_i1, mask, elts_per_word, rows[row_i3]);
+  e32 = get_element_from_row_with_params(nob, col_i2, mask, elts_per_word, rows[row_i3]);
+  e33 = get_element_from_row_with_params(nob, col_i3, mask, elts_per_word, rows[row_i3]);
+  e34 = get_element_from_row_with_params(nob, col_i4, mask, elts_per_word, rows[row_i3]);
+  e35 = get_element_from_row_with_params(nob, col_i5, mask, elts_per_word, rows[row_i3]);
+  e36 = get_element_from_row_with_params(nob, col_i6, mask, elts_per_word, rows[row_i3]);
+  e37 = get_element_from_row_with_params(nob, col_i7, mask, elts_per_word, rows[row_i3]);
+  e41 = get_element_from_row_with_params(nob, col_i1, mask, elts_per_word, rows[row_i4]);
+  e42 = get_element_from_row_with_params(nob, col_i2, mask, elts_per_word, rows[row_i4]);
+  e43 = get_element_from_row_with_params(nob, col_i3, mask, elts_per_word, rows[row_i4]);
+  e44 = get_element_from_row_with_params(nob, col_i4, mask, elts_per_word, rows[row_i4]);
+  e45 = get_element_from_row_with_params(nob, col_i5, mask, elts_per_word, rows[row_i4]);
+  e46 = get_element_from_row_with_params(nob, col_i6, mask, elts_per_word, rows[row_i4]);
+  e47 = get_element_from_row_with_params(nob, col_i7, mask, elts_per_word, rows[row_i4]);
+  e51 = get_element_from_row_with_params(nob, col_i1, mask, elts_per_word, rows[row_i5]);
+  e52 = get_element_from_row_with_params(nob, col_i2, mask, elts_per_word, rows[row_i5]);
+  e53 = get_element_from_row_with_params(nob, col_i3, mask, elts_per_word, rows[row_i5]);
+  e54 = get_element_from_row_with_params(nob, col_i4, mask, elts_per_word, rows[row_i5]);
+  e55 = get_element_from_row_with_params(nob, col_i5, mask, elts_per_word, rows[row_i5]);
+  e56 = get_element_from_row_with_params(nob, col_i6, mask, elts_per_word, rows[row_i5]);
+  e57 = get_element_from_row_with_params(nob, col_i7, mask, elts_per_word, rows[row_i5]);
+  e61 = get_element_from_row_with_params(nob, col_i1, mask, elts_per_word, rows[row_i6]);
+  e62 = get_element_from_row_with_params(nob, col_i2, mask, elts_per_word, rows[row_i6]);
+  e63 = get_element_from_row_with_params(nob, col_i3, mask, elts_per_word, rows[row_i6]);
+  e64 = get_element_from_row_with_params(nob, col_i4, mask, elts_per_word, rows[row_i6]);
+  e65 = get_element_from_row_with_params(nob, col_i5, mask, elts_per_word, rows[row_i6]);
+  e66 = get_element_from_row_with_params(nob, col_i6, mask, elts_per_word, rows[row_i6]);
+  e67 = get_element_from_row_with_params(nob, col_i7, mask, elts_per_word, rows[row_i6]);
+  e71 = get_element_from_row_with_params(nob, col_i1, mask, elts_per_word, rows[row_i7]);
+  e72 = get_element_from_row_with_params(nob, col_i2, mask, elts_per_word, rows[row_i7]);
+  e73 = get_element_from_row_with_params(nob, col_i3, mask, elts_per_word, rows[row_i7]);
+  e74 = get_element_from_row_with_params(nob, col_i4, mask, elts_per_word, rows[row_i7]);
+  e75 = get_element_from_row_with_params(nob, col_i5, mask, elts_per_word, rows[row_i7]);
+  e76 = get_element_from_row_with_params(nob, col_i6, mask, elts_per_word, rows[row_i7]);
+  e77 = get_element_from_row_with_params(nob, col_i7, mask, elts_per_word, rows[row_i7]);
   return det7(prime_operations, e11, e12, e13, e14, e15, e16, e17,
               e21, e22, e23, e24, e25, e26, e27,
               e31, e32, e33, e34, e35, e36, e37,

@@ -1,5 +1,5 @@
 /*
- * $Id: zcheck.c,v 1.3 2002/06/28 08:39:16 jon Exp $
+ * $Id: zcheck.c,v 1.4 2002/06/30 21:33:15 jon Exp $
  *
  * Check no non-zero values off ends of rows
  *
@@ -28,7 +28,7 @@ int main(int argc, const char * const argv[])
   const char *in;
   FILE *inp;
   const header *h;
-  unsigned int prime, nob, noc, nor, len, elts_per_word, *row, i, j;
+  unsigned int prime, nob, noc, nor, len, *row, i, j, mask, elts_per_word;
 
   if (2 != argc) {
     check_usage();
@@ -52,7 +52,7 @@ int main(int argc, const char * const argv[])
   noc = header_get_noc(h);
   len = header_get_len(h);
   header_free(h);
-  elts_per_word = bits_in_unsigned_int / nob;
+  mask = get_mask_and_elts(nob, &elts_per_word);
   if (0 != noc % elts_per_word){
     /* Possible left over bits, need to check */
     if (memory_rows(len, 1000) < 1) {
@@ -71,7 +71,7 @@ int main(int argc, const char * const argv[])
       }
       assert(noc < len * elts_per_word);
       for (j = noc; j < len * elts_per_word; j++) {
-        unsigned int elt = get_element_from_row(nob, j, row);
+        unsigned int elt = get_element_from_row_with_params(nob, j, mask, elts_per_word, row);
         if (0 != elt) {
           fprintf(stderr, "%s: found value %d at offset %d (>= %d) in row %d of %s\n",
                   name, elt, j, noc, i, in);

@@ -1,5 +1,5 @@
 /*
- * $Id: pcv.c,v 1.3 2002/06/28 08:39:16 jon Exp $
+ * $Id: pcv.c,v 1.4 2002/06/30 21:33:14 jon Exp $
  *
  * Function to lift vectors from a quotient space
  *
@@ -36,7 +36,7 @@ void lift(const char *range, const char *vectors,
 {
   FILE *inp1 = NULL, *inp2 = NULL, *outp = NULL;
   const header *h_in1, *h_in2, *h_out;
-  unsigned int prime, nob, noc, nor, nor_o, noc_o, len, len_o, i, j, elt;
+  unsigned int prime, nob, noc, nor, nor_o, noc_o, len, len_o, i, j, elt, mask, elts_per_word;
   unsigned int *row_in, *row_out;
   orbit_set *orbits;
   assert(NULL != range);
@@ -97,6 +97,7 @@ void lift(const char *range, const char *vectors,
       exit(1);
   }
   /* Now step through vectors computing lifted representation */
+  mask = get_mask_and_elts(nob, &elts_per_word);
   for (i = 0; i < nor_o; i += 1) {
     /* Initialise output row */
     row_init(row_out, len_o);
@@ -112,7 +113,7 @@ void lift(const char *range, const char *vectors,
     }
     /* Set the elements */
     for (j = 0; j < noc; j++) {
-      elt = get_element_from_row(nob, j, row_in);
+      elt = get_element_from_row_with_params(nob, j, mask, elts_per_word, row_in);
       if (0 != elt) {
         /* Output elt at each orbit element position */
         unsigned int k, l;

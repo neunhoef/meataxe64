@@ -1,5 +1,5 @@
 /*
- * $Id: restrict.c,v 1.4 2002/06/28 08:39:16 jon Exp $
+ * $Id: restrict.c,v 1.5 2002/06/30 21:33:15 jon Exp $
  *
  * Function to restrict a matrix from a big field to a smaller
  *
@@ -37,7 +37,7 @@ int restrict(const char *m1, const char *m2, unsigned int q, const char *name)
   FILE *outp = NULL;
   unsigned int prime_in, nob_in, noc, nor, len_in,
       nob_out, nod_out, len_out, base_prime, index_in, index_out;
-  unsigned int i;
+  unsigned int i, mask, elts_per_word;
   const header *h_in;
   header *h_out;
   unsigned int *row1, *row2;
@@ -93,6 +93,7 @@ int restrict(const char *m1, const char *m2, unsigned int q, const char *name)
   }
   row1 = memory_pointer_offset(0, 0, len_in);
   row2 = memory_pointer_offset(0, 1, len_in);
+  mask = get_mask_and_elts(nob_in, &elts_per_word);
   for (i = 0; i < nor; i++) {
     unsigned int j;
     errno = 0;
@@ -105,7 +106,7 @@ int restrict(const char *m1, const char *m2, unsigned int q, const char *name)
     }
     row_init(row2, len_out);
     for (j = 0; j < noc; j++) {
-      unsigned int elt = get_element_from_row(nob_in, j, row1);
+      unsigned int elt = get_element_from_row_with_params(nob_in, j, mask, elts_per_word, row1);
       if (elt >= q) {
         fprintf(stderr, "%s: element %d from row %d, column %d of %s is not in field of order %d, terminating\n", name, elt, i, j, m1, q);
         (void)cleanup(inp, outp);

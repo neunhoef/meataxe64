@@ -1,5 +1,5 @@
 /*
- * $Id: qs.c,v 1.11 2002/06/28 08:39:16 jon Exp $
+ * $Id: qs.c,v 1.12 2002/06/30 21:33:15 jon Exp $
  *
  * Function to compute quotient space representation
  *
@@ -39,7 +39,7 @@ void quotient(const char *range, const char *gen,
 {
   FILE *inp_r = NULL, *inp_g = NULL, *outp = NULL;
   const header *h_in_r, *h_in_g, *h_out;
-  unsigned int prime, nob, noc, nor_r, nor_g, nor_o, len, len_o, d, i, j, k, elt, step_r, step_i, prime_g;
+  unsigned int prime, nob, noc, nor_r, nor_g, nor_o, len, len_o, d, i, j, k, elt, step_r, step_i, prime_g, mask, elts_per_word;
   unsigned int **rows1, **rows2;
   int *map_r, *map_g;
   unsigned int *map_o;
@@ -159,6 +159,7 @@ void quotient(const char *range, const char *gen,
     cleanup(inp_r, inp_g, outp);
     exit(1);
   }
+  mask = get_mask_and_elts(nob, &elts_per_word);
   i = 0; /* Counting the rows from g */
   j = 0; /* Counting the significant rows from g */
   while (j < nor_o) {
@@ -224,7 +225,7 @@ void quotient(const char *range, const char *gen,
       for (k = 0; k < nor_o; k++) {
         assert(map_o[k] < noc);
         assert(map_o[k] >= k);
-        elt = get_element_from_row(nob, map_o[k], rows2[d]);
+        elt = get_element_from_row_with_params(nob, map_o[k], mask, elts_per_word, rows2[d]);
         put_element_to_row(nob, k, row_o, elt);
       }
       errno = 0;

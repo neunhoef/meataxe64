@@ -1,5 +1,5 @@
 /*
- * $Id: ss.c,v 1.12 2002/06/28 08:39:16 jon Exp $
+ * $Id: ss.c,v 1.13 2002/06/30 21:33:15 jon Exp $
  *
  * Function to compute subspace representation
  * Uses the computed map, rather than clean/echelise
@@ -38,7 +38,7 @@ void subspace(const char *range, const char *image,
 {
   FILE *inp1 = NULL, *inp2 = NULL, *outp = NULL;
   const header *h_in1, *h_in2, *h_out;
-  unsigned int prime, nob, noc, nor, nor_o, noc_o, len, len_e, i, j, elt;
+  unsigned int prime, nob, noc, nor, nor_o, noc_o, len, len_e, i, j, elt, mask, elts_per_word;
   unsigned int *row_in, *row_out;
   int *map;
   assert(NULL != range);
@@ -102,6 +102,7 @@ void subspace(const char *range, const char *image,
   }
   /* inp1 no longer necessary */
   fclose(inp1);
+  mask = get_mask_and_elts(nob, &elts_per_word);
   /* Now step through image computing subspace representation */
   for (i = 0; i < nor_o; i += 1) {
     /* Read row of image */
@@ -119,7 +120,7 @@ void subspace(const char *range, const char *image,
     /* Set the elements */
     for (j = 0; j < nor; j++) {
       assert(0 <= map[j]);
-      elt = get_element_from_row(nob, map[j], row_in);
+      elt = get_element_from_row_with_params(nob, map[j], mask, elts_per_word, row_in);
       put_element_to_row(nob, j, row_out, elt);
     }
     errno = 0;

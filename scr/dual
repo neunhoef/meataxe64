@@ -1,14 +1,13 @@
 #!/bin/sh
 #
-# $Id: dual,v 1.5 2002/06/25 10:30:12 jon Exp $
+# $Id: dual,v 1.6 2002/06/30 21:33:15 jon Exp $
 #
 # Script to dual of a matrix
 #
 # Inputs
 # $1: matrix
 # $2: out
-# $3: transpose of matrix
-# $4: memory (optional)
+# $3: memory (optional)
 #
 # Return codes
 # 1: error in parameters
@@ -16,8 +15,8 @@
 #
 #set -v
 . functions
-usage="$0: usage: $0 <in> <out> <transpose> [<memory>]"
-if [ $# -ne 3 -a $# -ne 4 ]; then
+usage="$0: usage: $0 <in> <out> [<memory>]"
+if [ $# -ne 2 -a $# -ne 3 ]; then
   echo $usage
   exit 1;
 fi
@@ -35,13 +34,19 @@ else
   echo "$0: missing file $a"
   exit 1
 fi
-if [ $# -eq 3 ]; then
+if [ $# -eq 2 ]; then
   memory=200
 else
-  memory=$4
+  memory=$3
 fi
-tr=$3
+tmp=tmp${PPID}
+tr=${tmp}.0
 ztr $a ${tr} $memory
+ret=$?
+if [ 0 -ne $ret ]; then
+  rm -f ${tmp}*
+  exit $ret
+fi
 ok=0
 while [ 0 -eq $ok ]; do
   ziv ${tr} $o $memory 2>/dev/null
@@ -49,6 +54,9 @@ while [ 0 -eq $ok ]; do
   if [ 2 -eq $ret ]; then
     let memory=`more_memory $memory`
   else
+    rm -f ${tmp}*
     exit $ret
   fi  
 done
+rm -f ${tmp}*
+exit 0

@@ -1,5 +1,5 @@
 /*
- * $Id: lv.c,v 1.3 2002/06/28 08:39:16 jon Exp $
+ * $Id: lv.c,v 1.4 2002/06/30 21:33:14 jon Exp $
  *
  * Function to lift vectors from a quotient space
  *
@@ -37,7 +37,7 @@ void lift(const char *range, const char *vectors,
 {
   FILE *inp1 = NULL, *inp2 = NULL, *outp = NULL;
   const header *h_in1, *h_in2, *h_out;
-  unsigned int prime, nob, noc, nor, nor_o, noc_i, len_i, noc_o, len, len_o, i, j, elt;
+  unsigned int prime, nob, noc, nor, nor_o, noc_i, len_i, noc_o, len, len_o, i, j, elt, mask, elts_per_word;
   unsigned int *row_in, *row_out;
   int *map;
   unsigned int *col_incs;
@@ -114,6 +114,7 @@ void lift(const char *range, const char *vectors,
     assert(0 == col_incs[k]);
     col_incs[k]++;
   }
+  mask = get_mask_and_elts(nob, &elts_per_word);
   /* Now step through vectors computing lifted representation */
   for (i = 0; i < nor_o; i += 1) {
     /* Initialise output row */
@@ -133,7 +134,7 @@ void lift(const char *range, const char *vectors,
     for (j = 0; j < noc; j++) {
       if (0 == col_incs[j]) {
         /* This column is in the quotient */
-        elt = get_element_from_row(nob, l, row_in);
+        elt = get_element_from_row_with_params(nob, l, mask, elts_per_word, row_in);
         put_element_to_row(nob, j, row_out, elt);
         l++;
       } else {

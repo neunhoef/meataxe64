@@ -1,5 +1,5 @@
 /*
- * $Id: mul.c,v 1.26 2002/06/28 08:39:16 jon Exp $
+ * $Id: mul.c,v 1.27 2002/06/30 21:33:14 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
@@ -96,7 +96,7 @@ static int mul_row_by_map(unsigned int *row_in, unsigned int *row_out, unsigned 
                           unsigned int noc, unsigned int len, unsigned int nob,
                           unsigned int noc_o, prime_opsp operations, const char *m, const char *name)
 {
-  unsigned int j;
+  unsigned int j, mask, elts_per_word;
   assert(NULL != row_in);
   assert(NULL != row_out);
   assert(NULL != map);
@@ -106,16 +106,17 @@ static int mul_row_by_map(unsigned int *row_in, unsigned int *row_out, unsigned 
   assert(0 != noc);
   assert(0 != nob);
   assert(0 != noc_o);
+  mask = get_mask_and_elts(nob, &elts_per_word);
   row_init(row_out, len);
   for (j = 0; j < noc; j++) {
-    unsigned int elt = get_element_from_row(nob, j, row_in);
+    unsigned int elt = get_element_from_row_with_params(nob, j, mask, elts_per_word, row_in);
     if (0 != elt) {
       unsigned int k = map[j], elt2;
       if (k >= noc_o) {
         fprintf(stderr, "%s: element %d from map %s out of range (0 - %d), terminating\n", name, k, m, noc_o - 1);
         return 0;
       }
-      elt2 = get_element_from_row(nob, k, row_out);
+      elt2 = get_element_from_row_with_params(nob, k, mask, elts_per_word, row_out);
       if (0 != elt2) {
         elt = (*operations->add)(elt, elt2);
       }

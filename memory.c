@@ -1,5 +1,5 @@
 /*
- * $Id: memory.c,v 1.7 2002/06/28 08:39:16 jon Exp $
+ * $Id: memory.c,v 1.8 2002/06/30 21:33:14 jon Exp $
  *
  * Large memory manipulation for meataxe
  *
@@ -13,7 +13,7 @@
 #include <errno.h>
 #include "utils.h"
 
-static unsigned char *memory = NULL;
+static unsigned int *memory = NULL;
 static size_t extent = 0;
 
 /* Initialise the memory system with given size */
@@ -22,14 +22,14 @@ void memory_init(const char *name, size_t size)
 {
   assert(NULL == memory);
   extent = ((0 != size) ? size : (MEM_SIZE));
-  assert(NULL == memory);
+  extent /= sizeof(unsigned int);
   errno = 0;
-  memory = malloc(extent * 1000);
+  memory = malloc(extent * 1000 * sizeof(unsigned int));
   if (NULL == memory) {
     if ( 0 != errno) {
       perror(name);
     }
-    fprintf(stderr, "%s: failed to allocate %d bytes, exiting\n", name, extent * 1000);
+    fprintf(stderr, "%s: failed to allocate %d bytes, exiting\n", name, extent * 1000 * sizeof(unsigned int));
     exit(1);
   }
 }
@@ -38,6 +38,7 @@ void memory_init(const char *name, size_t size)
 /* Dispose of the memory */
 void memory_dispose(void)
 {
+  assert(NULL != memory);
   free(memory);
   memory = NULL;
 }
@@ -54,15 +55,16 @@ void *memory_pointer(unsigned int n)
 
 void *memory_pointer_offset(unsigned int n, unsigned int i, unsigned int len)
 {
+  unsigned int offset = (i + 1) * len + n * extent;
   assert(n < 1000);
   assert(0 != len);
-  assert((i + 1) * (len * sizeof(unsigned int)) + n * extent <= 1000 * extent);
-  return memory + n * extent + i * len * sizeof(unsigned int);
+  assert(offset <= 1000 * extent);
+  return memory + offset;
 }
 
 unsigned int memory_rows(unsigned int len, unsigned int size)
 {
   assert(0 != len);
   assert(1000 >= size);
-  return (size * extent) / (len * sizeof(unsigned int));
+  return (size * extent) / len;
 }

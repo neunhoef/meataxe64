@@ -3,14 +3,10 @@ Worry about return (NULL == s) code generation error
 Profile multiply (eg on 26750 for Co1) for different memory sizes
 Investigate better matrix multiplications
 Look into memory requirements for zmu inside indicate etc (problem is power, which doesn't recover from out of memory, and mul, which exits 1 on grease allcoation failure)
-Use errno to indicate failures better, using strerror
 Implement a verbosity level for all programs, with -v <n>. Add a standard parser to deal with this
-Look into problems with odd brain sizes
-Look into performance 199 vs 200 vs 201
+Look into failures causing silly indicators
+Check return codes more thoroughly in scripts
 Fix zps to take less memory
-Write zah doc
-Test find_nullity_onef_with_orders, and use in irredf and indicatef (1)
-Use get_element_from_row_with_params wherever possible (1)
 Find a better algorithm for zsp memory. Investigate performance (1)
 Debug emu/zsl file corruption problem (2)
 Cleanup return vs exit (1)
@@ -24,4 +20,4 @@ Consider a more structured error return type (1)
 Convert monster generator to use new operations (2)
 Build lift (as introduce column?) (1)
 Work on lattice of submodules (5)
-(22, 15/07/2002, 24/06/2002)
+(20, 20/07/2002, 30/06/2002)

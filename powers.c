@@ -1,5 +1,5 @@
 /*
- * $Id: powers.c,v 1.7 2002/06/28 08:39:16 jon Exp $
+ * $Id: powers.c,v 1.8 2002/06/30 21:33:14 jon Exp $
  *
  * Function to compute tensor powers of a matrix, from file
  *
@@ -34,7 +34,7 @@ int skew_square(const char *m1, const char *m2, const char *name)
 {
   FILE *inp = NULL;
   FILE *outp = NULL;
-  unsigned int prime, nob, nod, nor_in, len_in, nor_out, len_out;
+  unsigned int prime, nob, nod, nor_in, len_in, nor_out, len_out, mask, elts_per_word;
   const header *h_in = NULL, *h_out = NULL;
   unsigned int i, j, k, l;
   unsigned int **rows, *row_out;
@@ -96,6 +96,7 @@ int skew_square(const char *m1, const char *m2, const char *name)
   }
   fclose(inp);
   header_free(h_out);
+  mask = get_mask_and_elts(nob, &elts_per_word);
   for (i = 0; i + 1 < nor_in; i++) {
     /* Down the rows of m1 */
     for (j = i + 1; j < nor_in; j++) {
@@ -104,12 +105,12 @@ int skew_square(const char *m1, const char *m2, const char *name)
       row_init(row_out, len_out);
       for (k = 0; k + 1 < nor_in; k++) {
         /* Along the columns of m1 */
-        unsigned int e11 = get_element_from_row(nob, k, rows[i]);
-        unsigned int e21 = get_element_from_row(nob, k, rows[j]);
+        unsigned int e11 = get_element_from_row_with_params(nob, k, mask, elts_per_word, rows[i]);
+        unsigned int e21 = get_element_from_row_with_params(nob, k, mask, elts_per_word, rows[j]);
         for (l = k + 1; l < nor_in; l++) {
           /* Along the columns of m1 again */
-          unsigned int e12 = get_element_from_row(nob, l, rows[i]);
-          unsigned int e22 = get_element_from_row(nob, l, rows[j]);
+          unsigned int e12 = get_element_from_row_with_params(nob, l, mask, elts_per_word, rows[i]);
+          unsigned int e22 = get_element_from_row_with_params(nob, l, mask, elts_per_word, rows[j]);
           unsigned int e = det2(prime_operations, e11, e12, e21, e22);
           put_element_to_row(nob, offset, row_out, e);
           offset++;
@@ -137,7 +138,7 @@ static void make_row(unsigned int nob, unsigned int i, unsigned int j,
                      unsigned int len_out, unsigned int nor_in, unsigned int nor_out)
 {
   unsigned int offset = 0;
-  unsigned int k, l;
+  unsigned int k, l, mask, elts_per_word;
   assert(NULL != rows);
   assert(NULL != row_out);
   assert(0 != nob);
@@ -146,14 +147,15 @@ static void make_row(unsigned int nob, unsigned int i, unsigned int j,
   assert(0 != len_out);
   NOT_USED(nor_out);
   row_init(row_out, len_out);
+  mask = get_mask_and_elts(nob, &elts_per_word);
   for (k = 0; k + 1 < nor_in; k++) {
     /* Along the columns of m1 */
-    unsigned int elt1 = get_element_from_row(nob, k, rows[i]);
-    unsigned int elt2 = get_element_from_row(nob, k, rows[j]);
+    unsigned int elt1 = get_element_from_row_with_params(nob, k, mask, elts_per_word, rows[i]);
+    unsigned int elt2 = get_element_from_row_with_params(nob, k, mask, elts_per_word, rows[j]);
     for (l = k + 1; l < nor_in; l++) {
       /* Along the columns of m1 again */
-      unsigned int elt3 = get_element_from_row(nob, l, rows[i]);
-      unsigned int elt4 = get_element_from_row(nob, l, rows[j]);
+      unsigned int elt3 = get_element_from_row_with_params(nob, l, mask, elts_per_word, rows[i]);
+      unsigned int elt4 = get_element_from_row_with_params(nob, l, mask, elts_per_word, rows[j]);
       unsigned int e1 = (*prime_operations.mul)(elt1, elt4);
       unsigned int e2 = (*prime_operations.negate)((*prime_operations.mul)(elt2, elt3));
       unsigned int e = (*prime_operations.add)(e1, e2);
@@ -163,8 +165,8 @@ static void make_row(unsigned int nob, unsigned int i, unsigned int j,
   }
   for (k = 0; k < nor_in; k++) {
     /* Along the columns of m1 */
-    unsigned int elt1 = get_element_from_row(nob, k, rows[i]);
-    unsigned int elt2 = get_element_from_row(nob, k, rows[j]);
+    unsigned int elt1 = get_element_from_row_with_params(nob, k, mask, elts_per_word, rows[i]);
+    unsigned int elt2 = get_element_from_row_with_params(nob, k, mask, elts_per_word, rows[j]);
     unsigned int elt3 = (*prime_operations.mul)(elt1, elt2);
     put_element_to_row(nob, offset, row_out, elt3);
     offset++;
@@ -176,7 +178,7 @@ int sym_square(const char *m1, const char *m2, const char *name)
 {
   FILE *inp = NULL;
   FILE *outp = NULL;
-  unsigned int prime, nob, nod, nor_in, len_in, nor_out, len_out;
+  unsigned int prime, nob, nod, nor_in, len_in, nor_out, len_out, mask, elts_per_word;
   const header *h_in = NULL, *h_out = NULL;
   unsigned int i, j;
   unsigned int **rows, *row_out;
@@ -250,6 +252,7 @@ int sym_square(const char *m1, const char *m2, const char *name)
       }
     }
   }
+  mask = get_mask_and_elts(nob, &elts_per_word);
   for (i = 0; i < nor_in; i++) {
     /* Down the rows of m1 */
     make_row(nob, i, i, prime_operations, row_out, rows, len_out, nor_in, nor_out);
@@ -272,7 +275,7 @@ int skew_cube(const char *m1, const char *m2, const char *name)
 {
   FILE *inp = NULL;
   FILE *outp = NULL;
-  unsigned int prime, nob, nod, nor_in, len_in, nor_out, len_out;
+  unsigned int prime, nob, nod, nor_in, len_in, nor_out, len_out, mask, elts_per_word;
   const header *h_in = NULL, *h_out = NULL;
   unsigned int i, j, k, l, m, n;
   unsigned int **rows, *row_out;
@@ -334,6 +337,7 @@ int skew_cube(const char *m1, const char *m2, const char *name)
   }
   fclose(inp);
   header_free(h_out);
+  mask = get_mask_and_elts(nob, &elts_per_word);
   for (i = 0; i + 2 < nor_in; i++) {
     /* Down the rows of m1 */
     for (j = i + 1; j + 1 < nor_in; j++) {
@@ -344,19 +348,19 @@ int skew_cube(const char *m1, const char *m2, const char *name)
         row_init(row_out, len_out);
         for (l = 0; l + 2 < nor_in; l++) {
           /* Along the columns of m1 */
-          unsigned e11 = get_element_from_row(nob, l, rows[i]);
-          unsigned e21 = get_element_from_row(nob, l, rows[j]);
-          unsigned e31 = get_element_from_row(nob, l, rows[k]);
+          unsigned e11 = get_element_from_row_with_params(nob, l, mask, elts_per_word, rows[i]);
+          unsigned e21 = get_element_from_row_with_params(nob, l, mask, elts_per_word, rows[j]);
+          unsigned e31 = get_element_from_row_with_params(nob, l, mask, elts_per_word, rows[k]);
           for (m = l + 1; m + 1 < nor_in; m++) {
             /* Along the columns of m1 again */
-            unsigned int e12 = get_element_from_row(nob, m, rows[i]);
-            unsigned int e22 = get_element_from_row(nob, m, rows[j]);
-            unsigned int e32 = get_element_from_row(nob, m, rows[k]);
+            unsigned int e12 = get_element_from_row_with_params(nob, m, mask, elts_per_word, rows[i]);
+            unsigned int e22 = get_element_from_row_with_params(nob, m, mask, elts_per_word, rows[j]);
+            unsigned int e32 = get_element_from_row_with_params(nob, m, mask, elts_per_word, rows[k]);
             for (n = m + 1; n < nor_in; n++) {
               /* Along the columns of m1 again */
-              unsigned int e13 = get_element_from_row(nob, n, rows[i]);
-              unsigned int e23 = get_element_from_row(nob, n, rows[j]);
-              unsigned int e33 = get_element_from_row(nob, n, rows[k]);
+              unsigned int e13 = get_element_from_row_with_params(nob, n, mask, elts_per_word, rows[i]);
+              unsigned int e23 = get_element_from_row_with_params(nob, n, mask, elts_per_word, rows[j]);
+              unsigned int e33 = get_element_from_row_with_params(nob, n, mask, elts_per_word, rows[k]);
 /*
               unsigned int elt = det3(rows, nob, prime_operations, i, l, j, m, k, n);
 */
@@ -388,7 +392,7 @@ int skew_fourth(const char *m1, const char *m2, const char *name)
 {
   FILE *inp = NULL;
   FILE *outp = NULL;
-  unsigned int prime, nob, nod, nor_in, len_in, nor_out, len_out;
+  unsigned int prime, nob, nod, nor_in, len_in, nor_out, len_out, mask, elts_per_word;
   const header *h_in = NULL, *h_out = NULL;
   unsigned int i, i_1, i_2, i_3, i_4, j_1, j_2, j_3, j_4;
   unsigned int **rows, *row_out, *row1, *row2, *row3, *row4;
@@ -454,27 +458,28 @@ int skew_fourth(const char *m1, const char *m2, const char *name)
   }
   fclose(inp);
   header_free(h_out);
+  mask = get_mask_and_elts(nob, &elts_per_word);
   for (i_1 = 0; i_1 + 3 < nor_in; i_1++) {
     /* Down the rows of m1 */
     for (i = 0; i < nor_in; i++) {
-      row1[i] = get_element_from_row(nob, i, rows[i_1]);
+      row1[i] = get_element_from_row_with_params(nob, i, mask, elts_per_word, rows[i_1]);
     }
     for (i_2 = i_1 + 1; i_2 + 2 < nor_in; i_2++) {
       /* Down the rows of m1 again */
       for (i = 0; i < nor_in; i++) {
-        row2[i] = get_element_from_row(nob, i, rows[i_2]);
+        row2[i] = get_element_from_row_with_params(nob, i, mask, elts_per_word, rows[i_2]);
       }
       for (i_3 = i_2 + 1; i_3 + 1 < nor_in; i_3++) {
         /* Down the rows of m1 again */
         for (i = 0; i < nor_in; i++) {
-          row3[i] = get_element_from_row(nob, i, rows[i_3]);
+          row3[i] = get_element_from_row_with_params(nob, i, mask, elts_per_word, rows[i_3]);
         }
         for (i_4 = i_3 + 1; i_4 < nor_in; i_4++) {
           /* Down the rows of m1 again */
           unsigned int offset = 0;
           row_init(row_out, len_out);
           for (i = 0; i < nor_in; i++) {
-            row4[i] = get_element_from_row(nob, i, rows[i_4]);
+            row4[i] = get_element_from_row_with_params(nob, i, mask, elts_per_word, rows[i_4]);
           }
           for (j_1 = 0; j_1 + 3 < nor_in; j_1++) {
             /* Along the columns of m1 */
@@ -539,7 +544,7 @@ int skew_fifth(const char *m1, const char *m2, const char *name)
 {
   FILE *inp = NULL;
   FILE *outp = NULL;
-  unsigned int prime, nob, nod, nor_in, len_in, nor_out, len_out;
+  unsigned int prime, nob, nod, nor_in, len_in, nor_out, len_out, mask, elts_per_word;
   const header *h_in = NULL, *h_out = NULL;
   unsigned int i, i_1, i_2, i_3, i_4, i_5, j_1, j_2, j_3, j_4, j_5;
   unsigned int **rows, *row_out, *row1, *row2, *row3, *row4, *row5;
@@ -606,31 +611,32 @@ int skew_fifth(const char *m1, const char *m2, const char *name)
   }
   fclose(inp);
   header_free(h_out);
+  mask = get_mask_and_elts(nob, &elts_per_word);
   for (i_1 = 0; i_1 + 4 < nor_in; i_1++) {
     /* Down the rows of m1 */
     for (i = 0; i < nor_in; i++) {
-      row1[i] = get_element_from_row(nob, i, rows[i_1]);
+      row1[i] = get_element_from_row_with_params(nob, i, mask, elts_per_word, rows[i_1]);
     }
     for (i_2 = i_1 + 1; i_2 + 3 < nor_in; i_2++) {
       /* Down the rows of m1 again */
       for (i = 0; i < nor_in; i++) {
-        row2[i] = get_element_from_row(nob, i, rows[i_2]);
+        row2[i] = get_element_from_row_with_params(nob, i, mask, elts_per_word, rows[i_2]);
       }
       for (i_3 = i_2 + 1; i_3 + 2 < nor_in; i_3++) {
         /* Down the rows of m1 again */
         for (i = 0; i < nor_in; i++) {
-          row3[i] = get_element_from_row(nob, i, rows[i_3]);
+          row3[i] = get_element_from_row_with_params(nob, i, mask, elts_per_word, rows[i_3]);
         }
         for (i_4 = i_3 + 1; i_4 + 1 < nor_in; i_4++) {
           /* Down the rows of m1 again */
           for (i = 0; i < nor_in; i++) {
-            row4[i] = get_element_from_row(nob, i, rows[i_4]);
+            row4[i] = get_element_from_row_with_params(nob, i, mask, elts_per_word, rows[i_4]);
           }
           for (i_5 = i_4 + 1; i_5 < nor_in; i_5++) {
             /* Down the rows of m1 again */
             unsigned int offset = 0;
             for (i = 0; i < nor_in; i++) {
-              row5[i] = get_element_from_row(nob, i, rows[i_5]);
+              row5[i] = get_element_from_row_with_params(nob, i, mask, elts_per_word, rows[i_5]);
             }
             row_init(row_out, len_out);
             for (j_1 = 0; j_1 + 4 < nor_in; j_1++) {
@@ -712,7 +718,7 @@ int skew_sixth(const char *m1, const char *m2, const char *name)
 {
   FILE *inp = NULL;
   FILE *outp = NULL;
-  unsigned int prime, nob, nod, nor_in, len_in, nor_out, len_out;
+  unsigned int prime, nob, nod, nor_in, len_in, nor_out, len_out, mask, elts_per_word;
   const header *h_in = NULL, *h_out = NULL;
   unsigned int i, j, i_1, i_2, i_3, i_4, i_5, i_6, j_1, j_2, j_3, j_4, j_5, j_6;
   unsigned int **rows, *row_out, **int_rows, *row1, *row2, *row3, *row4, *row5, *row6;
@@ -773,7 +779,7 @@ int skew_sixth(const char *m1, const char *m2, const char *name)
   }
   for (i = 0; i < nor_in; i++){
     for (j = 0; j < nor_in; j++){
-      int_rows[i][j] = get_element_from_row(nob, j, rows[i]);
+      int_rows[i][j] = get_element_from_row_with_params(nob, j, mask, elts_per_word, rows[i]);
     }
   }
   if (0 == open_and_write_binary_header(&outp, h_out, m2, name)) {
@@ -781,6 +787,7 @@ int skew_sixth(const char *m1, const char *m2, const char *name)
   }
   fclose(inp);
   header_free(h_out);
+  mask = get_mask_and_elts(nob, &elts_per_word);
   for (i_1 = 0; i_1 + 5 < nor_in; i_1++) {
     /* Down the rows of m1 */
     row1 = int_rows[i_1];
@@ -895,7 +902,7 @@ int skew_seventh(const char *m1, const char *m2, const char *name)
 {
   FILE *inp = NULL;
   FILE *outp = NULL;
-  unsigned int prime, nob, nod, nor_in, len_in, nor_out, len_out;
+  unsigned int prime, nob, nod, nor_in, len_in, nor_out, len_out, mask, elts_per_word;
   const header *h_in = NULL, *h_out = NULL;
   unsigned int i, j, i_1, i_2, i_3, i_4, i_5, i_6, i_7, j_1, j_2, j_3, j_4, j_5, j_6, j_7;
   unsigned int **rows, *row_out, **int_rows, *row1, *row2, *row3, *row4, *row5, *row6, *row7;
@@ -956,7 +963,7 @@ int skew_seventh(const char *m1, const char *m2, const char *name)
   }
   for (i = 0; i < nor_in; i++){
     for (j = 0; j < nor_in; j++){
-      int_rows[i][j] = get_element_from_row(nob, j, rows[i]);
+      int_rows[i][j] = get_element_from_row_with_params(nob, j, mask, elts_per_word, rows[i]);
     }
   }
   if (0 == open_and_write_binary_header(&outp, h_out, m2, name)) {
@@ -964,6 +971,7 @@ int skew_seventh(const char *m1, const char *m2, const char *name)
   }
   fclose(inp);
   header_free(h_out);
+  mask = get_mask_and_elts(nob, &elts_per_word);
   for (i_1 = 0; i_1 + 6 < nor_in; i_1++) {
     /* Down the rows of m1 */
     row1 = int_rows[i_1];
