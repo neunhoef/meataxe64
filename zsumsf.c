@@ -1,5 +1,5 @@
 /*
- * $Id: zsumsf.c,v 1.3 2002/07/09 09:08:12 jon Exp $
+ * $Id: zsumsf.c,v 1.4 2002/09/11 10:02:28 jon Exp $
  *
  * Compute sums in the group algebra in two matrices
  *
@@ -57,7 +57,7 @@ int main(int argc, const char * const argv[])
   }
   endian_init();
   memory_init(name, memory);
-  res = sumsf(argv[1], argv[2], argv[3], argv[4], o_a, o_b, n, 0, name, &acceptor);
+  res = sumsf(argv[1], argv[2], argv[3], argv[4], o_a, o_b, n, 0, &acceptor, name);
   if (0 != res) {
     printf("Failed to find a suitable element\n");
   }

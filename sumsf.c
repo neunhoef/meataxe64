@@ -1,5 +1,5 @@
 /*
- * $Id: sumsf.c,v 1.3 2002/07/03 12:06:54 jon Exp $
+ * $Id: sumsf.c,v 1.4 2002/09/11 10:02:28 jon Exp $
  *
  * Function to compute linear sums of two matices
  *
@@ -23,8 +23,7 @@
 int sumsf(const char *in1, const char *in2, const char *out,
           const char *dir,
           unsigned int o_a, unsigned o_b, unsigned int n,
-          unsigned int sub_order,
-          const char *name, accept acceptor)
+          unsigned int sub_order, accept acceptor, const char *name)
 {
   char *buf;
   FILE *f;

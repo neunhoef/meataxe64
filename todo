@@ -2,6 +2,7 @@ Worry about isspace failure (can't detect \n) (still occurs on RH 7.2) ctype is 
 Worry about return (NULL == s) code generation error
 Documentation changes for zfln, zrand, ztco, ztcv, ztrecover
 Documentation changes for find_best_nullity_with_orders, sym_basis, proj_base, sub_quot
+Consider putting memory size into argument parser
 Write span_and_spin for spins on large nullspaces
 Extend zsums and friends to handle multiple (more than 2) generators
 Make zsums and friends distinguish find failure from errors

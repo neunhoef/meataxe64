@@ -1,5 +1,5 @@
 /*
- * $Id: sums.c,v 1.9 2002/08/05 09:08:25 jon Exp $
+ * $Id: sums.c,v 1.10 2002/09/11 10:02:28 jon Exp $
  *
  * Function to compute linear sums of two matices
  *
@@ -21,15 +21,15 @@
 #include "rn.h"
 #include "utils.h"
 
-int sums(const char *in1, const char *in2, const char *out,
-         unsigned int o_a, unsigned o_b, unsigned int n,
-         unsigned int sub_order,
-         const char *name, accept acceptor)
+int sums(const char *out, unsigned int n, unsigned int argc, const char *const args[],
+         unsigned int sub_order, accept acceptor, const char *name)
 {
   char *buf;
+  const char *in1 = args[0], *in2 = args[2];
   FILE *f;
   unsigned int i, j, k, l, r, s, cur_word = 0, cur_power = 1, base_prime;
   unsigned int prime, nod, nor, noc, count;
+  unsigned int o_a = strtoul(args[1], NULL, 0), o_b = strtoul(args[3], NULL, 0);
   const header *h;
   int m;
   const char **names;
@@ -40,6 +40,9 @@ int sums(const char *in1, const char *in2, const char *out,
   assert(NULL != in1);
   assert(NULL != in2);
   assert(NULL != out);
+  assert(NULL != args);
+  assert(0 != argc);
+  NOT_USED(argc);
   if (0 == o_a || 0 == o_b || 0 == n) {
     fprintf(stderr, "%s: unexpected zero in order of a, order of b or n, terminating\n", name);
     exit(1);
