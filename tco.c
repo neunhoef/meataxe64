@@ -1,5 +1,5 @@
 /*
- * $Id: tco.c,v 1.25 2004/07/31 07:50:15 jon Exp $
+ * $Id: tco.c,v 1.26 2004/11/28 11:36:53 jon Exp $
  *
  * Tensor condense one group element
  *
@@ -308,6 +308,14 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r,
                    NULL, NULL, NULL, NULL, NULL, NULL, inp, NULL, NULL,
                    NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL);
   }
+  for (i = 0; i < s; i++) {
+    if (0 == dim_irr[i]) {
+      fprintf(stderr, "%s: irreducible %d has dimension zero, terminating\n", name, i);
+      return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
+                     NULL, NULL, NULL, NULL, NULL, NULL, inp, NULL, NULL,
+                     NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL);
+    }
+  }
   fclose(inp);
   inp = fopen(end, "r");
   if (NULL == inp) {
@@ -321,6 +329,14 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r,
     return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
                    NULL, NULL, NULL, NULL, NULL, NULL, inp, NULL, NULL,
                    NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL);
+  }
+  for (i = 0; i < s; i++) {
+    if (0 == dim_end[i]) {
+      fprintf(stderr, "%s: irreducible %d has endomorphism dimension zero, terminating\n", name, i);
+      return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
+                     NULL, NULL, NULL, NULL, NULL, NULL, inp, NULL, NULL,
+                     NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL);
+    }
   }
   fclose(inp);
   /* Now compute the maximum tensor size */
