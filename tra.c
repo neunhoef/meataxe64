@@ -1,5 +1,5 @@
 /*
- * $Id: tra.c,v 1.14 2002/10/13 16:38:07 jon Exp $
+ * $Id: tra.c,v 1.15 2003/06/21 21:56:57 jon Exp $
  *
  * Function to transpose a matrix
  *
@@ -19,6 +19,21 @@
 #include "rows.h"
 #include "utils.h"
 #include "write.h"
+
+void tra_in_situ(unsigned int **rows, unsigned int nor, unsigned int nob)
+{
+  unsigned int i, j, mask, elts_per_word;
+  assert(NULL != rows);
+  mask = get_mask_and_elts(nob, &elts_per_word);
+  for (i = 0; i + 1 < nor; i++) {
+    for (j = i; j < nor; j++) {
+      unsigned int elt1 = get_element_from_row_with_params(nob, j, mask, elts_per_word, rows[i]);
+      unsigned int elt2 = get_element_from_row_with_params(nob, i, mask, elts_per_word, rows[j]);
+      put_element_to_row_with_params(nob, i, mask, elts_per_word, rows[j], elt1);
+      put_element_to_row_with_params(nob, j, mask, elts_per_word, rows[i], elt2);
+    }
+  }
+}
 
 void tra_in_store(unsigned int **rows1, unsigned int **rows2,
                   unsigned int nor, unsigned int noc,

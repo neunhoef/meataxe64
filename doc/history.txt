@@ -259,3 +259,4 @@ skew seventh
 20030527 - Add sym_basis_delta and doc.
 20030621 - First working version of zsymb plus documentation
 20030621 - First version of zttr, plus sym_basis_delta using zsymb
+20030621 - Added tra_in_situ for use by tsp and tmu

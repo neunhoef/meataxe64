@@ -1,5 +1,5 @@
 /*
- * $Id: tmul.c,v 1.3 2002/06/28 08:39:16 jon Exp $
+ * $Id: tmul.c,v 1.4 2003/06/21 21:56:57 jon Exp $
  *
  * Function to multiply a matrix by a tensor product
  *
@@ -134,7 +134,7 @@ int tmul(const char *m1, const char *m2, const char *m3,
   create_pointers(row1, ptrs_row1, nor1, len2, prime);
   create_pointers(row2, ptrs_row2, nor1, len2, prime);
   errno = 0;
-  if (0 == endian_read_matrix(in2, rows2, len1, nor1)) {
+  if (0 == endian_read_matrix(in2, rows1, len1, nor1)) {
     if ( 0 != errno) {
       perror(name);
     }
@@ -144,7 +144,7 @@ int tmul(const char *m1, const char *m2, const char *m3,
     return 0;
   }
   fclose(in2);
-  tra_in_store(rows2, rows1, nor1, noc1, nob, len1);
+  tra_in_situ(rows1, nor1, nob);
   errno = 0;
   if (0 == endian_read_matrix(in3, rows2, len2, nor2)) {
     if ( 0 != errno) {

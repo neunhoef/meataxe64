@@ -1,5 +1,5 @@
 /*
- * $Id: tsp.c,v 1.11 2003/02/28 20:04:58 jon Exp $
+ * $Id: tsp.c,v 1.12 2003/06/21 21:56:57 jon Exp $
  *
  * Function to spin some vectors under two generators in tensor space
  *
@@ -105,10 +105,10 @@ unsigned int spin(const char *in, const char *out,
   /* a1, b1 to be square and same size, ditto a2 and b2 */
   /* Tensor size of a1, a2 to be # columns in seed vector */
   /* Primes to correspond except for maps */
-  if (noc1 != header_get_nor(h_a1) ||
+  if (noc1 != nor1 ||
       noc1 != header_get_noc(h_b1) ||
       noc1 != header_get_nor(h_b1) ||
-      noc2 != header_get_nor(h_a2) ||
+      noc2 != nor2 ||
       noc2 != header_get_noc(h_b2) ||
       noc2 != header_get_nor(h_b2) ||
       noc1 * noc2 != noc ||
@@ -242,8 +242,8 @@ unsigned int spin(const char *in, const char *out,
   }
   /* Read the first group action */
   errno = 0;
-  if (0 == endian_read_matrix(f_a1, rows_a2, len1, nor1) ||
-      0 == endian_read_matrix(f_b1, rows_b2, len1, nor1)) {
+  if (0 == endian_read_matrix(f_a1, rows_a1, len1, nor1) ||
+      0 == endian_read_matrix(f_b1, rows_b1, len1, nor1)) {
     if ( 0 != errno) {
       perror(name);
     }
@@ -253,8 +253,8 @@ unsigned int spin(const char *in, const char *out,
     exit(1);
   }
   /* Transpose the first group action */
-  tra_in_store(rows_a2, rows_a1, nor1, noc1, nob, len1);
-  tra_in_store(rows_b2, rows_b1, nor1, noc1, nob, len1);
+  tra_in_situ(rows_a1, nor1, nob);
+  tra_in_situ(rows_b1, nor1, nob);
   /* Read the second group action */
   errno = 0;
   if (0 == endian_read_matrix(f_a2, rows_a2, len2, nor2) ||
