@@ -1,5 +1,5 @@
 /*
- * $Id: rows.h,v 1.13 2002/10/04 17:16:03 jon Exp $
+ * $Id: rows.h,v 1.14 2004/06/12 16:54:27 jon Exp $
  *
  * Row manipulation for meataxe
  *
@@ -46,5 +46,7 @@ typedef struct {
 } row_ops, *row_opsp;
 
 extern int rows_init(unsigned int prime, row_opsp ops);
+
+extern int short_rows_init(unsigned int prime, row_opsp ops);
 
 #endif

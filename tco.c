@@ -1,5 +1,5 @@
 /*
- * $Id: tco.c,v 1.23 2004/06/08 20:51:07 jon Exp $
+ * $Id: tco.c,v 1.24 2004/06/12 16:54:27 jon Exp $
  *
  * Tensor condense one group element
  *
@@ -474,7 +474,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
                      NULL, NULL, p, q, h_p, h_q, s, h_o, NULL, rows, lrows, rrows);
     }
   }
-  rows_init(prime, &row_operations);
+  short_rows_init(prime, &row_operations);
   grease_init(&row_operations, &grease);
   if (0 == grease_level(prime, &grease, memory_rows(max_irr_len, 100))) {
     fprintf(stderr, "%s: failed to determine grease level, terminating\n", name);

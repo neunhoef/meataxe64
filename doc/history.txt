@@ -307,3 +307,4 @@ skew seventh
 20040606 - Improve grease_row_inc and tco
 20040606 - Remove use of maps from mul_in_store
 20040608 - Replace memset in time critical places. Stop copying grease rows unnecessarily
+20040612 - Add short row operations
