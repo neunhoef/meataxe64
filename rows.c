@@ -1,5 +1,5 @@
 /*
- * $Id: rows.c,v 1.6 2001/09/10 20:48:56 jon Exp $
+ * $Id: rows.c,v 1.7 2001/09/12 23:13:04 jon Exp $
  *
  * Row manipulation for meataxe
  *
@@ -13,16 +13,28 @@
 #include "rows.h"
 
 static int row_add_2(const unsigned int *row1, const unsigned int *row2,
-                     unsigned int *row3, unsigned int noc)
+                     unsigned int *row3, unsigned int len)
 {
   unsigned int row_words;
-  unsigned int i;
-  assert(0 != noc);
+  unsigned int i, j;
+  assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
   assert(NULL != row3);
-  row_words = (noc + bits_in_unsigned_int - 1) / bits_in_unsigned_int;
-  for (i = 0; i < row_words; i++) {
+  row_words = len / sizeof(unsigned int);
+  /* Unroll for efficiency */
+  j = row_words / 8;
+  for (i = 0; i < j; i++) {
+    *(row3++) = *(row1++) ^ *(row2++);
+    *(row3++) = *(row1++) ^ *(row2++);
+    *(row3++) = *(row1++) ^ *(row2++);
+    *(row3++) = *(row1++) ^ *(row2++);
+    *(row3++) = *(row1++) ^ *(row2++);
+    *(row3++) = *(row1++) ^ *(row2++);
+    *(row3++) = *(row1++) ^ *(row2++);
+    *(row3++) = *(row1++) ^ *(row2++);
+  }
+  for (i = j * 8; i < row_words; i++) {
     *(row3++) = *(row1++) ^ *(row2++);
   }
   return 1;
@@ -54,16 +66,15 @@ static int check_for_3(unsigned int a)
   h = g | (f >> 1) /* 01 if answer was 3 or 4, otherwise 0 */
 
 static int row_add_3(const unsigned int *row1, const unsigned int *row2,
-                     unsigned int *row3, unsigned int noc)
+                     unsigned int *row3, unsigned int len)
 {
   unsigned int row_words;
   unsigned int i;
-  unsigned int elts_in_word = bits_in_unsigned_int / 2;
-  assert(0 != noc);
+  assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
   assert(NULL != row3);
-  row_words = (noc + elts_in_word - 1) / elts_in_word;
+  row_words = len / sizeof(unsigned int);
   for (i = 0; i < row_words; i++) {
     unsigned int a, b, c, d, e, f, g, h;
     assert(4 == sizeof(unsigned int));
@@ -77,18 +88,17 @@ static int row_add_3(const unsigned int *row1, const unsigned int *row2,
 }
 
 static int scaled_row_add_3(const unsigned int *row1, const unsigned int *row2,
-                            unsigned int *row3, unsigned int noc, unsigned int elt)
+                            unsigned int *row3, unsigned int len, unsigned int elt)
 {
   unsigned int row_words;
   unsigned int i;
-  unsigned int elts_in_word = bits_in_unsigned_int / 2;
   assert(2 == elt);
-  assert(0 != noc);
+  assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
   assert(NULL != row3);
   NOT_USED(elt);
-  row_words = (noc + elts_in_word - 1) / elts_in_word;
+  row_words = len / sizeof(unsigned int);
   for (i = 0; i < row_words; i++) {
     unsigned int a, b, c, d, e, f, g, h;
     assert(4 == sizeof(unsigned int));
@@ -106,16 +116,15 @@ static int scaled_row_add_3(const unsigned int *row1, const unsigned int *row2,
 #define TWO_BITS_4 ((ONE_BITS_4) << 1)
 
 static int row_add_4(const unsigned int *row1, const unsigned int *row2,
-                     unsigned int *row3, unsigned int noc)
+                     unsigned int *row3, unsigned int len)
 {
   unsigned int row_words;
-  unsigned int elts_in_word = bits_in_unsigned_int / 2;
   unsigned int i;
-  assert(0 != noc);
+  assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
   assert(NULL != row3);
-  row_words = (noc + elts_in_word - 1) / elts_in_word;
+  row_words = len / sizeof(unsigned int);
   for (i = 0; i < row_words; i++) {
     *(row3++) = *(row1++) ^ *(row2++);
   }
@@ -123,17 +132,16 @@ static int row_add_4(const unsigned int *row1, const unsigned int *row2,
 }
 
 static int scaled_row_add_4(const unsigned int *row1, const unsigned int *row2,
-                            unsigned int *row3, unsigned int noc, unsigned int elt)
+                            unsigned int *row3, unsigned int len, unsigned int elt)
 {
   unsigned int row_words;
   unsigned int i;
-  unsigned int elts_in_word = bits_in_unsigned_int / 2;
-  assert(0 != noc);
+  assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
   assert(NULL != row3);
   assert(2 <= elt && elt <= 3);
-  row_words = (noc + elts_in_word - 1) / elts_in_word;
+  row_words = len / sizeof(unsigned int);
   for (i = 0; i < row_words; i++) {
     unsigned int a, b, c, d, e, f, g, h;
     assert(4 == sizeof(unsigned int));
@@ -180,16 +188,15 @@ static int check_for_5(unsigned int a)
   k = (g >> 2) & (h | j); /* Detect 5s and 6s */
 
 static int row_add_5(const unsigned int *row1, const unsigned int *row2,
-                     unsigned int *row3, unsigned int noc)
+                     unsigned int *row3, unsigned int len)
 {
   unsigned int row_words;
   unsigned int i;
-  unsigned int elts_in_word = bits_in_unsigned_int / 3;
-  assert(0 != noc);
+  assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
   assert(NULL != row3);
-  row_words = (noc + elts_in_word - 1) / elts_in_word;
+  row_words = len / sizeof(unsigned int);
   for (i = 0; i < row_words; i++) {
     unsigned int a, b, c, d, e, f, g, h, j, k;
     assert(4 == sizeof(unsigned int));
@@ -203,17 +210,16 @@ static int row_add_5(const unsigned int *row1, const unsigned int *row2,
 }
 
 static int scaled_row_add_5(const unsigned int *row1, const unsigned int *row2,
-                            unsigned int *row3, unsigned int noc, unsigned int elt)
+                            unsigned int *row3, unsigned int len, unsigned int elt)
 {
   unsigned int row_words;
   unsigned int i;
-  unsigned int elts_in_word = bits_in_unsigned_int / 3;
-  assert(0 != noc);
+  assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
   assert(NULL != row3);
   assert(2 <= elt && elt <= 4);
-  row_words = (noc + elts_in_word - 1) / elts_in_word;
+  row_words = len / sizeof(unsigned int);
   for (i = 0; i < row_words; i++) {
     unsigned int a, b, c, d, e, f, g, h, j, k;
     assert(4 == sizeof(unsigned int));
@@ -257,36 +263,25 @@ static int scaled_row_add_5(const unsigned int *row1, const unsigned int *row2,
 }
 
 void row_copy(const unsigned int *row1, unsigned int *row2,
-             unsigned int nob, unsigned int noc)
+              unsigned int len)
 {
-  unsigned int elts_per_word;
-  unsigned int row_words;
-  assert(0 != nob);
-  assert(0 != noc);
+  assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
-  elts_per_word = bits_in_unsigned_int / nob;
-  row_words = (noc + elts_per_word - 1) / elts_per_word;
-  memcpy(row2, row1, row_words * sizeof(unsigned int));
+  memcpy(row2, row1, len);
 }
 
-int row_malloc(unsigned int nob, unsigned int noc, unsigned int **row)
+int row_malloc(unsigned int len, unsigned int **row)
 {
-  unsigned int elts_per_word = bits_in_unsigned_int / nob;
-  unsigned int row_words = (noc + elts_per_word - 1) / elts_per_word;
-  unsigned int row_chars = row_words * sizeof(unsigned int);
   assert(NULL != row);
-  *row = malloc(row_chars);
+  *row = malloc(len);
   return (NULL != *row);
 }
 
-void row_init(unsigned int *row, unsigned int nob, unsigned int noc)
+void row_init(unsigned int *row, unsigned int len)
 {
-  unsigned int elts_per_word = bits_in_unsigned_int / nob;
-  unsigned int row_words = (noc + elts_per_word - 1) / elts_per_word;
-  unsigned int row_chars = row_words * sizeof(unsigned int);
   assert(NULL != row);
-  memset(row, 0, row_chars);
+  memset(row, 0, len);
 }
 
 int rows_init(unsigned int prime, row_opsp ops)

@@ -1,5 +1,5 @@
 /*
- * $Id: rows.h,v 1.4 2001/09/08 12:40:55 jon Exp $
+ * $Id: rows.h,v 1.5 2001/09/12 23:13:04 jon Exp $
  *
  * Row manipulation for meataxe
  *
@@ -9,11 +9,11 @@
 #define included__rows
 
 extern void row_copy(const unsigned int *, unsigned int *,
-                     unsigned int, unsigned int);
+                     unsigned int);
 
-extern int row_malloc(unsigned int nob, unsigned int noc, unsigned int **row);
+extern int row_malloc(unsigned int len, unsigned int **row);
 
-extern void row_init(unsigned int *, unsigned int nob, unsigned int noc);
+extern void row_init(unsigned int *, unsigned int len);
 
 typedef int (*row_adder)(const unsigned int *, const unsigned int *,
                          unsigned int *, unsigned int);

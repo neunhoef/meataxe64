@@ -1,5 +1,5 @@
 /*
- * $Id: add.c,v 1.5 2001/09/08 12:40:55 jon Exp $
+ * $Id: add.c,v 1.6 2001/09/12 23:13:04 jon Exp $
  *
  * Function to add two matrices to give a third
  *
@@ -23,9 +23,9 @@ int add(const char *m1, const char *m2, const char *m3, const char *name)
   FILE *inp1;
   FILE *inp2;
   FILE *outp;
-  unsigned int prime, nob, noc, nor;
+  unsigned int prime, nob, noc, nor, len;
   unsigned int i;
-  header h1, h2;
+  const header *h1, *h2;
   unsigned int *row1, *row2, *row3;
   row_ops row_operations;
   row_adder adder;
@@ -60,6 +60,7 @@ int add(const char *m1, const char *m2, const char *m3, const char *name)
   nob = header_get_nob(h1);
   nor = header_get_nor(h1);
   noc = header_get_noc(h1);
+  len = header_get_len(h1);
   if (header_get_prime(h2) != prime ||
       header_get_nob(h2) != nob ||
       header_get_noc(h2) != noc ||
@@ -85,9 +86,9 @@ int add(const char *m1, const char *m2, const char *m3, const char *name)
     fclose(outp);
     return 0;
   }
-  if (0 == row_malloc(nob, noc, &row1) ||
-      0 == row_malloc(nob, noc, &row2) ||
-      0 == row_malloc(nob, noc, &row3)) {
+  if (0 == row_malloc(len, &row1) ||
+      0 == row_malloc(len, &row2) ||
+      0 == row_malloc(len, &row3)) {
     fprintf(stderr, "%s cannot allocate rows for %s, %s, %s, terminating\n", name, m1, m2, m3);
     fclose(inp1);
     fclose(inp2);
@@ -95,28 +96,28 @@ int add(const char *m1, const char *m2, const char *m3, const char *name)
     return 0;
   }
   for (i = 0; i < nor; i++) {
-    if (0 == endian_read_row(inp1, row1, nob, noc)) {
+    if (0 == endian_read_row(inp1, row1, len)) {
       fprintf(stderr, "%s cannot read row %d from %s, terminating\n", name, i, m1);
       fclose(inp1);
       fclose(inp2);
       fclose(outp);
       return 0;
     }
-    if (0 == endian_read_row(inp2, row2, nob, noc)) {
+    if (0 == endian_read_row(inp2, row2, len)) {
       fprintf(stderr, "%s cannot read row %d from %s, terminating\n", name, i, m2);
       fclose(inp1);
       fclose(inp2);
       fclose(outp);
       return 0;
     }
-    if (0 == (*adder)(row1, row2, row3, noc)) {
+    if (0 == (*adder)(row1, row2, row3, len)) {
       fprintf(stderr, "%s addition not supported for %d, terminating\n", name, prime);
       fclose(inp1);
       fclose(inp2);
       fclose(outp);
       return 0;
     }
-    if (0 == endian_write_row(outp, row3, nob, noc)) {
+    if (0 == endian_write_row(outp, row3, len)) {
       fprintf(stderr, "%s cannot write row %d to %s, terminating\n", name, i, m3);
       fclose(inp1);
       fclose(inp2);

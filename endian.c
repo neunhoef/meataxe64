@@ -1,5 +1,5 @@
 /*
- * $Id: endian.c,v 1.3 2001/09/02 22:16:41 jon Exp $
+ * $Id: endian.c,v 1.4 2001/09/12 23:13:04 jon Exp $
  *
  * Endian handling for meataxe
  *
@@ -13,18 +13,18 @@
 
 static int endian_is_big = 0;
 
-int endian_write_int(unsigned int a, const FILE *fp)
+int endian_write_int(unsigned int a, FILE *fp)
 {
   if (endian_is_big) {
     int i;
     for (i = 0; i < 4; i++) {
       unsigned char c = a & 0xff;
-      if (1 != fwrite(&c, sizeof(unsigned char), 1, (FILE *)fp))
+      if (1 != fwrite(&c, sizeof(unsigned char), 1, fp))
         return 0;
       a >>= CHAR_BIT;
     }
   } else {
-    return (1 == fwrite(&a, sizeof(unsigned int), 1, (FILE *)fp));
+    return (1 == fwrite(&a, sizeof(unsigned int), 1, fp));
   }
   return 1;
 }
@@ -44,18 +44,16 @@ unsigned int endian_get_int(unsigned int i, const unsigned int *row)
   }
 }
 
-int endian_read_row(const FILE *fp, unsigned int *row,
-                    unsigned int nob, unsigned int noc)
+int endian_read_row(FILE *fp, unsigned int *row, unsigned int len)
 {
-  unsigned int elts_per_word = bits_in_unsigned_int / nob;
-  unsigned int row_words = (noc + elts_per_word - 1) / elts_per_word;
+  unsigned int row_words = len / sizeof(unsigned int);
   if (endian_is_big) {
     while (row_words > 0) {
       int j;
       unsigned char buf[4];
       unsigned int res = 0;
       assert(4 == sizeof(unsigned int));
-      if (4 != fread(buf, 1, 4, (FILE *)fp)) {
+      if (4 != fread(buf, 1, 4, fp)) {
         return 0;
       }
       for (j = 0; j < 4; j++) {
@@ -67,15 +65,13 @@ int endian_read_row(const FILE *fp, unsigned int *row,
     }
     return 1;
   } else {
-    return row_words == fread(row, sizeof(unsigned int), row_words, (FILE *)fp);
+    return row_words == fread(row, sizeof(unsigned int), row_words, fp);
   }
 }
 
-int endian_write_row(const FILE *fp, const unsigned int *row,
-                     unsigned int nob, unsigned int noc)
+int endian_write_row(FILE *fp, const unsigned int *row, unsigned int len)
 {
-  unsigned int elts_per_word = bits_in_unsigned_int / nob;
-  unsigned int row_words = (noc + elts_per_word - 1) / elts_per_word;
+  unsigned int row_words = len / sizeof(unsigned int);
   if (endian_is_big) {
     while (row_words > 0) {
       endian_write_int(*row, fp);
@@ -84,30 +80,28 @@ int endian_write_row(const FILE *fp, const unsigned int *row,
     }
     return 1;
   } else {
-    return row_words == fwrite(row, sizeof(unsigned int), row_words, (FILE *)fp);
+    return row_words == fwrite(row, sizeof(unsigned int), row_words, fp);
   }
 }
 
-int endian_read_matrix(const FILE *fp, unsigned int **row,
-                       unsigned int nob, unsigned int noc,
-                       unsigned int nor)
+int endian_read_matrix(FILE *fp, unsigned int **row,
+                       unsigned int len, unsigned int nor)
 {
   unsigned int i;
   for (i = 0; i < nor; i++) {
-    if (0 == endian_read_row(fp, row[i], nob, noc)) {
+    if (0 == endian_read_row(fp, row[i], len)) {
       return 0;
     }
   }
   return 1;
 }
 
-int endian_write_matrix(const FILE *fp, unsigned int **row,
-                        unsigned int nob, unsigned int noc,
-                        unsigned int nor)
+int endian_write_matrix(FILE *fp, unsigned int **row,
+                        unsigned int len, unsigned int nor)
 {
   unsigned int i;
   for (i = 0; i < nor; i++) {
-    if (0 == endian_write_row(fp, row[i], nob, noc)) {
+    if (0 == endian_write_row(fp, row[i], len)) {
       return 0;
     }
   }

@@ -1,5 +1,5 @@
 /*
- * $Id: write.c,v 1.3 2001/09/04 23:00:12 jon Exp $
+ * $Id: write.c,v 1.4 2001/09/12 23:13:04 jon Exp $
  *
  * Write a header
  *
@@ -12,7 +12,7 @@
 #include "utils.h"
 #include "write.h"
 
-int write_text_header(const FILE *fp, const header h)
+int write_text_header(FILE *fp, const header *h)
 {
   unsigned int prime, nod, noc, nor;
   char buf1[12];
@@ -30,18 +30,18 @@ int write_text_header(const FILE *fp, const header h)
   (void)sprintf(buf2, "%6d", prime);
   (void)sprintf(buf3, "%6d", nor);
   (void)sprintf(buf4, "%6d", noc);
-  if (2 != fwrite(buf1, 1, 2, (FILE *)fp) ||
-      6 != fwrite(buf2, 1, 6, (FILE *)fp) ||
-      6 != fwrite(buf3, 1, 6, (FILE *)fp) ||
-      6 != fwrite(buf4, 1, 6, (FILE *)fp) ||
-      fputc('\n', (FILE *)fp) < 0) {
+  if (2 != fwrite(buf1, 1, 2, fp) ||
+      6 != fwrite(buf2, 1, 6, fp) ||
+      6 != fwrite(buf3, 1, 6, fp) ||
+      6 != fwrite(buf4, 1, 6, fp) ||
+      fputc('\n', fp) < 0) {
     fprintf(stderr, "Failed to write header to text output\n");
     return 0;
   }
   return 1;
 }
 
-int write_binary_header(const FILE *fp, header h, const char *name)
+int write_binary_header(FILE *fp, const header *h, const char *name)
 {
   unsigned int nob;
   unsigned int prime;
@@ -56,10 +56,10 @@ int write_binary_header(const FILE *fp, header h, const char *name)
   nor = header_get_nor(h);
   noc = header_get_noc(h);
 
-  if (1 != fwrite(&nob, sizeof(unsigned int), 1, (FILE *)fp) ||
-      1 != fwrite(&prime, sizeof(unsigned int), 1, (FILE *)fp) ||
-      1 != fwrite(&nor, sizeof(unsigned int), 1, (FILE *)fp) ||
-      1 != fwrite(&noc, sizeof(unsigned int), 1, (FILE *)fp)) {
+  if (1 != fwrite(&nob, sizeof(unsigned int), 1, fp) ||
+      1 != fwrite(&prime, sizeof(unsigned int), 1, fp) ||
+      1 != fwrite(&nor, sizeof(unsigned int), 1, fp) ||
+      1 != fwrite(&noc, sizeof(unsigned int), 1, fp)) {
     fprintf(stderr, "Failed to write header to binary output %s\n", name);
     return 0;
   }

@@ -1,5 +1,5 @@
 /*
- * $Id: pr.c,v 1.3 2001/09/05 22:47:25 jon Exp $
+ * $Id: pr.c,v 1.4 2001/09/12 23:13:04 jon Exp $
  *
  * Print a matrix
  *
@@ -17,6 +17,7 @@
 #include "elements.h"
 #include "endian.h"
 #include "primes.h"
+#include "rows.h"
 
 /* Purely for formatting purposes */
 #define BITS_PER_ROW 80
@@ -30,13 +31,10 @@ int main(int argc, const char * const argv[])
 {
   const char *in;
   FILE *inp;
-  unsigned int prime, nod, noc, nor, nob;
+  unsigned int prime, nod, noc, nor, nob, len;
   unsigned int i, j;
-  header h;
+  const header *h;
   unsigned int *row;
-  unsigned int row_words;
-  unsigned int row_chars;
-  unsigned int elts_per_word;
   prime_ops prime_operations;
 
   endian_init();
@@ -59,16 +57,13 @@ int main(int argc, const char * const argv[])
   nod = header_get_nod(h);
   nor = header_get_nor(h);
   noc = header_get_noc(h);
-  elts_per_word = bits_in_unsigned_int / nob;
-  row_words = (noc + elts_per_word - 1) / elts_per_word;
-  row_chars = row_words * sizeof(unsigned int);
+  len = header_get_len(h);
   if (0 == write_text_header(stdout, h)) {
     fprintf(stderr, "pr: cannot write text header, terminating\n");
     fclose(inp);
     exit(1);
   }
-  row = malloc(row_chars);
-  if (NULL == row) {
+  if (0 == row_malloc(len, &row)) {
     fprintf(stderr, "pr: cannot allocate row for %s, terminating\n", in);
     fclose(inp);
     exit(1);
@@ -80,8 +75,7 @@ int main(int argc, const char * const argv[])
   }
   for (i = 0; i < nor; i++) {
     unsigned int m = 0;
-
-    if (0 == endian_read_row(inp, row, nob, noc)) {
+    if (0 == endian_read_row(inp, row, len)) {
       fprintf(stderr, "pr: cannot read row %d from %s, terminating\n", i, in);
       fclose(inp);
       exit(1);

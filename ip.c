@@ -1,5 +1,5 @@
 /*
- * $Id: ip.c,v 1.5 2001/09/05 22:47:25 jon Exp $
+ * $Id: ip.c,v 1.6 2001/09/12 23:13:04 jon Exp $
  *
  * Read a matrix
  *
@@ -30,7 +30,7 @@ int main(int argc, const char * const argv[])
   unsigned int prime, nob, nod, noc, nor;
   unsigned int i, j;
   unsigned int base_mask;
-  header h;
+  const header *h;
 
   if (3 != argc) {
     ip_usage();

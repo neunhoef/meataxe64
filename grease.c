@@ -1,5 +1,5 @@
 /*
- * $Id: grease.c,v 1.3 2001/09/08 12:40:55 jon Exp $
+ * $Id: grease.c,v 1.4 2001/09/12 23:13:04 jon Exp $
  *
  * Functions to grease matrix rows
  *
@@ -120,15 +120,14 @@ int grease(unsigned int nob, unsigned int nor1, unsigned int noc1,
 }
 
 int grease_allocate_rows(unsigned int size,
-                         unsigned int prime, unsigned int nob, unsigned int noc,
+                         unsigned int prime, unsigned int len,
                          unsigned int *grease_row_count,
                          unsigned int ***rows_out)
 {
   unsigned int q_n;
   assert(NULL != grease_row_count);
   assert(0 != size);
-  assert(0 != nob);
-  assert(0 != noc);
+  assert(0 != len);
   assert(0 != prime);
   if (0 == rows_init(prime, &row_operations)) {
     return 0;
@@ -162,7 +161,7 @@ int grease_allocate_rows(unsigned int size,
     }
     for (i = 0; i < grease_table_size; i++) {
       if (0 == grease_table_alloc[i]) {
-        if (0 == row_malloc(nob, noc, grease_table + i)) {
+        if (0 == row_malloc(len, grease_table + i)) {
           free(grease_table_alloc);
           /* Free all so far allocated */
           for (j = 0; j < i; j++) {
@@ -182,14 +181,14 @@ int grease_allocate_rows(unsigned int size,
 }
 
 int grease_make_rows(unsigned int **rows, unsigned int size,
-                     unsigned int prime, unsigned int noc,
+                     unsigned int prime, unsigned int len,
                      unsigned int col_index,
                      unsigned int ***rows_out)
 {
   assert(NULL != rows_out);
   assert(NULL != rows);
   assert(0 != size);
-  assert(0 != noc);
+  assert(0 != len);
   assert(0 != prime);
   if (1 == size) {
     *rows_out = &(rows[col_index]);
@@ -224,7 +223,7 @@ int grease_make_rows(unsigned int **rows, unsigned int size,
         /* Then add */
         j = i - k; /* (i + 1) - k - 1 */
         if (0 == (*adder)(grease_table[k - 1], grease_table[j], grease_table[i],
-                          noc)) {
+                          len)) {
           /* Deallocate all and return 0 */
           return 0;
         }

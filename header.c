@@ -1,5 +1,5 @@
 /*
- * $Id: header.c,v 1.2 2001/09/04 23:00:12 jon Exp $
+ * $Id: header.c,v 1.3 2001/09/12 23:13:04 jon Exp $
  *
  * Header manipulation
  *
@@ -20,76 +20,97 @@ struct header_struct
   unsigned int nod;	/* The number of digits per element (text) */
   unsigned int nor;	/* The number of rows */
   unsigned int noc;	/* The number of columns */
+  unsigned int len;	/* The number of bytes in a row (rounded up to a word) */
 };
 
-unsigned int header_get_prime(header h)
+unsigned int header_get_prime(const header *h)
 {
   assert(NULL != h);
   return h->prime;
 }
 
-void header_set_prime(header h, unsigned int p)
+void header_set_prime(header *h, unsigned int p)
 {
   assert(NULL != h);
   assert(is_a_prime_power(p));
   h->prime = p;
 }
 
-unsigned int header_get_nob(header h)
+unsigned int header_get_nob(const header *h)
 {
   assert(NULL != h);
   return h->nob;
 }
 
-void header_set_nob(header h, unsigned int n)
+void header_set_nob(header *h, unsigned int n)
 {
   assert(NULL != h);
   assert(n >= 1);
   h->nob = n;
 }
 
-unsigned int header_get_nod(header h)
+unsigned int header_get_nod(const header *h)
 {
   assert(NULL != h);
   return h->nod;
 }
 
-void header_set_nod(header h, unsigned int n)
+void header_set_nod(header *h, unsigned int n)
 {
   assert(NULL != h);
   assert(n >= 1);
   h->nod = n;
 }
 
-unsigned int header_get_nor(header h)
+unsigned int header_get_nor(const header *h)
 {
   assert(NULL != h);
   return h->nor;
 }
 
-void header_set_nor(header h, unsigned int n)
+void header_set_nor(header *h, unsigned int n)
 {
   assert(NULL != h);
   assert(n >= 1);
   h->nor = n;
 }
 
-unsigned int header_get_noc(header h)
+unsigned int header_get_noc(const header *h)
 {
   assert(NULL != h);
   return h->noc;
 }
 
-void header_set_noc(header h, unsigned int n)
+void header_set_noc(header *h, unsigned int n)
 {
   assert(NULL != h);
   assert(n >= 1);
   h->noc = n;
 }
 
-int header_alloc(header *h)
+static unsigned int get_len(unsigned int nob, unsigned int noc)
 {
-  header h1 = malloc(sizeof(*h1));
+  unsigned int bits_in_word = bits_in_unsigned_int / nob;
+  return ((noc + bits_in_word - 1) / bits_in_word) * 4;
+}
+
+unsigned int header_get_len(const header *h)
+{
+  assert(NULL != h);
+  assert(get_len(h->nob, h->noc) == h->len);
+  return h->len;
+}
+
+void header_set_len(header *h)
+{
+  assert(NULL != h);
+  assert(0 != h->nob);
+  h->len = get_len(h->nob, h->noc);
+}
+
+int header_alloc(header **h)
+{
+  header *h1 = malloc(sizeof(*h1));
   assert(NULL != h);
   if (NULL == h1) {
     fprintf(stderr, "Failed to allocate header structure\n");
@@ -99,18 +120,18 @@ int header_alloc(header *h)
   return 1;
 }
 
-void header_free(header h)
+void header_free(header *h)
 {
   assert(NULL != h);
   memset(h, 0x4c, sizeof(*h));
   free(h);
 }
 
-header header_create(unsigned int prime, unsigned int nob,
+const header *header_create(unsigned int prime, unsigned int nob,
                      unsigned int nod, unsigned int noc,
                      unsigned int nor)
 {
-  header h;
+  header *h;
   int i = header_alloc(&h);
   assert(NULL != h);
   assert(i);
@@ -120,5 +141,6 @@ header header_create(unsigned int prime, unsigned int nob,
   header_set_nod(h, nod);
   header_set_noc(h, noc);
   header_set_nor(h, nor);
+  header_set_len(h);
   return h;
 }

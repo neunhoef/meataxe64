@@ -1,5 +1,5 @@
 /*
- * $Id: id.c,v 1.2 2001/09/04 23:00:12 jon Exp $: ad.c,v 1.1 2001/08/30 18:31:45 jon Exp $
+ * $Id: id.c,v 1.3 2001/09/12 23:13:04 jon Exp $: ad.c,v 1.1 2001/08/30 18:31:45 jon Exp $
  *
  * Generate identity matrix
  *
@@ -23,11 +23,11 @@ static void id_usage(void)
 int main(int argc, const char * const argv[])
 {
   const char *out;
-  unsigned int prime, nob, nod, noc, nor;
+  unsigned int prime, nob, nod, noc, nor, len;
   unsigned int i;
   unsigned int *row;
   FILE *outp;
-  header h;
+  const header *h;
 
   if (5 != argc) {
     id_usage();
@@ -59,22 +59,23 @@ int main(int argc, const char * const argv[])
     exit(1);
   }
   h = header_create(prime, nob, nod, noc, nor);
+  len = header_get_len(h);
   if (0 == write_binary_header(outp, h, out)) {
     fprintf(stderr, "id: cannot write header\n");
     fclose(outp);
     exit(1);
   }
-  if (0 == row_malloc(nob, noc, &row)) {
+  if (0 == row_malloc(len, &row)) {
     fprintf(stderr, "id: cannot create output row\n");
     fclose(outp);
     exit(1);
   }
   for (i = 0; i < nor; i++) {
-    row_init(row, nob, noc);
+    row_init(row, len);
     if (i < noc) {
       put_element_to_row(nob, i, row, 1);
     }
-    if (0 == endian_write_row(outp, row, nob, noc)) {
+    if (0 == endian_write_row(outp, row, len)) {
       fprintf(stderr, "id: write output row to %s\n", out);
       fclose(outp);
       exit(1);

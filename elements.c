@@ -1,5 +1,5 @@
 /*
- * $Id: elements.c,v 1.7 2001/09/09 22:34:11 jon Exp $
+ * $Id: elements.c,v 1.8 2001/09/12 23:13:04 jon Exp $
  *
  * Element manipulation for meataxe
  *
@@ -15,7 +15,7 @@
 static prime_ops prime_operations = { NULL, NULL};
 static int inited = 0;
 
-int get_element_from_text(const FILE *fp, unsigned int nod,
+int get_element_from_text(FILE *fp, unsigned int nod,
                           unsigned int prime, unsigned int *el)
 {
   unsigned int e = 0;
@@ -23,8 +23,8 @@ int get_element_from_text(const FILE *fp, unsigned int nod,
   assert(NULL != fp);
   assert(0 != nod);
   assert(0 != prime);
-  while (0 == feof((FILE *)fp) && 0 != nod) {
-    int i = fgetc((FILE *)fp);
+  while (0 == feof(fp) && 0 != nod) {
+    int i = fgetc(fp);
     if (i < 0)
       return 0; /* Off end of file */
     if (my_isspace(i))

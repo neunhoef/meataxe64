@@ -1,5 +1,5 @@
 /*
- * $Id: read.c,v 1.6 2001/09/05 22:47:25 jon Exp $
+ * $Id: read.c,v 1.7 2001/09/12 23:13:04 jon Exp $
  *
  * Read a header
  *
@@ -23,7 +23,7 @@
 
 #define LINE_LENGTH (2+6+6+6)
 
-int read_text_header(const FILE *fp, header *hp, const char *name)
+int read_text_header(FILE *fp, const header **hp, const char *name)
 {
   unsigned int nob;
   unsigned int nod;
@@ -37,15 +37,15 @@ int read_text_header(const FILE *fp, header *hp, const char *name)
   assert(NULL != fp);
   assert(NULL != hp);
   assert(NULL != name);
-  j = fread(str, 1, LINE_LENGTH, (FILE *)fp);
+  j = fread(str, 1, LINE_LENGTH, fp);
   if (LINE_LENGTH != j) {
     fprintf(stderr, "End of file reading '%s'\n", name);
     return 0;
   }
-  i = fgetc((FILE *)fp);
+  i = fgetc(fp);
   while (i >= 0 && '\n' != (char)i) {
     if (my_isspace(i))
-      i = fgetc((FILE *)fp);
+      i = fgetc(fp);
     else
       break;
   }
@@ -78,9 +78,9 @@ int read_text_header(const FILE *fp, header *hp, const char *name)
   return 1;
 }
 
-int read_binary_header(const FILE *fp, header *hp, const char *name)
+int read_binary_header(FILE *fp, const header **hp, const char *name)
 {
-  header h;
+  header *h;
   unsigned int nob;
   unsigned int nod;
   unsigned int prime;
@@ -94,10 +94,10 @@ int read_binary_header(const FILE *fp, header *hp, const char *name)
     fprintf(stderr, "Failed to allocate header for binary input %s\n", name);
     return 0;
   }
-  if (1 != fread(&nob, sizeof(unsigned int), 1, (FILE *)fp) ||
-      1 != fread(&prime, sizeof(unsigned int), 1, (FILE *)fp) ||
-      1 != fread(&nor, sizeof(unsigned int), 1, (FILE *)fp) ||
-      1 != fread(&noc, sizeof(unsigned int), 1, (FILE *)fp)) {
+  if (1 != fread(&nob, sizeof(unsigned int), 1, fp) ||
+      1 != fread(&prime, sizeof(unsigned int), 1, fp) ||
+      1 != fread(&nor, sizeof(unsigned int), 1, fp) ||
+      1 != fread(&noc, sizeof(unsigned int), 1, fp)) {
     fprintf(stderr, "Failed to read header from binary input %s\n", name);
     return 0;
   }
@@ -111,6 +111,7 @@ int read_binary_header(const FILE *fp, header *hp, const char *name)
   header_set_prime(h, prime);
   header_set_nor(h, nor);
   header_set_noc(h, noc);
+  header_set_len(h);
   *hp = h;
   return 1;
 }

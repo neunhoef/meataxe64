@@ -9,3 +9,4 @@
 20010909 - first input and add mod 5
 20010909 - first multiply mod 5
 20010910 - first input, print, add and multiply for GF4
+20010912 - cleaning up, introduced len, started on memory.h Knocked .3 sec off B multiply

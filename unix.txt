@@ -5,7 +5,7 @@
 # All rights reserved
 # Company confidential
 #
-# $Id: unix.txt,v 1.1 2001/08/28 21:39:44 jon Exp $
+# $Id: unix.txt,v 1.2 2001/09/12 23:13:04 jon Exp $
 #
 EXEEXT=
 LIBEXT= a
@@ -14,7 +14,7 @@ DEPENDOBJEXT= o
 DEPENDEXT= d
 CC= gcc
 DEPEND_CC= gcc
-REL_COMPILE_FLAGS= -O3
+REL_COMPILE_FLAGS= -O3 -foptimize-sibling-calls -falign-loops=2 -falign-functions=2
 DEBUG_COMPILE_FLAGS= -g
 LINK_FLAGS= -static
 REL_LINK_FLAGS= $(LINK_FLAGS)
