@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: find_nullity_one_with_orders,v 1.8 2002/09/11 21:20:47 jon Exp $
+# $Id: find_nullity_one_with_orders,v 1.9 2002/09/16 09:26:47 jon Exp $
 #
 # Script to find an element of nullity one in two generators
 #
@@ -35,6 +35,15 @@ tmp=tmp${PPID}
 ok=0
 nor=`znor $a`
 # Try zsums
+q=1
+for x in $*; do
+  r=`zprime $x`
+  if [ $r -gt $q ]; then
+    q=$r
+    break
+  fi
+done
+depth=`max_depth $q 1023`
 while [ $ok -eq 0 ]; do
   out=`zsums ${tmp}.zsums 5 1 $memory $* 2>/dev/null`
   ret=$?

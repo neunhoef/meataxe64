@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: functions,v 1.5 2002/06/25 10:30:12 jon Exp $
+# $Id: functions,v 1.6 2002/09/16 09:26:47 jon Exp $
 #
 # Functions to support the meataxe scripts
 #
@@ -59,4 +59,21 @@ function fsize()
   local x
   x=`ls -s -k $1 | sed -e "s/^ *//g;s/  *.*$//g"`
   echo $x
+}
+
+function max_depth()
+{
+  local depth
+  local total
+  local max
+  local q
+  depth=0
+  total=1
+  max=$2
+  q=$1
+  while [ $total -lt $max ]; do
+    let depth=$depth+1
+    let total=$total*$q
+  done
+  echo $depth
 }

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: split,v 1.13 2002/09/11 21:20:47 jon Exp $
+# $Id: split,v 1.14 2002/09/16 09:26:47 jon Exp $
 #
 # Script to split a representation
 #
@@ -121,8 +121,17 @@ if [ 2 -eq $q ]; then
 elif [ 3 -le $q ]; then
   max_null=15
 fi
+q=1
+for x in $a $b $*; do
+  r=`zprime $x`
+  if [ $r -gt $q ]; then
+    q=$r
+    break
+  fi
+done
+depth=`max_depth $q 1023`
 while [ $ok -eq 0 ]; do
-  out=`zsums ${tmp}.zsums 10 $max_null $memory ${y[0]} ${order[0]} ${y[1]} ${order[1]} 2>/dev/null`
+  out=`zsums ${tmp}.zsums $depth $max_null $memory ${y[0]} ${order[0]} ${y[1]} ${order[1]} 2>/dev/null`
   ret=$?
   if [ 2 -eq $ret ]; then
     let memory=`more_memory $memory`
@@ -144,7 +153,7 @@ ok=0
 let max_null=$nor-1
 echo searching for any element using zsums
 while [ $ok -eq 0 ]; do
-  out=`zsums ${tmp}.zsums 10 $max_null $memory ${y[0]} ${order[0]} ${y[1]} ${order[1]} 2>/dev/null`
+  out=`zsums ${tmp}.zsums $depth $max_null $memory ${y[0]} ${order[0]} ${y[1]} ${order[1]} 2>/dev/null`
   ret=$?
   if [ 2 -eq $ret ]; then
     let memory=`more_memory $memory`
