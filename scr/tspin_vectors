@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: tspin_vectors,v 1.3 2002/10/13 20:07:20 jon Exp $
+# $Id: tspin_vectors,v 1.4 2002/10/14 09:24:05 jon Exp $
 #
 # Compute subspaces, with a memory limit,
 # using tensor product generators
@@ -49,7 +49,7 @@ while [ $x -lt $y ]; do
     if [ $rn -eq 0 ]; then
       echo vector $x is zero and so not considered
     else
-      sub=`ztsp ${tmp}.0 $1.$x.ss $a1 $a2 $b1 $b2 $memory`
+      sub=`ztsp -m $memory ${tmp}.0 $1.$x.ss $a1 $a2 $b1 $b2`
       ret=$?
       if [ $ret -eq 0 ]; then
         echo subspace $1.$x.ss of size $sub found for element $x
