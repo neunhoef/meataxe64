@@ -1,5 +1,5 @@
 /*
- * $Id: rows.c,v 1.15 2002/06/28 08:39:16 jon Exp $
+ * $Id: rows.c,v 1.16 2002/09/24 20:39:43 jon Exp $
  *
  * Row manipulation for meataxe
  *
@@ -50,8 +50,8 @@ static void row_add_2(const unsigned int *row1, const unsigned int *row2,
   }
 }
 
-static void row_inc_2(const unsigned int *row1,
-                      unsigned int *row2, unsigned int len)
+static void row_inc_2_sub(const unsigned int *row1,
+                          unsigned int *row2, unsigned int len)
 {
   unsigned int i, j;
   assert(0 != len);
@@ -71,6 +71,25 @@ static void row_inc_2(const unsigned int *row1,
   }
   for (i = j * 8; i < len; i++) {
     *(row2++) ^= *(row1++);
+  }
+}
+
+static void row_inc_2(const unsigned int *row1,
+                      unsigned int *row2, unsigned int len)
+{
+  if (len > 10) {
+    /* Search for first non-zero */
+    while (len > 0) {
+      if (0 != *row1) {
+        row_inc_2_sub(row1, row2, len);
+        return;
+      }
+      row1++;
+      row2++;
+      len--;
+    }
+  } else {
+    row_inc_2_sub(row1, row2, len);
   }
 }
 
@@ -118,7 +137,7 @@ static void row_add_3(const unsigned int *row1, const unsigned int *row2,
   }
 }
 
-static void row_inc_3(const unsigned int *row1, unsigned int *row2, unsigned int len)
+static void row_inc_3_sub(const unsigned int *row1, unsigned int *row2, unsigned int len)
 {
   unsigned int i;
   assert(0 != len);
@@ -132,6 +151,25 @@ static void row_inc_3(const unsigned int *row1, unsigned int *row2, unsigned int
     mod_3_add(a,b,c,d,e,f,g,h);
     *(row2++) = c - (h * 3); /* Reduce mod 3 if needed */
     assert(check_for_3(c - (h * 3)));
+  }
+}
+
+static void row_inc_3(const unsigned int *row1,
+                      unsigned int *row2, unsigned int len)
+{
+  if (len > 10) {
+    /* Search for first non-zero */
+    while (len > 0) {
+      if (0 != *row1) {
+        row_inc_3_sub(row1, row2, len);
+        return;
+      }
+      row1++;
+      row2++;
+      len--;
+    }
+  } else {
+    row_inc_3_sub(row1, row2, len);
   }
 }
 
@@ -159,8 +197,8 @@ static void scaled_row_add_3(const unsigned int *row1, const unsigned int *row2,
   }
 }
 
-static void scaled_row_inc_3(const unsigned int *row1, unsigned int *row2,
-                             unsigned int len, unsigned int elt)
+static void scaled_row_inc_3_sub(const unsigned int *row1, unsigned int *row2,
+                                 unsigned int len, unsigned int elt)
 {
   unsigned int i;
   assert(2 == elt);
@@ -177,6 +215,25 @@ static void scaled_row_inc_3(const unsigned int *row1, unsigned int *row2,
     mod_3_add(a,b,c,d,e,f,g,h);
     assert(check_for_3(c - (h * 3)));
     *(row2++) = c - (h * 3); /* Reduce mod 3 if needed */
+  }
+}
+
+static void scaled_row_inc_3(const unsigned int *row1, unsigned int *row2,
+                             unsigned int len, unsigned int elt)
+{
+  if (len > 10) {
+    /* Search for first non-zero */
+    while (len > 0) {
+      if (0 != *row1) {
+        scaled_row_inc_3_sub(row1, row2, len, elt);
+        return;
+      }
+      row1++;
+      row2++;
+      len--;
+    }
+  } else {
+    scaled_row_inc_3_sub(row1, row2, len, elt);
   }
 }
 
@@ -270,8 +327,8 @@ static void scaled_row_add_4(const unsigned int *row1, const unsigned int *row2,
   }
 }
 
-static void scaled_row_inc_4(const unsigned int *row1, unsigned int *row2,
-                             unsigned int len, unsigned int elt)
+static void scaled_row_inc_4_sub(const unsigned int *row1, unsigned int *row2,
+                                 unsigned int len, unsigned int elt)
 {
   unsigned int i;
   assert(0 != len);
@@ -285,6 +342,25 @@ static void scaled_row_inc_4(const unsigned int *row1, unsigned int *row2,
     b = *(row2);
     scale_mod_4(a,c,d,e,f,g,h,elt);
     *(row2++) = a ^ b;
+  }
+}
+
+static void scaled_row_inc_4(const unsigned int *row1, unsigned int *row2,
+                             unsigned int len, unsigned int elt)
+{
+  if (len > 10) {
+    /* Search for first non-zero */
+    while (len > 0) {
+      if (0 != *row1) {
+        scaled_row_inc_4_sub(row1, row2, len, elt);
+        return;
+      }
+      row1++;
+      row2++;
+      len--;
+    }
+  } else {
+    scaled_row_inc_4_sub(row1, row2, len, elt);
   }
 }
 
@@ -369,7 +445,7 @@ static void row_add_5(const unsigned int *row1, const unsigned int *row2,
   }
 }
 
-static void row_inc_5(const unsigned int *row1, unsigned int *row2, unsigned int len)
+static void row_inc_5_sub(const unsigned int *row1, unsigned int *row2, unsigned int len)
 {
   unsigned int i;
   assert(0 != len);
@@ -383,6 +459,25 @@ static void row_inc_5(const unsigned int *row1, unsigned int *row2, unsigned int
     mod_5_add(a,b,c,d,e,f,g,h,j,k);
     assert(check_for_5(f - (k * 5)));
     *(row2++) = f - (k * 5); /* Reduce mod 5 if needed */
+  }
+}
+
+static void row_inc_5(const unsigned int *row1,
+                      unsigned int *row2, unsigned int len)
+{
+  if (len > 10) {
+    /* Search for first non-zero */
+    while (len > 0) {
+      if (0 != *row1) {
+        row_inc_5_sub(row1, row2, len);
+        return;
+      }
+      row1++;
+      row2++;
+      len--;
+    }
+  } else {
+    row_inc_5_sub(row1, row2, len);
   }
 }
 
@@ -439,8 +534,8 @@ static void scaled_row_add_5(const unsigned int *row1, const unsigned int *row2,
   }
 }
 
-static void scaled_row_inc_5(const unsigned int *row1, unsigned int *row2,
-                             unsigned int len, unsigned int elt)
+static void scaled_row_inc_5_sub(const unsigned int *row1, unsigned int *row2,
+                                 unsigned int len, unsigned int elt)
 {
   unsigned int i;
   assert(0 != len);
@@ -456,6 +551,25 @@ static void scaled_row_inc_5(const unsigned int *row1, unsigned int *row2,
     mod_5_add(a,b,c,d,e,f,g,h,j,k);
     assert(check_for_5(f - (k * 5)));
     *(row2++) = f - (k * 5); /* Reduce mod 5 if needed */
+  }
+}
+
+static void scaled_row_inc_5(const unsigned int *row1, unsigned int *row2,
+                             unsigned int len, unsigned int elt)
+{
+  if (len > 10) {
+    /* Search for first non-zero */
+    while (len > 0) {
+      if (0 != *row1) {
+        scaled_row_inc_5_sub(row1, row2, len, elt);
+        return;
+      }
+      row1++;
+      row2++;
+      len--;
+    }
+  } else {
+    scaled_row_inc_5_sub(row1, row2, len, elt);
   }
 }
 
