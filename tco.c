@@ -1,5 +1,5 @@
 /*
- * $Id: tco.c,v 1.24 2004/06/12 16:54:27 jon Exp $
+ * $Id: tco.c,v 1.25 2004/07/31 07:50:15 jon Exp $
  *
  * Tensor condense one group element
  *
@@ -189,8 +189,10 @@ static int cleanup(unsigned int *left_multiplicities, unsigned int *right_multip
 
 #define GREASE_MAX 6
 
-int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const char *irr, const char *end,
+int tcondense(unsigned int s, const char *mults_l, const char *mults_r,
+              const char *irr, const char *end,
               const char *left, const char *right, const char *out,
+              const char *in, unsigned int loop, unsigned int init,
               int argc, const char *const *argv, const char *name)
 {
   unsigned int *left_multiplicities = NULL, *right_multiplicities = NULL, *dim_irr = NULL, *dim_end = NULL;
@@ -199,10 +201,11 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
     max_rows, max_irr, max_irr2, max_irr_len, max_end, i, j, k;
   unsigned int *nor_p = NULL, *nor_q = NULL, *noc_p = NULL, *noc_q = NULL, *len_p = NULL, *len_q = NULL;
   const header *h_l, *h_r, *h_o, **h_p, **h_q;
-  unsigned int alpha, beta, gamma, delta, extent_l, extent_r, extent_te, extent_end, extent_q, extent_p, o_r, o_c, m_r, m_c, n_r, n_c;
+  unsigned int alpha, beta, gamma, delta, extent_l, extent_r, extent_te, extent_end, extent_q, extent_p, o_r, m_r, n_r;
   unsigned int **rows, **lrows, **rrows, **te_rows, *te_row, **end_rows, **q_rows, **p_rows, *q_row;
   unsigned int mask, elts_per_word, elts_per_word_nob;
   unsigned int **expanded_lrows, **expanded_rrows;
+  unsigned int vector[3] = {0, 0, 0};
   row_ops row_operations;
   grease_struct grease;
   unsigned int powers[GREASE_MAX];
@@ -254,6 +257,44 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
                    NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL);
   }
   fclose(inp);
+  /* Check that loop and init make sense */
+  switch (loop) {
+  case 0:
+    if (init >= s) {
+      fprintf(stderr, "%s: cannot restart beyond end of loop 0, terminating\n", name);
+      return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
+                     NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                     NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL);
+    }
+    vector[0] = init;
+    break;
+  case 1:
+    if (init >= left_multiplicities[s-1]) {
+      fprintf(stderr, "%s: cannot restart beyond end of loop 1, terminating\n", name);
+      return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
+                     NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                     NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL);
+    }
+    vector[0] = s-1;
+    vector[1] = init;
+    break;
+  case 2:
+    if (init >= right_multiplicities[s-1]) {
+      fprintf(stderr, "%s: cannot restart beyond end of loop 2, terminating\n", name);
+      return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
+                     NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                     NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL);
+    }
+    vector[0] = s-1;
+    vector[1] = left_multiplicities[s-1] - 1;
+    vector[2] = init;
+    break;
+  default:
+    fprintf(stderr, "%s: cannot restart further in than loop 2, terminating\n", name);
+      return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
+                     NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                     NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL);
+  }
   inp = fopen(irr, "r");
   if (NULL == inp) {
     fprintf(stderr, "%s: failed to open irreducible dimensions file '%s', terminating\n", name, irr);
@@ -308,13 +349,11 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
     return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
                   NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
                   NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL);
-    return 0;
   }
   if (0 == open_and_read_binary_header(&rightp, &h_r, right, name)) {
     return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
                    NULL, NULL, NULL, NULL, NULL, NULL, NULL, leftp, NULL,
                    h_l, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL);
-    return 0;
   }
   nob = header_get_nob(h_l);
   lim = bits_in_unsigned_int - nob;
@@ -437,6 +476,50 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
                    nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, NULL,
                    NULL, NULL, p, q, h_p, h_q, s, h_o, NULL, NULL, lrows, rrows);
   }
+  if (0 != init || 0 != loop) {
+    /* Must copy some stuff first */
+    FILE *inp;
+    const header *h_i;
+    unsigned int nrows = 0;
+    unsigned int *row = memory_pointer(0);
+    /* Compute the number of rows */
+    for (i = 0; i < vector[0]; i++) {
+      nrows += left_multiplicities[i] * right_multiplicities[i] * dim_end[i];
+    }
+    i = vector[0];
+    for (j = 0; j < vector[1]; j++) {
+      nrows += right_multiplicities[i] * dim_end[i];
+    }
+    for (k = 0; k < vector[2]; k++) {
+      nrows += dim_end[i];
+    }
+    /* Open the input */
+    if (0 == open_and_read_binary_header(&inp, &h_i, in, name)) {
+      return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
+                     nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, NULL,
+                     NULL, NULL, p, q, h_p, h_q, s, h_o, outp, NULL, lrows, rrows);
+    }
+    /* Check the parameters */
+    if (header_get_prime(h_i) != prime ||
+        header_get_nor(h_i) != nor ||
+        header_get_noc(h_i) != nor) {
+      fclose(inp);
+      return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
+                     nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, NULL,
+                     NULL, NULL, p, q, h_p, h_q, s, h_o, outp, NULL, lrows, rrows);
+    }
+    /* Delete the header */
+    header_free(h_i);
+    /* Copy */
+    if (0 == endian_copy_matrix(inp, outp, row, len, nrows)) {
+      fprintf(stderr, "%s: failed to copy %d rows from %s to %s, terminating\n", name, nrows, in, out);
+      fclose(inp);
+      return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
+                     nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, NULL,
+                     NULL, NULL, p, q, h_p, h_q, s, h_o, outp, NULL, lrows, rrows);
+    }
+    fclose(inp);
+  }
   rows = matrix_malloc(max_end);
   for (i = 0; i < max_end; i++) {
     rows[i] = memory_pointer_offset(extent_l + extent_r + extent_te + extent_end + extent_p + extent_q, i, len);
@@ -471,7 +554,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
       free(te_row);
       return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
                      nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, NULL,
-                     NULL, NULL, p, q, h_p, h_q, s, h_o, NULL, rows, lrows, rrows);
+                     NULL, NULL, p, q, h_p, h_q, s, h_o, outp, rows, lrows, rrows);
     }
   }
   short_rows_init(prime, &row_operations);
@@ -485,7 +568,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
     free(te_row);
     return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
                    nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, NULL,
-                   NULL, NULL, p, q, h_p, h_q, s, h_o, NULL, rows, lrows, rrows);
+                   NULL, NULL, p, q, h_p, h_q, s, h_o, outp, rows, lrows, rrows);
   }
   if (grease.level > GREASE_MAX) {
     grease.level = GREASE_MAX; /* No point in greasing these little multiplications */
@@ -503,7 +586,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
     free(te_row);
     return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
                    nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, NULL,
-                   NULL, NULL, p, q, h_p, h_q, s, h_o, NULL, rows, lrows, rrows);
+                   NULL, NULL, p, q, h_p, h_q, s, h_o, outp, rows, lrows, rrows);
   }
   j = 1;
   for (i = 0; i < GREASE_MAX; i++) {
@@ -532,6 +615,8 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
     unsigned int dim_irr_i = dim_irr[i];
     unsigned int dim_endi = dim_end[i];
     unsigned int noc_qi = noc_q[i];
+    int skipping0 = i < vector[0];
+    int equal0 = i == vector[0];
     /* Read ahead q[i], only needed once */
     if (0 == endian_read_matrix(q[i], q_rows, len_q[i], nor_q[i])) {
       matrix_free(te_rows);
@@ -544,7 +629,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
       free(te_row);
       return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
                      nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, NULL,
-                     NULL, NULL, p, q, h_p, h_q, s, h_o, NULL, rows, lrows, rrows);
+                     NULL, NULL, p, q, h_p, h_q, s, h_o, outp, rows, lrows, rrows);
     }
     for (j = 0; j < noc_qi; j++) {
       unsigned int acc = 0;
@@ -556,12 +641,14 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
     }
     for (alpha = 0; alpha < left_multiplicities[i]; alpha++) {
       /* Row loop over multiplicity of Si */
+      int skipping1 = skipping0 || (equal0 && (alpha < vector[1]));
+      int equal1 = (equal0 && (alpha == vector[1]));
       /* First read lrows */
       assert(dim_irr_i <= max_irr);
       if (0 == endian_read_matrix(leftp, lrows, len_l, dim_irr_i)) {
         return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
                        nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, NULL,
-                       NULL, NULL, p, q, h_p, h_q, s, h_o, NULL, rows, lrows, rrows);
+                       NULL, NULL, p, q, h_p, h_q, s, h_o, outp, rows, lrows, rrows);
       }
       /* Now expand these rows */
       for (k = 0; k < dim_irr_i; k++) {
@@ -571,171 +658,177 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
       }
       for (beta = 0; beta < right_multiplicities[i]; beta++) {
         /* Row loop over multiplicity of Si* */
-        unsigned int beta_i = n_r + beta * dim_irr_i;
-        for (j = 0; j < dim_endi; j++) {
-          row_init(rows[j], len);
-        }
-        o_c = 0;
-        m_c = 0;
-        n_c = 0;
-        for (j = 0; j < s; j++) {
-          /* Column loop over distinct irreducibles of H */
-          unsigned int dim_irr_j = dim_irr[j];
-          unsigned int nobj = nob * dim_irr_j;
-          unsigned int dim_endj = dim_end[j];
-          unsigned int len_pj = len_p[j];
-          unsigned int len_qj = len_q[j];
-          unsigned int noc_qj = noc_q[j];
-          unsigned int left_multiplicitiesj = left_multiplicities[j];
-          unsigned int right_multiplicitiesj = right_multiplicities[j];
-          unsigned int **p_rowsj = p_rows + j * max_irr2;
-          unsigned int p_rowsj_elt = get_element_from_row(nob, 0, *p_rowsj);
-          for (gamma = 0; gamma < left_multiplicitiesj; gamma++) {
-            /* Column loop over multiplicity of Sj */
-            for (delta = 0; delta < right_multiplicitiesj; delta++) {
-              /* Column loop over multiplicity of Sj* */
-              unsigned int te_i, te_o_r;
-              unsigned int base_i = n_c + delta * dim_irr_j;
-              unsigned int **arg1, **arg2;
-              te_o_r = 0;
-              for (te_i = 0; te_i < dim_irr_i; te_i++) {
-                /* Rows of M */
-                unsigned int *expanded_lrow = expanded_lrows[te_i] + m_c + gamma * dim_irr_j;
-                unsigned int te_j;
-                for (te_j = 0; te_j < dim_irr_i; te_j++) {
-                  /* Rows of N */
-                  if (0 != q_row[te_o_r]) {
+        int skipping2 = skipping1 || (equal1 && (beta < vector[2]));
+        if (skipping2) {
+#if 0
+          printf("Skipping with i = %d, alpha = %d, beta = %d\n",
+                 i, alpha, beta);
+#endif
+        } else {
+          unsigned int beta_i = n_r + beta * dim_irr_i;
+          unsigned int o_c = 0, m_c = 0, n_c = 0;
+          for (j = 0; j < dim_endi; j++) {
+            row_init(rows[j], len);
+          }
+          for (j = 0; j < s; j++) {
+            /* Column loop over distinct irreducibles of H */
+            unsigned int dim_irr_j = dim_irr[j];
+            unsigned int nobj = nob * dim_irr_j;
+            unsigned int dim_endj = dim_end[j];
+            unsigned int len_pj = len_p[j];
+            unsigned int len_qj = len_q[j];
+            unsigned int noc_qj = noc_q[j];
+            unsigned int left_multiplicitiesj = left_multiplicities[j];
+            unsigned int right_multiplicitiesj = right_multiplicities[j];
+            unsigned int **p_rowsj = p_rows + j * max_irr2;
+            unsigned int p_rowsj_elt = get_element_from_row(nob, 0, *p_rowsj);
+            for (gamma = 0; gamma < left_multiplicitiesj; gamma++) {
+              /* Column loop over multiplicity of Sj */
+              for (delta = 0; delta < right_multiplicitiesj; delta++) {
+                /* Column loop over multiplicity of Sj* */
+                unsigned int te_i, te_o_r;
+                unsigned int base_i = n_c + delta * dim_irr_j;
+                unsigned int **arg1, **arg2;
+                te_o_r = 0;
+                for (te_i = 0; te_i < dim_irr_i; te_i++) {
+                  /* Rows of M */
+                  unsigned int *expanded_lrow = expanded_lrows[te_i] + m_c + gamma * dim_irr_j;
+                  unsigned int te_j;
+                  for (te_j = 0; te_j < dim_irr_i; te_j++) {
+                    /* Rows of N */
+                    if (0 != q_row[te_o_r]) {
 #if use_minor_tensor
-                    minor_tensor(expanded_rrows, beta_i, te_j, te_rows,
-                                 te_o_r, max_irr_len, dim_irr_j, expanded_lrow,
-                                 base_i, row_operations, te_row, nob, elts_per_word_nob, nobj);
+                      minor_tensor(expanded_rrows, beta_i, te_j, te_rows,
+                                   te_o_r, max_irr_len, dim_irr_j, expanded_lrow,
+                                   base_i, row_operations, te_row, nob, elts_per_word_nob, nobj);
 #else
-                    unsigned int te_o_c_word = 0;
-                    unsigned int te_o_c_offset = 0;
-                    unsigned int word = 0;
-                    unsigned int *expanded_rrow = expanded_rrows[beta_i + te_j] + base_i;
-                    unsigned int *te_rowsr = te_rows[te_o_r];
-                    unsigned int *expanded_lrow1 = expanded_lrow;
-                    unsigned int *expanded_lrow2 = expanded_lrow + dim_irr_j;
-                    row_init(te_rowsr, max_irr_len);
-                    while (expanded_lrow1 < expanded_lrow2) {
-                      /* Columns of M */
-                      unsigned int elt = *expanded_lrow1;
-                      if (0 != elt) {
-                        unsigned int *row = expanded_rrow; /* was rrows */
-                        unsigned int *row1;
-                        if (1 != elt) {
-                          (*row_operations.scaler)(row, te_row, dim_irr_j, elt);
-                          row = te_row;
-                        }
-                        row1 = row + dim_irr_j;
-                        while (row < row1) {
-                          elt = *row;
-                          word |= elt << te_o_c_offset;
-                          te_o_c_offset += nob;
+                      unsigned int te_o_c_word = 0;
+                      unsigned int te_o_c_offset = 0;
+                      unsigned int word = 0;
+                      unsigned int *expanded_rrow = expanded_rrows[beta_i + te_j] + base_i;
+                      unsigned int *te_rowsr = te_rows[te_o_r];
+                      unsigned int *expanded_lrow1 = expanded_lrow;
+                      unsigned int *expanded_lrow2 = expanded_lrow + dim_irr_j;
+                      row_init(te_rowsr, max_irr_len);
+                      while (expanded_lrow1 < expanded_lrow2) {
+                        /* Columns of M */
+                        unsigned int elt = *expanded_lrow1;
+                        if (0 != elt) {
+                          unsigned int *row = expanded_rrow; /* was rrows */
+                          unsigned int *row1;
+                          if (1 != elt) {
+                            (*row_operations.scaler)(row, te_row, dim_irr_j, elt);
+                            row = te_row;
+                          }
+                          row1 = row + dim_irr_j;
+                          while (row < row1) {
+                            elt = *row;
+                            word |= elt << te_o_c_offset;
+                            te_o_c_offset += nob;
+                            if (te_o_c_offset > lim) {
+                              te_o_c_offset = 0;
+                              te_rowsr[te_o_c_word] = word;
+                              te_o_c_word++;
+                              word = 0;
+                            }
+                            row++;
+                          }
+                        } else {
+                          te_o_c_offset += nobj;
                           if (te_o_c_offset > lim) {
-                            te_o_c_offset = 0;
                             te_rowsr[te_o_c_word] = word;
-                            te_o_c_word++;
+                            te_o_c_word += te_o_c_offset / elts_per_word_nob;
+                            te_o_c_offset %= elts_per_word_nob;
                             word = 0;
                           }
-                          row++;
                         }
-                      } else {
-                        te_o_c_offset += nobj;
-                        if (te_o_c_offset > lim) {
-                          te_rowsr[te_o_c_word] = word;
-                          te_o_c_word += te_o_c_offset / elts_per_word_nob;
-                          te_o_c_offset %= elts_per_word_nob;
-                          word = 0;
-                        }
+                        expanded_lrow1++;
                       }
-                      expanded_lrow1++;
-                    }
-                    te_rowsr[te_o_c_word] = word;
+                      te_rowsr[te_o_c_word] = word;
 #endif
-                  }
-                  te_o_r++;
-                }
-              }
-              if (1 == noc_qi && 1 == *q_row) {
-                /* 1 x 1 identity matrix qi, no point in multiply */
-                arg1 = te_rows;
-                arg2 = end_rows;
-              } else {
-                if (0 == mul_in_store(q_rows, te_rows, end_rows,
-                                      noc_qi, len_qj, nob, dim_endi, prime,
-                                      0, &grease)) {
-                  matrix_free(te_rows);
-                  matrix_free(end_rows);
-                  matrix_free(q_rows);
-                  matrix_free(q_row);
-                  matrix_free(p_rows);
-                  grease_free(&grease);
-                  free_expanded(expanded_lrows, max_irr);
-                  free_expanded(expanded_rrows, nor_r);
-                  free(te_row);
-                  return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
-                                 nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, NULL,
-                                 NULL, NULL, p, q, h_p, h_q, s, h_o, NULL, rows, lrows, rrows);
-                }
-                arg1 = end_rows;
-                arg2 = te_rows;
-              }
-              /* arg1 is the input to the second multiply, and arg2 the result */
-              if (1 == noc_qj && 1 == p_rowsj_elt) {
-                /* 1 x 1 identity matrix pj, no point in multiply */
-                arg2 = arg1; /* Result is the same as input */
-              } else {
-                if (0 == mul_in_store(arg1, p_rowsj, arg2, noc_qj,
-                                      len_pj, nob, dim_endi, prime,
-                                      0, &grease)) {
-                  matrix_free(te_rows);
-                  matrix_free(end_rows);
-                  matrix_free(q_rows);
-                  matrix_free(q_row);
-                  matrix_free(p_rows);
-                  grease_free(&grease);
-                  free_expanded(expanded_lrows, max_irr);
-                  free_expanded(expanded_rrows, nor_r);
-                  free(te_row);
-                  return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
-                                 nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, NULL,
-                                 NULL, NULL, p, q, h_p, h_q, s, h_o, NULL, rows, lrows, rrows);
-                }
-              }
-              /* Write into the output */
-              for (k = 0; k < dim_endi; k++) {
-                unsigned int *rowsk =  rows[k];
-                unsigned int *te_rowsk =  arg2[k];
-                unsigned int l;
-                for (l = 0; l < dim_endj; l++) {
-                  unsigned int elt = get_element_from_row_with_params(nob, l, mask, elts_per_word, te_rowsk);
-                  if (0 != elt) {
-                    put_element_to_row(nob, o_c + l, rowsk, elt);
+                    }
+                    te_o_r++;
                   }
                 }
+                if (1 == noc_qi && 1 == *q_row) {
+                  /* 1 x 1 identity matrix qi, no point in multiply */
+                  arg1 = te_rows;
+                  arg2 = end_rows;
+                } else {
+                  if (0 == mul_in_store(q_rows, te_rows, end_rows,
+                                        noc_qi, len_qj, nob, dim_endi, prime,
+                                        0, &grease)) {
+                    matrix_free(te_rows);
+                    matrix_free(end_rows);
+                    matrix_free(q_rows);
+                    matrix_free(q_row);
+                    matrix_free(p_rows);
+                    grease_free(&grease);
+                    free_expanded(expanded_lrows, max_irr);
+                    free_expanded(expanded_rrows, nor_r);
+                    free(te_row);
+                    return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
+                                   nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, NULL,
+                                   NULL, NULL, p, q, h_p, h_q, s, h_o, outp, rows, lrows, rrows);
+                  }
+                  arg1 = end_rows;
+                  arg2 = te_rows;
+                }
+                /* arg1 is the input to the second multiply, and arg2 the result */
+                if (1 == noc_qj && 1 == p_rowsj_elt) {
+                  /* 1 x 1 identity matrix pj, no point in multiply */
+                  arg2 = arg1; /* Result is the same as input */
+                } else {
+                  if (0 == mul_in_store(arg1, p_rowsj, arg2, noc_qj,
+                                        len_pj, nob, dim_endi, prime,
+                                        0, &grease)) {
+                    matrix_free(te_rows);
+                    matrix_free(end_rows);
+                    matrix_free(q_rows);
+                    matrix_free(q_row);
+                    matrix_free(p_rows);
+                    grease_free(&grease);
+                    free_expanded(expanded_lrows, max_irr);
+                    free_expanded(expanded_rrows, nor_r);
+                    free(te_row);
+                    return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
+                                   nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, NULL,
+                                   NULL, NULL, p, q, h_p, h_q, s, h_o, outp, rows, lrows, rrows);
+                  }
+                }
+                /* Write into the output */
+                for (k = 0; k < dim_endi; k++) {
+                  unsigned int *rowsk =  rows[k];
+                  unsigned int *te_rowsk =  arg2[k];
+                  unsigned int l;
+                  for (l = 0; l < dim_endj; l++) {
+                    unsigned int elt = get_element_from_row_with_params(nob, l, mask, elts_per_word, te_rowsk);
+                    if (0 != elt) {
+                      put_element_to_row(nob, o_c + l, rowsk, elt);
+                    }
+                  }
+                }
+                o_c += dim_endj; /* Increment output column index */
               }
-              o_c += dim_endj; /* Increment output column index */
             }
+            m_c += left_multiplicitiesj * dim_irr_j;
+            n_c += right_multiplicitiesj * dim_irr_j;
           }
-          m_c += left_multiplicitiesj * dim_irr_j;
-          n_c += right_multiplicitiesj * dim_irr_j;
-        }
-        /* Now write out the rows we've just made */
-        if (0 == endian_write_matrix(outp, rows, len, dim_endi)) {
-          matrix_free(te_rows);
-          matrix_free(end_rows);
-          matrix_free(q_rows);
-          matrix_free(q_row);
-          matrix_free(p_rows);
-          grease_free(&grease);
-          free_expanded(expanded_lrows, max_irr);
-          free_expanded(expanded_rrows, nor_r);
-          free(te_row);
-          return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
-                         nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, NULL,
-                         NULL, NULL, p, q, h_p, h_q, s, h_o, outp, rows, lrows, rrows);
+          /* Now write out the rows we've just made */
+          if (0 == endian_write_matrix(outp, rows, len, dim_endi)) {
+            matrix_free(te_rows);
+            matrix_free(end_rows);
+            matrix_free(q_rows);
+            matrix_free(q_row);
+            matrix_free(p_rows);
+            grease_free(&grease);
+            free_expanded(expanded_lrows, max_irr);
+            free_expanded(expanded_rrows, nor_r);
+            free(te_row);
+            return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
+                           nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, NULL,
+                           NULL, NULL, p, q, h_p, h_q, s, h_o, outp, rows, lrows, rrows);
+          }
         }
         o_r += dim_endi; /* Increment output row index */
       }

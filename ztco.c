@@ -1,5 +1,5 @@
 /*
- * $Id: ztco.c,v 1.4 2004/01/04 21:22:50 jon Exp $
+ * $Id: ztco.c,v 1.5 2004/07/31 07:50:15 jon Exp $
  *
  * Tensor condense
  *
@@ -44,7 +44,7 @@ int main(int argc, const char * const argv[])
   out = argv[8];
   memory_init(name, memory);
   endian_init();
-  ret = tcondense(s, mults_l, mults_r, irr, end, left, right, out, argc - 9, argv + 9, name);
+  ret = tcondense(s, mults_l, mults_r, irr, end, left, right, out, NULL, 0, 0, argc - 9, argv + 9, name);
   memory_dispose();
   if (1 == ret) {
     return 0;

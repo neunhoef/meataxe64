@@ -313,3 +313,4 @@ skew seventh
 20040617 - Split mul_in_store loop into main part and final part, then remove tests
 20040621 - Fix minor fault in error handling in zsymb
 20040728 - Fix minor fault in real_indicate
+20040731 - Add ztcocon to continue a tensor condense eg to recover from an unexpected machine shutdown)
