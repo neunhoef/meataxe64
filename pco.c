@@ -1,5 +1,5 @@
 /*
- * $Id: pco.c,v 1.5 2003/07/28 21:04:46 jon Exp $
+ * $Id: pco.c,v 1.6 2004/06/08 20:51:07 jon Exp $
  *
  * Permuation condense one group element
  *
@@ -103,7 +103,13 @@ int pcondense(const char *in1, const char *in2,
     orbit *orb = orbits->orbits + i;
     unsigned int j, k;
     row_init(row, len);
+#if 1
+    for (j = 0; j < nor_o; j++) {
+      int_row[j] = 0;
+    }
+#else
     memset(int_row, 0, nor_o * sizeof(unsigned int));
+#endif
     for (j = 0; j < orb->size; j++) {
       k = map[orb->values[j]];
       /* Now find its orbit */

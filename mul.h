@@ -1,5 +1,5 @@
 /*
- * $Id: mul.h,v 1.9 2004/06/06 11:49:21 jon Exp $
+ * $Id: mul.h,v 1.10 2004/06/08 20:51:07 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
@@ -33,6 +33,7 @@ extern int skip_mul_from_store(unsigned int offset, unsigned int **rows1, unsign
 extern int mul_in_store(unsigned int **rows1, unsigned int **rows2, unsigned int **rows3,
                         unsigned int noc_i, unsigned int len_o,
                         unsigned int nob, unsigned int nor_i, unsigned int prime,
+                        int preserve_rows,
                         grease grease);
 
 

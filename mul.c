@@ -1,5 +1,5 @@
 /*
- * $Id: mul.c,v 1.40 2004/06/06 11:49:21 jon Exp $
+ * $Id: mul.c,v 1.41 2004/06/08 20:51:07 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
@@ -528,15 +528,16 @@ int mul_from_store(unsigned int **rows1, unsigned int **rows3,
                              nob, nor, noc_o, prime, grease, verbose, m, name);
 }
 
-/* If parameter 1 is a map, then then map is in rows1[0] */
-/* Similarly parameter 2 */
+/* Does not handle maps */
 int mul_in_store(unsigned int **rows1, unsigned int **rows2, unsigned int **rows3,
                  unsigned int noc, unsigned int len,
                  unsigned int nob, unsigned int nor, unsigned int prime,
+                 int preserve_rows,
                  grease grease)
 {
   unsigned int i, j, l;
-  unsigned int **grease_rows;
+  unsigned int level;
+  unsigned int **grease_rows = NULL;
   assert(NULL != rows1);
   assert(NULL != rows2);
   assert(NULL != rows3);
@@ -544,17 +545,21 @@ int mul_in_store(unsigned int **rows1, unsigned int **rows2, unsigned int **rows
   assert(0 != nob); /* nob refers to rows1 */
   /* len may have come from m2, and hence would be zero for a map */
   assert(0 != len);
-  /* Save the grease row pointers */
-  grease_rows = matrix_malloc(grease->level);
-  l = 1;
-  /* Replace the initial allocated grease rows with the rows of rows2 */
-  for (j = 0; j < grease->level; j++) {
-    grease_rows[j] = grease->rows[l - 1];
-    l *= prime;
+  assert(NULL != grease);
+  level = grease->level;
+  if (preserve_rows) {
+    /* Save the grease row pointers */
+    grease_rows = matrix_malloc(level);
+    l = 1;
+    /* Replace the initial allocated grease rows with the rows of rows2 */
+    for (j = 0; j < level; j++) {
+      grease_rows[j] = grease->rows[l - 1];
+      l *= prime;
+    }
   }
   /* We will use our element instead */
-  for (i = 0; i < noc; i += grease->level) {
-    unsigned int size = (grease->level + i <= noc) ? grease->level : noc - i;
+  for (i = 0; i < noc; i += level) {
+    unsigned int size = (level + i <= noc) ? level : noc - i;
     unsigned int width = size * nob;
     unsigned int word_offset, bit_offset, mask;
     int in_word;
@@ -582,12 +587,14 @@ int mul_in_store(unsigned int **rows1, unsigned int **rows2, unsigned int **rows
       }
     }
   }
-  /* Restore the grease row pointers */
-  l = 1;
-  for (j = 0; j < grease->level; j++) {
-    grease->rows[l - 1] = grease_rows[j];
-    l *= prime;
+  if (preserve_rows) {
+    /* Restore the grease row pointers */
+    l = 1;
+    for (j = 0; j < level; j++) {
+      grease->rows[l - 1] = grease_rows[j];
+      l *= prime;
+    }
+    matrix_free(grease_rows);
   }
-  matrix_free(grease_rows);
   return 1;
 }

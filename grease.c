@@ -1,5 +1,5 @@
 /*
- * $Id: grease.c,v 1.23 2004/06/06 09:38:56 jon Exp $
+ * $Id: grease.c,v 1.24 2004/06/08 20:51:07 jon Exp $
  *
  * Functions to grease matrix rows
  *
@@ -127,7 +127,10 @@ void grease_init_rows(grease grease, unsigned int prime)
   unsigned int i, j, k, *l;
   assert(NULL != grease);
   assert(0 != grease->level);
-  memset(grease->status, 0, grease->size * sizeof(unsigned int));
+  j = grease->size;
+  for (i = 0; i < j; i++) {
+    grease->status[i] = 0;
+  }
   j = 1;
   k = grease->level;
   l = grease->status - 1;

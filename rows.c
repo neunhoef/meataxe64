@@ -1,5 +1,5 @@
 /*
- * $Id: rows.c,v 1.27 2004/06/05 21:58:53 jon Exp $
+ * $Id: rows.c,v 1.28 2004/06/08 20:51:07 jon Exp $
  *
  * Row manipulation for meataxe
  *
@@ -1021,8 +1021,12 @@ void row_copy(const unsigned int *row1, unsigned int *row2,
 
 void row_init(unsigned int *row, unsigned int len)
 {
+  unsigned int *row1 = row + len;
   assert(NULL != row);
-  memset(row, 0, len * sizeof(unsigned int));
+  while (row < row1) {
+    *row = 0;
+    row++;
+  }
 }
 
 int rows_init(unsigned int prime, row_opsp ops)

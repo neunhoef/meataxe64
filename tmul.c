@@ -1,5 +1,5 @@
 /*
- * $Id: tmul.c,v 1.5 2004/06/06 11:49:21 jon Exp $
+ * $Id: tmul.c,v 1.6 2004/06/08 20:51:07 jon Exp $
  *
  * Function to multiply a matrix by a tensor product
  *
@@ -176,7 +176,7 @@ int tmul(const char *m1, const char *m2, const char *m3,
     if (0 == mul_in_store(ptrs_row2, rows2, ptrs_row1,
                           noc2, len2,
                           nob, nor1, prime,
-                          &grease)) {
+                          0, &grease)) {
       fprintf(stderr, "%s: failed to multiply using %s, terminating\n",
               name, m3);
       cleanup(in1, out, NULL);
@@ -185,7 +185,7 @@ int tmul(const char *m1, const char *m2, const char *m3,
     if (0 == mul_in_store(rows1, ptrs_row1, ptrs_row2,
                           noc1, len2,
                           nob, nor1, prime,
-                          &grease)) {
+                          0, &grease)) {
       fprintf(stderr, "%s: failed to multiply using %s, terminating\n",
               name, m2);
       cleanup(in1, out, NULL);

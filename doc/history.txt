@@ -306,3 +306,4 @@ skew seventh
 20040605 - Added -mg parameter for setting maximum grease level
 20040606 - Improve grease_row_inc and tco
 20040606 - Remove use of maps from mul_in_store
+20040608 - Replace memset in time critical places. Stop copying grease rows unnecessarily

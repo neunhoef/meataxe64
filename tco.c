@@ -1,5 +1,5 @@
 /*
- * $Id: tco.c,v 1.22 2004/06/06 11:49:21 jon Exp $
+ * $Id: tco.c,v 1.23 2004/06/08 20:51:07 jon Exp $
  *
  * Tensor condense one group element
  *
@@ -665,7 +665,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
               } else {
                 if (0 == mul_in_store(q_rows, te_rows, end_rows,
                                       noc_qi, len_qj, nob, dim_endi, prime,
-                                      &grease)) {
+                                      0, &grease)) {
                   matrix_free(te_rows);
                   matrix_free(end_rows);
                   matrix_free(q_rows);
@@ -689,7 +689,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
               } else {
                 if (0 == mul_in_store(arg1, p_rowsj, arg2, noc_qj,
                                       len_pj, nob, dim_endi, prime,
-                                      &grease)) {
+                                      0, &grease)) {
                   matrix_free(te_rows);
                   matrix_free(end_rows);
                   matrix_free(q_rows);

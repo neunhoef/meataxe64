@@ -1,5 +1,5 @@
 /*
- * $Id: tsp.c,v 1.14 2004/06/06 11:49:21 jon Exp $
+ * $Id: tsp.c,v 1.15 2004/06/08 20:51:07 jon Exp $
  *
  * Function to spin some vectors under two generators in tensor space
  *
@@ -285,7 +285,7 @@ unsigned int spin(const char *in, const char *out,
       if (0 == mul_in_store(mat_rows, gen->rows_2, work_rows,
                             noc2, len2,
                             nob, nor1, prime,
-                            &grease)) {
+                            1, &grease)) {
         fprintf(stderr, "%s: failed to multiply using %s, terminating\n", name, gen->m1);
         exit(1);
       }
@@ -293,7 +293,7 @@ unsigned int spin(const char *in, const char *out,
       if (0 == mul_in_store(gen->rows_1, work_rows, mat_rows,
                             noc1, len2,
                             nob, nor1, prime,
-                            &grease)) {
+                            1, &grease)) {
         fprintf(stderr, "%s: failed to multiply using %s, terminating\n", name, gen->m1);
         exit(1);
       }

@@ -1,5 +1,5 @@
 /*
- * $Id: clean_vectors.c,v 1.4 2004/04/25 16:31:47 jon Exp $
+ * $Id: clean_vectors.c,v 1.5 2004/06/08 20:51:07 jon Exp $
  *
  * Clean one file of vectors with another
  *
@@ -157,7 +157,13 @@ int clean_vectors(const char *echelised, const char *vectors, const char *output
         free(map);
         return 0;
       }
+#if 1 /* Is this code necessary at all? */
+      for (d = 0; d < stride1; d++) {
+        map[d] = 0;
+      }
+#else
       memset(map, 0, stride1 * sizeof(int));
+#endif
       for (d = 0; d < stride1; d++) {
         unsigned int pos;
         unsigned int elt = first_non_zero(rows1[d], nob, len, &pos);
