@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.63 2005/03/21 21:43:55 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.64 2005/04/04 20:47:33 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -376,8 +376,6 @@ Turn on verbose mode
 <li><a href="#zrsums">zrsums</a></li>
 <li><a href="#zrsumsf">zrsumsf</a></li>
 <li><a href="#zsad">zsad</a></li>
-<li><a href="#zsb">zsb</a></li>
-<li><a href="#zsbf">zsbf</a></li>
 <li><a href="#zscript">zscript</a></li>
 <li><a href="#zsel">zsel</a></li>
 <li><a href="#zsid">zsid</a></li>
@@ -391,9 +389,7 @@ Turn on verbose mode
 <li><a href="#zsksi">zsksi</a></li>
 <li><a href="#zsksq">zsksq</a></li>
 <li><a href="#zsl">zsl</a></li>
-<li><a href="#zsp">zsp</a></li>
 <li><a href="#zspan">zspan</a></li>
-<li><a href="#zspf">zspf</a></li>
 <li><a href="#zss">zss</a></li>
 <li><a href="#zsums">zsums</a></li>
 <li><a href="#zsumsf">zsumsf</a></li>
@@ -1714,7 +1710,7 @@ binary permutations are required, the program <a href="#zcv">zcv</a>
 should be used. The input format is essentially the Aachen format, but
 with some of the format restrictions relaxed, in particular to allow
 permutations on more than 999999 points. Given that programs such as
-<a href="#zsp">zsp</a> can deal directly with permutation group
+<a href="#zmsp">zmsp</a> can deal directly with permutation group
 generators, as can <a href="#zad">zad</a> and <a href="#zmu">zmu</a>,
 it should rarely be necessary to use this program.
 </li>
@@ -1951,8 +1947,16 @@ Purpose: Compute a standard basis of vectors from a single seed
 <td valign=top>2</td><td valign=top>Insufficient memory for two matrices plus workspace</td>
 </tr>
 </table>
-Commentary: This performs the same function as <a href="#zsb">zsb</a>,
-but can deal with more than two generators.
+Commentary: This produces a basis consisting entirely of elements in
+the same G orbit, and ordered as follows. The first element is the
+seed. At any stage we apply a generator to all elements it has not
+been applied to yet, and add these one at a time, in order, to the
+basis if they are linearly independent. We then switch to the next
+generator and repeat. The process terminates when either a proper
+subspace has been found, in which case the program exits with code 1,
+or the entire space has been generated. Any generator can be a
+permutation, however, it is unlikely that all will be, since a
+permutation module cannot be irreducible.
 </li>
 <li>
 <h3><a name="zmsbf">zmsbf</a></h3>
@@ -1992,8 +1996,18 @@ Purpose: Compute a standard basis of vectors from a single seed
 <td valign=top>2</td><td valign=top>Insufficient memory for two matrices plus workspace</td>
 </tr>
 </table>
-Commentary: This performs the same function as <a href="#zsbf">zsbf</a>,
-but can deal with more than two generators.
+Commentary: This program implements the same algorithm as <a
+href="#zmsb">zmsb</a>, but uses intermediate files to cope with lack of
+main memory. fseek and ftell are used to position within the file used
+to record an echelised basis (need in order to determine whether a new
+vector is linearly independent). In the case of files exceeding 2Gb,
+fseeko64 and ftello64 are used. Unfortunately, these require long long
+on 32 bits systems, which is not ANSI. However, the alternative is to
+be unable to perform <a href="#zmsb">zmsb</a> at all. If long files are
+required, then they have to be supported in the kernel and C library,
+which will be a problem on some older linux systems. The exit codes
+are as for <a href="#zmsb">zmsb</a>. The temporary workspace directory
+must exist, this program will not create it.
 </li>
 <li>
 <h3><a name="zmsp">zmsp</a></h3>
@@ -2033,11 +2047,13 @@ produced at that stage</td>
 <td valign=top>2</td><td valign=top>Insufficient memory for subspace plus workspace</td>
 </tr>
 </table>
-Commentary: This is a special case of <a href="#zsp">zsp</a> where
-multiple (more than two) generators are to be supplied. This is
-especially important either when the meataxe is being used on groups
-which are not two generator, or when it is being used on condensations
-(which frequently require more than two generators).
+Commentary: This program generates a subspace by applying each of the
+generators in turn to the vectors already generated but to which this
+generator has not yet been applied, until either no new linearly
+independent vectors are produced, or the program runs out of memory.
+Any generator may be a map, but the seed may not. The subspace
+produced is in fully echelised form, as defined earlier in this
+documentation.
 </li>
 <li>
 <h3><a name="zmspf">zmspf</a></h3>
@@ -2516,7 +2532,7 @@ Purpose: Compute permutation representation
 </table>
 Commentary: Produce a permutation representation from a set of vectors
 and a permuted set of the same, in a very naive way. Note that <a
-href="#zps">zps</a> already prouces the permutations on a pair of
+href="#zvp">zvp</a> already produces the permutations on a pair of
 generators, and has a somewhat better algorithm.
 </li>
 <li>
@@ -3055,103 +3071,6 @@ Purpose: Scaled addition. The scalar applies to parameter 1
 Commentary: 
 </li>
 <li>
-<h3><a name="zsb">zsb</a></h3>
-Purpose: Compute a standard basis of vectors from a single seed
-<table>
-<thead>
-<td valign=top>Parameters:</td>
-</thead>
-<tr>
-<td valign=top>1</td><td valign=top>The input vector</td>
-</tr>
-<tr>
-<td valign=top>2</td><td valign=top>The output basis</td>
-</tr>
-<tr>
-<td valign=top>3</td><td valign=top>Group generator 1 (matrix or permutation)</td>
-</tr>
-<tr>
-<td valign=top>4</td><td valign=top>Group generator 2 (matrix or permutation)</td>
-</tr>
-<tr>
-<td valign=top>Textual output on stdout:</td><td valign=top>The basis size</td>
-</tr>
-</table>
-<table>
-<thead>Return codes:</thead>
-<tr>
-<td valign=top>0</td><td valign=top>Success</td>
-</tr>
-<tr>
-<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
-</tr>
-<tr>
-<td valign=top>2</td><td valign=top>Insufficient memory for two matrices plus workspace</td>
-</tr>
-</table>
-Commentary: This produces a basis consisting entirely of elements in
-the same G orbit, and ordered as follows. The first element is the
-seed. At any stage we apply a generator to all elements it has not
-been applied to yet, and add these one at a time, in order, to the
-basis if they are linearly independent. We then switch to the other
-generator and repeat. The process terminates when either a proper
-subspace has been found, in which case the program exits with code 1,
-or the entire space has been generated. Either generator can be a
-permutation, however, it is unlikely that both will be, since a
-permutation module cannot be irreducible.
-</li>
-<li>
-<h3><a name="zsbf">zsbf</a></h3>
-Purpose: A version of <a href="#zsb">zsb</a> using intermediate files
-<table>
-<thead>
-<td valign=top>Parameters:</td>
-</thead>
-<tr>
-<td valign=top>1</td><td valign=top>The input vector</td>
-</tr>
-<tr>
-<td valign=top>2</td><td valign=top>The output basis</td>
-</tr>
-<tr>
-<td valign=top>3</td><td valign=top>Group generator 1 (matrix or permutation)</td>
-</tr>
-<tr>
-<td valign=top>4</td><td valign=top>Group generator 2 (matrix or permutation)</td>
-</tr>
-<tr>
-<td valign=top>5</td><td valign=top>A temporary directory for workspace files</td>
-</tr>
-<tr>
-<td valign=top>Textual output on stdout:</td><td valign=top>The basis size</td>
-</tr>
-</table>
-<table>
-<thead>Return codes:</thead>
-<tr>
-<td valign=top>0</td><td valign=top>Success</td>
-</tr>
-<tr>
-<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
-</tr>
-<tr>
-<td valign=top>2</td><td valign=top>Insufficient memory for workspace</td>
-</tr>
-</table>
-Commentary: This program implements the same algorithm as <a
-href="#zsb">zsb</a>, but uses intermediate files to cope with lack of
-main memory. fseek and ftell are used to position within the file used
-to record an echelised basis (need in order to determine whether a new
-vector is linearly independent). In the case of files exceeding 2Gb,
-fseeko64 and ftello64 are used. Unfortunately, these require long long
-on 32 bits systems, which is not ANSI. However, the alternative is to
-be unable to perform <a href="#zsb">zsb</a> at all. If long files are
-required, then they have to be supported in the kernal and C library,
-which will be a problem on some older linux systems. The exit codes
-are as for <a href="#zsb">zsb</a>. The temporary workspace directory
-must exist, this program will not create it.
-</li>
-<li>
 <h3><a name="zscript">zscript</a></h3>
 Purpose: Evaluate an element of the group algebra
 <table>
@@ -3629,52 +3548,6 @@ currently handled include ad, mu and tr, although onl;y mu and ad have
 been exercised (by emu). It uses the same locking protocol as emu.
 </li>
 <li>
-<h3><a name="zsp">zsp</a></h3>
-Purpose: Produce a minimal subspace stable under the generators
-containing a given vector
-<table>
-<thead>
-<td valign=top>Parameters:</td>
-</thead>
-<tr>
-<td valign=top>1</td><td valign=top>The input vector</td>
-</tr>
-<tr>
-<td valign=top>2</td><td valign=top>The subspace</td>
-</tr>
-<tr>
-<td valign=top>3</td><td valign=top>Generator 1</td>
-</tr>
-<tr>
-<td valign=top>4</td><td valign=top>Generator 2</td>
-</tr>
-<tr>
-<td valign=top>Textual output on stdout:</td><td valign=top>The subspace dimension, or if
-memory is exhausted, the number of rows produced at that stage</td>
-</tr>
-</table>
-<table>
-<thead>Return codes:</thead>
-<tr>
-<td valign=top>0</td><td valign=top>Success</td>
-</tr>
-<tr>
-<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
-</tr>
-<tr>
-<td valign=top>2</td><td valign=top>Insufficient memory for subspace plus workspace</td>
-</tr>
-</table>
-Commentary: This program generates a subspace by applying each of the
-generators in turn to the vectors already generated but to which this
-generator has not yet been applied, until either no new linearly
-independent vectors are produced, or the program runs out of memory.
-Either generator may be a map, but the seed may not. At present, this
-program is restricted to two generators. It is hoped to remove this
-restriction at some future stage. The subspace produced is in fully
-echelised form, as defined earlier in this documentation.
-</li>
-<li>
 <h3><a name="zspan">zspan</a></h3>
 Purpose: Produce the projective span of a set of vectors
 <table>
@@ -3708,57 +3581,6 @@ spanned by the input vectors (assuming the input vectors are linearly
 independent). This is all that is required for the purposes of being
 able to spin with all possible null vectors of a group algebra
 element, eg for use within the Norton irreducibility test.
-</li>
-<li>
-<h3><a name="zspf">zspf</a></h3>
-Purpose: Produce a minimal subspace stable under the generators
-containing a given vector, using intermediate files
-<table>
-<thead>
-<td valign=top>Parameters:</td>
-</thead>
-<tr>
-<td valign=top>1</td><td valign=top>The input vector</td>
-</tr>
-<tr>
-<td valign=top>2</td><td valign=top>The subspace</td>
-</tr>
-<tr>
-<td valign=top>3</td><td valign=top>Generator 1</td>
-</tr>
-<tr>
-<td valign=top>4</td><td valign=top>Generator 2</td>
-</tr>
-<tr>
-<td valign=top>5</td><td valign=top>Temporary directory</td>
-</tr>
-<tr>
-<td valign=top>Textual output on stdout:</td><td valign=top>The subspace dimension, or if
-memory is exhausted, the number of rows produced at that stage</td>
-</tr>
-</table>
-<table>
-<thead>Return codes:</thead>
-<tr>
-<td valign=top>0</td><td valign=top>Success</td>
-</tr>
-<tr>
-<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
-</tr>
-<tr>
-<td valign=top>2</td><td valign=top>Insufficient memory for workspace</td>
-</tr>
-</table>
-Commentary: This program uses the same algorithm as <a
-href="#zsp">zsp</a>, but uses an intermediate file to overcome memory
-limitations. Either generator may be a map, but the seed may not. At
-present, this program is restricted to two generators. It is hoped to
-remove this restriction at some future stage. The subspace produced is
-in fully echelised form, as defined earlier in this documentation.
-This program requires (in certain circumstances) to create large files
-(over 2Gb), and to be able to seek and tell within them, cf <a
-href="#zsbf">zsbf</a>. The temporary workspace directory must exist,
-this program will not create it.
 </li>
 <li>
 <h3><a name="zss">zss</a></h3>
@@ -4651,7 +4473,7 @@ The scripts provide the glue that takes the tedium (and hopefully the
 potential for error) out of the use of the lower level meataxe
 programs. In general, the difference is that a program is expected
 either to be computationally intensive (eg <a href="#zmu">zmu</a>, <a
-href="#zsp">zsp</a>), or to deal with binary data. A script is
+href="#zmsp">zmsp</a>), or to deal with binary data. A script is
 expected to be organisational. So, for example, there is a script to
 split an entire module into its composition factors, record the
 irreducibles, note when new irreducibles are found, and compute their
@@ -5034,8 +4856,8 @@ Purpose: A version of <a href="#base">base</a> using intermediate files
 </tr>
 </table>
 Commentary: This is a version of <a href="#base">base</a> using <a href="#znsf">znsf</a>,
-<a href="#zsbf">zsbf</a> and <a href="#zivf">zivf</a> instead of <a
-href="#zns">zns</a>, <a href="#zsb">zsb</a> and <a
+<a href="#zmsbf">zmsbf</a> and <a href="#zivf">zivf</a> instead of <a
+href="#zns">zns</a>, <a href="#zmsb">zmsb</a> and <a
 href="#ziv">ziv</a>. These programs will work with more limited
 amounts of memory, and so the amount to be used can be specified.
 Otherwise, this script functions analogously to <a href="#base">base</a>. Note that the
@@ -5143,8 +4965,8 @@ intermediate files
 </table>
 Commentary: This is a version of <a
 href="#base_vectors">base_vectors</a> using <a href="#znsf">znsf</a>
-and <a href="#zsbf">zsbf</a> instead of <a href="#zns">zns</a> and <a
-href="#zsb">zsb</a>. These programs will work with more limited
+and <a href="#zmsbf">zmsbf</a> instead of <a href="#zns">zns</a> and <a
+href="#zmsb">zmsb</a>. These programs will work with more limited
 amounts of memory, and so the amount to be used can be specified.
 Otherwise, this script functions analogously to <a
 href="#base_vectors">base_vectors</a>. Note that the temporary
@@ -6747,8 +6569,8 @@ standard base</td>
 </table>
 Commentary: This is essentially <a
 href="#indicate_with_element">indicate_with_element</a>, except that
-<a href="#znsf">znsf</a> and <a href="#zsbf">zsbf</a> are used in
-place of <a href="#zns">zns</a> and <a href="#zsb">zsb</a>, to
+<a href="#znsf">znsf</a> and <a href="#zmsbf">zmsbf</a> are used in
+place of <a href="#zns">zns</a> and <a href="#zmsb">zmsb</a>, to
 overcome main memory limitations. Note that the temporary directory
 must exist, this script will not create it.
 </li>
@@ -6803,8 +6625,8 @@ intermediate files
 </table>
 Commentary: This is essentially <a
 href="#indicate_with_script">indicate_with_script</a>, but using <a
-href="#znsf">znsf</a> and <a href="#zsbf">zsbf</a> in place of <a
-href="#zns">zns</a> and <a href="#zsb">zsb</a>. Having computed the
+href="#znsf">znsf</a> and <a href="#zmsbf">zmsbf</a> in place of <a
+href="#zns">zns</a> and <a href="#zmsb">zmsb</a>. Having computed the
 element required, it then calls <a
 href="#indicatef_with_element">indicatef_with_element</a> to perform
 the rest of the calculation. Note that the temporary directory must
@@ -7347,8 +7169,8 @@ already known, which known irreducible it is.</td>
 </tr>
 </table>
 Commentary: This script replaces the use of <a href="#zns">zns</a>, <a
-href="#zsb">zsb</a> and <a href="#ziv">ziv</a> with <a
-href="#znsf">znsf</a>, <a href="#zsbf">zsbf</a> and <a
+href="#zmsb">zmsb</a> and <a href="#ziv">ziv</a> with <a
+href="#znsf">znsf</a>, <a href="#zmsbf">zmsbf</a> and <a
 href="#zivf">zivf</a> in order to cope with situations where
 insufficient main memory is available. Otherwise, it is similar to the
 non file based version. Note that the temporary directory must exist,
@@ -8637,7 +8459,7 @@ tensor</td>
 </tr>
 <tr>
 <td valign=top>5</td><td valign=top>The amount of memory to use for <a
-href="#zsp">zsp</a></td>
+href="#zmsp">zmsp</a></td>
 </tr>
 <tr>
 <td valign=top>6</td><td valign=top>The number of the first vector to be used</td>
@@ -8773,7 +8595,7 @@ system take over, your programs will never terminate. Matrix
 operations make mincemeat of VM and paging systems, causing thrashing
 and usages of around 0.5% instead of the 99% you want. Using the file
 based versions <a href="#znsf">znsf</a>, <a href="#zrnf">zrnf</a>, <a
-href="#zspf">zspf</a>, <a href="#zsbf">zsbf</a>, <a
+href="#zmspf">zmspf</a>, <a href="#zmsbf">zmsbf</a>, <a
 href="#ztspf">ztspf</a> will give nearly as good performance as the
 all in memory equivalents, with one caveat, made in the next point.
 </li>
