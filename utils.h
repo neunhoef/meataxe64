@@ -1,5 +1,5 @@
 /*
- * $Id: utils.h,v 1.7 2001/09/30 21:49:18 jon Exp $
+ * $Id: utils.h,v 1.8 2001/10/03 00:01:42 jon Exp $
  *
  * Utilities for meataxe
  *
@@ -29,8 +29,6 @@ extern void *my_malloc(size_t);
 
 unsigned int getin(FILE *f, unsigned int a);
 
-extern void nextline(FILE *f);
-
-const char *get_str(FILE *f, char **name, unsigned int depth);
+const char *get_str(FILE *f);
 
 #endif

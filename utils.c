@@ -1,5 +1,5 @@
 /*
- * $Id: utils.c,v 1.7 2001/09/30 21:49:18 jon Exp $
+ * $Id: utils.c,v 1.8 2001/10/03 00:01:42 jon Exp $
  *
  * Utils for meataxe
  *
@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 #include <limits.h>
 #include <ctype.h>
@@ -89,50 +90,50 @@ int read_decimal(const char *str, unsigned int len, unsigned int *out)
   return 1;
 }
 
-static long hadcr = 0;
-
-/******  subroutine to get an integer like FORTRAN does  */
 unsigned int getin(FILE *f, unsigned int a)
 {
-  int c;
-  unsigned long i,j=0;
+  unsigned int j = 0;
+  char *s = my_malloc(a + 1);
+  char *t = fgets(s, a + 1, f);
  
-  if(hadcr == 1) return j;
-  for(i = 0;i < a; i++) {
-    c = fgetc(f);
-    if(c == '\n') {
-      hadcr = 1;
-      return j;
-    }
-    if(c < '0') c = '0';
-    if(c > '9') c = '0';
-    j = 10*j + (c-'0');
+  if (NULL == t) {
+    j = 0;
+    return 0;
+  } else {
+    j = strtoul(s, &t, 0);
   }
+  free(s);
   return j;
 }
  
-void nextline(FILE *f)
-{
-  if(hadcr == 1) {
-    hadcr=0;
-    return;
-  }
-  while (fgetc(f) != '\n');
-}
-
-
-const char *get_str(FILE *f, char **name, unsigned int depth)
+static char *get_str_sub(FILE *f, unsigned int depth)
 {
   int c = fgetc(f);
-  if (c < 0 || my_isspace(c)) {
-    if ('\n' == c) hadcr = 1;
-    *name = my_malloc(depth + 1);
-    (*name)[depth] = '\0';
-    return *name;
+  char *out;
+  if (c >= 0 && 0 == my_isspace(c)) {
+    out = get_str_sub(f, depth + 1);
   } else {
-    get_str(f, name, depth + 1);
-    (*name)[depth] = c;
-    return *name;
+    out = my_malloc(depth + 1);  
+    c = '\0';
+  }
+  out[depth] = c;
+  return out;
+}
+
+const char *get_str(FILE *f)
+{
+  int c = fgetc(f);
+  while (my_isspace(c)) {
+    c = fgetc(f);
+  }
+  if (c >= 0) {
+    char *out = get_str_sub(f, 1);  
+    *out = c;
+    return out;
+  } else {
+    fprintf(stderr, "Failed to read string, terminating\n");
+    exit(1);
+    return NULL; /* Avoid compiler warning */
   }
 }
 

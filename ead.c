@@ -14,6 +14,7 @@
 #include <string.h>
 #include "add.h"
 #include "files.h"
+#include "map.h"
 #include "memory.h"
 #include "utils.h"
 
@@ -26,14 +27,10 @@ static void ead_usage(void)
 
 int main(int argc,  char **argv)
 {
-  FILE *input1, *input2;
-  FILE *output;
   unsigned int col_pieces1, row_pieces1;
   unsigned int col_pieces2, row_pieces2;
   unsigned int i, j;
-  const char **names;
-  char *temp;
-  const char *m1, *m2, *m3;
+  const char **names1, **names2, **names3;
   memory_init(name, 0);
   /******  First check the number of input arguments  */
   if (argc != 4) {
@@ -41,63 +38,24 @@ int main(int argc,  char **argv)
     exit(1);
   }
   /* Now get a look at the map file */
-  m1 = pathname(argv[1], "map");
-  input1 = fopen(m1, "rb");
-  if (input1 == NULL) {
-    fprintf(stderr, "%s: cannot open first input map %s", name, m1);
-    exit(1);
-  }
-  m2 = pathname(argv[2], "map");
-  input2 = fopen(m2, "rb");
-  if (input2 == NULL) {
-    fprintf(stderr, "%s: cannot open second input map %s", name, m2);
-    exit(1);
-  }
-  row_pieces1 = getin(input1, 6);
-  col_pieces1 = getin(input1, 6);
-  names = my_malloc(row_pieces1 * col_pieces1 * sizeof(char *));
-  nextline(input1);
-  row_pieces2 = getin(input2, 6);
-  col_pieces2 = getin(input2, 6);
+  input_map(name, argv[1], &col_pieces1, &row_pieces1, &names1);
+  input_map(name, argv[2], &col_pieces2, &row_pieces2, &names2);
   if (row_pieces1 != row_pieces2 || col_pieces1 != col_pieces2) {
     fprintf(stderr, "%s: incompatible explosion points, terminating\n", name);
     exit(1);
   }
-  fclose(input2);
-  for (i = 0; i < row_pieces1; i++) {
-    for (j = 0; j < col_pieces1; j++) {
-      names[i * col_pieces1 + j] = get_str(input1, &temp, 0);
-    }
-    nextline(input1);
-  }
-  fclose(input1);
   /* Now we have all relevant names */
   /* We could now check for addition compatibility */
   /* Or we could assume the user has got it right, */
   /* and only fail when a spawned add fails */
-
-  /* Now create the result map file */
-  /* Same as the first file */
-  m3 = pathname(argv[3], "map");
-  output = fopen(m3, "wb");
-  if (output == NULL) {
-    fprintf(stderr, "%s: cannot open output map %s", name, m3);
-    exit(1);
-  }
-  fprintf(output, "%6u%6u\n", row_pieces1, col_pieces1);
-  for (i = 0; i < row_pieces1; i++) {
-    for (j = 0; j < col_pieces1; j++) {
-      fprintf(output, "%s ", names[i * col_pieces1 + j]);
-    }
-    fprintf(output, "\n");
-  }
-  fclose(output);
+  /* Now create the output names */
+  output_map(name, argv[3], col_pieces1, row_pieces1, &names3);
   /* Now loop doing the adds */
   for (i = 0; i < row_pieces1; i++) {
     for (j = 0; j < col_pieces1; j++) {
-      add(pathname(argv[1], names[i * col_pieces1 + j]),
-	  pathname(argv[2], names[i * col_pieces1 + j]),
-	  pathname(argv[3], names[i * col_pieces1 + j]), name);
+      add(pathname(argv[1], names1[i * col_pieces1 + j]),
+	  pathname(argv[2], names2[i * col_pieces1 + j]),
+	  pathname(argv[3], names3[i * col_pieces1 + j]), name);
     }
   }
   return 0;

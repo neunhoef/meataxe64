@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.14 2001/09/30 21:49:18 jon Exp $
+# $Id: makefile,v 1.15 2001/10/03 00:01:42 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -16,6 +16,7 @@ ARCH=i386
 AD_TARGET=	ad
 DTOU_TARGET=	dtou
 EAD_TARGET=	ead
+EID_TARGET=	eid
 EMU_TARGET=	emu
 ID_TARGET=	id
 IP_TARGET=	ip
@@ -23,19 +24,22 @@ MON_TARGET=	monst
 MU_TARGET=	mu
 PR_TARGET=	pr
 SL_TARGET=	sl
+ZEX_TARGET=	zex
 
-DTOU_MODULES=	dtou
 AD_MODULES=	ad add elements endian header memory primes read rows utils write
-EAD_MODULES=	add ead endian files header memory read rows system utils write
-EMU_MODULES=	command emu files memory system utils
+DTOU_MODULES=	dtou
+EAD_MODULES=	add ead endian files header map memory read rows system utils write
+EID_MODULES=	eid elements endian exrows files header map memory primes rows utils write
+EMU_MODULES=	command emu files map memory system utils
 ID_MODULES=	id elements endian header memory primes rows utils write
 IP_MODULES=	elements endian header ip primes read utils write
+MON_MODULES=	endian exrows files header map memory mmat mop mtx primes utils write
 MU_MODULES=	elements endian grease header matrix memory mu mul primes read rows utils write
-MON_MODULES=	endian header memory mmat mop mtx primes utils write
 PR_MODULES=	elements endian header memory pr primes read rows utils write
 SL_MODULES=	add command elements endian files grease header matrix memory mul primes read rows slave system utils write
+ZEX_MODULES=	elements endian exrows files header map memory primes read rows utils write zex
 
-MODULES=	$(AD_MODULES) $(DTOU_MODULES) $(EMU_MODULES) $(ID_MODULES) $(IP_MODULES) $(MON_MODULES) $(MU_MODULES) $(PR_MODULES) $(SL_MODULES)
+MODULES=	$(AD_MODULES) $(DTOU_MODULES) $(EAD_MODULES) $(EID_MODULES) $(EMU_MODULES) $(ID_MODULES) $(IP_MODULES) $(MON_MODULES) $(MU_MODULES) $(PR_MODULES) $(SL_MODULES) $(ZEX_MODULES)
 
 include dirs.txt
 
@@ -81,6 +85,9 @@ include targets.txt
 TARGET:=EAD
 include targets.txt
 
+TARGET:=EID
+include targets.txt
+
 TARGET:=EMU
 include targets.txt
 
@@ -100,6 +107,9 @@ TARGET:=PR
 include targets.txt
 
 TARGET:=SL
+include targets.txt
+
+TARGET:=ZEX
 include targets.txt
 
 debug: $(DEBUG_TARGETS)

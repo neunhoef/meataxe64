@@ -1,5 +1,5 @@
 /*
- * $Id: emu.c,v 1.4 2001/09/30 21:49:18 jon Exp $
+ * $Id: emu.c,v 1.5 2001/10/03 00:01:42 jon Exp $
  *
  * Exploded multiply
  *
@@ -17,6 +17,7 @@
 #include <string.h>
 #include "command.h"
 #include "files.h"
+#include "map.h"
 #include "memory.h"
 #include "utils.h"
 #include "system.h"
@@ -30,17 +31,12 @@ static void emu_usage(void)
 
 int main(int argc,  char **argv)
 {
-  FILE *input1, *input2;
-  FILE *output1;
   unsigned int col_pieces1, row_pieces1;
   unsigned int col_pieces2, row_pieces2;
   unsigned int i, j, k, limit;
-  unsigned int name_size;
   const char **names1, **names2, **names3;
   t_uid *tmp_ids;
-  char *temp;
   job *jobs;
-  const char *m1, *m2, *m3;
   memory_init(name, 0);
   printf("emu starting\n");
   init_system();
@@ -52,73 +48,19 @@ int main(int argc,  char **argv)
   /* Now get a look at the map file */
   limit = strtoul(argv[5], NULL, 0);
   init_tasks(limit, argv[4], "emu");
-  m1 = pathname(argv[1], "map");
-  input1 = fopen(m1, "rb");
-  if (NULL == input1) {
-    fprintf(stderr, "%s: cannot open first input map %s", name, m1);
-    exit(1);
-  }
-  m2 = pathname(argv[2], "map");
-  input2 = fopen(m2, "rb");
-  if (NULL == input2) {
-    fprintf(stderr, "%s: cannot open second input map %s", name, m2);
-    exit(1);
-  }
-  row_pieces1 = getin(input1, 6);
-  col_pieces1 = getin(input1, 6);
-  names1 = my_malloc(row_pieces1 * col_pieces1 * sizeof(char *));
-  nextline(input1);
-  row_pieces2 = getin(input2, 6);
-  col_pieces2 = getin(input2, 6);
-  nextline(input2);
+  /* Now get a look at the map file */
+  input_map(name, argv[1], &col_pieces1, &row_pieces1, &names1);
+  input_map(name, argv[2], &col_pieces2, &row_pieces2, &names2);
   if (col_pieces1 != row_pieces2) {
     fprintf(stderr, "%s: incompatible explosion points, terminating\n", name);
     exit(1);
   }
-  for (i = 0; i < row_pieces1; i++) {
-    for (j = 0; j < col_pieces1; j++) {
-      names1[i * col_pieces1 + j] = get_str(input1, &temp, 0);
-    }
-    nextline(input1);
-  }
-  fclose(input1);
-  names2 = my_malloc(row_pieces2 * col_pieces2 * sizeof(char *));
-  for (i = 0; i < row_pieces2; i++) {
-    for (j = 0; j < col_pieces2; j++) {
-      names2[i * col_pieces2 + j] = get_str(input2, &temp, 0);
-    }
-    nextline(input2);
-  }
-  fclose(input2);
   /* Now we have all relevant input names */
   /* We could now check for multiplication compatibility */
   /* Or we could assume the user has got it right, */
   /* and only fail when a spawned job fails */
   /* Now create the output names */
-  names3 = my_malloc(row_pieces1 * col_pieces2 * sizeof(char *));
-  name_size = digits_of(row_pieces1) + digits_of(col_pieces2) + 2; /* nnn_mmm\0 */
-  for (i = 0; i < row_pieces1; i++) {
-    for (j = 0; j < col_pieces2; j++) {
-      char *name = my_malloc(name_size); /* Make this more efficient ****/
-      sprintf(name, "%u_%u", i, j);
-      names3[i * col_pieces2 + j] = name;
-    }
-  }
-  /* Now create the result map file */
-  m3 = pathname(argv[3], "map");
-  output1 = fopen(m3, "wb");
-  if (output1 == NULL) {
-    fprintf(stderr, "%s: cannot open output map %s", name, m3);
-    exit(1);
-  }
-  fprintf(output1, "%6u%6u\n", row_pieces1, col_pieces2);
-  for (i = 0; i < row_pieces1; i++) {
-    for (j = 0; j < col_pieces2; j++) {
-      fprintf(output1, "%s ", names3[i * col_pieces2 + j]);
-    }
-    fprintf(output1, "\n");
-  }
-  fclose(output1);
+  output_map(name, argv[3], col_pieces2, row_pieces1, &names3);
   /* Now generate the temporary names for the multiplies */
   jobs = my_malloc(col_pieces1*col_pieces2*row_pieces1*sizeof(job));
   tmp_ids = my_malloc(col_pieces1*col_pieces2*row_pieces1*sizeof(t_uid));

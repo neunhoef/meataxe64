@@ -1,5 +1,5 @@
 /*
- * $Id: mu.c,v 1.5 2001/09/18 23:15:46 jon Exp $
+ * $Id: mu.c,v 1.6 2001/10/03 00:01:42 jon Exp $
  *
  * Multiply two matrices to give a third
  *
@@ -34,10 +34,7 @@ int main(int argc, const char * const argv[])
   in2 = argv[2];
   out = argv[3];
   if (5 == argc) {
-    if (0 == read_decimal(argv[4], strlen(argv[4]), &memory)) {
-      fprintf(stderr, "%s: failed to read memory size from command line\n", name);
-      return 0;
-    }
+    memory = strtoul(argv[4], NULL, 0);
   }
   memory_init(name, memory);
   if (0 == mul(in1, in2, out, "mu")) {

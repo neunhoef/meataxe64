@@ -26,3 +26,5 @@
 20010927 - Better modularisation of makefile
 20010930 - First successful monster multiply on element A (the involution)
 20010930 - Move some junk out of ead and emu into utils, system, files
+20011001 - Abstract out map creation and extended row output
+20011002 - Created eid and used to complete check on A*A, Created zex

@@ -1,5 +1,5 @@
 /*
- * $Id: endian.h,v 1.5 2001/09/16 10:05:44 jon Exp $
+ * $Id: endian.h,v 1.6 2001/10/03 00:01:42 jon Exp $
  *
  * Endian handling for meataxe
  *
@@ -7,6 +7,8 @@
 
 #ifndef included__endian
 #define included__endian
+
+#include <stdio.h>
 
 extern int endian_write_int(unsigned int a, FILE *fp);
 

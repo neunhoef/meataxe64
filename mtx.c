@@ -1,5 +1,5 @@
 /*
- * $Id: mtx.c,v 1.5 2001/09/30 17:51:20 jon Exp $
+ * $Id: mtx.c,v 1.6 2001/10/03 00:01:42 jon Exp $
  *
  * Extended row operations for monster meataxe
  *
@@ -11,7 +11,9 @@
 #include <limits.h>
 #include <assert.h>
 #include "endian.h"
+#include "exrows.h"
 #include "header.h"
+#include "map.h"
 #include "memory.h"
 #include "utils.h"
 #include "write.h"
@@ -23,27 +25,12 @@ static unsigned char table[256];
 static int cv_initialised = 0;
 static int initialised = 0;
 static FILE **outputs;
-static unsigned long *spaces;
+static const char **names;
 
 static void quit(const char *a)
 {
   fprintf(stderr, "error %s in program monster mtx\n", a);
   exit(15);
-}
-
-static void *mymalloc(unsigned long siz)
-{
-  void *a = (void *)malloc(siz);
-  if (NULL == a) {
-    fprintf(stderr, "mymalloc fails to obtain %ld bytes\n", siz);
-    quit("mymalloc failed");
-  }
-  return a;
-}
-
-static void SSET(unsigned long *s_ptr, unsigned long dim)
-{
-  *s_ptr = ( (dim+31)/32);
 }
 
 static void convert_byte(unsigned char *out, const unsigned char *in)
@@ -82,57 +69,14 @@ static void convert_row(unsigned int total_cols, const unsigned char *bits)
 
 void put_row(unsigned int row_num, unsigned int total_cols, unsigned int split_size, unsigned char *bits)
 {
-  unsigned int cols;
-  unsigned int rows;
-  unsigned int total_rows = total_cols;
-  unsigned int i, j;
-  split_size = ((split_size + bits_in_unsigned_int - 1)/ bits_in_unsigned_int) * bits_in_unsigned_int;
+  unsigned int cols, rows;
   cols = (total_cols + split_size - 1) / split_size;
   rows = cols;
-  convert_row(total_cols, bits);
   if (!initialised) {
-    FILE *output = fopen("map", "w");
     initialised = 1;
-    if (NULL == output) {
-      quit("Cannot open map file");
-    }
-    spaces = mymalloc(cols * sizeof(unsigned long));
-    for (j = 0; j < cols; j++) {
-      SSET(spaces + j, (j < cols-1) ? split_size : total_cols - j * split_size);
-    }
-    fprintf(output, "%6u%6u\n", rows, cols);
-    for (i = 0; i < rows; i++) {
-      for (j = 0; j < cols; j++) {
-	fprintf(output, "%u_%u ", i, j);
-      }
-      fprintf(output, "\n");
-    }
-    fclose(output);
+    output_map(name, ".", cols, rows, &names);
+    outputs = my_malloc(cols * sizeof(FILE *));
   }
-  if (row_num % split_size == 0) {
-    /* Open relevant files */
-    unsigned int row = row_num / split_size;
-    unsigned int nor = (row_num + split_size <= total_rows) ? split_size : total_rows - row * split_size;
-    outputs = mymalloc(cols * sizeof(FILE *));
-    for(i = 0; i < cols; i++) {
-      unsigned int noc = ((i+1) * split_size <= total_cols) ? split_size : total_cols - i * split_size;
-      char foo[20];
-      const header *h = header_create(2, 1, 1, noc, nor);
-      sprintf(foo, "%u_%u", row, i);
-      outputs[i] = fopen(foo, "wb");
-      (void)write_binary_header(outputs[i], h, "monster mtx");
-    }
-  }
-  /* Now output the row */
-  for (i = 0; i < cols; i++) {
-    unsigned char *v = row + (i * split_size) / 8;
-    (void)endian_write_row(outputs[i], (const unsigned int *)v, spaces[i]);
-  }
-  /* Now close files if last row for this set */
-  if (row_num + 1 == total_rows || (row_num + 1) % split_size == 0) {
-    unsigned int i;
-    for (i = 0; i < cols; i++) {
-      fclose(outputs[i]);
-    }
-  }
+  convert_row(total_cols, bits);
+  ex_row_put(row_num, total_cols, ".", names, split_size, (unsigned int *)row, outputs);
 }
