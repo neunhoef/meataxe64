@@ -1,5 +1,5 @@
 /*
- * $Id: rn.c,v 1.12 2002/04/10 23:33:27 jon Exp $
+ * $Id: rn.c,v 1.13 2002/06/28 08:39:16 jon Exp $
  *
  * Compute the rank of a matrix
  *
@@ -8,6 +8,7 @@
 #include "rn.h"
 #include <stdio.h>
 #include <assert.h>
+#include <errno.h>
 #include "clean.h"
 #include "endian.h"
 #include "grease.h"
@@ -57,7 +58,11 @@ int rank(const char *m, unsigned int *r, const char *name)
     for (n = 0; n < nor; n++) {
       mat[n] = memory_pointer_offset(0, n, len);
     }
+    errno = 0;
     if (0 == endian_read_matrix(inp, mat, len, nor)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: cannot read matrix for %s, terminating\n", name, m);
       fclose(inp);
       return 0;

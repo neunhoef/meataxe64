@@ -1,5 +1,5 @@
 /*
- * $Id: orbit.c,v 1.1 2002/06/25 10:30:12 jon Exp $
+ * $Id: orbit.c,v 1.2 2002/06/28 08:39:16 jon Exp $
  *
  * Functions for handling orbits
  *
@@ -10,6 +10,7 @@
 #include "utils.h"
 #include <stdio.h>
 #include <assert.h>
+#include <errno.h>
 
 /* Read binary form of an orbit */
 int read_orbits(FILE *inp, unsigned int nor, orbit_set **orbits,
@@ -22,7 +23,11 @@ int read_orbits(FILE *inp, unsigned int nor, orbit_set **orbits,
   assert(NULL != in);
   assert(NULL != name);
   /* Read the total number of orbits */
+  errno = 0;
   if (1 != endian_read_int(&size, inp)) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: failed to read number of orbits from %s, terminating\n", name, in);
     return 0;
   }
@@ -36,7 +41,11 @@ int read_orbits(FILE *inp, unsigned int nor, orbit_set **orbits,
     orbit *orb = os->orbits + i;
     unsigned int o_size;
     /* Now read the size of the orbit */
+    errno = 0;
     if (0 == endian_read_int(&o_size, inp)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: failed to read orbit size for orbit %d to orbits file %s, terminating\n", name, i, in);
       return 0;
     }
@@ -45,7 +54,11 @@ int read_orbits(FILE *inp, unsigned int nor, orbit_set **orbits,
     orb->values = my_malloc(o_size * sizeof(unsigned int));
     /* Now read the orbit entries */
     for (j = 0; j < o_size; j++) {
+      errno = 0;
       if (0 == endian_read_int(orb->values + j, inp)) {
+        if ( 0 != errno) {
+          perror(name);
+        }
         fprintf(stderr, "%s: failed to read orbit value at offset %d for orbit %d to orbits file %s, terminating\n", name, j, i, in);
         return 0;
       }
@@ -74,7 +87,11 @@ int write_orbits(FILE *outp, const orbit_set *orbits,
   assert(NULL != name);
   size = orbits->size;
   /* Write the total number of orbits */
+  errno = 0;
   if (0 == endian_write_int(size, outp)) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: failed to write size to orbits file %s, terminating\n", name, out);
     return 0;
   }
@@ -83,13 +100,21 @@ int write_orbits(FILE *outp, const orbit_set *orbits,
     orbit *orb = orbits->orbits + i;
     unsigned int o_size = orb->size;
     /* Now write the size of the orbit */
+    errno = 0;
     if (0 == endian_write_int(o_size, outp)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: failed to write orbit size for orbit %d to orbits file %s, terminating\n", name, i, out);
       return 0;
     }
     /* Now write the orbit entries */
     for (j = 0; j < o_size; j++) {
+      errno = 0;
       if (0 == endian_write_int(orb->values[j], outp)) {
+        if ( 0 != errno) {
+          perror(name);
+        }
         fprintf(stderr, "%s: failed to write orbit value at offset %d for orbit %d to orbits file %s, terminating\n", name, j, i, out);
         return 0;
       }

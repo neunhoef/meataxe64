@@ -1,5 +1,5 @@
 /*
- * $Id: zimport.c,v 1.5 2002/06/27 08:24:08 jon Exp $
+ * $Id: zimport.c,v 1.6 2002/06/28 08:39:16 jon Exp $
  *
  * Import matrix from old system
  *
@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <errno.h>
 #include "endian.h"
 #include "elements.h"
 #include "header.h"
@@ -77,7 +78,11 @@ int main(int argc, const char * const argv[])
       unsigned int elt = get_element_from_char_row(eperb, prime, j, in_row);
       put_element_to_row(nob, j, out_row, elt);
     }
+    errno = 0;
     if (0 == endian_write_row(f_out, out_row, len)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: failed to write row %d to %s, terminating\n", name, i, out);
       exit(1);
     }

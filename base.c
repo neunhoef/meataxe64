@@ -1,5 +1,5 @@
 /*
- * $Id: base.c,v 1.2 2002/06/27 08:24:08 jon Exp $
+ * $Id: base.c,v 1.3 2002/06/28 08:39:16 jon Exp $
  *
  * Form an echelised basis from one file to another
  *
@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+#include <errno.h>
 #include "clean_file.h"
 #include "endian.h"
 #include "grease.h"
@@ -70,8 +71,12 @@ unsigned int base(const char *in, const char *dir,
   name_echelised = my_malloc(d + 4);
   sprintf(name_echelised, "%s/%s.1", dir, tmp);
   /* Create the temporary file */
+  errno = 0;
   echelised = fopen64(name_echelised, "w+b");
   if (NULL == echelised) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: cannot open %s, terminating\n", name, name_echelised);
     fclose(inp);
     exit(1);
@@ -110,7 +115,11 @@ unsigned int base(const char *in, const char *dir,
   }
   for (d = 0; d < nor1; d += max_rows) {
     unsigned int stride = (d + max_rows > nor1) ? nor1 - d : max_rows;
+    errno = 0;
     if (0 == endian_read_matrix(inp, rows1, len, stride)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: failed to read rows from %s, terminating\n",
               name, in);
       fclose(inp);

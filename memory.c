@@ -1,5 +1,5 @@
 /*
- * $Id: memory.c,v 1.6 2002/06/25 10:30:12 jon Exp $
+ * $Id: memory.c,v 1.7 2002/06/28 08:39:16 jon Exp $
  *
  * Large memory manipulation for meataxe
  *
@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <errno.h>
 #include "utils.h"
 
 static unsigned char *memory = NULL;
@@ -19,10 +20,15 @@ static size_t extent = 0;
 /* If a size of 0 is given, the default value MEM_SIZE * 1000 is used */
 void memory_init(const char *name, size_t size)
 {
+  assert(NULL == memory);
   extent = ((0 != size) ? size : (MEM_SIZE));
   assert(NULL == memory);
+  errno = 0;
   memory = malloc(extent * 1000);
   if (NULL == memory) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: failed to allocate %d bytes, exiting\n", name, extent * 1000);
     exit(1);
   }

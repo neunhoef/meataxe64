@@ -1,5 +1,5 @@
 /*
- * $Id: restrict.c,v 1.3 2002/06/25 10:30:12 jon Exp $
+ * $Id: restrict.c,v 1.4 2002/06/28 08:39:16 jon Exp $
  *
  * Function to restrict a matrix from a big field to a smaller
  *
@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <errno.h>
 #include "elements.h"
 #include "endian.h"
 #include "header.h"
@@ -94,7 +95,11 @@ int restrict(const char *m1, const char *m2, unsigned int q, const char *name)
   row2 = memory_pointer_offset(0, 1, len_in);
   for (i = 0; i < nor; i++) {
     unsigned int j;
+    errno = 0;
     if (0 == endian_read_row(inp, row1, len_in)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: cannot read row %d from %s, terminating\n", name, i, m1);
       return cleanup(inp, outp);
     }
@@ -108,7 +113,11 @@ int restrict(const char *m1, const char *m2, unsigned int q, const char *name)
       }
       put_element_to_row(nob_out, j, row2, elt);
     }
+    errno = 0;
     if (0 == endian_write_row(outp, row2, len_out)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: cannot write row %d to %s, terminating\n", name, i, m2);
       return cleanup(inp, outp);
     }

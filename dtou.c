@@ -1,5 +1,5 @@
 /*
- * $Id: dtou.c,v 1.4 2002/06/25 10:30:12 jon Exp $
+ * $Id: dtou.c,v 1.5 2002/06/28 08:39:16 jon Exp $
  *
  * Strip out DOS style line termination
  */
@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <errno.h>
 
 static const char *name = "dtou";
 
@@ -23,9 +24,13 @@ int main(int argc, const char * const argv[])
     dtou_usage();
     exit(1);
   }
+  errno = 0;
   inp = fopen(argv[1], "r");
   outp = fopen(argv[2], "w");
   if (NULL == inp || NULL == outp) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "dtou: Can't open files %s, %s\n", argv[1], argv[2]);
     exit(1);
   }

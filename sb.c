@@ -1,5 +1,5 @@
 /*
- * $Id: sb.c,v 1.7 2002/06/27 08:24:08 jon Exp $
+ * $Id: sb.c,v 1.8 2002/06/28 08:39:16 jon Exp $
  *
  * Function to spin some vectors under two generators to obtain a standard base
  *
@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <errno.h>
 
 typedef struct gen_struct *gen;
 
@@ -125,7 +126,11 @@ unsigned int spin(const char *in, const char *out, const char *a,
     rows1[d] = memory_pointer_offset(0, d, len);
     rows2[d] = memory_pointer_offset(450, d, len);
   }
+  errno = 0;
   if (0 == endian_read_matrix(inp, rows1, len, nor)) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: failed to read rows from %s, terminating\n",
             name, in);
     cleanup(inp, f_a, f_b);
@@ -235,7 +240,11 @@ unsigned int spin(const char *in, const char *out, const char *a,
   if (0 == open_and_write_binary_header(&outp, h_out, out, name)) {
     exit(1);
   }
+  errno = 0;
   if (0 == endian_write_matrix(outp, rows1, len, nor)) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: failed to write output to %s, terminating\n",
             name, out);
     fclose(outp);

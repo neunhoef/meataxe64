@@ -1,5 +1,5 @@
 /*
- * $Id: endian.c,v 1.8 2001/11/29 01:13:09 jon Exp $
+ * $Id: endian.c,v 1.9 2002/06/28 08:39:16 jon Exp $
  *
  * Endian handling for meataxe
  *
@@ -98,7 +98,9 @@ int endian_write_row(FILE *fp, const unsigned int *row, unsigned int len)
 {
   if (endian_is_big) {
     while (len > 0) {
-      endian_write_int(*row, fp);
+      if (0 == endian_write_int(*row, fp)) {
+        return 0;
+      }
       row++;
       len--;
     }

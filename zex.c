@@ -1,5 +1,5 @@
 /*
- * $Id: zex.c,v 1.8 2002/06/27 08:24:08 jon Exp $
+ * $Id: zex.c,v 1.9 2002/06/28 08:39:16 jon Exp $
  *
  * explode a matrix
  *
@@ -9,11 +9,12 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include "map.h"
+#include <errno.h>
 #include "endian.h"
 #include "exrows.h"
 #include "files.h"
 #include "header.h"
+#include "map.h"
 #include "memory.h"
 #include "read.h"
 #include "utils.h"
@@ -79,7 +80,11 @@ int main(int argc,  char **argv)
   }
   row = memory_pointer_offset(0, 0, len);
   for (i = 0; i < nor; i++) {
+    errno = 0;
     if (0 == endian_read_row(input, row, len)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s cannot read row %d from %s, terminating\n", name, i, argv[1]);
       fclose(input);
     }

@@ -1,5 +1,5 @@
 /*
- * $Id: ps.c,v 1.2 2002/06/27 08:24:08 jon Exp $
+ * $Id: ps.c,v 1.3 2002/06/28 08:39:16 jon Exp $
  *
  * Function to compute permutation space representation
  *
@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 
 typedef struct vec_struct
 {
@@ -128,7 +129,11 @@ void permutation_space(const char *range, const char *image,
     exit(1);
   }
   header_free(h_out);
+  errno = 0;
   if (0 == endian_read_matrix(inp1, rows, len, nor)) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: unable to read %s, terminating\n", name, range);
     cleanup(inp1, inp2, outp);
     exit(1);
@@ -149,7 +154,11 @@ void permutation_space(const char *range, const char *image,
     /* Read row of image */
     unsigned int row_out = 0, hash;
     vec row_vec, **found_row, *row_vec_ptr = &row_vec;
+    errno = 0;
     if (0 == endian_read_row(inp2, row_in, len)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: cannot read row from %s, terminating\n", name, image);
       cleanup(inp1, inp2, outp);
       exit(1);
@@ -167,7 +176,11 @@ void permutation_space(const char *range, const char *image,
       cleanup(inp1, inp2, outp);
       exit(1);
     }
+    errno = 0;
     if (0 == endian_write_int(row_out, outp)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: cannot write row to %s, terminating\n", name, image);
       cleanup(inp1, inp2, outp);
       exit(1);

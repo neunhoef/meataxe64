@@ -1,5 +1,5 @@
 /*
- * $Id: mul.c,v 1.25 2002/06/27 08:24:08 jon Exp $
+ * $Id: mul.c,v 1.26 2002/06/28 08:39:16 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
@@ -11,6 +11,7 @@
 #include <assert.h>
 #include <limits.h>
 #include <string.h>
+#include <errno.h>
 #include "elements.h"
 #include "endian.h"
 #include "grease.h"
@@ -227,7 +228,11 @@ static int mul_by_map(FILE *inp1, FILE *inp2, const header *h1, const header *h2
     return cleanup(inp1, NULL, outp);
   }
   for (i = 0; i < nor1; i++) {
+    errno = 0;
     if (0 == endian_read_row(inp1, row1, len1)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: cannot read row from %s, terminating\n", name, m1);
       map_free(map2);
       return cleanup(inp1, NULL, outp);
@@ -236,7 +241,11 @@ static int mul_by_map(FILE *inp1, FILE *inp2, const header *h1, const header *h2
       map_free(map2);
       return cleanup(inp1, NULL, outp);
     }
+    errno = 0;
     if (0 == endian_write_row(outp, row2, len3)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: cannot write row to %s, terminating\n", name, m3);
       map_free(map2);
       return cleanup(inp1, NULL, outp);
@@ -352,7 +361,6 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
     if (is_perm1) {
       unsigned int *map = malloc_map(rest);
       if (0 == read_map(inp1, rest, map, name, m1)) {
-        fprintf(stderr, "%s: unable to read %s, terminating\n", name, m1);
         grease_free(&grease);
         map_free(map);
         return cleanup(inp1, inp2, outp);
@@ -370,7 +378,11 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
       }
       map_free(map);
     } else {
+      errno = 0;
       if (0 == endian_read_matrix(inp1, rows1, len1, rest)) {
+        if ( 0 != errno) {
+          perror(name);
+        }
         fprintf(stderr, "%s: unable to read %s, terminating\n", name, m1);
         grease_free(&grease);
         return cleanup(inp1, inp2, outp);
@@ -385,7 +397,11 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
       return 0;
     }
     /* Write matrix 3 */
+    errno = 0;
     if (0 == endian_write_matrix(outp, rows3, len2, rest)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: unable to write %s, terminating\n", name, m3);
       matrix_free(rows1);
       matrix_free(rows3);
@@ -447,7 +463,11 @@ int mul_from_store(unsigned int **rows1, unsigned int **rows3,
       /* This sets the initial rows */
       l = 1;
       for (j = 0; j < size; j++) {
+        errno = 0;
         if (0 == endian_read_row(inp, grease->rows[l - 1], len)) {
+          if ( 0 != errno) {
+            perror(name);
+          }
           fprintf(stderr, "%s: unable to read %s, terminating\n", name, m);
           return 0;
         }

@@ -1,5 +1,5 @@
 /*
- * $Id: rnf.c,v 1.10 2002/06/27 08:24:08 jon Exp $
+ * $Id: rnf.c,v 1.11 2002/06/28 08:39:16 jon Exp $
  *
  * Compute the rank of a matrix, using temporary files
  *
@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
+#include <errno.h>
 #include "clean.h"
 #include "endian.h"
 #include "grease.h"
@@ -136,8 +137,12 @@ unsigned int rank(const char *m1, const char *dir, const char *m2,
   }
   r = 0; /* Rank count */
   if (0 != record) {
+    errno = 0;
     outp = fopen64(name3, "wb");
     if (NULL == outp) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: failed to open temporary file %s, terminating\n", name, name3);
       fclose(inp);
       exit(1);
@@ -146,7 +151,11 @@ unsigned int rank(const char *m1, const char *dir, const char *m2,
   while (rows_to_do > 0) {
     unsigned int rows_remaining = rows_to_do;
     unsigned int stride = (step1 > rows_remaining) ? rows_remaining : step1;
+    errno = 0;
     if (0 == endian_read_matrix(in->f, mat1, len, stride)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: cannot read matrix for %s, terminating\n", name, in->name);
       fclose(in->f);
       cleanup_outp(record, outp, name3);
@@ -161,7 +170,11 @@ unsigned int rank(const char *m1, const char *dir, const char *m2,
       if (0 != record) {
         for (i = 0; i < stride; i++) {
           if (map[i] >= 0) {
+            errno = 0;
             if (0 == endian_write_row(outp, mat1[i], len)) {
+              if ( 0 != errno) {
+                perror(name);
+              }
               fprintf(stderr, "%s: cannot write row to %s, terminating\n", name, name3);
               fclose(in->f);
               cleanup_outp(record, outp, name3);
@@ -173,9 +186,13 @@ unsigned int rank(const char *m1, const char *dir, const char *m2,
       }
       if (rows_remaining > 0) {
         unsigned int rows_written = 0;
+        errno = 0;
         out->f = fopen64(out->name, "wb");
         out->created = 1;
         if (NULL == out->f) {
+          if ( 0 != errno) {
+            perror(name);
+          }
           fprintf(stderr, "%s: cannot open temporary output %s, terminating\n", name, out->name);
           fclose(in->f);
           cleanup_outp(record, outp, name3);
@@ -185,7 +202,11 @@ unsigned int rank(const char *m1, const char *dir, const char *m2,
         for (i = 0; i < rows_remaining; i += step2) {
           unsigned int stride2 = (step2 + i > rows_remaining) ? rows_remaining - i : step2;
           unsigned int j;
+          errno = 0;
           if (0 == endian_read_matrix(in->f, mat2, len, stride2)) {
+            if ( 0 != errno) {
+              perror(name);
+            }
             fprintf(stderr, "%s: cannot read matrix for %s, terminating\n", name, in->name);
             fclose(in->f);
             fclose(out->f);
@@ -196,7 +217,11 @@ unsigned int rank(const char *m1, const char *dir, const char *m2,
           clean(mat1, stride, mat2, stride2, map, NULL, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, name);
           for (j = 0; j < stride2; j++) {
             if (0 == row_is_zero(mat2[j], len)) {
+              errno = 0;
               if (0 == endian_write_row(out->f, mat2[j], len)) {
+                if ( 0 != errno) {
+                  perror(name);
+                }
                 fprintf(stderr, "%s: cannot write matrix for %s, terminating\n", name, out->name);
                 fclose(in->f);
                 fclose(out->f);
@@ -212,8 +237,12 @@ unsigned int rank(const char *m1, const char *dir, const char *m2,
         in = in->next;
         out = out->next;
         if (rows_written > 0) {
+          errno = 0;
           in->f = fopen64(in->name, "rb");
           if (NULL == in->f) {
+            if ( 0 != errno) {
+              perror(name);
+            }
             fprintf(stderr, "%s: cannot open temporary output %s, terminating\n", name, in->name);
             cleanup_outp(record, outp, name3);
             cleanup(t1, t2);
@@ -239,20 +268,32 @@ unsigned int rank(const char *m1, const char *dir, const char *m2,
     if (0 == open_and_write_binary_header(&outp, h_out, m2, name)) {
       exit(1);
     }
+    errno = 0;
     inp = fopen64(name3, "rb");
     if (NULL == inp) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fclose(outp);
       fprintf(stderr, "%s: cannot open input %s, terminating\n",name, name3);
       exit(1);
     }
     for (i = 0; i < r; i++) {
+      errno = 0;
       if (0 == endian_read_row(inp, row, len)) {
+        if ( 0 != errno) {
+          perror(name);
+        }
         fprintf(stderr, "%s: cannot read row from %s, terminating\n", name, name3);
         fclose(inp);
         fclose(outp);
         exit(1);
       }
+      errno = 0;
       if (0 == endian_write_row(outp, row, len)) {
+        if ( 0 != errno) {
+          perror(name);
+        }
         fprintf(stderr, "%s: cannot write row to %s, terminating\n", name, m2);
         fclose(inp);
         fclose(outp);

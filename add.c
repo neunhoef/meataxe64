@@ -1,5 +1,5 @@
 /*
- * $Id: add.c,v 1.19 2002/06/25 10:30:12 jon Exp $
+ * $Id: add.c,v 1.20 2002/06/28 08:39:16 jon Exp $
  *
  * Function to add two matrices to give a third
  *
@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <limits.h>
+#include <errno.h>
 #include "elements.h"
 #include "endian.h"
 #include "header.h"
@@ -120,7 +121,11 @@ static int add_sub(const char *m1, const char *m2, const char *m3, const char *n
     } else {
       (*incer)(row1, row2, len);
     }
+    errno = 0;
     if (0 == endian_write_row(outp, row2, len)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: cannot write row %d to %s, terminating\n", name, i, m3);
       return cleanup(inp1, inp2, outp);
     }

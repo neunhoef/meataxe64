@@ -1,5 +1,5 @@
 /*
- * $Id: sbf.c,v 1.6 2002/06/27 08:24:08 jon Exp $
+ * $Id: sbf.c,v 1.7 2002/06/28 08:39:16 jon Exp $
  *
  * Function to spin some vectors under two generators to obtain a standard base
  *
@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <errno.h>
 
 typedef struct gen_struct *gen;
 
@@ -167,7 +168,11 @@ unsigned int spin(const char *in, const char *out, const char *a,
     rows3[d] = memory_pointer_offset(600, d, len);
   }
   assert(1 == nor);
+  errno = 0;
   if (0 == endian_read_matrix(inp, rows1, len, 1)) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: failed to read rows from %s, terminating\n",
             name, in);
     cleanup(inp, f_a, f_b);
@@ -204,9 +209,13 @@ unsigned int spin(const char *in, const char *out, const char *a,
     cleanup(inp, f_a, f_b);
   }
   /* Create the two temporary files */
+  errno = 0;
   basis = fopen64(name_basis, "w+b");
   echelised = fopen64(name_echelised, "w+b");
   if (NULL == basis || NULL == echelised) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: cannot open one of %s or %s, terminating\n", name, name_basis, name_echelised);
     if (NULL != basis) {
       fclose(basis);
@@ -216,7 +225,11 @@ unsigned int spin(const char *in, const char *out, const char *a,
     exit(1);
   }
   tmps_created = 1;
+  errno = 0;
   if (0 == endian_write_row(basis, rows1[0], len) || 0 == endian_write_row(echelised, rows2[0], len)) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: cannot write initial row to one of %s or %s, terminating\n", name, name_basis, name_echelised);
     cleanup_all(NULL, f_a, f_b, basis, echelised, name_basis, name_echelised);
     exit(1);
@@ -236,7 +249,11 @@ unsigned int spin(const char *in, const char *out, const char *a,
       /* and produce the product in rows1 */
       /* Seek to correct place in basis */
       fseeko64(basis, gen->base_ptr, SEEK_SET);
+      errno = 0;
       if (0 == endian_read_matrix(basis, rows2, len, stride)) {
+        if ( 0 != errno) {
+          perror(name);
+        }
         fprintf(stderr, "%s: failed to read %d rows from %s at offset %lld, terminating\n", name, stride, name_basis, gen->base_ptr);
         cleanup_all(NULL, f_a, f_b, basis, echelised, name_basis, name_echelised);
         exit(1);
@@ -266,7 +283,11 @@ unsigned int spin(const char *in, const char *out, const char *a,
       for (i = 0; i < stride; i++) {
         if (new_map[i] >= 0) {
           /* Got a useful row */
+          errno = 0;
           if (0 == endian_write_row(basis, rows1[i], len)) {
+            if ( 0 != errno) {
+              perror(name);
+            }
             fprintf(stderr, "%s: failed to write to %s, terminating\n",
                     name, name_basis);
             cleanup_all(NULL, f_a, f_b, basis, echelised, name_basis, name_echelised);

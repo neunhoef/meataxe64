@@ -1,5 +1,5 @@
 /*
- * $Id: ivf.c,v 1.2 2002/06/25 10:30:12 jon Exp $
+ * $Id: ivf.c,v 1.3 2002/06/28 08:39:16 jon Exp $
  *
  * Invert a matrix using intermediate files
  *
@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include <errno.h>
 #include "clean.h"
 #include "elements.h"
 #include "endian.h"
@@ -114,9 +115,13 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
     }
     (void)grease_level(prime, &grease, work_rows);
     r = grease.level;
+    errno = 0;
     echelised = fopen64(name_echelised, "w+b");
     id = fopen64(name_id, "w+b");
     if (NULL == echelised || NULL == id) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: cannot open %s, terminating\n", name, name_echelised);
       cleanup_all(echelised, name_echelised, id, name_id);
       fclose(inp);
@@ -128,7 +133,11 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
     for (n = 0; n < nor; n++) {
       row_init(rows2[0], len);
       put_element_to_row(nob, n, rows2[0], 1);
+      errno = 0;
       if (0 == endian_write_row(id, rows2[0], len)) {
+        if ( 0 != errno) {
+          perror(name);
+        }
         fprintf(stderr, "%s: cannot write row %d to %s, terminating\n", name, n, name_id);
         fclose(inp);
         header_free(h);
@@ -148,13 +157,21 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
       unsigned int stride = (r + max_rows <= nor) ? max_rows : nor - r;
       long long ptr_e1 = ftello64(echelised), ptr_i1 = ftello64(id);
       int *map;
+      errno = 0;
       if (0 == endian_read_matrix(echelised, rows1, len, stride)) {
+        if ( 0 != errno) {
+          perror(name);
+        }
         fprintf(stderr, "%s: cannot read %d rows from matrix for %s, terminating\n", name, stride, name_echelised);
         header_free(h);
         cleanup_all(echelised, name_echelised, id, name_id);
         exit(1);
       }
+      errno = 0;
       if (0 == endian_read_matrix(id, rows2, len, stride)) {
+        if ( 0 != errno) {
+          perror(name);
+        }
         fprintf(stderr, "%s: cannot read %d rows from matrix for %s, terminating\n", name, stride, name_id);
         header_free(h);
         cleanup_all(echelised, name_echelised, id, name_id);
@@ -174,8 +191,12 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
       /* Now write back the cleaning result */
       fseeko64(echelised, ptr_e1, SEEK_SET);
       fseeko64(id, ptr_i1, SEEK_SET);
+      errno = 0;
       if (0 == endian_write_matrix(echelised, rows1, len, stride) ||
           0 == endian_write_matrix(id, rows2, len, stride)) {
+        if ( 0 != errno) {
+          perror(name);
+        }
         fprintf(stderr, "%s: failed to write %d rows to one of %s or %s, terminating\n",
                 name, stride, name_echelised, name_id);
         header_free(h);
@@ -190,8 +211,12 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
         /* Read stride2 rows from echelised and id at offsets ptr_e1, ptr_i1 */
         fseeko64(echelised, ptr_e1, SEEK_SET);
         fseeko64(id, ptr_i1, SEEK_SET);
+        errno = 0;
         if (0 == endian_read_matrix(echelised, rows3, len, stride2) ||
             0 == endian_read_matrix(id, rows4, len, stride2)) {
+          if ( 0 != errno) {
+            perror(name);
+          }
           fprintf(stderr, "%s: cannot read %d rows from one of %s or %s, terminating\n",
                   name, stride2, name_echelised, name_id);
           header_free(h);
@@ -203,8 +228,12 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
         /* Write back the cleaned version to echelised and id */
         fseeko64(echelised, ptr_e1, SEEK_SET);
         fseeko64(id, ptr_i1, SEEK_SET);
+        errno = 0;
         if (0 == endian_write_matrix(echelised, rows3, len, stride2) ||
             0 == endian_write_matrix(id, rows4, len, stride2)) {
+          if ( 0 != errno) {
+            perror(name);
+          }
           fprintf(stderr, "%s: cannot write %d rows to one of %s or %s, terminating\n",
                   name, stride2, name_echelised, name_id);
           header_free(h);
@@ -222,8 +251,12 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
         /* Read stride2 rows from echelised and id at offsets ptr_e1, ptr_i1 */
         fseeko64(echelised, ptr_e1, SEEK_SET);
         fseeko64(id, ptr_i1, SEEK_SET);
+        errno = 0;
         if (0 == endian_read_matrix(echelised, rows3, len, stride2) ||
             0 == endian_read_matrix(id, rows4, len, stride2)) {
+          if ( 0 != errno) {
+            perror(name);
+          }
           fprintf(stderr, "%s: cannot read %d rows from one of %s or %s, terminating\n",
                   name, stride2, name_echelised, name_id);
           header_free(h);
@@ -235,8 +268,12 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
         /* Write back the cleaned version to echelised and id */
         fseeko64(echelised, ptr_e1, SEEK_SET);
         fseeko64(id, ptr_i1, SEEK_SET);
+        errno = 0;
         if (0 == endian_write_matrix(echelised, rows3, len, stride2) ||
             0 == endian_write_matrix(id, rows4, len, stride2)) {
+          if ( 0 != errno) {
+            perror(name);
+          }
           fprintf(stderr, "%s: cannot write %d rows to one of %s or %s, terminating\n",
                   name, stride2, name_echelised, name_id);
           header_free(h);
@@ -261,7 +298,11 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
       /* Back to start in id file */
       fseeko64(id, 0, SEEK_SET);
       for (n = 0; n < nor; n++) {
+        errno = 0;
         if (0 == endian_read_row(id, rows2[0], len)) {
+          if ( 0 != errno) {
+            perror(name);
+          }
           fprintf(stderr, "%s cannot read row %d from %s, terminating\n", name, n, name_id);
           cleanup_all(echelised, name_echelised, id, name_id);
           fclose(outp);
@@ -277,7 +318,11 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
         }
       }
       for (n = 0; n < stride; n++) {
+        errno = 0;
         if (0 == endian_write_row(outp, rows1[n], len)) {
+          if ( 0 != errno) {
+            perror(name);
+          }
           fprintf(stderr, "%s: cannot write row %d to %s, terminating\n", name, r + n, m2);
           cleanup_all(echelised, name_echelised, id, name_id);
           fclose(outp);

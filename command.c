@@ -1,5 +1,5 @@
 /*
- * $Id: command.c,v 1.10 2001/12/15 20:47:27 jon Exp $
+ * $Id: command.c,v 1.11 2002/06/28 08:39:16 jon Exp $
  *
  * Interface to task manager (definition)
  *
@@ -11,6 +11,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <assert.h>
+#include <errno.h>
 #include "files.h"
 #include "system.h"
 #include "utils.h"
@@ -209,15 +210,23 @@ void copy_back(const char *new, const char *old, const char *task_name)
   assert(NULL != new);
   assert(NULL != old);
   assert(NULL != task_name);
+  errno = 0;
   input = fopen(old, "rb");
   if (NULL == input) {
     release_lock();
+    if ( 0 != errno) {
+      perror(task_name);
+    }
     fprintf(stderr, "Slave %s can't open %s\n, terminating\n", task_name, old);
     exit(1);
   }
+  errno = 0;
   output = fopen(new, "wb");
   if (NULL == output) {
     release_lock();
+    if ( 0 != errno) {
+      perror(task_name);
+    }
     fprintf(stderr, "Slave %s can't open %s\n, terminating\n", task_name, new);
     exit(1);
   }
@@ -259,9 +268,13 @@ static void add_tasks(int is_consumer, task *new_tasks[], unsigned int size)
   FILE *new, *old;
   unsigned int i;
   wait_lock(task_name);
+  errno = 0;
   copy = fopen(COMMAND_COPY, "wb");
   if (copy == NULL) {
     release_lock();
+    if ( 0 != errno) {
+      perror(task_name);
+    }
     fprintf(stderr, "Cannot create " COMMAND_COPY "\n");
     exit(1);
   }
@@ -273,10 +286,14 @@ static void add_tasks(int is_consumer, task *new_tasks[], unsigned int size)
   }
   fflush(copy);
   fclose(copy);
+  errno = 0;
   new = fopen(COMMAND_FILE, "wb");
   copy = fopen(COMMAND_COPY, "rb");
   if (new == NULL || copy == NULL) {
     release_lock();
+    if ( 0 != errno) {
+      perror(task_name);
+    }
     fprintf(stderr, "Cannot open " COMMAND_FILE " for write or " COMMAND_COPY " for read\n");
     exit(1);
   }
@@ -430,11 +447,17 @@ static void update(task *tasks, unsigned int size)
       printf("Unexpected null result from fopen %s\n", COMMAND_FILE);
     } else {
       char line[MAX_LINE];
-      FILE *copy = fopen(COMMAND_COPY, "wb");
-      FILE *done = fopen(COMMAND_DONE, "ab");
+      FILE *copy;
+      FILE *done;
       FILE *output;
+      errno = 0;
+      copy = fopen(COMMAND_COPY, "wb");
+      done = fopen(COMMAND_DONE, "ab");
       if (copy == NULL) {
 	release_lock();
+        if ( 0 != errno) {
+          perror(task_name);
+        }
 	fprintf(stderr, "Cannot create " COMMAND_COPY "\n");
         exit(1);
       }
@@ -457,6 +480,7 @@ static void update(task *tasks, unsigned int size)
       fclose(done);
       fclose(input);
       /* Copy the command file back */
+      errno = 0;
       input = fopen(COMMAND_COPY, "rb");
       output = fopen(COMMAND_FILE, "wb");
       if (input != NULL && output != NULL) {
@@ -466,6 +490,9 @@ static void update(task *tasks, unsigned int size)
 	fclose(input);
       } else {
 	release_lock();
+        if ( 0 != errno) {
+          perror(task_name);
+        }
 	fprintf(stderr, "Cannot create either " COMMAND_COPY " or " COMMAND_FILE "\n");
         exit(1);
       }
@@ -670,9 +697,13 @@ void prepend_task(const char *task_line, const char *task_name)
       just_wait(10);
       continue;
     }
+    errno = 0;
     output = fopen(COMMAND_COPY, "wb");
     if (NULL == output) {
       release_lock();
+      if ( 0 != errno) {
+        perror(task_name);
+      }
       fprintf(stderr, "Slave %s can't open %s\n, terminating\n", task_name, COMMAND_COPY);
       exit(1);
     }
@@ -701,9 +732,13 @@ void append_task(const char *task_line, const char *task_name)
       just_wait(10);
       continue;
     }
+    errno = 0;
     output = fopen(COMMAND_COPY, "wb");
     if (NULL == output) {
       release_lock();
+      if ( 0 != errno) {
+        perror(task_name);
+      }
       fprintf(stderr, "Slave %s can't open %s\n, terminating\n", task_name, COMMAND_COPY);
       exit(1);
     }

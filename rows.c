@@ -1,5 +1,5 @@
 /*
- * $Id: rows.c,v 1.14 2001/11/22 20:04:03 jon Exp $
+ * $Id: rows.c,v 1.15 2002/06/28 08:39:16 jon Exp $
  *
  * Row manipulation for meataxe
  *
@@ -51,7 +51,7 @@ static void row_add_2(const unsigned int *row1, const unsigned int *row2,
 }
 
 static void row_inc_2(const unsigned int *row1,
-                     unsigned int *row2, unsigned int len)
+                      unsigned int *row2, unsigned int len)
 {
   unsigned int i, j;
   assert(0 != len);
@@ -216,6 +216,7 @@ static void row_scale_in_place_3(unsigned int *row,
 #define ONE_BITS_4 0x55555555
 #define TWO_BITS_4 ((ONE_BITS_4) << 1)
 
+#if 0 /* These the same as GF(2) */
 static void row_add_4(const unsigned int *row1, const unsigned int *row2,
                       unsigned int *row3, unsigned int len)
 {
@@ -239,6 +240,7 @@ static void row_inc_4(const unsigned int *row1, unsigned int *row2, unsigned int
     *(row2++) ^= *(row1++);
   }
 }
+#endif
 
 #define scale_mod_4(b,c,d,e,f,g,h,elt) \
     c = ((b) & TWO_BITS_4) >> 1; \
@@ -524,8 +526,8 @@ int rows_init(unsigned int prime, row_opsp ops)
     ops->scaler_in_place = &row_scale_in_place_3;
     return 1;
   } else if (4 == prime) {
-    ops->adder = &row_add_4;
-    ops->incer = &row_inc_4;
+    ops->adder = &row_add_2;
+    ops->incer = &row_inc_2;
     ops->scaled_adder = &scaled_row_add_4;
     ops->scaled_incer = &scaled_row_inc_4;
     ops->scaler = &row_scale_4;

@@ -1,11 +1,12 @@
 /*
- * $Id: ztrace.c,v 1.2 2002/04/10 23:33:27 jon Exp $
+ * $Id: ztrace.c,v 1.3 2002/06/28 08:39:16 jon Exp $
  *
  * Compute the trace of a matrix
  *
  */
 
 #include <stdio.h>
+#include <errno.h>
 #include "elements.h"
 #include "endian.h"
 #include "header.h"
@@ -69,7 +70,11 @@ int main(int argc, const char * const argv[])
   row_init(&row2, 1);
   for (i = 0; i < nor; i++) {
     unsigned int elt;
+    errno = 0;
     if (0 == endian_read_row(inp, row, len)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: cannot read row %d from %s, terminating\n", name, i, in);
       fclose(inp);
       exit(1);

@@ -1,5 +1,5 @@
 /*
- * $Id: tra.c,v 1.11 2002/06/27 08:24:08 jon Exp $
+ * $Id: tra.c,v 1.12 2002/06/28 08:39:16 jon Exp $
  *
  * Function to transpose a matrix
  *
@@ -8,6 +8,7 @@
 #include "tra.h"
 #include <stdio.h>
 #include <assert.h>
+#include <errno.h>
 #include "endian.h"
 #include "elements.h"
 #include "header.h"
@@ -104,12 +105,16 @@ int tra(const char *m1, const char *m2, const char *name)
     }
     for (j = 0; j < nor; j++) {
       /* Read one row */
+      errno = 0;
       if (0 == endian_read_row(input, row1, len1)) {
-          fprintf(stderr, "%s cannot read row %d from %s, terminating\n", name, i, m1);
-          fclose(input);
-          fclose(output);
-          matrix_free(rows);
-          return 0;
+        if ( 0 != errno) {
+          perror(name);
+        }
+        fprintf(stderr, "%s cannot read row %d from %s, terminating\n", name, i, m1);
+        fclose(input);
+        fclose(output);
+        matrix_free(rows);
+        return 0;
       }
       /* Now write into k output rows starting at column j */
       for (l = i; l < i + k; l++) {
@@ -128,7 +133,11 @@ int tra(const char *m1, const char *m2, const char *name)
       return 0;
     }
     for (j = 0; j < k; j++) {
+      errno = 0;
       if (0 == endian_write_row(output, rows[j], len2)) {
+        if ( 0 != errno) {
+          perror(name);
+        }
         fprintf(stderr, "%s cannot write row %d to %s, terminating\n", name, j, m2);
         fclose(input);
         fclose(output);

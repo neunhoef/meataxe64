@@ -1,5 +1,5 @@
 /*
- * $Id: lv.c,v 1.2 2002/06/27 08:24:08 jon Exp $
+ * $Id: lv.c,v 1.3 2002/06/28 08:39:16 jon Exp $
  *
  * Function to lift vectors from a quotient space
  *
@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 
 static void cleanup(FILE *f1, FILE *f2, FILE *f3)
 {
@@ -119,7 +120,11 @@ void lift(const char *range, const char *vectors,
     unsigned int l = 0;
     row_init(row_out, len_o);
     /* Read row of vectors */
+    errno = 0;
     if (0 == endian_read_row(inp2, row_in, len_i)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: cannot read row from %s, terminating\n", name, vectors);
       cleanup(NULL, inp2, outp);
       exit(1);
@@ -135,7 +140,11 @@ void lift(const char *range, const char *vectors,
         /* This column is not in the quotient, so leave a zero here */
       }
     }
+    errno = 0;
     if (0 == endian_write_row(outp, row_out, len_o)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: cannot write row to %s, terminating\n", name, out);
       cleanup(NULL, inp2, outp);
       exit(1);

@@ -1,5 +1,5 @@
 /*
- * $Id: ns.c,v 1.8 2002/04/10 23:33:27 jon Exp $
+ * $Id: ns.c,v 1.9 2002/06/28 08:39:16 jon Exp $
  *
  * Compute the null space of a matrix
  *
@@ -8,6 +8,7 @@
 #include "ns.h"
 #include <stdio.h>
 #include <assert.h>
+#include <errno.h>
 #include "clean.h"
 #include "elements.h"
 #include "endian.h"
@@ -66,7 +67,11 @@ unsigned int nullspace(const char *m1, const char *m2, const char *name)
     mat1[n] = memory_pointer_offset(0, n, len1);
     mat2[n] = memory_pointer_offset(400, n, len2);
   }
+  errno = 0;
   if (0 == endian_read_matrix(inp, mat1, len1, nor)) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: cannot read matrix for %s, terminating\n", name, m1);
     fclose(inp);
     exit(1);
@@ -87,7 +92,11 @@ unsigned int nullspace(const char *m1, const char *m2, const char *name)
     }
     for (r = 0; r < nor; r++) {
       if (map[r] < 0) {
+        errno = 0;
         if (0 == endian_write_row(outp, mat2[r], len2)) {
+          if ( 0 != errno) {
+            perror(name);
+          }
           fprintf(stderr, "%s cannot write row %d to %s, terminating\n", name, r, m2);
           fclose(outp);
           exit(1);

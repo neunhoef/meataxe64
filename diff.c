@@ -1,5 +1,5 @@
 /*
- * $Id: diff.c,v 1.4 2002/06/25 10:30:12 jon Exp $
+ * $Id: diff.c,v 1.5 2002/06/28 08:39:16 jon Exp $
  *
  * Function to find the differences between two matrices
  *
@@ -9,6 +9,8 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <assert.h>
+#include <errno.h>
 #include "endian.h"
 #include "header.h"
 #include "memory.h"
@@ -25,6 +27,9 @@ int diff(const char *m1, const char *m2, const char *name)
   const header *h1, *h2;
   unsigned int *row1, *row2;
 
+  assert(NULL != m1);
+  assert(NULL != m2);
+  assert(NULL != name);
   if (0 == open_and_read_binary_header(&inp1, &h1, m1, name) ||
       0 == open_and_read_binary_header(&inp2, &h2, m2, name)) {
     if (NULL != inp1) {
@@ -68,13 +73,21 @@ int diff(const char *m1, const char *m2, const char *name)
   row1 = memory_pointer_offset(0, 0, len);
   row2 = memory_pointer_offset(0, 1, len);
   for (i = 0; i < nor; i++) {
+    errno = 0;
     if (0 == endian_read_row(inp1, row1, len)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s cannot read row %d from %s, terminating\n", name, i, m1);
       fclose(inp1);
       fclose(inp2);
       return 0;
     }
+    errno = 0;
     if (0 == endian_read_row(inp2, row2, len)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s cannot read row %d from %s, terminating\n", name, i, m2);
       fclose(inp1);
       fclose(inp2);

@@ -1,5 +1,5 @@
 /*
- * $Id: pco.c,v 1.2 2002/06/27 08:24:08 jon Exp $
+ * $Id: pco.c,v 1.3 2002/06/28 08:39:16 jon Exp $
  *
  * Permuation condense one group element
  *
@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+#include <errno.h>
 #include "endian.h"
 #include "elements.h"
 #include "header.h"
@@ -71,7 +72,6 @@ int pcondense(const char *in1, const char *in2,
   nor_o = orbits->size;
   map = malloc_map(nor);
   if (0 == read_map(genf, nor, map, in2, name)) {
-    fprintf(stderr, "%s: cannot read map file %s, terminating\n", name, in2);
     fclose(genf);
     exit(1);
   }
@@ -128,7 +128,11 @@ int pcondense(const char *in1, const char *in2,
         put_element_to_row(nob, j, row, l);
       }
     }
+    errno = 0;
     if (0 == endian_write_row(outf, row, len)){
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: failed to output row %d to %s, terminating\n", name, i, out);
       fclose(outf);
       exit(1);

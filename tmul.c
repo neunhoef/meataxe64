@@ -1,5 +1,5 @@
 /*
- * $Id: tmul.c,v 1.2 2002/06/27 08:24:08 jon Exp $
+ * $Id: tmul.c,v 1.3 2002/06/28 08:39:16 jon Exp $
  *
  * Function to multiply a matrix by a tensor product
  *
@@ -21,6 +21,7 @@
 #include "tra.h"
 #include "utils.h"
 #include "write.h"
+#include <errno.h>
 
 static void cleanup(FILE *f1, FILE *f2, FILE *f3)
 {
@@ -132,7 +133,11 @@ int tmul(const char *m1, const char *m2, const char *m3,
   ptrs_row2 = matrix_malloc(nor1);
   create_pointers(row1, ptrs_row1, nor1, len2, prime);
   create_pointers(row2, ptrs_row2, nor1, len2, prime);
+  errno = 0;
   if (0 == endian_read_matrix(in2, rows2, len1, nor1)) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: failed to read %s, terminating\n",
             name, m2);
     cleanup(in1, in2, in3);
@@ -140,7 +145,11 @@ int tmul(const char *m1, const char *m2, const char *m3,
   }
   fclose(in2);
   tra_in_store(rows2, rows1, nor1, noc1, nob, len1);
+  errno = 0;
   if (0 == endian_read_matrix(in3, rows2, len2, nor2)) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: failed to read %s, terminating\n",
             name, m3);
     cleanup(in1, NULL, in3);
@@ -153,7 +162,11 @@ int tmul(const char *m1, const char *m2, const char *m3,
   }
   header_free(h_in);
   for (i = 0; i < nor; i++) {
+    errno = 0;
     if (0 == endian_read_row(in1, row1, len)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: failed to read row %d from %s, terminating\n",
               name, i, m1);
       cleanup(in1, out, NULL);
@@ -179,7 +192,11 @@ int tmul(const char *m1, const char *m2, const char *m3,
       return 0;
     }
     m_to_v(ptrs_row2, row1, nor1, noc2, prime);
+    errno = 0;
     if (0 == endian_write_row(out, row1, len)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: failed to write output row %d to %s, terminating\n",
               name, i, m4);
       cleanup(in1, out, NULL);

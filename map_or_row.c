@@ -1,15 +1,16 @@
 /*
- * $Id: map_or_row.c,v 1.1 2002/06/25 10:30:12 jon Exp $
+ * $Id: map_or_row.c,v 1.2 2002/06/28 08:39:16 jon Exp $
  *
  * Handle reading from a choice of map or row
  *
  */
 
 #include "map_or_row.h"
-#include "maps.h"
 #include <stdio.h>
 #include <assert.h>
+#include <errno.h>
 #include "endian.h"
+#include "maps.h"
 
 int read_row(int is_perm, FILE *inp, unsigned int *row,
              unsigned int nob, unsigned int noc, unsigned int len,
@@ -21,11 +22,14 @@ int read_row(int is_perm, FILE *inp, unsigned int *row,
   assert(NULL != name);
   if (is_perm) {
     if (0 == read_map_element_as_row(inp, row, nob, noc, len, m, name)) {
-      fprintf(stderr, "%s: cannot read row %d from %s, terminating\n", name, i, m);
       return 0;
     }
   } else {
+    errno = 0;
     if (0 == endian_read_row(inp, row, len)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: cannot read row %d from %s, terminating\n", name, i, m);
       return 0;
     }

@@ -1,5 +1,5 @@
 /*
- * $Id: clean.c,v 1.13 2002/02/27 19:06:17 jon Exp $
+ * $Id: clean.c,v 1.14 2002/06/28 08:39:16 jon Exp $
  *
  * Cleaning and echilisation for meataxe
  *
@@ -31,7 +31,7 @@ void clean(unsigned int **m1, unsigned int d1,
            unsigned int start, unsigned int start_e,
            unsigned int len_e, const char *name)
 {
-  unsigned int i = 0, inc = grease_level;
+  unsigned int i = 0, inc = grease_level, mask, elts_per_word;
   grease_struct grease, grease_e;
   NOT_USED(name);
   assert(NULL != m1);
@@ -48,6 +48,7 @@ void clean(unsigned int **m1, unsigned int d1,
     assert(NULL != m1_e);
     assert(NULL != m2_e);
   }
+  mask = get_mask_and_elts(nob, &elts_per_word);
   grease.level = grease_level;
   grease_e.level = grease_level;
   primes_init(prime, &prime_operations);
@@ -93,10 +94,12 @@ void clean(unsigned int **m1, unsigned int d1,
     for (j = 0; j < d2; j++) {
       unsigned int elts = 0, l = 0;
       assert(NULL != m2[j]);
+      
       for (k = 0; k < inc; k++) {
-        if (map[i + k] >= 0) {
-          elts |= (get_element_from_row(nob, map[i + k], m2[j])) << (nob * l);
-          l++;
+        int m = map[i + k];
+        if (m >= 0) {
+          elts |= (get_element_from_row_with_params(nob, m, mask, elts_per_word, m2[j]) << l);
+          l += nob;
         }
       }
       if (0 != elts) {

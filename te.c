@@ -1,5 +1,5 @@
 /*
- * $Id: te.c,v 1.6 2002/06/25 10:30:12 jon Exp $
+ * $Id: te.c,v 1.7 2002/06/28 08:39:16 jon Exp $
  *
  * Function to tensor two matrices to give a third
  *
@@ -20,6 +20,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
 
 static int cleanup(FILE *inp1, FILE *inp2, FILE *outp)
 {
@@ -79,7 +80,6 @@ int tensor(const char *m1, const char *m2, const char *m3, const char *name)
     header_free(h2);
     if (0 == read_map(inp1, nor1, map1, name, m1) ||
         0 == read_map(inp2, nor2, map2, name, m2)) {
-      fprintf(stderr, "%s: failed to read one of %s and %s, terminating\n", name, m1, m2);
       map_free(map1);
       map_free(map2);
       map_free(map_o);
@@ -155,7 +155,6 @@ int tensor(const char *m1, const char *m2, const char *m3, const char *name)
                        nor1, m1, name) ||
         0 == read_rows(is_perm2, inp2, rows2, nob, noc2, len2,
                        nor2, m2, name)) {
-      fprintf(stderr, "%s: cannot read some of %s or %s, terminating\n", name, m1, m2);
       return cleanup(inp1, inp2, outp);
     }
     if (0 == open_and_write_binary_header(&outp, h3, m3, name)) {
@@ -189,7 +188,11 @@ int tensor(const char *m1, const char *m2, const char *m3, const char *name)
           }
           offset += noc2;
         }
+        errno = 0;
         if (0 == endian_write_row(outp, row_out, len3)) {
+          if ( 0 != errno) {
+            perror(name);
+          }
           fprintf(stderr, "%s: cannot write some of %s, terminating\n", name, m3);
           fclose(outp);
           return 0;

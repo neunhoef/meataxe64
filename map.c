@@ -1,5 +1,5 @@
 /*
- * $Id: map.c,v 1.3 2001/11/07 22:35:27 jon Exp $
+ * $Id: map.c,v 1.4 2002/06/28 08:39:16 jon Exp $
  *
  * Handle maps for exploded matrices
  *
@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <errno.h>
 #include "files.h"
 #include "utils.h"
 
@@ -24,8 +25,12 @@ void input_map(const char *name, const char *dir, unsigned int *cols,
   assert(NULL != rows);
   assert(NULL != names);
   m = pathname(dir, "map");
+  errno = 0;
   input = fopen(m, "rb");
   if (NULL == input) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: cannot open input map %s\n", name, m);
     exit(1);
   }
@@ -61,8 +66,12 @@ void output_map(const char *name, const char *dir, unsigned int cols,
     }
   }
   m = pathname(dir, "map");
+  errno = 0;
   output = fopen(m, "wb");
   if (output == NULL) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: cannot open output map %s\n", name, m);
     exit(1);
   }

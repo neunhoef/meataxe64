@@ -1,5 +1,5 @@
 /*
- * $Id: tsp.c,v 1.2 2002/06/27 08:24:08 jon Exp $
+ * $Id: tsp.c,v 1.3 2002/06/28 08:39:16 jon Exp $
  *
  * Function to spin some vectors under two generators in tensor space
  *
@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <errno.h>
 
 typedef struct gen_struct *gen;
 
@@ -189,7 +190,11 @@ unsigned int spin(const char *in, const char *out,
   /* We reserve memory_pointer_offset(0, 0, len) for workspace */
   work_row = memory_pointer_offset(0, 0, len);
   create_pointers(work_row, work_rows, nor1, len2, prime);
+  errno = 0;
   if (0 == endian_read_row(inp, work_row, header_get_len(h_in))) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: failed to read row from %s, terminating\n", name, in);
     cleanup(inp, f_a1, f_b1, f_a2, f_b2);
     exit(1);
@@ -226,8 +231,12 @@ unsigned int spin(const char *in, const char *out,
     exit(1);
   }
   /* Read the first group action */
+  errno = 0;
   if (0 == endian_read_matrix(f_a1, rows_a2, len1, nor1) ||
       0 == endian_read_matrix(f_b1, rows_b2, len1, nor1)) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: unable to read %s or %s, terminating\n",
             name, a1, b1);
     cleanup(NULL, f_a1, f_b1, f_a2, f_b2);
@@ -237,8 +246,12 @@ unsigned int spin(const char *in, const char *out,
   tra_in_store(rows_a2, rows_a1, nor1, noc1, nob, len1);
   tra_in_store(rows_b2, rows_b1, nor1, noc1, nob, len1);
   /* Read the second group action */
+  errno = 0;
   if (0 == endian_read_matrix(f_a2, rows_a2, len2, nor2) ||
       0 == endian_read_matrix(f_b2, rows_b2, len2, nor2)) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: unable to read %s or %s, terminating\n",
             name, a2, b2);
     cleanup(NULL, f_a1, f_b1, f_a2, f_b2);
@@ -308,7 +321,11 @@ unsigned int spin(const char *in, const char *out,
   for (d = 0; d < nor; d++) {
     create_pointers(rows[d], mat_rows, nor1, len2, prime);
     m_to_v(mat_rows, work_row, nor1, noc2, prime);
+    errno = 0;
     if (0 == endian_write_row(outp, work_row, len)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: failed to write output row %d to %s, terminating\n",
               name, d, out);
       fclose(outp);

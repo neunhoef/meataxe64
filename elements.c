@@ -1,5 +1,5 @@
 /*
- * $Id: elements.c,v 1.16 2002/06/25 10:30:12 jon Exp $
+ * $Id: elements.c,v 1.17 2002/06/28 08:39:16 jon Exp $
  *
  * Element manipulation for meataxe
  *
@@ -81,6 +81,26 @@ unsigned int get_element_from_char_row(unsigned int eperb, unsigned int prime,
     i++;
   }
   return word % prime;
+}
+
+unsigned int get_mask_and_elts(unsigned int nob, unsigned int *elts_per_word)
+{
+  assert(NULL != elts_per_word);
+  *elts_per_word = bits_in_unsigned_int / nob;
+  return (1 << nob) - 1;
+}
+
+unsigned int get_element_from_row_with_params(unsigned int nob, unsigned int index, unsigned int mask,
+                                              unsigned int elts_per_word, const unsigned int *row)
+{
+  unsigned int word_offset = index / elts_per_word;
+  unsigned int bit_offset = (index % elts_per_word) * nob;
+  unsigned int word = row[word_offset];
+  unsigned int res = (word >> bit_offset) & mask;
+  assert(0 != nob);
+  assert(NULL != row);
+  assert(bit_offset + nob <= bits_in_unsigned_int);
+  return res;
 }
 
 void element_access_init(unsigned int nob, unsigned int from, unsigned int size,

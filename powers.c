@@ -1,5 +1,5 @@
 /*
- * $Id: powers.c,v 1.6 2002/04/10 23:33:27 jon Exp $
+ * $Id: powers.c,v 1.7 2002/06/28 08:39:16 jon Exp $
  *
  * Function to compute tensor powers of a matrix, from file
  *
@@ -19,6 +19,7 @@
 #include "write.h"
 #include <stdio.h>
 #include <assert.h>
+#include <errno.h>
 
 static int cleanup(FILE *inp, FILE *outp)
 {
@@ -82,7 +83,11 @@ int skew_square(const char *m1, const char *m2, const char *name)
     rows[i] = memory_pointer_offset(0, i, len_in);
   }
   row_out = memory_pointer(900);
+  errno = 0;
   if (0 == endian_read_matrix(inp, rows, len_in, nor_in)) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: cannot read some of %s, terminating\n", name, m1);
     return cleanup(inp, outp);
   }
@@ -111,7 +116,11 @@ int skew_square(const char *m1, const char *m2, const char *name)
         }
       }
       assert(offset == nor_out);
+      errno = 0;
       if (0 == endian_write_row(outp, row_out, len_out)) {
+        if ( 0 != errno) {
+          perror(name);
+        }
         fprintf(stderr, "%s: cannot write some of %s, terminating\n", name, m2);
         fclose(outp);
         return 0;
@@ -212,7 +221,11 @@ int sym_square(const char *m1, const char *m2, const char *name)
     rows[i] = memory_pointer_offset(0, i, len_in);
   }
   row_out = memory_pointer(900);
+  errno = 0;
   if (0 == endian_read_matrix(inp, rows, len_in, nor_in)) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: cannot read some of %s, terminating\n", name, m1);
     return cleanup(inp, outp);
   }
@@ -226,7 +239,11 @@ int sym_square(const char *m1, const char *m2, const char *name)
     for (j = i + 1; j < nor_in; j++) {
       /* Down the rows of m1 again */
       make_row(nob, i, j, prime_operations, row_out, rows, len_out, nor_in, nor_out);
+      errno = 0;
       if (0 == endian_write_row(outp, row_out, len_out)) {
+        if ( 0 != errno) {
+          perror(name);
+        }
         fprintf(stderr, "%s: cannot write some of %s, terminating\n", name, m2);
         fclose(outp);
         return 0;
@@ -236,7 +253,11 @@ int sym_square(const char *m1, const char *m2, const char *name)
   for (i = 0; i < nor_in; i++) {
     /* Down the rows of m1 */
     make_row(nob, i, i, prime_operations, row_out, rows, len_out, nor_in, nor_out);
+    errno = 0;
     if (0 == endian_write_row(outp, row_out, len_out)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: cannot write some of %s, terminating\n", name, m2);
       fclose(outp);
       return 0;
@@ -300,7 +321,11 @@ int skew_cube(const char *m1, const char *m2, const char *name)
     rows[i] = memory_pointer_offset(0, i, len_in);
   }
   row_out = memory_pointer(900);
+  errno = 0;
   if (0 == endian_read_matrix(inp, rows, len_in, nor_in)) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: cannot read some of %s, terminating\n", name, m1);
     return cleanup(inp, outp);
   }
@@ -342,7 +367,11 @@ int skew_cube(const char *m1, const char *m2, const char *name)
           }
         }
         assert(offset == nor_out);
+        errno = 0;
         if (0 == endian_write_row(outp, row_out, len_out)) {
+          if ( 0 != errno) {
+            perror(name);
+          }
           fprintf(stderr, "%s: cannot write some of %s, terminating\n", name, m2);
           fclose(outp);
           return 0;
@@ -412,7 +441,11 @@ int skew_fourth(const char *m1, const char *m2, const char *name)
     rows[i] = memory_pointer_offset(0, i, len_in);
   }
   row_out = memory_pointer(900);
+  errno = 0;
   if (0 == endian_read_matrix(inp, rows, len_in, nor_in)) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: cannot read some of %s, terminating\n", name, m1);
     return cleanup(inp, outp);
   }
@@ -480,7 +513,11 @@ int skew_fourth(const char *m1, const char *m2, const char *name)
             }
           }
           assert(offset == nor_out);
+          errno = 0;
           if (0 == endian_write_row(outp, row_out, len_out)) {
+            if ( 0 != errno) {
+              perror(name);
+            }
             fprintf(stderr, "%s: cannot write some of %s, terminating\n", name, m2);
             fclose(outp);
             return 0;
@@ -556,7 +593,11 @@ int skew_fifth(const char *m1, const char *m2, const char *name)
     rows[i] = memory_pointer_offset(0, i, len_in);
   }
   row_out = memory_pointer(900);
+  errno = 0;
   if (0 == endian_read_matrix(inp, rows, len_in, nor_in)) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: cannot read some of %s, terminating\n", name, m1);
     return cleanup(inp, outp);
   }
@@ -643,7 +684,11 @@ int skew_fifth(const char *m1, const char *m2, const char *name)
               }
             }
             assert(offset == nor_out);
+            errno = 0;
             if (0 == endian_write_row(outp, row_out, len_out)) {
+              if ( 0 != errno) {
+                perror(name);
+              }
               fprintf(stderr, "%s: cannot write some of %s, terminating\n", name, m2);
               fclose(outp);
               return 0;
@@ -718,7 +763,11 @@ int skew_sixth(const char *m1, const char *m2, const char *name)
     int_rows[i] = my_malloc(nor_in * sizeof(unsigned int));
   }
   row_out = memory_pointer(900);
+  errno = 0;
   if (0 == endian_read_matrix(inp, rows, len_in, nor_in)) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: cannot read some of %s, terminating\n", name, m1);
     return cleanup(inp, outp);
   }
@@ -818,7 +867,11 @@ int skew_sixth(const char *m1, const char *m2, const char *name)
                 }
               }
               assert(offset == nor_out);
+              errno = 0;
               if (0 == endian_write_row(outp, row_out, len_out)) {
+                if ( 0 != errno) {
+                  perror(name);
+                }
                 fprintf(stderr, "%s: cannot write some of %s, terminating\n", name, m2);
                 fclose(outp);
                 return 0;
@@ -893,7 +946,11 @@ int skew_seventh(const char *m1, const char *m2, const char *name)
     int_rows[i] = my_malloc(nor_in * sizeof(unsigned int));
   }
   row_out = memory_pointer(900);
+  errno = 0;
   if (0 == endian_read_matrix(inp, rows, len_in, nor_in)) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: cannot read some of %s, terminating\n", name, m1);
     return cleanup(inp, outp);
   }
@@ -1013,7 +1070,11 @@ int skew_seventh(const char *m1, const char *m2, const char *name)
                   }
                 }
                 assert(offset == nor_out);
+                errno = 0;
                 if (0 == endian_write_row(outp, row_out, len_out)) {
+                  if ( 0 != errno) {
+                    perror(name);
+                  }
                   fprintf(stderr, "%s: cannot write some of %s, terminating\n", name, m2);
                   fclose(outp);
                   return 0;

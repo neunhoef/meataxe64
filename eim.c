@@ -1,5 +1,5 @@
 /*
- * $Id: eim.c,v 1.8 2002/06/27 08:24:08 jon Exp $
+ * $Id: eim.c,v 1.9 2002/06/28 08:39:16 jon Exp $
  *
  * implode a matrix (ie glue exploded matrices together)
  *
@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <errno.h>
 #include "elements.h"
 #include "endian.h"
 #include "exrows.h"
@@ -139,7 +140,11 @@ int main(int argc,  const char *const argv[])
       if (0 == ex_row_get(col_pieces, inputs, headers, row1, row2, name, names, i, nob)) {
         fail(inputs, output, col_pieces);
       }
+      errno = 0;
       if (0 == endian_write_row(output, row1, header_get_len(outh))) {
+        if ( 0 != errno) {
+          perror(name);
+        }
         fprintf(stderr, "%s cannot write row to %s, terminating\n",
                 name, argv[1]);
         fail(inputs, output, col_pieces);

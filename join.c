@@ -1,5 +1,5 @@
 /*
- * $Id: join.c,v 1.3 2002/06/25 10:30:12 jon Exp $
+ * $Id: join.c,v 1.4 2002/06/28 08:39:16 jon Exp $
  *
  * Function to append two matrices to give a third
  *
@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <errno.h>
 #include "header.h"
 #include "endian.h"
 #include "map_or_row.h"
@@ -90,7 +91,11 @@ int join(const char *m1, const char *m2, const char *m3, const char *name)
       fclose(outp);
       return 0;
     }
+    errno = 0;
     if (0 == endian_write_row(outp, row, len)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s cannot write row %d to %s, terminating\n", name, i, m3);
       fclose(inp1);
       fclose(inp2);
@@ -105,7 +110,11 @@ int join(const char *m1, const char *m2, const char *m3, const char *name)
       fclose(outp);
       return 0;
     }
+    errno = 0;
     if (0 == endian_write_row(outp, row, len)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s cannot write row %d to %s, terminating\n", name, i, m3);
       fclose(inp2);
       fclose(outp);

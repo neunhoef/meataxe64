@@ -1,5 +1,5 @@
 /*
- * $Id: write.c,v 1.12 2002/06/27 07:31:58 jon Exp $
+ * $Id: write.c,v 1.13 2002/06/28 08:39:16 jon Exp $
  *
  * Write a header
  *
@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <errno.h>
 #include "header.h"
 #include "utils.h"
 #include "endian.h"
@@ -48,9 +49,13 @@ int write_binary_header(FILE *fp, const header *h, const char *file, const char 
   nor = header_get_nor(h);
   noc = header_get_noc(h);
 
+  errno = 0;
   if (1 != endian_write_int(prime, fp) ||
       1 != endian_write_int(nor, fp) ||
       1 != endian_write_int(noc, fp)) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: failed to write header to binary output %s\n", name, file);
     return 0;
   }
@@ -64,8 +69,12 @@ int open_and_write_binary_header(FILE **outp, const header *h, const char *m, co
   assert(NULL != outp);
   assert(NULL != h);
   assert(NULL != m);
+  errno = 0;
   out = fopen64(m, "wb");
   if (NULL == out) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: cannot open %s, terminating\n", name, m);
     return 0;
   }

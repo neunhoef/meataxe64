@@ -1,5 +1,5 @@
 /*
- * $Id: zfo.c,v 1.1 2002/06/25 10:30:12 jon Exp $
+ * $Id: zfo.c,v 1.2 2002/06/28 08:39:16 jon Exp $
  *
  * Find the orbits under multiple generators
  *
@@ -65,7 +65,6 @@ int main(int argc, const char * const argv[])
   header_free(h);
   map = malloc_map(nor);
   if (0 == read_map(inp, nor, map, name, in)) {
-    fprintf(stderr, "%s: Failed to read map %s, terminating\n", name, in);
     fclose(inp);
     fclose(outp);
     exit(1);
@@ -137,7 +136,6 @@ int main(int argc, const char * const argv[])
       exit(1);
     }
     if (0 == read_map(inp, nor, map, name, in)) {
-      fprintf(stderr, "%s: Failed to read map %s, terminating\n", name, in);
       fclose(inp);
       fclose(outp);
       exit(1);

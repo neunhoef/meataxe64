@@ -1,5 +1,5 @@
 /*
- * $Id: zre.c,v 1.3 2002/06/27 08:24:08 jon Exp $
+ * $Id: zre.c,v 1.4 2002/06/28 08:39:16 jon Exp $
  *
  * Convert a matrix from new to old
  *
@@ -10,6 +10,7 @@
 #include <string.h>
 #include <assert.h>
 #include <limits.h>
+#include <errno.h>
 #include "elements.h"
 #include "endian.h"
 #include "header.h"
@@ -80,7 +81,11 @@ int main(int argc, const char * const argv[])
   for (i = 0; i < nor; i++) {
     unsigned int j;
     unsigned char *char_row = (unsigned char *)row;
+    errno = 0;
     if (0 == endian_read_row(inp, row, len)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: cannot read row %d from %s, terminating\n", name, i, argv[1]);
       fclose(inp);
       fclose(outp);
@@ -90,7 +95,11 @@ int main(int argc, const char * const argv[])
     for (j = 0; j < len * sizeof(unsigned int); j++) {
       char_row[j] = convert_char(char_row[j]);
     }
+    errno = 0;
     if (0 == endian_write_row(outp, row, len)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: cannot write row %d to %s, terminating\n", name, i, argv[2]);
       fclose(inp);
       fclose(outp);

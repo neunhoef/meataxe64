@@ -1,5 +1,5 @@
 /*
- * $Id: ident.c,v 1.9 2002/06/27 08:24:08 jon Exp $
+ * $Id: ident.c,v 1.10 2002/06/28 08:39:16 jon Exp $
  *
  * Subroutine to generate identity matrix
  *
@@ -8,6 +8,7 @@
 #include "ident.h"
 #include <stdio.h>
 #include <assert.h>
+#include <errno.h>
 #include "elements.h"
 #include "endian.h"
 #include "header.h"
@@ -41,7 +42,7 @@ int ident(unsigned int prime, unsigned int nor, unsigned int noc, unsigned int e
       return 0;
     }
     if (nor > noc) {
-        fprintf(stderr, "%s: cannot create identity map with more rows than columns\n", name);
+      fprintf(stderr, "%s: cannot create identity map with more rows than columns\n", name);
       header_free(h);
       return 0;
     }
@@ -50,7 +51,6 @@ int ident(unsigned int prime, unsigned int nor, unsigned int noc, unsigned int e
       map[i] = i;
     }
     if (0 == write_map(outp, nor, map, name, out)) {
-        fprintf(stderr, "%s: failed to write identity map\n", name);
       header_free(h);
       return 0;
     }
@@ -87,8 +87,12 @@ int ident(unsigned int prime, unsigned int nor, unsigned int noc, unsigned int e
       if (i < noc) {
         put_element_to_row(nob, i, row, elt);
       }
+      errno = 0;
       if (0 == endian_write_row(outp, row, len)) {
-        fprintf(stderr, "%s: write output row to %s\n", name, out);
+        if ( 0 != errno) {
+          perror(name);
+        }
+        fprintf(stderr, "%s: cannot write output row to %s\n", name, out);
         fclose(outp);
         return 0;
       }

@@ -1,5 +1,5 @@
 /*
- * $Id: conj.c,v 1.5 2002/06/25 10:30:12 jon Exp $
+ * $Id: conj.c,v 1.6 2002/06/28 08:39:16 jon Exp $
  *
  * Function to compute algebraic conjugate of a matrix, from file
  *
@@ -7,6 +7,8 @@
 
 #include "conj.h"
 #include <stdio.h>
+#include <assert.h>
+#include <errno.h>
 #include "elements.h"
 #include "endian.h"
 #include "header.h"
@@ -36,6 +38,10 @@ int conjugate(const char *m1, const char *m2, unsigned int power, const char *na
   const header *h;
   unsigned int *row;
   prime_ops ops;
+
+  assert(NULL != m1);
+  assert(NULL != m2);
+  assert(NULL != name);
   if (0 == open_and_read_binary_header(&inp, &h, m1, name)) {
     return 0;
   }
@@ -74,7 +80,11 @@ int conjugate(const char *m1, const char *m2, unsigned int power, const char *na
   row = memory_pointer_offset(0, 0, len);
   (void)int_pow(prime, power, &power); /* Convert from index to power */
   for (i = 0; i < nor; i++) {
+    errno = 0;
     if (0 == endian_read_row(inp, row, len)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: cannot read row %d from %s, terminating\n", name, i, m1);
       return cleanup(inp, outp);
     }
@@ -86,7 +96,11 @@ int conjugate(const char *m1, const char *m2, unsigned int power, const char *na
         put_element_to_row(nob, j, row, elt);
       }
     }
+    errno = 0;
     if (0 == endian_write_row(outp, row, len)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: cannot write row %d to %s, terminating\n", name, i, m2);
       return cleanup(inp, outp);
     }

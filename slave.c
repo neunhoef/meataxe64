@@ -1,5 +1,5 @@
 /*
- * $Id: slave.c,v 1.8 2002/01/14 23:43:45 jon Exp $
+ * $Id: slave.c,v 1.9 2002/06/28 08:39:16 jon Exp $
  *
  * Slave for extended operations
  * Based on zsl.c     MTX6 slave version 6.0.11 7.11.98 
@@ -10,6 +10,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <errno.h>
 #include "add.h"
 #include "endian.h"
 #include "files.h"
@@ -89,9 +90,13 @@ int main(int argc, const char *const argv[])
       just_wait(10);
       continue;
     }
+    errno = 0;
     output = fopen(COMMAND_COPY, "wb");
     if (NULL == output) {
       release_lock();
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "Slave %s can't open %s\n, terminating\n", argv[1], COMMAND_COPY);
       exit(1);
     }
@@ -131,15 +136,23 @@ int main(int argc, const char *const argv[])
       } else {
         assert(size1 + a == size2 + b);
       }
+      errno = 0;
       input = fopen(COMMAND_COPY, "rb");
       if (NULL == input) {
         release_lock();
+        if ( 0 != errno) {
+          perror(name);
+        }
         fprintf(stderr, "Slave %s can't open %s\n, terminating\n", argv[1], COMMAND_COPY);
         exit(1);
       }
+      errno = 0;
       output = fopen(COMMAND_FILE, "wb");
       if (NULL == output) {
         release_lock();
+        if ( 0 != errno) {
+          perror(name);
+        }
         fprintf(stderr, "Slave %s can't open %s\n, terminating\n", argv[1], COMMAND_FILE);
         exit(1);
       }
@@ -184,15 +197,23 @@ int main(int argc, const char *const argv[])
         }
       }
       wait_lock(argv[1]);
+      errno = 0;
       input = fopen(COMMAND_FILE, "rb");
       if (NULL == input) {
         release_lock();
+        if ( 0 != errno) {
+          perror(name);
+        }
         fprintf(stderr, "Slave %s can't open %s\n, terminating\n", argv[1], COMMAND_FILE);
         exit(1);
       }
+      errno = 0;
       output = fopen(COMMAND_COPY, "wb");
       if (NULL == output) {
         release_lock();
+        if ( 0 != errno) {
+          perror(name);
+        }
         fprintf(stderr, "Slave %s can't open %s\n, terminating\n", argv[1], COMMAND_COPY);
         exit(1);
       }
@@ -213,15 +234,23 @@ int main(int argc, const char *const argv[])
       size2 = file_size(COMMAND_COPY);
       assert(size1 + b == size2 + a);
       /* Now copy to original command file */
+      errno = 0;
       input = fopen(COMMAND_COPY, "rb");
       if (NULL == input) {
         release_lock();
+        if ( 0 != errno) {
+          perror(name);
+        }
         fprintf(stderr, "Slave %s can't open %s\n, terminating\n", argv[1], COMMAND_COPY);
         exit(1);
       }
+      errno = 0;
       output = fopen(COMMAND_FILE, "wb");
       if (NULL == output) {
         release_lock();
+        if ( 0 != errno) {
+          perror(name);
+        }
         fprintf(stderr, "Slave %s can't open %s\n, terminating\n", argv[1], COMMAND_FILE);
         exit(1);
       }

@@ -1,5 +1,5 @@
 /*
- * $Id: files.c,v 1.4 2002/01/06 16:35:48 jon Exp $
+ * $Id: files.c,v 1.5 2002/06/28 08:39:16 jon Exp $
  *
  * file system stuff for unix
  *
@@ -47,7 +47,7 @@ int ren(const char *old, const char *new)
       /* Old file still there, retry */
     }
   }
-  printf("rename of %s to %s failed, exiting\n", old, new);
+  fprintf(stderr, "rename of %s to %s failed, exiting\n", old, new);
   exit(1);
   return -1; /* Prevent compiler warning */
 }

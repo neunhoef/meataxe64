@@ -1,5 +1,5 @@
 /*
- * $Id: iv.c,v 1.4 2002/04/15 07:47:23 jon Exp $
+ * $Id: iv.c,v 1.5 2002/06/28 08:39:16 jon Exp $
  *
  * Invert a matrix
  *
@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include <errno.h>
 #include "clean.h"
 #include "elements.h"
 #include "endian.h"
@@ -71,7 +72,11 @@ void invert(const char *m1, const char *m2, const char *name)
       mat1[n] = memory_pointer_offset(0, n, len);
       mat2[n] = memory_pointer_offset(400, n, len);
     }
+    errno = 0;
     if (0 == endian_read_matrix(inp, mat1, len, nor)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: cannot read matrix for %s, terminating\n", name, m1);
       header_free(h);
       fclose(inp);
@@ -111,7 +116,11 @@ void invert(const char *m1, const char *m2, const char *name)
 #endif
     free(map1);
     for (r = 0; r < nor; r++) {
+      errno = 0;
       if (0 == endian_write_row(outp, mat2[map2[r]], len)) {
+        if ( 0 != errno) {
+          perror(name);
+        }
         fprintf(stderr, "%s: cannot write row %d to %s, terminating\n", name, r, m2);
         fclose(outp);
         exit(1);

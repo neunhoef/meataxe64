@@ -1,5 +1,5 @@
 /*
- * $Id: pr.c,v 1.11 2002/06/27 07:31:58 jon Exp $
+ * $Id: pr.c,v 1.12 2002/06/28 08:39:16 jon Exp $
  *
  * Print a matrix
  *
@@ -10,6 +10,7 @@
 #include <string.h>
 #include <assert.h>
 #include <limits.h>
+#include <errno.h>
 #include "elements.h"
 #include "endian.h"
 #include "header.h"
@@ -69,7 +70,11 @@ int main(int argc, const char * const argv[])
   if (1 == prime) {
     /* A permutation or map */
     for (i = 0; i < nor; i++) {
+      errno = 0;
       if (1 != endian_read_int(&j, inp)) {
+        if ( 0 != errno) {
+          perror(name);
+        }
         fprintf(stderr, "%s: failed to read entry %d from %s, terminating\n", name, i, in);
         fclose(inp);
         exit(1);
@@ -90,7 +95,11 @@ int main(int argc, const char * const argv[])
     }
     for (i = 0; i < nor; i++) {
       unsigned int m = 0;
+      errno = 0;
       if (0 == endian_read_row(inp, row, len)) {
+        if ( 0 != errno) {
+          perror(name);
+        }
         fprintf(stderr, "%s: cannot read row %d from %s, terminating\n", name, i, in);
         fclose(inp);
         exit(1);

@@ -1,5 +1,5 @@
 /*
- * $Id: utils.c,v 1.18 2002/03/10 22:45:28 jon Exp $
+ * $Id: utils.c,v 1.19 2002/06/28 08:39:16 jon Exp $
  *
  * Utils for meataxe
  *
@@ -12,6 +12,7 @@
 #include <assert.h>
 #include <limits.h>
 #include <ctype.h>
+#include <errno.h>
 
 unsigned int bits_in_unsigned_int = CHAR_BIT * sizeof(unsigned int);
 
@@ -112,9 +113,11 @@ void *my_malloc(size_t size)
 {
   void *ret;
   assert(0 != size);
+  errno = 0;
   ret = malloc(size);
   if (NULL == ret) {
-    fprintf(stderr, "Failed to allocate %d bytes, terminating\n", size);
+    fprintf(stderr, "Failed to allocate %d bytes with error reason '%s', terminating\n",
+            size, (0 != errno) ? strerror(errno) : "unknown");
     exit(1);
   }
   return ret;

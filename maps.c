@@ -1,5 +1,5 @@
 /*
- * $Id: maps.c,v 1.2 2002/06/25 10:30:12 jon Exp $
+ * $Id: maps.c,v 1.3 2002/06/28 08:39:16 jon Exp $
  *
  * Maps from {0 .. nor-1} -> {0 .. noc-1}
  *
@@ -8,6 +8,7 @@
 #include "maps.h"
 #include <stdio.h>
 #include <assert.h>
+#include <errno.h>
 #include "elements.h"
 #include "endian.h"
 #include "header.h"
@@ -34,7 +35,11 @@ int read_map_element_as_row(FILE *inp, unsigned int *row, unsigned int nob,
   assert(NULL != row);
   assert(NULL != in);
   assert(NULL != name);
+  errno = 0;
   if (1 != endian_read_int(&i, inp)) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: failed to read entry from %s, terminating\n", name, in);
     return 0;
   }
@@ -56,7 +61,11 @@ int read_map(FILE *inp, unsigned int nor, unsigned int *map, const char *name, c
   assert(NULL != name);
   assert(NULL != in);
   for (i = 0; i < nor; i++) {
+    errno = 0;
     if (1 != endian_read_int(&j, inp)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: failed to read entry %d from %s, terminating\n", name, i, in);
       fclose(inp);
       return 0;
@@ -74,7 +83,11 @@ int write_map(FILE *outp, unsigned int nor, unsigned int *map, const char *name,
   assert(NULL != name);
   assert(NULL != out);
   for (i = 0; i < nor; i++) {
+    errno = 0;
     if (1 != endian_write_int(map[i], outp)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: failed to write entry %d to %s, or entry out of range, terminating\n", name, i, out);
       fclose(outp);
       return 0;

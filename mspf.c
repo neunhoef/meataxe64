@@ -1,5 +1,5 @@
 /*
- * $Id: mspf.c,v 1.3 2002/06/27 08:24:08 jon Exp $
+ * $Id: mspf.c,v 1.4 2002/06/28 08:39:16 jon Exp $
  *
  * Function to spin some vectors under multiple generators
  * using intermediate files in a temporary directory.
@@ -25,6 +25,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <errno.h>
 
 typedef struct gen_struct *gen;
 
@@ -174,8 +175,12 @@ unsigned int spin(const char *in, const char *out, const char *dir,
     rows2[d] = memory_pointer_offset(450, d, len);
   }
   /* Create the temporary file */
+  errno = 0;
   echelised = fopen64(name_echelised, "w+b");
   if (NULL == echelised) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: cannot open %s, terminating\n", name, name_echelised);
     cleanup(inp, argc, files);
     exit(1);
@@ -185,7 +190,11 @@ unsigned int spin(const char *in, const char *out, const char *dir,
   clean_nor = 0;
   for (i = 0; i < nor; i += max_rows) {
     unsigned int stride = (i + max_rows > nor) ? nor - i : max_rows;
+    errno = 0;
     if (0 == endian_read_matrix(inp, rows1, len, stride)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: failed to read rows from %s, terminating\n",
               name, in);
       cleanup_all(inp, argc, files, echelised, name_echelised);
@@ -221,7 +230,11 @@ unsigned int spin(const char *in, const char *out, const char *dir,
       /* and produce the product in rows1 */
       /* Seek to correct place in echelised basis */
       fseeko64(echelised, gen->base_ptr, SEEK_SET);
+      errno = 0;
       if (0 == endian_read_matrix(echelised, rows2, len, stride)) {
+        if ( 0 != errno) {
+          perror(name);
+        }
         fprintf(stderr, "%s: failed to read %d rows from %s at offset %lld, terminating\n", name, stride, gen->m, gen->base_ptr);
         cleanup_all(NULL, argc, files, echelised, name_echelised);
         exit(1);

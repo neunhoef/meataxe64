@@ -1,5 +1,5 @@
 /*
- * $Id: extend_matrix.c,v 1.3 2002/06/25 10:30:12 jon Exp $
+ * $Id: extend_matrix.c,v 1.4 2002/06/28 08:39:16 jon Exp $
  *
  * Function to field extend a matrix
  *
@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <errno.h>
 #include "endian.h"
 #include "extend.h"
 #include "memory.h"
@@ -64,7 +65,11 @@ int extend_matrix(const char *in, const char *out, unsigned int out_prime, const
   in_row = memory_pointer_offset(0, 0, in_len);
   out_row = memory_pointer_offset(500, 0, out_len);
   for (i = 0; i < nor; i++) {
+    errno = 0;
     if (0 == endian_read_row(inp, in_row, in_len)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s cannot read row from %s, terminating\n", name, in);
       fclose(inp);
       fclose(outp);
@@ -75,7 +80,11 @@ int extend_matrix(const char *in, const char *out, unsigned int out_prime, const
       fclose(outp);
       return 0;
     }
+    errno = 0;
     if (0 == endian_write_row(outp, out_row, out_len)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s cannot write row to %s, terminating\n", name, out);
       fclose(inp);
       fclose(outp);

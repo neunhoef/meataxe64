@@ -1,5 +1,5 @@
 /*
- * $Id: nsf.c,v 1.9 2002/06/27 08:24:08 jon Exp $
+ * $Id: nsf.c,v 1.10 2002/06/28 08:39:16 jon Exp $
  *
  * Compute the nullspace of a matrix, using temporary files
  *
@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
+#include <errno.h>
 #include "clean.h"
 #include "endian.h"
 #include "grease.h"
@@ -76,8 +77,12 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
   sprintf(name3, "%s/%s.2", dir, tmp);
   sprintf(name4, "%s/%s.3", dir, tmp); /* Two for identity */
   sprintf(name5, "%s/%s.4", dir, tmp); /* One for null vectors */
+  errno = 0;
   outp = fopen64(name5, "wb");
   if (NULL == outp) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: cannot open intermediate null vector file %s, terminating\n",
             name, name5);
     exit(1);
@@ -158,7 +163,11 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
     unsigned int rows_remaining = rows_to_do;
     unsigned int stride = (step1 > rows_remaining) ? rows_remaining : step1;
     unsigned int i;
+    errno = 0;
     if (0 == endian_read_matrix(in->f, mat1, len, stride)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: cannot read matrix for %s, terminating\n", name, in->name);
       fclose(in->f);
       fclose(in->f_id);
@@ -166,7 +175,11 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
       cleanup(t1, t2, name5);
       exit(1);
     }
+    errno = 0;
     if (0 == endian_read_matrix(in->f_id, mat3, len_id, stride)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: cannot read matrix for %s, terminating\n", name, in->name_id);
       fclose(in->f);
       fclose(in->f_id);
@@ -178,7 +191,11 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
     rows_remaining -= stride;
     for (i = 0; i < stride; i++) {
       if (map[i] < 0) {
+        errno = 0;
         if (0 == endian_write_row(outp, mat3[i], len_id)) {
+          if ( 0 != errno) {
+            perror(name);
+          }
           fprintf(stderr, "%s: cannot write matrix for %s, terminating\n", name, name5);
           fclose(in->f);
           fclose(in->f_id);
@@ -193,8 +210,12 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
       r += n;
       if (rows_remaining > 0) {
         unsigned int rows_written = 0;
+        errno = 0;
         out->f = fopen64(out->name, "wb");
         if (NULL == out->f) {
+          if ( 0 != errno) {
+            perror(name);
+          }
           fprintf(stderr, "%s: cannot open temporary output %s, terminating\n", name, out->name);
           fclose(in->f);
           fclose(in->f_id);
@@ -202,9 +223,13 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
           cleanup(t1, t2, name5);
           exit(1);
         }
+        errno = 0;
         out->f_id = fopen64(out->name_id, "wb");
         out->created = 1;
         if (NULL == out->f_id) {
+          if ( 0 != errno) {
+            perror(name);
+          }
           fprintf(stderr, "%s: cannot open temporary output %s, terminating\n", name, out->name_id);
           fclose(in->f);
           fclose(in->f_id);
@@ -216,7 +241,11 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
         for (i = 0; i < rows_remaining; i += step2) {
           unsigned int stride2 = (step2 + i > rows_remaining) ? rows_remaining - i : step2;
           unsigned int j;
+          errno = 0;
           if (0 == endian_read_matrix(in->f, mat2, len, stride2)) {
+            if ( 0 != errno) {
+              perror(name);
+            }
             fprintf(stderr, "%s: cannot read matrix for %s, terminating\n", name, in->name);
             fclose(in->f);
             fclose(in->f_id);
@@ -226,7 +255,11 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
             cleanup(t1, t2, name5);
             exit(1);
           }
+          errno = 0;
           if (0 == endian_read_matrix(in->f_id, mat4, len_id, stride2)) {
+            if ( 0 != errno) {
+               perror(name);
+            }
             fprintf(stderr, "%s: cannot read matrix for %s, terminating\n", name, in->name_id);
             fclose(in->f);
             fclose(in->f_id);
@@ -242,7 +275,11 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
 /* This invalidates nullspace algorithms for inverses */
             if (0 == row_is_zero(mat2[j], len)) {
 #endif
+              errno = 0;
               if (0 == endian_write_row(out->f, mat2[j], len)) {
+                if ( 0 != errno) {
+                  perror(name);
+                }
                 fprintf(stderr, "%s: cannot write matrix for %s, terminating\n", name, out->name);
                 fclose(in->f);
                 fclose(in->f_id);
@@ -252,7 +289,11 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
                 cleanup(t1, t2, name5);
                 exit(1);
               }
+              errno = 0;
               if (0 == endian_write_row(out->f_id, mat4[j], len_id)) {
+                if ( 0 != errno) {
+                  perror(name);
+                }
                 fprintf(stderr, "%s: cannot write matrix for %s, terminating\n", name, out->name_id);
                 fclose(in->f);
                 fclose(in->f_id);
@@ -266,7 +307,11 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
 #if 0
             } else {
               /* Found a null row, write it out */
+              errno = 0;
               if (0 == endian_write_row(outp, mat4[j], len_id)) {
+                if ( 0 != errno) {
+                  perror(name);
+                }
                 fprintf(stderr, "%s: cannot write matrix for %s, terminating\n", name, name5);
                 fclose(in->f);
                 fclose(in->f_id);
@@ -285,14 +330,22 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
         in = in->next;
         out = out->next;
         if (rows_written > 0) {
+          errno = 0;
           in->f = fopen64(in->name, "rb");
           if (NULL == in->f) {
+            if ( 0 != errno) {
+              perror(name);
+            }
             fprintf(stderr, "%s: cannot open temporary input %s, terminating\n", name, in->name);
             cleanup(t1, t2, name5);
             exit(1);
           }
+          errno = 0;
           in->f_id = fopen64(in->name_id, "rb");
           if (NULL == in->f_id) {
+            if ( 0 != errno) {
+              perror(name);
+            }
             fprintf(stderr, "%s: cannot open temporary input %s, terminating\n", name, in->name_id);
             cleanup(t1, t2, name5);
             exit(1);
@@ -330,8 +383,12 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
       (void)remove(name5);
       exit(1);
     }
+    errno = 0;
     inp = fopen64(name5, "rb");
     if (NULL == inp) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: cannot open intermediate null vector file %s, terminating\n",
               name, name5);
       fclose(outp);
@@ -339,14 +396,22 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
       exit(1);
     }
     for (i = 0; i < nor - r; i++) {
+      errno = 0;
       if (0 == endian_read_row(inp, row, len_id)) {
+        if ( 0 != errno) {
+          perror(name);
+        }
         fprintf(stderr, "%s: cannot read row from %s, terminating\n", name, name5);
         fclose(inp);
         fclose(outp);
         (void)remove(name5);
         exit(1);
       }
+      errno = 0;
       if (0 == endian_write_row(outp, row, len_id)) {
+        if ( 0 != errno) {
+          perror(name);
+        }
         fprintf(stderr, "%s: cannot write row to %s, terminating\n", name, m2);
         fclose(inp);
         fclose(outp);

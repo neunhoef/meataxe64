@@ -154,3 +154,4 @@ skew seventh
 20020620 - use new zdiff in scripts
 20020620 - start converting file spinning to use clean_files interface
 20020624 - start allowing multiple module generators in intermediate file versions (spf, mspf, tspf).
+20020627 - Add use of perror and errno to all error diagnostics

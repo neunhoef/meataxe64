@@ -1,5 +1,5 @@
 /*
- * $Id: ss.c,v 1.11 2002/06/27 08:24:08 jon Exp $
+ * $Id: ss.c,v 1.12 2002/06/28 08:39:16 jon Exp $
  *
  * Function to compute subspace representation
  * Uses the computed map, rather than clean/echelise
@@ -21,6 +21,7 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <errno.h>
 
 static void cleanup(FILE *f1, FILE *f2, FILE *f3)
 {
@@ -104,7 +105,11 @@ void subspace(const char *range, const char *image,
   /* Now step through image computing subspace representation */
   for (i = 0; i < nor_o; i += 1) {
     /* Read row of image */
+    errno = 0;
     if (0 == endian_read_row(inp2, row_in, len)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: cannot read row from %s, terminating\n", name, image);
       cleanup(NULL, inp2, outp);
       exit(1);
@@ -117,7 +122,11 @@ void subspace(const char *range, const char *image,
       elt = get_element_from_row(nob, map[j], row_in);
       put_element_to_row(nob, j, row_out, elt);
     }
+    errno = 0;
     if (0 == endian_write_row(outp, row_out, len_e)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: cannot write row to %s, terminating\n", name, out);
       cleanup(NULL, inp2, outp);
       exit(1);

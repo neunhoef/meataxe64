@@ -1,11 +1,12 @@
 /*
- * $Id: sns.c,v 1.6 2002/04/10 23:33:27 jon Exp $
+ * $Id: sns.c,v 1.7 2002/06/28 08:39:16 jon Exp $
  *
  * Simple compute of the null space of a matrix
  *
  */
 
 #include <stdio.h>
+#include <errno.h>
 #include "endian.h"
 #include "elements.h"
 #include "memory.h"
@@ -70,7 +71,11 @@ int main(int argc, const char * const argv[])
     mat1[n] = memory_pointer_offset(0, n, len);
     mat2[n] = memory_pointer_offset(500, n, len);
   }
+  errno = 0;
   if (0 == endian_read_matrix(inp, mat1, len, nor)) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: cannot read matrix for %s, terminating\n", name, argv[1]);
     fclose(inp);
     exit(1);
@@ -89,7 +94,11 @@ int main(int argc, const char * const argv[])
   }
   for (n = 0; n < nor; n++) {
     if (row_is_zero(mat1[n], len)) {
+      errno = 0;
       if (0 == endian_write_row(outp, mat2[n], len)) {
+        if ( 0 != errno) {
+          perror(name);
+        }
         fprintf(stderr, "%s: error writing %s, terminating\n", name, argv[2]);
         exit(1);
       }

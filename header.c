@@ -1,5 +1,5 @@
 /*
- * $Id: header.c,v 1.12 2002/04/10 23:33:27 jon Exp $
+ * $Id: header.c,v 1.13 2002/06/28 08:39:16 jon Exp $
  *
  * Header manipulation
  *
@@ -171,7 +171,7 @@ void header_set_blen(header *h)
 
 int header_alloc(header **h)
 {
-  header *h1 = malloc(sizeof(*h1));
+  header *h1 = my_malloc(sizeof(*h1));
   assert(NULL != h);
   if (NULL == h1) {
     fprintf(stderr, "Failed to allocate header structure\n");

@@ -1,5 +1,5 @@
 /*
- * $Id: ip.c,v 1.13 2002/06/27 07:31:58 jon Exp $
+ * $Id: ip.c,v 1.14 2002/06/28 08:39:16 jon Exp $
  *
  * Read a matrix
  *
@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <limits.h>
+#include <errno.h>
 #include "header.h"
 #include "utils.h"
 #include "read.h"
@@ -40,8 +41,12 @@ int main(int argc, const char * const argv[])
   }
   in = argv[1];
   out = argv[2];
+  errno = 0;
   inp = fopen(in, "r");
   if (NULL == inp) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: cannot open %s, terminating\n", name, in);
     exit(1);
   }
@@ -71,7 +76,11 @@ int main(int argc, const char * const argv[])
         fprintf(stderr, "%s: %d (out of range 1 - %d) found as permutation image, terminating\n", name, j, noc);
         exit(1);
       }
+      errno = 0;
       if (0 == endian_write_int(j - 1, outp)) {
+        if ( 0 != errno) {
+          perror(name);
+        }
         fprintf(stderr, "%s: cannot write output value %d in row %d to %s\n", name, j - 1, i, out);
         fclose(inp);
         fclose(outp);
@@ -93,7 +102,11 @@ int main(int argc, const char * const argv[])
           a |= e << (k * nob);
           k++;
           if ((k + 1) * nob > bits_in_unsigned_int) {
+            errno = 0;
             if (0 == endian_write_int(a, outp)) {
+              if ( 0 != errno) {
+                perror(name);
+              }
               fprintf(stderr, "Failed to write element to %s at (%d, %d)\n",
                       out, i, j);
               fclose(inp);
@@ -111,7 +124,11 @@ int main(int argc, const char * const argv[])
           exit(1);
         }
       }
+      errno = 0;
       if (0 != k && 0 == endian_write_int(a, outp)) {
+        if ( 0 != errno) {
+          perror(name);
+        }
         fprintf(stderr, "Failed to write element to %s at (%d, %d)\n",
                 out, i, j);
         fclose(inp);

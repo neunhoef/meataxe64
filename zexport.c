@@ -1,5 +1,5 @@
 /*
- * $Id: zexport.c,v 1.6 2002/06/27 08:24:08 jon Exp $
+ * $Id: zexport.c,v 1.7 2002/06/28 08:39:16 jon Exp $
  *
  * Export matrix to old system
  *
@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <errno.h>
 #include "endian.h"
 #include "elements.h"
 #include "header.h"
@@ -68,7 +69,11 @@ int main(int argc, const char * const argv[])
     exit(1);
   }
   for (i = 0; i < nor; i++) {
+    errno = 0;
     if (0 == endian_read_row(f_in, in_row, len)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: failed to read row %d from %s, terminating\n", name, i, in);
       exit(1);
     }

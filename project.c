@@ -1,5 +1,5 @@
 /*
- * $Id: project.c,v 1.4 2002/06/27 08:24:08 jon Exp $
+ * $Id: project.c,v 1.5 2002/06/28 08:39:16 jon Exp $
  *
  * Function to project into quotient space representation
  *
@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 
 static void cleanup(FILE *f1, FILE *f2, FILE *f3)
 {
@@ -117,7 +118,11 @@ void project(const char *range, const char *in,
   pos = ftello64(inp_r); /* Where we are in the range */
   for (i = 0; i < nor_r; i += step) {
     unsigned int j, stride_i = (i + step <= nor_r) ? step : nor_r - i;
+    errno = 0;
     if (0 == endian_read_matrix(inp_r, rows1, len, stride_i)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: failed to read rows from %s, terminating\n",
               name, range);
       cleanup(inp_r, inp_g, outp);
@@ -160,7 +165,6 @@ void project(const char *range, const char *in,
     for (d = 0; d < stride_j; d++) {
       if (0 == read_row(1 == prime_g, inp_g, rows2[d],
                         nob, noc_r, len, d, in, name)) {
-        fprintf(stderr, "%s: failed to read row from %s, terminating\n", name, in);
         fclose(inp_g);
         exit(1);
       }
@@ -174,7 +178,11 @@ void project(const char *range, const char *in,
     }
     for (k = 0; k < nor_r; k += step) {
       unsigned int stride_k = (k + step <= nor_r) ? step : nor_r - k;
+      errno = 0;
       if (0 == in_store && 0 == endian_read_matrix(inp_r, rows1, len, stride_k)) {
+        if ( 0 != errno) {
+          perror(name);
+        }
         fprintf(stderr, "%s: failed to read rows from %s, terminating\n",
                 name, range);
         cleanup(inp_r, inp_g, outp);
@@ -189,7 +197,11 @@ void project(const char *range, const char *in,
         elt = get_element_from_row(nob, map_o[k], rows2[d]);
         put_element_to_row(nob, k, row_o, elt);
       }
+      errno = 0;
       if (0 == endian_write_row(outp, row_o, len_o)) {
+        if ( 0 != errno) {
+          perror(name);
+        }
         fprintf(stderr, "%s: failed to write output to %s, terminating\n",
                 name, out);
         fclose(outp);

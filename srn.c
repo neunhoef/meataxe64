@@ -1,11 +1,12 @@
 /*
- * $Id: srn.c,v 1.6 2002/04/10 23:33:27 jon Exp $: zrn.c,v 1.1 2001/11/12 13:43:38 jon Exp $
+ * $Id: srn.c,v 1.7 2002/06/28 08:39:16 jon Exp $: zrn.c,v 1.1 2001/11/12 13:43:38 jon Exp $
  *
  * Simple compute of the rank of a matrix
  *
  */
 
 #include <stdio.h>
+#include <errno.h>
 #include "endian.h"
 #include "memory.h"
 #include "clean.h"
@@ -60,7 +61,11 @@ int main(int argc, const char * const argv[])
   for (n = 0; n < nor; n++) {
     mat[n] = memory_pointer_offset(0, n, len);
   }
+  errno = 0;
   if (0 == endian_read_matrix(inp, mat, len, nor)) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: cannot read matrix for %s, terminating\n", name, argv[1]);
     fclose(inp);
     exit(1);

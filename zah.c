@@ -1,5 +1,5 @@
 /*
- * $Id: zah.c,v 1.3 2002/06/27 08:28:23 jon Exp $
+ * $Id: zah.c,v 1.4 2002/06/28 08:39:16 jon Exp $
  *
  * Add a header to en intermediate file matrix
  * Essentially a disaster recovery program
@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <errno.h>
 #include "elements.h"
 #include "endian.h"
 #include "files.h"
@@ -48,13 +49,21 @@ int main(int argc, const char * const argv[])
   out = argv[3];
   memory_init(name, memory);
   endian_init();
+  errno = 0;
   text_inp = fopen(text_in, "r");
   if (NULL == text_inp) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: cannot open %s, terminating\n", name, text_in);
     exit(1);
   }
+  errno = 0;
   inp = fopen64(in, "r");
   if (NULL == inp) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: cannot open %s, terminating\n", name, in);
     fclose(text_inp);
     exit(1);
@@ -79,13 +88,21 @@ int main(int argc, const char * const argv[])
     exit(1);
   }
   for (i = 0; i < nor; i++) {
+    errno = 0;
     if (0 == endian_read_row(inp, row, len)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: cannot read row %d from %s, terminating\n", name, i, in);
       fclose(inp);
       fclose(outp);
       exit(1);
     }
+    errno = 0;
     if (0 == endian_write_row(outp, row, len)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: cannot write row %d to %s, terminating\n", name, i, out);
       fclose(inp);
       fclose(outp);

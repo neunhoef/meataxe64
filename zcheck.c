@@ -1,5 +1,5 @@
 /*
- * $Id: zcheck.c,v 1.2 2002/04/10 23:33:27 jon Exp $
+ * $Id: zcheck.c,v 1.3 2002/06/28 08:39:16 jon Exp $
  *
  * Check no non-zero values off ends of rows
  *
@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <errno.h>
 #include "elements.h"
 #include "endian.h"
 #include "header.h"
@@ -60,7 +61,11 @@ int main(int argc, const char * const argv[])
     }
     row = memory_pointer(0);
     for (i = 0; i < nor; i++) {
+      errno = 0;
       if (0 == endian_read_row(inp, row, len)) {
+        if ( 0 != errno) {
+          perror(name);
+        }
         fprintf(stderr, "%s: cannot read one row from %s, terminating\n", name, in);
         exit(1);
       }

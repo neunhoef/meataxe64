@@ -1,5 +1,5 @@
 /*
- * $Id: tspf.c,v 1.2 2002/06/27 08:24:08 jon Exp $
+ * $Id: tspf.c,v 1.3 2002/06/28 08:39:16 jon Exp $
  *
  * Function to spin some vectors under two generators in tensor space
  * using intermediate files in a temporary directory.
@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <errno.h>
 
 typedef struct gen_struct *gen;
 
@@ -220,7 +221,11 @@ unsigned int spin(const char *in, const char *out,
   /* We reserve memory_pointer_offset(0, 0, len) for workspace */
   work_row = memory_pointer_offset(0, 0, len);
   create_pointers(work_row, work_rows, nor1, len2, prime);
+  errno = 0;
   if (0 == endian_read_row(inp, work_row, header_get_len(h_in))) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: failed to read row from %s, terminating\n", name, in);
     cleanup(inp, f_a1, f_b1, f_a2, f_b2);
     exit(1);
@@ -258,8 +263,12 @@ unsigned int spin(const char *in, const char *out,
     exit(1);
   }
   /* Read the first group action */
+  errno = 0;
   if (0 == endian_read_matrix(f_a1, rows_a2, len1, nor1) ||
       0 == endian_read_matrix(f_b1, rows_b2, len1, nor1)) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: unable to read %s or %s, terminating\n",
             name, a1, b1);
     cleanup(NULL, f_a1, f_b1, f_a2, f_b2);
@@ -269,8 +278,12 @@ unsigned int spin(const char *in, const char *out,
   tra_in_store(rows_a2, rows_a1, nor1, noc1, nob, len1);
   tra_in_store(rows_b2, rows_b1, nor1, noc1, nob, len1);
   /* Read the second group action */
+  errno = 0;
   if (0 == endian_read_matrix(f_a2, rows_a2, len2, nor2) ||
       0 == endian_read_matrix(f_b2, rows_b2, len2, nor2)) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: unable to read %s or %s, terminating\n",
             name, a2, b2);
     cleanup(NULL, f_a1, f_b1, f_a2, f_b2);
@@ -281,13 +294,21 @@ unsigned int spin(const char *in, const char *out,
   fclose(f_a2);
   fclose(f_b2);
   /* Create the temporary file */
+  errno = 0;
   echelised = fopen64(name_echelised, "w+b");
   if (NULL == echelised) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: cannot open %s, terminating\n", name, name_echelised);
     exit(1);
   }
   tmps_created = 1;
+  errno = 0;
   if (0 == endian_write_row(echelised, rows1[0], len)) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: cannot write initial row to %s, terminating\n", name, name_echelised);
     cleanup_tmp(echelised, name_echelised);
     exit(1);
@@ -304,7 +325,11 @@ unsigned int spin(const char *in, const char *out,
       /* and produce the product in rows1 */
       /* Seek to correct place in echelised basis */
       fseeko64(echelised, gen->base_ptr, SEEK_SET);
+      errno = 0;
       if (0 == endian_read_matrix(echelised, rows2, len, stride)) {
+        if ( 0 != errno) {
+          perror(name);
+        }
         fprintf(stderr, "%s: failed to read %d rows from %s at offset %lld, terminating\n", name, stride, name_echelised, gen->base_ptr);
         cleanup_tmp(echelised, name_echelised);
         exit(1);
@@ -370,7 +395,11 @@ unsigned int spin(const char *in, const char *out,
   header_free(h_out);
   fseeko64(echelised, 0, SEEK_SET);
   for (d = 0; d < nor; d++) {
+    errno = 0;
     if (0 == endian_read_row(echelised, work_row, len)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: failed to read input row %d from %s, terminating\n",
                 name, d, name_echelised);
       fclose(outp);
@@ -378,7 +407,11 @@ unsigned int spin(const char *in, const char *out,
       exit(1);
     }
     m_to_v(work_rows, rows1[0], nor1, noc2, prime);
+    errno = 0;
     if (0 == endian_write_row(outp, rows1[0], len_o)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: failed to write output row %d to %s, terminating\n",
                 name, d, out);
       fclose(outp);

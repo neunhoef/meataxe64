@@ -1,5 +1,5 @@
 /*
- * $Id: read.c,v 1.20 2002/06/27 07:31:58 jon Exp $
+ * $Id: read.c,v 1.21 2002/06/28 08:39:16 jon Exp $
  *
  * Read a header
  *
@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <ctype.h>
+#include <errno.h>
 #include "endian.h"
 #include "header.h"
 #include "primes.h"
@@ -91,9 +92,13 @@ int read_binary_header(FILE *fp, const header **hp, const char *file, const char
     fprintf(stderr, "%s: failed to allocate header for binary input %s\n", name, file);
     return 0;
   }
+  errno = 0;
   if (1 != endian_read_int(&prime, fp) ||
       1 != endian_read_int(&nor, fp) ||
       1 != endian_read_int(&noc, fp)) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: failed to read header from binary input %s\n", name, file);
     return 0;
   }
@@ -123,8 +128,12 @@ int open_and_read_binary_header(FILE **inp, const header **h, const char *m, con
   assert(NULL != h);
   assert(NULL != m);
   assert(NULL != name);
+  errno = 0;
   in = fopen64(m, "rb");
   if (NULL == in) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: cannot open %s, terminating\n", name, m);
     *h = NULL;
     return 0;

@@ -1,5 +1,5 @@
 /*
- * $Id: msp.c,v 1.2 2002/06/27 08:24:08 jon Exp $
+ * $Id: msp.c,v 1.3 2002/06/28 08:39:16 jon Exp $
  *
  * Function to spin some vectors under multiple generators
  *
@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <errno.h>
 
 typedef struct gen_struct *gen;
 
@@ -142,7 +143,11 @@ unsigned int spin(const char *in, const char *out,
   for (d = 0; d < max_rows; d++) {
     rows[d] = memory_pointer_offset(0, d, len);
   }
+  errno = 0;
   if (0 == endian_read_matrix(inp, rows, len, nor)) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: failed to read rows from %s, terminating\n", name, in);
     cleanup(inp, argc, files);
     exit(1);
@@ -217,7 +222,11 @@ unsigned int spin(const char *in, const char *out,
   if (0 == open_and_write_binary_header(&outp, h_out, out, name)) {
     exit(1);
   }
+  errno = 0;
   if (0 == endian_write_matrix(outp, rows, len, nor)) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: failed to write output to %s, terminating\n",
             name, out);
     fclose(outp);

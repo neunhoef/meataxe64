@@ -1,5 +1,5 @@
 /*
- * $Id: clean_file.c,v 1.1 2002/06/25 10:30:12 jon Exp $
+ * $Id: clean_file.c,v 1.2 2002/06/28 08:39:16 jon Exp $
  *
  * Cleaning and echilisation, when the already clean vectors
  * are in a file which is to be updated
@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+#include <errno.h>
 #include "clean.h"
 #include "endian.h"
 #include "utils.h"
@@ -50,7 +51,11 @@ int clean_file(FILE *clean_vectors, unsigned int *nor,
     fseeko64(clean_vectors, 0, SEEK_SET);
     for (i = 0; i < my_nor; i += nor2) {
       unsigned int stride = (i + nor2 > my_nor) ? my_nor - i : nor2;
+      errno = 0;
       if (0 == endian_read_matrix(clean_vectors, rows2, len, stride)) {
+        if ( 0 != errno) {
+          perror(name);
+        }
         fprintf(stderr, "%s: failed to read %d rows from temporary file, terminating\n", name, stride);
         return 0;
       }
@@ -66,7 +71,11 @@ int clean_file(FILE *clean_vectors, unsigned int *nor,
       unsigned int stride2 = (nor2 + i > my_nor) ? my_nor - i : nor2;
       /* Read stride2 rows from echelised at offset ptr */
       fseeko64(clean_vectors, ptr, SEEK_SET);
+      errno = 0;
       if (0 == endian_read_matrix(clean_vectors, rows2, len, stride2)) {
+        if ( 0 != errno) {
+          perror(name);
+        }
         fprintf(stderr, "%s: cannot read temporary matrix, terminating\n", name);
         return 0;
       }
@@ -75,7 +84,11 @@ int clean_file(FILE *clean_vectors, unsigned int *nor,
             grease_level, prime, len, nob, start, 0, 0, name);
       /* Write back the cleaned version to echelised */
       fseeko64(clean_vectors, ptr, SEEK_SET);
+      errno = 0;
       if (0 == endian_write_matrix(clean_vectors, rows2, len, stride2)) {
+        if ( 0 != errno) {
+          perror(name);
+        }
         fprintf(stderr, "%s: cannot write temporary matrix, terminating\n", name);
         return 0;
       }
@@ -89,7 +102,11 @@ int clean_file(FILE *clean_vectors, unsigned int *nor,
     if (internal_new_map[i] >= 0) {
       /* Got a useful row */
       map[my_nor + j] = internal_new_map[i];
+      errno = 0;
       if (0 == endian_write_row(clean_vectors, rows1[i], len)) {
+        if ( 0 != errno) {
+          perror(name);
+        }
         fprintf(stderr, "%s: failed to write to temporary matrix, terminating\n",
                 name);
         return 0;

@@ -1,5 +1,5 @@
 /*
- * $Id: qs.c,v 1.10 2002/06/27 08:24:08 jon Exp $
+ * $Id: qs.c,v 1.11 2002/06/28 08:39:16 jon Exp $
  *
  * Function to compute quotient space representation
  *
@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 
 static void cleanup(FILE *f1, FILE *f2, FILE *f3)
 {
@@ -122,7 +123,11 @@ void quotient(const char *range, const char *gen,
   pos = ftello64(inp_r); /* Where we are in the range */
   for (i = 0; i < nor_r; i += step_r) {
     unsigned int j, stride_i = (i + step_r <= nor_r) ? step_r : nor_r - i;
+    errno = 0;
     if (0 == endian_read_matrix(inp_r, rows1, len, stride_i)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: failed to read rows from %s, terminating\n",
               name, range);
       cleanup(inp_r, inp_g, outp);
@@ -164,7 +169,11 @@ void quotient(const char *range, const char *gen,
       while (map_o[j + d] >= i) {
         /* Handle permutation here */
         if (1 == prime_g) {
+          errno = 0;
           if (0 == endian_read_int(&k, inp_g)) {
+            if ( 0 != errno) {
+              perror(name);
+            }
             fprintf(stderr, "%s: failed to read element from %s, terminating\n", name, gen);
             cleanup(inp_r, inp_g, outp);
             exit(1);
@@ -174,7 +183,11 @@ void quotient(const char *range, const char *gen,
             put_element_to_row(nob, k, rows2[d], 1);
           }
         } else {
+          errno = 0;
           if (0 == endian_read_row(inp_g, rows2[d], len)) {
+            if ( 0 != errno) {
+              perror(name);
+            }
             fprintf(stderr, "%s: failed to read row from %s, terminating\n", name, gen);
             cleanup(inp_r, inp_g, outp);
             exit(1);
@@ -193,7 +206,11 @@ void quotient(const char *range, const char *gen,
     }
     for (k = 0; k < nor_r; k += step_r) {
       unsigned int stride_k = (k + step_r <= nor_r) ? step_r : nor_r - k;
+      errno = 0;
       if (0 == in_store && 0 == endian_read_matrix(inp_r, rows1, len, stride_k)) {
+        if ( 0 != errno) {
+          perror(name);
+        }
         fprintf(stderr, "%s: failed to read rows from %s, terminating\n",
                 name, range);
         cleanup(inp_r, inp_g, outp);
@@ -210,7 +227,11 @@ void quotient(const char *range, const char *gen,
         elt = get_element_from_row(nob, map_o[k], rows2[d]);
         put_element_to_row(nob, k, row_o, elt);
       }
+      errno = 0;
       if (0 == endian_write_row(outp, row_o, len_o)) {
+        if ( 0 != errno) {
+          perror(name);
+        }
         fprintf(stderr, "%s: failed to write output to %s, terminating\n",
                 name, out);
         fclose(outp);

@@ -8,7 +8,9 @@ Implement a verbosity level for all programs, with -v <n>. Add a standard parser
 Look into problems with odd brain sizes
 Look into performance 199 vs 200 vs 201
 Fix zps to take less memory
-Test find_nullity_onef_with_orders (1)
+Write zah doc
+Test find_nullity_onef_with_orders, and use in irredf and indicatef (1)
+Use get_element_from_row_with_params wherever possible (1)
 Find a better algorithm for zsp memory. Investigate performance (1)
 Debug emu/zsl file corruption problem (2)
 Cleanup return vs exit (1)

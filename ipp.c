@@ -1,5 +1,5 @@
 /*
- * $Id: ipp.c,v 1.9 2002/06/27 07:31:58 jon Exp $
+ * $Id: ipp.c,v 1.10 2002/06/28 08:39:16 jon Exp $
  *
  * Read a permutation into a matrix
  *
@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <limits.h>
+#include <errno.h>
 #include "elements.h"
 #include "endian.h"
 #include "header.h"
@@ -51,8 +52,12 @@ int main(int argc, const char * const argv[])
   }
   nob = bits_of(prime);
   nod = digits_of(prime);
+  errno = 0;
   inp = fopen(in, "r");
   if (NULL == inp) {
+    if ( 0 != errno) {
+      perror(name);
+    }
     fprintf(stderr, "%s: cannot open %s, terminating\n", name, in);
     exit(1);
   }
@@ -84,7 +89,11 @@ int main(int argc, const char * const argv[])
       exit(1);
     }
     put_element_to_row(nob, j - 1, row, 1);
+    errno = 0;
     if (0 == endian_write_row(outp, row, len)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
       fprintf(stderr, "%s: cannot write output row %d to %s\n", name, i, out);
       fclose(inp);
       fclose(outp);
