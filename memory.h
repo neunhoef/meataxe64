@@ -1,5 +1,5 @@
 /*
- * $Id: memory.h,v 1.5 2002/07/04 17:50:06 jon Exp $
+ * $Id: memory.h,v 1.6 2003/02/10 23:20:55 jon Exp $
  *
  * Large memory manipulation for meataxe
  *
@@ -30,5 +30,11 @@ extern unsigned int memory_rows(unsigned int len, unsigned int size);
 
 /* Find out how much memory is required for a given number of rows */
 extern unsigned int find_extent(unsigned int nor, unsigned int len);
+
+/* Compute the amount of memory required for rows of length len1
+ * Such that we can have the same number of each length in the given extent
+ * Clamp so that neither length goes below 10 rows, or above 990
+ */
+extern unsigned int split_memory(unsigned int len1, unsigned int len2, unsigned int ext);
 
 #endif

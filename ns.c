@@ -1,5 +1,5 @@
 /*
- * $Id: ns.c,v 1.9 2002/06/28 08:39:16 jon Exp $
+ * $Id: ns.c,v 1.10 2003/02/10 23:20:55 jon Exp $
  *
  * Compute the null space of a matrix
  *
@@ -16,6 +16,7 @@
 #include "header.h"
 #include "matrix.h"
 #include "memory.h"
+#include "parse.h"
 #include "read.h"
 #include "write.h"
 
@@ -24,7 +25,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *name)
   FILE *inp, *outp;
   const header *h1;
   header *h2;
-  unsigned int prime, nob, nor, len1, len2, n, r, **mat1, **mat2;
+  unsigned int prime, nob, nor, len1, len2, space1, space2, sub1, sub2, n, r, **mat1, **mat2;
   int *map;
   grease_struct grease;
   assert(NULL != m1);
@@ -44,10 +45,21 @@ unsigned int nullspace(const char *m1, const char *m2, const char *name)
   len1 = header_get_len(h1);
   h2 = header_create(prime, nob, header_get_nod(h1), nor, nor);
   len2 = header_get_len(h2);
-  r = memory_rows(len1, 100);
-  n = memory_rows(len2, 100);
+  space1 = split_memory(len1, len2, 1000);
+  space2 = 1000 - space1;
+  if (verbose) {
+    printf("%s: splitting memory %u : %u\n", name, space1, space2);
+    fflush(stdout);
+  }
+  assert(10 <= space1 && space1 <= 990);
+  assert(10 <= space2 && space2 <= 990);
+  sub1 = space1 / 5;
+  sub2 = space2 / 5;
+  assert(0 != sub1 && 0 != sub2 && sub1 < space1 && sub2 < space2);
+  r = memory_rows(len1, sub1);
+  n = memory_rows(len2, sub2);
   header_free(h1);
-  if (memory_rows(len1, 400) < nor || memory_rows(len2, 400) < nor || r < prime || n < prime) {
+  if (memory_rows(len1, space1 - sub1) < nor || memory_rows(len2, space2 - sub2) < nor || r < prime || n < prime) {
     fprintf(stderr, "%s: cannot allocate %d rows for %s and %s, terminating\n",
             name, 2 * (nor + prime), m1, m2);
     fclose(inp);
@@ -64,8 +76,8 @@ unsigned int nullspace(const char *m1, const char *m2, const char *name)
   mat1 = matrix_malloc(nor);
   mat2 = matrix_malloc(nor);
   for (n = 0; n < nor; n++) {
-    mat1[n] = memory_pointer_offset(0, n, len1);
-    mat2[n] = memory_pointer_offset(400, n, len2);
+    mat1[n] = memory_pointer_offset(sub1 + sub2, n, len1);
+    mat2[n] = memory_pointer_offset(sub2 /* + sub1 */ + space1 /* - sub1 */, n, len2);
   }
   errno = 0;
   if (0 == endian_read_matrix(inp, mat1, len1, nor)) {
@@ -82,7 +94,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *name)
     row_init(mat2[n], len2);
     put_element_to_row(nob, n, mat2[n], 1);
   }
-  echelise(mat1, nor, &n, &map, mat2, 1, grease.level, prime, len1, nob, 800, 900, len2, 0, name);
+  echelise(mat1, nor, &n, &map, mat2, 1, grease.level, prime, len1, nob, 0, sub1, len2, 0, name);
   matrix_free(mat1);
   if (n < nor) {
     /* Output null rows of mat2 */

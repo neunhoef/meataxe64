@@ -1,5 +1,5 @@
 /*
- * $Id: memory.c,v 1.13 2003/02/05 19:30:54 jon Exp $
+ * $Id: memory.c,v 1.14 2003/02/10 23:20:55 jon Exp $
  *
  * Large memory manipulation for meataxe
  *
@@ -93,4 +93,21 @@ unsigned int find_extent(unsigned int nor, unsigned int len)
     required--;
   }
   return required + 1;
+}
+
+unsigned int split_memory(unsigned int len1, unsigned int len2, unsigned int ext)
+{
+  unsigned int total = len1 + len2;
+  unsigned int res;
+  assert(ext >= 20 && ext <= 1000);
+  assert(0 != len1);
+  assert(0 != len2);
+  assert(total > len1 && total > len2); /* Check we don't integer overflow */
+  res = (len1 * ext) / total;
+  if (res < 10) {
+    res = 10;
+  } else if (res + 10 > ext) {
+    res = ext - 10;
+  }
+  return res;
 }

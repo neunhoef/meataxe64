@@ -1,5 +1,5 @@
 /*
- * $Id: nsf.c,v 1.11 2002/07/08 17:39:14 jon Exp $
+ * $Id: nsf.c,v 1.12 2003/02/10 23:20:55 jon Exp $
  *
  * Compute the nullspace of a matrix, using temporary files
  *
@@ -17,6 +17,7 @@
 #include "ident.h"
 #include "matrix.h"
 #include "memory.h"
+#include "parse.h"
 #include "read.h"
 #include "system.h"
 #include "utils.h"
@@ -50,7 +51,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
   FILE *inp, *outp;
   const header *h;
   header *h_out;
-  unsigned int prime, nob, nod, nor, len, len_id, max_len,
+  unsigned int prime, nob, nod, nor, len, len_id, space, space_id, sub, sub_id,
       n, r, **mat1, **mat2, **mat3, **mat4,
       i, rows_to_do, max_rows, step1, step2;
   int *map;
@@ -127,10 +128,23 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
     exit(1);
   }
   len_id = header_get_len(h);
-  max_len = (len > len_id) ? len : len_id;
-  max_rows = memory_rows(max_len, 400);
-  r = memory_rows(max_len, 50);
-  if (r < prime) {
+  space = split_memory(len, len_id, 1000);
+  space_id = 1000 - space;
+  if (verbose) {
+    printf("%s: splitting memory %u : %u\n", name, space, space_id);
+    fflush(stdout);
+  }
+  assert(10 <= space && space <= 990);
+  assert(10 <= space_id && space_id <= 990);
+  sub = space / 10;
+  sub_id = space_id / 10;
+  assert(0 != sub && 0 != sub_id && 2 * sub < space && 2 * sub_id < space_id);
+  max_rows = memory_rows(len, space - 2 * sub);
+  if (max_rows > memory_rows(len_id, space_id - 2 * sub_id)) {
+    max_rows = memory_rows(len_id, space_id - 2 * sub_id);
+  }
+  r = memory_rows(len, sub);
+  if (r < prime || memory_rows(len_id, sub_id) < prime) {
     fprintf(stderr, "%s: cannot allocate %d rows for %s, terminating\n", name, prime, m1);
     fclose(f.f);
     fclose(f.f_id);
@@ -147,12 +161,12 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
   mat3 = matrix_malloc(step1);
   mat4 = matrix_malloc(step2);
   for (n = 0; n < step1; n++) {
-    mat1[n] = memory_pointer_offset(0, n, max_len);
-    mat3[n] = memory_pointer_offset(400, n, max_len);
+    mat1[n] = memory_pointer_offset(2 * sub, n, len);
+    mat3[n] = memory_pointer_offset(space, n, len_id);
   }
   for (n = 0; n < step2; n++) {
-    mat2[n] = memory_pointer_offset(800, n, max_len);
-    mat4[n] = memory_pointer_offset(850, n, max_len);
+    mat2[n] = memory_pointer_offset(sub, n, len);
+    mat4[n] = memory_pointer_offset(space + sub_id, n, len_id);
   }
   r = 0; /* Rank count */
   while (rows_to_do > 0) {
@@ -186,7 +200,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
       exit(1);
     }
     /* Clean input and record */
-    echelise(mat1, stride, &n, &map, mat3, 1, grease.level, prime, len, nob, 900, 950, len_id, 1, name);
+    echelise(mat1, stride, &n, &map, mat3, 1, grease.level, prime, len, nob, 0, space_id, len_id, 1, name);
     rows_remaining -= stride;
     /* Output any new null vectors */
     for (i = 0; i < stride; i++) {
@@ -270,7 +284,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
             cleanup(t1, t2, name5);
             exit(1);
           }
-          clean(mat1, stride, mat2, stride2, map, mat3, mat4, 1, grease.level, prime, len, nob, 900, 950, len_id, name);
+          clean(mat1, stride, mat2, stride2, map, mat3, mat4, 1, grease.level, prime, len, nob, 0, space_id, len_id, name);
           for (j = 0; j < stride2; j++) {
             errno = 0;
             if (0 == endian_write_row(out->f, mat2[j], len)) {
