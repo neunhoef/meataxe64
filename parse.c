@@ -1,5 +1,5 @@
 /*
- * $Id: parse.c,v 1.3 2002/10/13 14:16:08 jon Exp $
+ * $Id: parse.c,v 1.4 2002/10/13 16:50:01 jon Exp $
  *
  * Function to parse command line flags
  *
@@ -60,10 +60,20 @@ static void set_env_values(void)
   unsigned int len = sizeof(parse_table) / sizeof(parse_element);
   unsigned int i;
   for(i = 0; i < len; i++) {
-    if (NULL != parse_table[i].env_tag) {
-      const char *env_val = getenv(parse_table[i].env_tag);
+    pparse_element elt = parse_table + i;
+    if (NULL != elt->env_tag) {
+      const char *env_val = getenv(elt->env_tag);
       if (NULL != env_val) {
-        *(parse_table[i].flag) = parse_table[i].set_value;
+        switch (elt->type) {
+        case nullary:
+          *(elt->flag) = elt->set_value;
+          return;
+        case unary:
+          *(elt->flag) = strtoul(env_val, NULL, 0);
+          return;
+        default:
+          assert(0);
+      }
       }
     }
   }
@@ -78,10 +88,10 @@ static unsigned int parse_tag(const char *tag, const char *val, int argc)
     if ((nullary == elt->type || (unary == elt->type && argc > 2)) && 0 == strcmp(tag, elt->tag)) {
       switch (elt->type) {
       case nullary:
-        *(parse_table[i].flag) = parse_table[i].set_value;
+        *(elt->flag) = parse_table[i].set_value;
         return 1;
       case unary:
-        *(parse_table[i].flag) = strtoul(val, NULL, 0);
+        *(elt->flag) = strtoul(val, NULL, 0);
         return 2;
       default:
         assert(0);
