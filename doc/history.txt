@@ -258,3 +258,4 @@ skew seventh
 20030518 - Compute entire span spanned by image of gamma operator to prevent time wasted when no more could be produced.
 20030527 - Add sym_basis_delta and doc.
 20030621 - First working version of zsymb plus documentation
+20030621 - First version of zttr, plus sym_basis_delta using zsymb
