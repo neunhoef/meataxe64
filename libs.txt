@@ -1,0 +1,19 @@
+#
+# Generic multiple library rules
+#
+# $Id: libs.txt,v 1.1 2004/08/22 11:09:47 jon Exp $
+#
+# generate all library names plus rules
+#
+
+TARGET_TYPE:=REL
+include lib.txt
+
+TARGET_TYPE:=DEBUG
+include lib.txt
+
+TARGET_TYPE:=PROF
+include lib.txt
+
+TARGET_TYPE:=PROFNA
+include lib.txt
