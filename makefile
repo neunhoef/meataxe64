@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.82 2003/01/02 20:37:40 jon Exp $
+# $Id: makefile,v 1.83 2003/06/12 07:11:41 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -96,6 +96,7 @@ ZSPANMSP_TARGET=	zspanmsp
 ZSS_TARGET=	zss
 ZSUMS_TARGET=	zsums
 ZSUMSF_TARGET=	zsumsf
+ZSYMB_TARGET=	zsymb
 ZSYMSQ_TARGET=	zsymsq
 ZTCO_TARGET=	ztco
 ZTCV_TARGET=	ztcv
@@ -196,6 +197,7 @@ ZSPANMSP_MODULES=	elements endian grease header maps matrix memory mul parse pri
 ZSS_MODULES=	elements endian header memory parse primes read rows ss ss_map utils write zss
 ZSUMS_MODULES=	add clean elements endian grease header ident map_or_row maps matrix memory mul parse primes read rn rows sums utils write zsums
 ZSUMSF_MODULES=	add clean elements endian grease header ident map_or_row maps matrix memory mul parse primes read rnf rows sumsf system utils write zsumsf
+ZSYMB_MODULES=	clean elements endian grease header matrix maps memory mul parse primes read rows symb system utils write zsymb
 ZSYMSQ_MODULES=	dets elements endian header matrix memory powers parse primes read rows utils write zsymsq
 ZTCO_MODULES=	elements endian grease header maps matrix memory mul parse primes read rows tco utils write ztco
 ZTCV_MODULES=	elements endian grease header maps matrix memory mul parse primes read rows tcv utils write ztcv
@@ -296,6 +298,7 @@ MODULES=	$(CONS_MODULES) \
 	$(ZSS_MODULES) \
 	$(ZSUMS_MODULES) \
 	$(ZSUMSF_MODULES) \
+	$(ZSYMB_MODULES) \
 	$(ZSYMSQ_MODULES) \
 	$(ZTCO_MODULES) \
 	$(ZTCV_MODULES) \
@@ -603,6 +606,9 @@ TARGET:=ZSUMS
 include targets.txt
 
 TARGET:=ZSUMSF
+include targets.txt
+
+TARGET:=ZSYMB
 include targets.txt
 
 TARGET:=ZSYMSQ
