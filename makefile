@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.72 2002/09/01 12:33:40 jon Exp $
+# $Id: makefile,v 1.73 2002/09/05 18:24:26 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -88,6 +88,7 @@ ZSKSQ_TARGET=	zsksq
 ZSL_TARGET=	zsl
 ZSP_TARGET=	zsp
 ZSPAN_TARGET=	zspan
+ZSPANMSP_TARGET=	zspanmsp
 ZSPF_TARGET=	zspf
 ZSS_TARGET=	zss
 ZSUMS_TARGET=	zsums
@@ -184,6 +185,7 @@ ZSKSQ_MODULES=	dets elements endian header matrix memory powers parse primes rea
 ZSL_MODULES=	add elements endian files grease header map_or_row maps matrix memory mul parse primes read rows slave system utils write
 ZSP_MODULES=	clean elements endian grease header maps matrix memory mul parse primes read rows sp utils write zsp
 ZSPAN_MODULES=	elements endian header matrix memory parse primes read rows utils write zspan
+ZSPANMSP_MODULES=	elements endian grease header maps matrix memory mul parse primes read rows spanmsp utils write zspanmsp
 ZSPF_MODULES=	clean clean_file elements endian grease header maps matrix memory mul parse primes read rows spf system utils write zspf
 ZSS_MODULES=	elements endian header memory parse primes read rows ss ss_map utils write zss
 ZSUMS_MODULES=	add clean elements endian grease header ident map_or_row maps matrix memory mul parse primes read rn rows sums utils write zsums
@@ -280,6 +282,7 @@ MODULES=	$(DECOMP_MODULES) \
 	$(ZSL_MODULES) \
 	$(ZSP_MODULES) \
 	$(ZSPAN_MODULES) \
+	$(ZSPANMSP_MODULES) \
 	$(ZSPF_MODULES) \
 	$(ZSS_MODULES) \
 	$(ZSUMS_MODULES) \
@@ -567,6 +570,9 @@ TARGET:=ZSP
 include targets.txt
 
 TARGET:=ZSPAN
+include targets.txt
+
+TARGET:=ZSPANMSP
 include targets.txt
 
 TARGET:=ZSPF
