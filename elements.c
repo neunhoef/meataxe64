@@ -1,5 +1,5 @@
 /*
- * $Id: elements.c,v 1.4 2001/09/04 23:00:12 jon Exp $
+ * $Id: elements.c,v 1.5 2001/09/05 22:47:25 jon Exp $
  *
  * Element manipulation for meataxe
  *
@@ -12,29 +12,37 @@
 #include "primes.h"
 #include "elements.h"
 
-int get_element_from_text(const FILE *fp, unsigned int nob,
+static prime_ops prime_operations = { NULL, NULL};
+static int inited = 0;
+
+int get_element_from_text(const FILE *fp, unsigned int nod,
                           unsigned int prime, unsigned int *el)
 {
   unsigned int e = 0;
 
   assert(NULL != fp);
-  assert(0 != nob);
+  assert(0 != nod);
   assert(0 != prime);
-  while (0 == feof((FILE *)fp) && 0 != nob) {
+  while (0 == feof((FILE *)fp) && 0 != nod) {
     int i = fgetc((FILE *)fp);
     if (i < 0)
       return 0; /* Off end of file */
-    if (isspace(i))
+    if (my_isspace(i))
       continue; /* Ignore formatting */
     if (isdigit(i)) {
       e = e * 10 + (i - '0');
-      nob--;
+      nod--;
     } else {
+      printf("Failed on '%c', where isspace delivered %d\n", i, isspace(i));
       return 0; /* Failed, non-digit */
     }
   }
   /* Now we have e, convert to representation required by prime */
-  if (0 == prime_rep(&e, prime))
+  if (0 == inited && 0 == primes_init(prime, &prime_operations)) {
+    return 0;
+  }
+  inited = 1;
+  if (0 == (*prime_operations.prime_rep)(&e))
     return 0; /* Failed to convert */
   *el = e;
   return 1;

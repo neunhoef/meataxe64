@@ -1,5 +1,5 @@
 /*
- * $Id: ip.c,v 1.4 2001/09/04 23:00:12 jon Exp $
+ * $Id: ip.c,v 1.5 2001/09/05 22:47:25 jon Exp $
  *
  * Read a matrix
  *
@@ -27,7 +27,7 @@ int main(int argc, const char * const argv[])
   const char *out;
   FILE *inp;
   FILE *outp;
-  unsigned int prime, nob, noc, nor;
+  unsigned int prime, nob, nod, noc, nor;
   unsigned int i, j;
   unsigned int base_mask;
   header h;
@@ -62,6 +62,7 @@ int main(int argc, const char * const argv[])
   }
   prime = header_get_prime(h);
   nob = header_get_nob(h);
+  nod = header_get_nod(h);
   nor = header_get_nor(h);
   noc = header_get_noc(h);
   base_mask = (1 << nob) - 1;
@@ -70,7 +71,7 @@ int main(int argc, const char * const argv[])
     unsigned int k = 0;
     for (j = 0; j < noc; j++) {
       unsigned int e;
-      if (get_element_from_text(inp, nob, prime, &e)) {
+      if (get_element_from_text(inp, nod, prime, &e)) {
         a |= e << (k * nob);
         k++;
         if ((k + 1) * nob > bits_in_unsigned_int) {

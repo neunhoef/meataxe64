@@ -1,5 +1,5 @@
 /*
- * $Id: utils.c,v 1.4 2001/09/04 23:00:12 jon Exp $
+ * $Id: utils.c,v 1.5 2001/09/05 22:47:25 jon Exp $
  *
  * Utils for meataxe
  *
@@ -13,6 +13,11 @@
 #include "utils.h"
 
 unsigned int bits_in_unsigned_int = CHAR_BIT * sizeof(unsigned int);
+
+int my_isspace(int i)
+{
+    return (i == ' ') || (i == 9) || (i == 10) || (i == 13);
+}
 
 static int is_prime(unsigned int j)
 {
@@ -89,7 +94,7 @@ int read_decimal(const char *str, unsigned int len, unsigned int *out)
 
   assert(0 < len);
   assert(len <= 6);
-  while (isspace(*str) && len > 0) {
+  while (my_isspace(*str) && len > 0) {
     len--;
     str++;
   }

@@ -1,5 +1,5 @@
 /*
- * $Id: elements.h,v 1.4 2001/09/04 23:00:12 jon Exp $
+ * $Id: elements.h,v 1.5 2001/09/05 22:47:25 jon Exp $
  *
  * Element manipulation for meataxe
  *
@@ -15,7 +15,7 @@
 
 /* Read an element from the text input stream */
 /* Return 1 for success, 0 for failure */
-extern int get_element_from_text(const FILE *, unsigned int nob,
+extern int get_element_from_text(const FILE *, unsigned int nod,
                                  unsigned int prime, unsigned int *);
 /* Extract an element from a row at given position */
 extern unsigned int get_element_from_row(unsigned int nob, unsigned int index,

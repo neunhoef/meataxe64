@@ -1,5 +1,5 @@
 /*
- * $Id: pr.c,v 1.2 2001/09/04 23:00:12 jon Exp $
+ * $Id: pr.c,v 1.3 2001/09/05 22:47:25 jon Exp $
  *
  * Print a matrix
  *
@@ -37,6 +37,7 @@ int main(int argc, const char * const argv[])
   unsigned int row_words;
   unsigned int row_chars;
   unsigned int elts_per_word;
+  prime_ops prime_operations;
 
   endian_init();
   if (2 != argc) {
@@ -54,7 +55,7 @@ int main(int argc, const char * const argv[])
     exit(1);
   }
   prime = header_get_prime(h);
-  nob = header_get_nod(h);
+  nob = header_get_nob(h);
   nod = header_get_nod(h);
   nor = header_get_nor(h);
   noc = header_get_noc(h);
@@ -72,6 +73,11 @@ int main(int argc, const char * const argv[])
     fclose(inp);
     exit(1);
   }
+  if (0 == primes_init(prime, &prime_operations)) {
+    fprintf(stderr, "pr: cannot initialise prime operations, terminating\n");
+    fclose(inp);
+    exit(1);
+  }
   for (i = 0; i < nor; i++) {
     unsigned int m = 0;
 
@@ -86,7 +92,7 @@ int main(int argc, const char * const argv[])
       unsigned int k;
       m = j; /* To survive the loop */
       e = get_element_from_row(nob, j, row);
-      if (0 == decimal_rep(&e, prime)) {
+      if (0 == (*prime_operations.decimal_rep)(&e)) {
         fprintf(stderr, "pr: cannot convert %d with prime %d from %s, terminating\n", e, prime, in);
         fclose(inp);
         exit(1);

@@ -1,5 +1,5 @@
 /*
- * $Id: read.c,v 1.5 2001/09/04 23:00:12 jon Exp $
+ * $Id: read.c,v 1.6 2001/09/05 22:47:25 jon Exp $
  *
  * Read a header
  *
@@ -44,7 +44,7 @@ int read_text_header(const FILE *fp, header *hp, const char *name)
   }
   i = fgetc((FILE *)fp);
   while (i >= 0 && '\n' != (char)i) {
-    if (isspace(i))
+    if (my_isspace(i))
       i = fgetc((FILE *)fp);
     else
       break;
