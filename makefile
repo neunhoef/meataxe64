@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.59 2002/06/25 10:30:12 jon Exp $
+# $Id: makefile,v 1.60 2002/06/27 07:20:24 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -24,6 +24,7 @@ SNS_TARGET=	sns
 SRN_TARGET=	srn
 STOP_TARGET=	stop
 ZAD_TARGET=	zad
+ZAH_TARGET=	zah
 ZBASE_TARGET=	zbase
 ZCHAR_TARGET=	zchar
 ZCHECK_TARGET=	zcheck
@@ -110,6 +111,7 @@ SNS_MODULES=	clean elements endian grease header matrix memory primes read rows 
 SRN_MODULES=	clean elements endian grease header matrix memory primes read rows srn utils
 STOP_MODULES=	command files stop system utils
 ZAD_MODULES=	ad add elements endian header map_or_row maps memory primes read rows utils write
+ZAH_MODULES=	elements endian header memory primes read utils write zah
 ZBASE_MODULES=	base clean clean_file elements endian grease header maps matrix memory primes read rows system utils write zbase
 ZCHAR_MODULES=	endian header primes read utils zchar
 ZCHECK_MODULES=	elements endian header memory primes read utils zcheck
@@ -196,6 +198,7 @@ MODULES=	$(DTOU_MODULES) \
 	$(SRN_MODULES) \
 	$(STOP_MODULES) \
 	$(ZAD_MODULES) \
+	$(ZAH_MODULES) \
 	$(ZBASE_MODULES) \
 	$(ZCHAR_MODULES) \
 	$(ZCHECK_MODULES) \
@@ -345,6 +348,9 @@ TARGET:=STOP
 include targets.txt
 
 TARGET:=ZAD
+include targets.txt
+
+TARGET:=ZAH
 include targets.txt
 
 TARGET:=ZBASE
