@@ -1,19 +1,19 @@
 #!/bin/sh
 #
-# $Id: new_irredf_with_orders,v 1.4 2002/06/30 21:33:15 jon Exp $
+# $Id: new_irredf_with_orders,v 1.5 2002/07/07 18:25:44 jon Exp $
 #
 # Script to classify an irreducible representation
-# using intermediate files
 #
 # Inputs
-# $1: generator a
-# $2: generator b
-# $3: order a
-# $4: order b
-# $5: temporary directory
-# $6: initial memory (optional)
+# $1: initial memory
+# $2: temporary directory
+# $3: generator a
+# $4: order a
+# $5: generator b
+# $6: order b
+# $7-: other generators and orders
 #
-# outputs will be of the form irred/${nor}_${i}_{1,2}
+# outputs will be of the form irred/${nor}_${i}_{1,..}
 # where nor = znor $a and i is an available unused index
 #
 #
@@ -23,20 +23,19 @@
 # 254: no nullity one element found
 # 255: existing irreducible
 #
-usage="$0: usage: $0 <a> <b> <order a> <order b> <tmp directory> [<memory>]"
-if [ $# -ne 5 -a $# -ne 6 ]; then
+usage="$0: usage: $0 <memory> <tmp directory> <a> <order a> <b> <order b> [<other generators and orders>]"
+if [ $# -lt 6 ]; then
   echo $usage
   exit 1;
 fi
 . functions
-a=$1
-b=$2
-o_a=$3
-o_b=$4
-tmp_dir=$5
+memory=$1
+tmp_dir=$2
+a=$3
+o_a=$4
+b=$5
+o_b=$6
 if [ -e $a -a -e $b ]; then
-  q=`zprime $a`
-  r=`zprime $b`
   nor=`znor $a`
   noc=`znoc $a`
   if [ $nor -ne $noc ]; then
@@ -44,45 +43,126 @@ if [ -e $a -a -e $b ]; then
     exit 1
   fi
   if [ $nor -ne `znor $b` -o $nor -ne `znoc $b` ]; then
-    echo "$0: $a and $b are not compatible"
-    exit 1
-  fi
-  if [ 1 -eq $q -a 1 -eq $r ]; then
-    echo "$0: representation on two maps cannot be irreducible"
-    exit 1
-  fi
-  if [ 1 -ne $q -a 1 -ne $r -a $q -ne $r ]; then
-    echo "$0: $a and $b are not compatible"
+    echo $a and $b are not compatible
     exit 1
   fi
 else
   echo "$0: missing files $a or $b"
   exit 1
 fi
-if [ $# -eq 6 ]; then
-  memory=$6
-else
-  memory=200
+let i=$#-2
+let j=$i/2
+let k=$j*2
+if [ $i -ne $k ]; then
+  echo "$0: missing order for final generator"
+  exit 1
 fi
+i=0
+shift 2
+while [ $i -lt $j ]; do
+  rest[$i]=$1
+  o_rest[$i]=$2
+  let i=$i+1
+  shift 2
+done
 #
 # Now search for element of nullity one
 #
 tmp=tmp${PPID}
 e=${tmp}.1
-script=`find_nullity_onef_with_orders $a $b $e $o_a $o_b $tmp_dir $memory`
-ret=$?
-if [ $ret -ne 0 ]; then
-  rm -f ${tmp}.*
-  echo $script
-  exit $ret
-fi
 name=${tmp}_${nor}
-basef $e $a $b ${name} ${tmp}.0 ${tmp_dir} ${memory}
-ret=$?
-if [ $ret -ne 0 ]; then
-  echo basef returns $ret, terminating
-  rm -f ${tmp}*
-  exit 1
+ok=0
+i=1
+while [ $i -lt $j -a 0 -eq $ok ]; do
+  k=0
+  while [ $k -lt $i -a 0 -eq $ok ]; do
+    a=${rest[$k]}
+    o_a=${o_rest[$k]}
+    b=${rest[$i]}
+    o_b=${o_rest[$i]}
+    script=`find_nullity_onef_with_orders $a $b $e $o_a $o_b $tmp_dir $memory`
+    ret=$?
+    if [ 0 -eq $ret ]; then
+      ok=1
+    fi
+    let k=$k+1
+  done
+  let i=$i+1
+done
+if [ 0 -eq $ret ]; then
+  x=`basef $e ${name} ${tmp}.0 ${tmp_dir} $memory ${rest[*]}`
+  ret=$?
+  if [ $ret -ne 0 ]; then
+    echo basef returns $ret, terminating
+    rm -f ${tmp}*
+    exit 1
+  fi
+elif [ 254 -eq $ret ]; then
+  a=${rest[0]}
+  b=${rest[1]}
+  o_a=${o_rest[0]}
+  o_b=${o_rest[1]}
+# Irreducible not absolutely irreducible
+  script=`find_best_nullity_with_orders $a $b $e $o_a $o_b $memory`
+# Find the nullspace
+  ok=0
+  while [ $ok -eq 0 ]; do
+    nullity=`znsf $e ${tmp}.0 ${tmp_dir} $memory 2>/dev/null`
+    ret=$?
+    if [ $ret -eq 0 ]; then
+      ok=1
+    elif [ $ret -eq 2 ]; then
+      let memory=`more_memory $memory 2>/dev/null`
+    else
+      rm -f ${tmp}*
+      exit 1
+    fi
+  done
+  if [ 0 -eq $nullity -o 1 -eq $nullity ]; then
+    echo "Unexpected result, nullity $nullity when expected > 1"
+    rm -f ${tmp}*
+    exit 1
+  fi
+# Pick two distinct elements in the span
+  zspan ${tmp}.0 ${tmp}.2 2
+  zsel ${tmp}.2 ${tmp}.2.0 0
+  zsel ${tmp}.2 ${tmp}.2.1 1
+# Produce both standard bases
+  for i in 0 1; do
+    basef_from_vector ${tmp}.2.$i ${name}_sb_$i ${tmp}.3 ${tmp_dir} $memory ${rest[*]}
+    ret=$?
+    if [ 0 -ne $ret ]; then
+      rm -f ${tmp}*
+      exit $ret
+    fi
+  done
+# Compare, if equal all ok, if not, fail
+  eq=1;
+  i=1
+  while [ $i -le $j ]; do
+    if zdiff ${name}_sb_0_$i ${name}_sb_1_$i 1>/dev/null; then
+      eq=1
+    else
+      eq=0
+      break
+    fi
+    let i=$i+1
+  done
+  if [ 0 -eq $eq ]; then
+    echo failed to produce a standard basis for $a
+    rm -f ${tmp}*
+    exit 254
+  fi
+  i=1;
+  while [ $i -le $j ]; do
+    mv ${name}_sb_0_$i ${name}_sb_$i
+    rm ${name}_sb_1_$i
+    let i=$i+1
+  done
+else
+  echo $script
+  rm -f ${tmp}.*
+  exit $ret
 fi
 if [ ! -e irreds ]; then
   mkdir irreds
@@ -94,12 +174,26 @@ if [ $ret -eq 0 ]; then
 # Some irreds of this dimension
   for x in $names; do
     y=`echo $x | sed -e "s/_1$//g"`
-    if zdiff ${y}_1 ${name}_sb_1 1>/dev/null; then
-      if zdiff ${y}_2 ${name}_sb_2 1>/dev/null; then
-        echo Existing irreducible ${y} found
-        rm -f ${tmp}*
-        exit 255
+    eq=1
+    i=1;
+    while [ $i -le $j ]; do
+      if [ -e ${y}_$i ]; then
+        if zdiff ${y}_$i ${name}_sb_$i 1>/dev/null; then
+          eq=1
+        else
+          eq=0
+          break
+        fi
+      else
+        eq=0
+        break
       fi
+      let i=$i+1
+    done
+    if [ 1 -eq $eq ] ; then
+      echo Existing irreducible ${y} found
+      rm -f ${tmp}*
+      exit 255
     fi
   done
 fi
@@ -109,8 +203,11 @@ fi
 echo Found a new irreducible of dimension ${nor} using script $script
 new_name=`new_irred_name irreds/${nor}`
 #echo assigning new name ${new_name}
-mv ${name}_sb_1 ${new_name}_1
-mv ${name}_sb_2 ${new_name}_2
+i=1
+while [ $i -le $j ]; do
+  mv ${name}_sb_$i ${new_name}_$i
+  let i=$i+1
+done
 if [ -e ${new_name}_1_${script} -o -L ${new_name}_1_${script} ]; then
   rm ${new_name}_1_${script}
 fi

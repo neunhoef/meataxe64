@@ -1,16 +1,16 @@
 #!/bin/sh
 #
-# $Id: basef_with_vector,v 1.2 2002/07/05 12:42:52 jon Exp $
+# $Id: basef_with_vector,v 1.3 2002/07/07 18:25:44 jon Exp $
 #
 # Script to find a standard base for a representation, given a vector
 #
 # Inputs
 # $1: vector with which to split
-# $2: generator a
-# $3: generator b
-# $4: the standard basis
-# $5: temporary directory
-# $6: memory
+# $2: the standard basis
+# $3: temporary directory
+# $4: memory
+# $5: generator a
+# $6: generator b
 #
 #
 #
@@ -21,17 +21,17 @@
 #
 #set -v
 . functions
-usage="$0: usage: $0 <e> <a> <b> <s> <tmp dir> <memory>"
-if [ $# -ne 6 ]; then
+usage="$0: usage: $0 <e> <s> <tmp dir> <memory> <a> <b>"
+if [ $# -lt 6 ]; then
   echo $usage
   exit 1;
 fi
 e=$1
-a=$2
-b=$3
-s=$4
-dir=$5
-if [ -e $e -a -e $a -a -e $b ]; then
+s=$2
+dir=$3
+memory=$4
+a=$5
+if [ -e $e -a -e $a ]; then
   q=`zprime $a`
   nor=`znor $a`
   noc=`znoc $a`
@@ -39,32 +39,24 @@ if [ -e $e -a -e $a -a -e $b ]; then
     echo "$0: $a is not square"
     exit 1
   fi
-  if [ $nor -ne `znor $b` -o $nor -ne `znoc $b` ]; then
-    echo "$0: $a and $b are not compatible"
-    exit 1
-  fi
   if [ $noc -ne `znoc $e` -o 1 -ne `znor $e` ]; then
     echo "$0: $a and $e are not compatible"
     exit 1
   fi
 else
-  echo "$0: missing files $e, $a or $b"
+  echo "$0: missing files $e or $a"
   exit 1
 fi
-tmp=tmp${PPID}
-memory=$6
-dim=`zsbf $e $s $a $b $dir $memory`
+shift 5
+dim=`zmsbf $e $s $dir $memory $a $*`
 ret=$?
 if [ 0 -eq $ret ]; then
   if [ $dim -ne $nor ]; then
     echo Strange result from zsbf giving wrong dimension $dim vs $nor
-    rm -f ${tmp}*
     exit 1
   fi
 else
   echo zsbf unexpectedly returns $ret
-  rm -f ${tmp}*
   exit 1
 fi
-rm -f ${tmp}*
 exit 0

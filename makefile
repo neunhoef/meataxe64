@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.66 2002/07/07 12:10:42 jon Exp $
+# $Id: makefile,v 1.67 2002/07/07 18:25:44 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -290,7 +290,7 @@ SRCDIR=.
 # Compiler search path for headers
 INCLUDES=-I. -I$(GENDIR) -I$(SRCDIR) -I $(SRCDIR)/$(OS)
 # Preprocessor defined values
-DEFINES=-DMEM_SIZE=200
+DEFINES=-DMEM_SIZE=200 -DCACHE_SIZE=1000
 
 # Get OS specific portion
 # Can similarly have arch specific portion

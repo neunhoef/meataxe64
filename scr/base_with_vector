@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: base_with_vector,v 1.4 2002/07/05 17:19:22 jon Exp $
+# $Id: base_with_vector,v 1.5 2002/07/07 18:25:44 jon Exp $
 #
 # Script to find a standard base for a representation, given a vector
 #
@@ -45,7 +45,6 @@ else
   echo "$0: missing files $e or $a"
   exit 1
 fi
-tmp=tmp${PPID}
 ok=0
 shift 4
 while [ 0 -eq $ok ]; do
@@ -56,16 +55,13 @@ while [ 0 -eq $ok ]; do
       ok=1
     else
       echo Strange result from zsb giving wrong dimension $dim vs $nor
-      rm -f ${tmp}*
       exit 1
     fi
   elif [ $ret -eq 2 ]; then
     let memory=`more_memory $memory`
   else
     echo zsb unexpectedly returns $ret
-    rm -f ${tmp}*
     exit 1
   fi
 done
-rm -f ${tmp}*
 exit 0

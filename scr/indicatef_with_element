@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: indicatef_with_element,v 1.3 2002/07/05 13:52:51 jon Exp $
+# $Id: indicatef_with_element,v 1.4 2002/07/07 18:25:44 jon Exp $
 #
 # Script to find the indicator of an irreducible representation
 # Assumes a and b in standard base form
@@ -57,7 +57,7 @@ tmp=tmp${PPID}
 S=${tmp}.3
 Q=${tmp}.4
 sb=${tmp}.0
-x=`basef_vectors $e $a_d $b_d $S ${tmp_dir} $memory`
+x=`basef_vectors $e $S ${tmp_dir} $memory $a_d $b_d`
 ret=$?
 if [ $ret -eq 0 ]; then
   real_indicate $a $b $S $memory

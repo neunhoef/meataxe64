@@ -1,20 +1,20 @@
 #!/bin/sh
 #
-# $Id: basef,v 1.7 2002/07/04 17:56:46 jon Exp $
+# $Id: basef,v 1.8 2002/07/07 18:25:44 jon Exp $
 #
 # Script to find a representation in standard base
 # using intermediate files
 #
 # Inputs
 # $1: element with which to split
-# $2: generator a
-# $3: generator b
-# $4: output filename base
-# $5: the standard basis
-# $6: temporary directory to be used
-# $7: memory (optional)
+# $2: output filename base
+# $3: the standard basis
+# $4: temporary directory to be used
+# $5: memory
+# $6: generator a
+# $7-: other generators
 #
-# outputs will be of the form <$4>_sb_{1,2}
+# outputs will be of the form <$2>_sb_{1,..}
 # where nor is number of rows, and q is the prime power
 #
 #
@@ -26,23 +26,18 @@
 #
 #set -v
 . functions
-usage="$0: usage: $0 <e> <a> <b> <output_stem> <s> <tmp directory> [<memory>]"
-if [ $# -ne 6 -a $# -ne 7 ]; then
+usage="$0: usage: $0 <e> <output_stem> <s> <tmp directory> <memory> <a> [<other generators>]"
+if [ $# -lt 7 ]; then
   echo $usage
   exit 1;
 fi
 e=$1
-a=$2
-b=$3
-o=$4
-s=$5
-dir=$6
-if [ 7 -eq $# ]; then
-  memory=$7
-else
-  memory=200
-fi
-if [ -e $e -a -e $a -a -e $b ]; then
+o=$2
+s=$3
+dir=$4
+memory=$5
+a=$6
+if [ -e $e -a -e $a ]; then
   q=`zprime $a`
   nor=`znor $a`
   noc=`znoc $a`
@@ -50,26 +45,20 @@ if [ -e $e -a -e $a -a -e $b ]; then
     echo "$0: $a is not square"
     exit 1
   fi
-  if [ $nor -ne `znor $b` -o $nor -ne `znoc $b` ]; then
-    echo "$0: $a and $b are not compatible"
-    exit 1
-  fi
   if [ $nor -ne `znoc $e` -o $nor -ne `znor $e` ]; then
     echo "$0: $a and $e are not compatible"
     exit 1
   fi
 else
-  echo "$0: missing files $e, $a or $b"
+  echo "$0: missing files $e or $a"
   exit 1
 fi
-tmp=tmp${PPID}
-basef_vectors $e $a $b $s $dir $memory
+shift 6
+basef_vectors $e $s $dir $memory $a $*
 ret=$?
 if [ 0 -ne $ret ]; then
-  rm -f ${tmp}*
   exit $ret
 fi
-conjugatef $s ${o}_sb $dir $memory $a $b
+conjugatef $s ${o}_sb $dir $memory $a $*
 ret=$?
-rm -f ${tmp}*
 exit $ret

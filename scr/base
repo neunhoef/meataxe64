@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: base,v 1.12 2002/07/05 17:19:22 jon Exp $
+# $Id: base,v 1.13 2002/07/07 18:25:44 jon Exp $
 #
 # Script to find a representation in standard base
 #
@@ -48,16 +48,13 @@ else
   echo "$0: missing files $e or $a"
   exit 1
 fi
-tmp=tmp${PPID}
 memory=200
 shift 4
 base_vectors $e $s $a $*
 ret=$?
 if [ 0 -ne $ret ]; then
-  rm -f ${tmp}*
   exit $ret
 fi
 conjugate $s ${o}_sb $a $*
 ret=$?
-rm -f ${tmp}*
 exit $ret
