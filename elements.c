@@ -1,5 +1,5 @@
 /*
- * $Id: elements.c,v 1.6 2001/09/08 12:40:55 jon Exp $
+ * $Id: elements.c,v 1.7 2001/09/09 22:34:11 jon Exp $
  *
  * Element manipulation for meataxe
  *
@@ -59,6 +59,7 @@ unsigned int get_element_from_row(unsigned int nob, unsigned int index,
   unsigned int res = (word >> bit_offset) & mask;
   assert(0 != nob);
   assert(NULL != row);
+  assert(bit_offset + nob <= bits_in_unsigned_int);
   return res;
 }
 
@@ -91,13 +92,14 @@ void put_element_to_row(unsigned int nob, unsigned int index,
 {
   unsigned int elts_per_word = bits_in_unsigned_int / nob;
   unsigned int word_offset = index / elts_per_word;
-  unsigned int bit_offset = index % elts_per_word;
+  unsigned int bit_offset = (index % elts_per_word) * nob;
   unsigned int word = row[word_offset];
   unsigned int base_mask = (1 << nob) - 1;
-  unsigned int mask = base_mask << (bit_offset * nob);
+  unsigned int mask = base_mask << bit_offset;
   assert(0 != nob);
   assert(NULL != row);
-  elt = elt << (bit_offset * nob);
+  assert(bit_offset + nob <= bits_in_unsigned_int);
+  elt = elt << bit_offset;
   word = (word & (mask ^ 0xffffffff)) | elt;
   row[word_offset] = word;
 }

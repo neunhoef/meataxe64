@@ -6,3 +6,5 @@
 20010905 - first input for GF3
 20010906 - first add for GF3
 20010908 - first successful multiply for GF3
+20010909 - first input and add mod 5
+20010909 - first multiply mod 5

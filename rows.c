@@ -1,5 +1,5 @@
 /*
- * $Id: rows.c,v 1.4 2001/09/08 12:40:55 jon Exp $
+ * $Id: rows.c,v 1.5 2001/09/09 22:34:11 jon Exp $
  *
  * Row manipulation for meataxe
  *
@@ -42,15 +42,15 @@ static int check_for_3(unsigned int a)
 }
 #endif
 
-#define ONE_BITS 0x55555555
-#define TWO_BITS ((ONE_BITS) << 1)
+#define ONE_BITS_3 0x55555555
+#define TWO_BITS_3 ((ONE_BITS_3) << 1)
 
 #define mod_3_add(a,b,c,d,e,f,g,h) \
   c = (a) + (b); /* Result, not reduced mod 3 */ \
   d = (a) & (b); /* 0, 1 => ignore, 2 => result was 4 = 2 + 2, 3 can't happen */ \
   e = (a) ^ (b); /* 0, 1, 2 => ignore, 3 => result was 3 */ \
-  f = d & (TWO_BITS); /* Ignore all but 2 + 2 */ \
-  g = ((e & (TWO_BITS)) >> 1) & (e & (ONE_BITS)); /* Pick out 3 case only */ \
+  f = d & (TWO_BITS_3); /* Ignore all but 2 + 2 */ \
+  g = ((e & (TWO_BITS_3)) >> 1) & (e & (ONE_BITS_3)); /* Pick out 3 case only */ \
   h = g | (f >> 1) /* 01 if answer was 3 or 4, otherwise 0 */
 
 static int row_add_3(const unsigned int *row1, const unsigned int *row2,
@@ -94,10 +94,115 @@ static int scaled_row_add_3(const unsigned int *row1, const unsigned int *row2,
     assert(4 == sizeof(unsigned int));
     a = *(row1++);
     b = *(row2++);
-    b = ((b & (ONE_BITS)) << 1) | ((b & (TWO_BITS)) >> 1); /* Negate b */
+    b = ((b & (ONE_BITS_3)) << 1) | ((b & (TWO_BITS_3)) >> 1); /* Negate b */
     mod_3_add(a,b,c,d,e,f,g,h);
     assert(check_for_3(c - (h * 3)));
     *(row3++) = c - (h * 3); /* Reduce mod 3 if needed */
+  }
+  return 1;
+}
+
+#ifndef NDEBUG
+static int check_for_5(unsigned int a)
+{
+  unsigned int i;
+  for (i = 0; i < 10; i++) {
+    if ((a & 7) >= 5) {
+      return 0;
+    }
+    a >>= 3;
+  }
+  return 1;
+}
+#endif
+
+#define FOUR_BITS_5 04444444444 /* Detect overflow into next digit mod 5 */
+#define ONE_BITS_5 01111111111 /* Detect bit 0 one in digit */
+#define TWO_BITS_5 ((ONE_BITS_5) << 1) /* Detect bit 1 one in digit */
+
+#define mod_5_add(a,b,c,d,e,f,g,h,j,k) \
+  c = (a) + (b); /* Result, not reduced mod 3 */ \
+  d = (a) & (b) & (FOUR_BITS_5); /* 4 gives the overflow into next digit case */ \
+  e = d | (d >> 2); /* Overflow indicator * 5 */ \
+  f = c - e; /* Correct overflow into next digit */ \
+  g = f & (FOUR_BITS_5); /* Detect possible internal to digit overflows */ \
+  h = f & (ONE_BITS_5); /* Detect possible 5s */ \
+  j = (f & (TWO_BITS_5)) >> 1; /* Detect possible 6s */ \
+  k = (g >> 2) & (h | j); /* Detect 5s and 6s */
+
+static int row_add_5(const unsigned int *row1, const unsigned int *row2,
+                     unsigned int *row3, unsigned int noc)
+{
+  unsigned int row_words;
+  unsigned int i;
+  unsigned int elts_in_word = bits_in_unsigned_int / 3;
+  assert(0 != noc);
+  assert(NULL != row1);
+  assert(NULL != row2);
+  assert(NULL != row3);
+  row_words = (noc + elts_in_word - 1) / elts_in_word;
+  for (i = 0; i < row_words; i++) {
+    unsigned int a, b, c, d, e, f, g, h, j, k;
+    assert(4 == sizeof(unsigned int));
+    a = *(row1++);
+    b = *(row2++);
+    mod_5_add(a,b,c,d,e,f,g,h,j,k);
+    assert(check_for_5(f - (k * 5)));
+    *(row3++) = f - (k * 5); /* Reduce mod 5 if needed */
+  }
+  return 1;
+}
+
+static int scaled_row_add_5(const unsigned int *row1, const unsigned int *row2,
+                            unsigned int *row3, unsigned int noc, unsigned int elt)
+{
+  unsigned int row_words;
+  unsigned int i;
+  unsigned int elts_in_word = bits_in_unsigned_int / 3;
+  assert(0 != noc);
+  assert(NULL != row1);
+  assert(NULL != row2);
+  assert(NULL != row3);
+  assert(2 <= elt && elt <= 4);
+  row_words = (noc + elts_in_word - 1) / elts_in_word;
+  for (i = 0; i < row_words; i++) {
+    unsigned int a, b, c, d, e, f, g, h, j, k;
+    assert(4 == sizeof(unsigned int));
+    a = *(row1++);
+    b = *(row2++);
+    switch(elt) {
+    case 2:
+      c = (b & (FOUR_BITS_5));
+      d = (c >> 2) | (c >> 1); /* The 4 -> 3 case */
+      e = (b & (TWO_BITS_5));
+      f = (b & (ONE_BITS_5));
+      g = f & (e >> 1); /* The 3 -> 1 case */
+      h = (e | f) ^ (g * 3); /* Reduce to only the 0, 1, 2 case */
+      b = d | g | (h << 1); /* 0, 1, 2 -> 0, 2, 4 */
+      break;
+    case 3:
+      c = (b & (FOUR_BITS_5)) >> 1; /* get the 4 -> 2 case */
+      d = b & (TWO_BITS_5);
+      e = b & (ONE_BITS_5);
+      f = (d & (e << 1)) << 1; /* get the 3 -> 4 case */
+      g = b ^ (ONE_BITS_5);
+      h = g & (d >> 1); /* get the 2 -> 1 case */
+      j = (e & ((d ^ (TWO_BITS_5)) >> 1)) * 3; /* The 1 -> 3 case */
+      b = c | f | h | j;
+      break;
+    case 4:
+      c = (((b & (FOUR_BITS_5)) >> 2) | ((b & (TWO_BITS_5)) >> 1) | (b & (ONE_BITS_5))) * 5;
+      b = b ^ c; /* xor with 5 on non-zero digits */
+      c = b & (TWO_BITS_5); /* Detect the 2 bits */
+      d = c << 1; /* Move into the 4 bits position */
+      b ^= d; /* And normalise back (7 -> 3, 6 -> 2) */
+      break;
+    default:
+      assert(0);
+    }
+    mod_5_add(a,b,c,d,e,f,g,h,j,k);
+    assert(check_for_5(f - (k * 5)));
+    *(row3++) = f - (k * 5); /* Reduce mod 5 if needed */
   }
   return 1;
 }
@@ -144,6 +249,10 @@ int rows_init(unsigned int prime, row_opsp ops)
   } else if (3 == prime) {
     ops->adder = &row_add_3;
     ops->scaled_adder = &scaled_row_add_3;
+    return 1;
+  } else if (5 == prime) {
+    ops->adder = &row_add_5;
+    ops->scaled_adder = &scaled_row_add_5;
     return 1;
   } else {
     return 0;

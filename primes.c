@@ -1,5 +1,5 @@
 /*
- * $Id: primes.c,v 1.3 2001/09/05 22:47:25 jon Exp $
+ * $Id: primes.c,v 1.4 2001/09/09 22:34:11 jon Exp $
  *
  * Prime manipulation for meataxe
  *
@@ -26,8 +26,8 @@ static int decimal_rep_2(unsigned int *e)
 
 int primes_init(unsigned int prime, prime_opsp ops)
 {
-  if (2 == prime || 3 == prime) {
-    /* p = 2 and p = 3 behave the same */
+  if (2 == prime || 3 == prime || 5 == prime) {
+    /* p = 2, p = 3, p = 5 behave the same */
     ops->prime_rep = &prime_rep_2;
     ops->decimal_rep = &decimal_rep_2;
     return 1;
