@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: sym_basis,v 1.4 2002/09/05 18:18:57 jon Exp $
+# $Id: sym_basis,v 1.5 2002/09/09 19:23:54 jon Exp $
 #
 # Script to compute a symmetry basis wrt an ordered set of irreducibles
 #
@@ -157,7 +157,7 @@ for x in `cat $irreds`; do
         rm -f ${tmp}.*
         exit 1
       fi
-      zscript ${tmp}.5_1 ${tmp}.5_2 ${tmp}.6 ${tmp}.zscript $script_x $memory
+      zscript ${tmp}.6 ${tmp}.zscript $script_x $memory ${tmp}.5_1 ${tmp}.5_2
       ret=$?
       rm -f ${tmp}.zscript*
       if [ 0 -ne $ret ]; then

@@ -1,5 +1,5 @@
 /*
- * $Id: zscript.c,v 1.2 2002/07/09 09:08:12 jon Exp $
+ * $Id: zscript.c,v 1.3 2002/09/09 19:23:54 jon Exp $
  *
  * Compute a script in two generators
  *
@@ -16,7 +16,7 @@ static const char *name = "zscript";
 
 static void script_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <a> <b> <out_file> <tmp> <script> [<memory>]\n", name, name);
+  fprintf(stderr, "%s: usage: %s <out_file> <tmp> <script> <memory> <a> <b>\n", name, name);
 }
 
 int main(int argc, const char * const argv[])
@@ -29,18 +29,16 @@ int main(int argc, const char * const argv[])
   unsigned int memory = MEM_SIZE;
 
   argv = parse_line(argc, argv, &argc);
-  if (6 != argc && 7 != argc) {
+  if (7 != argc) {
     script_usage();
     exit(1);
   }
-  in1 = argv[1];
-  in2 = argv[2];
-  out = argv[3];
-  tmp = argv[4];
-  script = argv[5];
-  if (7 == argc) {
-    memory = strtoul(argv[6], NULL, 0);
-  }
+  in1 = argv[5];
+  in2 = argv[6];
+  out = argv[1];
+  tmp = argv[2];
+  script = argv[3];
+  memory = strtoul(argv[4], NULL, 0);
   memory_init(name, memory);
   endian_init();
   if (0 == exec_script(in1, in2, out, tmp, script, name)) {
