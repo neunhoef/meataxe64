@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: dual,v 1.9 2002/10/13 19:09:42 jon Exp $
+# $Id: dual,v 1.10 2002/10/14 09:10:31 jon Exp $
 #
 # Script to dual of a matrix
 #
@@ -49,7 +49,7 @@ if [ 0 -ne $ret ]; then
 fi
 ok=0
 while [ 0 -eq $ok ]; do
-  ziv ${tr} $o $memory 2>/dev/null
+  ziv -m $memory ${tr} $o 2>/dev/null
   ret=$?
   if [ 2 -eq $ret ]; then
     let memory=`more_memory $memory`

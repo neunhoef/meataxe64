@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: conjugate,v 1.3 2002/10/13 14:16:08 jon Exp $
+# $Id: conjugate,v 1.4 2002/10/14 09:10:31 jon Exp $
 #
 # Script to conjugate elements into another base
 #
@@ -45,7 +45,7 @@ tmp=tmp${PPID}
 memory=200
 ok=0
 while [ 0 -eq $ok ]; do
-  ziv $e ${tmp}.2 $memory 2>/dev/null
+  ziv -m $memory $e ${tmp}.2 2>/dev/null
   ret=$?
   if [ $ret -eq 2 ]; then
     let memory=`more_memory $memory`

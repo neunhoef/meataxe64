@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: conjugatef,v 1.3 2002/10/13 14:16:08 jon Exp $
+# $Id: conjugatef,v 1.4 2002/10/14 09:10:31 jon Exp $
 #
 # Script to conjugate elements into another base, using intermediate files
 #
@@ -46,7 +46,7 @@ else
   exit 1
 fi
 tmp=tmp${PPID}
-zivf $e ${tmp}.2 $dir $memory 2>/dev/null
+zivf -m $memory $e ${tmp}.2 $dir 2>/dev/null
 ret=$?
 if [ 0 -ne $ret ]; then
   echo zivf unexpectedly returns $ret
