@@ -1,5 +1,5 @@
 /*
- * $Id: eid.c,v 1.2 2001/10/03 23:57:32 jon Exp $
+ * $Id: eid.c,v 1.3 2001/11/06 22:25:40 jon Exp $
  *
  * Generate exploded identity matrix
  *
@@ -14,6 +14,7 @@
 #include "files.h"
 #include "map.h"
 #include "memory.h"
+#include "primes.h"
 #include "rows.h"
 #include "utils.h"
 

@@ -1,5 +1,5 @@
 /*
- * $Id: utils.c,v 1.11 2001/10/16 22:55:53 jon Exp $
+ * $Id: utils.c,v 1.12 2001/11/06 22:25:40 jon Exp $
  *
  * Utils for meataxe
  *
@@ -18,52 +18,6 @@ unsigned int bits_in_unsigned_int = CHAR_BIT * sizeof(unsigned int);
 int my_isspace(int i)
 {
   return (i == ' ') || (i == 9) || (i == 10) || (i == 13);
-}
-
-static int is_prime(unsigned int j)
-{
-  unsigned int i = 2;
-  while (i*i <= j) {
-    if (j % i == 0) {
-      return 0;
-    }
-    i++;
-  }
-  return 1;
-}
-
-static int next_prime(unsigned int *i)
-{
-  unsigned int j;
-
-  assert(NULL != i);
-  j = *i + 1;
-  while (0 == is_prime(j)) {
-    if (UINT_MAX > j)
-      j++;
-    else
-      return 0;
-  }
-  *i = j;
-  return 1;
-}
-
-int is_a_prime_power(unsigned int n)
-{
-  unsigned int i = 2;
-  while (i <= n) {
-    if (n % i ==  0) {
-      /* Now found the prime */      
-        while (n % i ==  0) {
-          n /= i;
-        }
-        return (1 == n);
-    } else {
-      if (0 == next_prime(&i))
-        return 0;
-    }
-  }
-  return 0;
 }
 
 unsigned int read_decimal(const char *str, unsigned int len)

@@ -1,5 +1,5 @@
 /*
- * $Id: elements.h,v 1.9 2001/10/06 23:33:12 jon Exp $
+ * $Id: elements.h,v 1.10 2001/11/06 22:25:40 jon Exp $
  *
  * Element manipulation for meataxe
  *
@@ -37,5 +37,9 @@ extern void put_element_to_row(unsigned int nob, unsigned int index,
 extern unsigned int elements_contract(unsigned int elts, unsigned int prime, unsigned int nob);
 
 extern unsigned int count_word(unsigned int word, unsigned int nob);
+
+extern unsigned int negate_elements(unsigned int elts, unsigned int nob, unsigned int prime);
+
+extern unsigned int invert_elements(unsigned int elts, unsigned int nob, unsigned int prime);
 
 #endif

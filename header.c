@@ -1,5 +1,5 @@
 /*
- * $Id: header.c,v 1.5 2001/10/03 23:57:32 jon Exp $
+ * $Id: header.c,v 1.6 2001/11/06 22:25:40 jon Exp $
  *
  * Header manipulation
  *
@@ -10,6 +10,7 @@
 #include <limits.h>
 #include <stdlib.h>
 #include <string.h>
+#include "primes.h"
 #include "utils.h"
 #include "header.h"
 

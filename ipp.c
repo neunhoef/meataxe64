@@ -1,5 +1,5 @@
 /*
- * $Id: ipp.c,v 1.2 2001/10/18 22:59:18 jon Exp $
+ * $Id: ipp.c,v 1.3 2001/11/06 22:25:40 jon Exp $
  *
  * Read a permutation into a matrix
  *
@@ -13,6 +13,7 @@
 #include "endian.h"
 #include "header.h"
 #include "memory.h"
+#include "primes.h"
 #include "read.h"
 #include "rows.h"
 #include "utils.h"

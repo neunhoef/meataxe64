@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.22 2001/10/18 22:59:18 jon Exp $
+# $Id: makefile,v 1.23 2001/11/06 22:25:40 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -33,7 +33,7 @@ ZEX_TARGET=	zex
 AD_MODULES=	ad add elements endian header memory primes read rows utils write
 CT_MODULES=	count ct elements endian header memory primes read utils
 DTOU_MODULES=	dtou
-EAD_MODULES=	add ead endian files header map memory read rows system utils write
+EAD_MODULES=	add ead endian files header map memory primes read rows system utils write
 ECT_MODULES=	count ect elements endian files header map memory primes read utils
 EID_MODULES=	eid elements endian exrows files header map memory primes rows utils write
 EIM_MODULES=	eim elements endian files header map memory primes read utils write

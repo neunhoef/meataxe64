@@ -1,5 +1,5 @@
 /*
- * $Id: elements.c,v 1.10 2001/10/06 23:33:12 jon Exp $
+ * $Id: elements.c,v 1.11 2001/11/06 22:25:40 jon Exp $
  *
  * Element manipulation for meataxe
  *
@@ -12,7 +12,7 @@
 #include "primes.h"
 #include "elements.h"
 
-static prime_ops prime_operations = { NULL, NULL};
+static prime_ops prime_operations = { NULL, NULL, NULL, NULL};
 static int inited = 0;
 
 int get_element_from_text(FILE *fp, unsigned int nod,
@@ -145,3 +145,34 @@ unsigned int count_word(unsigned int word, unsigned int nob)
   return res;
 }
 
+unsigned int negate_elements(unsigned int elts, unsigned int nob, unsigned int prime)
+{
+  unsigned int new = 0, i = 0, mask = (1 << nob) - 1;
+  if (0 == inited && 0 == primes_init(prime, &prime_operations)) {
+    return 0;
+  }
+  inited = 1;
+  while (0 != elts) {
+    unsigned int elt = elts & mask;
+    new |= ((*prime_operations.negate)(elt)) << (i * nob);
+    i++;
+    elts >>= nob;
+  }
+  return new;
+}
+
+unsigned int invert_elements(unsigned int elts, unsigned int nob, unsigned int prime)
+{
+  unsigned int new = 0, i = 0, mask = (1 << nob) - 1;
+  if (0 == inited && 0 == primes_init(prime, &prime_operations)) {
+    return 0;
+  }
+  inited = 1;
+  while (0 != elts) {
+    unsigned int elt = elts & mask;
+    new |= ((*prime_operations.invert)(elt)) << (i * nob);
+    i++;
+    elts >>= nob;
+  }
+  return new;
+}

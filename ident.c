@@ -1,5 +1,5 @@
 /*
- * $Id: ident.c,v 1.1 2001/10/10 23:19:42 jon Exp $
+ * $Id: ident.c,v 1.2 2001/11/06 22:25:40 jon Exp $
  *
  * Subroutine to generate identity matrix
  *
@@ -11,6 +11,7 @@
 #include "endian.h"
 #include "header.h"
 #include "memory.h"
+#include "primes.h"
 #include "rows.h"
 #include "utils.h"
 #include "write.h"

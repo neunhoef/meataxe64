@@ -1,5 +1,5 @@
 /*
- * $Id: utils.h,v 1.10 2001/10/16 22:55:53 jon Exp $
+ * $Id: utils.h,v 1.11 2001/11/06 22:25:40 jon Exp $
  *
  * Utilities for meataxe
  *
@@ -14,8 +14,6 @@
 #define NOT_USED(_x) (void)(_x)
 
 #define MAX_LINE 100000
-
-extern int is_a_prime_power(unsigned int);
 
 extern unsigned int read_decimal(const char *str, unsigned int len);
 

@@ -1,5 +1,5 @@
 /*
- * $Id: eip.c,v 1.1 2001/10/18 22:59:18 jon Exp $
+ * $Id: eip.c,v 1.2 2001/11/06 22:25:40 jon Exp $
  *
  * Read a permutation into an exploded matrix
  *
@@ -15,6 +15,7 @@
 #include "header.h"
 #include "map.h"
 #include "memory.h"
+#include "primes.h"
 #include "read.h"
 #include "rows.h"
 #include "utils.h"

@@ -40,3 +40,5 @@
 20011013 - Yet more monster generation work
 20011016 - Wrote input permutation
 20011019 - Wrote exploded input permutation
+20011105 - Moved prime detection into prime.c
+20011106 - Added invert and negate for 2, 3, 4, 5, and for element sets
