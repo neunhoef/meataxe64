@@ -1,5 +1,5 @@
 /*
- * $Id: tco.c,v 1.3 2002/09/05 18:18:57 jon Exp $
+ * $Id: tco.c,v 1.4 2002/09/09 13:18:03 jon Exp $
  *
  * Tensor condense one group element
  *
@@ -39,6 +39,17 @@ static void close_files_and_headers(FILE **p, FILE **q, const header **h_p, cons
     assert(NULL != h_q[j]);
     header_free(h_q[j]);
   }
+}
+
+static void free_expanded(unsigned int **expanded, unsigned int nor)
+{
+  unsigned int i;
+  assert(NULL != expanded);
+  assert(0 != nor);
+  for (i = 0; i < nor; i++) {
+    free(expanded[i]);
+  }
+  matrix_free(expanded);
 }
 
 static int cleanup(unsigned int *left_multiplicities, unsigned int *right_multiplicities,
@@ -384,6 +395,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
     matrix_free(te_rows);
     matrix_free(end_rows);
     matrix_free(q_rows);
+    free(te_row);
     return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
                    nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, NULL, NULL,
                    NULL, NULL, p, q, h_p, h_q, s, h_o, NULL, rows, lrows, rrows);
@@ -416,8 +428,9 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
       matrix_free(te_rows);
       matrix_free(end_rows);
       matrix_free(q_rows);
-      matrix_free(expanded_lrows);
-      matrix_free(expanded_rrows);
+      free_expanded(expanded_lrows, nor_l);
+      free_expanded(expanded_rrows, nor_r);
+      free(te_row);
       return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
                      nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, NULL, NULL,
                      NULL, NULL, p, q, h_p, h_q, s, h_o, NULL, rows, lrows, rrows);
@@ -481,8 +494,9 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
                 matrix_free(end_rows);
                 matrix_free(q_rows);
                 grease_free(&grease);
-                matrix_free(expanded_lrows);
-                matrix_free(expanded_rrows);
+                free_expanded(expanded_lrows, nor_l);
+                free_expanded(expanded_rrows, nor_r);
+                free(te_row);
                 return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
                                nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, NULL, NULL,
                                NULL, NULL, p, q, h_p, h_q, s, h_o, NULL, rows, lrows, rrows);
@@ -494,8 +508,9 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
                 matrix_free(end_rows);
                 matrix_free(q_rows);
                 grease_free(&grease);
-                matrix_free(expanded_lrows);
-                matrix_free(expanded_rrows);
+                free_expanded(expanded_lrows, nor_l);
+                free_expanded(expanded_rrows, nor_r);
+                free(te_row);
                 return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
                                nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, NULL, NULL,
                                NULL, NULL, p, q, h_p, h_q, s, h_o, NULL, rows, lrows, rrows);
@@ -525,8 +540,9 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
   matrix_free(end_rows);
   matrix_free(q_rows);
   grease_free(&grease);
-  matrix_free(expanded_lrows);
-  matrix_free(expanded_rrows);
+  free_expanded(expanded_lrows, nor_l);
+  free_expanded(expanded_rrows, nor_r);
+  free(te_row);
   if (0 == endian_write_matrix(outp, rows, len, nor)) {
     return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
                    nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, NULL, NULL,
