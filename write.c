@@ -1,5 +1,5 @@
 /*
- * $Id: write.c,v 1.4 2001/09/12 23:13:04 jon Exp $
+ * $Id: write.c,v 1.5 2001/09/16 10:05:44 jon Exp $
  *
  * Write a header
  *
@@ -10,6 +10,7 @@
 #include <assert.h>
 #include "header.h"
 #include "utils.h"
+#include "endian.h"
 #include "write.h"
 
 int write_text_header(FILE *fp, const header *h)
@@ -56,10 +57,10 @@ int write_binary_header(FILE *fp, const header *h, const char *name)
   nor = header_get_nor(h);
   noc = header_get_noc(h);
 
-  if (1 != fwrite(&nob, sizeof(unsigned int), 1, fp) ||
-      1 != fwrite(&prime, sizeof(unsigned int), 1, fp) ||
-      1 != fwrite(&nor, sizeof(unsigned int), 1, fp) ||
-      1 != fwrite(&noc, sizeof(unsigned int), 1, fp)) {
+  if (1 != endian_write_int(nob, fp) ||
+      1 != endian_write_int(prime, fp) ||
+      1 != endian_write_int(nor, fp) ||
+      1 != endian_write_int(noc, fp)) {
     fprintf(stderr, "Failed to write header to binary output %s\n", name);
     return 0;
   }

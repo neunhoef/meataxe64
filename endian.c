@@ -1,5 +1,5 @@
 /*
- * $Id: endian.c,v 1.4 2001/09/12 23:13:04 jon Exp $
+ * $Id: endian.c,v 1.5 2001/09/16 10:05:44 jon Exp $
  *
  * Endian handling for meataxe
  *
@@ -25,6 +25,21 @@ int endian_write_int(unsigned int a, FILE *fp)
     }
   } else {
     return (1 == fwrite(&a, sizeof(unsigned int), 1, fp));
+  }
+  return 1;
+}
+
+int endian_read_int(unsigned int *a, FILE *fp)
+{
+  assert(NULL != a);
+  if (endian_is_big) {
+    unsigned int i;
+    if (1 != fread(&i, sizeof(unsigned int), 1, fp))
+      return 0;
+    *a = endian_get_int(0, &i);
+    return 1;
+  } else {
+    return (1 == fread(a, sizeof(unsigned int), 1, fp));
   }
   return 1;
 }

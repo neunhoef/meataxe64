@@ -1,5 +1,5 @@
 /*
- * $Id: read.c,v 1.7 2001/09/12 23:13:04 jon Exp $
+ * $Id: read.c,v 1.8 2001/09/16 10:05:44 jon Exp $
  *
  * Read a header
  *
@@ -94,10 +94,10 @@ int read_binary_header(FILE *fp, const header **hp, const char *name)
     fprintf(stderr, "Failed to allocate header for binary input %s\n", name);
     return 0;
   }
-  if (1 != fread(&nob, sizeof(unsigned int), 1, fp) ||
-      1 != fread(&prime, sizeof(unsigned int), 1, fp) ||
-      1 != fread(&nor, sizeof(unsigned int), 1, fp) ||
-      1 != fread(&noc, sizeof(unsigned int), 1, fp)) {
+  if (1 != endian_read_int(&nob, fp) ||
+      1 != endian_read_int(&prime, fp) ||
+      1 != endian_read_int(&nor, fp) ||
+      1 != endian_read_int(&noc, fp)) {
     fprintf(stderr, "Failed to read header from binary input %s\n", name);
     return 0;
   }

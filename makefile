@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.7 2001/09/13 21:16:44 jon Exp $
+# $Id: makefile,v 1.8 2001/09/16 10:05:44 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -25,7 +25,7 @@ AD_MODULES=	ad add elements endian header primes read rows utils write
 ID_MODULES=	id elements endian header primes rows utils write
 IP_MODULES=	elements endian header ip primes read utils write
 MU_MODULES=	elements endian grease header matrix mu mul primes read rows utils write
-MON_MODULES=	mmat mop mtx
+MON_MODULES=	endian header mmat mop mtx primes utils write
 PR_MODULES=	elements endian header pr primes read rows utils write
 DTOU_MODULES=	dtou
 

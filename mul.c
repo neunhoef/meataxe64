@@ -1,5 +1,5 @@
 /*
- * $Id: mul.c,v 1.6 2001/09/13 19:44:31 jon Exp $
+ * $Id: mul.c,v 1.7 2001/09/16 10:05:44 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
@@ -141,8 +141,8 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
   for (i = 0; i < noc1; i += step) {
     unsigned int size = (step + i <= noc1) ? step : noc1 - i;
     unsigned int word_offset, bit_offset, mask;
-    /* Read step rows from matrix 2 into rows 2 */
-    if (0 == endian_read_matrix(inp2, rows2, len2, step)) {
+    /* Read size rows from matrix 2 into rows 2 */
+    if (0 == endian_read_matrix(inp2, rows2, len2, size)) {
       fprintf(stderr, "%s: unable to read %s, terminating\n", name, m2);
       fclose(inp1);
       fclose(inp2);

@@ -1,5 +1,5 @@
 /*
- * $Id: mop.c,v 1.1 2001/09/13 21:16:44 jon Exp $
+ * $Id: mop.c,v 1.2 2001/09/16 10:05:44 jon Exp $
  *
  * Monster operations for meataxe
  *
@@ -243,32 +243,6 @@ static void rdvec(const char* filnam, unsigned char* vecin)
     FGAP(vectemp,vecin,71,1);
     fclose(f);
 }
-
-
-/*
-static void wtvec(char* filnam, char* vecout)
-{
-    FILE * f ;
-    int i;
-    f = fopen(filnam,"wb");
-     if (f == NULL) 
-    {
-        printf("File %s cannot be created!\n",filnam);
-        exit(-1);
-    }
-    fwrite(vechead,1,12,f);
-    for (i=0;i<24611;i++) vectemp[i]=0;
-    ptr1=0;
-    ptr2=0;
-    for (i=0;i<90;i++)     FUNGAP(vecout,vectemp,729,3);
-    FUNGAP(vecout,vectemp,21870,2);
-    for (i=0;i<66;i++)     FUNGAP(vecout,vectemp,162,2);
-    FUNGAP(vecout,vectemp,198,2);
-    FUNGAP(vecout,vectemp,71,1);
-    fwrite(vectemp,1,24611,f);
-    fclose(f);
-}
-*/
 
 static int veccomp(unsigned char *veca, unsigned char * vecb)
 {
