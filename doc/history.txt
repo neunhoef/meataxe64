@@ -234,3 +234,4 @@ skew seventh
 20030205 - fix a number of minor faults related to sns and bad memory requests
 20030210 - modify nullspace for better memory split
 20030224 - add verbosity for multiply
+20030225 - fix bug in join.c wrong header to output

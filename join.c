@@ -1,5 +1,5 @@
 /*
- * $Id: join.c,v 1.4 2002/06/28 08:39:16 jon Exp $
+ * $Id: join.c,v 1.5 2003/02/25 18:53:09 jon Exp $
  *
  * Function to append two matrices to give a third
  *
@@ -78,7 +78,7 @@ int join(const char *m1, const char *m2, const char *m3, const char *name)
   header_free(h1);
   header_free(h2);
   h = header_create(prime, nob, nod, noc, nor1 + nor2);
-  if (0 == open_and_write_binary_header(&outp, h1, m3, name)) {
+  if (0 == open_and_write_binary_header(&outp, h, m3, name)) {
     fclose(inp1);
     fclose(inp2);
     return 0;
