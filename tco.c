@@ -1,5 +1,5 @@
 /*
- * $Id: tco.c,v 1.14 2004/05/02 19:33:19 jon Exp $
+ * $Id: tco.c,v 1.15 2004/05/03 09:37:48 jon Exp $
  *
  * Tensor condense one group element
  *
@@ -140,7 +140,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
   unsigned int *left_multiplicities = NULL, *right_multiplicities = NULL, *dim_irr = NULL, *dim_end = NULL;
   FILE *inp = NULL, *leftp = NULL, *rightp = NULL, *outp = NULL, **p, **q;
   unsigned int nor, nob, nod, len, prime, nor_l, noc_l, len_l, nor_r, noc_r, len_r,
-    max_rows, max_irr, max_irr2, max_irr_len, max_end, max_end_len, i, j, k, l;
+    max_rows, max_irr, max_irr2, max_irr_len, max_end, i, j, k, l;
   unsigned int *nor_p = NULL, *nor_q = NULL, *noc_p = NULL, *noc_q = NULL, *len_p = NULL, *len_q = NULL;
   const header *h_l, *h_r, *h_o, **h_p, **h_q;
   unsigned int alpha, beta, gamma, delta, extent_l, extent_r, extent_te, extent_end, extent_q, extent_p, o_r, o_c, m_r, m_c, n_r, n_c;
@@ -270,7 +270,6 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
   noc_r = header_get_noc(h_r);
   len_r = header_get_len(h_r);
   max_irr_len = compute_len(nob, max_irr2);
-  max_end_len = compute_len(nob, max_end);
   if (1 == prime || header_get_prime(h_r) != prime || 0 == is_a_prime_power(prime) ||
       nor_l != noc_l || nor_r != noc_r) {
     fprintf(stderr, "%s: header compatibility failure between '%s' and '%s', terminating\n", name, left, right);
@@ -340,9 +339,9 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
   extent_l = find_extent(max_irr, len_l);
   extent_r = find_extent(nor_r, len_r);
   extent_te = find_extent(1 + max_irr2, max_irr_len);
-  extent_end = find_extent(max_irr2, max_end_len);
+  extent_end = find_extent(max_irr2, max_irr_len);
   extent_q = find_extent(max_end, max_irr_len);
-  extent_p = find_extent(max_irr2 * s, max_end_len);
+  extent_p = find_extent(max_irr2 * s, max_irr_len);
   if (extent_l + extent_r + extent_te + extent_end + extent_p + extent_q >= 900) {
     fprintf(stderr, "%s: insufficient memory, terminating\n", name);
     (void)cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
@@ -390,7 +389,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
   /* Rows for the partial tensor */
   for (i = 0; i < max_irr2; i++) {
     te_rows[i] = memory_pointer_offset(extent_l + extent_r, i, max_irr_len);
-    end_rows[i] = memory_pointer_offset(extent_l + extent_r + extent_te, i, max_end_len);
+    end_rows[i] = memory_pointer_offset(extent_l + extent_r + extent_te, i, max_irr_len);
   }
   /* A workspace row for creating partial tensors in */
   te_row = /*memory_pointer_offset(extent_l + extent_r, max_irr2, max_irr_len)*/
@@ -401,7 +400,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
   }
   /* Rows for the P matrices */
   for (i = 0; i < max_irr2 * s; i++) {
-    p_rows[i] = memory_pointer_offset(extent_l + extent_r + extent_te + extent_end + extent_q, i, max_end_len);
+    p_rows[i] = memory_pointer_offset(extent_l + extent_r + extent_te + extent_end + extent_q, i, max_irr_len);
   }
   /* Now read the P matrices */
   for (i = 0; i < s; i++) {
@@ -418,7 +417,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
   }
   rows_init(prime, &row_operations);
   grease_init(&row_operations, &grease);
-  if (0 == grease_level(prime, &grease, memory_rows(max_end_len, 100))) {
+  if (0 == grease_level(prime, &grease, memory_rows(max_irr_len, 100))) {
     fprintf(stderr, "%s: failed to determine grease level, terminating\n", name);
     matrix_free(te_rows);
     matrix_free(end_rows);
@@ -436,7 +435,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
     printf("%s: using grease level %d\n", name, grease.level);
     fflush(stdout);
   }
-  if (0 == grease_allocate(prime, max_end_len, &grease, 900)){
+  if (0 == grease_allocate(prime, max_irr_len, &grease, 900)){
     fprintf(stderr, "%s: failed to allocate grease, terminating\n", name);
     matrix_free(te_rows);
     matrix_free(end_rows);
@@ -466,7 +465,6 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
   for (i = 0; i < s; i++) {
     /* Row loop over distinct irreducibles of H */
     unsigned int dim_irr_i = dim_irr[i];
-    unsigned int dim_irr_i2 = dim_irr_i * dim_irr_i;
     unsigned int dim_endi = dim_end[i];
     unsigned int noc_qi = noc_q[i];
     const char *argv2i = argv[2 * i];
@@ -488,7 +486,6 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
       /* First read lrows */
       assert(dim_irr_i <= max_irr);
       if (0 == endian_read_matrix(leftp, lrows, len_l, dim_irr_i)) {
-        /* TODO: Ensure this is right */
         return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
                        nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, NULL,
                        NULL, NULL, p, q, h_p, h_q, s, h_o, NULL, rows, lrows, rrows);
@@ -510,9 +507,10 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
         for (j = 0; j < s; j++) {
           /* Column loop over distinct irreducibles of H */
           unsigned int dim_irr_j = dim_irr[j];
-          unsigned int dim_irr_j2 = dim_irr_j * dim_irr_j;
           unsigned int dim_endj = dim_end[j];
           unsigned int len_pj = len_p[j];
+          unsigned int len_qj = len_q[j];
+          unsigned int noc_qj = noc_q[j];
           const char *argv2j1 = argv[2 * j + 1];
           unsigned int left_multiplicitiesj = left_multiplicities[j];
           unsigned int right_multiplicitiesj = right_multiplicities[j];
@@ -572,9 +570,9 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
                   te_o_r++;
                 }
               }
-              if (0 == mul_in_store(te_rows, p_rows + j * max_irr2, end_rows, 0 /*is_map1*/, 0 /* is_map2 */, dim_irr_j2,
-                                    len_pj, nob, dim_irr_i2, dim_endj, prime,
-                                    &grease, "sub-tensor", argv2j1, name)) {
+              if (0 == mul_in_store(q_rows, te_rows, end_rows, 0 /* is_map1 */, 0 /* is_map2 */,
+                                    noc_qi, len_qj, nob, dim_endi, noc_qj, prime,
+                                    &grease, argv2i, "sub-tensor", name)) {
                 matrix_free(te_rows);
                 matrix_free(end_rows);
                 matrix_free(q_rows);
@@ -587,9 +585,9 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
                                nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, NULL,
                                NULL, NULL, p, q, h_p, h_q, s, h_o, NULL, rows, lrows, rrows);
               }
-              if (0 == mul_in_store(q_rows, end_rows, te_rows, 0 /* is_map1 */, 0 /* is_map2 */,
-                                    noc_qi, len_pj, nob, dim_endi, dim_endj, prime,
-                                    &grease, argv2i, "sub-tensor", name)) {
+              if (0 == mul_in_store(end_rows, p_rows + j * max_irr2, te_rows, 0 /*is_map1*/, 0 /* is_map2 */, noc_qj,
+                                    len_pj, nob, dim_endi, dim_endj, prime,
+                                    &grease, "sub-tensor", argv2j1, name)) {
                 matrix_free(te_rows);
                 matrix_free(end_rows);
                 matrix_free(q_rows);
