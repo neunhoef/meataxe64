@@ -1,5 +1,5 @@
 /*
- * $Id: utils.c,v 1.6 2001/09/25 22:31:58 jon Exp $
+ * $Id: utils.c,v 1.7 2001/09/30 21:49:18 jon Exp $
  *
  * Utils for meataxe
  *
@@ -87,6 +87,53 @@ int read_decimal(const char *str, unsigned int len, unsigned int *out)
   }
   *out = res;
   return 1;
+}
+
+static long hadcr = 0;
+
+/******  subroutine to get an integer like FORTRAN does  */
+unsigned int getin(FILE *f, unsigned int a)
+{
+  int c;
+  unsigned long i,j=0;
+ 
+  if(hadcr == 1) return j;
+  for(i = 0;i < a; i++) {
+    c = fgetc(f);
+    if(c == '\n') {
+      hadcr = 1;
+      return j;
+    }
+    if(c < '0') c = '0';
+    if(c > '9') c = '0';
+    j = 10*j + (c-'0');
+  }
+  return j;
+}
+ 
+void nextline(FILE *f)
+{
+  if(hadcr == 1) {
+    hadcr=0;
+    return;
+  }
+  while (fgetc(f) != '\n');
+}
+
+
+const char *get_str(FILE *f, char **name, unsigned int depth)
+{
+  int c = fgetc(f);
+  if (c < 0 || my_isspace(c)) {
+    if ('\n' == c) hadcr = 1;
+    *name = my_malloc(depth + 1);
+    (*name)[depth] = '\0';
+    return *name;
+  } else {
+    get_str(f, name, depth + 1);
+    (*name)[depth] = c;
+    return *name;
+  }
 }
 
 unsigned int bits_of(unsigned int n)

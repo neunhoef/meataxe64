@@ -1,17 +1,21 @@
-/* system.c */
 /*
+ * $Id: system.c,v 1.3 2001/09/30 21:49:19 jon Exp $
+ *
  * system dependent stuff for locking etc
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <netdb.h>
 #include <unistd.h>
-#include <sys/stat.h>
-#include <time.h>
-#include <errno.h>
+#include <stdio.h>
+#include <netdb.h>
 #include <assert.h>
+#include <errno.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <string.h>
+#if 0
+#include <time.h>
+#endif
+#include "files.h"
 #include "system.h"
 
 void just_wait(unsigned int i)
@@ -107,43 +111,6 @@ void wait_lock(const char *task_name)
   printf("Acquired lock\n");
 #endif
   fflush(stdout);
-}
-
-int remove(const char *file)
-{
-  return (unlink(file));
-}
-
-int ren(const char *old, const char *new)
-{
-  int retries = 100;
-  while (retries-- >= 0) {
-    struct stat buf1, buf2;
-    int j;
-    int k;
-    (void)rename(old, new);
-    /* Try to stat old file and new files */
-    j = stat(old, &buf1);
-    k = stat(new, &buf2);
-    if (j) {
-      /* Looks like old file not there */
-      if (k) {
-	/* New file not there either, just retry */
-      } else {
-	if (buf2.st_nlink == 1) {
-	  /* We're happy */
-	  return 0;
-	} else {
-	  /* Retry */
-	}
-      }
-    } else {
-      /* Old file still there, retry */
-    }
-  }
-  printf("rename of %s to %s failed, exiting\n", old, new);
-  exit(1);
-  return -1; /* Prevent compiler warning */
 }
 
 void release_lock(void)

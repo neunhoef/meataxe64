@@ -1,5 +1,5 @@
 /*
- * $Id: utils.h,v 1.6 2001/09/25 22:31:58 jon Exp $
+ * $Id: utils.h,v 1.7 2001/09/30 21:49:18 jon Exp $
  *
  * Utilities for meataxe
  *
@@ -9,6 +9,7 @@
 #define included__utils
 
 #include <stdlib.h>
+#include <stdio.h>
 
 #define NOT_USED(_x) (void)(_x)
 
@@ -25,5 +26,11 @@ extern unsigned int bits_of(unsigned int n);
 extern int my_isspace(int);
 
 extern void *my_malloc(size_t);
+
+unsigned int getin(FILE *f, unsigned int a);
+
+extern void nextline(FILE *f);
+
+const char *get_str(FILE *f, char **name, unsigned int depth);
 
 #endif

@@ -51,7 +51,7 @@ typedef struct output
   output_type type;
   union foobar
   {
-    char *name;
+    const char *name;
     t_uid uid;
   } value;
 } output;

@@ -1,5 +1,6 @@
-/* emu.c */
 /*
+ * $Id: emu.c,v 1.4 2001/09/30 21:49:18 jon Exp $
+ *
  * Exploded multiply
  *
  * Five arguments
@@ -15,6 +16,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "command.h"
+#include "files.h"
 #include "memory.h"
 #include "utils.h"
 #include "system.h"
@@ -26,87 +28,15 @@ static void emu_usage(void)
   fprintf(stderr, "%s: usage: %s <dir1> <dir2> <dir3> <dir4> <limit>\n", name, name);
 }
 
-static unsigned int digits(unsigned long a)
-{
-  if (a < 10) {
-    return 1;
-  } else {
-    return 1 + digits(a / 10);
-  }
-}
-
-static int is_absolute(const char *filename)
-{
-  return (filename != NULL) && ((*filename == '/') || memcmp(filename+1, ":\\", 2) == 0);
-}
-
-static char *pathname(const char *dirname, const char *filename)
-{
-  char *result = my_malloc(strlen(dirname) + strlen(filename) + 2);
-  if (is_absolute(filename)) {
-    strcpy(result, filename);
-  } else {
-    strcpy(result, dirname);
-    strcat(result, "/");
-    strcat(result, filename);
-  }
-  return result;
-}
-
-static long hadcr = 0;
-
-/******  subroutine to get an integer like FORTRAN does  */
-static unsigned long getin(FILE *f, unsigned long a)
-{
-  int c;
-  unsigned long i,j=0;
- 
-  if(hadcr == 1) return j;
-  for(i=0;i<a;i++) {
-    c = fgetc(f);
-    if(c == '\n') {
-      hadcr = 1;
-      return j;
-    }
-    if(c < '0') c = '0';
-    if(c > '9') c = '0';
-    j = 10*j + (c-'0');
-  }
-  return j;
-}
- 
-static void nextline(FILE *f)
-{
-  if(hadcr == 1) {
-    hadcr=0;
-    return;
-  }
-  while (fgetc(f) != '\n');
-}
- 
-static char *get_str(FILE *f, char **name, unsigned int depth)
-{
-  int c = fgetc(f);
-  if (c < 0 || my_isspace(c)) {
-    if ('\n' == c) hadcr = 1;
-    *name = my_malloc(depth + 1);
-    (*name)[depth] = '\0';
-    return *name;
-  } else {
-    get_str(f, name, depth + 1);
-    (*name)[depth] = c;
-    return *name;
-  }
-}
-
 int main(int argc,  char **argv)
 {
   FILE *input1, *input2;
   FILE *output1;
-  unsigned long col_pieces1, row_pieces1;
-  unsigned long col_pieces2, row_pieces2;
-  unsigned long i, j, k, limit;
-  char **names1, **names2, **names3;
+  unsigned int col_pieces1, row_pieces1;
+  unsigned int col_pieces2, row_pieces2;
+  unsigned int i, j, k, limit;
+  unsigned int name_size;
+  const char **names1, **names2, **names3;
   t_uid *tmp_ids;
   char *temp;
   job *jobs;
@@ -166,10 +96,11 @@ int main(int argc,  char **argv)
   /* and only fail when a spawned job fails */
   /* Now create the output names */
   names3 = my_malloc(row_pieces1 * col_pieces2 * sizeof(char *));
+  name_size = digits_of(row_pieces1) + digits_of(col_pieces2) + 2; /* nnn_mmm\0 */
   for (i = 0; i < row_pieces1; i++) {
     for (j = 0; j < col_pieces2; j++) {
-      char *name = my_malloc(digits(row_pieces1) + digits(col_pieces2) + 2); /* Make this more efficient ****/
-      sprintf(name, "%lu_%lu", i, j);
+      char *name = my_malloc(name_size); /* Make this more efficient ****/
+      sprintf(name, "%u_%u", i, j);
       names3[i * col_pieces2 + j] = name;
     }
   }
@@ -180,7 +111,7 @@ int main(int argc,  char **argv)
     fprintf(stderr, "%s: cannot open output map %s", name, m3);
     exit(1);
   }
-  fprintf(output1, "%6lu%6lu\n", row_pieces1, col_pieces2);
+  fprintf(output1, "%6u%6u\n", row_pieces1, col_pieces2);
   for (i = 0; i < row_pieces1; i++) {
     for (j = 0; j < col_pieces2; j++) {
       fprintf(output1, "%s ", names3[i * col_pieces2 + j]);

@@ -25,3 +25,4 @@
 20010926 - First emu running single machine
 20010927 - Better modularisation of makefile
 20010930 - First successful monster multiply on element A (the involution)
+20010930 - Move some junk out of ead and emu into utils, system, files
