@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: sym_basis,v 1.12 2002/11/26 20:46:23 jon Exp $
+# $Id: sym_basis,v 1.13 2003/05/17 21:35:41 jon Exp $
 #
 # Script to compute a symmetry basis wrt an ordered set of irreducibles
 #
@@ -68,7 +68,7 @@ for x in `cat $irreds`; do
       exit 255
     elif [ 1 -eq $ret ]; then
       rm -f ${tmp}.*
-      echo "$name: failure in new_irred, terminating"
+      echo "$name: $r"
       exit 1
     elif [ 255 -ne $ret ]; then
       rm -f ${tmp}.*
@@ -157,29 +157,6 @@ for x in `cat $irreds`; do
         names="$names ${tmp}.5_$z"
         let z=$z+1
       done
-      r=`new_irred $memory $names`
-      ret=$?
-      if [ 0 -eq $ret ]; then
-        rm -f ${tmp}.*
-        echo "$name: new unknown irreducible found, terminating"
-        exit 255
-      elif [ 1 -eq $ret ]; then
-        rm -f ${tmp}.*
-        echo "$name: failure in new_irred, terminating"
-        exit 1
-      elif [ 255 -ne $ret ]; then
-        rm -f ${tmp}.*
-        echo "$name: unexpected return $ret from new_irred, terminating"
-        exit 1
-      fi
-      irr=`echo $r | sed -e "s/Existing irreducible //g;s/ found//g"`
-      if [ "$irr" != "${w}" ]; then
-        rm -f ${tmp}.*
-        echo "$name: vector $y spins to an incorrect subspace, terminating"
-        exit 1
-      fi
-# Need to convert our non-standard basis in ${tmp}.3 to a standard basis as per the irreducibles
-# Use the script associated with irreducible x
       z=`ls ${w}_1_I*`
       ret=$?
       if [ 0 -ne $ret ]; then
@@ -194,12 +171,35 @@ for x in `cat $irreds`; do
         rm -f ${tmp}.*
         exit 1
       fi
-      zscript -m $memory ${tmp}.6 ${tmp}.zscript $script_x ${tmp}.5_1 ${tmp}.5_2
+      r=`new_irred_with_script $memory $script_x $names`
+      ret=$?
+      if [ 0 -eq $ret ]; then
+        rm -f ${tmp}.*
+        echo "$name: new unknown irreducible found, terminating"
+        exit 255
+      elif [ 1 -eq $ret ]; then
+        rm -f ${tmp}.*
+        echo "$name: $r"
+        exit 1
+      elif [ 255 -ne $ret ]; then
+        rm -f ${tmp}.*
+        echo "$name: unexpected return $ret from new_irred, terminating"
+        exit 1
+      fi
+      irr=`echo $r | sed -e "s/Existing irreducible //g;s/ found//g"`
+      if [ "$irr" != "${w}" ]; then
+        rm -f ${tmp}.*
+        echo "$name: vector $y spins to an incorrect subspace, terminating"
+        exit 1
+      fi
+# Need to convert our non-standard basis in ${tmp}.3 to a standard basis as per the irreducibles
+# Use the script associated with irreducible x
+      zscript -m $memory ${tmp}.6 ${tmp}.zscript $script_x ${names}
       ret=$?
       rm -f ${tmp}.zscript*
       if [ 0 -ne $ret ]; then
         rm -f ${tmp}.*
-        echo "$name: failed to apply script to ${tmp}.6_1 ${tmp}.6_2, terminating"
+        echo "$name: failed to apply script to ${names}, terminating"
         exit 1
       fi
       n=`zns -m $memory ${tmp}.6 ${tmp}.7`
@@ -232,15 +232,22 @@ for x in `cat $irreds`; do
 # ${tmp}.5 is a standard basis for this irreducible piece
       if [ 0 -eq $have_basis ]; then
         cp ${tmp}.5 $basis
+        ret=$?
         have_basis=1
       else
         zjoin $basis ${tmp}.5 ${tmp}.4
+        ret=$?
+        if [ 0 -ne $ret ]; then
+          rm -f ${tmp}.*
+          echo "$name: unexpected failure in zjoin, terminating"
+          exit 1
+        fi
         cp ${tmp}.4 $basis
+        ret=$?
       fi
-      ret=$?
       if [ 0 -ne $ret ]; then
         rm -f ${tmp}.*
-        echo "$name: unexpected failure in zjoin, terminating"
+        echo "$name: unexpected failure in cp, terminating"
         exit 1
       fi
       let count=$count+1
