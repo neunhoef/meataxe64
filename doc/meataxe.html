@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.34 2002/10/13 14:16:08 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.35 2002/10/13 14:30:24 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -380,6 +380,8 @@ Turn on verbose mode
 <li><a href="#zscript">zscript</a></li>
 <li><a href="#zsel">zsel</a></li>
 <li><a href="#zsid">zsid</a></li>
+<li><a href="#zsign">zsign</a></li>
+<li><a href="#zsing">zsing</a></li>
 <li><a href="#zskcu">zskcu</a></li>
 <li><a href="#zskfi">zskfi</a></li>
 <li><a href="#zskfo">zskfo</a></li>
@@ -3320,6 +3322,83 @@ Purpose: Scaled identity matrix
 </table>
 Commentary: The output is not required to be square. It is simply
 guaranteed to be &lt;scalar&gt; on its main diagonal, and 0 elsewhere.
+</li>
+<li>
+<h3><a name="zsign">zsign</a></h3>
+Purpose: Find the orthogonal group sign with respect to a quadratic
+form and its associated bilinear form
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>The quadratic form</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>The bilinear form</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>None</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Space has sign + (ie it has a
+maximum possible size totally singular subspace)</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient memory</td>
+</tr>
+<tr>
+<td valign=top>255</td><td valign=top>Space has sign -</td>
+</tr>
+</table>
+Commentary: Spaces of odd dimension are regarded as having sign +. In
+the case of odd characteristic, the same matrix can be supplied as the
+quadratic and bilinear form, as we are not interested in the exact
+values, merely in zero versus not zero. This program is cubic in
+complexity, and is somewhat slower than others in the suite of a
+similar complexity, and so should be used sparingly.
+</li>
+<li>
+<h3><a name="zsing">zsing</a></h3>
+Purpose: Find a totally singular vector with respect to a quadratic
+form
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>The space within which to search</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>The quadratic form</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>The output</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>None</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>255</td><td valign=top>No vector found, space is definite</td>
+</tr>
+</table>
+Commentary: This program is mainly used, if at all, in the computation
+of orthogonal group signs
 </li>
 <li>
 <h3><a name="zskcu">zskcu</a></h3>
