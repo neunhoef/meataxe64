@@ -1,7 +1,6 @@
 Worry about isspace failure (can't detect \n) (still occurs on RH 7.2) ctype is buggered
 Worry about return (NULL == s) code generation error
 Documentation changes for proj_base, sub_quot
-Look into zsumsf error codes when can't write and use in irredf etc
 Think about better instruction ordering for rows.c
 Think about better use of grease for ztmu
 Write span_and_spin for spins on large nullspaces

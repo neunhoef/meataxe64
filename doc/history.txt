@@ -226,3 +226,4 @@ skew seventh
 20021119 - Fix lack of error checking on endian_copy_matrix
 20021123 - Fix memory issues for zsign within rela_indicate
 20021125 - Added Nikolaus talk.
+20021129 - Tidy up error handling in scripts

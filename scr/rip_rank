@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: rip_rank,v 1.4 2002/10/13 20:07:20 jon Exp $: irred,v 1.4 2002/01/26 00:36:06 jon Exp $
+# $Id: rip_rank,v 1.5 2002/11/29 19:19:01 jon Exp $: irred,v 1.4 2002/01/26 00:36:06 jon Exp $
 #
 # Script to compute the rank of a rip off element on a representation
 #
@@ -81,7 +81,7 @@ let x=$order-1
 memory=200
 ok=0
 while [ $ok -eq 0 ]; do
-  rank=`zrn -m $memory ${tmp}.ad.$x 2>/dev/null`
+  rank=`zrn -m $memory ${tmp}.ad.$x 2>&1`
   ret=$?
   if [ 0 -eq $ret ]; then
     mv ${tmp}.ad.$x $o
@@ -89,6 +89,7 @@ while [ $ok -eq 0 ]; do
     echo $a: $rank
     exit $ret
   elif [ 2 -ne $ret ]; then
+    echo $rank
     rm -f ${tmp}*
     exit $ret
   fi

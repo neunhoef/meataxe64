@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: new_irredf_with_orders,v 1.12 2002/10/14 09:05:57 jon Exp $
+# $Id: new_irredf_with_orders,v 1.13 2002/11/29 19:19:01 jon Exp $
 #
 # Script to classify an irreducible representation
 #
@@ -32,9 +32,7 @@ fi
 memory=$1
 tmp_dir=$2
 a=$3
-o_a=$4
 b=$5
-o_b=$6
 if [ -e $a -a -e $b ]; then
   nor=`znor $a`
   noc=`znoc $a`
@@ -74,23 +72,8 @@ tmp=tmp${PPID}
 e=${tmp}.1
 name=${tmp}_${nor}
 ok=0
-i=1
-while [ $i -lt $j -a 0 -eq $ok ]; do
-  k=0
-  while [ $k -lt $i -a 0 -eq $ok ]; do
-    a=${rest[$k]}
-    o_a=${o_rest[$k]}
-    b=${rest[$i]}
-    o_b=${o_rest[$i]}
-    script=`find_nullity_onef_with_orders $e $memory $tmp_dir $line`
-    ret=$?
-    if [ 0 -eq $ret ]; then
-      ok=1
-    fi
-    let k=$k+1
-  done
-  let i=$i+1
-done
+script=`find_nullity_onef_with_orders $e $memory $tmp_dir $line`
+ret=$?
 if [ 0 -eq $ret ]; then
   x=`basef $e ${name} ${tmp}.0 ${tmp_dir} $memory ${rest[*]}`
   ret=$?
@@ -102,14 +85,12 @@ if [ 0 -eq $ret ]; then
 elif [ 254 -eq $ret ]; then
   a=${rest[0]}
   b=${rest[1]}
-  o_a=${o_rest[0]}
-  o_b=${o_rest[1]}
 # Irreducible not absolutely irreducible
   script=`find_best_nullityf_with_orders $e $memory ${tmp_dir} $line`
 # Find the nullspace
   ok=0
   while [ $ok -eq 0 ]; do
-    nullity=`znsf -m $memory $e ${tmp}.0 ${tmp_dir} 2>/dev/null`
+    nullity=`znsf -m $memory $e ${tmp}.0 ${tmp_dir} 2>&1`
     ret=$?
     if [ $ret -eq 0 ]; then
       ok=1

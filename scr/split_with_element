@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: split_with_element,v 1.20 2002/10/14 09:20:33 jon Exp $
+# $Id: split_with_element,v 1.21 2002/11/29 19:19:01 jon Exp $
 #
 # Script to split a representation given a particular element to work from
 #
@@ -68,7 +68,7 @@ memory=200
 ok=0
 nullity=0
 while [ 0 -eq $ok ]; do
-  nullity=`zns -m $memory $e ${tmp}.2 2>/dev/null`
+  nullity=`zns -m $memory $e ${tmp}.2 2>&1`
   ret=$?
   if [ $ret -eq 0 ]; then
     ok=1
@@ -78,6 +78,7 @@ while [ 0 -eq $ok ]; do
 #     echo Allocating more memory for zns, now $memory
     else
       rm -f ${tmp}*
+      echo $nullity
       exit 1
     fi
   fi
@@ -139,15 +140,13 @@ while [ $vector -lt $vectors ]; do
     ret=$?
     if [ $ret -eq 0 ]; then
       mem_ok=1
+    elif [ $ret -eq 2 ]; then
+      let memory=`more_memory $memory`
+#     echo Allocating more memory for zmsp, now $memory
     else
-      if [ $ret -eq 2 ]; then
-        let memory=`more_memory $memory`
-#       echo Allocating more memory for zmsp, now $memory
-      else
-        echo Split failed with some sort of error
-        rm -f ${tmp}*
-        exit 1
-      fi
+      echo Split failed with some sort of error $ret
+      rm -f ${tmp}*
+      exit 1
     fi
   done
   let vector=$vector+1

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: intersect,v 1.7 2002/10/13 20:07:20 jon Exp $
+# $Id: intersect,v 1.8 2002/11/29 19:19:01 jon Exp $
 #
 # Script to intersect two spaces
 #
@@ -45,7 +45,7 @@ fi
 ok=0
 memory=200
 while [ 0 -eq $ok ]; do
-  nullity=`zns -m $memory ${tmp}.0 ${tmp}.1 2>/dev/null`
+  nullity=`zns -m $memory ${tmp}.0 ${tmp}.1 2>&1`
   ret=$?
   if [ $ret -eq 0 ]; then
     ok=1
@@ -54,6 +54,7 @@ while [ 0 -eq $ok ]; do
       let memory=`more_memory $memory`
 #     echo Allocating more memory for zns, now $memory
     else
+      echo $nullity
       rm ${tmp}*
       exit $ret
     fi

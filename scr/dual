@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: dual,v 1.10 2002/10/14 09:10:31 jon Exp $
+# $Id: dual,v 1.11 2002/11/29 19:19:01 jon Exp $
 #
 # Script to dual of a matrix
 #
@@ -53,6 +53,10 @@ while [ 0 -eq $ok ]; do
   ret=$?
   if [ 2 -eq $ret ]; then
     let memory=`more_memory $memory`
+  elif [ 0 -ne $ret ]; then
+    echo ziv unexpectedly returns $ret
+    rm -f ${tmp}*
+    exit $ret
   else
     rm -f ${tmp}*
     exit $ret
