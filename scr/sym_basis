@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: sym_basis,v 1.15 2003/05/19 17:52:28 jon Exp $
+# $Id: sym_basis,v 1.16 2003/05/31 21:07:17 jon Exp $
 #
 # Script to compute a symmetry basis wrt an ordered set of irreducibles
 #
@@ -112,7 +112,7 @@ for x in `cat $irreds`; do
   fi
   if [ $dim -gt 0 ]; then
 # First compute total space spun from image of gamma operator
-    r=`zmsp -m $memory ${tmp}.1 ${tmp}.2 $*`
+    r=`zmspf -m $memory ${tmp}.1 ${tmp}.2 . $*`
     ret=$?
     if [ 0 -ne $ret ]; then
       rm -f ${tmp}.*
@@ -181,27 +181,6 @@ for x in `cat $irreds`; do
         names="$names ${tmp}.5_$z"
         let z=$z+1
       done
-      r=`new_irred_with_script $memory $script_x $names`
-      ret=$?
-      if [ 0 -eq $ret ]; then
-        rm -f ${tmp}.*
-        echo "$name: new unknown irreducible found, terminating"
-        exit 255
-      elif [ 1 -eq $ret ]; then
-        rm -f ${tmp}.*
-        echo "$name: $r"
-        exit 1
-      elif [ 255 -ne $ret ]; then
-        rm -f ${tmp}.*
-        echo "$name: unexpected return $ret from new_irred, terminating"
-        exit 1
-      fi
-      irr=`echo $r | sed -e "s/Existing irreducible //g;s/ found//g"`
-      if [ "$irr" != "${w}" ]; then
-        rm -f ${tmp}.*
-        echo "$name: vector $y spins to an incorrect subspace, terminating"
-        exit 1
-      fi
 # Need to convert our non-standard basis in ${tmp}.3 to a standard basis as per the irreducibles
 # Use the script associated with irreducible x
       zscript -m $memory ${tmp}.6 ${tmp}.zscript $script_x ${names}
@@ -237,6 +216,17 @@ for x in `cat $irreds`; do
         rm -f ${tmp}.*
         exit 1
       fi
+# Now check we've got the right irreducible
+      i=1
+      for x in $names; do
+        if ! diff ${tmp}.8_sb_$i ${w}_$i 1>/dev/null 2>&1; then
+          echo "$name: base_from_vector returns unexpected irreducible, terminating"
+          rm -f ${tmp}.*
+          exit 1
+        fi
+        let i=$i+1
+      done
+# Now convert the non-standard basis in ${tmp}.3 to a standard basis
       zmu -m $memory ${tmp}.4 ${tmp}.3 ${tmp}.5
       if [ 0 -ne $ret ]; then
         rm -f ${tmp}.*
@@ -264,15 +254,38 @@ for x in `cat $irreds`; do
         exit 1
       fi
       if [ 0 -eq $have_local_basis ]; then
-        cp ${tmp}.5 ${tmp}.4
+        ldim=`zbase -m $memory ${tmp}.5 . $local_basis`
         ret=$?
         if [ 0 -ne $ret ]; then
           rm -f ${tmp}.*
-          echo "$name: unexpected failure in cp, terminating"
+          echo $ldim
+          echo "$name: failed to compute ldim, terminating"
           exit 1
         fi
       else
-        zjoin $local_basis ${tmp}.5 ${tmp}.4
+        zclean -m $memory $local_basis ${tmp}.5 ${tmp}.4
+        ret=$?
+        if [ 0 -ne $ret ]; then
+          rm -f ${tmp}.*
+          echo "$name: zclean failed, terminating"
+          exit 1
+        fi
+        ldim=`zbase -m $memory ${tmp}.4 . ${tmp}.5`
+        ret=$?
+        if [ 0 -ne $ret ]; then
+          rm -f ${tmp}.*
+          echo $ldim
+          echo "$name: failed to compute ldim, terminating"
+          exit 1
+        fi
+        zclean -m $memory ${tmp}.5 $local_basis ${tmp}.4
+        ret=$?
+        if [ 0 -ne $ret ]; then
+          rm -f ${tmp}.*
+          echo "$name: zclean failed, terminating"
+          exit 1
+        fi
+        zjoin ${tmp}.4 ${tmp}.5 $local_basis
         ret=$?
         if [ 0 -ne $ret ]; then
           rm -f ${tmp}.*
@@ -281,14 +294,6 @@ for x in `cat $irreds`; do
         fi
       fi
       have_local_basis=1
-      ldim=`zbase -m $memory ${tmp}.4 . $local_basis`
-      ret=$?
-      if [ 0 -ne $ret ]; then
-        rm -f ${tmp}.*
-        echo $ldim
-        echo "$name: failed to compute dim, terminating"
-        exit 1
-      fi
       let count=$count+1
       let y=$y+1
     done
