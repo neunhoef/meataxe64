@@ -1,5 +1,5 @@
 /*
- * $Id: read.c,v 1.21 2002/06/28 08:39:16 jon Exp $
+ * $Id: read.c,v 1.22 2002/10/02 16:47:59 jon Exp $
  *
  * Read a header
  *
@@ -30,7 +30,7 @@ int read_text_header_items(FILE *fp, unsigned int *nod, unsigned int *prime,
                            unsigned int *nor, unsigned int *noc, const char *file, const char *name)
 {
   int i;
-  
+
   assert(NULL != fp);
   assert(NULL != file);
   assert(NULL != name);
@@ -66,11 +66,12 @@ int read_text_header(FILE *fp, const header **hp, const char *file, const char *
   assert(NULL != hp);
   assert(NULL != file);
   assert(NULL != name);
-  if (read_text_header_items(fp, &nod, &prime, &nor, &noc, file, name)) {
+  if (read_text_header_items(fp, &nod, &prime, &nor, &noc, file, name) && (1 == prime || is_a_prime_power(prime))) {
     nob = bits_of(prime);
     *hp = header_create(prime, nob, nod, noc, nor);
     return 1;
   } else {
+    fprintf(stderr, "%s: value %d is neither 1 nor a prime\n", name, prime);
     return 0;
   }
 }
