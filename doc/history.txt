@@ -35,3 +35,4 @@
 20011007 - Test eim. Write tr and etr. Test tr. Rewrite slave and test
 20011008 - Write stop.c to introduce kill commands into the command file
 20011010 - Fix bug introduced into emu. Minor improvments to mmat
+20011010 - Add id subroutine

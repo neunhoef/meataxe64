@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.18 2001/10/09 19:36:26 jon Exp $
+# $Id: makefile,v 1.19 2001/10/10 23:19:42 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -37,7 +37,7 @@ EID_MODULES=	eid elements endian exrows files header map memory primes rows util
 EIM_MODULES=	eim elements endian files header map memory primes read utils write
 EMU_MODULES=	command emu files map memory system utils
 ETR_MODULES=	elements endian etr files header map matrix memory primes read tra utils write
-ID_MODULES=	id elements endian header memory primes rows utils write
+ID_MODULES=	id ident elements endian header memory primes rows utils write
 IP_MODULES=	elements endian header ip primes read utils write
 MON_MODULES=	endian exrows files header map memory mmat mop mtx primes utils write
 MU_MODULES=	elements endian grease header matrix memory mu mul primes read rows utils write
