@@ -36,3 +36,4 @@
 20011008 - Write stop.c to introduce kill commands into the command file
 20011010 - Fix bug introduced into emu. Minor improvments to mmat
 20011010 - Add id subroutine
+20011011 - More improvements to mmat and mop.c
