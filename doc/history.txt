@@ -55,3 +55,4 @@
 20011122 - Debug spin to work with B
 20011124 - Subspace splits He 2058 permutation representation
 20011125 - Started on quotient space
+20011125 - quotient space works

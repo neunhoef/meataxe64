@@ -1,5 +1,5 @@
 /*
- * $Id: qs.c,v 1.1 2001/11/25 12:44:33 jon Exp $
+ * $Id: qs.c,v 1.2 2001/11/26 00:04:29 jon Exp $
  *
  * Function to compute quotient space representation
  *
@@ -21,8 +21,8 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-#if 0
 static void cleanup(FILE *f1, FILE *f2)
 {
   if (NULL != f1)
@@ -30,140 +30,138 @@ static void cleanup(FILE *f1, FILE *f2)
   if (NULL != f2)
     fclose(f2);
 }
-#endif
 
 void quotient(const char *range, const char *gen,
               const char *out, const char *name)
 {
-  NOT_USED(range);
-  NOT_USED(gen);
-  NOT_USED(out);
-  NOT_USED(name);
+  FILE *inp_r = NULL, *inp_g = NULL, *outp = NULL;
+  const header *h_in_r, *h_in_g, *h_out;
+  unsigned int prime, nob, noc, nor_r, nor_g, nor_o, len, len_o, max_rows, d, i, elt;
+  unsigned int **rows1, **rows2, **rows3;
+  int *map_r, *map_g;
+  unsigned int *map_o;
+  row_ops row_operations;
+  grease_struct grease;
   assert(NULL != range);
   assert(NULL != gen);
   assert(NULL != out);
   assert(NULL != name);
-/* TODO: Read range and gen headers, and check compatible
- * TODO: Read range
- * TODO: Create map on columns
- * TODO: Create map of holes
- * TODO: Read hole elements from generator and rearrange
- * TODO: Clean stuff from generator
- * TODO: Contract result and write out
- */
-#if 0
-  FILE *inp1 = NULL, *inp2 = NULL, *outp = NULL;
-  const header *h_in1, *h_in2, *h_out;
-  unsigned int prime, nob, noc, nor, len, len_e, max_rows, d, elt;
-  unsigned int **rows1, **rows2, **rows3, **rows4;
-  int *map;
-  prime_ops prime_operations;
-  row_ops row_operations;
-  grease_struct grease;
-  assert(NULL != range);
-  assert(NULL != image);
-  assert(NULL != out);
-  assert(NULL != name);
-  if (0 == open_and_read_binary_header(&inp1, &h_in1, range, name) ||
-      0 == open_and_read_binary_header(&inp2, &h_in2, image, name)) {
+  if (0 == open_and_read_binary_header(&inp_r, &h_in_r, range, name) ||
+      0 == open_and_read_binary_header(&inp_g, &h_in_g, gen, name)) {
     fprintf(stderr, "%s: failed to read header from one of %s, %s, terminating\n",
-            name, range, image);
-    cleanup(inp1, NULL);
+            name, range, gen);
+    cleanup(inp_r, NULL);
     exit(1);
   }
-  prime = header_get_prime(h_in1);
-  nob = header_get_nob(h_in1);
-  nor = header_get_nor(h_in1);
-  noc = header_get_noc(h_in1);
-  len = header_get_len(h_in1);
-  if (noc != header_get_noc(h_in2) ||
-      nor != header_get_nor(h_in2) ||
-      prime != header_get_prime(h_in2) ||
-      nob != header_get_nob(h_in2)) {
+  prime = header_get_prime(h_in_r);
+  nob = header_get_nob(h_in_r);
+  nor_r = header_get_nor(h_in_r);
+  nor_g = header_get_nor(h_in_g);
+  noc = header_get_noc(h_in_r);
+  len = header_get_len(h_in_r);
+  if (noc != header_get_noc(h_in_g) ||
+      noc != nor_g ||
+      prime != header_get_prime(h_in_g) ||
+      nob != header_get_nob(h_in_g)) {
     fprintf(stderr, "%s: incompatible parameters for %s, %s, terminating\n",
-            name, range, image);
-    cleanup(inp1, inp2);
+            name, range, gen);
+    cleanup(inp_r, inp_g);
     exit(1);
   }
-  if (nor > noc) {
+  if (nor_r > noc) {
     fprintf(stderr, "%s: too many rows in %s, %s, terminating\n",
-            name, range, image);
-    cleanup(inp1, inp2);
+            name, range, gen);
+    cleanup(inp_r, inp_g);
     exit(1);
   }
-  h_out = header_create(prime, nob, header_get_nod(h_in1), nor, nor);
-  len_e = header_get_len(h_out);
-  assert(header_get_len(h_in2) == len);
-  assert(len >= len_e);
-  primes_init(prime, &prime_operations);
-  rows_init(prime, &row_operations);
-  grease_init(&row_operations, &grease);
-  if (0 == grease_level(prime, &grease, memory_rows(len, 40))) {
-    fprintf(stderr, "%s: failed to get grease for %s, terminating\n",
-            name, range);
-    cleanup(inp1, inp2);
-    exit(1);
-  }
-  rows1 = matrix_malloc(nor); /* range */
-  rows2 = matrix_malloc(nor); /* image */
-  rows3 = matrix_malloc(nor); /* -1 */
-  rows4 = matrix_malloc(nor); /* output */
-  max_rows = memory_rows(len, 230);
-  if (max_rows < nor) {
+  assert(header_get_len(h_in_g) == len);
+  nor_o = nor_g - nor_r; /* Number of output rows and columns */
+  rows1 = matrix_malloc(nor_g); /* range */
+  rows2 = matrix_malloc(nor_g); /* gen */
+  rows3 = matrix_malloc(nor_g); /* result */
+  max_rows = memory_rows(len, 300);
+  if (max_rows < nor_g) {
     fprintf(stderr, "%s: insufficient memory for %s, %s, %s, terminating\n",
-            name, range, image, out);
-    cleanup(inp1, inp2);
+            name, range, gen, out);
+    cleanup(inp_r, inp_g);
     exit(1);
   }
-  for (d = 0; d < nor; d++) {
+  for (d = 0; d < nor_g; d++) {
     rows1[d] = memory_pointer_offset(0, d, len);
-    rows2[d] = memory_pointer_offset(230, d, len);
-    rows3[d] = memory_pointer_offset(460, d, len_e);
-    rows4[d] = memory_pointer_offset(690, d, len_e);
+    rows2[d] = memory_pointer_offset(300, d, len);
+    rows3[d] = memory_pointer_offset(600, d, len); /* Really len_o */ 
   }
-  if (0 == endian_read_matrix(inp1, rows1, len, nor)) {
+  if (0 == endian_read_matrix(inp_r, rows1, len, nor_r)) {
     fprintf(stderr, "%s: failed to read rows from %s, terminating\n",
             name, range);
-    cleanup(inp1, inp2);
+    cleanup(inp_r, inp_g);
     exit(1);
   }
-  fclose(inp1);
-  if (0 == endian_read_matrix(inp2, rows2, len, nor)) {
-    fprintf(stderr, "%s: failed to read rows from %s, terminating\n",
-            name, range);
-    fclose(inp2);
-    exit(1);
-  }
-  fclose(inp2);
-  map = my_malloc(nor * sizeof(int));
-  for (d = 0; d < nor; d++) {
-    unsigned int i;
+  fclose(inp_r);
+  h_out = header_create(prime, nob, header_get_nod(h_in_r), nor_o, nor_o);
+  len_o = header_get_len(h_out);
+  assert(len >= len_o);
+  map_r = my_malloc(nor_r * sizeof(int));
+  map_g = my_malloc(nor_g * sizeof(int));
+  map_o = my_malloc(nor_o * sizeof(unsigned int));
+  memset(map_r, 0, nor_r * sizeof(int));
+  memset(map_g, 0, nor_g * sizeof(int));
+  for (d = 0; d < nor_r; d++) {
     elt = first_non_zero(rows1[d], nob, len, &i);
     assert(0 != elt);
     NOT_USED(elt);
-    map[d] = i;
+    map_r[d] = i;
+    assert(i < nor_g);
+    assert(0 == map_g[i]);
+    map_g[i] = 1; /* Record a submodule significant row */
   }
-  elt = (*prime_operations.negate)(1);
-  for (d = 0; d < nor; d++) {
-    row_init(rows3[d], len_e);
-    row_init(rows4[d], len_e);
-    put_element_to_row(nob, d, rows3[d], elt);
+  i = 0;
+  for (d = 0; d < nor_g; d++) {
+    if (0 == map_g[d]) {
+      map_o[i++] = d; /* Which rows of g to read */
+    }
   }
-  clean(rows1, nor, rows2, nor, map, rows3, rows4, 1,
-        grease.level, prime, len, nob, 920, 960, len_e, name);
-  for (d = 0; d < nor; d++) {
-    if (0 == row_is_zero(rows2[d], len)) {
-      fprintf(stderr, "Suspicious row %d not cleaned to zero\n", d);
+  assert(i == nor_o);
+  i = 0;
+  for (d = 0; d < nor_o; d++) {
+    while (map_o[d] >= i) {
+      if (0 == endian_read_row(inp_g, rows2[d], len)) {
+        fprintf(stderr, "%s: failed to read row from %s, terminating\n", name, gen);
+        fclose(inp_g);
+        exit(1);
+      }
+      i++;
+      assert(i <= nor_g);
+    }
+  }
+  fclose(inp_g);
+  rows_init(prime, &row_operations);
+  grease_init(&row_operations, &grease);
+  if (0 == grease_level(prime, &grease, memory_rows(len, 100))) {
+    fprintf(stderr, "%s: failed to get grease for %s, terminating\n",
+            name, range);
+    cleanup(inp_r, inp_g);
+    exit(1);
+  }
+  clean(rows1, nor_r, rows2, nor_o, map_r, NULL, NULL, 0,
+        grease.level, prime, len, nob, 900, 0, 0, name);
+  for (d = 0; d < nor_o; d++) {
+    row_init(rows3[d], len_o);
+  }
+  for (d = 0; d < nor_o; d++) {
+    for (i = 0; i < nor_o; i++) {
+      assert(map_o[i] < noc);
+      elt = get_element_from_row(nob, map_o[i], rows2[d]);
+      put_element_to_row(nob, i, rows3[d], elt);
     }
   }
   if (0 == open_and_write_binary_header(&outp, h_out, out, name)) {
     exit(1);
   }
-  if (0 == endian_write_matrix(outp, rows4, len_e, nor)) {
+  if (0 == endian_write_matrix(outp, rows3, len_o, nor_o)) {
     fprintf(stderr, "%s: failed to write output to %s, terminating\n",
             name, out);
     fclose(outp);
     exit(1);
   }
-#endif
 }
