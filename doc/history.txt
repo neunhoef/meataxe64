@@ -12,3 +12,4 @@
 20010912 - cleaning up, introduced len, started on memory.h Knocked .3 sec off B multiply
 20010913 - Made mul work row by row on matrix 2. Imported monster generator and cleaned it up
 20010914 - More clean up, tested monster generation
+20010916 - Added names to all programs, wrote memory handling and added it to all but mul

@@ -1,5 +1,5 @@
 /*
- * $Id: ip.c,v 1.6 2001/09/12 23:13:04 jon Exp $
+ * $Id: ip.c,v 1.7 2001/09/16 20:20:39 jon Exp $
  *
  * Read a matrix
  *
@@ -16,9 +16,11 @@
 #include "elements.h"
 #include "endian.h"
 
+static const char *name = "ip";
+
 static void ip_usage(void)
 {
-  fprintf(stderr, "ip: usage: ip <in_file> <out_file>\n");
+  fprintf(stderr, "%s: usage: %s <in_file> <out_file>\n", name, name);
 }
 
 int main(int argc, const char * const argv[])
@@ -40,12 +42,12 @@ int main(int argc, const char * const argv[])
   out = argv[2];
   inp = fopen(in, "r");
   if (NULL == inp) {
-    fprintf(stderr, "ip: cannot open %s, terminating\n", in);
+    fprintf(stderr, "%s: cannot open %s, terminating\n", name, in);
     exit(1);
   }
   outp = fopen(out, "wb");
   if (NULL == outp) {
-    fprintf(stderr, "ip: cannot open %s, terminating\n", out);
+    fprintf(stderr, "%s: cannot open %s, terminating\n", name, out);
     fclose(inp);
     exit(1);
   }

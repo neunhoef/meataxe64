@@ -1,5 +1,5 @@
 /*
- * $Id: id.c,v 1.3 2001/09/12 23:13:04 jon Exp $: ad.c,v 1.1 2001/08/30 18:31:45 jon Exp $
+ * $Id: id.c,v 1.4 2001/09/16 20:20:39 jon Exp $: ad.c,v 1.1 2001/08/30 18:31:45 jon Exp $
  *
  * Generate identity matrix
  *
@@ -8,16 +8,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "elements.h"
 #include "endian.h"
 #include "header.h"
-#include "write.h"
+#include "memory.h"
 #include "rows.h"
-#include "elements.h"
 #include "utils.h"
+#include "write.h"
+
+static const char *name = "id";
 
 static void id_usage(void)
 {
-  fprintf(stderr, "id: usage: id <prime> <nor> <noc> <out_file>\n");
+  fprintf(stderr, "%s: usage: %s <prime> <nor> <noc> <out_file>\n", name, name);
 }
 
 int main(int argc, const char * const argv[])
@@ -39,7 +42,7 @@ int main(int argc, const char * const argv[])
     return 0;
   }
   if (0 == is_a_prime_power(prime)) {
-    fprintf(stderr, "id: non prime %d\n", prime);
+    fprintf(stderr, "%s: non prime %d\n", name, prime);
     exit(1);
   }
   if (0 == read_decimal(argv[2], strlen(argv[2]), &nor)) {
@@ -53,34 +56,37 @@ int main(int argc, const char * const argv[])
   nob = bits_of(prime);
   nod = digits_of(prime);
   endian_init();
+  memory_init(name, 0);
   outp = fopen(out, "wb");
   if (0 == outp) {
-    fprintf(stderr, "id: cannot open %s\n", out);
+    fprintf(stderr, "%s: cannot open %s\n", name, out);
     exit(1);
   }
   h = header_create(prime, nob, nod, noc, nor);
   len = header_get_len(h);
   if (0 == write_binary_header(outp, h, out)) {
-    fprintf(stderr, "id: cannot write header\n");
+    fprintf(stderr, "%s: cannot write header\n", name);
     fclose(outp);
     exit(1);
   }
-  if (0 == row_malloc(len, &row)) {
-    fprintf(stderr, "id: cannot create output row\n");
+  if (memory_rows(len, 1000) < 3) {
+    fprintf(stderr, "%s: cannot create output row\n", name);
     fclose(outp);
     exit(1);
   }
+  row = memory_pointer_offset(0, 0, len);
   for (i = 0; i < nor; i++) {
     row_init(row, len);
     if (i < noc) {
       put_element_to_row(nob, i, row, 1);
     }
     if (0 == endian_write_row(outp, row, len)) {
-      fprintf(stderr, "id: write output row to %s\n", out);
+      fprintf(stderr, "%s: write output row to %s\n", name, out);
       fclose(outp);
       exit(1);
     }
   }
   fclose(outp);
+  memory_dispose();
   return 0;
 }

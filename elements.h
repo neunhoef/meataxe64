@@ -1,5 +1,5 @@
 /*
- * $Id: elements.h,v 1.6 2001/09/12 23:13:04 jon Exp $
+ * $Id: elements.h,v 1.7 2001/09/16 20:20:39 jon Exp $
  *
  * Element manipulation for meataxe
  *
@@ -26,9 +26,13 @@ extern void element_access_init(unsigned int nob, unsigned int from, unsigned in
                                 unsigned int *word_offset, unsigned int *bit_offset,
                                 unsigned int *mask);
 
+#if 1
 /* Extract some elements from a row at given position */
 extern unsigned int get_elements_from_row(const unsigned int *row,
                                           unsigned int bit_offset, unsigned int mask);
+#else
+#define get_elements_from_row(row,offset,mask) (((*(row))>>(bit_offset))&(mask))
+#endif
 
 /* Insert an element into a row at given position */
 extern void put_element_to_row(unsigned int nob, unsigned int index,

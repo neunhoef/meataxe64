@@ -1,5 +1,5 @@
 /*
- * $Id: pr.c,v 1.4 2001/09/12 23:13:04 jon Exp $
+ * $Id: pr.c,v 1.5 2001/09/16 20:20:39 jon Exp $
  *
  * Print a matrix
  *
@@ -10,21 +10,24 @@
 #include <string.h>
 #include <assert.h>
 #include <limits.h>
-#include "header.h"
-#include "utils.h"
-#include "read.h"
-#include "write.h"
 #include "elements.h"
 #include "endian.h"
+#include "header.h"
+#include "memory.h"
 #include "primes.h"
+#include "read.h"
 #include "rows.h"
+#include "utils.h"
+#include "write.h"
 
 /* Purely for formatting purposes */
 #define BITS_PER_ROW 80
 
+static const char *name = "pr";
+
 static void pr_usage(void)
 {
-  fprintf(stderr, "pr: usage: pr <in_file>\n");
+  fprintf(stderr, "%s: usage: %s <in_file>\n", name, name);
 }
 
 int main(int argc, const char * const argv[])
@@ -38,6 +41,7 @@ int main(int argc, const char * const argv[])
   prime_ops prime_operations;
 
   endian_init();
+  memory_init(name, 0);
   if (2 != argc) {
     pr_usage();
     exit(1);
@@ -45,7 +49,7 @@ int main(int argc, const char * const argv[])
   in = argv[1];
   inp = fopen(in, "rb");
   if (NULL == inp) {
-    fprintf(stderr, "pr: cannot open %s, terminating\n", in);
+    fprintf(stderr, "%s: cannot open %s, terminating\n", name, in);
     exit(1);
   }
   if (0 == read_binary_header(inp, &h, in)) {
@@ -59,24 +63,25 @@ int main(int argc, const char * const argv[])
   noc = header_get_noc(h);
   len = header_get_len(h);
   if (0 == write_text_header(stdout, h)) {
-    fprintf(stderr, "pr: cannot write text header, terminating\n");
+    fprintf(stderr, "%s: cannot write text header, terminating\n", name);
     fclose(inp);
     exit(1);
   }
-  if (0 == row_malloc(len, &row)) {
-    fprintf(stderr, "pr: cannot allocate row for %s, terminating\n", in);
+  if (memory_rows(len, 1000) < 1) {
+    fprintf(stderr, "%s: cannot allocate row for %s, terminating\n", name, in);
     fclose(inp);
     exit(1);
   }
+  row = memory_pointer_offset(0, 0, len);
   if (0 == primes_init(prime, &prime_operations)) {
-    fprintf(stderr, "pr: cannot initialise prime operations, terminating\n");
+    fprintf(stderr, "%s: cannot initialise prime operations, terminating\n", name);
     fclose(inp);
     exit(1);
   }
   for (i = 0; i < nor; i++) {
     unsigned int m = 0;
     if (0 == endian_read_row(inp, row, len)) {
-      fprintf(stderr, "pr: cannot read row %d from %s, terminating\n", i, in);
+      fprintf(stderr, "%s: cannot read row %d from %s, terminating\n", name, i, in);
       fclose(inp);
       exit(1);
     }
@@ -87,7 +92,7 @@ int main(int argc, const char * const argv[])
       m = j; /* To survive the loop */
       e = get_element_from_row(nob, j, row);
       if (0 == (*prime_operations.decimal_rep)(&e)) {
-        fprintf(stderr, "pr: cannot convert %d with prime %d from %s, terminating\n", e, prime, in);
+        fprintf(stderr, "%s: cannot convert %d with prime %d from %s, terminating\n", name, e, prime, in);
         fclose(inp);
         exit(1);
       }
@@ -96,7 +101,7 @@ int main(int argc, const char * const argv[])
       if (k > nod) {
         /* Some precision will be lost */
         /* This shouldn't happen */
-        fprintf(stderr, "pr: cannot print %d to precision %d without loss of data, terminating\n", e, nod);
+        fprintf(stderr, "%s: cannot print %d to precision %d without loss of data, terminating\n", name, e, nod);
         fclose(inp);
         exit(1);
       } else if (k < nod) {
@@ -118,5 +123,6 @@ int main(int argc, const char * const argv[])
     }
   }
   fclose(inp);
+  memory_dispose();
   return 0;
 }

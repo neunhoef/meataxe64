@@ -1,5 +1,5 @@
 /*
- * $Id: memory.h,v 1.1 2001/09/12 23:13:04 jon Exp $
+ * $Id: memory.h,v 1.2 2001/09/16 20:20:39 jon Exp $
  *
  * Large memory manipulation for meataxe
  *
@@ -10,15 +10,18 @@
 
 /* Initialise the memory system with given size */
 /* If a size of 0 is given, the default value MEM_SIZE * (1 << 20) is used */
-extern void memory_init(size_t);
+extern void memory_init(const char *, size_t);
 
 /* Dispose of the memory */
 extern void memory_dispose(void);
 
 /* Get a pointer to the first row n thousandths of the way through the memory */
-extern char *memory_pointer(unsigned int);
+extern void *memory_pointer(unsigned int);
 
 /* Get a pointer to the ith row of given size starting n thousandths of the way through the memory */
-extern char *memory_pointer(unsigned int n, unsigned int i);
+extern void *memory_pointer_offset(unsigned int n, unsigned int i, unsigned int len);
+
+/* Find out how many rows of given size fit in given memory */
+extern unsigned int memory_rows(unsigned int len, unsigned int size);
 
 #endif

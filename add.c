@@ -1,5 +1,5 @@
 /*
- * $Id: add.c,v 1.6 2001/09/12 23:13:04 jon Exp $
+ * $Id: add.c,v 1.7 2001/09/16 20:20:39 jon Exp $
  *
  * Function to add two matrices to give a third
  *
@@ -9,13 +9,14 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <limits.h>
-#include "header.h"
-#include "utils.h"
-#include "read.h"
-#include "write.h"
 #include "elements.h"
 #include "endian.h"
+#include "header.h"
+#include "memory.h"
+#include "read.h"
 #include "rows.h"
+#include "utils.h"
+#include "write.h"
 #include "add.h"
 
 int add(const char *m1, const char *m2, const char *m3, const char *name)
@@ -86,15 +87,16 @@ int add(const char *m1, const char *m2, const char *m3, const char *name)
     fclose(outp);
     return 0;
   }
-  if (0 == row_malloc(len, &row1) ||
-      0 == row_malloc(len, &row2) ||
-      0 == row_malloc(len, &row3)) {
+  if (memory_rows(len, 1000) < 3) {
     fprintf(stderr, "%s cannot allocate rows for %s, %s, %s, terminating\n", name, m1, m2, m3);
     fclose(inp1);
     fclose(inp2);
     fclose(outp);
     return 0;
   }
+  row1 = memory_pointer_offset(0, 0, len);
+  row2 = memory_pointer_offset(0, 1, len);
+  row3 = memory_pointer_offset(0, 2, len);
   for (i = 0; i < nor; i++) {
     if (0 == endian_read_row(inp1, row1, len)) {
       fprintf(stderr, "%s cannot read row %d from %s, terminating\n", name, i, m1);
