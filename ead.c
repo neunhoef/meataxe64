@@ -1,5 +1,5 @@
 /*
- * $Id: ead.c,v 1.7 2002/07/09 09:08:12 jon Exp $
+ * $Id: ead.c,v 1.8 2004/01/04 21:22:50 jon Exp $
  *
  * Exploded add
  *
@@ -25,7 +25,7 @@ static const char *name = "ead";
 
 static void ead_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <dir1> <dir2> <dir3>\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <dir1> <dir2> <dir3>\n", name, name, parse_usage());
 }
 
 int main(int argc,  const char *const argv[])

@@ -1,5 +1,5 @@
 /*
- * $Id: zqf.c,v 1.6 2002/10/14 19:11:51 jon Exp $
+ * $Id: zqf.c,v 1.7 2004/01/04 21:22:50 jon Exp $
  *
  * Clear to zero the upper triangle of a matrix, including the diagonal
  * This is a utility program for computation of quadratic forms
@@ -20,7 +20,7 @@ static const char *name = "zqf";
 
 static void qf_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s [-v] [-m <memory>] <in_file> <out_file>\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <in_file> <out_file>\n", name, name, parse_usage());
 }
 
 int main(int argc, const char * const argv[])

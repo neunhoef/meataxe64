@@ -1,5 +1,5 @@
 /*
- * $Id: zspanmsp.c,v 1.2 2002/10/14 19:11:51 jon Exp $
+ * $Id: zspanmsp.c,v 1.3 2004/01/04 21:22:50 jon Exp $
  *
  * Compute subspaces from the span of a matrix until we find a proper subspace
  *
@@ -18,7 +18,7 @@ static const char *name = "zspanmsp";
 
 static void spanmsp_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s [-v] [-m <memory>] <in_file> <out_file> <gen_1> [<gen>*]\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <in_file> <out_file> <gen_1> [<gen>*]\n", name, name, parse_usage());
 }
 
 int main(int argc, const char * const argv[])
@@ -28,7 +28,7 @@ int main(int argc, const char * const argv[])
   unsigned int i;
 
   argv = parse_line(argc, argv, &argc);
-  if (4 <= argc) {
+  if (3 >= argc) {
     spanmsp_usage();
     exit(1);
   }

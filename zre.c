@@ -1,5 +1,5 @@
 /*
- * $Id: zre.c,v 1.5 2002/07/09 09:08:12 jon Exp $
+ * $Id: zre.c,v 1.6 2004/01/04 21:22:50 jon Exp $
  *
  * Convert a matrix from new to old
  *
@@ -26,7 +26,7 @@ static const char *name = "zre";
 
 static void re_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <in_file> <out_file>\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <in_file> <out_file>\n", name, name, parse_usage());
 }
 
 int main(int argc, const char * const argv[])

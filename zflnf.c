@@ -1,5 +1,5 @@
 /*
- * $Id: zflnf.c,v 1.5 2003/08/17 16:52:46 jon Exp $
+ * $Id: zflnf.c,v 1.6 2004/01/04 21:22:50 jon Exp $
  *
  * Compute sums in the group algebra in two matrices finding one of lowest non-zero nullity
  * Expected to be used during computation of standard bases of irreducible but not absolutely
@@ -27,7 +27,7 @@ static const char *best_form = NULL;
 
 static void fln_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s [-v] [-m <memory>] <out_file_stem> <n> <nullity> <tmp dir> <in_file a> <order a> <in_file b> <order b>\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <out_file_stem> <n> <nullity> <tmp dir> <in_file a> <order a> <in_file b> <order b>\n", name, name, parse_usage());
 }
 
 static unsigned int find_gcd(unsigned int a, unsigned int b)

@@ -1,5 +1,5 @@
 /*
- * $Id: ect.c,v 1.4 2002/10/14 19:11:51 jon Exp $
+ * $Id: ect.c,v 1.5 2004/01/04 21:22:50 jon Exp $
  *
  * Count the non-zero elements in an exploded matrix
  *
@@ -18,7 +18,7 @@ static const char *name = "ect";
 
 static void ect_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s [-v] [-m <memory>] <in_dir>\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <in_dir>\n", name, name, parse_usage());
 }
 
 int main(int argc, const char *const argv[])

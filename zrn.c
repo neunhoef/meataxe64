@@ -1,5 +1,5 @@
 /*
- * $Id: zrn.c,v 1.4 2002/10/13 20:07:20 jon Exp $
+ * $Id: zrn.c,v 1.5 2004/01/04 21:22:50 jon Exp $
  *
  * Compute the rank of a matrix
  *
@@ -15,7 +15,7 @@ static const char *name = "zrn";
 
 static void rn_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s [-v] [-m <memory>] <in_file>\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <in_file>\n", name, name, parse_usage());
 }
 
 int main(int argc, const char * const argv[])

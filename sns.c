@@ -1,5 +1,5 @@
 /*
- * $Id: sns.c,v 1.10 2003/02/05 19:30:54 jon Exp $
+ * $Id: sns.c,v 1.11 2004/01/04 21:22:50 jon Exp $
  *
  * Simple compute of the null space of a matrix
  *
@@ -21,7 +21,7 @@ static const char *name = "sns";
 
 static void rn_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s [-v] [-m <memory>] <in_file> <out_file>\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <in_file> <out_file>\n", name, name, parse_usage());
 }
 
 int main(int argc, const char * const argv[])

@@ -1,5 +1,5 @@
 /*
- * $Id: parse.c,v 1.4 2002/10/13 16:50:01 jon Exp $
+ * $Id: parse.c,v 1.5 2004/01/04 21:22:50 jon Exp $
  *
  * Function to parse command line flags
  *
@@ -118,3 +118,11 @@ const char *const *parse_line(int argc, const char *const argv[], int *new_argc)
   *new_argc = argc;
   return argv;
 }
+
+static const char *usage = "[-v] [-m <memory>]";
+
+const char *parse_usage(void)
+{
+  return usage;
+}
+

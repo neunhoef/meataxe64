@@ -1,5 +1,5 @@
 /*
- * $Id: zss.c,v 1.3 2002/10/13 22:41:39 jon Exp $
+ * $Id: zss.c,v 1.4 2004/01/04 21:22:50 jon Exp $
  *
  * Calculate subspace representation
  *
@@ -15,7 +15,7 @@ static const char *name = "zss";
 
 static void ss_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s [-v] [-m <memory>] <range> <image> <output>\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <range> <image> <output>\n", name, name, parse_usage());
 }
 
 int main(int argc, const char * const argv[])

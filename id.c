@@ -1,5 +1,5 @@
 /*
- * $Id: id.c,v 1.13 2002/07/09 09:08:12 jon Exp $: ad.c,v 1.1 2001/08/30 18:31:45 jon Exp $
+ * $Id: id.c,v 1.14 2004/01/04 21:22:50 jon Exp $: ad.c,v 1.1 2001/08/30 18:31:45 jon Exp $
  *
  * Generate identity matrix
  *
@@ -17,7 +17,7 @@ static const char *name = "zid";
 
 static void id_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <field order> <nor> <noc> <out_file>\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <field order> <nor> <noc> <out_file>\n", name, name, parse_usage());
 }
 
 int main(int argc, const char * const argv[])

@@ -1,5 +1,5 @@
 /*
- * $Id: zclean.c,v 1.2 2002/10/14 19:11:51 jon Exp $
+ * $Id: zclean.c,v 1.3 2004/01/04 21:22:50 jon Exp $
  *
  * Clean a set of vectors with another set
  *
@@ -15,7 +15,7 @@ static const char *name = "zclean";
 
 static void clean_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s [-v] [-m <memory>] <clean vectors> <vectors to clean> <output>\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <clean vectors> <vectors to clean> <output>\n", name, name, parse_usage());
 }
 
 int main(int argc, const char * const argv[])

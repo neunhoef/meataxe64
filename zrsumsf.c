@@ -1,5 +1,5 @@
 /*
- * $Id: zrsumsf.c,v 1.6 2003/08/10 14:30:25 jon Exp $
+ * $Id: zrsumsf.c,v 1.7 2004/01/04 21:22:50 jon Exp $
  *
  * Compute restricted sums in the group algebra in two matrices
  *
@@ -19,7 +19,7 @@ static unsigned int nullity = 0;
 
 static void rsumsf_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s [-v] [-m <memory>] <out_file_stem> <n> <nullity> <subfield order> <tmp dir> <in_file a> <order a> <in_file b> <order b>\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <out_file_stem> <n> <nullity> <subfield order> <tmp dir> <in_file a> <order a> <in_file b> <order b>\n", name, name, parse_usage());
 }
 
 static int acceptor(unsigned int rank, unsigned int nor, const char *file, const char *form)

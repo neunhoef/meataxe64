@@ -1,5 +1,5 @@
 /*
- * $Id: zconj.c,v 1.3 2003/07/20 18:13:53 jon Exp $
+ * $Id: zconj.c,v 1.4 2004/01/04 21:22:50 jon Exp $
  *
  * Algebraic conjugate a matrix
  *
@@ -16,7 +16,7 @@ static const char *name = "zconj";
 
 static void conj_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <in_file> <out_file> <power>\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <in_file> <out_file> <power>\n", name, name, parse_usage());
 }
 
 int main(int argc, const char * const argv[])

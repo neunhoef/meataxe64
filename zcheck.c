@@ -1,5 +1,5 @@
 /*
- * $Id: zcheck.c,v 1.5 2002/07/09 09:08:12 jon Exp $
+ * $Id: zcheck.c,v 1.6 2004/01/04 21:22:50 jon Exp $
  *
  * Check no non-zero values off ends of rows
  *
@@ -21,7 +21,7 @@ static const char *name = "zcheck";
 
 static void check_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <in_file>\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <in_file>\n", name, name, parse_usage());
 }
 
 int main(int argc, const char * const argv[])

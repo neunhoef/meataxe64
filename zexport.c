@@ -1,5 +1,5 @@
 /*
- * $Id: zexport.c,v 1.9 2002/07/09 09:08:12 jon Exp $
+ * $Id: zexport.c,v 1.10 2004/01/04 21:22:50 jon Exp $
  *
  * Export matrix to old system
  *
@@ -23,7 +23,7 @@ static const char *name = "zexport";
 
 static void export_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <in_file> <out_file>\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <in_file> <out_file>\n", name, name, parse_usage());
 }
 
 int main(int argc, const char * const argv[])

@@ -1,5 +1,5 @@
 /*
- * $Id: zlv.c,v 1.3 2002/10/14 19:11:51 jon Exp $: zss.c,v 1.1 2001/11/25 00:17:19 jon Exp $
+ * $Id: zlv.c,v 1.4 2004/01/04 21:22:50 jon Exp $: zss.c,v 1.1 2001/11/25 00:17:19 jon Exp $
  *
  * Calculate inverse quotient space representation, ie lift
  *
@@ -15,7 +15,7 @@ static const char *name = "zlv";
 
 static void lv_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s [-v] [-m <memory>] <range> <vectors> <output>\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <range> <vectors> <output>\n", name, name, parse_usage());
 }
 
 int main(int argc, const char * const argv[])

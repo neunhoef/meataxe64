@@ -1,5 +1,5 @@
 /*
- * $Id: esad.c,v 1.2 2002/07/09 09:08:12 jon Exp $
+ * $Id: esad.c,v 1.3 2004/01/04 21:22:50 jon Exp $
  *
  * Exploded scaled add
  *
@@ -25,7 +25,7 @@ static const char *name = "esad";
 
 static void esad_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <dir1> <dir2> <dir3> <scalar>\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <dir1> <dir2> <dir3> <scalar>\n", name, name, parse_usage());
 }
 
 int main(int argc,  const char *const argv[])

@@ -1,5 +1,5 @@
 /*
- * $Id: ztmu.c,v 1.3 2002/10/14 09:31:12 jon Exp $
+ * $Id: ztmu.c,v 1.4 2004/01/04 21:22:50 jon Exp $
  *
  * Tensor multiply three matrices to give a fourth
  *
@@ -18,7 +18,7 @@ static const char *name = "ztmu";
 
 static void tmu_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s [-v] [-m <memory>] <in_file> <left tensor> <right tensor> <out_file>\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <in_file> <left tensor> <right tensor> <out_file>\n", name, name, parse_usage());
 }
 
 int main(int argc, const char * const argv[])

@@ -1,5 +1,5 @@
 /*
- * $Id: zfo.c,v 1.3 2002/07/09 09:08:12 jon Exp $
+ * $Id: zfo.c,v 1.4 2004/01/04 21:22:50 jon Exp $
  *
  * Find the orbits under multiple generators
  *
@@ -22,7 +22,7 @@ static const char *name = "zfo";
 
 static void fo_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <out_file> <in_file> <max_orbit_size> [<in_file>*]\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <out_file> <in_file> <max_orbit_size> [<in_file>*]\n", name, name, parse_usage());
 }
 
 int main(int argc, const char * const argv[])

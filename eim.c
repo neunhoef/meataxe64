@@ -1,5 +1,5 @@
 /*
- * $Id: eim.c,v 1.10 2002/07/09 09:08:12 jon Exp $
+ * $Id: eim.c,v 1.11 2004/01/04 21:22:50 jon Exp $
  *
  * implode a matrix (ie glue exploded matrices together)
  *
@@ -27,7 +27,7 @@ static const char *name = "eim";
 
 static void eim_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <mat> <dir>\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <mat> <dir>\n", name, name, parse_usage());
 }
 
 static void fail(FILE **inputs, FILE *output, unsigned int cols)

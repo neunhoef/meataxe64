@@ -1,5 +1,5 @@
 /*
- * $Id: zse.c,v 1.6 2002/07/09 09:08:12 jon Exp $
+ * $Id: zse.c,v 1.7 2004/01/04 21:22:50 jon Exp $
  *
  * Select a row of a matrix
  *
@@ -21,7 +21,7 @@ static const char *name = "zsel";
 
 static void sel_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <in_file> <out_file> <row number>\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <in_file> <out_file> <row number>\n", name, name, parse_usage());
 }
 
 int main(int argc, const char * const argv[])

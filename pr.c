@@ -1,5 +1,5 @@
 /*
- * $Id: pr.c,v 1.15 2002/10/14 19:11:51 jon Exp $
+ * $Id: pr.c,v 1.16 2004/01/04 21:22:50 jon Exp $
  *
  * Print a matrix
  *
@@ -29,7 +29,7 @@ static const char *name = "zpr";
 
 static void pr_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s [-v] [-m <memory>] <in_file>\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <in_file>\n", name, name, parse_usage());
 }
 
 int main(int argc, const char * const argv[])

@@ -1,5 +1,5 @@
 /*
- * $Id: eid.c,v 1.5 2002/07/09 09:08:12 jon Exp $
+ * $Id: eid.c,v 1.6 2004/01/04 21:22:50 jon Exp $
  *
  * Generate exploded identity matrix
  *
@@ -23,7 +23,7 @@ static const char *name = "eid";
 
 static void id_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <field order> <nor> <noc> <split> <out_dir>\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <field order> <nor> <noc> <split> <out_dir>\n", name, name, parse_usage());
 }
 
 int main(int argc, const char * const argv[])

@@ -1,5 +1,5 @@
 /*
- * $Id: emu.c,v 1.9 2002/07/09 09:08:12 jon Exp $
+ * $Id: emu.c,v 1.10 2004/01/04 21:22:50 jon Exp $
  *
  * Exploded multiply
  *
@@ -28,7 +28,7 @@ static const char *name = "emu";
 
 static void emu_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <dir1> <dir2> <dir3> <dir4> <limit>\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <dir1> <dir2> <dir3> <dir4> <limit>\n", name, name, parse_usage());
 }
 
 int main(int argc,  const char *const argv[])

@@ -1,5 +1,5 @@
 /*
- * $Id: ztcv.c,v 1.2 2002/10/14 19:11:51 jon Exp $
+ * $Id: ztcv.c,v 1.3 2004/01/04 21:22:50 jon Exp $
  *
  * Calculate lift from tensor condensation representation
  *
@@ -15,7 +15,7 @@ static const char *name = "ztcv";
 
 static void tcv_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s [-v] [-m <memory>] <s> <file of left multiplicities> <file of right multiplicities> <input> <output> <basis 1> [<further bases>]\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <s> <file of left multiplicities> <file of right multiplicities> <input> <output> <basis 1> [<further bases>]\n", name, name, parse_usage());
 }
 
 int main(int argc, const char * const argv[])

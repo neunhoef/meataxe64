@@ -1,5 +1,5 @@
 /*
- * $Id: parse.h,v 1.2 2002/10/12 14:17:06 jon Exp $
+ * $Id: parse.h,v 1.3 2004/01/04 21:22:50 jon Exp $
  *
  * Function to parse command line flags
  *
@@ -14,5 +14,8 @@ extern unsigned int memory;
 
 /* NULL return means parse failure, already reported */
 extern const char *const *parse_line(int argc, const char *const argv[], int *new_argc);
+
+/* Return a string giving the stuff we can parse for inclusion in usage */
+extern const char *parse_usage(void);
 
 #endif

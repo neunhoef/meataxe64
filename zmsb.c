@@ -1,5 +1,5 @@
 /*
- * $Id: zmsb.c,v 1.3 2002/10/14 09:05:57 jon Exp $
+ * $Id: zmsb.c,v 1.4 2004/01/04 21:22:50 jon Exp $
  *
  * Spin some vectors under two generators to obtain a standard base
  *
@@ -15,7 +15,7 @@ static const char *name = "zmsb";
 
 static void msb_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s [-v] [-m <memory>] <in_file> <out_file> <gen_1> [<gen>*]\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <in_file> <out_file> <gen_1> [<gen>*]\n", name, name, parse_usage());
 }
 
 int main(int argc, const char * const argv[])

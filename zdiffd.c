@@ -1,5 +1,5 @@
 /*
- * $Id: zdiffd.c,v 1.2 2003/01/14 12:04:54 jon Exp $
+ * $Id: zdiffd.c,v 1.3 2004/01/04 21:22:50 jon Exp $
  *
  * Find the differences between two matrices
  *
@@ -16,7 +16,7 @@ static const char *name = "zdiffd";
 
 static void diff_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s [-v] [-m <memory>] <in_file> <elt>\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <in_file> <elt>\n", name, name, parse_usage());
 }
 
 int main(int argc, const char * const argv[])

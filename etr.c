@@ -1,5 +1,5 @@
 /*
- * $Id: etr.c,v 1.4 2002/07/09 09:08:12 jon Exp $
+ * $Id: etr.c,v 1.5 2004/01/04 21:22:50 jon Exp $
  *
  * Exploded transpose
  *
@@ -24,7 +24,7 @@ static const char *name = "etr";
 
 static void etr_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <dir1> <dir2>\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <dir1> <dir2>\n", name, name, parse_usage());
 }
 
 int main(int argc,  const char *const argv[])

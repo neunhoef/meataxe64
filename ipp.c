@@ -1,5 +1,5 @@
 /*
- * $Id: ipp.c,v 1.11 2002/07/09 09:08:12 jon Exp $
+ * $Id: ipp.c,v 1.12 2004/01/04 21:22:50 jon Exp $
  *
  * Read a permutation into a matrix
  *
@@ -25,7 +25,7 @@ static const char *name = "zip";
 
 static void zip_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <in_file> <out_file> <field order>\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <in_file> <out_file> <field order>\n", name, name, parse_usage());
 }
 
 int main(int argc, const char * const argv[])

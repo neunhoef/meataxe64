@@ -1,5 +1,5 @@
 /*
- * $Id: zfe.c,v 1.3 2002/07/09 09:08:12 jon Exp $
+ * $Id: zfe.c,v 1.4 2004/01/04 21:22:50 jon Exp $
  *
  * Field extend a matrix
  *
@@ -16,7 +16,7 @@ static const char *name = "zfe";
 
 static void fe_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <in_file> <out_file> <extension>\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <in_file> <out_file> <extension>\n", name, name, parse_usage());
 }
 
 int main(int argc, const char * const argv[])

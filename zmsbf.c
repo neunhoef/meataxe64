@@ -1,5 +1,5 @@
 /*
- * $Id: zmsbf.c,v 1.4 2002/11/02 10:28:10 jon Exp $
+ * $Id: zmsbf.c,v 1.5 2004/01/04 21:22:50 jon Exp $
  *
  * Spin some vectors under multiple generators to obtain a standard base
  * using intermediate files in a temporary directory
@@ -16,7 +16,7 @@ static const char *name = "zmsbf";
 
 static void msbf_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s [-v] [-m <memory>] <in_file> <out_file> <tmp dir> <gen_1> [<gen>*]\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <in_file> <out_file> <tmp dir> <gen_1> [<gen>*]\n", name, name, parse_usage());
 }
 
 int main(int argc, const char * const argv[])

@@ -1,5 +1,5 @@
 /*
- * $Id: zns.c,v 1.4 2003/02/10 23:20:55 jon Exp $
+ * $Id: zns.c,v 1.5 2004/01/04 21:22:50 jon Exp $
  *
  * Compute the null space of a matrix
  *
@@ -15,7 +15,7 @@ static const char *name = "zns";
 
 static void ns_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s [-v] [-m <memory>] <in_file> <out_file>\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <in_file> <out_file>\n", name, name, parse_usage());
 }
 
 int main(int argc, const char * const argv[])

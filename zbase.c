@@ -1,5 +1,5 @@
 /*
- * $Id: zbase.c,v 1.6 2002/10/13 20:07:20 jon Exp $
+ * $Id: zbase.c,v 1.7 2004/01/04 21:22:50 jon Exp $
  *
  * Compute a basis for a space from a set of vectors
  *
@@ -15,7 +15,7 @@ static const char *name = "zbase";
 
 static void base_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s [-v] [-m <memory>] <in_file> <temp dir> <output>\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <in_file> <temp dir> <output>\n", name, name, parse_usage());
 }
 
 int main(int argc, const char * const argv[])

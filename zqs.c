@@ -1,5 +1,5 @@
 /*
- * $Id: zqs.c,v 1.3 2002/10/13 22:41:39 jon Exp $: zss.c,v 1.1 2001/11/25 00:17:19 jon Exp $
+ * $Id: zqs.c,v 1.4 2004/01/04 21:22:50 jon Exp $: zss.c,v 1.1 2001/11/25 00:17:19 jon Exp $
  *
  * Calculate quotient space representation
  *
@@ -15,7 +15,7 @@ static const char *name = "zqs";
 
 static void qs_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s [-v] [-m <memory>] <range> <generator> <output>\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <range> <generator> <output>\n", name, name, parse_usage());
 }
 
 int main(int argc, const char * const argv[])

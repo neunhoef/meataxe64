@@ -1,5 +1,5 @@
 /*
- * $Id: ziv.c,v 1.3 2002/10/14 09:10:31 jon Exp $
+ * $Id: ziv.c,v 1.4 2004/01/04 21:22:50 jon Exp $
  *
  * Invert a matrix
  *
@@ -15,7 +15,7 @@ static const char *name = "ziv";
 
 static void iv_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s [-v]  [-m <memory>] <in_file> <out_file>\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <in_file> <out_file>\n", name, name, parse_usage());
 }
 
 int main(int argc, const char * const argv[])

@@ -1,5 +1,5 @@
 /*
- * $Id: ztspf.c,v 1.3 2002/10/14 09:24:05 jon Exp $
+ * $Id: ztspf.c,v 1.4 2004/01/04 21:22:50 jon Exp $
  *
  * Spin some vectors under two generators in tensor space
  * using intermediate files in a temporary directory
@@ -16,7 +16,7 @@ static const char *name = "ztspf";
 
 static void tspf_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s [-v] [-m <memory>] <in_file> <out_file> <gen_a1> <gen_a2> <gen_b1> <gen_b2> <tmp dir>\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <in_file> <out_file> <gen_a1> <gen_a2> <gen_b1> <gen_b2> <tmp dir>\n", name, name, parse_usage());
 }
 
 int main(int argc, const char * const argv[])

@@ -1,5 +1,5 @@
 /*
- * $Id: zsad.c,v 1.3 2002/07/09 09:08:12 jon Exp $
+ * $Id: zsad.c,v 1.4 2004/01/04 21:22:50 jon Exp $
  *
  * Add a matrix and a scaled matrix to give a third
  *
@@ -16,7 +16,7 @@ static const char *name = "zsad";
 
 static void sad_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <in_file> <in_file> <out_file> <scalar>\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <in_file> <in_file> <out_file> <scalar>\n", name, name, parse_usage());
 }
 
 /* lambda a + b */

@@ -1,5 +1,5 @@
 /*
- * $Id: tr.c,v 1.6 2002/10/13 19:09:42 jon Exp $
+ * $Id: tr.c,v 1.7 2004/01/04 21:22:50 jon Exp $
  *
  * Transpose a matrix
  *
@@ -16,7 +16,7 @@ static const char *name = "ztr";
 
 static void tr_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s [-v] [-m <memory>] <in_file> <out_file>\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <in_file> <out_file>\n", name, name, parse_usage());
 }
 
 int main(int argc, const char * const argv[])

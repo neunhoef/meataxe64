@@ -277,3 +277,4 @@ skew seventh
 20031228 - Added lift_vectors
 20031230 - Added zsignf for computation of big representation signs
 20031231 - Fixed minor bug in real_indicate when incorporating zsignf
+20040104 - Added function to parse to give usage, and modified others to use it

@@ -1,5 +1,5 @@
 /*
- * $Id: zlp.c,v 1.3 2002/10/14 19:11:51 jon Exp $
+ * $Id: zlp.c,v 1.4 2004/01/04 21:22:50 jon Exp $
  *
  * Projective (line) permute some vectors under two generators
  *
@@ -15,7 +15,7 @@ static const char *name = "zlp";
 
 static void lp_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s [-v] [-m <memory>] <in_file> <out_file> <gen_a> <gen_b> <out a> <out b>\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <in_file> <out_file> <gen_a> <gen_b> <out a> <out b>\n", name, name, parse_usage());
 }
 
 int main(int argc, const char * const argv[])

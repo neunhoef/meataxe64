@@ -1,5 +1,5 @@
 /*
- * $Id: mu.c,v 1.11 2002/10/13 14:16:07 jon Exp $
+ * $Id: mu.c,v 1.12 2004/01/04 21:22:50 jon Exp $
  *
  * Multiply two matrices to give a third
  *
@@ -18,7 +18,7 @@ static const char *name = "zmu";
 
 static void mu_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s [-v] [-m <memory>] <in_file> <in_file> <out_file>\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <in_file> <in_file> <out_file>\n", name, name, parse_usage());
 }
 
 int main(int argc, const char * const argv[])

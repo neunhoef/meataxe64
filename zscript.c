@@ -1,5 +1,5 @@
 /*
- * $Id: zscript.c,v 1.5 2002/10/14 17:32:07 jon Exp $
+ * $Id: zscript.c,v 1.6 2004/01/04 21:22:50 jon Exp $
  *
  * Compute a script in two generators
  *
@@ -16,7 +16,7 @@ static const char *name = "zscript";
 
 static void script_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s [-v] [-m <memory>] <out_file> <tmp> <script> <a> [<other generators>]\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <out_file> <tmp> <script> <a> [<other generators>]\n", name, name, parse_usage());
 }
 
 int main(int argc, const char * const argv[])

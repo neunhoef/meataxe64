@@ -1,5 +1,5 @@
 /*
- * $Id: ztco.c,v 1.3 2003/03/17 00:15:49 jon Exp $
+ * $Id: ztco.c,v 1.4 2004/01/04 21:22:50 jon Exp $
  *
  * Tensor condense
  *
@@ -17,7 +17,7 @@ static const char *name = "ztco";
 
 static void tco_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s [-v] [-m <memory>] <s> <file of left multiplicities> <file of right multiplicities> <file of irreducible dimensions> <file of endomorphism dimensions> <left tensor> <right tensor> <output> <basis 1> <projection 1> [<further bases and projections>]\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <s> <file of left multiplicities> <file of right multiplicities> <file of irreducible dimensions> <file of endomorphism dimensions> <left tensor> <right tensor> <output> <basis 1> <projection 1> [<further bases and projections>]\n", name, name, parse_usage());
 }
 
 int main(int argc, const char * const argv[])

@@ -1,5 +1,5 @@
 /*
- * $Id: ct.c,v 1.5 2002/10/14 19:11:51 jon Exp $
+ * $Id: ct.c,v 1.6 2004/01/04 21:22:50 jon Exp $
  *
  * Count the non-zero elements in a matrix
  *
@@ -16,7 +16,7 @@ static const char *name = "zct";
 
 static void ct_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s [-v] [-m <memory>] <in_file>\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <in_file>\n", name, name, parse_usage());
 }
 
 int main(int argc, const char * const argv[])

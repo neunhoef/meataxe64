@@ -1,5 +1,5 @@
 /*
- * $Id: zsymb.c,v 1.1 2003/06/12 07:11:42 jon Exp $
+ * $Id: zsymb.c,v 1.2 2004/01/04 21:22:50 jon Exp $
  *
  * Create a symmetry basis
  *
@@ -15,7 +15,7 @@ static const char *name = "zsymb";
 
 static void symb_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s [-v] [-m <memory>] <number of spaces> <expected space size> <in_file> <out_file> <tmp dir> <gen_1> [<gen>*]\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <number of spaces> <expected space size> <in_file> <out_file> <tmp dir> <gen_1> [<gen>*]\n", name, name, parse_usage());
 }
 
 int main(int argc, const char * const argv[])

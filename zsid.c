@@ -17,7 +17,7 @@ static const char *name = "zsid";
 
 static void sid_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <field order> <nor> <noc> <elt> <out_file>\n", name, name);
+  fprintf(stderr, "%s: usage: %s %s <field order> <nor> <noc> <elt> <out_file>\n", name, name, parse_usage());
 }
 
 int main(int argc, const char * const argv[])
