@@ -303,3 +303,4 @@ skew seventh
 20040506 - Improvements to inner loop giving significant speed up
 20040512 - Added space_split for splitting null vectors into subspaces and quotients
 20040605 - Several minor improvements for the benefit of tensor condense
+20040605 - Added -mg parameter for setting maximum grease level

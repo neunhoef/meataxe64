@@ -1,5 +1,5 @@
 /*
- * $Id: parse.c,v 1.5 2004/01/04 21:22:50 jon Exp $
+ * $Id: parse.c,v 1.6 2004/06/05 22:16:11 jon Exp $
  *
  * Function to parse command line flags
  *
@@ -30,8 +30,17 @@ int verbose = 0;
 
 unsigned int memory = MEM_SIZE;
 
+unsigned int max_grease = 32;
+
 static parse_element parse_table[] =
 {
+  {
+    &max_grease,
+    1,
+    unary,
+    "-mg",
+    "mtx_max_grease"
+  },
   {
     &memory,
     1,
@@ -119,7 +128,7 @@ const char *const *parse_line(int argc, const char *const argv[], int *new_argc)
   return argv;
 }
 
-static const char *usage = "[-v] [-m <memory>]";
+static const char *usage = "[-v] [-m <memory>] [-mg <maximum grease level>]";
 
 const char *parse_usage(void)
 {

@@ -1,5 +1,5 @@
 /*
- * $Id: grease.c,v 1.21 2004/06/05 21:58:13 jon Exp $
+ * $Id: grease.c,v 1.22 2004/06/05 22:16:11 jon Exp $
  *
  * Functions to grease matrix rows
  *
@@ -14,6 +14,7 @@
 #include "elements.h"
 #include "matrix.h"
 #include "memory.h"
+#include "parse.h"
 #include "primes.h"
 #include "rows.h"
 #include "utils.h"
@@ -26,7 +27,7 @@ int grease_level(unsigned int prime, grease grease, unsigned int avail)
   assert(0 != avail);
   if (prime > avail + 1)
     return 0;
-  while (j * prime <= avail + 1) {
+  while (j * prime <= avail + 1 && i < max_grease) {
     j *= prime;
     i++;
   }
