@@ -1,5 +1,5 @@
 /*
- * $Id: rows.c,v 1.8 2001/09/18 23:15:46 jon Exp $
+ * $Id: rows.c,v 1.9 2001/09/20 00:00:16 jon Exp $
  *
  * Row manipulation for meataxe
  *
@@ -119,6 +119,8 @@ static int row_inc_3(const unsigned int *row1, unsigned int *row2, unsigned int 
   return row_add_3(row1, row2, row2, len);
 }
 
+#define scale_mod_3(b) (((b) & (ONE_BITS_3)) << 1) | (((b) & (TWO_BITS_3)) >> 1)
+
 static int scaled_row_add_3(const unsigned int *row1, const unsigned int *row2,
                             unsigned int *row3, unsigned int len, unsigned int elt)
 {
@@ -136,10 +138,30 @@ static int scaled_row_add_3(const unsigned int *row1, const unsigned int *row2,
     assert(4 == sizeof(unsigned int));
     a = *(row1++);
     b = *(row2++);
-    b = ((b & (ONE_BITS_3)) << 1) | ((b & (TWO_BITS_3)) >> 1); /* Negate b */
+    b = scale_mod_3(b); /* Negate b */
     mod_3_add(a,b,c,d,e,f,g,h);
     assert(check_for_3(c - (h * 3)));
     *(row3++) = c - (h * 3); /* Reduce mod 3 if needed */
+  }
+  return 1;
+}
+
+static int row_scale_3(const unsigned int *row1, unsigned int *row2,
+                       unsigned int len, unsigned int elt)
+{
+  unsigned int row_words;
+  unsigned int i;
+  assert(2 == elt);
+  assert(0 != len);
+  assert(NULL != row1);
+  assert(NULL != row2);
+  NOT_USED(elt);
+  row_words = len / sizeof(unsigned int);
+  for (i = 0; i < row_words; i++) {
+    unsigned int a;
+    assert(4 == sizeof(unsigned int));
+    a = *(row1++);
+    *(row2++) = scale_mod_3(a);
   }
   return 1;
 }
@@ -168,6 +190,15 @@ static int row_inc_4(const unsigned int *row1, unsigned int *row2, unsigned int 
   return row_add_4(row1, row2, row2, len);
 }
 
+#define scale_mod_4(b,c,d,e,f,g,h,elt) \
+    c = ((b) & TWO_BITS_4) >> 1; \
+    d = (b) & ONE_BITS_4; \
+    e = c | d; /* Detect non-zero */ \
+    f = (b) + e * (elt - 1); /* Add, with possible overflow */ \
+    g = c * ((elt == 3) ? 1 : 0); /* Detect 2 or 3 * 3 */ \
+    h = c & d; /* Detect 3  * any */ \
+    b = f - (g |  h) * 3 /* Subtract out the overflows */ 
+
 static int scaled_row_add_4(const unsigned int *row1, const unsigned int *row2,
                             unsigned int *row3, unsigned int len, unsigned int elt)
 {
@@ -184,14 +215,29 @@ static int scaled_row_add_4(const unsigned int *row1, const unsigned int *row2,
     assert(4 == sizeof(unsigned int));
     a = *(row1++);
     b = *(row2++);
-    c = (b & TWO_BITS_4) >> 1;
-    d = b & ONE_BITS_4;
-    e = c | d; /* Detect non-zero */
-    f = b + e * (elt - 1); /* Add, with possible overflow */
-    g = c * ((elt == 3) ? 1 : 0); /* Detect 2 or 3 * 3 */
-    h = c & d; /* Detect 3  * any */
-    b = f - (g |  h) * 3; /* Subtract out the overflows */
+    scale_mod_4(b,c,d,e,f,g,h,elt);
     *(row3++) = a ^ b;
+  }
+  return 1;
+}
+
+static int row_scale_4(const unsigned int *row1, unsigned int *row2,
+                       unsigned int len, unsigned int elt)
+{
+  unsigned int row_words;
+  unsigned int i;
+  assert(2 <= elt && elt <= 3);
+  assert(0 != len);
+  assert(NULL != row1);
+  assert(NULL != row2);
+  NOT_USED(elt);
+  row_words = len / sizeof(unsigned int);
+  for (i = 0; i < row_words; i++) {
+    unsigned int b, c, d, e, f, g, h;
+    assert(4 == sizeof(unsigned int));
+    b = *(row1++);
+    scale_mod_4(b,c,d,e,f,g,h,elt);
+    *(row2++) = b;
   }
   return 1;
 }
@@ -251,6 +297,38 @@ static int row_inc_5(const unsigned int *row1, unsigned int *row2, unsigned int 
   return row_add_5(row1, row2, row2, len);
 }
 
+#define scale_mod_5(b,d,c,e,f,g,h,j,elt) \
+    switch(elt) { \
+    case 2: \
+      c = (b & (FOUR_BITS_5)); \
+      d = (c >> 2) | (c >> 1); /* The 4 -> 3 case */ \
+      e = (b & (TWO_BITS_5)); \
+      f = (b & (ONE_BITS_5)); \
+      g = f & (e >> 1); /* The 3 -> 1 case */ \
+      h = (e | f) ^ (g * 3); /* Reduce to only the 0, 1, 2 case */ \
+      b = d | g | (h << 1); /* 0, 1, 2 -> 0, 2, 4 */ \
+      break; \
+    case 3: \
+      c = (b & (FOUR_BITS_5)) >> 1; /* get the 4 -> 2 case */ \
+      d = b & (TWO_BITS_5); \
+      e = b & (ONE_BITS_5); \
+      f = (d & (e << 1)) << 1; /* get the 3 -> 4 case */ \
+      g = b ^ (ONE_BITS_5); \
+      h = g & (d >> 1); /* get the 2 -> 1 case */ \
+      j = (e & ((d ^ (TWO_BITS_5)) >> 1)) * 3; /* The 1 -> 3 case */ \
+      b = c | f | h | j; \
+      break; \
+    case 4: \
+      c = (((b & (FOUR_BITS_5)) >> 2) | ((b & (TWO_BITS_5)) >> 1) | (b & (ONE_BITS_5))) * 5; \
+      b = b ^ c; /* xor with 5 on non-zero digits */ \
+      c = b & (TWO_BITS_5); /* Detect the 2 bits */ \
+      d = c << 1; /* Move into the 4 bits position */ \
+      b ^= d; /* And normalise back (7 -> 3, 6 -> 2) */ \
+      break; \
+    default: \
+      assert(0); \
+    }
+
 static int scaled_row_add_5(const unsigned int *row1, const unsigned int *row2,
                             unsigned int *row3, unsigned int len, unsigned int elt)
 {
@@ -267,39 +345,30 @@ static int scaled_row_add_5(const unsigned int *row1, const unsigned int *row2,
     assert(4 == sizeof(unsigned int));
     a = *(row1++);
     b = *(row2++);
-    switch(elt) {
-    case 2:
-      c = (b & (FOUR_BITS_5));
-      d = (c >> 2) | (c >> 1); /* The 4 -> 3 case */
-      e = (b & (TWO_BITS_5));
-      f = (b & (ONE_BITS_5));
-      g = f & (e >> 1); /* The 3 -> 1 case */
-      h = (e | f) ^ (g * 3); /* Reduce to only the 0, 1, 2 case */
-      b = d | g | (h << 1); /* 0, 1, 2 -> 0, 2, 4 */
-      break;
-    case 3:
-      c = (b & (FOUR_BITS_5)) >> 1; /* get the 4 -> 2 case */
-      d = b & (TWO_BITS_5);
-      e = b & (ONE_BITS_5);
-      f = (d & (e << 1)) << 1; /* get the 3 -> 4 case */
-      g = b ^ (ONE_BITS_5);
-      h = g & (d >> 1); /* get the 2 -> 1 case */
-      j = (e & ((d ^ (TWO_BITS_5)) >> 1)) * 3; /* The 1 -> 3 case */
-      b = c | f | h | j;
-      break;
-    case 4:
-      c = (((b & (FOUR_BITS_5)) >> 2) | ((b & (TWO_BITS_5)) >> 1) | (b & (ONE_BITS_5))) * 5;
-      b = b ^ c; /* xor with 5 on non-zero digits */
-      c = b & (TWO_BITS_5); /* Detect the 2 bits */
-      d = c << 1; /* Move into the 4 bits position */
-      b ^= d; /* And normalise back (7 -> 3, 6 -> 2) */
-      break;
-    default:
-      assert(0);
-    }
+    scale_mod_5(b,d,c,e,f,g,h,j,elt);
     mod_5_add(a,b,c,d,e,f,g,h,j,k);
     assert(check_for_5(f - (k * 5)));
     *(row3++) = f - (k * 5); /* Reduce mod 5 if needed */
+  }
+  return 1;
+}
+
+static int row_scale_5(const unsigned int *row1, unsigned int *row2,
+                       unsigned int len, unsigned int elt)
+{
+  unsigned int row_words;
+  unsigned int i;
+  assert(0 != len);
+  assert(NULL != row1);
+  assert(NULL != row2);
+  assert(2 <= elt && elt <= 4);
+  row_words = len / sizeof(unsigned int);
+  for (i = 0; i < row_words; i++) {
+    unsigned int b, c, d, e, f, g, h, j;
+    assert(4 == sizeof(unsigned int));
+    b = *(row1++);
+    scale_mod_5(b,d,c,e,f,g,h,j,elt);
+    *(row2++) = b;
   }
   return 1;
 }
@@ -325,21 +394,25 @@ int rows_init(unsigned int prime, row_opsp ops)
     ops->adder = &row_add_2;
     ops->incer = &row_inc_2;
     ops->scaled_adder = NULL; /* Should never be called */
+    ops->scaler = NULL; /* Should never be called */
     return 1;
   } else if (3 == prime) {
     ops->adder = &row_add_3;
     ops->incer = &row_inc_3;
     ops->scaled_adder = &scaled_row_add_3;
+    ops->scaler = &row_scale_3;
     return 1;
   } else if (4 == prime) {
     ops->adder = &row_add_4;
     ops->incer = &row_inc_4;
     ops->scaled_adder = &scaled_row_add_4;
+    ops->scaler = &row_scale_4;
     return 1;
   } else if (5 == prime) {
     ops->adder = &row_add_5;
     ops->incer = &row_inc_5;
     ops->scaled_adder = &scaled_row_add_5;
+    ops->scaler = &row_scale_5;
     return 1;
   } else {
     return 0;

@@ -1,5 +1,5 @@
 /*
- * $Id: elements.c,v 1.8 2001/09/12 23:13:04 jon Exp $
+ * $Id: elements.c,v 1.9 2001/09/20 00:00:16 jon Exp $
  *
  * Element manipulation for meataxe
  *
@@ -71,20 +71,27 @@ void element_access_init(unsigned int nob, unsigned int from, unsigned int size,
   unsigned int bits = nob * size;
   assert(0 != nob);
   assert(0 != size);
+  assert(bits <= bits_in_unsigned_int);
   elts_per_word = bits_in_unsigned_int / nob;
   *word_offset = from / elts_per_word;
   *bit_offset = (from % elts_per_word) * nob;
-  assert(*bit_offset + bits <= bits_in_unsigned_int);
   *mask = (1 << bits) - 1;
 }
 
-unsigned int get_elements_from_row(const unsigned int *row,
+/* This allows cross word access */
+unsigned int get_elements_from_row(const unsigned int *row, unsigned int width,
                                    unsigned int bit_offset, unsigned int mask)
 {
-  unsigned int word;
+  unsigned int word, word1;
   assert(NULL != row);
   word = *row;
-  return (word >> bit_offset) & mask;
+  word1 = (word >> bit_offset) & mask;
+  if (bit_offset + width <= bits_in_unsigned_int) {
+    return word1;
+  } else {
+    word = (row[1] << (bits_in_unsigned_int - bit_offset)) & mask;
+    return word1 | word;
+  }
 }
 
 void put_element_to_row(unsigned int nob, unsigned int index,
@@ -103,3 +110,24 @@ void put_element_to_row(unsigned int nob, unsigned int index,
   word = (word & (mask ^ 0xffffffff)) | elt;
   row[word_offset] = word;
 }
+
+/* Convert bit field representation to power series */
+unsigned int elements_contract(unsigned int elts, unsigned int prime, unsigned int nob)
+{
+  if (0 == prime % 2) {
+    return elts; /* Exact representation for powers of 2 */
+  } else {
+    unsigned int out = 0, power = 1, mask = (1 << nob) - 1;
+    assert(0 != nob);
+    assert(0 != prime);
+    assert(prime <= mask);
+    while (0 != elts) {
+      unsigned int elt = elts & mask;
+      out += power * elt;
+      elts >>= nob;
+      power *= prime;
+    }
+    return out;
+  }
+}
+

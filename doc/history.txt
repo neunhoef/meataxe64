@@ -17,3 +17,5 @@
 20010918 - Same for M, best was about 400k memory
 20010918 - Redid all of mu and grease in terms of new memory strategy
 20010918 - Added row incrementers and shaved more time off
+20010919 - Started on grease for other primes and word overlapping elements
+20010919 - Grease going for all available primes, but only one d for p > 2

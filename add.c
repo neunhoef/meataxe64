@@ -1,5 +1,5 @@
 /*
- * $Id: add.c,v 1.7 2001/09/16 20:20:39 jon Exp $
+ * $Id: add.c,v 1.8 2001/09/20 00:00:16 jon Exp $
  *
  * Function to add two matrices to give a third
  *
@@ -27,9 +27,9 @@ int add(const char *m1, const char *m2, const char *m3, const char *name)
   unsigned int prime, nob, noc, nor, len;
   unsigned int i;
   const header *h1, *h2;
-  unsigned int *row1, *row2, *row3;
+  unsigned int *row1, *row2;
   row_ops row_operations;
-  row_adder adder;
+  row_incer incer;
 
   endian_init();
   inp1 = fopen(m1, "rb");
@@ -79,7 +79,7 @@ int add(const char *m1, const char *m2, const char *m3, const char *name)
     fclose(outp);
     return 0;
   }
-  adder = row_operations.adder;
+  incer = row_operations.incer;
   if (0 == write_binary_header(outp, h1, m3)) {
     fprintf(stderr, "%s cannot write header to %s, terminating\n", name, m3);
     fclose(inp1);
@@ -87,7 +87,7 @@ int add(const char *m1, const char *m2, const char *m3, const char *name)
     fclose(outp);
     return 0;
   }
-  if (memory_rows(len, 1000) < 3) {
+  if (memory_rows(len, 1000) < 2) {
     fprintf(stderr, "%s cannot allocate rows for %s, %s, %s, terminating\n", name, m1, m2, m3);
     fclose(inp1);
     fclose(inp2);
@@ -96,7 +96,6 @@ int add(const char *m1, const char *m2, const char *m3, const char *name)
   }
   row1 = memory_pointer_offset(0, 0, len);
   row2 = memory_pointer_offset(0, 1, len);
-  row3 = memory_pointer_offset(0, 2, len);
   for (i = 0; i < nor; i++) {
     if (0 == endian_read_row(inp1, row1, len)) {
       fprintf(stderr, "%s cannot read row %d from %s, terminating\n", name, i, m1);
@@ -112,14 +111,14 @@ int add(const char *m1, const char *m2, const char *m3, const char *name)
       fclose(outp);
       return 0;
     }
-    if (0 == (*adder)(row1, row2, row3, len)) {
+    if (0 == (*incer)(row1, row2, len)) {
       fprintf(stderr, "%s addition not supported for %d, terminating\n", name, prime);
       fclose(inp1);
       fclose(inp2);
       fclose(outp);
       return 0;
     }
-    if (0 == endian_write_row(outp, row3, len)) {
+    if (0 == endian_write_row(outp, row2, len)) {
       fprintf(stderr, "%s cannot write row %d to %s, terminating\n", name, i, m3);
       fclose(inp1);
       fclose(inp2);
