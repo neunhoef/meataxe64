@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: new_irred_with_orders,v 1.9 2002/07/05 17:19:22 jon Exp $
+# $Id: new_irred_with_orders,v 1.10 2002/07/15 17:02:57 jon Exp $
 #
 # Script to classify an irreducible representation
 #
@@ -198,8 +198,8 @@ fi
 #
 # New irreducible found
 #
-echo Found a new irreducible of dimension ${nor} using script $script
 new_name=`new_irred_name irreds/${nor}`
+echo Found a new irreducible ${new_name} of dimension ${nor} using script $script
 #echo assigning new name ${new_name}
 i=1
 while [ $i -le $j ]; do

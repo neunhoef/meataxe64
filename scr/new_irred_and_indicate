@@ -1,14 +1,14 @@
 #!/bin/sh
 #
-# $Id: new_irred_and_indicate,v 1.1 2002/06/25 10:30:12 jon Exp $
+# $Id: new_irred_and_indicate,v 1.2 2002/07/15 17:02:57 jon Exp $
 #
 # Script to classify an irreducible representation
 # and compute its indicator in characteristic two
 #
 # Inputs
+# $1: initial memory
 # $1: generator a
 # $2: generator b
-# $3: initial memory (optional)
 #
 # outputs will be of the form irred/${nor}_${i}_{1,2}
 # where nor = znor $a and i is an available unused index
@@ -20,12 +20,14 @@
 # 254: no nullity one element found
 # 255: existing irreducible
 #
-usage="$0: usage: $0 <a> <b> [<memory>]"
-if [ $# -ne 2 -a $# -ne 3 ]; then
+usage="$0: usage: $0 <memory> <a>  [<other generators>]"
+if [ $# -lt 3 ]; then
   echo $usage
   exit 1;
 fi
 . functions
+memory=$1
+shift
 a=$1
 b=$2
 if [ -e $a -a -e $b ]; then
@@ -66,9 +68,4 @@ if [ 0 -ne $ret ]; then
   echo Cannot compute order of $b
   exit 1
 fi
-if [ $# -eq 3 ]; then
-  memory=$3
-else
-  memory=200
-fi
-exec new_irred_and_indicate_with_orders $a $b $o_a $o_b $memory
+exec new_irred_and_indicate_with_orders $memory $a $o_a $b $o_b

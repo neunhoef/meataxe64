@@ -171,3 +171,4 @@ skew seventh
 20020707 - Modify scripts to use zmsbf. Fix documentation
 20020709 - Add verbose and quiet options
 20020711 - Add ztrecover for recovering tmp files in tensor spins
+20020715 - Brought new_irred_and_indicate into line with other scripts
