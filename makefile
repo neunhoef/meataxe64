@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.26 2001/11/14 00:07:42 jon Exp $
+# $Id: makefile,v 1.27 2001/11/16 00:12:33 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -18,6 +18,7 @@ EIP_TARGET=	eip
 EMU_TARGET=	emu
 ETR_TARGET=	etr
 MON_TARGET=	monst
+SRN_TARGET=	srn
 STOP_TARGET=	stop
 ZAD_TARGET=	zad
 ZCT_TARGET=	zct
@@ -28,7 +29,7 @@ ZIP_TARGET=	zip
 ZMU_TARGET=	zmu
 ZPR_TARGET=	zpr
 ZRN_TARGET=	zrn
-ZSL_TARGET=	zsl
+ZSL_TARGET= zsl
 ZTR_TARGET=	ztr
 
 DTOU_MODULES=	dtou
@@ -40,6 +41,7 @@ EIP_MODULES=	eip elements endian exrows files header map memory primes read rows
 EMU_MODULES=	command emu files map memory system utils
 ETR_MODULES=	elements endian etr files header map matrix memory primes read tra utils write
 MON_MODULES=	endian exrows files header map memory mmat mop mtx primes rows utils write
+SRN_MODULES=	clean elements endian grease header matrix memory primes read rows srn utils
 STOP_MODULES=	command files stop system utils
 ZAD_MODULES=	ad add elements endian header memory primes read rows utils write
 ZCT_MODULES=	count ct elements endian header memory primes read utils
@@ -53,7 +55,7 @@ ZRN_MODULES=	clean elements endian grease header matrix memory primes read rn ro
 ZSL_MODULES=	add elements endian files grease header matrix memory mul primes read rows slave system utils write
 ZTR_MODULES=	elements endian header matrix memory primes read tr tra utils write
 
-MODULES=	$(DTOU_MODULES) $(EAD_MODULES) $(ECT_MODULES) $(EID_MODULES) $(EIM_MODULES) $(EIP_MODULES) $(EMU_MODULES) $(ETR_MODULES) $(MON_MODULES) $(STOP_MODULES) $(ZAD_MODULES) $(ZCT_MODULES) $(ZCV_MODULES) $(ZEX_MODULES) $(ZID_MODULES) $(ZIP_MODULES) $(ZMU_MODULES) $(ZPR_MODULES) $(ZRN_MODULES) $(ZSL_MODULES) $(ZTR_MODULES)
+MODULES=	$(DTOU_MODULES) $(EAD_MODULES) $(ECT_MODULES) $(EID_MODULES) $(EIM_MODULES) $(EIP_MODULES) $(EMU_MODULES) $(ETR_MODULES) $(MON_MODULES) $(SRN_MODULES) $(STOP_MODULES) $(ZAD_MODULES) $(ZCT_MODULES) $(ZCV_MODULES) $(ZEX_MODULES) $(ZID_MODULES) $(ZIP_MODULES) $(ZMU_MODULES) $(ZPR_MODULES) $(ZRN_MODULES) $(ZSL_MODULES) $(ZTR_MODULES)
 
 include dirs.txt
 
@@ -115,6 +117,9 @@ TARGET:=ETR
 include targets.txt
 
 TARGET:=MON
+include targets.txt
+
+TARGET:=SRN
 include targets.txt
 
 TARGET:=STOP

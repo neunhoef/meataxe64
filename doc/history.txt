@@ -46,3 +46,4 @@
 20011112 - First in store rn
 20011112 - rn can operate without grease
 20011113 - matrix_malloc can't fail. Debugging rn. Add proper row_incer and in place scale
+20011115 - produced simple rank
