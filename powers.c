@@ -1,5 +1,5 @@
 /*
- * $Id: powers.c,v 1.8 2002/06/30 21:33:14 jon Exp $
+ * $Id: powers.c,v 1.9 2002/07/01 11:06:30 jon Exp $
  *
  * Function to compute tensor powers of a matrix, from file
  *
@@ -777,6 +777,7 @@ int skew_sixth(const char *m1, const char *m2, const char *name)
     fprintf(stderr, "%s: cannot read some of %s, terminating\n", name, m1);
     return cleanup(inp, outp);
   }
+  mask = get_mask_and_elts(nob, &elts_per_word);
   for (i = 0; i < nor_in; i++){
     for (j = 0; j < nor_in; j++){
       int_rows[i][j] = get_element_from_row_with_params(nob, j, mask, elts_per_word, rows[i]);
@@ -787,7 +788,6 @@ int skew_sixth(const char *m1, const char *m2, const char *name)
   }
   fclose(inp);
   header_free(h_out);
-  mask = get_mask_and_elts(nob, &elts_per_word);
   for (i_1 = 0; i_1 + 5 < nor_in; i_1++) {
     /* Down the rows of m1 */
     row1 = int_rows[i_1];
@@ -961,6 +961,7 @@ int skew_seventh(const char *m1, const char *m2, const char *name)
     fprintf(stderr, "%s: cannot read some of %s, terminating\n", name, m1);
     return cleanup(inp, outp);
   }
+  mask = get_mask_and_elts(nob, &elts_per_word);
   for (i = 0; i < nor_in; i++){
     for (j = 0; j < nor_in; j++){
       int_rows[i][j] = get_element_from_row_with_params(nob, j, mask, elts_per_word, rows[i]);
@@ -971,7 +972,6 @@ int skew_seventh(const char *m1, const char *m2, const char *name)
   }
   fclose(inp);
   header_free(h_out);
-  mask = get_mask_and_elts(nob, &elts_per_word);
   for (i_1 = 0; i_1 + 6 < nor_in; i_1++) {
     /* Down the rows of m1 */
     row1 = int_rows[i_1];
