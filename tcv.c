@@ -1,5 +1,5 @@
 /*
- * $Id: tcv.c,v 1.5 2003/01/02 20:37:40 jon Exp $
+ * $Id: tcv.c,v 1.6 2003/01/17 21:19:32 jon Exp $
  *
  * Function to lift vectors from a tensor condensation representation
  *
@@ -237,7 +237,7 @@ int lift(unsigned int s, const char *mults_l, const char *mults_r, const char *i
   noc_o = dim_l * dim_r;
   h_o = header_create(prime, nob, header_get_nod(h_i), noc_o, nor_i);
   len_o = header_get_len(h_o);
-  extent_o = find_extent(2, len_o);
+  extent_o = find_extent(3, len_o);
   if (extent_q + extent_i + extent_o >= 900) {
     fprintf(stderr, "%s: insufficient memory, terminating\n", name);
     (void)cleanup(left_multiplicities, right_multiplicities,
