@@ -1,5 +1,5 @@
 /*
- * $Id: singular.c,v 1.2 2002/10/12 17:40:49 jon Exp $
+ * $Id: singular.c,v 1.3 2002/10/18 11:24:28 jon Exp $
  *
  * Function to find a singular vector, given a quadratic form
  *
@@ -24,7 +24,7 @@
 #include "write.h"
 
 int singular_vector(unsigned int **rows, unsigned int **work,
-                    unsigned int *out, FILE *formp,
+                    unsigned int *out, unsigned int *out_num, FILE *formp,
                     unsigned int noc, unsigned int nor, unsigned int nob,
                     unsigned int len, unsigned int prime, grease grease,
                     const char *form, const char *name)
@@ -40,6 +40,7 @@ int singular_vector(unsigned int **rows, unsigned int **work,
   assert(NULL != formp);
   assert(NULL != grease);
   assert(NULL != name);
+  assert(NULL != out_num);
   assert(0 != nob);
   assert(0 != noc);
   assert(0 != len);
@@ -54,7 +55,6 @@ int singular_vector(unsigned int **rows, unsigned int **work,
                           grease, form, name)) {
     return 1;
   }
-  /* TODO: compute matrix of inner products */
   for (i = 0; i < nor; i++) {
     for (j = 0; j < nor; j++) {
       products[i][j] = (*row_operations.product)(rows[i], work[j], len);
@@ -67,6 +67,7 @@ int singular_vector(unsigned int **rows, unsigned int **work,
     unsigned int k, l, m;
     memset(vector, 0, 3 * sizeof(unsigned int));
     vector[i] = 1;
+    *out_num = i;
     j = 0;
     while (j < power) {
       unsigned int sub_prod[3], prod = 0, tmp;
@@ -113,7 +114,7 @@ int singular(const char *space, const char *form, const char *out, const char *n
   const header *h_in1, *h_in2;
   header *h_out;
   unsigned int prime, nob, nor, len, n, **mat;
-  unsigned int *out_row;
+  unsigned int *out_row, out_num;
   int res;
   grease_struct grease;
   prime_ops prime_operations;
@@ -198,7 +199,7 @@ int singular(const char *space, const char *form, const char *out, const char *n
     return 1;
   }
   fclose(inp1);
-  res = singular_vector(mat, mat + 3, out_row, inp2,
+  res = singular_vector(mat, mat + 3, out_row, &out_num, inp2,
                         nor, nor, nob, len, prime, &grease, form, name);
   matrix_free(mat);
   fclose(inp2);

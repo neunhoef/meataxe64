@@ -1,8 +1,6 @@
 Worry about isspace failure (can't detect \n) (still occurs on RH 7.2) ctype is buggered
 Worry about return (NULL == s) code generation error
 Documentation changes for proj_base, sub_quot
-Write non characteristic 2 inner products
-Incorporate zsign into indicate
 Think about better use of grease for ztmu
 Make span algorithm generally available
 Write span_and_spin for spins on large nullspaces

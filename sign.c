@@ -1,5 +1,5 @@
 /*
- * $Id: sign.c,v 1.3 2002/10/15 14:30:44 jon Exp $
+ * $Id: sign.c,v 1.4 2002/10/18 11:24:28 jon Exp $
  *
  * Function compute the orthogonal group sign
  *
@@ -30,9 +30,12 @@ int sign(const char *qform, const char *bform, const char *name)
 {
   FILE *qinp = NULL, *binp = NULL;
   const header *h_inq, *h_inb;
-  unsigned int prime, nob, nor, noc, len, m, n, **mat;
-  unsigned int *sing_row1, *sing_row2, *products, *row, *elts;
-  int res, *map, *rev_map;
+  unsigned int prime, nob, nor, noc, len, n, **mat;
+  unsigned int *sing_row1, *sing_row2, *products, *row, out_num;
+  int res;
+#if 0
+  int *map;
+#endif
   grease_struct grease;
   prime_ops prime_operations;
   row_ops row_operations;
@@ -109,14 +112,15 @@ int sign(const char *qform, const char *bform, const char *name)
   }
   sing_row1 = memory_pointer_offset(0, nor + 3, len);
   sing_row2 = memory_pointer_offset(0, nor + 4, len);
-  /* Now set up the identity */
+  /* Now set up the identity (in reverse order, part of a cunning plan) */
   for (n = 0; n < nor; n++) {
     row_init(mat[n], len);
-    put_element_to_row(nob, n, mat[n], 1);
+    put_element_to_row(nob, nor - 1 - n, mat[n], 1);
   }
   products = my_malloc(nor * sizeof(unsigned int));
   while (nor > 2) {
-    res = singular_vector(mat, mat + noc, sing_row1, qinp,
+    int start_pos = -1;
+    res = singular_vector(mat, mat + noc, sing_row1, &out_num, qinp,
                           noc, nor, nob, len, prime, &grease, qform, name);
     if (0 != res) {
       fclose(binp);
@@ -126,6 +130,11 @@ int sign(const char *qform, const char *bform, const char *name)
       fprintf(stderr, "%s: cannot find a singular vector, terminating\n", name);
       return 1;
     }
+    /* TODO: remove mat[out_num] from the set of vectors, remove the clean etc */
+    assert(nor > 3);
+    row = mat[out_num];
+    mat[out_num] = mat[nor - 1];
+    mat[nor - 1] = row;
     if (0 == mul_from_store(&sing_row1, &sing_row2, binp, 0, noc, len, nob, 1, noc, prime,
                             &grease, bform, name)) {
       fclose(binp);
@@ -134,10 +143,16 @@ int sign(const char *qform, const char *bform, const char *name)
       free(products);
       return 1;
     }
-    for (n = 0; n < nor; n++) {
-      products[n] = (*row_operations.product)(sing_row2, mat[n], len);
+    for (n = 0; n < len; n++) {
+      if (0 != sing_row2[n]) {
+        start_pos = n;
+        break;
+      }
     }
-    /* TODO: Clean mat according to the products */
+    assert(start_pos >= 0);
+    for (n = 0; n + 1 < nor; n++) {
+      products[n] = (*row_operations.product)(mat[n] + start_pos, sing_row2 + start_pos, len - start_pos);
+    }
     n = 0;
     res = -1;
     while (n < nor) {
@@ -162,6 +177,7 @@ int sign(const char *qform, const char *bform, const char *name)
       }
       n++;
     }
+#if 0
     echelise(&sing_row1, 1, &n, &map, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, 0, name);
     if (1 != n) {
       fclose(binp);
@@ -172,16 +188,19 @@ int sign(const char *qform, const char *bform, const char *name)
       fprintf(stderr, "%s: singular vector is zero, terminating\n", name);
       return 1;
     }
+#endif
     /* Now remove mat[res] as this isn't a null vector */
-    assert(nor > 1);
+    assert(nor > 3);
     row = mat[res];
-    mat[res] = mat[nor - 1];
-    mat[nor - 1] = row;
+    mat[res] = mat[nor - 2];
+    mat[nor - 2] = row;
+#if 0
     clean(&sing_row1, 1, mat, nor - 1, map, NULL, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, name);
     free(map);
     {
       int done = 0;
-      unsigned int pos, elt;
+      unsigned int pos, elt, *elts, m;
+      int *rev_map;
       /* Compute the map for the given rows */
       map = my_malloc((nor - 1) * sizeof(int));
       rev_map = my_malloc(noc * sizeof(int));
@@ -257,9 +276,10 @@ int sign(const char *qform, const char *bform, const char *name)
       free(map);
       free(rev_map);
     }
+#endif
     nor -= 2;
   }
-  res = singular_vector(mat, mat + noc, sing_row1, qinp,
+  res = singular_vector(mat, mat + noc, sing_row1, &out_num, qinp,
                         noc, nor, nob, len, prime, &grease, qform, name);
   matrix_free(mat);
   free(products);

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: real_indicate,v 1.5 2002/10/15 14:30:44 jon Exp $
+# $Id: real_indicate,v 1.6 2002/10/18 11:24:28 jon Exp $
 #
 # Script to find the indicator of an irreducible representation
 # assuming it is real, and we have the standard basis conjugating
@@ -91,7 +91,7 @@ if [ 2 -eq $p ]; then
         rm ${a}_+*
       fi
 # Now compute the orthogonal group sign
-      zsign -m $memory $Q $S
+      zsign -m $memory ${tmp}.8 $S
       ret=$?
       if [ 0 -eq $ret ]; then
         ln -s $a ${a}_++
