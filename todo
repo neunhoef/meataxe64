@@ -9,7 +9,6 @@ Think about orthogonal group sign
 Implement a verbosity level for all programs, with -v <n>. Add a standard parser to deal with this
 Investigate rename failure on large files from zscript
 Consider allowing maps into ztsp and ztspf
-Test clean_file not writing back there are no new vectors *
 Look into intermediate file version of find_best_nullity_with_orders *
 Fix zvp and zps to take less memory
 Think about better grease vector selection for making vectors
