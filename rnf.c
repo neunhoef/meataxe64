@@ -1,5 +1,5 @@
 /*
- * $Id: rnf.c,v 1.11 2002/06/28 08:39:16 jon Exp $
+ * $Id: rnf.c,v 1.12 2002/07/08 17:39:14 jon Exp $
  *
  * Compute the rank of a matrix, using temporary files
  *
@@ -233,6 +233,7 @@ unsigned int rank(const char *m1, const char *dir, const char *m2,
             }
           }
         }
+        fclose(in->f);
         fclose(out->f);
         in = in->next;
         out = out->next;

@@ -1,5 +1,5 @@
 /*
- * $Id: nsf.c,v 1.10 2002/06/28 08:39:16 jon Exp $
+ * $Id: nsf.c,v 1.11 2002/07/08 17:39:14 jon Exp $
  *
  * Compute the nullspace of a matrix, using temporary files
  *
@@ -63,9 +63,6 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
   assert(NULL != dir);
   assert(NULL != m1);
   assert(NULL != m2);
-  NOT_USED(mat3);
-  NOT_USED(mat4);
-  NOT_USED(inp);
   i = strlen(tmp) + strlen(dir);
   name1 = my_malloc(i + 4);
   name2 = my_malloc(i + 4);
@@ -142,7 +139,6 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
     exit(2);
   }
   (void)grease_level(prime, &grease, r);
-  /* Now read the matrix */
   rows_to_do = nor;
   step1 = (max_rows > nor) ? nor : max_rows;
   step2 = r;
@@ -164,6 +160,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
     unsigned int stride = (step1 > rows_remaining) ? rows_remaining : step1;
     unsigned int i;
     errno = 0;
+    /* Read input rows */
     if (0 == endian_read_matrix(in->f, mat1, len, stride)) {
       if ( 0 != errno) {
         perror(name);
@@ -176,6 +173,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
       exit(1);
     }
     errno = 0;
+    /* Read corresponding identity rows */
     if (0 == endian_read_matrix(in->f_id, mat3, len_id, stride)) {
       if ( 0 != errno) {
         perror(name);
@@ -187,8 +185,10 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
       cleanup(t1, t2, name5);
       exit(1);
     }
+    /* Clean input and record */
     echelise(mat1, stride, &n, &map, mat3, 1, grease.level, prime, len, nob, 900, 950, len_id, 1, name);
     rows_remaining -= stride;
+    /* Output any new null vectors */
     for (i = 0; i < stride; i++) {
       if (map[i] < 0) {
         errno = 0;
@@ -208,6 +208,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
     if (0 != n) {
       /* Some addition to the rank */
       r += n;
+      /* If still some input rows, then clean with newly echelised rows */
       if (rows_remaining > 0) {
         unsigned int rows_written = 0;
         errno = 0;
@@ -271,60 +272,39 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
           }
           clean(mat1, stride, mat2, stride2, map, mat3, mat4, 1, grease.level, prime, len, nob, 900, 950, len_id, name);
           for (j = 0; j < stride2; j++) {
-#if 0 /* If we include the code below, we disturb the order of vectors */
-/* This invalidates nullspace algorithms for inverses */
-            if (0 == row_is_zero(mat2[j], len)) {
-#endif
-              errno = 0;
-              if (0 == endian_write_row(out->f, mat2[j], len)) {
-                if ( 0 != errno) {
-                  perror(name);
-                }
-                fprintf(stderr, "%s: cannot write matrix for %s, terminating\n", name, out->name);
-                fclose(in->f);
-                fclose(in->f_id);
-                fclose(out->f);
-                fclose(out->f_id);
-                fclose(outp);
-                cleanup(t1, t2, name5);
-                exit(1);
+            errno = 0;
+            if (0 == endian_write_row(out->f, mat2[j], len)) {
+              if ( 0 != errno) {
+                perror(name);
               }
-              errno = 0;
-              if (0 == endian_write_row(out->f_id, mat4[j], len_id)) {
-                if ( 0 != errno) {
-                  perror(name);
-                }
-                fprintf(stderr, "%s: cannot write matrix for %s, terminating\n", name, out->name_id);
-                fclose(in->f);
-                fclose(in->f_id);
-                fclose(out->f);
-                fclose(out->f_id);
-                fclose(outp);
-                cleanup(t1, t2, name5);
-                exit(1);
-              }
-              rows_written++;
-#if 0
-            } else {
-              /* Found a null row, write it out */
-              errno = 0;
-              if (0 == endian_write_row(outp, mat4[j], len_id)) {
-                if ( 0 != errno) {
-                  perror(name);
-                }
-                fprintf(stderr, "%s: cannot write matrix for %s, terminating\n", name, name5);
-                fclose(in->f);
-                fclose(in->f_id);
-                fclose(out->f);
-                fclose(out->f_id);
-                fclose(outp);
-                cleanup(t1, t2, name5);
-                exit(1);
-              }
+              fprintf(stderr, "%s: cannot write matrix for %s, terminating\n", name, out->name);
+              fclose(in->f);
+              fclose(in->f_id);
+              fclose(out->f);
+              fclose(out->f_id);
+              fclose(outp);
+              cleanup(t1, t2, name5);
+              exit(1);
             }
-#endif
+            errno = 0;
+            if (0 == endian_write_row(out->f_id, mat4[j], len_id)) {
+              if ( 0 != errno) {
+                perror(name);
+              }
+              fprintf(stderr, "%s: cannot write matrix for %s, terminating\n", name, out->name_id);
+              fclose(in->f);
+              fclose(in->f_id);
+              fclose(out->f);
+              fclose(out->f_id);
+              fclose(outp);
+              cleanup(t1, t2, name5);
+              exit(1);
+            }
+            rows_written++;
           }
         }
+        fclose(in->f);
+        fclose(in->f_id);
         fclose(out->f);
         fclose(out->f_id);
         in = in->next;
