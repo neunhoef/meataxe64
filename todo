@@ -8,7 +8,6 @@ Implement a verbosity level for all programs, with -v <n>. Add a standard parser
 Look into problems with odd brain sizes
 Look into performance 199 vs 200 vs 201
 Fix zps to take less memory
-Use ANSI remove and rename instead of files.h versions
 Test find_nullity_onef_with_orders (1)
 Find a better algorithm for zsp memory. Investigate performance (1)
 Debug emu/zsl file corruption problem (2)

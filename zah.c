@@ -1,5 +1,5 @@
 /*
- * $Id: zah.c,v 1.2 2002/06/27 07:31:58 jon Exp $
+ * $Id: zah.c,v 1.3 2002/06/27 08:28:23 jon Exp $
  *
  * Add a header to en intermediate file matrix
  * Essentially a disaster recovery program
@@ -11,6 +11,7 @@
 #include <assert.h>
 #include "elements.h"
 #include "endian.h"
+#include "files.h"
 #include "header.h"
 #include "memory.h"
 #include "read.h"
