@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: sym_basis_delta,v 1.1 2003/05/26 09:36:22 jon Exp $
+# $Id: sym_basis_delta,v 1.2 2003/05/31 20:50:30 jon Exp $
 #
 # Script to compute a symmetry basis wrt an ordered set of irreducibles,
 # using delta words
@@ -45,8 +45,6 @@ for x in `cat $irreds`; do
 # Cope with dual here
 #
   if [ 1 -eq $dualise ]; then
-    echo "$name: can't do duals yet"
-    exit 1
     i=1
     names=
     while [ 0 -lt $i ]; do
@@ -81,6 +79,15 @@ for x in `cat $irreds`; do
     fi
     irr=`echo $r | sed -e "s/Existing irreducible //g;s/ found//g"`
     w=$irr
+# Now find $w in list of irreds
+    i=1
+    for x in `cat $irreds`; do
+      if [ ${w} = ${x} ]; then
+        irred_num=$i
+        echo Found ${w} at number $irred_num
+        break
+      fi
+    done
   fi
   i=1
   for x in $deltas; do
@@ -264,15 +271,38 @@ for x in `cat $irreds`; do
         exit 1
       fi
       if [ 0 -eq $have_local_basis ]; then
-        cp ${tmp}.5 ${tmp}.4
+        ldim=`zbase -m $memory ${tmp}.5 . $local_basis`
         ret=$?
         if [ 0 -ne $ret ]; then
           rm -f ${tmp}.*
-          echo "$name: unexpected failure in cp, terminating"
+          echo $ldim
+          echo "$name: failed to compute ldim, terminating"
           exit 1
         fi
       else
-        zjoin $local_basis ${tmp}.5 ${tmp}.4
+        zclean -m $memory $local_basis ${tmp}.5 ${tmp}.4
+        ret=$?
+        if [ 0 -ne $ret ]; then
+          rm -f ${tmp}.*
+          echo "$name: zclean failed, terminating"
+          exit 1
+        fi
+        ldim=`zbase -m $memory ${tmp}.4 . ${tmp}.5`
+        ret=$?
+        if [ 0 -ne $ret ]; then
+          rm -f ${tmp}.*
+          echo $ldim
+          echo "$name: failed to compute ldim, terminating"
+          exit 1
+        fi
+        zclean -m $memory ${tmp}.5 $local_basis ${tmp}.4
+        ret=$?
+        if [ 0 -ne $ret ]; then
+          rm -f ${tmp}.*
+          echo "$name: zclean failed, terminating"
+          exit 1
+        fi
+        zjoin ${tmp}.4 ${tmp}.5 $local_basis
         ret=$?
         if [ 0 -ne $ret ]; then
           rm -f ${tmp}.*
@@ -281,14 +311,6 @@ for x in `cat $irreds`; do
         fi
       fi
       have_local_basis=1
-      ldim=`zbase -m $memory ${tmp}.4 . $local_basis`
-      ret=$?
-      if [ 0 -ne $ret ]; then
-        rm -f ${tmp}.*
-        echo $ldim
-        echo "$name: failed to compute dim, terminating"
-        exit 1
-      fi
       let count=$count+1
       let y=$y+1
     done
