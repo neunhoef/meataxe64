@@ -1,5 +1,5 @@
 /*
- * $Id: mop.c,v 1.13 2001/10/13 09:00:28 jon Exp $
+ * $Id: mop.c,v 1.14 2001/10/13 13:16:19 jon Exp $
  *
  * Monster operations for meataxe
  *
@@ -376,10 +376,16 @@ static int grease(suzel m)
     ptc1 = (char *)ptl1;
     ptc2 = (char *)ptl2;
     ptc3 = (char *)ptl3;
+/*
     for (j = 0; j < l729; j++) {
       *(ptl2++) = 0;
       *(ptl3++) = 0;
     }
+*/
+    memset(ptl2, 0, (l729) * sizeof(long));
+    memset(ptl3, 0, (l729) * sizeof(long));
+    ptl2 += (l729);
+    ptl3 += (l729);
     for (j = 0; j < 183; j++) {
       uc = (unsigned char)*(ptc1++);
       *(ptc2++) = w[uc];
@@ -394,10 +400,16 @@ static int grease(suzel m)
     ptc1 = (char *)ptl1;
     ptc2 = (char *)ptl2;
     ptc3 = (char *)ptl3;
+/*
     for (j = 0; j < l90; j++) {
       *(ptl2++) = 0;
       *(ptl3++) = 0;
     }
+*/
+    memset(ptl2, 0, (l90) * sizeof(long));
+    memset(ptl3, 0, (l90) * sizeof(long));
+    ptl2 += (l90);
+    ptl3 += (l90);
     for (j = 0; j < 23; j++) {
       uc = (unsigned char)*(ptc1++);
       *(ptc2++) = w[uc];
@@ -489,9 +501,13 @@ void vecsuz(const unsigned char *vecin, suzel m, unsigned char *vecout)
     ptl1 += l90;
     ptc2 = (unsigned char *)vwork;
     if (m->inout == 1) {
+      memcpy(ptc1, ptc2, 183);
+      ptc1 += 183;
+      ptc2 += 183;
+/*
       for (j = 0; j < 183; j++) *(ptc1++) = *(ptc2++);
-    }
-    if (m->inout == 2) {
+*/
+    } else if (m->inout == 2) {
       for (j = 0; j < 183; j++) {
 	uc = (unsigned char) *(ptc2++);
 	*(ptc1++) = bar[uc];
@@ -525,15 +541,20 @@ void vecsuz(const unsigned char *vecin, suzel m, unsigned char *vecout)
     }
     ptl3 += l142;
   }
+/*
   ptc1 += 8224;
   ptc2 = (unsigned char *) vwork;
+*/
+  memcpy(ptc1 + 8224, vwork, 18);
+/*
   for (k = 0; k < 18; k++) *(ptc1++) = *(ptc2++);
+*/
 }
 
 
 void vecT(unsigned char *vecin, unsigned char *vecout)
 {
-  unsigned long i, j, k, l;
+  unsigned long i, j, l;
   unsigned char entry;
   unsigned char *ptc1, *ptc2;
   unsigned int *ptl3;
@@ -569,7 +590,12 @@ void vecT(unsigned char *vecin, unsigned char *vecout)
       ptl3 += l324;
     }
     ptc2 = (unsigned char *) vwork;
+    memcpy(ptc1, ptc2, 41);
+    ptc1 += 41;
+    ptc2 += 41;
+/*
     for (k = 0; k < 41; k++) *(ptc1++) = *(ptc2++);
+*/
     j += 4;
   }
   for (l = 0; l < 55; l++) {
@@ -593,7 +619,12 @@ void vecT(unsigned char *vecin, unsigned char *vecout)
     }
 
     ptc2 = (unsigned char *) vwork;
+    memcpy(ptc1, ptc2, 41);
+    ptc1 += 41;
+    ptc2 += 41;
+/*
     for (k = 0; k < 41; k++) *(ptc1++) = *(ptc2++);
+*/
     j += 4;
   }
   memset(vwork, 0, (l538) * sizeof(long));
@@ -631,47 +662,75 @@ void vecT(unsigned char *vecin, unsigned char *vecout)
     }
     ptl3 += l538;
   }
+/*
   ptc2 = (unsigned char *) vwork;
+*/
+  memcpy(ptc1, vwork, 68);
+/*
   for (k = 0; k < 68; k++) *(ptc1++) = *(ptc2++);
+*/
 }
 
 void cpsuz(suzel a, suzel b)
 {
   long *ptl1, *ptl2;
-  unsigned char *ptc1, *ptc2;
-  unsigned int i;
   b->greased = a->greased;
   b->inout = a->inout;
   ptl1 = a->m729;
   ptl2 = b->m729;
+  memcpy(ptl2, ptl1, 729*l729 * sizeof(long));
+/*
   for (i = 0; i < 729*l729; i++) *(ptl2++) = *(ptl1++);
+*/
   ptl1 = a->m90;
   ptl2 = b->m90;
+  memcpy(ptl2, ptl1, 90*l90 * sizeof(long));
+/*
   for (i = 0; i < 90*l90; i++) *(ptl2++) = *(ptl1++);
-
+*/
   ptl1 = a->m142;
   ptl2 = b->m142;
+  memcpy(ptl2, ptl1, 142*l142 * sizeof(long));
+/*
   for (i = 0; i < 142*l142; i++) *(ptl2++) = *(ptl1++);
+*/
   ptl1 = (a->p32760)+1;
   ptl2 = (b->p32760)+1;
+  memcpy(ptl2, ptl1, 32760 * sizeof(long));
+/*
   for (i = 1; i <= 32760; i++) *(ptl2++) = *(ptl1++);
+*/
+  memcpy((b->b32760)+1, (a->b32760)+1, 32760);
+/*
   ptc1 = (a->b32760)+1;
   ptc2 = (b->b32760)+1;
   for (i = 1; i <= 32760; i++) *(ptc2++) = *(ptc1++);
-
-  if (a->greased == 1) {
+*/
+  if (1 == a->greased) {
+    memcpy(b->w729, a->w729, 729*l729 * sizeof(long));
+/*
     ptl1 = a->w729;
     ptl2 = b->w729;
     for (i = 0; i < 729*l729; i++) *(ptl2++) = *(ptl1++);
+*/
+    memcpy(b->w90, a->w90, 90*l90 * sizeof(long));
+/*
     ptl1 = a->w90;
     ptl2 = b->w90;
     for (i = 0; i < 90*l90; i++) *(ptl2++) = *(ptl1++);
+*/
+    memcpy(b->ww729, a->ww729, 729*l729 * sizeof(long));
+/*
     ptl1 = a->ww729;
     ptl2 = b->ww729;
     for (i = 0; i < 729*l729; i++) *(ptl2++) = *(ptl1++);
+*/
+    memcpy(b->ww90, a->ww90, 90*l90 * sizeof(long));
+/*
     ptl1 = a->ww90;
     ptl2 = b->ww90;
     for (i = 0; i < 90*l90; i++) *(ptl2++) = *(ptl1++);
+*/
   }
 }
 
@@ -682,7 +741,7 @@ void suzmult(suzel a, suzel b, suzel c)
   char unsigned entry;
   unsigned char uc;
   unsigned char *ptc1, *ptc2, *ptc3;
-  unsigned int *ptl1, *ptl2, *ptl2a, *ptl2w, *ptl2ww, *ptl3, *ptl3a;
+  unsigned int *ptl1, *ptl2, *ptl2a, *ptl2w, *ptl2ww, *ptl3;
   cpsuz(b, suzwork);
 
   if (a->greased == 0) grease(a);
@@ -739,8 +798,11 @@ void suzmult(suzel a, suzel b, suzel c)
   ptl1 = (unsigned int *)suzwork->m90;
   ptl3 = (unsigned int *)c->m90;
   for (i = 0; i < 90; i++) {
+    memset(ptl3, 0, (l90) * sizeof(long));
+/*
     ptl3a = ptl3;
     for (k = 0; k < l90; k++) *(ptl3a++) = 0;
+*/
     ptl2 = (unsigned int *)a->m90;
     ptl2w = (unsigned int *)a->w90;
     ptl2ww = (unsigned int *)a->ww90;
