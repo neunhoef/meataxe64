@@ -1,5 +1,5 @@
 /*
- * $Id: primes.h,v 1.1 2001/08/28 21:39:44 jon Exp $
+ * $Id: primes.h,v 1.2 2001/08/30 18:31:45 jon Exp $
  *
  * Prime power manipulation for meataxe
  *
@@ -10,5 +10,8 @@
 
 /* Convert an integer to its representation in GF(p) */
 extern int prime_rep(unsigned int *, unsigned int);
+
+/* Convert an element of GF(p) to its representation integer */
+extern int decimal_rep(unsigned int *, unsigned int);
 
 #endif

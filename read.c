@@ -1,5 +1,5 @@
 /*
- * $Id: read.c,v 1.1 2001/08/28 21:39:44 jon Exp $
+ * $Id: read.c,v 1.2 2001/08/30 18:31:45 jon Exp $
  *
  * Read a header
  *
@@ -74,7 +74,7 @@ static unsigned int digits_of(unsigned int n)
   return i;
 }
 
-int read_text_header(FILE *fp, header *hp, const char *name)
+int read_text_header(const FILE *fp, header *hp, const char *name)
 {
   unsigned int nob;
   unsigned int nod;
@@ -88,15 +88,15 @@ int read_text_header(FILE *fp, header *hp, const char *name)
   assert(NULL != fp);
   assert(NULL != hp);
   assert(NULL != name);
-  j = fread(str, 1, LINE_LENGTH, fp);
+  j = fread(str, 1, LINE_LENGTH, (FILE *)fp);
   if (LINE_LENGTH != j) {
     fprintf(stderr, "End of file reading '%s', terminating\n", name);
     exit(1);
   }
-  i = fgetc(fp);
+  i = fgetc((FILE *)fp);
   while (i >= 0 && '\n' != (char)i) {
     if (isspace(i))
-      i = fgetc(fp);
+      i = fgetc((FILE *)fp);
   }
   if ('\n' != (char)i) {
     fprintf(stderr, "Newline expected reading '%s', terminating\n", name);
@@ -115,7 +115,7 @@ int read_text_header(FILE *fp, header *hp, const char *name)
   return 1;
 }
 
-int read_binary_header(FILE *fp, header *hp, const char *name)
+int read_binary_header(const FILE *fp, header *hp, const char *name)
 {
   header h;
   unsigned int nob;
@@ -128,10 +128,10 @@ int read_binary_header(FILE *fp, header *hp, const char *name)
   assert(NULL != fp);
   assert(NULL != name);
   h = header_alloc();
-  if (1 != fread(&nob, sizeof(unsigned int), 1, fp) ||
-      1 != fread(&prime, sizeof(unsigned int), 1, fp) ||
-      1 != fread(&nor, sizeof(unsigned int), 1, fp) ||
-      1 != fread(&noc, sizeof(unsigned int), 1, fp)) {
+  if (1 != fread(&nob, sizeof(unsigned int), 1, (FILE *)fp) ||
+      1 != fread(&prime, sizeof(unsigned int), 1, (FILE *)fp) ||
+      1 != fread(&nor, sizeof(unsigned int), 1, (FILE *)fp) ||
+      1 != fread(&noc, sizeof(unsigned int), 1, (FILE *)fp)) {
     fprintf(stderr, "Failed to read header from binary input %s\n", name);
     exit(1);
   }

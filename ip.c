@@ -1,5 +1,5 @@
 /*
- * $Id: ip.c,v 1.1 2001/08/28 21:39:44 jon Exp $
+ * $Id: ip.c,v 1.2 2001/08/30 18:31:45 jon Exp $
  *
  * Read a matrix
  *
@@ -30,8 +30,6 @@ int main(int argc, const char * const argv[])
   unsigned int prime, nob, noc, nor;
   unsigned int i, j;
   unsigned int base_mask;
-  unsigned int bits_in_unsigned_int =
-    CHAR_BIT * sizeof(unsigned int);
   header h;
 
   endian_init();
@@ -43,16 +41,18 @@ int main(int argc, const char * const argv[])
   out = argv[2];
   inp = fopen(in, "r");
   if (NULL == inp) {
-    fprintf(stderr, "ip: cannot open %s\n, terminating", in);
+    fprintf(stderr, "ip: cannot open %s, terminating\n", in);
     exit(1);
   }
-  outp = fopen(out, "w");
+  outp = fopen(out, "wb");
   if (NULL == outp) {
-    fprintf(stderr, "ip: cannot open %s\n, terminating", out);
+    fprintf(stderr, "ip: cannot open %s, terminating\n", out);
     fclose(inp);
     exit(1);
   }
   if (0 == read_text_header(inp, &h, in)) {
+    fclose(inp);
+    fclose(outp);
     exit(1);
   }
   write_binary_header(outp, h, out);
@@ -66,13 +66,15 @@ int main(int argc, const char * const argv[])
     unsigned int k = 0;
     for (j = 0; j < noc; j++) {
       unsigned int e;
-      if (get_element(inp, nob, prime, &e)) {
+      if (get_element_from_text(inp, nob, prime, &e)) {
         a |= e << (k * nob);
         k++;
         if ((k + 1) * nob > bits_in_unsigned_int) {
           if (0 == endian_write_int(a, outp)) {
             fprintf(stderr, "Failed to write element to %s at (%d, %d)\n",
                     out, i, j);
+            fclose(inp);
+            fclose(outp);
             exit(1);
           }
           k = 0;
@@ -81,17 +83,20 @@ int main(int argc, const char * const argv[])
       } else {
         fprintf(stderr, "Failed to read element from %s at (%d, %d)\n",
                 in, i, j);
+        fclose(inp);
+        fclose(outp);
         exit(1);
       }
     }
     if (0 != k && 0 == endian_write_int(a, outp)) {
       fprintf(stderr, "Failed to write element to %s at (%d, %d)\n",
               out, i, j);
+      fclose(inp);
+      fclose(outp);
       exit(1);
     }
   }
   fclose(inp);
   fclose(outp);
-  printf("ip: all ok\n");
   return 1;
 }

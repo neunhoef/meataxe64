@@ -1,0 +1,57 @@
+<html>
+<head>
+<title>
+Design decision during construction of meataxe
+</title>
+</head>
+<body>
+<h1>
+Design decision during construction of meataxe
+</h1>
+<ul>
+<li>
+Maintain external printed form as per sources on Birmingham website.
+In particular, header is a two digit nod (number of digits), followed
+by three six digit fields, the prime power, nor (number of rows) and
+noc (number of columns). nod determines how many digits will be
+consumed per matrix entry. Matrices are printed at a maximum of 80
+characters per line.
+</li>
+<li>
+Internally, all matrices are held as arrays of unsigned ints. Field
+values are packed into these, with the least significant bits
+corresponding to lower column numbers. Some wastage may occur at word
+boundaries, if the prime power does not require a number of bits which
+is a power of two (eg 5 or 7).
+</li>
+<li>
+Binary matrices are held in essentially the same as form as intenally,
+except that they are always little endian. Endian conversion takes
+place on input and output. This allows different endian machines, eg
+Sparcs and PCs, to use the same binary format whilst achieving
+internal efficiency. Each binary matrix contains a four word header,
+consisting of nob (number of bytes), prime power, nor, noc.
+</li>
+<li>
+</li>
+<li>
+</li>
+<li>
+</li>
+<li>
+</li>
+<li>
+</li>
+<li>
+</li>
+<li>
+</li>
+<li>
+</li>
+<li>
+</li>
+<li>
+</li>
+</ul>
+</body>
+</html>

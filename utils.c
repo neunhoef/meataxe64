@@ -1,5 +1,5 @@
 /*
- * $Id: utils.c,v 1.1 2001/08/28 21:39:44 jon Exp $
+ * $Id: utils.c,v 1.2 2001/08/30 18:31:45 jon Exp $
  *
  * Utils for meataxe
  *
@@ -10,6 +10,8 @@
 #include <assert.h>
 #include <limits.h>
 #include "utils.h"
+
+unsigned int bits_in_unsigned_int = CHAR_BIT * sizeof(unsigned int);
 
 static int is_prime(unsigned int j)
 {

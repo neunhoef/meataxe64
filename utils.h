@@ -1,5 +1,5 @@
 /*
- * $Id: utils.h,v 1.1 2001/08/28 21:39:44 jon Exp $
+ * $Id: utils.h,v 1.2 2001/08/30 18:31:45 jon Exp $
  *
  * Utilities for meataxe
  *
@@ -14,5 +14,7 @@ extern int is_a_prime_power(unsigned int);
 
 extern int alloc_matrix(unsigned int nob, unsigned int noc,
                          unsigned int nor, unsigned int **res);
+
+extern unsigned int bits_in_unsigned_int;
 
 #endif
