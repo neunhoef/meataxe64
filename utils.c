@@ -1,5 +1,5 @@
 /*
- * $Id: utils.c,v 1.13 2001/11/07 22:35:27 jon Exp $
+ * $Id: utils.c,v 1.14 2001/11/12 13:43:38 jon Exp $
  *
  * Utils for meataxe
  *
@@ -175,5 +175,28 @@ int get_task_line(char *line, FILE *input)
       return 0;
     }
     return 1;
+  }
+}
+
+int pow(unsigned int n, unsigned int index, unsigned int *res)
+{
+  assert(0 != n);
+  if (0 == index) {
+    *res = 1;
+    return 1;
+  } else if (1 == index) {
+    *res = n;
+    return 1;
+  } else {
+    if (0 != pow(n, index-1, res)) {
+      if (*res < (UINT_MAX / n)) {
+        *res *= n;
+        return 1;
+      } else {
+        return 0;
+      }
+    } else {
+      return 0;
+    }
   }
 }

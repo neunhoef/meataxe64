@@ -1,5 +1,5 @@
 /*
- * $Id: utils.h,v 1.11 2001/11/06 22:25:40 jon Exp $
+ * $Id: utils.h,v 1.12 2001/11/12 13:43:38 jon Exp $
  *
  * Utilities for meataxe
  *
@@ -39,4 +39,6 @@ extern unsigned int skip_non_white(unsigned int i, const char *chars);
 
 extern int get_task_line(char *line, FILE *input);
 
+extern int pow(unsigned int n, unsigned int index,
+               unsigned int *res);
 #endif

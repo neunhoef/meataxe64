@@ -42,4 +42,5 @@
 20011019 - Wrote exploded input permutation
 20011105 - Moved prime detection into prime.c
 20011106 - Added invert and negate for 2, 3, 4, 5, and for element sets
-20011107 - Added first version of clean
+20011107 - Added first version of clean and echelise
+20011112 - First in store rn

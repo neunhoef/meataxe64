@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.24 2001/11/07 22:35:27 jon Exp $
+# $Id: makefile,v 1.25 2001/11/12 13:43:38 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -49,7 +49,7 @@ ZID_MODULES=	id ident elements endian header memory primes rows utils write
 ZIP_MODULES=	elements endian header ipp memory primes read rows utils write
 ZMU_MODULES=	elements endian grease header matrix memory mu mul primes read rows utils write
 ZPR_MODULES=	elements endian header memory pr primes read rows utils write
-ZRN_MODULES=	clean elements endian grease header matrix memory primes read rn rows utils
+ZRN_MODULES=	clean elements endian grease header matrix memory primes read rn rows utils zrn
 ZSL_MODULES=	add elements endian files grease header matrix memory mul primes read rows slave system utils write
 ZTR_MODULES=	elements endian header matrix memory primes read tr tra utils write
 

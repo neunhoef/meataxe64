@@ -1,5 +1,5 @@
 /*
- * $Id: grease.c,v 1.8 2001/11/07 22:35:27 jon Exp $
+ * $Id: grease.c,v 1.9 2001/11/12 13:43:38 jon Exp $
  *
  * Functions to grease matrix rows
  *
@@ -24,30 +24,6 @@ static unsigned int **grease_table;
 /* 0 => unset, 1 => set */
 static int *grease_table_comp;
 static row_ops row_operations = { NULL, NULL, NULL, NULL};
-
-static int pow(unsigned int n, unsigned int index,
-               unsigned int *res)
-{
-  assert(0 != n);
-  if (0 == index) {
-    *res = 1;
-    return 1;
-  } else if (1 == index) {
-    *res = n;
-    return 1;
-  } else {
-    if (0 != pow(n, index-1, res)) {
-      if (*res < (UINT_MAX / n)) {
-        *res *= n;
-        return 1;
-      } else {
-        return 0;
-      }
-    } else {
-      return 0;
-    }
-  }
-}
 
 int grease(unsigned int prime, unsigned int *step, unsigned int avail)
 {
