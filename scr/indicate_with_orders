@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: indicate_with_orders,v 1.6 2002/06/30 21:33:15 jon Exp $
+# $Id: indicate_with_orders,v 1.7 2002/09/11 17:07:19 jon Exp $
 #
 # Script to find the indicator of an irreducible representation
 # Assumes a and b in standard base form
@@ -53,7 +53,7 @@ b_d=${tmp}.1
 dual_with_order $a $a_d $o_a $memory
 dual_with_order $b $b_d $o_b $memory
 e=${tmp}.2
-script=`find_nullity_one_with_orders $a_d $b_d $e $o_a $o_b $memory`
+script=`find_nullity_one_with_orders $e $memory $a_d $o_a $b_d $o_b`
 ret=$?
 if [ $ret -ne 0 ]; then
   rm -f ${tmp}.*

@@ -184,5 +184,6 @@ skew seventh
 20020905 - Started on span and spin for very large nullspaces
 20020909 - First apparently working ztcv for tensor uncondense
 20020909 - Start on improving zscript to handle multiple generators
-20020910 - zscript handles more thn 2 generators
+20020910 - zscript handles more than 2 generators
 20020911 - Start on improving zsums and friends to handle multiple generators
+20020911 - Integrate news zsums etc into scripts

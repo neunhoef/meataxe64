@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: new_irred_with_orders,v 1.13 2002/09/11 10:02:28 jon Exp $
+# $Id: new_irred_with_orders,v 1.14 2002/09/11 17:07:19 jon Exp $
 #
 # Script to classify an irreducible representation
 #
@@ -57,10 +57,12 @@ if [ $i -ne $k ]; then
 fi
 i=0
 shift 1
+line=
 while [ $i -lt $j ]; do
   rest[$i]=$1
   o_rest[$i]=$2
   let i=$i+1
+  line="$line $1 $2"
   shift 2
 done
 #
@@ -71,24 +73,8 @@ e=${tmp}.1
 name=${tmp}_${nor}
 ok=0
 i=1
-while [ $i -lt $j -a 0 -eq $ok ]; do
-  k=0
-  while [ $k -lt $i -a 0 -eq $ok ]; do
-    a=${rest[$k]}
-    o_a=${o_rest[$k]}
-    b=${rest[$i]}
-    o_b=${o_rest[$i]}
-    script=`find_nullity_one_with_orders $a $b $e $o_a $o_b $memory`
-    ret=$?
-    if [ 0 -eq $ret ]; then
-      ok=1
-    else
-      echo find_nullity_one_with_orders returns $ret
-    fi
-    let k=$k+1
-  done
-  let i=$i+1
-done
+script=`find_nullity_one_with_orders $e $memory $line`
+ret=$?
 if [ 0 -eq $ret ]; then
   x=`base $e ${name} ${tmp}.0 ${rest[*]}`
   ret=$?
@@ -98,12 +84,8 @@ if [ 0 -eq $ret ]; then
     exit 1
   fi
 elif [ 254 -eq $ret ]; then
-  a=${rest[0]}
-  b=${rest[1]}
-  o_a=${o_rest[0]}
-  o_b=${o_rest[1]}
 # Irreducible not absolutely irreducible
-  script=`find_best_nullity_with_orders $a $b $e $o_a $o_b $memory`
+  script=`find_best_nullity_with_orders $e $memory $line`
   ret=$?
   if [ 0 -ne $ret ]; then
     echo $script

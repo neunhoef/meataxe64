@@ -1,45 +1,42 @@
 #!/bin/sh
 #
-# $Id: find_nullity_one_with_orders,v 1.6 2002/09/11 10:02:28 jon Exp $
+# $Id: find_nullity_one_with_orders,v 1.7 2002/09/11 17:07:19 jon Exp $
 #
 # Script to find an element of nullity one in two generators
 #
 # Inputs
-# $1: generator a
-# $2: generator b
-# $3: output file name
+# $1: output file name
+# $2: initial memory
+# $3: generator a
 # $4: order a
-# $5: order b
-# $6: initial memory (optional)
+# $5: generator b
+# $6: order b
+# $7-: further generators and orders
 #
 # Return codes
 # 1: error in parameters
 # 0: success
 # 254: nullity not 1
 #
-usage="$0: usage: $0 <a> <b> <out> <order a> <order b> [<memory>]"
-if [ $# -ne 5 -a $# -ne 6 ]; then
+usage="$0: usage: $0 <out> <memory> <a> <order a> <b> <order b> [<further generators and orders>]"
+if [ $# -lt 6 ]; then
   echo $usage
   exit 1;
 fi
 . functions
-a=$1
-b=$2
-e=$3
+e=$1
+memory=$2
+a=$3
 o_a=$4
-o_b=$5
+b=$5
+o_b=$6
+shift 2
 tmp=tmp${PPID}
 ok=0
-if [ $# -eq 5 ]; then
-  memory=200
-else
-  memory=$6
-fi
 nor=`znor $a`
-q=`zprime $a`
 # Try zsums
 while [ $ok -eq 0 ]; do
-  out=`zsums ${tmp}.zsums 5 1 $memory $a $o_a $b $o_b 2>/dev/null`
+  out=`zsums ${tmp}.zsums 5 1 $memory $* 2>/dev/null`
   ret=$?
   if [ 2 -eq $ret ]; then
     let memory=`more_memory $memory`

@@ -4,7 +4,7 @@ Documentation changes for zrand, ztco, ztcv, ztrecover
 Documentation changes for sym_basis, proj_base, sub_quot
 Consider putting memory size into argument parser
 Write span_and_spin for spins on large nullspaces
-Extend zsums and friends to handle multiple (more than 2) generators
+Pass all generators into indicate
 Make zsums and friends distinguish find failure from errors
 Fix find_nullity_one and friends to use better codes from zsums and friends
 Think about a restricted form of new_irred where we supply the script (only for things like sym_basis)
