@@ -339,3 +339,4 @@ skew seventh
 20050220 - Fix bug in real_indicate in odd characteristic calling zsignf
 20050321 - Remove dualise parameter from sym_basis scripts
 20050404 - Fix some documentation errors
+20050406 - Fix bug in nsf for very non-square matrices

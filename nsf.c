@@ -1,5 +1,5 @@
 /*
- * $Id: nsf.c,v 1.17 2004/08/28 19:58:00 jon Exp $
+ * $Id: nsf.c,v 1.18 2005/04/06 21:41:02 jon Exp $
  *
  * Compute the nullspace of a matrix, using temporary files
  *
@@ -52,7 +52,7 @@ unsigned int nullspacef(const char *m1, const char *m2, const char *dir, const c
   const header *h;
   header *h_out;
   unsigned int prime, nob, nod, nor, len, len_id, space, space_id, sub, sub_id,
-      n, r, **mat1, **mat2, **mat3, **mat4,
+      n, r, r1, **mat1, **mat2, **mat3, **mat4,
       i, rows_to_do, max_rows, step1, step2;
   int *map;
   row_ops row_operations;
@@ -146,7 +146,11 @@ unsigned int nullspacef(const char *m1, const char *m2, const char *dir, const c
     max_rows = memory_rows(len_id, space_id - 2 * sub_id);
   }
   r = memory_rows(len, sub);
-  if (r < prime || memory_rows(len_id, sub_id) < prime) {
+  r1 = memory_rows(len_id, sub_id);
+  if (r1 < r) {
+    r = r1; /* For a grease level and step rate compatible with both */
+  }
+  if (r < prime) {
     fprintf(stderr, "%s: cannot allocate %d rows for %s, terminating\n", name, prime, m1);
     fclose(f.f);
     fclose(f.f_id);
