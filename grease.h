@@ -1,5 +1,5 @@
 /*
- * $Id: grease.h,v 1.8 2001/12/23 23:31:42 jon Exp $
+ * $Id: grease.h,v 1.9 2002/09/27 19:37:43 jon Exp $
  *
  * Functions to grease matrix rows
  *
@@ -20,8 +20,10 @@ typedef struct grease_struct
 } grease_struct, *grease;
 
 /* Compute highest grease level given available space */
-extern int grease_level(unsigned int prime,
-                        grease grease, unsigned int avail);
+extern int grease_level(unsigned int prime, grease grease, unsigned int avail);
+
+/* Compute a sensible grease level given available number of rows */
+extern int grease_limit(unsigned int prime, unsigned int level, unsigned int grease_rows, unsigned int total_rows);
 
 /* Set up row operations */
 extern void grease_init(row_opsp ops, grease grease);

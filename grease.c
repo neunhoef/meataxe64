@@ -1,5 +1,5 @@
 /*
- * $Id: grease.c,v 1.17 2002/03/09 19:18:02 jon Exp $
+ * $Id: grease.c,v 1.18 2002/09/27 19:37:43 jon Exp $
  *
  * Functions to grease matrix rows
  *
@@ -32,6 +32,20 @@ int grease_level(unsigned int prime, grease grease, unsigned int avail)
   }
   grease->level = i;
   return 1;
+}
+
+int grease_limit(unsigned int prime, unsigned int level,
+                 unsigned int grease_rows, unsigned int total_rows)
+{
+  while (level > 1) {
+    if (5 * grease_rows > total_rows) {
+      level--;
+      grease_rows /= prime;
+    } else {
+      break;
+    }
+  }
+  return level;
 }
 
 void grease_init(row_opsp ops, grease grease)
