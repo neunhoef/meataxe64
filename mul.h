@@ -1,5 +1,5 @@
 /*
- * $Id: mul.h,v 1.8 2004/02/15 10:27:17 jon Exp $
+ * $Id: mul.h,v 1.9 2004/06/06 11:49:21 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
@@ -31,9 +31,9 @@ extern int skip_mul_from_store(unsigned int offset, unsigned int **rows1, unsign
 /* Either of rows1, rows2 may be a map. If both are, then so will rows3 */
 /* If at least one of m1, m2 is not a map, then len is output length */
 extern int mul_in_store(unsigned int **rows1, unsigned int **rows2, unsigned int **rows3,
-                        int is_map1, int is_map2, unsigned int noc_i, unsigned int len_o,
-                        unsigned int nob, unsigned int nor_i, unsigned int noc_o, unsigned int prime,
-                        grease grease, const char *m1, const char *m2, const char *name);
+                        unsigned int noc_i, unsigned int len_o,
+                        unsigned int nob, unsigned int nor_i, unsigned int prime,
+                        grease grease);
 
 
 #endif

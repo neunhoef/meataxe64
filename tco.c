@@ -1,5 +1,5 @@
 /*
- * $Id: tco.c,v 1.21 2004/06/06 09:39:34 jon Exp $
+ * $Id: tco.c,v 1.22 2004/06/06 11:49:21 jon Exp $
  *
  * Tensor condense one group element
  *
@@ -532,7 +532,6 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
     unsigned int dim_irr_i = dim_irr[i];
     unsigned int dim_endi = dim_end[i];
     unsigned int noc_qi = noc_q[i];
-    const char *argv2i = argv[2 * i];
     /* Read ahead q[i], only needed once */
     if (0 == endian_read_matrix(q[i], q_rows, len_q[i], nor_q[i])) {
       matrix_free(te_rows);
@@ -587,7 +586,6 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
           unsigned int len_pj = len_p[j];
           unsigned int len_qj = len_q[j];
           unsigned int noc_qj = noc_q[j];
-          const char *argv2j1 = argv[2 * j + 1];
           unsigned int left_multiplicitiesj = left_multiplicities[j];
           unsigned int right_multiplicitiesj = right_multiplicities[j];
           unsigned int **p_rowsj = p_rows + j * max_irr2;
@@ -665,9 +663,9 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
                 arg1 = te_rows;
                 arg2 = end_rows;
               } else {
-                if (0 == mul_in_store(q_rows, te_rows, end_rows, 0 /* is_map1 */, 0 /* is_map2 */,
-                                      noc_qi, len_qj, nob, dim_endi, noc_qj, prime,
-                                      &grease, argv2i, "sub-tensor", name)) {
+                if (0 == mul_in_store(q_rows, te_rows, end_rows,
+                                      noc_qi, len_qj, nob, dim_endi, prime,
+                                      &grease)) {
                   matrix_free(te_rows);
                   matrix_free(end_rows);
                   matrix_free(q_rows);
@@ -689,9 +687,9 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
                 /* 1 x 1 identity matrix pj, no point in multiply */
                 arg2 = arg1; /* Result is the same as input */
               } else {
-                if (0 == mul_in_store(arg1, p_rowsj, arg2, 0 /*is_map1*/, 0 /* is_map2 */, noc_qj,
-                                      len_pj, nob, dim_endi, dim_endj, prime,
-                                      &grease, "sub-tensor", argv2j1, name)) {
+                if (0 == mul_in_store(arg1, p_rowsj, arg2, noc_qj,
+                                      len_pj, nob, dim_endi, prime,
+                                      &grease)) {
                   matrix_free(te_rows);
                   matrix_free(end_rows);
                   matrix_free(q_rows);

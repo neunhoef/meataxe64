@@ -1,5 +1,5 @@
 /*
- * $Id: tspf.c,v 1.14 2004/04/25 16:31:48 jon Exp $
+ * $Id: tspf.c,v 1.15 2004/06/06 11:49:21 jon Exp $
  *
  * Function to spin some vectors under two generators in tensor space
  * using intermediate files in a temporary directory.
@@ -357,9 +357,9 @@ unsigned int spin(const char *in, const char *out,
         create_pointers(rows2[i], mat_rows, nor1, len2, prime);
         if (all_in_store) {
           if (0 == mul_in_store(mat_rows, gen->rows_2, work_rows,
-                                0, gen->is_map2, noc2, len2,
-                                nob, nor1, noc2, prime,
-                                &grease, gen->m1, gen->m2, name)) {
+                                noc2, len2,
+                                nob, nor1, prime,
+                                &grease)) {
             fprintf(stderr, "%s: failed to multiply using %s, terminating\n", name, gen->m1);
             exit(1);
           }
@@ -374,9 +374,9 @@ unsigned int spin(const char *in, const char *out,
         }
         create_pointers(rows1[i], mat_rows, nor1, len2, prime);
         if (0 == mul_in_store(gen->rows_1, work_rows, mat_rows,
-                              gen->is_map1, 0, noc1, len2,
-                              nob, nor1, noc2, prime,
-                              &grease, gen->m1, gen->m2, name)) {
+                              noc1, len2,
+                              nob, nor1, prime,
+                              &grease)) {
           fprintf(stderr, "%s: failed to multiply using %s, terminating\n", name, gen->m1);
           if (0 == all_in_store) {
             fclose(f_a2);
