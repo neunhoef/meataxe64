@@ -1,5 +1,5 @@
 /*
- * $Id: rows.c,v 1.22 2004/04/20 22:41:10 jon Exp $
+ * $Id: rows.c,v 1.23 2004/04/21 23:05:45 jon Exp $
  *
  * Row manipulation for meataxe
  *
@@ -133,9 +133,22 @@ static int check_for_3(unsigned int a)
 }
 #endif
 
+#define new_add_mod_3 1
+
 #define ONE_BITS_3 0x55555555
 #define TWO_BITS_3 ((ONE_BITS_3) << 1)
 
+#if new_add_mod_3
+#define mod_3_add(a,b,c,d,e,f,g,h) \
+  c = (a) + (b); /* Result, not reduced mod 3 */ \
+  d = (a) & (b); /* Non-zero <=> answer is 4 */ \
+  e = (a) ^ (b); /* 0, 1, 2 => ignore, 3 => answer is 3 */ \
+  f = e & (e << 1); /* Non-zero => answer is 3 */ \
+  g = (d | f) & TWO_BITS_3 ; /* Non-zero => answer is 3 or 4 */ \
+  h = g | (g >> 1); /* Amount to subtract */ \
+  c -= h
+
+#else
 #define mod_3_add(a,b,c,d,e,f,g,h) \
   c = (a) + (b); /* Result, not reduced mod 3 */ \
   d = (a) & (b); /* 0, 1 => ignore, 2 => result was 4 = 2 + 2, 3 can't happen */ \
@@ -143,6 +156,7 @@ static int check_for_3(unsigned int a)
   f = d & (TWO_BITS_3); /* Ignore all but 2 + 2 */ \
   g = ((e & (TWO_BITS_3)) >> 1) & (e & (ONE_BITS_3)); /* Pick out 3 case only */ \
   h = g | (f >> 1) /* 01 if answer was 3 or 4, otherwise 0 */
+#endif
 
 static void row_add_3(const unsigned int *row1, const unsigned int *row2,
                      unsigned int *row3, unsigned int len)
@@ -157,9 +171,15 @@ static void row_add_3(const unsigned int *row1, const unsigned int *row2,
     assert(4 == sizeof(unsigned int));
     a = *(row1++);
     b = *(row2++);
+#if new_add_mod_3
+    mod_3_add(a,b,c,d,e,f,g,h);
+    *(row3++) = c;
+    assert(check_for_3(c));
+#else
     mod_3_add(a,b,c,d,e,f,g,h);
     *(row3++) = c - (h * 3); /* Reduce mod 3 if needed */
     assert(check_for_3(c - (h * 3)));
+#endif
   }
 }
 
@@ -174,9 +194,15 @@ static void row_inc_3_sub(const unsigned int *row1, unsigned int *row2, unsigned
     assert(4 == sizeof(unsigned int));
     a = *(row1++);
     b = *(row2);
+#if new_add_mod_3
+    mod_3_add(a,b,c,d,e,f,g,h);
+    *(row2++) = c;
+    assert(check_for_3(c));
+#else
     mod_3_add(a,b,c,d,e,f,g,h);
     *(row2++) = c - (h * 3); /* Reduce mod 3 if needed */
     assert(check_for_3(c - (h * 3)));
+#endif
   }
 }
 
@@ -217,9 +243,15 @@ static void scaled_row_add_3(const unsigned int *row1, const unsigned int *row2,
     a = *(row1++);
     b = *(row2++);
     b = scale_mod_3(b); /* Negate b */
+#if new_add_mod_3
+    mod_3_add(a,b,c,d,e,f,g,h);
+    *(row3++) = c;
+    assert(check_for_3(c));
+#else
     mod_3_add(a,b,c,d,e,f,g,h);
     assert(check_for_3(c - (h * 3)));
     *(row3++) = c - (h * 3); /* Reduce mod 3 if needed */
+#endif
   }
 }
 
@@ -238,9 +270,15 @@ static void scaled_row_inc_3_sub(const unsigned int *row1, unsigned int *row2,
     a = *(row1++);
     b = *(row2);
     a = scale_mod_3(a); /* Negate a */
+#if new_add_mod_3
+    mod_3_add(a,b,c,d,e,f,g,h);
+    *(row2++) = c;
+    assert(check_for_3(c));
+#else
     mod_3_add(a,b,c,d,e,f,g,h);
     assert(check_for_3(c - (h * 3)));
     *(row2++) = c - (h * 3); /* Reduce mod 3 if needed */
+#endif
   }
 }
 
