@@ -9,7 +9,7 @@ Think about orthogonal group sign
 Use the verbosity level in all programs. Use fflush?
 Investigate rename failure on large files from zscript
 Consider allowing maps into ztsp and ztspf
-Look into intermediate file version of find_best_nullity_with_orders *
+Look into intermediate file version of find_best_nullity_with_orders and zfln *
 Fix zvp and zps to take less memory
 Think about better grease vector selection for making vectors
 Fix zsums use to handle zero elements

@@ -1,5 +1,5 @@
 /*
- * $Id: sp.c,v 1.19 2002/07/09 12:05:38 jon Exp $
+ * $Id: sp.c,v 1.20 2002/07/10 15:13:07 jon Exp $
  *
  * Function to spin some vectors under two generators
  *
@@ -164,6 +164,7 @@ unsigned int spin(const char *in, const char *out, const char *a,
     rows_to_do = (rows_to_do + gen->nor > nor) ? (nor - gen->nor) : rows_to_do;
     if (verbose) {
       printf("%s: multiplying %d rows\n", name, rows_to_do);
+      fflush(stdout);
     }
     if (0 == mul_from_store(rows + gen->nor, rows + nor, gen->f, gen->is_map, noc, len, nob,
                             rows_to_do, noc, prime, &grease, gen->m, name)) {
@@ -172,6 +173,10 @@ unsigned int spin(const char *in, const char *out, const char *a,
       exit(1);
     }
     gen->nor += rows_to_do;
+    if (verbose) {
+      printf("%s: cleaning %d rows\n", name, rows_to_do);
+      fflush(stdout);
+    }
     clean(rows, nor, rows + nor, rows_to_do, map, NULL, NULL, 0,
           grease.level, prime, len, nob, 900, 0, 0, name);
     echelise(rows + nor, rows_to_do, &d, &new_map, NULL, 0,
@@ -193,7 +198,8 @@ unsigned int spin(const char *in, const char *out, const char *a,
     free(new_map);
     assert(j == d);
     if (verbose) {
-      printf("%s: Adding %d new rows giving %d rows\n", name, d, nor + d);
+      printf("%s: adding %d new rows giving %d rows\n", name, d, nor + d);
+      fflush(stdout);
     }
     nor += d; /* The number of extra rows we made */
     gen = gen->next;
@@ -211,6 +217,7 @@ unsigned int spin(const char *in, const char *out, const char *a,
   }
   if (verbose) {
     printf("%s: Writing %d rows to output\n", name, nor);
+    fflush(stdout);
   }
   errno = 0;
   if (0 == endian_write_matrix(outp, rows, len, nor)) {

@@ -1,5 +1,5 @@
 /*
- * $Id: tsp.c,v 1.9 2002/07/09 12:05:38 jon Exp $
+ * $Id: tsp.c,v 1.10 2002/07/10 15:13:07 jon Exp $
  *
  * Function to spin some vectors under two generators in tensor space
  *
@@ -278,6 +278,7 @@ unsigned int spin(const char *in, const char *out,
     rows_to_do = (rows_to_do + gen->nor > nor) ? (nor - gen->nor) : rows_to_do;
     if (verbose) {
       printf("%s: multiplying %d rows\n", name, rows_to_do);
+      fflush(stdout);
     }
     for (i = 0; i < rows_to_do; i++) {
       create_pointers(rows[gen->nor + i], mat_rows, nor1, len2, prime);
@@ -298,6 +299,10 @@ unsigned int spin(const char *in, const char *out,
       }
     }
     gen->nor += rows_to_do;
+    if (verbose) {
+      printf("%s: cleaning %d rows\n", name, rows_to_do);
+      fflush(stdout);
+    }
     clean(rows, nor, rows + nor, rows_to_do, map, NULL, NULL, 0,
           grease.level, prime, len, nob, 900, 0, 0, name);
     echelise(rows + nor, rows_to_do, &d, &new_map, NULL, 0,
@@ -319,7 +324,8 @@ unsigned int spin(const char *in, const char *out,
     free(new_map);
     assert(j == d);
     if (verbose) {
-      printf("%s: Adding %d new rows giving %d rows\n", name, d, nor + d);
+      printf("%s: adding %d new rows giving %d rows\n", name, d, nor + d);
+      fflush(stdout);
     }
     nor += d; /* The number of extra rows we made */
     gen = gen->next;
@@ -336,6 +342,7 @@ unsigned int spin(const char *in, const char *out,
   len = header_get_len(h_out);
   if (verbose) {
     printf("%s: Writing %d rows to output\n", name, nor);
+    fflush(stdout);
   }
   for (d = 0; d < nor; d++) {
     create_pointers(rows[d], mat_rows, nor1, len2, prime);

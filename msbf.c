@@ -1,5 +1,5 @@
 /*
- * $Id: msbf.c,v 1.4 2002/07/09 12:05:37 jon Exp $
+ * $Id: msbf.c,v 1.5 2002/07/10 15:13:07 jon Exp $
  *
  * Function to spin some vectors under multiple generators to obtain a standard base
  *
@@ -260,6 +260,7 @@ unsigned int spin(const char *in, const char *out, const char *dir,
     k = 0;
     if (verbose) {
       printf("%s: multiplying %d rows\n", name, rows_to_do);
+      fflush(stdout);
     }
     while (k < rows_to_do) {
       unsigned int stride = (k + max_rows <= rows_to_do) ? max_rows : rows_to_do - k;
@@ -290,6 +291,10 @@ unsigned int spin(const char *in, const char *out, const char *dir,
       }
       gen->nor += stride;
       d = nor;
+      if (verbose) {
+        printf("%s: cleaning %d rows\n", name, stride);
+        fflush(stdout);
+      }
       if (0 == clean_file(echelised, &d, rows2, stride, rows3, step,
                           map, new_map, 1, grease.level, prime,
                           len, nob, 900, name)) {
@@ -297,7 +302,8 @@ unsigned int spin(const char *in, const char *out, const char *dir,
         exit(1);
       }
       if (verbose) {
-        printf("%s: Adding %d new rows giving %d rows\n", name, d - nor, d);
+        printf("%s: adding %d new rows giving %d rows\n", name, d - nor, d);
+        fflush(stdout);
       }
       nor = d;
       /* Extra code to deal with adding the standard basis vectors */
@@ -344,6 +350,7 @@ unsigned int spin(const char *in, const char *out, const char *dir,
   fseeko64(basis, 0, SEEK_SET);
   if (verbose) {
     printf("%s: Copying %d rows to output\n", name, nor);
+    fflush(stdout);
   }
   endian_copy_matrix(basis, outp, *rows1, len, nor);
   fclose(outp);

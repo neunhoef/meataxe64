@@ -1,5 +1,5 @@
 /*
- * $Id: sb.c,v 1.12 2002/07/09 12:05:37 jon Exp $
+ * $Id: sb.c,v 1.13 2002/07/10 15:13:07 jon Exp $
  *
  * Function to spin some vectors under two generators to obtain a standard base
  *
@@ -178,6 +178,7 @@ unsigned int spin(const char *in, const char *out, const char *a,
     k = 0;
     if (verbose) {
       printf("%s: multiplying %d rows\n", name, rows_to_do);
+      fflush(stdout);
     }
     while (k < rows_to_do) {
       unsigned int rows_poss = max_rows - nor;
@@ -193,6 +194,10 @@ unsigned int spin(const char *in, const char *out, const char *a,
         memcpy(rows2[nor + i], rows1[nor + i], len * sizeof(unsigned int));
       }
       gen->nor += stride;
+      if (verbose) {
+        printf("%s: cleaning %d rows\n", name, stride);
+        fflush(stdout);
+      }
       clean(rows2, nor, rows2 + nor, stride, map, NULL, NULL, 0,
             grease.level, prime, len, nob, 900, 0, 0, name);
       echelise(rows2 + nor, stride, &d, &new_map, NULL, 0,
@@ -226,7 +231,8 @@ unsigned int spin(const char *in, const char *out, const char *a,
       free(new_map);
       assert(j == d);
       if (verbose) {
-        printf("%s: Adding %d new rows giving %d rows\n", name, d, nor + d);
+        printf("%s: adding %d new rows giving %d rows\n", name, d, nor + d);
+        fflush(stdout);
       }
       nor += d; /* The number of extra rows we made */
       assert(max_rows + d == rows_poss + nor);
@@ -253,6 +259,7 @@ unsigned int spin(const char *in, const char *out, const char *a,
   }
   if (verbose) {
     printf("%s: Writing %d rows to output\n", name, nor);
+    fflush(stdout);
   }
   errno = 0;
   if (0 == endian_write_matrix(outp, rows1, len, nor)) {
