@@ -1,5 +1,5 @@
 /*
- * $Id: zsp.c,v 1.2 2001/11/22 20:04:03 jon Exp $
+ * $Id: zsp.c,v 1.3 2001/12/27 01:17:12 jon Exp $
  *
  * Spin some vectors under two generators
  *
@@ -14,7 +14,7 @@ static const char *name = "zsp";
 
 static void sp_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s <in_file> <out_file> <gen_a> <gen_b_file> [<memory>]\n", name, name);
+  fprintf(stderr, "%s: usage: %s <in_file> <out_file> <gen_a> <gen_b> [<memory>]\n", name, name);
 }
 
 int main(int argc, const char * const argv[])

@@ -1,5 +1,5 @@
 /*
- * $Id: sp.c,v 1.8 2001/12/23 23:31:42 jon Exp $
+ * $Id: sp.c,v 1.9 2001/12/27 01:17:12 jon Exp $
  *
  * Function to spin some vectors under two generators
  *
@@ -129,7 +129,7 @@ unsigned int spin(const char *in, const char *out, const char *a,
     free(new_map);
     if (d != nor) {
       fprintf(stderr, "%s: %s contains dependent vectors, terminating\n", name, in);
-      cleanup(inp, f_a, f_b);
+      cleanup(NULL, f_a, f_b);
       exit(1);
     }
   }
@@ -152,7 +152,7 @@ unsigned int spin(const char *in, const char *out, const char *a,
     if (0 == mul_from_store(rows + gen->nor, rows + nor, gen->f, noc, len, nob,
                             rows_to_do, prime, &grease, gen->m, name)) {
       fprintf(stderr, "%s: failed to multiply using %s, terminating\n", name, gen->m);
-      cleanup(inp, f_a, f_b);
+      cleanup(NULL, f_a, f_b);
       exit(1);
     }
     gen->nor += rows_to_do;

@@ -1,5 +1,5 @@
 #
-# $Id: functions,v 1.1 2001/12/15 20:47:27 jon Exp $
+# $Id: functions,v 1.2 2001/12/27 01:17:12 jon Exp $
 #
 # Functions to support the meataxe scripts
 #
@@ -12,4 +12,24 @@ function more_memory()
     let x=$1*2
   fi
   echo $x
+}
+
+function new_name()
+{
+  local o
+  local nor
+  local dim
+  local x
+  o=$1
+  nor=$2
+  dim=$3
+  name=${o}_${nor}_${dim}
+  if [ -e ${name}_1 ]; then
+    x=1
+    while [ -e ${name}_${x}_1 ]; do
+      let x=$x+1
+    done
+    name=${name}_${x}
+  fi
+  echo $name
 }

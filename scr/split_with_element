@@ -1,5 +1,5 @@
 #
-# $Id: split_with_element,v 1.5 2001/12/11 01:00:44 jon Exp $
+# $Id: split_with_element,v 1.6 2001/12/27 01:17:12 jon Exp $
 #
 # Script to split a representation given a particular element to work from
 #
@@ -124,7 +124,13 @@ while [ $vector -lt $vectors ]; do
 done
 let codim=$nor-$dim
 if [ $split -ne 0 ]; then
-  echo Obtained a subspace of dimension $dim, codimension $codim
+  ss_name=`new_name ${o} ${nor} ${dim}`
+  qs_name=`new_name ${o} ${nor} ${codim}`
+  if [ $dim -eq $codim ]; then
+    ss_name=${ss_name}_a
+    qs_name=${qs_name}_b
+  fi
+  echo Obtained a subspace ${ss_name} of dimension $dim, quotient ${qs_name} codimension $codim
 else
 # echo checking if irreducible
   if [ $c -eq 0 ]; then
@@ -133,7 +139,7 @@ else
     ret=$?
 #   echo irred returns result $ret
     if [ $ret -eq 255 ]; then
-      echo irreducible $a $b found
+      echo irreducible $a $b of dimension $nor found
       exit 255
     elif [ $ret -eq 254 ]; then
       exit 254
@@ -152,12 +158,6 @@ else
     fi
     exit 255
   fi
-fi
-ss_name=${o}_${nor}_${dim}
-qs_name=${o}_${nor}_${codim}
-if [ $dim -eq $codim ]; then
-  ss_name=${ss_name}_a
-  qs_name=${qs_name}_b
 fi
 zmu ${tmp}.5 $a ${tmp}.6 1>/dev/null
 zss ${tmp}.5 ${tmp}.6 ${ss_name}_1 $memory

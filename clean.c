@@ -1,5 +1,5 @@
 /*
- * $Id: clean.c,v 1.10 2001/12/23 23:31:42 jon Exp $
+ * $Id: clean.c,v 1.11 2001/12/27 01:17:12 jon Exp $
  *
  * Cleaning and echilisation for meataxe
  *
@@ -108,7 +108,7 @@ void clean(unsigned int **m1, unsigned int d1,
 #endif
         if (0 != record) {
 #if LAZY_GREASE
-          grease_row_inc(&grease, len_e, m2_e[j], prime, elements_contract(elts, prime, nob));
+          grease_row_inc(&grease_e, len_e, m2_e[j], prime, elements_contract(elts, prime, nob));
 #else
           (*row_operations.incer)(grease_e.rows[elements_contract(elts, prime, nob) - 1], m2_e[j], len_e);
 #endif

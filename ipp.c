@@ -1,5 +1,5 @@
 /*
- * $Id: ipp.c,v 1.5 2001/11/29 01:13:09 jon Exp $
+ * $Id: ipp.c,v 1.6 2001/12/27 01:17:12 jon Exp $
  *
  * Read a permutation into a matrix
  *
@@ -82,7 +82,7 @@ int main(int argc, const char * const argv[])
     assert(j >= 1);
     put_element_to_row(nob, j - 1, row, 1);
     if (0 == endian_write_row(outp, row, len)) {
-      fprintf(stderr, "%s: write output row to %s\n", name, out);
+      fprintf(stderr, "%s: cannot write output row %d to %s\n", name, i, out);
       fclose(inp);
       fclose(outp);
       exit(1);

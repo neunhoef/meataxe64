@@ -1,5 +1,5 @@
 /*
- * $Id: eim.c,v 1.5 2001/11/29 01:13:09 jon Exp $
+ * $Id: eim.c,v 1.6 2001/12/27 01:17:12 jon Exp $
  *
  * implode a matrix (ie glue exploded matrices together)
  *
@@ -11,10 +11,12 @@
 #include <assert.h>
 #include "elements.h"
 #include "endian.h"
+#include "exrows.h"
 #include "files.h"
 #include "header.h"
 #include "memory.h"
 #include "map.h"
+#include "primes.h"
 #include "read.h"
 #include "utils.h"
 #include "write.h"
@@ -47,7 +49,7 @@ int main(int argc,  const char *const argv[])
   const header *h = NULL, *outh;
   const header **headers;
   unsigned int *row1, *row2;
-  unsigned int nob, nod, nor, len, prime;
+  unsigned int nob = 0, nod = 0, nor, len, prime = 0;
   unsigned int col_pieces, row_pieces;
   unsigned int rows, cols;
   unsigned int i, j;
@@ -71,6 +73,7 @@ int main(int argc,  const char *const argv[])
     assert(NULL != h);
     fclose(input);
     cols += header_get_noc(h);
+    header_free(h);
   }
   for (i = 0; i < row_pieces; i++) {
     matrix = pathname(argv[2], names[i * col_pieces]);
@@ -81,11 +84,16 @@ int main(int argc,  const char *const argv[])
     assert(NULL != h);
     fclose(input);
     rows += header_get_nor(h);
+    if (0 == i) {
+      prime = header_get_prime(h);
+      nob = header_get_nob(h);
+      nod = header_get_nod(h);
+    }
+    header_free(h);
   }
-  assert(NULL != h);
-  prime = header_get_prime(h);
-  nob = header_get_nob(h);
-  nod = header_get_nod(h);
+  assert(0 != nob);
+  assert(0 != nod);
+  assert(is_a_prime_power(prime));
   outh = header_create(prime, nob, nod, cols, rows);
   assert(NULL != outh);
   len = header_get_len(outh);
@@ -117,7 +125,6 @@ int main(int argc,  const char *const argv[])
     nor = header_get_nor(headers[0]);
     for (j = 1; j < col_pieces; j++) {
       if (header_get_nor(headers[j]) != nor || header_get_prime(headers[j]) != prime) {
-        /*** Check for consistency on prime */
         fprintf(stderr, "%s header mismatch %d != %d or %d != %d from %s and %s, terminating\n",
                 name, nor, header_get_nor(headers[j]), prime, header_get_prime(headers[j]),
                 pathname(argv[2], names[i * col_pieces]), pathname(argv[2], names[i * col_pieces + j]));
@@ -125,20 +132,8 @@ int main(int argc,  const char *const argv[])
       }
     }
     for (k = 0; k < nor; k++) {
-      unsigned int l = 0; /* Index into output row */
-      for (j = 0; j < col_pieces; j++) {
-        unsigned int m = 0, n;
-        if (0 == endian_read_row(inputs[j], row2, header_get_len(headers[j]))) {
-          fprintf(stderr, "%s cannot read row from %s, terminating\n",
-                  name, names[i * col_pieces + j]);
-          fail(inputs, output, col_pieces);
-        }
-        n = header_get_noc(headers[j]);
-        while (m < n) {
-          put_element_to_row(nob, l, row1, get_element_from_row(nob, m, row2));            
-          m++;
-          l++;
-        }
+      if (0 == ex_row_get(col_pieces, inputs, headers, row1, row2, name, names, i, nob)) {
+        fail(inputs, output, col_pieces);
       }
       if (0 == endian_write_row(output, row1, header_get_len(outh))) {
         fprintf(stderr, "%s cannot write row to %s, terminating\n",

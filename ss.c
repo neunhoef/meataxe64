@@ -1,5 +1,5 @@
 /*
- * $Id: ss.c,v 1.5 2001/12/11 01:00:44 jon Exp $
+ * $Id: ss.c,v 1.6 2001/12/27 01:17:12 jon Exp $
  *
  * Function to compute subspace representation
  * Will work entirely in RAM if possible, otherwise rereading basis file
@@ -104,13 +104,15 @@ void subspace(const char *range, const char *image,
     cleanup(inp1, inp2, outp);
     exit(1);
   }
+  /* Set up image and output rows */
   for (d = 0; d < step_i; d++) {
-    rows2[d] = memory_pointer_offset(800, d, len);
-    rows4[d] = memory_pointer_offset(860, d, len_e);
+    rows2[d] = memory_pointer_offset(0, d, len);
+    rows4[d] = memory_pointer_offset(400, d, len_e);
   }
+  /* Set up range and -1 rows */
   for (d = 0; d < step_j; d++) {
-    rows1[d] = memory_pointer_offset(0, d, len);
-    rows3[d] = memory_pointer_offset(400, d, len_e);
+    rows1[d] = memory_pointer_offset(800, d, len);
+    rows3[d] = memory_pointer_offset(860, d, len_e);
   }
   map = my_malloc(nor * sizeof(int));
   for (i = 0; i < nor; i += step_i) {

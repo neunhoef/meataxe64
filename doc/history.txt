@@ -65,3 +65,4 @@
 20011215 - added diff, rnf, iv, script functions
 20011216 - add standard base, zcheck and dual
 20011223 - add lazy grease
+20011226 - complete split_all

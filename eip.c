@@ -1,5 +1,5 @@
 /*
- * $Id: eip.c,v 1.2 2001/11/06 22:25:40 jon Exp $
+ * $Id: eip.c,v 1.3 2001/12/27 01:17:12 jon Exp $
  *
  * Read a permutation into an exploded matrix
  *
@@ -95,7 +95,11 @@ int main(int argc, const char * const argv[])
     j = getin(inp, 7);
     assert(j >= 1);
     put_element_to_row(nob, j - 1, row, 1);
-    ex_row_put(i, nor, nor, argv[2], names, split, row, outputs);
+    if (0 == ex_row_put(i, nor, nor, argv[2], names, split, row, outputs)) {
+      fprintf(stderr, "%s: cannot write output row %d\n", name, i);
+      fclose(inp);
+      exit(1);
+    }
   }
   fclose(inp);
   return 0;

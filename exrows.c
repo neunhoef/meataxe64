@@ -1,5 +1,5 @@
 /*
- * $Id: exrows.c,v 1.5 2001/11/29 01:13:09 jon Exp $
+ * $Id: exrows.c,v 1.6 2001/12/27 01:17:12 jon Exp $
  *
  * Extended row manipulation for meataxe
  *
@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <limits.h>
 #include <assert.h>
+#include "elements.h"
 #include "endian.h"
 #include "files.h"
 #include "header.h"
@@ -55,4 +56,26 @@ int ex_row_put(unsigned int row_num, unsigned int total_cols, unsigned int total
     }
   }
   return 0;
+}
+
+int ex_row_get(unsigned int col_pieces, FILE **inputs, const header **headers,
+               unsigned int *row1, unsigned int *row2, const char *name, const char **names,
+               unsigned int i, unsigned int nob)
+{
+  unsigned int j, l = 0; /* Index into output row */
+  for (j = 0; j < col_pieces; j++) {
+    unsigned int m = 0, n;
+    if (0 == endian_read_row(inputs[j], row2, header_get_len(headers[j]))) {
+      fprintf(stderr, "%s cannot read row from %s, terminating\n",
+              name, names[i * col_pieces + j]);
+      return 0;
+    }
+    n = header_get_noc(headers[j]);
+    while (m < n) {
+      put_element_to_row(nob, l, row1, get_element_from_row(nob, m, row2));            
+      m++;
+      l++;
+    }
+  }
+  return 1;
 }
