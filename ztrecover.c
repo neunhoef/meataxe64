@@ -1,5 +1,5 @@
 /*
- * $Id: ztrecover.c,v 1.1 2002/07/12 18:37:06 jon Exp $
+ * $Id: ztrecover.c,v 1.2 2002/09/21 16:59:46 jon Exp $
  *
  * Recover a tensor subspace
  *
@@ -108,7 +108,7 @@ int main(int argc, const char * const argv[])
     }
     m_to_v(mat_rows, row_out, noc1, noc2, prime);
     errno = 0;
-    if (0 == endian_write_row(inp, row_out, len_o)) {
+    if (0 == endian_write_row(outp, row_out, len_o)) {
       if ( 0 != errno) {
         perror(name);
       }
