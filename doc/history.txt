@@ -175,3 +175,6 @@ skew seventh
 20020720 - Add zrand
 20020724 - Fix split_with_element to allow pathological elements
 20020802 - Add new_irredf_and_indiciate_with_orders
+20020806 - Start on tensor condense
+20020823 - Start on tensor uncondense
+20020826 Fix problem in zscript with renaming large files.

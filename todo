@@ -1,13 +1,15 @@
 Worry about isspace failure (can't detect \n) (still occurs on RH 7.2) ctype is buggered
 Worry about return (NULL == s) code generation error
+Make zsums and friends distinguish find failure from errors
+Fix find_nullity_one and friends to use better codes from zsums and friends
+Think about a restricted form of new_irred where we supply the script (only for things like sym_basis)
 Profile multiply (eg on 26750 for Co1) for different memory sizes
 Profile zns on 3584.e.3 for McL for different memory sizes. Think about grease strategy.
 Think about Sn and symmetrized powers
 Optimise monst by reversing bit order
 Investigate better matrix multiplications
 Think about orthogonal group sign
-Investigate rename failure on large files from zscript
-Consider allowing maps into ztsp and ztspf
+Consider allowing maps into ztsp and ztspf and ztco
 Look into intermediate file version of find_best_nullity_with_orders and zfln *
 Fix zvp and zps to take less memory
 Think about better grease vector selection for making vectors
@@ -24,4 +26,4 @@ Examine profiles from monst (1)
 Consider a more structured error return type (1)
 Convert monster generator to use new operations (2)
 Work on lattice of submodules (5)
-(19, 26/07/2002, 07/07/2002)
+(19, 13/08/2002, 25/07/2002)

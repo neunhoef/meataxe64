@@ -1,5 +1,5 @@
 /*
- * $Id: script.c,v 1.5 2002/06/25 10:30:12 jon Exp $
+ * $Id: script.c,v 1.6 2002/08/26 12:29:28 jon Exp $
  *
  * Function to compute a script in two generators
  *
@@ -235,7 +235,7 @@ int exec_script(const char *m1, const char *m2, const char *m3,
   if (0 == strcmp(m1, current) || 0 == strcmp(m2, current)) {
     return scale(current, m3, 1, name);
   } else {
-    (void)ren(current, m3); /* Turn current summand into output */
+    rename(current, m3); /* Turn current summand into output */
   }
   return 1;
 }
