@@ -1,17 +1,17 @@
 /*
- * $Id: write.c,v 1.6 2001/09/25 22:31:58 jon Exp $
+ * $Id: write.c,v 1.7 2001/11/07 22:35:27 jon Exp $
  *
  * Write a header
  *
  */
 
+#include "write.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
 #include "header.h"
 #include "utils.h"
 #include "endian.h"
-#include "write.h"
 
 int write_text_header(FILE *fp, const header *h)
 {

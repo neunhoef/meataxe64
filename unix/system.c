@@ -1,9 +1,10 @@
 /*
- * $Id: system.c,v 1.5 2001/10/09 19:36:26 jon Exp $
+ * $Id: system.c,v 1.6 2001/11/07 22:35:27 jon Exp $
  *
  * system dependent stuff for locking etc
  */
 
+#include "system.h"
 #include <unistd.h>
 #include <stdio.h>
 #include <netdb.h>
@@ -14,7 +15,6 @@
 #include <string.h>
 #include <limits.h>
 #include "files.h"
-#include "system.h"
 
 void just_wait(unsigned int i)
 {

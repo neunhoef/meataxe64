@@ -1,15 +1,15 @@
 /*
- * $Id: endian.c,v 1.6 2001/09/25 22:31:58 jon Exp $
+ * $Id: endian.c,v 1.7 2001/11/07 22:35:27 jon Exp $
  *
  * Endian handling for meataxe
  *
  */
 
+#include "endian.h"
 #include <stdio.h>
 #include <assert.h>
 #include <limits.h>
 #include "utils.h"
-#include "endian.h"
 
 static int endian_is_big = 0;
 

@@ -1,16 +1,16 @@
 /*
- * $Id: memory.c,v 1.3 2001/09/25 22:31:58 jon Exp $
+ * $Id: memory.c,v 1.4 2001/11/07 22:35:27 jon Exp $
  *
  * Large memory manipulation for meataxe
  *
  */
 
+#include "memory.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 #include "utils.h"
-#include "memory.h"
 
 static unsigned char *memory = NULL;
 static size_t extent = 0;

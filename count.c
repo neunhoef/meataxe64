@@ -1,10 +1,11 @@
 /*
- * $Id: count.c,v 1.2 2001/10/07 18:02:56 jon Exp $
+ * $Id: count.c,v 1.3 2001/11/07 22:35:27 jon Exp $
  *
  * Function to count the non-zero elements in a matrix
  *
  */
 
+#include "count.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -13,7 +14,6 @@
 #include "header.h"
 #include "memory.h"
 #include "read.h"
-#include "count.h"
 
 unsigned int count(const char *matrix, const char *name)
 {

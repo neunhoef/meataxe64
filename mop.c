@@ -1,5 +1,5 @@
 /*
- * $Id: mop.c,v 1.18 2001/10/13 19:33:03 jon Exp $
+ * $Id: mop.c,v 1.19 2001/11/07 22:35:27 jon Exp $
  *
  * Monster operations for meataxe
  *
@@ -7,12 +7,12 @@
  *
  */
 
+#include "mop.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
 #include "rows.h"
-#include "mop.h"
 
 unsigned char vectemp[24712];
 unsigned long ptr1, ptr2;

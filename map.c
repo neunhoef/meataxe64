@@ -1,16 +1,16 @@
 /*
- * $Id: map.c,v 1.2 2001/10/07 18:02:56 jon Exp $
+ * $Id: map.c,v 1.3 2001/11/07 22:35:27 jon Exp $
  *
  * Handle maps for exploded matrices
  *
  */
 
+#include "map.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
 #include "files.h"
 #include "utils.h"
-#include "map.h"
 
 void input_map(const char *name, const char *dir, unsigned int *cols,
                unsigned int *rows, const char ***names)

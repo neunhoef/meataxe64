@@ -1,16 +1,29 @@
 /*
- * $Id: rows.c,v 1.10 2001/09/25 22:31:58 jon Exp $
+ * $Id: rows.c,v 1.11 2001/11/07 22:35:27 jon Exp $
  *
  * Row manipulation for meataxe
  *
  */
 
+#include "rows.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 #include "utils.h"
-#include "rows.h"
+
+int row_is_zero(unsigned int *row, unsigned int len)
+{
+  while (len > 0) {
+    if (0 != *row) {
+      return 0;
+    } else {
+      row++;
+      len--;
+    }
+  }
+  return 1;
+}
 
 static void row_add_2(const unsigned int *row1, const unsigned int *row2,
                      unsigned int *row3, unsigned int len)

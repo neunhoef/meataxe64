@@ -1,10 +1,11 @@
 /*
- * $Id: mul.c,v 1.10 2001/09/25 22:31:58 jon Exp $
+ * $Id: mul.c,v 1.11 2001/11/07 22:35:27 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
  */
 
+#include "mul.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -19,12 +20,11 @@
 #include "rows.h"
 #include "utils.h"
 #include "write.h"
-#include "mul.h"
 
 #define M1_SIZE 450
 #define M2_SIZE 100
 
-#define contract(elt,prime,nob) ((2 == (prime)) ? (elt) : elements_contract(elt, prime, nob))
+#define contract(elts,prime,nob) ((2 == (prime)) ? (elts) : elements_contract(elts, prime, nob))
 
 static int cleanup(FILE *inp1, FILE *inp2, FILE *outp)
 {
@@ -113,7 +113,7 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
   }
   printf("mul handling %d rows from %d at a time\n", nox, nor1);
   printf("mul nox2 = %d rows\n", nox2);
-  /* Compute best lazy grease give nox2 */
+  /* Compute best lazy grease given nox2 */
   if (0 == grease(prime, &step, nox2)) {
       greased = 0;
   }
@@ -159,6 +159,7 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
       unsigned int size = (step + i <= noc1) ? step : noc1 - i;
       unsigned int word_offset, bit_offset, mask;
       /* Read size rows from matrix 2 into rows 2 */
+      /* This sets the inital rows */
       l = 1;
       for (j = 0; j < size; j++) {
         if (0 == endian_read_row(inp2, grease_rows[l - 1], len2)) {
@@ -181,7 +182,7 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
         }
         if (0 != elt) {
           if (greased) {
-            (*incer)(grease_rows[contract(elt, prime, nob)-1], rows3[j], len2);
+            (*incer)(grease_rows[contract(elt, prime, nob) - 1], rows3[j], len2);
           } else {
             if (1 == elt) {
               (*incer)(grease_rows[0], rows3[j], len2);

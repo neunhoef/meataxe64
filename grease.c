@@ -1,10 +1,11 @@
 /*
- * $Id: grease.c,v 1.7 2001/09/25 22:31:58 jon Exp $
+ * $Id: grease.c,v 1.8 2001/11/07 22:35:27 jon Exp $
  *
  * Functions to grease matrix rows
  *
  */
 
+#include "grease.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -15,7 +16,6 @@
 #include "memory.h"
 #include "rows.h"
 #include "utils.h"
-#include "grease.h"
 
 static unsigned grease_table_size;
 static unsigned grease_table_rows;

@@ -1,16 +1,16 @@
 /*
- * $Id: matrix.c,v 1.4 2001/09/20 00:00:16 jon Exp $
+ * $Id: matrix.c,v 1.5 2001/11/07 22:35:27 jon Exp $
  *
  * Row manipulation for meataxe
  *
  */
 
+#include "matrix.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
 #include "utils.h"
 #include "rows.h"
-#include "matrix.h"
 
 int matrix_malloc(unsigned int nor, void **rows)
 {

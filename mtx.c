@@ -1,10 +1,11 @@
 /*
- * $Id: mtx.c,v 1.7 2001/10/03 23:57:33 jon Exp $
+ * $Id: mtx.c,v 1.8 2001/11/07 22:35:27 jon Exp $
  *
  * Extended row operations for monster meataxe
  *
  */
 
+#include "mtx.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,7 +18,6 @@
 #include "memory.h"
 #include "utils.h"
 #include "write.h"
-#include "mtx.h"
 
 static const char *name = "monst";
 static unsigned int *row;

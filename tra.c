@@ -1,10 +1,11 @@
 /*
- * $Id: tra.c,v 1.1 2001/10/07 18:02:56 jon Exp $
+ * $Id: tra.c,v 1.2 2001/11/07 22:35:27 jon Exp $
  *
  * Function to transpose a matrix
  *
  */
 
+#include "tra.h"
 #include <stdio.h>
 #include <assert.h>
 #include "endian.h"
@@ -14,7 +15,6 @@
 #include "memory.h"
 #include "read.h"
 #include "write.h"
-#include "tra.h"
 
 int tra(const char *m1, const char *m2, const char *name)
 {

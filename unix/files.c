@@ -1,10 +1,11 @@
 /*
- * $Id: files.c,v 1.2 2001/10/09 19:36:26 jon Exp $
+ * $Id: files.c,v 1.3 2001/11/07 22:35:27 jon Exp $
  *
  * file system stuff for unix
  *
  */
 
+#include "files.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -12,7 +13,6 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include "utils.h"
-#include "files.h"
 
 int remove(const char *file)
 {

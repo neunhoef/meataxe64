@@ -1,5 +1,5 @@
 /*
- * $Id: write.h,v 1.4 2001/09/12 23:13:04 jon Exp $
+ * $Id: write.h,v 1.5 2001/11/07 22:35:27 jon Exp $
  *
  * Writing a header for meataxe
  *
@@ -9,6 +9,7 @@
 #define included__write
 
 #include <stdio.h>
+#include "header.h"
 
 extern int write_text_header(FILE *, const header *);
 extern int write_binary_header(FILE *, const header *, const char *);

@@ -1,15 +1,15 @@
 /*
- * $Id: primes.c,v 1.6 2001/11/06 22:25:40 jon Exp $
+ * $Id: primes.c,v 1.7 2001/11/07 22:35:27 jon Exp $
  *
  * Prime manipulation for meataxe
  *
  */
 
+#include "primes.h"
 #include <stdio.h>
 #include <assert.h>
 #include <limits.h>
 #include "utils.h"
-#include "primes.h"
 
 static int prime_rep_2(unsigned int *e)
 {

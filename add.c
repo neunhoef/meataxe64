@@ -1,10 +1,11 @@
 /*
- * $Id: add.c,v 1.9 2001/09/25 22:31:58 jon Exp $
+ * $Id: add.c,v 1.10 2001/11/07 22:35:27 jon Exp $
  *
  * Function to add two matrices to give a third
  *
  */
 
+#include "add.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -17,7 +18,6 @@
 #include "rows.h"
 #include "utils.h"
 #include "write.h"
-#include "add.h"
 
 int add(const char *m1, const char *m2, const char *m3, const char *name)
 {

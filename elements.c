@@ -1,16 +1,16 @@
 /*
- * $Id: elements.c,v 1.11 2001/11/06 22:25:40 jon Exp $
+ * $Id: elements.c,v 1.12 2001/11/07 22:35:27 jon Exp $
  *
  * Element manipulation for meataxe
  *
  */
 
+#include "elements.h"
 #include <stdio.h>
 #include <assert.h>
 #include <ctype.h>
 #include "utils.h"
 #include "primes.h"
-#include "elements.h"
 
 static prime_ops prime_operations = { NULL, NULL, NULL, NULL};
 static int inited = 0;
@@ -175,4 +175,35 @@ unsigned int invert_elements(unsigned int elts, unsigned int nob, unsigned int p
     elts >>= nob;
   }
   return new;
+}
+
+unsigned int first_non_zero(unsigned int *row, unsigned int nob,
+                            unsigned int len, unsigned int *pos)
+{
+  unsigned int i = 0;
+  unsigned int elts_per_word = bits_in_unsigned_int / nob;
+  assert(NULL != row);
+  assert(NULL != pos);
+  while (0 != len) {
+    unsigned int elts = *row;
+    if (0 != elts) {
+      unsigned int mask = (1 << nob) - 1;
+      while (0 != elts) {
+        unsigned int elt = elts & mask;
+        if (0 != elt) {
+          *pos = i;
+          return elt;
+        } else {
+          elts >>= nob;
+          i++;
+        }
+      }
+      assert(0);
+    } else {
+      i += elts_per_word;
+      row++;
+      len--;
+    }
+  }
+  return 0; /* No first non zero found */
 }

@@ -1,10 +1,11 @@
 /*
- * $Id: header.c,v 1.6 2001/11/06 22:25:40 jon Exp $
+ * $Id: header.c,v 1.7 2001/11/07 22:35:27 jon Exp $
  *
  * Header manipulation
  *
  */
 
+#include "header.h"
 #include <stdio.h>
 #include <assert.h>
 #include <limits.h>
@@ -12,7 +13,6 @@
 #include <string.h>
 #include "primes.h"
 #include "utils.h"
-#include "header.h"
 
 struct header_struct
 {

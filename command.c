@@ -1,10 +1,11 @@
 /*
- * $Id: command.c,v 1.8 2001/10/16 22:55:53 jon Exp $
+ * $Id: command.c,v 1.9 2001/11/07 22:35:27 jon Exp $
  *
  * Interface to task manager (definition)
  *
  */
 
+#include "command.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -12,7 +13,6 @@
 #include <assert.h>
 #include "system.h"
 #include "utils.h"
-#include "command.h"
 
 #define MAX_TASKS 1000000
 static const char *task_name = NULL;

@@ -1,5 +1,5 @@
 /*
- * $Id: read.h,v 1.4 2001/10/16 22:55:53 jon Exp $
+ * $Id: read.h,v 1.5 2001/11/07 22:35:27 jon Exp $
  *
  * Reading a header for meataxe
  *
@@ -9,6 +9,7 @@
 #define included__read
 
 #include <stdio.h>
+#include "header.h"
 
 extern int read_text_header(FILE *, const header **, const char *);
 extern int read_binary_header(FILE *, const header **, const char *);

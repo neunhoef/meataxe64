@@ -1,17 +1,17 @@
 /*
- * $Id: utils.c,v 1.12 2001/11/06 22:25:40 jon Exp $
+ * $Id: utils.c,v 1.13 2001/11/07 22:35:27 jon Exp $
  *
  * Utils for meataxe
  *
  */
 
+#include "utils.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 #include <limits.h>
 #include <ctype.h>
-#include "utils.h"
 
 unsigned int bits_in_unsigned_int = CHAR_BIT * sizeof(unsigned int);
 

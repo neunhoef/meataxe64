@@ -1,10 +1,11 @@
 /*
- * $Id: ident.c,v 1.2 2001/11/06 22:25:40 jon Exp $
+ * $Id: ident.c,v 1.3 2001/11/07 22:35:27 jon Exp $
  *
  * Subroutine to generate identity matrix
  *
  */
 
+#include "ident.h"
 #include <stdio.h>
 #include <assert.h>
 #include "elements.h"
@@ -15,7 +16,6 @@
 #include "rows.h"
 #include "utils.h"
 #include "write.h"
-#include "ident.h"
 
 int ident(unsigned int prime, unsigned int nor, unsigned int noc,
           const char *out, const char *name)

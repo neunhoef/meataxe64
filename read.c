@@ -1,10 +1,11 @@
 /*
- * $Id: read.c,v 1.12 2001/11/06 22:25:40 jon Exp $
+ * $Id: read.c,v 1.13 2001/11/07 22:35:27 jon Exp $
  *
  * Read a header
  *
  */
 
+#include "read.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -12,7 +13,6 @@
 #include "header.h"
 #include "primes.h"
 #include "utils.h"
-#include "read.h"
 
 /* Read a header out of a file */
 /* Leaves file pointer pointing at next line */

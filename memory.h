@@ -1,5 +1,5 @@
 /*
- * $Id: memory.h,v 1.3 2001/09/25 22:31:58 jon Exp $
+ * $Id: memory.h,v 1.4 2001/11/07 22:35:27 jon Exp $
  *
  * Large memory manipulation for meataxe
  *
@@ -7,6 +7,8 @@
 
 #ifndef included__memory
 #define included__memory
+
+#include <stdlib.h>
 
 /* Initialise the memory system with given size */
 /* If a size of 0 is given, the default value MEM_SIZE * (1 << 20) is used */
