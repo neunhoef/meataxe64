@@ -1,5 +1,5 @@
 /*
- * $Id: rows.c,v 1.5 2001/09/09 22:34:11 jon Exp $
+ * $Id: rows.c,v 1.6 2001/09/10 20:48:56 jon Exp $
  *
  * Row manipulation for meataxe
  *
@@ -98,6 +98,55 @@ static int scaled_row_add_3(const unsigned int *row1, const unsigned int *row2,
     mod_3_add(a,b,c,d,e,f,g,h);
     assert(check_for_3(c - (h * 3)));
     *(row3++) = c - (h * 3); /* Reduce mod 3 if needed */
+  }
+  return 1;
+}
+
+#define ONE_BITS_4 0x55555555
+#define TWO_BITS_4 ((ONE_BITS_4) << 1)
+
+static int row_add_4(const unsigned int *row1, const unsigned int *row2,
+                     unsigned int *row3, unsigned int noc)
+{
+  unsigned int row_words;
+  unsigned int elts_in_word = bits_in_unsigned_int / 2;
+  unsigned int i;
+  assert(0 != noc);
+  assert(NULL != row1);
+  assert(NULL != row2);
+  assert(NULL != row3);
+  row_words = (noc + elts_in_word - 1) / elts_in_word;
+  for (i = 0; i < row_words; i++) {
+    *(row3++) = *(row1++) ^ *(row2++);
+  }
+  return 1;
+}
+
+static int scaled_row_add_4(const unsigned int *row1, const unsigned int *row2,
+                            unsigned int *row3, unsigned int noc, unsigned int elt)
+{
+  unsigned int row_words;
+  unsigned int i;
+  unsigned int elts_in_word = bits_in_unsigned_int / 2;
+  assert(0 != noc);
+  assert(NULL != row1);
+  assert(NULL != row2);
+  assert(NULL != row3);
+  assert(2 <= elt && elt <= 3);
+  row_words = (noc + elts_in_word - 1) / elts_in_word;
+  for (i = 0; i < row_words; i++) {
+    unsigned int a, b, c, d, e, f, g, h;
+    assert(4 == sizeof(unsigned int));
+    a = *(row1++);
+    b = *(row2++);
+    c = (b & TWO_BITS_4) >> 1;
+    d = b & ONE_BITS_4;
+    e = c | d; /* Detect non-zero */
+    f = b + e * (elt - 1); /* Add, with possible overflow */
+    g = c * ((elt == 3) ? 1 : 0); /* Detect 2 or 3 * 3 */
+    h = c & d; /* Detect 3  * any */
+    b = f - (g |  h) * 3; /* Subtract out the overflows */
+    *(row3++) = a ^ b;
   }
   return 1;
 }
@@ -249,6 +298,10 @@ int rows_init(unsigned int prime, row_opsp ops)
   } else if (3 == prime) {
     ops->adder = &row_add_3;
     ops->scaled_adder = &scaled_row_add_3;
+    return 1;
+  } else if (4 == prime) {
+    ops->adder = &row_add_4;
+    ops->scaled_adder = &scaled_row_add_4;
     return 1;
   } else if (5 == prime) {
     ops->adder = &row_add_5;
