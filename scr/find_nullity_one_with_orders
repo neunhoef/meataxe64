@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: find_nullity_one_with_orders,v 1.4 2002/06/25 10:30:12 jon Exp $
+# $Id: find_nullity_one_with_orders,v 1.5 2002/07/12 18:07:37 jon Exp $
 #
 # Script to find an element of nullity one in two generators
 #
@@ -48,6 +48,7 @@ while [ $ok -eq 0 ]; do
     name=`echo $out | sed -e "s/^.*element //g;s/ of nullity.*$//g"`
     cp ${name} $e
     echo $out | sed -e "s/^.*form //g;s/ .*$//g"
+    rm -f ${tmp}*
   else
     echo Failed to find an element of nullity one
     rm -f ${tmp}*
