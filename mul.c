@@ -1,5 +1,5 @@
 /*
- * $Id: mul.c,v 1.13 2001/11/18 16:43:45 jon Exp $
+ * $Id: mul.c,v 1.14 2001/11/19 18:31:49 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
@@ -48,7 +48,6 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
   row_ops row_operations;
   row_adder adder;
   row_incer incer;
-  scaled_row_adder scaled_adder;
   grease_struct grease;
   endian_init();
   inp1 = fopen(m1, "rb");
@@ -99,7 +98,6 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
   grease_init(&row_operations, &grease);
   adder = row_operations.adder;
   incer = row_operations.incer;
-  scaled_adder = row_operations.scaled_adder;
   nox1 = memory_rows(len1, M1_SIZE);
   nox3 = memory_rows(len2, M1_SIZE); /* len3 = len2 */
   nox = (nox1 > nox3) ? nox3 : nox1; /* Deal with the one with bigger rows */

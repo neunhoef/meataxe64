@@ -1,5 +1,5 @@
 /*
- * $Id: rows.h,v 1.10 2001/11/14 00:07:42 jon Exp $
+ * $Id: rows.h,v 1.11 2001/11/19 18:31:49 jon Exp $
  *
  * Row manipulation for meataxe
  *
@@ -24,6 +24,9 @@ typedef void (*row_incer)(const unsigned int *,
 typedef void (*scaled_row_adder)(const unsigned int *, const unsigned int *,
                                 unsigned int *, unsigned int, unsigned int);
 
+typedef void (*scaled_row_incer)(const unsigned int *, unsigned int *,
+                                 unsigned int, unsigned int);
+
 typedef void (*row_scaler)(const unsigned int *, unsigned int *,
                           unsigned int, unsigned int);
 
@@ -34,6 +37,7 @@ typedef struct {
   row_adder adder;
   row_incer incer;
   scaled_row_adder scaled_adder;
+  scaled_row_incer scaled_incer;
   row_scaler scaler;
   row_scaler_in_place scaler_in_place;
 } row_ops, *row_opsp;

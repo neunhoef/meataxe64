@@ -48,3 +48,4 @@
 20011113 - matrix_malloc can't fail. Debugging rn. Add proper row_incer and in place scale
 20011115 - produced simple rank
 20011116 - rn works. sns produced
+20011118 - ns produced

@@ -1,5 +1,5 @@
 /*
- * $Id: rn.c,v 1.4 2001/11/18 16:43:45 jon Exp $
+ * $Id: rn.c,v 1.5 2001/11/19 18:31:49 jon Exp $
  *
  * Compute the rank of a matrix
  *
@@ -52,7 +52,7 @@ unsigned int rank(const char *m, const char *name)
     fclose(inp);
     exit(1);
   }
-  echelise(mat, nor, &n, &map, grease.level, prime, len, nob, 900, 0, name);
+  echelise(mat, nor, &n, &map, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, 0, name);
   free(mat);
   free(map);
   fclose(inp);

@@ -1,5 +1,5 @@
 /*
- * $Id: clean.c,v 1.6 2001/11/18 16:43:45 jon Exp $
+ * $Id: clean.c,v 1.7 2001/11/19 18:31:48 jon Exp $
  *
  * Cleaning and echilisation for meataxe
  *
@@ -12,27 +12,27 @@
 #include "elements.h"
 #include "grease.h"
 #include "matrix.h"
+#include "memory.h"
 #include "primes.h"
 #include "rows.h"
 #include "utils.h"
 
 static prime_ops prime_operations = {NULL, NULL, NULL, NULL};
 
-static row_ops row_operations = {NULL, NULL, NULL, NULL, NULL};
+static row_ops row_operations = {NULL, NULL, NULL, NULL, NULL, NULL};
 
 void clean(unsigned int **m1, unsigned int d1,
-           unsigned int **m2, unsigned int d2,
-           unsigned int *d_out, int *map,
+           unsigned int **m2, unsigned int d2, int *map,
+           unsigned int **m1_e, unsigned int **m2_e, int record,
            unsigned int grease_level, unsigned int prime,
            unsigned int len, unsigned int nob,
-           unsigned int start, const char *name)
+           unsigned int start, unsigned int start_e,
+           unsigned int len_e, const char *name)
 {
-  unsigned int dout = 0;
   unsigned int i = 0, inc = grease_level;
-  grease_struct grease;
+  grease_struct grease, grease_e;
   assert(NULL != m1);
   assert(NULL != m2);
-  assert(NULL != d_out);
   assert(NULL != map);
   assert(NULL != name);
   assert(0 != d1);
@@ -41,29 +41,45 @@ void clean(unsigned int **m1, unsigned int d1,
   assert(0 != nob);
   assert(0 != len);
   assert(0 != grease_level);
+  if (0 != record) {
+    assert(NULL != m1_e);
+    assert(NULL != m2_e);
+  }
   grease.level = grease_level;
+  grease_e.level = grease_level;
   primes_init(prime, &prime_operations);
   rows_init(prime, &row_operations);
   grease_init(&row_operations, &grease);
+  grease_init(&row_operations, &grease_e);
   grease_allocate(prime, len, &grease, start);
+  if (0 != record) {
+    grease_allocate(prime, len_e, &grease_e, start_e);
+  }
   while (i < d1) {
     unsigned int count; /* Actual amount we'll grease */
     unsigned int j = 0, k = 1;
     count = 0;
     grease_init_rows(&grease, prime);
+    if (0 != record) {
+      grease_init_rows(&grease_e, prime);
+    }
     /* Now insert the initial elements into grease.rows */
     while (count < grease_level && i + j < d1) {
       assert(NULL != m1[i + j]);
       if (map[i + j] >= 0) {
-        grease.rows[k - 1] = m1[i + j];
         /* Only insert if a useful row */
+        grease.rows[k - 1] = m1[i + j];
+        if (0 != record) {
+          grease_e.rows[k - 1] = m1_e[i + j];
+        }
         k *= prime;
         count++;
       }
       j++;
     }
     /* Now compute grease */
-    if (0 == grease_make_rows(&grease, count, prime, len)) {
+    if (0 == grease_make_rows(&grease, count, prime, len) ||
+        ((0 != record) && 0 == grease_make_rows(&grease_e, count, prime, len_e))) {
       fprintf(stderr, "%s: unable to compute grease, terminating\n", name);
       exit(1);
     }
@@ -81,25 +97,24 @@ void clean(unsigned int **m1, unsigned int d1,
       if (0 != elts) {
         elts = negate_elements(elts, nob, prime);
         (*row_operations.incer)(grease.rows[elements_contract(elts, prime, nob) - 1], m2[j], len);
+        if (0 != record) {
+          (*row_operations.incer)(grease_e.rows[elements_contract(elts, prime, nob) - 1], m2_e[j], len);
+        }
       }
     } /* for */
     i += inc;
   } /* i */
-  for (i = 0; i < d2; i++) {
-    assert(NULL != m2[i]);
-    if (0 == row_is_zero(m2[i], len)) {
-      dout++;
-    }
-  }
   grease_free(&grease);
-  *d_out = dout;
 }
 
 void echelise(unsigned int **m, unsigned int d,
               unsigned int *d_out, int **map,
+              unsigned int **m_e, int record,
               unsigned int grease_level, unsigned int prime,
               unsigned int len, unsigned int nob,
-              unsigned int start, int full, const char *name)
+              unsigned int start, unsigned int start_e,
+              unsigned int len_e,
+              int full, const char *name)
 {
   unsigned int dout = 0;
   unsigned int i = 0, j = 0, inc = grease_level;
@@ -129,8 +144,14 @@ void echelise(unsigned int **m, unsigned int d,
             elt = (*prime_operations.negate)(elt);
             if (1 == elt) {
               (*row_operations.incer)(m[i + n], m[i + l], len);
+              if (0 != record) {
+                (*row_operations.incer)(m_e[i + n], m_e[i + l], len_e);
+              }
             } else {
-              (*row_operations.scaled_adder)(m[i + n], m[i + l], m[i + l], len, elt);
+              (*row_operations.scaled_incer)(m[i + n], m[i + l], len, elt);
+              if (0 != record) {
+                (*row_operations.scaled_incer)(m_e[i + n], m_e[i + l], len_e, elt);
+              }
             }
           }
         }
@@ -143,6 +164,9 @@ void echelise(unsigned int **m, unsigned int d,
         if (1 != elt) {
           elt = (*prime_operations.invert)(elt);
           (*row_operations.scaler_in_place)(m[i + l], len, elt);
+          if (0 != record) {
+            (*row_operations.scaler_in_place)(m_e[i + l], len_e, elt);
+          }
         }
         bits[i + l] = pos;
         k++;
@@ -162,8 +186,14 @@ void echelise(unsigned int **m, unsigned int d,
             elt = (*prime_operations.negate)(elt);
             if (1 == elt) {
               (*row_operations.incer)(m[i + n], m[i + r], len);
+              if (0 != record) {
+                (*row_operations.incer)(m_e[i + n], m_e[i + r], len_e);
+              }
             } else {
-              (*row_operations.scaled_adder)(m[i + n], m[i + r], m[i + r], len, elt);
+              (*row_operations.scaled_incer)(m[i + n], m[i + r], len, elt);
+              if (0 != record) {
+                (*row_operations.scaled_incer)(m_e[i + n], m_e[i + r], len_e, elt);
+              }
             }
           }
         }
@@ -174,12 +204,16 @@ void echelise(unsigned int **m, unsigned int d,
         /* Only back clean for full echelise */
         /* Now clean m[0, i] with m[i, i + l] */
         if (0 != i) {
-          clean(m + i, l, m, i, &n, bits + i, k, prime, len, nob, start, name);
+          clean(m + i, l, m, i, bits + i,
+                m_e + i, m_e, record, k, prime, len,
+                nob, start, start_e, len_e, name);
         }
       }
       /* Now clean m[i + l, d] with m[i, i + l] */
       if (d > i + l) {
-        clean(m + i, l, m + i + l, d - i - l, &n, bits + i, k, prime, len, nob, start, name);
+        clean(m + i, l, m + i + l, d - i - l, bits + i,
+              m_e + i, m_e + i + l, record, k, prime, len,
+              nob, start, start_e, len_e, name);
       }
     }
     i += l;
@@ -213,9 +247,6 @@ unsigned int simple_echelise(unsigned int **m, unsigned int d,
         elt = (*prime_operations.invert)(elt);
         (*row_operations.scaler_in_place)(m[i], len, elt);
       }
-/*
-      printf("row %d significant at %d\n", i, j);
-*/
       while (k < d) {
         elt = get_element_from_row(nob, j, m[k]);
         if (0 != elt) {
@@ -223,15 +254,12 @@ unsigned int simple_echelise(unsigned int **m, unsigned int d,
           if (1 == elt) {
             (*row_operations.incer)(m[i], m[k], len);
           } else {
-            (*row_operations.scaled_adder)(m[i], m[k], m[k], len, elt);
+            (*row_operations.scaled_incer)(m[i], m[k], len, elt);
           }
         }
         k++;
       } /* while k */
-/*
-    } else {
-      printf("row %d not significant\n", i);
-*/    } /* if */
+    } /* if */
     i++;
   } /* while i */
   return rank;
@@ -271,8 +299,8 @@ unsigned int simple_echelise_and_record(unsigned int **m1, unsigned int **m2,
             (*row_operations.incer)(m1[i], m1[k], len);
             (*row_operations.incer)(m2[i], m2[k], len);
           } else {
-            (*row_operations.scaled_adder)(m1[i], m1[k], m1[k], len, elt);
-            (*row_operations.scaled_adder)(m2[i], m2[k], m1[k], len, elt);
+            (*row_operations.scaled_incer)(m1[i], m1[k], len, elt);
+            (*row_operations.scaled_incer)(m2[i], m1[k], len, elt);
           }
         }
         k++;
@@ -281,9 +309,4 @@ unsigned int simple_echelise_and_record(unsigned int **m1, unsigned int **m2,
     i++;
   } /* while i */
   return rank;
-}
-
-void clean_init(row_opsp ops)
-{
-  memcpy(&row_operations, ops, sizeof(row_operations));
 }

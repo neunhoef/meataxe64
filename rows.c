@@ -1,5 +1,5 @@
 /*
- * $Id: rows.c,v 1.12 2001/11/14 00:07:42 jon Exp $
+ * $Id: rows.c,v 1.13 2001/11/19 18:31:49 jon Exp $
  *
  * Row manipulation for meataxe
  *
@@ -159,6 +159,27 @@ static void scaled_row_add_3(const unsigned int *row1, const unsigned int *row2,
   }
 }
 
+static void scaled_row_inc_3(const unsigned int *row1, unsigned int *row2,
+                             unsigned int len, unsigned int elt)
+{
+  unsigned int i;
+  assert(2 == elt);
+  assert(0 != len);
+  assert(NULL != row1);
+  assert(NULL != row2);
+  NOT_USED(elt);
+  for (i = 0; i < len; i++) {
+    unsigned int a, b, c, d, e, f, g, h;
+    assert(4 == sizeof(unsigned int));
+    a = *(row1++);
+    b = *(row2);
+    b = scale_mod_3(b); /* Negate b */
+    mod_3_add(a,b,c,d,e,f,g,h);
+    assert(check_for_3(c - (h * 3)));
+    *(row2++) = c - (h * 3); /* Reduce mod 3 if needed */
+  }
+}
+
 static void row_scale_3(const unsigned int *row1, unsigned int *row2,
                         unsigned int len, unsigned int elt)
 {
@@ -244,6 +265,24 @@ static void scaled_row_add_4(const unsigned int *row1, const unsigned int *row2,
     b = *(row2++);
     scale_mod_4(b,c,d,e,f,g,h,elt);
     *(row3++) = a ^ b;
+  }
+}
+
+static void scaled_row_inc_4(const unsigned int *row1, unsigned int *row2,
+                             unsigned int len, unsigned int elt)
+{
+  unsigned int i;
+  assert(0 != len);
+  assert(NULL != row1);
+  assert(NULL != row2);
+  assert(2 <= elt && elt <= 3);
+  for (i = 0; i < len; i++) {
+    unsigned int a, b, c, d, e, f, g, h;
+    assert(4 == sizeof(unsigned int));
+    a = *(row1++);
+    b = *(row2);
+    scale_mod_4(b,c,d,e,f,g,h,elt);
+    *(row2++) = a ^ b;
   }
 }
 
@@ -378,7 +417,7 @@ static void row_inc_5(const unsigned int *row1, unsigned int *row2, unsigned int
     }
 
 static void scaled_row_add_5(const unsigned int *row1, const unsigned int *row2,
-                            unsigned int *row3, unsigned int len, unsigned int elt)
+                             unsigned int *row3, unsigned int len, unsigned int elt)
 {
   unsigned int i;
   assert(0 != len);
@@ -395,6 +434,26 @@ static void scaled_row_add_5(const unsigned int *row1, const unsigned int *row2,
     mod_5_add(a,b,c,d,e,f,g,h,j,k);
     assert(check_for_5(f - (k * 5)));
     *(row3++) = f - (k * 5); /* Reduce mod 5 if needed */
+  }
+}
+
+static void scaled_row_inc_5(const unsigned int *row1, unsigned int *row2,
+                             unsigned int len, unsigned int elt)
+{
+  unsigned int i;
+  assert(0 != len);
+  assert(NULL != row1);
+  assert(NULL != row2);
+  assert(2 <= elt && elt <= 4);
+  for (i = 0; i < len; i++) {
+    unsigned int a, b, c, d, e, f, g, h, j, k;
+    assert(4 == sizeof(unsigned int));
+    a = *(row1++);
+    b = *(row2);
+    scale_mod_5(b,d,c,e,f,g,h,j,elt);
+    mod_5_add(a,b,c,d,e,f,g,h,j,k);
+    assert(check_for_5(f - (k * 5)));
+    *(row2++) = f - (k * 5); /* Reduce mod 5 if needed */
   }
 }
 
@@ -452,6 +511,7 @@ int rows_init(unsigned int prime, row_opsp ops)
     ops->adder = &row_add_2;
     ops->incer = &row_inc_2;
     ops->scaled_adder = NULL; /* Should never be called */
+    ops->scaled_incer = NULL; /* Should never be called */
     ops->scaler = NULL; /* Should never be called */
     ops->scaler_in_place = NULL; /* Should never be called */
     return 1;
@@ -459,6 +519,7 @@ int rows_init(unsigned int prime, row_opsp ops)
     ops->adder = &row_add_3;
     ops->incer = &row_inc_3;
     ops->scaled_adder = &scaled_row_add_3;
+    ops->scaled_incer = &scaled_row_inc_3;
     ops->scaler = &row_scale_3;
     ops->scaler_in_place = &row_scale_in_place_3;
     return 1;
@@ -466,6 +527,7 @@ int rows_init(unsigned int prime, row_opsp ops)
     ops->adder = &row_add_4;
     ops->incer = &row_inc_4;
     ops->scaled_adder = &scaled_row_add_4;
+    ops->scaled_incer = &scaled_row_inc_4;
     ops->scaler = &row_scale_4;
     ops->scaler_in_place = &row_scale_in_place_4;
     return 1;
@@ -473,6 +535,7 @@ int rows_init(unsigned int prime, row_opsp ops)
     ops->adder = &row_add_5;
     ops->incer = &row_inc_5;
     ops->scaled_adder = &scaled_row_add_5;
+    ops->scaled_incer = &scaled_row_inc_5;
     ops->scaler = &row_scale_5;
     ops->scaler_in_place = &row_scale_in_place_5;
     return 1;
