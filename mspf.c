@@ -1,5 +1,5 @@
 /*
- * $Id: mspf.c,v 1.10 2002/07/10 15:13:07 jon Exp $
+ * $Id: mspf.c,v 1.11 2002/08/05 09:08:25 jon Exp $
  *
  * Function to spin some vectors under multiple generators
  * using intermediate files in a temporary directory.
@@ -269,6 +269,10 @@ unsigned int spin(const char *in, const char *out, const char *dir,
       }
       nor = d;
       k += stride; /* The number we consumed */
+      if (nor >= noc) {
+        /* No point in more multiplies if got a full basis */
+        break;
+      }
     }
     assert(gen->nor == old_nor);
     NOT_USED(old_nor);

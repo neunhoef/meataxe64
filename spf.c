@@ -1,5 +1,5 @@
 /*
- * $Id: spf.c,v 1.13 2002/07/10 15:13:07 jon Exp $
+ * $Id: spf.c,v 1.14 2002/08/05 09:08:25 jon Exp $
  *
  * Function to spin some vectors under two generators
  *
@@ -250,6 +250,10 @@ unsigned int spin(const char *in, const char *out, const char *a,
       }
       nor = d;
       k += stride; /* The number we consumed */
+      if (nor >= noc) {
+        /* No point in more multiplies if got a full basis */
+        break;
+      }
     }
     assert(gen->nor == old_nor);
     NOT_USED(old_nor);

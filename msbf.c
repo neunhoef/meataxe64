@@ -1,5 +1,5 @@
 /*
- * $Id: msbf.c,v 1.5 2002/07/10 15:13:07 jon Exp $
+ * $Id: msbf.c,v 1.6 2002/08/05 09:08:25 jon Exp $
  *
  * Function to spin some vectors under multiple generators to obtain a standard base
  *
@@ -313,7 +313,7 @@ unsigned int spin(const char *in, const char *out, const char *dir,
           /* Got a useful row */
           errno = 0;
           if (0 == endian_write_row(basis, rows1[i], len)) {
-            if ( 0 != errno) {
+            if (0 != errno) {
               perror(name);
             }
             fprintf(stderr, "%s: failed to write to %s, terminating\n",
@@ -324,6 +324,10 @@ unsigned int spin(const char *in, const char *out, const char *dir,
         }
       }
       k += stride; /* The number we consumed */
+      if (nor >= noc) {
+        /* No point in more multiplies if got a full basis */
+        break;
+      }
     }
     assert(gen->nor == old_nor);
     NOT_USED(old_nor);

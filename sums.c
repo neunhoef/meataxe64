@@ -1,5 +1,5 @@
 /*
- * $Id: sums.c,v 1.8 2002/07/03 12:06:54 jon Exp $
+ * $Id: sums.c,v 1.9 2002/08/05 09:08:25 jon Exp $
  *
  * Function to compute linear sums of two matices
  *
@@ -15,6 +15,7 @@
 #include "header.h"
 #include "ident.h"
 #include "mul.h"
+#include "parse.h"
 #include "primes.h"
 #include "read.h"
 #include "rn.h"
@@ -219,6 +220,10 @@ int sums(const char *in1, const char *in2, const char *out,
 */
           if (0 == rank(elts[pos], &s, name)) {
             exit(1);
+          }
+          if (verbose) {
+            printf("%s: checking element %s of rank %d\n", name, elt_names[pos], s);
+            fflush(stdout);
           }
           res = (*acceptor)(s, nor, elts[pos], elt_names[pos]);
           if (res & 1) {
