@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.16 2002/09/11 10:02:28 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.17 2002/09/11 10:55:33 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -282,6 +282,7 @@ Output on stderr is error diagnostic information.
 <li><a href="#zex">zex</a></li>
 <li><a href="#zexport">zexport</a></li>
 <li><a href="#zfe">zfe</a></li>
+<li><a href="#zfln">zfln</a></li>
 <li><a href="#zfo">zfo</a></li>
 <li><a href="#zid">zid</a></li>
 <li><a href="#zimport">zimport</a></li>
@@ -1334,6 +1335,62 @@ the inclusion ordering of subfields is not total, then some extra work
 will probably be required in this program. The first case in which
 this occurs is GF(64) (which is unlikely to be required for quite some
 time).
+</li>
+<li>
+<h3><a name="zfln">zfln</a></h3>
+Purpose: Find an element of non-zero lowest nullity bounded by the
+input parameter
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Stem for creation of output file names</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Depth of search</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>Maximum acceptable nullity</td>
+</tr>
+<tr>
+<td valign=top>4</td><td valign=top>Memory size</td>
+</tr>
+<tr>
+<td valign=top>5</td><td valign=top>Generator 1</td>
+</tr>
+<tr>
+<td valign=top>6</td><td valign=top>Order of generator 1</td>
+</tr>
+<tr>
+<td valign=top>7-</td><td valign=top>Other generators and orders</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>The element, if found, plus the
+script to create it</td>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient memory for matrix plus workspace</td>
+</tr>
+</table>
+Commentary: This program is used analogously to <a
+href="#zsums">zsums</a> in the situation where the representation in
+question is irreducible but not absolutely irreducible. In this
+situation, all nullities will be multiples of the dimension of the
+algebra preserving endomorphism ring of the irreducible to itself. By
+examining a large number of nullities, and taking the highest common
+factor, one can hope to deduce the dimension, and hopefully also find
+an element with that dimension. The general situation in which this is
+used is either classifying irreducibles of a condensation, or
+classifying irreducibles of a condensation subgroup.
 </li>
 <li>
 <h3><a name="zfo">zfo</a></h3>
@@ -4052,6 +4109,7 @@ dimension increases.
 <li><a href="#f7">f7</a></li>
 <li><a href="#f8">f8</a></li>
 <li><a href="#f9">f9</a></li>
+<li><a href="#find_best_nullity_with_orders">find_best_nullity_with_orders</a></li>
 <li><a href="#find_element">find_element</a></li>
 <li><a href="#find_nullity_one_with_orders">find_nullity_one_with_orders</a></li>
 <li><a href="#find_nullity_onef_with_orders">find_nullity_onef_with_orders</a></li>
@@ -5162,6 +5220,53 @@ A+BC+CC
 </tr>
 </table>
 Commentary: 
+</li>
+<li>
+<h3><a name="find_best_nullity_with_orders">find_best_nullity_with_orders</a></h3>
+Purpose: Find an element of best nullity, given the orders of the
+generators
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Generator 1</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Generator 2</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>Output</td>
+</tr>
+<tr>
+<td valign=top>4</td><td valign=top>Order of generator 1</td>
+</tr>
+<tr>
+<td valign=top>5</td><td valign=top>Order of generator 2</td>
+</tr>
+<tr>
+<td valign=top>6</td><td valign=top>Optional memory size (default 200k)</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>The script used to produce the element</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient memory for workspace</td>
+</tr>
+<tr>
+<td valign=top>255</td><td valign=top>No low nullity element found</td>
+</tr>
+</table>
+Commentary: This is essentially a wrapper for <a href="#zfln">zfln</a>
 </li>
 <li>
 <h3><a name="find_element">find_element</a></h3>
