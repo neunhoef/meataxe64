@@ -1,5 +1,5 @@
 /*
- * $Id: grease.c,v 1.20 2004/05/02 19:33:19 jon Exp $
+ * $Id: grease.c,v 1.21 2004/06/05 21:58:13 jon Exp $
  *
  * Functions to grease matrix rows
  *
@@ -123,13 +123,15 @@ int grease_allocate(unsigned int prime, unsigned int len,
 void grease_init_rows(grease grease, unsigned int prime)
 {
   /* Fill in grease->status */
-  unsigned int i, j;
+  unsigned int i, j, k, *l;
   assert(NULL != grease);
   assert(0 != grease->level);
   memset(grease->status, 0, grease->size * sizeof(unsigned int));
   j = 1;
-  for (i = 0; i < grease->level; i++) {
-    grease->status[j - 1] = 1; /* An entry from the matrix */
+  k = grease->level;
+  l = grease->status - 1;
+  for (i = 0; i < k; i++) {
+    l[j] = 1; /* An entry from the matrix */
     j *= prime; /* Next entry directly from matrix */
   }
 }
@@ -150,6 +152,7 @@ void grease_free(grease grease)
 
 /* Compute, if necessary, grease row i */
 /* i is uncorrected for the table, so should not be zero */
+/* len is the revised length taking offset into account */
 static void grease_make_row(grease grease, unsigned int i, unsigned int prime, unsigned int len, unsigned int offset)
 {
   unsigned int j = i - 1;
@@ -163,56 +166,33 @@ static void grease_make_row(grease grease, unsigned int i, unsigned int prime, u
   if (0 == rem) {
     /* Scaled operation, shouldn't be by 1 */
     assert(1 != quot);
-    (*grease->row_operations.scaler)(grease->rows[index - 1] + offset, grease->rows[j] + offset, len - offset, quot);
+    (*grease->row_operations.scaler)(grease->rows[index - 1] + offset, grease->rows[j] + offset, len, quot);
   } else {
     unsigned int k = index * quot - 1;
     if (0 == grease->status[rem - 1]) {
       grease_make_row(grease, rem, prime, len, offset);
     }
     if (0 == grease->status[k]) {
-      (*grease->row_operations.scaler)(grease->rows[index - 1] + offset, grease->rows[k] + offset, len - offset, quot);
+      (*grease->row_operations.scaler)(grease->rows[index - 1] + offset, grease->rows[k] + offset, len, quot);
       grease->status[k] = 1;
     }
     (*grease->row_operations.adder)(grease->rows[rem - 1] + offset, grease->rows[k] + offset,
-                                    grease->rows[j] + offset, len - offset);
+                                    grease->rows[j] + offset, len);
   }
   grease->status[j] = 1;
 }
 
-#if 0
-void grease_make_rows(grease grease, unsigned int level,
-                      unsigned int prime, unsigned int len)
-{
-  unsigned int i;
-  unsigned int table_size = grease->size;
-  assert(0 != table_size);
-  assert(0 != len);
-  assert(0 != prime);
-  assert(NULL != grease);
-  if (level < grease->level) {
-    unsigned int q_n;
-    if (0 == pow(prime, level, &q_n)) {
-      assert(0 != pow(prime, level, &q_n));
-    }
-    table_size = q_n - 1;
-  }
-  /* Compute non-fixed rows */
-  for (i = 0; i < table_size; i++) {
-    if (0 == grease->status[i]) {
-      grease_make_row(grease, i + 1, prime, len, 0);
-    }
-  }
-}
-#endif
-
 void grease_row_inc(grease grease, unsigned int len, unsigned int *row,
                     unsigned int prime, unsigned int element, unsigned int offset)
 {
+  unsigned int l = len - offset;
+  unsigned int e = element - 1;
   assert(NULL != row);
   assert(NULL != grease);
   assert(element >= 1);
-  if (0 == grease->status[element - 1]) {
-    grease_make_row(grease, element, prime, len, offset);
+  assert(len >= offset);
+  if (0 == grease->status[e]) {
+    grease_make_row(grease, element, prime, l, offset);
   }
-  (*grease->row_operations.incer)(grease->rows[element - 1] + offset, row + offset, len - offset);
+  (*grease->row_operations.incer)(grease->rows[e] + offset, row + offset, l);
 }
