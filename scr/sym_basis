@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: sym_basis,v 1.14 2003/05/18 16:19:08 jon Exp $
+# $Id: sym_basis,v 1.15 2003/05/19 17:52:28 jon Exp $
 #
 # Script to compute a symmetry basis wrt an ordered set of irreducibles
 #
@@ -78,7 +78,7 @@ for x in `cat $irreds`; do
     irr=`echo $r | sed -e "s/Existing irreducible //g;s/ found//g"`
     w=$irr
   fi
-  dim=`znor ${w}_1`
+  wdim=`znor ${w}_1`
   y=`ls ${w}_1_I*`
   ret=$?
   if [ 0 -ne $ret ]; then
@@ -111,9 +111,20 @@ for x in `cat $irreds`; do
     exit 1
   fi
   if [ $dim -gt 0 ]; then
+# First compute total space spun from image of gamma operator
+    r=`zmsp -m $memory ${tmp}.1 ${tmp}.2 $*`
+    ret=$?
+    if [ 0 -ne $ret ]; then
+      rm -f ${tmp}.*
+      echo $r
+      echo "$name: failed to spin image of gamma, terminating"
+      exit 1
+    fi
+    let tot=$r/$wdim
+    echo tot=$tot, r=$r, wdim=$wdim, dim=$dim
     y=0
     have_local_basis=0
-    while [ $y -lt $dim ]; do
+    while [ $y -lt $dim -a $count -lt $tot ]; do
       zsel ${tmp}.1 ${tmp}.2 $y
       ret=$?
       if [ 0 -ne $? ]; then
@@ -227,7 +238,10 @@ for x in `cat $irreds`; do
         exit 1
       fi
       zmu -m $memory ${tmp}.4 ${tmp}.3 ${tmp}.5
-      rm ${tmp}.4
+      if [ 0 -ne $ret ]; then
+        rm -f ${tmp}.*
+        exit 1
+      fi
 # ${tmp}.5 is a standard basis for this irreducible piece
       if [ 0 -eq $have_basis ]; then
         cp ${tmp}.5 $basis
