@@ -1,5 +1,5 @@
 /*
- * $Id: grease.c,v 1.22 2004/06/05 22:16:11 jon Exp $
+ * $Id: grease.c,v 1.23 2004/06/06 09:38:56 jon Exp $
  *
  * Functions to grease matrix rows
  *
@@ -154,7 +154,7 @@ void grease_free(grease grease)
 /* Compute, if necessary, grease row i */
 /* i is uncorrected for the table, so should not be zero */
 /* len is the revised length taking offset into account */
-static void grease_make_row(grease grease, unsigned int i, unsigned int prime, unsigned int len, unsigned int offset)
+static void grease_make_row(grease grease, unsigned int i, unsigned int len, unsigned int offset)
 {
   unsigned int j = i - 1;
   unsigned int quot, rem, index;
@@ -171,7 +171,7 @@ static void grease_make_row(grease grease, unsigned int i, unsigned int prime, u
   } else {
     unsigned int k = index * quot - 1;
     if (0 == grease->status[rem - 1]) {
-      grease_make_row(grease, rem, prime, len, offset);
+      grease_make_row(grease, rem, len, offset);
     }
     if (0 == grease->status[k]) {
       (*grease->row_operations.scaler)(grease->rows[index - 1] + offset, grease->rows[k] + offset, len, quot);
@@ -184,7 +184,7 @@ static void grease_make_row(grease grease, unsigned int i, unsigned int prime, u
 }
 
 void grease_row_inc(grease grease, unsigned int len, unsigned int *row,
-                    unsigned int prime, unsigned int element, unsigned int offset)
+                    unsigned int element, unsigned int offset)
 {
   unsigned int l = len - offset;
   unsigned int e = element - 1;
@@ -193,7 +193,7 @@ void grease_row_inc(grease grease, unsigned int len, unsigned int *row,
   assert(element >= 1);
   assert(len >= offset);
   if (0 == grease->status[e]) {
-    grease_make_row(grease, element, prime, l, offset);
+    grease_make_row(grease, element, l, offset);
   }
   (*grease->row_operations.incer)(grease->rows[e] + offset, row + offset, l);
 }
