@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: preserves,v 1.8 2003/01/02 20:37:40 jon Exp $
+# $Id: preserves,v 1.9 2003/01/14 12:04:54 jon Exp $
 #
 # Script to check if a matrix preservers a quadratic form
 #
@@ -69,8 +69,8 @@ else
   echo "$0: missing file $g"
   exit 1
 fi
-if [ $# -eq 6 ]; then
-  memory=$6
+if [ $# -eq 5 ]; then
+  memory=$5
 else
   memory=200
 fi
@@ -119,10 +119,15 @@ if [ 0 -eq $f ]; then
     exit 254
   fi
 fi
-if zdiffd ${tmp}.2 $f; then
+zdiffd -m $memory ${tmp}.2 $f
+ret=$?
+if [ 0 -eq $ret ]; then
   rm -f ${tmp}.*
   exit 0
-else
+elif [ 255 -eq $ret ]; then
   rm -f ${tmp}.*
   exit 255
+else
+  rm -f ${tmp}.*
+  exit $ret
 fi

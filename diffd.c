@@ -1,5 +1,5 @@
 /*
- * $Id: diffd.c,v 1.1 2003/01/02 20:37:40 jon Exp $
+ * $Id: diffd.c,v 1.2 2003/01/14 12:04:54 jon Exp $
  *
  * Function to find the differences between the diagonal of a matrix and a scalar
  *
@@ -29,7 +29,7 @@ int diffd(const char *m, unsigned int elt, const char *name)
   assert(NULL != m);
   assert(NULL != name);
   if (0 == open_and_read_binary_header(&inp, &h, m, name)) {
-    return 0;
+    exit(1);
   }
   prime = header_get_prime(h);
   nob = header_get_nob(h);
@@ -40,13 +40,13 @@ int diffd(const char *m, unsigned int elt, const char *name)
     fprintf(stderr, "%s: cannot compare map diagonal with field element, terminating\n", name);
     fclose(inp);
     header_free(h);
-    return 0;
+    exit(1);
   }
   header_free(h);
   if (memory_rows(len, 1000) < 1) {
     fprintf(stderr, "%s cannot allocate row for %s, terminating\n", name, m);
     fclose(inp);
-    return 0;
+    exit(2);
   }
   row = memory_pointer_offset(0, 0, len);
   for (i = 0; i < nor; i++) {
@@ -57,7 +57,7 @@ int diffd(const char *m, unsigned int elt, const char *name)
       }
       fprintf(stderr, "%s cannot read row %d from %s, terminating\n", name, i, m);
       fclose(inp);
-      return 0;
+      exit(1);
     }
     if (get_element_from_row(nob, i, row) != elt) {
       fclose(inp);

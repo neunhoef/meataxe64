@@ -1,5 +1,5 @@
 /*
- * $Id: zdiffd.c,v 1.1 2003/01/02 20:37:40 jon Exp $
+ * $Id: zdiffd.c,v 1.2 2003/01/14 12:04:54 jon Exp $
  *
  * Find the differences between two matrices
  *
@@ -34,7 +34,7 @@ int main(int argc, const char * const argv[])
   memory_init(name, 0);
   endian_init();
   if (0 == diffd(in1, elt, name)) {
-    exit(1);
+    exit(255);
   }
   memory_dispose();
   return 0;

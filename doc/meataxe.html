@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.41 2003/01/02 20:37:40 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.42 2003/01/14 12:04:54 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -1337,10 +1337,16 @@ preserved by a group element.
 <table>
 <thead>Return codes:</thead>
 <tr>
-<td valign=top>0</td><td valign=top>Success</td>
+<td valign=top>0</td><td valign=top>Compares equal</td>
 </tr>
 <tr>
 <td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient memory</td>
+</tr>
+<tr>
+<td valign=top>255</td><td valign=top>Compares unequal</td>
 </tr>
 </table>
 Commentary: Used in indicator calculations to check for preservation

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: real_indicate,v 1.8 2003/01/02 20:37:40 jon Exp $
+# $Id: real_indicate,v 1.9 2003/01/14 12:04:54 jon Exp $
 #
 # Script to find the indicator of an irreducible representation
 # assuming it is real, and we have the standard basis conjugating
@@ -115,6 +115,7 @@ if [ 2 -eq $p ]; then
         ln -s $a ${a}_+
         echo insufficient memory to compute group sign
       else
+        ln -s $a ${a}_+
         rm -f ${tmp}.*
         echo zsign failed with error code $ret
         exit 1
