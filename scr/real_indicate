@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: real_indicate,v 1.7 2002/11/23 21:34:22 jon Exp $
+# $Id: real_indicate,v 1.8 2003/01/02 20:37:40 jon Exp $
 #
 # Script to find the indicator of an irreducible representation
 # assuming it is real, and we have the standard basis conjugating
@@ -67,12 +67,9 @@ if [ 2 -eq $p ]; then
     zad $Q ${tmp}.7 ${tmp}.8
     ind=1
     for x in $*; do
-      preserves ${tmp}.8 $S ${tmp}.7 $x $i $memory
+      preserves ${tmp}.8 $S $x $i $memory
       ret=$?
-      if [ 1 -eq $ret ]; then
-        rm -f ${tmp}.*
-        exit 1
-      elif [ 254 -eq $ret ]; then
+      if [ 254 -eq $ret ]; then
         echo indicator o
         rm -f ${tmp}.*
         if [ -e ${a}_o -o -L ${a}_o ]; then
@@ -80,9 +77,16 @@ if [ 2 -eq $p ]; then
         fi
         ln -s $a ${a}_o
         exit 0
-      elif [ 0 -ne $ret ]; then
+      elif [ 255 -eq $ret ]; then
         ind=0
-        break
+# We allow for the loop to continue in case the form isn't preserved (indicator o)
+        if [ 0 -ne $i ]; then
+# Only checking for preservation when scalar is zero
+          break;
+        fi
+      elif [ 0 -ne $ret ]; then
+        rm -f ${tmp}.*
+        exit 1
       fi
     done
     if [ 1 -eq $ind ]; then
@@ -129,7 +133,6 @@ if [ 2 -eq $p ]; then
   ln -s $a ${a}_-
 else
 # Odd characteristic case
-# TODO: check that the group preserves the form, if not then o
   ztr -m $memory $S ${tmp}.0
   if [ 0 -ne $? ]; then
     rm -f ${tmp}.*

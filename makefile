@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.81 2002/10/27 13:29:31 jon Exp $
+# $Id: makefile,v 1.82 2003/01/02 20:37:40 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -9,6 +9,7 @@ GENERATED=
 
 .PHONY: debug rel profile profilena clean full_clean
 
+CONS_TARGET=	cons
 DTOU_TARGET=	dtou
 DECOMP_TARGET=	decomp
 EAD_TARGET=	ead
@@ -35,6 +36,7 @@ ZCT_TARGET=	zct
 ZCV_TARGET=	zcv
 ZDIAG_TARGET=	zdiag
 ZDIFF_TARGET=	zdiff
+ZDIFFD_TARGET=	zdiffd
 ZEX_TARGET=	zex
 ZEXPORT_TARGET=	zexport
 ZFE_TARGET=	zfe
@@ -107,6 +109,7 @@ ZTSPF_TARGET=	ztspf
 ZVP_TARGET=	zvp
 ZWORDS_TARGET=	zwords
 
+CONS_MODULES=	constrain utils
 DTOU_MODULES=	dtou
 DECOMP_MODULES=	decomp utils
 EAD_MODULES=	add ead elements endian files header map map_or_row maps memory parse primes read rows system utils write
@@ -133,6 +136,7 @@ ZCT_MODULES=	count ct elements endian header memory parse primes read utils
 ZCV_MODULES=	elements endian header ip parse primes read utils write
 ZDIAG_MODULES=	elements endian header memory parse primes read rows utils write zdiag
 ZDIFF_MODULES=	diff elements endian header maps memory parse primes read rows utils write zdiff
+ZDIFFD_MODULES=	diffd elements endian header memory parse primes read rows utils zdiffd
 ZEX_MODULES=	elements endian exrows files header map memory parse primes read rows utils write zex
 ZEXPORT_MODULES=	elements endian header memory parse primes read rows utils write zexport
 ZFE_MODULES=	elements endian extend extend_matrix header memory parse primes read rows utils write zfe
@@ -205,7 +209,8 @@ ZTSPF_MODULES=	clean clean_file elements endian grease header maps matrix memory
 ZVP_MODULES=	elements endian grease header maps matrix memory mul parse primes read rows vp utils write zvp
 ZWORDS_MODULES=	elements endian grease header maps matrix memory mul parse primes read rows utils write zwords
 
-MODULES=	$(DECOMP_MODULES) \
+MODULES=	$(CONS_MODULES) \
+	$(DECOMP_MODULES) \
 	$(DTOU_MODULES) \
 	$(EAD_MODULES) \
 	$(ECT_MODULES) \
@@ -231,6 +236,7 @@ MODULES=	$(DECOMP_MODULES) \
 	$(ZCV_MODULES) \
 	$(ZDIAG_MODULES) \
 	$(ZDIFF_MODULES) \
+	$(ZDIFFD_MODULES) \
 	$(ZEX_MODULES) \
 	$(ZEXPORT_MODULES) \
 	$(ZFE_MODULES) \
@@ -338,6 +344,9 @@ DEBUG_TARGETS:=
 PROF_TARGETS:=
 PROFNA_TARGETS:=
 
+TARGET:=CONS
+include targets.txt
+
 TARGET:=DECOMP
 include targets.txt
 
@@ -414,6 +423,9 @@ TARGET:=ZDIAG
 include targets.txt
 
 TARGET:=ZDIFF
+include targets.txt
+
+TARGET:=ZDIFFD
 include targets.txt
 
 TARGET:=ZEX

@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.40 2002/11/26 20:46:23 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.41 2003/01/02 20:37:40 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -333,6 +333,7 @@ Turn on verbose mode
 <li><a href="#zcv">zcv</a></li>
 <li><a href="#zdiag">zdiag</a></li>
 <li><a href="#zdiff">zdiff</a></li>
+<li><a href="#zdiffd">zdiffd</a></li>
 <li><a href="#zex">zex</a></li>
 <li><a href="#zexport">zexport</a></li>
 <li><a href="#zfe">zfe</a></li>
@@ -1286,8 +1287,10 @@ otherwise.
 </li>
 <li>
 <h3><a name="zdiff">zdiff</a></h3>
-Purpose: This is a diagnostic program for looking at
-differences between matrices in a human readable form.
+Purpose: This is used in the computation of quadratic forms to check
+preservation of the bilinear form by the group elements. It has also
+been used as a diagnostic program for looking at differences between
+matrices in a human readable form.
 <table>
 <thead>
 <td valign=top>Parameters:</td>
@@ -1311,8 +1314,37 @@ differences between matrices in a human readable form.
 <td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
 </tr>
 </table>
-Commentary: Its main use has been debugging file corruptions during
-exploded multiply work.
+Commentary: Used in indicator calculations
+</li>
+<li>
+<h3><a name="zdiffd">zdiffd</a></h3>
+Purpose: Check that the diagonal of a quadratic form has been
+preserved by a group element.
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Matrix</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Field element</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>None</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+</table>
+Commentary: Used in indicator calculations to check for preservation
+of the diagonal.
 </li>
 <li>
 <h3><a name="zex">zex</a></h3>
@@ -6919,10 +6951,10 @@ Purpose: A script internal to indicator calculation
 <td valign=top>2</td><td valign=top>The corresponding symmetrized form</td>
 </tr>
 <tr>
-<td valign=top>3</td><td valign=top>A matrix of the diagonal of parameter 1</td>
+<td valign=top>3</td><td valign=top>The element of the group</td>
 </tr>
 <tr>
-<td valign=top>4</td><td valign=top>The element of the group</td>
+<td valign=top>4</td><td valign=top>The field element on the form diagonal</td>
 </tr>
 <tr>
 <td valign=top>5</td><td valign=top>Optional memory size (default 200k)</td>

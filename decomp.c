@@ -1,5 +1,5 @@
 /*
- * $Id: decomp.c,v 1.1 2002/09/01 12:33:40 jon Exp $
+ * $Id: decomp.c,v 1.2 2003/01/02 20:37:40 jon Exp $
  *
  * Compute possible decompositions
  */
@@ -90,7 +90,6 @@ int main(int argc, const char *const argv[])
   multiplicities = malloc(num_irreds * sizeof(unsigned int));
   sub_degrees = malloc(num_sub_irreds * sizeof(unsigned int));
   sub_degrees_file = fopen(argv[4], "r");
-  character_file = fopen(argv[5], "r");
   if (NULL == sub_degrees_file) {
     fprintf(stderr, "%s: failed to open '%s', terminating\n", name, argv[4]);
     exit(1);

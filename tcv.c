@@ -1,5 +1,5 @@
 /*
- * $Id: tcv.c,v 1.4 2002/10/13 19:08:58 jon Exp $
+ * $Id: tcv.c,v 1.5 2003/01/02 20:37:40 jon Exp $
  *
  * Function to lift vectors from a tensor condensation representation
  *
@@ -47,9 +47,6 @@ static int cleanup(unsigned int *left_multiplicities, unsigned int *right_multip
   }
   if (NULL != right_multiplicities) {
     free(right_multiplicities);
-  }
-  if (NULL != inp) {
-    fclose(inp);
   }
   if (NULL != nor_q) {
     free(nor_q);

@@ -228,3 +228,4 @@ skew seventh
 20021125 - Added Nikolaus talk.
 20021129 - Tidy up error handling in scripts
 20021130 - fix bug in iv
+20030102 - add zdiffd and convert preserves to use it

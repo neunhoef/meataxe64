@@ -1,16 +1,15 @@
 #!/bin/sh
 #
-# $Id: preserves,v 1.7 2002/10/13 19:09:42 jon Exp $
+# $Id: preserves,v 1.8 2003/01/02 20:37:40 jon Exp $
 #
 # Script to check if a matrix preservers a quadratic form
 #
 # Inputs
 # $1: quadratic form Q
 # $2: corresponding bilinear form S
-# $3: diagonal matrix for Q
-# $4: g
-# $5: field element
-# $6: initial memory (optional)
+# $3: g
+# $4: field element
+# $5: initial memory (optional)
 #
 # The field element is used to determine whether to
 # perform the preservation of the symmetric form test
@@ -25,16 +24,15 @@
 #
 #set -v
 . functions
-usage="$0: usage: $0 <Q> <S> <lambda> <g> <field element> [<memory>]"
-if [ $# -ne 5 -a $# -ne 6 ]; then
+usage="$0: usage: $0 <Q> <S> <g> <field element> [<memory>]"
+if [ $# -ne 4 -a $# -ne 5 ]; then
   echo "$usage"
   exit 1;
 fi
 Q=$1
 S=$2
-L=$3
-g=$4
-f=$5
+g=$3
+f=$4
 if [ -e $Q ]; then
   q=`zprime $Q`
   nor=`znor $Q`
@@ -54,15 +52,6 @@ if [ -e $S ]; then
   fi
 else
   echo "$0: missing file $S"
-  exit 1
-fi
-if [ -e $L ]; then
-  if [ `zprime $L` -ne $q -o `znor $L` -ne $nor -o `znoc $L` -ne $noc ]; then
-    echo parameter mismatch between $Q and $L
-    exit 1
-  fi
-else
-  echo "$0: missing file $L"
   exit 1
 fi
 if [ -e $g ]; then
@@ -130,13 +119,7 @@ if [ 0 -eq $f ]; then
     exit 254
   fi
 fi
-zdiag ${tmp}.2 ${tmp}.4
-ret=$?
-if [ 0 -ne $ret ]; then
-  rm -f ${tmp}.*
-  exit $ret
-fi
-if zdiff $L ${tmp}.4 2>/dev/null 1>&2; then
+if zdiffd ${tmp}.2 $f; then
   rm -f ${tmp}.*
   exit 0
 else
