@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: dual,v 1.8 2002/09/11 21:20:47 jon Exp $
+# $Id: dual,v 1.9 2002/10/13 19:09:42 jon Exp $
 #
 # Script to dual of a matrix
 #
@@ -41,7 +41,7 @@ else
 fi
 tmp=tmp${PPID}
 tr=${tmp}.0
-ztr $a ${tr} $memory
+ztr -m $memory $a ${tr}
 ret=$?
 if [ 0 -ne $ret ]; then
   rm -f ${tmp}*

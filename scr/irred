@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: irred,v 1.8 2002/09/11 21:20:47 jon Exp $
+# $Id: irred,v 1.9 2002/10/13 19:09:42 jon Exp $
 #
 # Script to discover if a representation is irreducible
 #
@@ -59,12 +59,12 @@ tmp=tmp${PPID}
 #echo Using tmp stem $tmp
 ok=0
 nullity=0
-ztr $a ${tmp}.1 $memory
+ztr -m $memory $a ${tmp}.1
 if [ $? -ne 0 ]; then
   rm ${tmp}*
   exit 1
 fi
-ztr $e ${tmp}.0 $memory
+ztr -m $memory $e ${tmp}.0
 if [ $? -ne 0 ]; then
   rm ${tmp}*
   exit 1
@@ -72,7 +72,7 @@ fi
 x=2
 names=""
 for y in $*; do
-  ztr $y ${tmp}.$x $memory
+  ztr -m $memory $y ${tmp}.$x
   if [ $? -ne 0 ]; then
     rm ${tmp}*
     exit 1

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: preserves,v 1.6 2002/10/13 14:16:08 jon Exp $
+# $Id: preserves,v 1.7 2002/10/13 19:09:42 jon Exp $
 #
 # Script to check if a matrix preservers a quadratic form
 #
@@ -99,7 +99,7 @@ while [ 1 -eq $ok ]; do
   fi
   ok=0
 done
-ztr ${tmp}.0 ${tmp}.1 $memory
+ztr -m $memory ${tmp}.0 ${tmp}.1
 ret=$?
 if [ 0 -ne $ret ]; then
   rm -f ${tmp}.*
@@ -113,7 +113,7 @@ if [ 0 -ne $ret ]; then
 fi
 if [ 0 -eq $f ]; then
 # This test is only necessary for once for the entire search
-  ztr ${tmp}.2 ${tmp}.3 $memory
+  ztr -m $memory ${tmp}.2 ${tmp}.3
   ret=$?
   if [ 0 -ne $ret ]; then
     rm -f ${tmp}.*
