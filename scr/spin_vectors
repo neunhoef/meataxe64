@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: spin_vectors,v 1.4 2002/10/14 09:20:33 jon Exp $
+# $Id: spin_vectors,v 1.5 2005/01/08 12:18:04 jon Exp $
 #
 # Compute subspaces, with a memory limit
 #
@@ -43,7 +43,7 @@ while [ $x -lt $y ]; do
     continue
   fi
 # Check that we haven't selected a zero vector
-  rn=`zrn -m $memory ${tmp}.0`
+  rn=`srn -m $memory ${tmp}.0`
   ret=$?
   if [ 0 -ne $ret ]; then
     echo rn returns $ret on for vector $x, ignoring

@@ -327,6 +327,7 @@ skew seventh
 20041106 - Changed sums and sumsf so as not to allocate very large arrays
 20041115 - Changed zfln and zflnf to remember the file and script
 20041124 - Changed new_irred to try existing irreds first
+20041202 - Changed spin_vectors to use srn
 20041231 - Added missing return when clean_vectors detects header mismatch
 20050101 - Remove redundant spaces in count_irreds
 20050102 - Allow zpro to handle prime not 1
