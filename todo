@@ -6,7 +6,7 @@ Implement a verbosity level for all programs, with -v <n>. Add a standard parser
 Debug zsymsq failure on Co2 23 mod 3
 Test memory reduction stuff in memory.c using ztsp
 Investigate rename failure on large files from zscript
-Remove nor == 1 restriction from ztspf
+Consider allowing maps into ztsp and ztspf
 Analyse unexpected split failure
 Apply memory reduction to ztspf
 Fix zps to take less memory

@@ -1,5 +1,5 @@
 /*
- * $Id: mspf.c,v 1.4 2002/06/28 08:39:16 jon Exp $
+ * $Id: mspf.c,v 1.5 2002/07/04 22:54:18 jon Exp $
  *
  * Function to spin some vectors under multiple generators
  * using intermediate files in a temporary directory.
@@ -7,7 +7,6 @@
  */
 
 #include "mspf.h"
-#include "clean.h"
 #include "clean_file.h"
 #include "elements.h"
 #include "endian.h"

@@ -1,12 +1,11 @@
 /*
- * $Id: spf.c,v 1.7 2002/06/28 08:39:16 jon Exp $
+ * $Id: spf.c,v 1.8 2002/07/04 22:54:18 jon Exp $
  *
  * Function to spin some vectors under two generators
  *
  */
 
 #include "spf.h"
-#include "clean.h"
 #include "clean_file.h"
 #include "elements.h"
 #include "endian.h"

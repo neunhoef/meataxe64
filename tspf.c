@@ -1,5 +1,5 @@
 /*
- * $Id: tspf.c,v 1.5 2002/07/04 17:50:06 jon Exp $
+ * $Id: tspf.c,v 1.6 2002/07/04 22:54:18 jon Exp $
  *
  * Function to spin some vectors under two generators in tensor space
  * using intermediate files in a temporary directory.
@@ -7,7 +7,6 @@
  */
 
 #include "tspf.h"
-#include "clean.h"
 #include "clean_file.h"
 #include "elements.h"
 #include "endian.h"
@@ -75,11 +74,10 @@ unsigned int spin(const char *in, const char *out,
   header *h_out;
   char *name_echelised = NULL;
   const char *tmp = tmp_name();
-  unsigned int prime, nob, noc, nor, noc1, nor1, noc2, nor2, len, len1, len2, len_o, max_rows, max_nor, max_len, d;
+  unsigned int prime, nob, noc, nor, noc1, nor1, noc2, nor2, len, len1, len2, len_o, max_rows, max_nor, max_len, d, clean_nor, len_in;
   unsigned int **rows1, **rows2, *work_row;
   unsigned int **rows_a1, **rows_a2, **rows_b1, **rows_b2, **mat_rows, **work_rows;
-  int *map, *new_map;
-  int tmps_created = 0;
+  int *map;
   grease_struct grease;
   prime_ops prime_operations;
   row_ops row_operations;
@@ -111,6 +109,7 @@ unsigned int spin(const char *in, const char *out,
   nob = header_get_nob(h_in);
   noc = header_get_noc(h_in);
   nor = header_get_nor(h_in);
+  len_in = header_get_len(h_in);
   noc1 = header_get_noc(h_a1);
   nor1 = header_get_nor(h_a1);
   noc2 = header_get_noc(h_a2);
@@ -127,7 +126,6 @@ unsigned int spin(const char *in, const char *out,
       noc2 != header_get_noc(h_b2) ||
       noc2 != header_get_nor(h_b2) ||
       noc1 * noc2 != noc ||
-      1 != nor ||
       (prime != header_get_prime(h_a1) && 0 == gen_a.is_map1) ||
       (prime != header_get_prime(h_b1) && 0 == gen_b.is_map1) ||
       (prime != header_get_prime(h_a2) && 0 == gen_a.is_map2) ||
@@ -151,7 +149,7 @@ unsigned int spin(const char *in, const char *out,
   len = noc1 * len2; /* Space for matrix form */
   h_out = header_create(prime, nob, header_get_nod(h_in), noc, 1);
   assert(header_get_len(h_out) <= len);
-  assert(header_get_len(h_in) <= len);
+  assert(len_in <= len);
   /* Set up the generator descriptors */
   gen_a.f1 = f_a1;
   gen_a.m1 = a1;
@@ -196,6 +194,7 @@ unsigned int spin(const char *in, const char *out,
   }
   /* Now compute the maximum space for the subspace */
   max_rows = memory_rows(len, 350);
+  /* Give up if too few rows available */
   if (7 > max_rows || max_rows < 2 * (prime + 1)) {
     fprintf(stderr, "%s: failed to alocate enough memory, terminating\n",
             name);
@@ -217,47 +216,67 @@ unsigned int spin(const char *in, const char *out,
     rows1[d] = memory_pointer_offset(0, d + 1, len);
     rows2[d] = memory_pointer_offset(350, d + 1, len);
   }
-  /* We reserve memory_pointer_offset(0, 0, len) for workspace */
-  work_row = memory_pointer_offset(0, 0, len);
-  create_pointers(work_row, work_rows, nor1, len2, prime);
+  /* Create the temporary file */
   errno = 0;
-  if (0 == endian_read_row(inp, work_row, header_get_len(h_in))) {
+  echelised = fopen64(name_echelised, "w+b");
+  if (NULL == echelised) {
     if ( 0 != errno) {
       perror(name);
     }
-    fprintf(stderr, "%s: failed to read row from %s, terminating\n", name, in);
-    cleanup(inp, f_a1, f_b1, f_a2, f_b2);
+    fprintf(stderr, "%s: cannot open %s, terminating\n", name, name_echelised);
     exit(1);
   }
-  fclose(inp);
   /* Set up the map for the echelised basis */
   map = my_malloc(noc * sizeof(int));
-  create_pointers(rows1[0], mat_rows, nor1, len2, prime);
-  /* mat_rows subdivides rows1[0] as a matrix */
-  v_to_m(work_row, mat_rows, nor1, nor2, prime);
-  echelise(rows1, 1, &d, &new_map, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, 1, name);
-  /* Clean up either for zero row, or non-identity leading non-zero entry */
-  free(new_map);
-  if (1 != d) {
-    fprintf(stderr, "%s: %s contains dependent vectors, terminating\n", name, in);
+  clean_nor = 0;
+  for (d = 0; d < nor; d += max_rows) {
+    unsigned int stride = (d + max_rows > nor) ? nor - d : max_rows;
+    unsigned int j;
+    errno = 0;
+    if (0 == endian_read_matrix(inp, rows1, len_in, stride)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
+      fprintf(stderr, "%s: failed to read rows from %s, terminating\n",
+              name, in);
+      cleanup(inp, f_a1, f_b1, f_a2, f_b2);
+      cleanup_tmp(echelised, name_echelised);
+      exit(1);
+    }
+    for (j = 0; j < stride; j++) {
+      create_pointers(rows2[j], mat_rows, nor1, len2, prime);
+      v_to_m(rows1[j], mat_rows, nor1, nor2, prime);
+    }
+    if (0 == clean_file(echelised, &clean_nor, rows2, stride, rows1, max_rows,
+                        map, NULL, 0, grease.level, prime,
+                        len, nob, 900, name)) {
+      cleanup(inp, f_a1, f_b1, f_a2, f_b2);
+      cleanup_tmp(echelised, name_echelised);
+      exit(1);
+    }
+  }
+  fclose(inp);
+  if (0 == clean_nor) {
+    fprintf(stderr, "%s: input set of vectors has rank 0, terminating\n", name);
+    cleanup_tmp(echelised, name_echelised);
     cleanup(NULL, f_a1, f_b1, f_a2, f_b2);
-    exit(1);
   }
-  {
-    unsigned int i;
-    unsigned int elt = first_non_zero(rows1[0], nob, len, &i);
-    assert(0 != elt);
-    NOT_USED(elt);
-    map[0] = i;
-  }
+  nor = clean_nor;
+  /* We reserve memory_pointer_offset(0, 0, len) for workspace */
+  work_row = memory_pointer_offset(0, 0, len);
+  create_pointers(work_row, work_rows, nor1, len2, prime);
+  create_pointers(rows1[0], mat_rows, nor1, len2, prime);
+  /* Set up grease for multiplying */
   if (0 == grease_allocate(prime, len, &grease, 900)){
     fprintf(stderr, "%s: unable to allocate grease, terminating\n", name);
+    cleanup_tmp(echelised, name_echelised);
     cleanup(NULL, f_a1, f_b1, f_a2, f_b2);
     exit(1);
   }
   /* Think about either being a map */
   if (gen_a.is_map1 || gen_a.is_map2 || gen_b.is_map1 || gen_b.is_map2) {
     fprintf(stderr, "%s: cannot handle maps (yet), terminating\n", name);
+    cleanup_tmp(echelised, name_echelised);
     cleanup(NULL, f_a1, f_b1, f_a2, f_b2);
     exit(1);
   }
@@ -292,26 +311,7 @@ unsigned int spin(const char *in, const char *out,
   fclose(f_b1);
   fclose(f_a2);
   fclose(f_b2);
-  /* Create the temporary file */
   errno = 0;
-  echelised = fopen64(name_echelised, "w+b");
-  if (NULL == echelised) {
-    if ( 0 != errno) {
-      perror(name);
-    }
-    fprintf(stderr, "%s: cannot open %s, terminating\n", name, name_echelised);
-    exit(1);
-  }
-  tmps_created = 1;
-  errno = 0;
-  if (0 == endian_write_row(echelised, rows1[0], len)) {
-    if ( 0 != errno) {
-      perror(name);
-    }
-    fprintf(stderr, "%s: cannot write initial row to %s, terminating\n", name, name_echelised);
-    cleanup_tmp(echelised, name_echelised);
-    exit(1);
-  }
   while (nor < noc && (gen_a.nor < nor || gen_b.nor < nor)) {
     unsigned int i, rows_to_do = nor - gen->nor;
     unsigned int k, old_nor = nor;
