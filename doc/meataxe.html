@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.61 2004/11/06 10:29:17 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.62 2005/01/15 11:19:14 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -3936,7 +3936,7 @@ nullity found</td>
 </table>
 Commentary: See <a href="#zsums">zsums</a>. The temporary files are
 used to support internal use of <a href="#zrnf">zrnf</a> when
-computing ranks. The other opreations (add, multiply) are not space
+computing ranks. The other operations (add, multiply) are not space
 constrained, and so do not need the use of intermediate files. The
 temporary workspace directory must exist, this program will not create
 it.
@@ -4707,6 +4707,7 @@ dimension increases.
 <li><a href="#basef_from_vector">basef_from_vector</a></li>
 <li><a href="#basef_vectors">basef_vectors</a></li>
 <li><a href="#basef_with_vector">basef_with_vector</a></li>
+<li><a href="#checkorder">checkorder</a></li>
 <li><a href="#check_irred">check_irred</a></li>
 <li><a href="#check_irredf">check_irredf</a></li>
 <li><a href="#conjugate">conjugate</a></li>
@@ -5198,6 +5199,43 @@ Commentary: A version of <a
 href="#base_with_vector">base_with_vector</a> using intermediate
 files. Generally, users are not expected to invoke this script
 directly.
+</li>
+<li>
+<h3><a name="checkorder">checkorder</a></h3>
+Purpose: Check the order of an invertible matrix
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Matrix</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Order</td>
+</tr>
+<tr>
+<td valign=top>3-</td><td valign=top>Memory (optional)</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td
+valign=top>"Order correct" or "Order wrong"</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Correct</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>255</td><td valign=top>Wrong</td>
+</tr>
+</table>
+Commentary: This script is just to provide an easy way to sanity check
+matrices. It uses power to optimise the computation. It will not spot
+cases where the real order is a divisor of the input value.
 </li>
 <li>
 <h3><a name="check_irred">check_irred</a></h3>
