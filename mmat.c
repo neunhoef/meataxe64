@@ -1,5 +1,5 @@
 /*
- * $Id: mmat.c,v 1.2 2001/09/30 17:51:20 jon Exp $
+ * $Id: mmat.c,v 1.3 2001/10/10 23:16:44 jon Exp $
  *
  * Monster program
  * Based on Version 1 - 30th November 1998 by R.A.Parker and R.A.Wilson
@@ -16,11 +16,11 @@
 
 static void mkvec(long pos, unsigned char *vecin)
 {
-  int i;
-  for (i=0;i<24611;i++) vectemp[i]=0;
+  unsigned int i;
+  memset(vectemp, 0, 24611);
   FTOV(vectemp,pos/2,(pos+1)%2+1);
 
-  for (i=0;i<24712;i++) vecin[i]=0;
+  memset(vecin, 0, 24712);
   ptr1=0;
   ptr2=0;
   for (i=0;i<90;i++)     FGAP(vectemp,vecin,729,3);
@@ -32,16 +32,16 @@ static void mkvec(long pos, unsigned char *vecin)
 
 static void wtrow(unsigned int row_num, unsigned char *vecout)
 {
-    int i;
-    for (i=0;i<24611;i++) vectemp[i]=0;
-    ptr1=0;
-    ptr2=0;
-    for (i=0;i<90;i++)     FUNGAP(vecout,vectemp,729,3);
-    FUNGAP(vecout,vectemp,21870,2);
-    for (i=0;i<66;i++)     FUNGAP(vecout,vectemp,162,2);
-    FUNGAP(vecout,vectemp,198,2);
-    FUNGAP(vecout,vectemp,71,1);
-    put_row(row_num, 196882, 20000, vectemp);
+  unsigned int i;
+  memset(vectemp, 0, 24611);
+  ptr1=0;
+  ptr2=0;
+  for (i=0;i<90;i++)     FUNGAP(vecout,vectemp,729,3);
+  FUNGAP(vecout,vectemp,21870,2);
+  for (i=0;i<66;i++)     FUNGAP(vecout,vectemp,162,2);
+  FUNGAP(vecout,vectemp,198,2);
+  FUNGAP(vecout,vectemp,71,1);
+  put_row(row_num, 196882, 20000, vectemp);
 }
 
 int main(int argc, char *argv[])
