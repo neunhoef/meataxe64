@@ -1,5 +1,5 @@
 /*
- * $Id: tspf.c,v 1.17 2004/08/28 19:58:01 jon Exp $
+ * $Id: tspf.c,v 1.18 2004/09/17 17:05:30 jon Exp $
  *
  * Function to spin some vectors under two generators in tensor space
  * using intermediate files in a temporary directory.
@@ -388,7 +388,8 @@ unsigned int tensor_spinf(const char *in, const char *out,
       gen->nor += stride;
       d = nor;
       if (verbose) {
-        printf("%s: cleaning %d rows\n", name, stride);
+        printf("%s: cleaning %d rows out of %d for gen %s\n",
+               name, stride, rows_to_do, gen->m1);
         fflush(stdout);
       }
       if (0 == clean_file(&row_operations, echelised, &d, rows1, stride, rows2, step,

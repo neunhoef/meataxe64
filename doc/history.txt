@@ -320,3 +320,4 @@ skew seventh
 20040822 - Moved some functions out of library due to name duplication
 20040828 - Gave rank, spin etc unique names so they can be added to the library
 20040828 - Add means to rebuild library without rebuilding everything
+20040917 - Improved verbosity in multiply and spin

@@ -1,5 +1,5 @@
 /*
- * $Id: mul.c,v 1.45 2004/06/21 20:38:10 jon Exp $
+ * $Id: mul.c,v 1.46 2004/09/17 17:05:30 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
@@ -438,7 +438,7 @@ int skip_mul_from_store(unsigned int offset, unsigned int **rows1, unsigned int 
   assert(is_a_prime_power(prime)); /* prime refers to rows1 */
   assert(0 != nob); /* nob refers to rows1 */
   if (verbose) {
-    printf("%s: multiplying %d rows\n", name, nor);
+    printf("%s: multiplying %d rows with %s\n", name, nor, m);
     fflush(stdout);
   }
   /* Remember where we are in row 2 */

@@ -1,5 +1,5 @@
 /*
- * $Id: tsp.c,v 1.16 2004/08/28 19:58:00 jon Exp $
+ * $Id: tsp.c,v 1.17 2004/09/17 17:05:30 jon Exp $
  *
  * Function to spin some vectors under two generators in tensor space
  *
@@ -320,7 +320,8 @@ unsigned int tensor_spin(const char *in, const char *out,
     free(new_map);
     assert(j == d);
     if (verbose) {
-      printf("%s: adding %d new rows giving %d rows\n", name, d, nor + d);
+      printf("%s: adding %d new rows giving %d rows for gen %s\n",
+             name, d, nor + d, gen->m1);
       fflush(stdout);
     }
     nor += d; /* The number of extra rows we made */
