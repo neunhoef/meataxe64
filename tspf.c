@@ -1,5 +1,5 @@
 /*
- * $Id: tspf.c,v 1.3 2002/06/28 08:39:16 jon Exp $
+ * $Id: tspf.c,v 1.4 2002/07/02 11:06:35 jon Exp $
  *
  * Function to spin some vectors under two generators in tensor space
  * using intermediate files in a temporary directory.
@@ -363,19 +363,6 @@ unsigned int spin(const char *in, const char *out,
       }
       nor = d;
       k += stride; /* The number we consumed */
-/* debug */
-      new_map = my_malloc(noc * sizeof(int));
-      memset(new_map, -1, noc * sizeof(int));
-      for (i = 0; i < nor; i++) {
-        int k = map[i];
-        assert(k >= 0);
-        if (new_map[k] >= 0) {
-          fprintf(stderr, "Repeated pivot column %d found for row %d\n", k, i);
-          assert(0);
-        }
-      }
-      free(new_map);
-/* gubed */      
     }
     assert(gen->nor == old_nor);
     NOT_USED(old_nor);
