@@ -165,3 +165,4 @@ skew seventh
 20020704 - Remove nor == 1 restriction from ztspf
 20020705 - Apply reduced memory requirements to ztspf
 20020705 - Remove dependent vectors restrictions in ztsp, zmsp, zsp
+20020705 - Add zmsb and convert base_with_vector to use it
