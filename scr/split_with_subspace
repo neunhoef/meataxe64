@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: split_with_subspace,v 1.6 2002/10/13 14:16:08 jon Exp $
+# $Id: split_with_subspace,v 1.7 2002/10/13 22:41:39 jon Exp $
 #
 # Script to split a representation given a particular subspace to work from
 #
@@ -57,8 +57,8 @@ dim=`znor $s`
 let codim=$nor-$dim
 if [ $dim -lt $nor ]; then
   zmu -m $memory $s $a ${tmp}.0 1>/dev/null
-  zss $s ${tmp}.0 ${o_s} $memory
-  zqs $s $a ${o_q} $memory
+  zss -m $memory $s ${tmp}.0 ${o_s}
+  zqs -m $memory $s $a ${o_q}
   rm -f ${tmp}.0
 exit 0
 else
