@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: restrict_with_orders,v 1.3 2002/06/25 10:30:12 jon Exp $
+# $Id: restrict_with_orders,v 1.4 2002/07/05 17:19:22 jon Exp $
 #
 # Script to restrict a representation from a field to a subfield
 #
@@ -68,7 +68,7 @@ if [ $ret -ne 0 ]; then
   exit $ret
 fi
 name=${tmp}_${nor}
-x=`base $e $a $b ${name} ${tmp}.0`
+x=`base $e ${name} ${tmp}.0 $a $b`
 ret=$?
 if [ $ret -ne 0 ]; then
   echo base returns $ret, terminating

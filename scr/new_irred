@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: new_irred,v 1.7 2002/07/04 17:56:46 jon Exp $
+# $Id: new_irred,v 1.8 2002/07/05 17:19:22 jon Exp $
 #
 # Script to classify an irreducible representation
 #
@@ -61,9 +61,6 @@ for x in $*; do
     order[$i]=$order
     y[$i]=$x
     let i=$i+1
-    if [ 2 -le $i ]; then
-      break
-    fi
   elif [ 255 -eq $ret ]; then
     continue
   else
@@ -71,8 +68,10 @@ for x in $*; do
     exit 1
   fi
 done
-if [ 2 -ne $i ]; then
-  echo "Failed i not 2 ($i)"
-  exit 254
-fi
-exec new_irred_with_orders ${y[0]} ${y[1]} ${order[0]} ${order[1]} $memory
+j=0
+line=
+while [ $j -lt $i ]; do
+  line="$line ${y[$j]} ${order[$j]}"
+  let j=$j+1
+done
+exec new_irred_with_orders $memory $line

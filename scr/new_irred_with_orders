@@ -1,17 +1,18 @@
 #!/bin/sh
 #
-# $Id: new_irred_with_orders,v 1.8 2002/07/03 12:11:46 jon Exp $
+# $Id: new_irred_with_orders,v 1.9 2002/07/05 17:19:22 jon Exp $
 #
 # Script to classify an irreducible representation
 #
 # Inputs
-# $1: generator a
-# $2: generator b
+# $1: initial memory
+# $2: generator a
 # $3: order a
-# $4: order b
-# $5: initial memory (optional)
+# $4: generator b
+# $5: order b
+# $6-: other generators and orders
 #
-# outputs will be of the form irred/${nor}_${i}_{1,2}
+# outputs will be of the form irred/${nor}_${i}_{1,..}
 # where nor = znor $a and i is an available unused index
 #
 #
@@ -21,19 +22,18 @@
 # 254: no nullity one element found
 # 255: existing irreducible
 #
-usage="$0: usage: $0 <a> <b> <order a> <order b> [<memory>]"
-if [ $# -ne 4 -a $# -ne 5 ]; then
+usage="$0: usage: $0 <memory> <a> <order a> <b> <order b> [<other generators and orders>]"
+if [ $# -lt 5 ]; then
   echo $usage
   exit 1;
 fi
 . functions
-a=$1
-b=$2
+memory=$1
+a=$2
 o_a=$3
-o_b=$4
+b=$4
+o_b=$5
 if [ -e $a -a -e $b ]; then
-  q=`zprime $a`
-  r=`zprime $b`
   nor=`znor $a`
   noc=`znoc $a`
   if [ $nor -ne $noc ]; then
@@ -41,36 +41,54 @@ if [ -e $a -a -e $b ]; then
     exit 1
   fi
   if [ $nor -ne `znor $b` -o $nor -ne `znoc $b` ]; then
-    echo "$0: $a and $b are not compatible"
-    exit 1
-  fi
-  if [ 1 -eq $q -a 1 -eq $r ]; then
-    echo "$0: representation on two maps cannot be irreducible"
-    exit 1
-  fi
-  if [ 1 -ne $q -a 1 -ne $r -a $q -ne $r ]; then
-    echo "$0: $a and $b are not compatible"
+    echo $a and $b are not compatible
     exit 1
   fi
 else
   echo "$0: missing files $a or $b"
   exit 1
 fi
-if [ $# -eq 5 ]; then
-  memory=$5
-else
-  memory=200
+let i=$#-1
+let j=$i/2
+let k=$j*2
+if [ $i -ne $k ]; then
+  echo "$0: missing order for final generator"
+  exit 1
 fi
+i=0
+shift 1
+while [ $i -lt $j ]; do
+  rest[$i]=$1
+  o_rest[$i]=$2
+  let i=$i+1
+  shift 2
+done
 #
 # Now search for element of nullity one
 #
 tmp=tmp${PPID}
 e=${tmp}.1
 name=${tmp}_${nor}
-script=`find_nullity_one_with_orders $a $b $e $o_a $o_b $memory`
-ret=$?
+ok=0
+i=1
+while [ $i -lt $j -a 0 -eq $ok ]; do
+  k=0
+  while [ $k -lt $i -a 0 -eq $ok ]; do
+    a=${rest[$k]}
+    o_a=${o_rest[$k]}
+    b=${rest[$i]}
+    o_b=${o_rest[$i]}
+    script=`find_nullity_one_with_orders $a $b $e $o_a $o_b $memory`
+    ret=$?
+    if [ 0 -eq $ret ]; then
+      ok=1
+    fi
+    let k=$k+1
+  done
+  let i=$i+1
+done
 if [ 0 -eq $ret ]; then
-  x=`base $e $a $b ${name} ${tmp}.0`
+  x=`base $e ${name} ${tmp}.0 ${rest[*]}`
   ret=$?
   if [ $ret -ne 0 ]; then
     echo base returns $ret, terminating
@@ -78,6 +96,10 @@ if [ 0 -eq $ret ]; then
     exit 1
   fi
 elif [ 254 -eq $ret ]; then
+  a=${rest[0]}
+  b=${rest[1]}
+  o_a=${o_rest[0]}
+  o_b=${o_rest[1]}
 # Irreducible not absolutely irreducible
   script=`find_best_nullity_with_orders $a $b $e $o_a $o_b $memory`
 # Find the nullspace
@@ -105,7 +127,7 @@ elif [ 254 -eq $ret ]; then
   zsel ${tmp}.2 ${tmp}.2.1 1
 # Produce both standard bases
   for i in 0 1; do
-    base_from_vector ${tmp}.2.$i $a $b ${name}_sb_$i ${tmp}.3
+    base_from_vector ${tmp}.2.$i ${name}_sb_$i ${tmp}.3 ${rest[*]}
     ret=$?
     if [ 0 -ne $ret ]; then
       rm -f ${tmp}*
@@ -113,20 +135,27 @@ elif [ 254 -eq $ret ]; then
     fi
   done
 # Compare, if equal all ok, if not, fail
-  ok=0;
-  if zdiff ${name}_sb_0_1 ${name}_sb_1_1 1>/dev/null; then
-    if zdiff ${name}_sb_0_2 ${name}_sb_1_2 1>/dev/null; then
-      ok=1
+  eq=1;
+  i=1
+  while [ $i -le $j ]; do
+    if zdiff ${name}_sb_0_$i ${name}_sb_1_$i 1>/dev/null; then
+      eq=1
+    else
+      eq=0
+      break
     fi
-  fi
-  if [ 0 -eq $ok ]; then
+    let i=$i+1
+  done
+  if [ 0 -eq $eq ]; then
     echo failed to produce a standard basis for $a
-#    rm -f ${tmp}*
+    rm -f ${tmp}*
     exit 254
   fi
-  for i in 1 2; do
+  i=1;
+  while [ $i -le $j ]; do
     mv ${name}_sb_0_$i ${name}_sb_$i
     rm ${name}_sb_1_$i
+    let i=$i+1
   done
 else
   echo $script
@@ -143,12 +172,26 @@ if [ $ret -eq 0 ]; then
 # Some irreds of this dimension
   for x in $names; do
     y=`echo $x | sed -e "s/_1$//g"`
-    if zdiff ${y}_1 ${name}_sb_1 1>/dev/null; then
-      if zdiff ${y}_2 ${name}_sb_2 1>/dev/null; then
-        echo Existing irreducible ${y} found
-        rm -f ${tmp}*
-        exit 255
+    eq=1
+    i=1;
+    while [ $i -le $j ]; do
+      if [ -e ${y}_$i ]; then
+        if zdiff ${y}_$i ${name}_sb_$i 1>/dev/null; then
+          eq=1
+        else
+          eq=0
+          break
+        fi
+      else
+        eq=0
+        break
       fi
+      let i=$i+1
+    done
+    if [ 1 -eq $eq ] ; then
+      echo Existing irreducible ${y} found
+      rm -f ${tmp}*
+      exit 255
     fi
   done
 fi
@@ -158,8 +201,11 @@ fi
 echo Found a new irreducible of dimension ${nor} using script $script
 new_name=`new_irred_name irreds/${nor}`
 #echo assigning new name ${new_name}
-mv ${name}_sb_1 ${new_name}_1
-mv ${name}_sb_2 ${new_name}_2
+i=1
+while [ $i -le $j ]; do
+  mv ${name}_sb_$i ${new_name}_$i
+  let i=$i+1
+done
 if [ -e ${new_name}_1_${script} -o -L ${new_name}_1_${script} ]; then
   rm ${new_name}_1_${script}
 fi

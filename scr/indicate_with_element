@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: indicate_with_element,v 1.2 2002/06/25 10:30:12 jon Exp $
+# $Id: indicate_with_element,v 1.3 2002/07/05 17:19:22 jon Exp $
 #
 # Script to find the indicator of an irreducible representation
 # Assumes a and b in standard base form
@@ -56,7 +56,7 @@ S=${tmp}.3
 Q=${tmp}.4
 sb=${tmp}.0
 # TODO: cut down the amount of work here, we don't need the invert, multiplies etc
-x=`base_vectors $e $a_d $b_d $S`
+x=`base_vectors $e $S $a_d $b_d`
 ret=$?
 if [ $ret -eq 0 ]; then
   real_indicate $a $b $S $memory

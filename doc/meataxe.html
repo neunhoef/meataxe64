@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.5 2002/07/05 12:50:38 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.6 2002/07/05 17:19:22 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -3946,9 +3946,12 @@ dimension increases.
 </p>
 <ol>
 <li><a href="#base">base</a></li>
+<li><a href="#base_from_vector">base_from_vector</a></li>
 <li><a href="#base_vectors">base_vectors</a></li>
+<li><a href="#base_with_vector">base_with_vector</a></li>
 <li><a href="#basef">basef</a></li>
 <li><a href="#basef_vectors">basef_vectors</a></li>
+<li><a href="#conjugate">conjugate</a></li>
 <li><a href="#cut_cols">cut_cols</a></li>
 <li><a href="#dual">dual</a></li>
 <li><a href="#dual_subspace">dual_subspace</a></li>
@@ -4014,16 +4017,16 @@ which to generate a seed.
 <td valign=top>1</td><td valign=top>The element with which to split</td>
 </tr>
 <tr>
-<td valign=top>2</td><td valign=top>Generator 1 (may be a map)</td>
+<td valign=top>2</td><td valign=top>A stem for output filenames</td>
 </tr>
 <tr>
-<td valign=top>3</td><td valign=top>Generator 2 (may be a map)</td>
+<td valign=top>3</td><td valign=top>Where to record the standard basis vectors</td>
 </tr>
 <tr>
-<td valign=top>4</td><td valign=top>A stem for output filenames</td>
+<td valign=top>4</td><td valign=top>Generator 1 (may be a map)</td>
 </tr>
 <tr>
-<td valign=top>5</td><td valign=top>Where to record the standard basis vectors</td>
+<td valign=top>5-</td><td valign=top>Other generators (may be a map)</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>None</td>
@@ -4057,6 +4060,52 @@ inverse is not returned, although it could be if a need arose.
 Generally, users are not expected to invoke this script directly.
 </li>
 <li>
+<h3><a name="base_from_vector">base_from_vector</a></h3> Purpose:
+Produce a standard base, given a seed
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>The seed</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Output stem</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>Where to record the standard basis vectors</td>
+</tr>
+<td valign=top>4</td><td valign=top>Generator 1 (may be a map)</td>
+</tr>
+<tr>
+<td valign=top>5-</td><td valign=top>Other generators (may be a map)</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>None</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient memory for workspace</td>
+</tr>
+<tr>
+<td valign=top>254</td><td valign=top>The representation reduced</td>
+</tr>
+</table>
+Commentary: This script combines <a
+href="#base_with_vector>base_with_vector</a> and <a
+href="#conjugate">conjugate</a> to produce a standard basis and
+convert the generators into it. Generally, users are not expected to
+invoke this script directly.
+</li>
+<li>
 <h3><a name="base_vectors">base_vectors</a></h3>
 Purpose: Compute the vectors defining a standard base
 <table>
@@ -4067,13 +4116,13 @@ Purpose: Compute the vectors defining a standard base
 <td valign=top>1</td><td valign=top>The element with which to split</td>
 </tr>
 <tr>
-<td valign=top>2</td><td valign=top>Generator 1 (may be a map)</td>
+<td valign=top>2</td><td valign=top>Where to record the standard basis vectors</td>
 </tr>
 <tr>
-<td valign=top>3</td><td valign=top>Generator 2 (may be a map)</td>
+<td valign=top>3</td><td valign=top>Generator 1 (may be a map)</td>
 </tr>
 <tr>
-<td valign=top>4</td><td valign=top>Where to record the standard basis vectors</td>
+<td valign=top>4-</td><td valign=top>Other generators (may be a map)</td>
 </tr>
 <tr>
 <tr>
@@ -4106,6 +4155,51 @@ o), we do not need to conjugate the generators in the dual space back
 into standard base form (and to do so is computationally expensive,
 since it involves an invert and four multiplies). Generally, users are
 not expected to invoke this script directly.
+</li>
+<li>
+<h3><a name="base_with_vector">base_with_vector</a></h3> Purpose:
+Produce a standard base, given a seed
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>The seed</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Where to record the standard basis vectors</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>Memory to use</td>
+</tr>
+<tr>
+<td valign=top>4</td><td valign=top>Generator 1 (may be a map)</td>
+</tr>
+<tr>
+<td valign=top>5-</td><td valign=top>Other generators (may be a map)</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>None</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient memory for workspace</td>
+</tr>
+<tr>
+<td valign=top>254</td><td valign=top>The representation reduced</td>
+</tr>
+</table>
+Commentary: This script performs the standard base spin part of the
+full standard base process. Generally, users are not expected to
+invoke this script directly.
 </li>
 <li>
 <h3><a name="basef">basef</a></h3>
@@ -4223,6 +4317,45 @@ Otherwise, this script functions analogously to <a
 href="#base_vectors">base_vectors</a>. Note that the temporary
 directory must exist, this script will not create it. Generally, users
 are not expected to invoke this script directly.
+</li>
+<li>
+<h3><a name="conjugate">conjugate</a></h3>
+Purpose: Conjugate some elements, given an invertiable matrix
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>The element by which to conjugate</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>A stem for output filenames</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>Generator 1 (may be a map)</td>
+</tr>
+<tr>
+<td valign=top>4-</td><td valign=top>Other generators (may be a map)</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>None</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient memory for workspace</td>
+</tr>
+</table>
+Commentary: This script uses invert, and forms G E (G inverse) for
+each input G. Generally, users are not expected to invoke this script
+directly.
 </li>
 <li>
 <h3><a name="cut_cols">cut_cols</a></h3>
@@ -5595,19 +5728,22 @@ generators.
 <td valign=top>Parameters:</td>
 </thead>
 <tr>
-<td valign=top>1</td><td valign=top>Generator 1</td>
+<td valign=top>1</td><td valign=top>Memory size</td>
 </tr>
 <tr>
-<td valign=top>2</td><td valign=top>Generator 2</td>
+<td valign=top>2</td><td valign=top>Generator 1</td>
 </tr>
 <tr>
 <td valign=top>3</td><td valign=top>Order of generator 1</td>
 </tr>
 <tr>
-<td valign=top>4</td><td valign=top>Order of generator 2</td>
+<td valign=top>4</td><td valign=top>Generator 2</td>
 </tr>
 <tr>
-<td valign=top>5</td><td valign=top>Optional memory size (default 200k)</td>
+<td valign=top>5</td><td valign=top>Order of generator 2</td>
+</tr>
+<tr>
+<td valign=top>6</td><td valign=top>Other generators and orders</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>Information indicating either that

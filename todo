@@ -10,8 +10,8 @@ Debug zsymsq failure on Co2 23 mod 3
 Investigate rename failure on large files from zscript
 Consider allowing maps into ztsp and ztspf
 Analyse unexpected split failure
-Document new scripts and programs (base_with_vector, base_from_vector, conjugate, basef_with_vector, basef_from_vector, conjugatef)*
-Improve zsbf to take multiple generators and extend scripts for zmsb and zmsbf *
+Improve zsbf to take multiple generators and extend scripts for zmsbf *
+Document new scripts and programs (basef_with_vector, basef_from_vector, conjugatef) *
 Fix zvp and zps to take less memory
 Think about better grease vector selection for making vectors
 Fix zsums use to handle zero elements
