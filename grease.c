@@ -1,5 +1,5 @@
 /*
- * $Id: grease.c,v 1.19 2004/02/17 22:14:19 jon Exp $
+ * $Id: grease.c,v 1.20 2004/05/02 19:33:19 jon Exp $
  *
  * Functions to grease matrix rows
  *
@@ -54,53 +54,6 @@ void grease_init(row_opsp ops, grease grease)
   memcpy(&grease->row_operations, ops, sizeof(*ops));
 }
 
-int grease_allocate(unsigned int prime, unsigned int len,
-                    grease grease, unsigned int start)
-{
-  unsigned int q_n;
-  unsigned int i;
-  assert(NULL != grease);
-  assert(0 != grease->level);
-  assert(0 != len);
-  assert(0 != prime);
-  if (0 == int_pow(prime, grease->level, &q_n)) {
-    return 0;
-  }
-  grease->size = q_n - 1;
-  grease->status = matrix_malloc(grease->size);
-  /* Get the table pointers */
-  grease->rows = matrix_malloc(grease->size);
-  for (i = 0; i < grease->size; i++) {
-    grease->rows[i] = memory_pointer_offset(start, i, len);
-  }
-  return 1;
-}
-
-void grease_init_rows(grease grease, unsigned int prime)
-{
-  /* Fill in grease->status */
-  unsigned int i, j;
-  assert(NULL != grease);
-  assert(0 != grease->level);
-  memset(grease->status, 0, grease->size * sizeof(unsigned int));
-  j = 1;
-  for (i = 0; i < grease->level; i++) {
-    grease->status[j - 1] = 1; /* An entry from the matrix */
-    j *= prime; /* Next entry directly from matrix */
-  }
-}
-
-void grease_free(grease grease)
-{
-  assert(NULL != grease);
-  assert(NULL != grease->rows);
-  assert(NULL != grease->status);
-  free(grease->status);  
-  free(grease->rows);
-  grease->status = NULL;
-  grease->rows = NULL;
-}
-
 /* For an index into the table, determine the split as a sum of vector */
 /* quot * V[index] + V[rem] */
 static void split(unsigned int prime, unsigned int n,
@@ -141,34 +94,89 @@ static void split(unsigned int prime, unsigned int n,
   }
 }
 
+int grease_allocate(unsigned int prime, unsigned int len,
+                    grease grease, unsigned int start)
+{
+  unsigned int q_n;
+  unsigned int i;
+  assert(NULL != grease);
+  assert(0 != grease->level);
+  assert(0 != len);
+  assert(0 != prime);
+  if (0 == int_pow(prime, grease->level, &q_n)) {
+    return 0;
+  }
+  grease->size = q_n - 1;
+  grease->status = matrix_malloc(grease->size);
+  grease->quot = matrix_malloc(grease->size);
+  grease->rem = matrix_malloc(grease->size);
+  grease->index = matrix_malloc(grease->size);
+  /* Get the table pointers */
+  grease->rows = matrix_malloc(grease->size);
+  for (i = 0; i < grease->size; i++) {
+    grease->rows[i] = memory_pointer_offset(start, i, len);
+    split(prime, i + 1, grease->quot + i, grease->rem + i, grease->index + i);
+  }
+  return 1;
+}
+
+void grease_init_rows(grease grease, unsigned int prime)
+{
+  /* Fill in grease->status */
+  unsigned int i, j;
+  assert(NULL != grease);
+  assert(0 != grease->level);
+  memset(grease->status, 0, grease->size * sizeof(unsigned int));
+  j = 1;
+  for (i = 0; i < grease->level; i++) {
+    grease->status[j - 1] = 1; /* An entry from the matrix */
+    j *= prime; /* Next entry directly from matrix */
+  }
+}
+
+void grease_free(grease grease)
+{
+  assert(NULL != grease);
+  assert(NULL != grease->rows);
+  assert(NULL != grease->status);
+  free(grease->status);  
+  free(grease->quot);
+  free(grease->rem);
+  free(grease->index);
+  free(grease->rows);
+  grease->status = NULL;
+  grease->rows = NULL;
+}
+
 /* Compute, if necessary, grease row i */
 /* i is uncorrected for the table, so should not be zero */
 static void grease_make_row(grease grease, unsigned int i, unsigned int prime, unsigned int len, unsigned int offset)
 {
   unsigned int j = i - 1;
+  unsigned int quot, rem, index;
   assert(0 < i);
-  if (0 == grease->status[j]) {
-    unsigned int quot, rem, index;
-    split(prime, i, &quot, &rem, &index);
-    assert(0 != grease->status[index - 1]);
-    if (0 == rem) {
-      /* Scaled operation, shouldn't be by 1 */
-      assert(1 != quot);
-      (*grease->row_operations.scaler)(grease->rows[index - 1] + offset, grease->rows[j] + offset, len - offset, quot);
-    } else {
-      unsigned int k = index * quot - 1;
-      if (0 == grease->status[rem - 1]) {
-        grease_make_row(grease, rem, prime, len, offset);
-      }
-      if (0 == grease->status[k]) {
-        (*grease->row_operations.scaler)(grease->rows[index - 1] + offset, grease->rows[k] + offset, len - offset, quot);
-        grease->status[k] = 1;
-      }
-      (*grease->row_operations.adder)(grease->rows[rem - 1] + offset, grease->rows[k] + offset,
-                                      grease->rows[j] + offset, len - offset);
-      grease->status[j] = 1;
+  assert(0 == grease->status[j]);
+  quot = grease->quot[j];
+  rem = grease->rem[j];
+  index = grease->index[j];
+  assert(0 != grease->status[index - 1]);
+  if (0 == rem) {
+    /* Scaled operation, shouldn't be by 1 */
+    assert(1 != quot);
+    (*grease->row_operations.scaler)(grease->rows[index - 1] + offset, grease->rows[j] + offset, len - offset, quot);
+  } else {
+    unsigned int k = index * quot - 1;
+    if (0 == grease->status[rem - 1]) {
+      grease_make_row(grease, rem, prime, len, offset);
     }
+    if (0 == grease->status[k]) {
+      (*grease->row_operations.scaler)(grease->rows[index - 1] + offset, grease->rows[k] + offset, len - offset, quot);
+      grease->status[k] = 1;
+    }
+    (*grease->row_operations.adder)(grease->rows[rem - 1] + offset, grease->rows[k] + offset,
+                                    grease->rows[j] + offset, len - offset);
   }
+  grease->status[j] = 1;
 }
 
 #if 0

@@ -1,5 +1,5 @@
 /*
- * $Id: grease.h,v 1.10 2004/02/17 22:14:19 jon Exp $
+ * $Id: grease.h,v 1.11 2004/05/02 19:33:19 jon Exp $
  *
  * Functions to grease matrix rows
  *
@@ -16,6 +16,9 @@ typedef struct grease_struct
   unsigned int size;
   unsigned int **rows;
   unsigned int *status; /* 1 => set, 0 => unset */
+  unsigned int *quot;
+  unsigned int *rem;
+  unsigned int *index;
   row_ops row_operations;
 } grease_struct, *grease;
 

@@ -1,5 +1,5 @@
 /*
- * $Id: elements.h,v 1.18 2004/01/24 14:47:13 jon Exp $
+ * $Id: elements.h,v 1.19 2004/05/02 19:33:19 jon Exp $
  *
  * Element manipulation for meataxe
  *
@@ -36,6 +36,15 @@ extern unsigned int get_mask_and_elts(unsigned int nob, unsigned int *elts_per_w
 /* Extract an element from a row at given position, with fixed mask */
 extern unsigned int get_element_from_row_with_params(unsigned int nob, unsigned int index, unsigned int mask,
                                                      unsigned int elts_per_word, const unsigned int *row);
+
+/* Extract some elements from a row at given position, from within one word only */
+extern unsigned int get_elements_in_word_from_row(const unsigned int *row,
+                                                  unsigned int bit_offset, unsigned int mask);
+
+/* Extract some elements from a row at given position, across words */
+extern unsigned int get_elements_out_word_from_row(const unsigned int *row,
+                                                   unsigned int shift,
+                                                   unsigned int bit_offset, unsigned int mask);
 
 /* Extract some elements from a row at given position */
 extern unsigned int get_elements_from_row(const unsigned int *row, unsigned int width, unsigned int nob,

@@ -1,5 +1,5 @@
 /*
- * $Id: mul.c,v 1.35 2004/02/17 22:14:19 jon Exp $
+ * $Id: mul.c,v 1.36 2004/05/02 19:33:19 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
@@ -467,6 +467,8 @@ int skip_mul_from_store(unsigned int offset, unsigned int **rows1, unsigned int 
       unsigned int width = size * nob;
       unsigned int word_offset, bit_offset, mask;
       unsigned int elt_index = noc, index = 0;
+      int in_word;
+      unsigned int shift = 0;
       /* Read size rows from matrix 2 into rows 2 */
       /* This sets the initial rows */
       l = 1;
@@ -491,10 +493,15 @@ int skip_mul_from_store(unsigned int offset, unsigned int **rows1, unsigned int 
         index = elt_index / elts_per_word;
       }
       element_access_init(nob, i, size, &word_offset, &bit_offset, &mask);
+      in_word = bit_offset + width <= bits_in_unsigned_int;
+      if (0 == in_word) {
+        shift = ((bits_in_unsigned_int - bit_offset) / nob) * nob;
+      }
       grease_init_rows(grease, prime);
       for (j = 0; j < nor; j++) {
         unsigned int *row1 = rows1[j];
-        unsigned int elt = get_elements_from_row(row1 + word_offset, width, nob, bit_offset, mask);
+        unsigned int elt = (in_word) ? get_elements_in_word_from_row(row1, bit_offset, mask) :
+          get_elements_out_word_from_row(row1 + word_offset, shift, bit_offset, mask);
         if (offset == i) {
           row_init(rows3[j], len);
         }
@@ -585,6 +592,8 @@ int mul_in_store(unsigned int **rows1, unsigned int **rows2, unsigned int **rows
         unsigned int size = (grease->level + i <= noc) ? grease->level : noc - i;
         unsigned int width = size * nob;
         unsigned int word_offset, bit_offset, mask;
+        int in_word;
+        unsigned int shift = 0;
         l = 1;
         /* Replace the initial allocated grease rows with the rows of rows2 */
         for (j = 0; j < size; j++) {
@@ -592,10 +601,15 @@ int mul_in_store(unsigned int **rows1, unsigned int **rows2, unsigned int **rows
           l *= prime;
         }
         element_access_init(nob, i, size, &word_offset, &bit_offset, &mask);
+        in_word = bit_offset + width <= bits_in_unsigned_int;
+        if (0 == in_word) {
+          shift = ((bits_in_unsigned_int - bit_offset) / nob) * nob;
+        }
         grease_init_rows(grease, prime);
         for (j = 0; j < nor; j++) {
           unsigned int *row1 = rows1[j];
-          unsigned int elt = get_elements_from_row(row1 + word_offset, width, nob, bit_offset, mask);
+          unsigned int elt = (in_word) ? get_elements_in_word_from_row(row1 + word_offset, bit_offset, mask) :
+            get_elements_out_word_from_row(row1 + word_offset, shift, bit_offset, mask);
           if (0 == i) {
             row_init(rows3[j], len);
           }
