@@ -1,5 +1,5 @@
 /*
- * $Id: sumsf.c,v 1.6 2002/09/18 10:33:15 jon Exp $
+ * $Id: sumsf.c,v 1.7 2002/09/18 10:47:52 jon Exp $
  *
  * Function to compute linear sums of two matices
  *
@@ -265,6 +265,5 @@ int sumsf(const char *out, const char *dir, unsigned int n, unsigned int argc, c
     i++;
   }
   /* Failed to find a suitable element */
-  printf("Failed to find a suitable element\n");
   return 1;
 }

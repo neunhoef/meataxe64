@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.73 2002/09/05 18:24:26 jon Exp $
+# $Id: makefile,v 1.74 2002/09/18 10:47:52 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -73,6 +73,7 @@ ZRN_TARGET=	zrn
 ZRNF_TARGET=	zrnf
 ZRRANKS_TARGET=	zrranks
 ZRSUMS_TARGET=	zrsums
+ZRSUMSF_TARGET=	zrsumsf
 ZSAD_TARGET=	zsad
 ZSB_TARGET=	zsb
 ZSBF_TARGET=	zsbf
@@ -170,6 +171,7 @@ ZRN_MODULES=	clean elements endian grease header maps matrix memory parse primes
 ZRNF_MODULES=	clean elements endian grease header maps matrix memory parse primes read rnf rows system utils write zrnf
 ZRRANKS_MODULES=	add clean elements endian grease header ident map_or_row maps matrix memory mul parse primes read rn rows sums utils write zrranks
 ZRSUMS_MODULES=	add clean elements endian grease header ident map_or_row maps matrix memory mul parse primes read rn rows sums utils write zrsums
+ZRSUMSF_MODULES=	add clean elements endian grease header ident map_or_row maps matrix memory mul parse primes read rnf rows sumsf system utils write zrsumsf
 ZSAD_MODULES=	add elements endian header map_or_row maps memory parse primes read rows utils write zsad
 ZSB_MODULES=	clean elements endian grease header maps matrix memory mul parse primes read rows sb utils write zsb
 ZSBF_MODULES=	clean clean_file elements endian grease header maps matrix memory mul parse primes read rows sbf system utils write zsbf
@@ -267,6 +269,7 @@ MODULES=	$(DECOMP_MODULES) \
 	$(ZRNF_MODULES) \
 	$(ZRRANKS_MODULES) \
 	$(ZRSUMS_MODULES) \
+	$(ZRSUMSF_MODULES) \
 	$(ZSAD_MODULES) \
 	$(ZSB_MODULES) \
 	$(ZSBF_MODULES) \
@@ -525,6 +528,9 @@ TARGET:=ZRRANKS
 include targets.txt
 
 TARGET:=ZRSUMS
+include targets.txt
+
+TARGET:=ZRSUMSF
 include targets.txt
 
 TARGET:=ZSAD

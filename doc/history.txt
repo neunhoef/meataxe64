@@ -190,3 +190,4 @@ skew seventh
 20020911 - Start to extend indicators to cope with multiple generators
 20020912 - Indicators extend to cope with multiple generators
 20020917 - Added doc for ztco, ztcv, sym_basis
+20020918 - Added zrsumsf
