@@ -1,5 +1,5 @@
 /*
- * $Id: symb.c,v 1.4 2003/06/14 07:58:35 jon Exp $
+ * $Id: symb.c,v 1.5 2003/06/16 21:54:19 jon Exp $
  *
  * Function to compute a symmetry basis
  *
@@ -48,8 +48,59 @@ struct file_struct
   file next;
 };
 
-static void cleanup(void)
+static void cleanup_files(file_struct *t1, file_struct *t2)
 {
+  if (t1->created) {
+    (void)remove(t1->name);
+    t1->created = 0;
+  }
+  if (t2->created) {
+    (void)remove(t2->name);
+    t2->created = 0;
+  }
+}
+
+static void cleanup_names(char *name1, char *name2, char *name3, char *name4)
+{
+  free(name1);
+  free(name2);
+  free(name3);
+  free(name4);
+}
+
+static void cleanup_gens(struct gen_struct *gens, unsigned int argc)
+{
+  unsigned int i;
+  for (i = 0; i < argc; i++) {
+    fclose(gens[i].f);
+  }
+  free(gens);
+}
+
+static void cleanup(struct gen_struct *gens, unsigned int argc,
+                    char *name1, char *name2, char *name3, char *name4,
+                    FILE *inp, grease grease, FILE *outp,
+                    file_struct *t1, file_struct *t2, FILE *temp)
+{
+  if (NULL != gens) {
+    cleanup_gens(gens, argc);
+  }
+  if (NULL != inp) {
+    fclose(inp);
+  }
+  if (NULL != outp) {
+    fclose(outp);
+    (void)remove(name3);
+  }
+  if (NULL != temp) {
+    fclose(temp);
+    (void)remove(name4);
+  }
+  cleanup_files(t1, t2);
+  cleanup_names(name1, name2, name3, name4);
+  if (NULL != grease) {
+    grease_free(grease);
+  }
 }
 
 static int unfinished(struct gen_struct *gens,
@@ -98,9 +149,11 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
   sprintf(name_o2, "%s/%s.3", dir, tmp); /* For output after weeding in the second pass */
   if (0 == spaces || 0 == space_size) {
     fprintf(stderr, "%s: no spaces expected, or zero space size, terminating\n", name);
+    cleanup(NULL, 0, name1, name2, name_o1, name_o2, NULL, NULL, NULL, &t1, &t2, NULL);
     exit(1);
   }
   if (0 == open_and_read_binary_header(&f.f, &h_in, in, name)) {
+    cleanup(NULL, 0, name1, name2, name_o1, name_o2, NULL, NULL, NULL, &t1, &t2, NULL);
     exit(1);
   }
   prime = header_get_prime(h_in);
@@ -116,16 +169,16 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
   if (0 == grease_level(prime, &grease, memory_rows(len, 100))) {
     fprintf(stderr, "%s: failed to get grease for %s, terminating\n",
             name, in);
-    cleanup();
+    cleanup(NULL, 0, name1, name2, name_o1, name_o2, f.f, NULL, NULL, &t1, &t2, NULL);
     exit(2);
   }
   if (0 == grease_allocate(prime, len, &grease, 900)){
     fprintf(stderr, "%s: unable to allocate grease, terminating\n", name);
-    cleanup();
+    cleanup(NULL, 0, name1, name2, name_o1, name_o2, f.f, NULL, NULL, &t1, &t2, NULL);
   }
   if (0 == nor || 0 != nor % spaces) {
     fprintf(stderr, "%s: no input rows, or not a multiple of number of spaces\n", name);
-    cleanup();
+    cleanup(NULL, 0, name1, name2, name_o1, name_o2, f.f, &grease, NULL, &t1, &t2, NULL);
     exit(1);
   }
   /* Memory split */
@@ -140,7 +193,7 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
   outer_stride = (rows_available - ech_size) / rows_per_space;
   if (1 >= outer_stride) {
     fprintf(stderr, "%s: insufficient rows for one space \n", name);
-    cleanup();
+    cleanup(NULL, 0, name1, name2, name_o1, name_o2, f.f, &grease, NULL, &t1, &t2, NULL);
     exit(1);
   }
   if (outer_stride > nor) {
@@ -167,13 +220,12 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
     const char *gen_name = args[i];
     const header *h;
     if (0 == open_and_read_binary_header(files + i, &h, gen_name, name)) {
-      cleanup();
+      cleanup(gens, i, name1, name2, name_o1, name_o2, f.f, &grease, NULL, &t1, &t2, NULL);
       exit(1);
     }
     gens[i].is_map = 1 == header_get_prime(h);
     gens[i].m = gen_name;
     gens[i].f = files[i];
-    gens[i].nor = 0;
     if (noc != header_get_noc(h) ||
         noc != header_get_nor(h) ||
         (prime != header_get_prime(h) && 0 == gens[i].is_map) ||
@@ -181,7 +233,8 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
         (nob != header_get_nob(h) && 0 == gens[i].is_map)) {
       fprintf(stderr, "%s: incompatible parameters for %s, %s, terminating\n",
               name, in, gen_name);
-      cleanup();
+      cleanup(gens, i + 1, name1, name2, name_o1, name_o2, f.f, &grease, NULL, &t1, &t2, NULL);
+      header_free(h);
       exit(1);
     }
     assert(gens[i].is_map || header_get_len(h) == len);
@@ -203,7 +256,7 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
       perror(name);
     }
     fprintf(stderr, "%s: failed to open %s, terminating\n", name, name_o1);
-    cleanup();
+    cleanup(gens, argc, name1, name2, name_o1, name_o2, f.f, &grease, NULL, &t1, &t2, NULL);
     exit(1);
   }
   /* loop until input all consumed */
@@ -221,7 +274,7 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
       }
       fprintf(stderr, "%s: failed to read row from %s, terminating\n",
               name, f.name);
-      cleanup();
+      cleanup(gens, argc, name1, name2, name_o1, name_o2, f.f, &grease, o, &t1, &t2, NULL);
       exit(1);
     }
     /* Compute the map[0] entry, and fail if blank */
@@ -231,7 +284,7 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
     if (0 == d) {
       fprintf(stderr, "%s: read zero row from %s, terminating\n",
               name, f.name);
-      cleanup();
+      cleanup(gens, argc, name1, name2, name_o1, name_o2, f.f, &grease, o, &t1, &t2, NULL);
       exit(1);
     }
     map[0] = new_map[0];
@@ -241,6 +294,10 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
     gen = gens; /* The first generator */
     t_in = &f; /* Point to correct input and output */
     t_out = &t1;
+    /* Reset gen->nor for all generators */
+    for (d = 0; d < argc; d++) {
+      gens[d].nor = 0;
+    }
     while (sub_nor < space_size && unfinished(gens, argc, sub_nor)) {
       unsigned int rows_to_do = sub_nor - gen->nor, new_nor = sub_nor;
       if (0 != rows_to_do) {
@@ -253,7 +310,7 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
           }
           fprintf(stderr, "%s: failed to read rows from %s, terminating\n",
                   name, t_in->name);
-          cleanup();
+          cleanup(gens, argc, name1, name2, name_o1, name_o2, NULL, &grease, o, &t1, &t2, NULL);
           exit(1);
         }
         /* Read the rows of space 1 we want */
@@ -263,14 +320,14 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
           }
           fprintf(stderr, "%s: failed to read rows from %s, terminating\n",
                   name, t_in->name);
-          cleanup();
+          cleanup(gens, argc, name1, name2, name_o1, name_o2, NULL, &grease, o, &t1, &t2, NULL);
           exit(1);
         }
         /* Produce the products */
         if (0 == mul_from_store(mat, mat + rows_to_do, gen->f, gen->is_map, noc, len, nob,
                                 rows_to_do, noc, prime, &grease, verbose, gen->m, name)) {
           fprintf(stderr, "%s: failed to multiply using %s, terminating\n", name, gen->m);
-          cleanup();
+          cleanup(gens, argc, name1, name2, name_o1, name_o2, NULL, &grease, o, &t1, &t2, NULL);
           exit(1);
         }
         /* Prune the results */
@@ -313,7 +370,7 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
               }
               fprintf(stderr, "%s: failed to read rows from %s, terminating\n",
                       name, t_in->name);
-              cleanup();
+              cleanup(gens, argc, name1, name2, name_o1, name_o2, NULL, &grease, o, &t1, &t2, NULL);
               exit(1);
             }
             /* Now get the ones we want */
@@ -324,7 +381,7 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
                 }
                 fprintf(stderr, "%s: failed to read rows from %s, terminating\n",
                         name, t_in->name);
-                cleanup();
+                cleanup(gens, argc, name1, name2, name_o1, name_o2, NULL, &grease, o, &t1, &t2, NULL);
                 exit(1);
               }
               /* Do we want this one? */
@@ -343,7 +400,7 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
             if (0 == mul_from_store(mat, mat + m, gen->f, gen->is_map, noc, len, nob,
                                     l, noc, prime, &grease, verbose, gen->m, name)) {
               fprintf(stderr, "%s: failed to multiply using %s, terminating\n", name, gen->m);
-              cleanup();
+              cleanup(gens, argc, name1, name2, name_o1, name_o2, NULL, &grease, o, &t1, &t2, NULL);
               exit(1);
             }
             l = m; /* Don't need l as a count any more */
@@ -356,7 +413,7 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
               perror(name);
             }
             fprintf(stderr, "%s: failed to open %s, terminating\n", name, t_out->name);
-            cleanup();
+            cleanup(gens, argc, name1, name2, name_o1, name_o2, NULL, &grease, o, &t1, &t2, NULL);
             exit(1);
           }
           /* Back to start of input rows for this time round loop */
@@ -370,7 +427,7 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
               }
               fprintf(stderr, "%s: failed to read rows from %s, terminating\n",
                       name, t_in->name);
-              cleanup();
+              cleanup(gens, argc, name1, name2, name_o1, name_o2, NULL, &grease, o, &t1, &t2, NULL);
               exit(1);
             }
             /* write same to t_out */
@@ -380,7 +437,7 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
               }
               fprintf(stderr, "%s: failed to write rows to %s, terminating\n",
                       name, name_o1);
-              cleanup();
+              cleanup(gens, argc, name1, name2, name_o1, name_o2, NULL, &grease, o, &t1, &t2, NULL);
               exit(1);
             }
             /* Then write d rows from mat + l to t_out */
@@ -390,7 +447,7 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
               }
               fprintf(stderr, "%s: failed to write rows to %s, terminating\n",
                       name, name_o1);
-              cleanup();
+              cleanup(gens, argc, name1, name2, name_o1, name_o2, NULL, &grease, o, &t1, &t2, NULL);
               exit(1);
             }
             l += d;
@@ -409,7 +466,7 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
               perror(name);
             }
             fprintf(stderr, "%s: failed to open %s, terminating\n", name, t_in->name);
-            cleanup();
+            cleanup(gens, argc, name1, name2, name_o1, name_o2, NULL, &grease, o, &t1, &t2, NULL);
             exit(1);
           }
         }
@@ -426,7 +483,7 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
       }
       fprintf(stderr, "%s: failed to read rows from %s, terminating\n",
               name, t_in->name);
-      cleanup();
+      cleanup(gens, argc, name1, name2, name_o1, name_o2, NULL, NULL, o, &t1, &t2, NULL);
       exit(1);
     }
     if (0 == endian_write_matrix(o, mat, len, spaces_per_loop * space_size)) {
@@ -435,7 +492,7 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
       }
       fprintf(stderr, "%s: failed to write rows to %s, terminating\n",
               name, name_o1);
-      cleanup();
+      cleanup(gens, argc, name1, name2, name_o1, name_o2, NULL, NULL, o, &t1, &t2, NULL);
       exit(1);
     }
     if (&f != t_in) {
@@ -446,16 +503,21 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
   /* delete name1 and name2 if they exist */
   if (t1.created) {
     (void)remove(t1.name);
+    t1.created = 0;
   }
   if (t2.created) {
     (void)remove(t2.name);
+    t2.created = 0;
   }
   fclose(o);
-  /* TODO: weed the output from name_o1 to name_o2 */
-  /* cf base */
+  /* Don't need gens any more */
+  cleanup_gens(gens, argc);
+  /* Or grease */
+  grease_free(&grease);
+  /* weed the output from name_o1 to name_o2 */
   h_out = header_create(prime, nob, nod, noc, space_size * spaces);
   if (0 == open_and_write_binary_header(&outp, h_out, out, name)) {
-    cleanup();
+    cleanup(NULL, 0, name1, name2, name_o1, name_o2, NULL, NULL, NULL, &t1, &t2, NULL);
     exit(1);
   }
   header_free(h_out);
@@ -466,7 +528,7 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
       perror(name);
     }
     fprintf(stderr, "%s: cannot open %s, terminating\n", name, name_o1);
-    cleanup();
+    cleanup(NULL, 0, name1, name2, name_o1, name_o2, NULL, NULL, NULL, &t1, &t2, NULL);
     exit(1);
   }
   errno = 0;
@@ -476,7 +538,7 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
       perror(name);
     }
     fprintf(stderr, "%s: cannot open %s, terminating\n", name, name_o2);
-    cleanup();
+    cleanup(NULL, 0, name1, name2, name_o1, name_o2, NULL, NULL, NULL, &t1, &t2, temp);
     exit(1);
   }
   count = 0;
@@ -488,7 +550,7 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
       }
       fprintf(stderr, "%s: failed to read rows from %s, terminating\n",
               name, name_o1);
-      cleanup();
+      cleanup(NULL, 0, name1, name2, name_o1, name_o2, NULL, NULL, NULL, &t1, &t2, temp);
       exit(1);
     }
     /* Now copy to a safe place so the echelisation doesn't corrupt the original */
@@ -497,7 +559,7 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
     }
     if (0 == clean_file(temp, &count, ech_rows, space_size, mat + space_size, total_rows - space_size,
                         map, NULL, 0, grease.level, prime, len, nob, 900, name)) {
-      cleanup();
+      cleanup(NULL, 0, name1, name2, name_o1, name_o2, NULL, NULL, NULL, &t1, &t2, temp);
       exit(1);
     }
     /* Now check the answer */
@@ -509,14 +571,14 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
         }
         fprintf(stderr, "%s: failed to write rows to %s, terminating\n",
                 name, out);
-        cleanup();
+        cleanup(NULL, 0, name1, name2, name_o1, name_o2, NULL, NULL, NULL, &t1, &t2, temp);
         exit(1);
       }
     } else if (count != d) {
       /*Error */
       fprintf(stderr, "%s: unexpected %d rows added, when expecting 0 or %d, terminating\n",
               name, count - d, space_size);
-      cleanup();
+      cleanup(NULL, 0, name1, name2, name_o1, name_o2, NULL, NULL, NULL, &t1, &t2, temp);
       exit(1);
     }
   }
@@ -525,9 +587,13 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
     /* Error */
     fprintf(stderr, "%s: unexpected %d spaces found, when expecting %d spaces, terminating\n",
             name, count, spaces);
-    cleanup();
+    cleanup(NULL, 0, name1, name2, name_o1, name_o2, NULL, NULL, NULL, &t1, &t2, NULL);
   }
   fclose(outp);
+  fclose(temp);
   free(map);
+  (void)remove(name_o1);
+  (void)remove(name_o2);
+  cleanup_names(name1, name2, name_o1, name_o2);
   return count;
 }
