@@ -1,5 +1,5 @@
 /*
- * $Id: zsign.c,v 1.2 2002/10/13 13:54:15 jon Exp $
+ * $Id: zsign.c,v 1.3 2003/07/20 18:13:53 jon Exp $
  *
  * Compute the orthogonal group sign of a form
  *
@@ -21,7 +21,13 @@ static void sign_usage(void)
 int main(int argc, const char * const argv[])
 {
   int n;
+  unsigned int i;
 
+  printf("zsign: ");
+  for (i = 0; i + 1 < (unsigned int)argc; i++) {
+    printf(" %s", argv[i + 1]);
+  }
+  printf("\n");
   argv = parse_line(argc, argv, &argc);
   if (3 != argc) {
     sign_usage();

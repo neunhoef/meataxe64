@@ -1,7 +1,7 @@
 #
 # Generic build rules
 #
-# $Id: rules.txt,v 1.5 2002/11/13 19:42:49 jon Exp $
+# $Id: rules.txt,v 1.6 2003/07/20 18:13:53 jon Exp $
 #
 
 # Cancel builtin rules
@@ -32,7 +32,7 @@ $(PROFNAOBJDIR)/%.$(OBJEXT): %.c
 	@$(COMPILE)$@ $< $(DEBUG_COMPILE_FLAGS) $(PROF_COMPILE_FLAGS) $(NA_COMPILE_FLAGS) $(COMPILE_CFLAGS) $(INCLUDES) $(DEFINES)
 
 # Dependencies from C source
-$(DEPENDDIR)/%.$(DEPENDEXT): %.c
+$(DEPENDDIR)/%.$(DEPENDEXT): %.c $(GENFILES)
 	@echo Dependencies $<
 	-@mkdir -p $(DEPENDDIR)
 	@echo "$(RELOBJDIR)/$*.$(OBJEXT) $(DEBUGOBJDIR)/$*.$(OBJEXT) $(PROFOBJDIR)/$*.$(OBJEXT) $(PROFNAOBJDIR)/$*.$(OBJEXT): $(DEPENDDIR)/$*.$(DEPENDEXT)" > $@
@@ -43,3 +43,9 @@ $(ASMOUTDIR)/%.$(ASMOUTEXT): %.c
 	@echo Assembler for $<
 	-@mkdir -p $(ASMOUTDIR)
 	@$(COMPILE)$@ $< $(REL_COMPILE_FLAGS) $(COMPILE_CFLAGS) $(NA_COMPILE_FLAGS) $(ASMOUT_FLAGS) $(INCLUDES) $(DEFINES)
+
+# Auto-generated files
+$(GENDIR)/9.c:	$(DEBUGBINDIR)/maketab
+	@echo Generate $@
+	-@mkdir -p $(GENDIR)
+	$< 9 $@

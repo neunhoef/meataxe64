@@ -1,16 +1,19 @@
 /*
- * $Id: rows.c,v 1.19 2002/10/15 14:30:44 jon Exp $
+ * $Id: rows.c,v 1.20 2003/07/20 18:13:53 jon Exp $
  *
  * Row manipulation for meataxe
  *
  */
 
 #include "rows.h"
+#include "primes.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 #include "utils.h"
+
+static prime_ops prime_operations;
 
 int row_is_zero(unsigned int *row, unsigned int len)
 {
@@ -305,7 +308,7 @@ static unsigned int row_product_3(const unsigned int *row1, const unsigned int *
       unsigned int b = *row2;
       while (0 != b && 0 != a) {
         unsigned int prod = ((a & 0xf) << 4) | (b & 0xf);
-        res += prod_table_3[(prod)];
+        res += prod_table_3[prod];
         b >>= 4;
         a >>= 4;
       }
@@ -699,6 +702,188 @@ static unsigned int row_product_5(const unsigned int *row1, const unsigned int *
   return res;
 }
 
+#include "9.c"
+
+/* This macro only references its parameters once */
+#define word_add_9(in1,in2,out) \
+{ \
+  unsigned int a = 0, b = in1, c = in2, j = 0; \
+  while (0 != b || 0 != c) { \
+    unsigned int d = b & 0xff, e = c & 0xff, f; \
+    f = add_table_9[(d << 8) | e]; \
+    a |= f << j; \
+    b >>= 8; \
+    c >>= 8; \
+    j += 8; \
+  } \
+  out = a; \
+}
+
+static void row_add_9(const unsigned int *row1, const unsigned int *row2,
+                     unsigned int *row3, unsigned int len)
+{
+  unsigned int i;
+  assert(0 != len);
+  assert(NULL != row1);
+  assert(NULL != row2);
+  assert(NULL != row3);
+  for (i = 0; i < len; i++) {
+    word_add_9(*(row1++), *(row2++), *(row3++));
+  }
+}
+
+static void row_inc_9(const unsigned int *row1,
+                      unsigned int *row2, unsigned int len)
+{
+  if (len > 10) {
+    /* Search for first non-zero */
+    while (len > 0) {
+      if (0 != *row1) {
+        row_add_9(row1, row2, row2, len);
+        return;
+      }
+      row1++;
+      row2++;
+      len--;
+    }
+  } else {
+    row_add_9(row1, row2, row2, len);
+  }
+}
+
+/* This macro only references its parameters once */
+#define char_scale_9(in,out,n) \
+{ \
+  assert(2 <= n && n < 9); \
+  out = scale_table_9[n - 2][in]; \
+}
+
+/* This macro only references its parameters once */
+#define word_scale_9_with_tab(in,out) \
+{ \
+  unsigned int res = 0, idx = 0, icopy = in; \
+  while (0 != icopy) { \
+    res |= (tab[icopy & 0xff]) << idx; \
+    icopy >>= 8; \
+    idx += 8; \
+  } \
+  out = res; \
+}
+
+/* This macro only references its parameters once */
+#define word_scale_9(in,out,n) \
+{ \
+  unsigned int *tab; \
+  assert(2 <= (n) && (n) < 9); \
+  tab = scale_table_9[n - 2]; \
+  word_scale_9_with_tab(in,out);\
+}
+
+static void scaled_row_add_9(const unsigned int *row1, const unsigned int *row2,
+                             unsigned int *row3, unsigned int len, unsigned int elt)
+{
+  unsigned int i, *tab;
+  assert(0 != len);
+  assert(NULL != row1);
+  assert(NULL != row2);
+  assert(NULL != row3);
+  assert(2 <= elt && elt < 9);
+  tab = scale_table_9[elt - 2];
+  for (i = 0; i < len; i++) {
+    unsigned int out;
+    word_scale_9_with_tab(*(row2++),out);
+    word_add_9(*(row1++),out,*(row3++));
+  }
+}
+
+static void scaled_row_inc_9_sub(const unsigned int *row1, unsigned int *row2,
+                                 unsigned int len, unsigned int elt)
+{
+  unsigned int i, *tab;
+  assert(0 != len);
+  assert(NULL != row1);
+  assert(NULL != row2);
+  assert(2 <= elt && elt < 9);
+  tab = scale_table_9[elt - 2];
+  for (i = 0; i < len; i++) {
+    unsigned int out;
+    word_scale_9_with_tab(*(row1++),out);
+    word_add_9(*(row2),out,*(row2));
+    row2++;
+  }
+}
+
+static void scaled_row_inc_9(const unsigned int *row1, unsigned int *row2,
+                             unsigned int len, unsigned int elt)
+{
+  if (len > 10) {
+    /* Search for first non-zero */
+    while (len > 0) {
+      if (0 != *row1) {
+        scaled_row_inc_9_sub(row1, row2, len, elt);
+        return;
+      }
+      row1++;
+      row2++;
+      len--;
+    }
+  } else {
+    scaled_row_inc_9_sub(row1, row2, len, elt);
+  }
+}
+
+static void row_scale_9(const unsigned int *row1, unsigned int *row2,
+                        unsigned int len, unsigned int elt)
+{
+  unsigned int i, *tab;
+  assert(0 != len);
+  assert(NULL != row1);
+  assert(NULL != row2);
+  assert(2 <= elt && elt < 9);
+  tab = scale_table_9[elt - 2];
+  for (i = 0; i < len; i++) {
+    unsigned int out;
+    word_scale_9_with_tab(*(row1++),out);
+    *(row2++) = out;
+  }
+}
+
+static void row_scale_in_place_9(unsigned int *row,
+                                 unsigned int len, unsigned int elt)
+{
+  unsigned int i, *tab;
+  assert(0 != len);
+  assert(NULL != row);
+  assert(2 <= elt && elt < 9);
+  tab = scale_table_9[elt - 2];
+  for (i = 0; i < len; i++) {
+    unsigned int out;
+    word_scale_9_with_tab(*(row),out);
+    *(row++) = out;
+  }
+}
+
+static unsigned int row_product_9(const unsigned int *row1, const unsigned int *row2, unsigned int len)
+{
+  unsigned int res = 0;
+  while (len > 0) {
+    unsigned int a = *row1;
+    if (0 != a) {
+      unsigned int b = *row2;
+      while (0 != b && 0 != a) {
+        unsigned int prod = ((a & 0xf) << 4) | (b & 0xf);
+        res = (*prime_operations.add)(res, prod_table_9[prod]);
+        b >>= 4;
+        a >>= 4;
+      }
+    }
+    len--;
+    row1++;
+    row2++;
+  }
+  return res;
+}
+
 void row_copy(const unsigned int *row1, unsigned int *row2,
               unsigned int len)
 {
@@ -717,7 +902,8 @@ void row_init(unsigned int *row, unsigned int len)
 int rows_init(unsigned int prime, row_opsp ops)
 {
   unsigned int i;
-  if (2 == prime) {
+  switch (prime) {
+  case 2:
     ops->adder = &row_add_2;
     ops->incer = &row_inc_2;
     ops->scaled_adder = NULL; /* Should never be called */
@@ -734,8 +920,8 @@ int rows_init(unsigned int prime, row_opsp ops)
       }
       prod_table_2[i] = prod;
     }
-    return 1;
-  } else if (3 == prime) {
+    break;
+  case 3:
     ops->adder = &row_add_3;
     ops->incer = &row_inc_3;
     ops->scaled_adder = &scaled_row_add_3;
@@ -783,8 +969,8 @@ int rows_init(unsigned int prime, row_opsp ops)
       }
       prod_table_3[i] = prod;
     }
-    return 1;
-  } else if (4 == prime) {
+    break;
+  case 4:
     ops->adder = &row_add_2;
     ops->incer = &row_inc_2;
     ops->scaled_adder = &scaled_row_add_4;
@@ -833,8 +1019,8 @@ int rows_init(unsigned int prime, row_opsp ops)
       }
       prod_table_4[i] = prod;
     }
-    return 1;
-  } else if (5 == prime) {
+    break;
+  case 5:
     ops->adder = &row_add_5;
     ops->incer = &row_inc_5;
     ops->scaled_adder = &scaled_row_add_5;
@@ -842,8 +1028,22 @@ int rows_init(unsigned int prime, row_opsp ops)
     ops->scaler = &row_scale_5;
     ops->scaler_in_place = &row_scale_in_place_5;
     ops->product = &row_product_5;
-    return 1;
-  } else {
+    break;
+  case 9:
+    if (0 == primes_init(9, &prime_operations)) {
+      return 0;
+    }
+    ops->adder = &row_add_9;
+    ops->incer = &row_inc_9;
+    ops->scaled_adder = &scaled_row_add_9;
+    ops->scaled_incer = &scaled_row_inc_9;
+    ops->scaler = &row_scale_9;
+    ops->scaler_in_place = &row_scale_in_place_9;
+    ops->product = &row_product_9;
+    break;
+  default:
+    assert(0);
     return 0;
   }
+  return 1;
 }

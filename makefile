@@ -1,11 +1,11 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.85 2003/06/21 14:04:24 jon Exp $
+# $Id: makefile,v 1.86 2003/07/20 18:13:53 jon Exp $
 #
 all: debug rel profile profilena
 
-GENERATED=
+GENERATED=9.c
 
 .PHONY: debug rel profile profilena clean full_clean
 
@@ -21,6 +21,7 @@ EMU_TARGET=	emu
 ESAD_TARGET=	esad
 ESID_TARGET=	esid
 ETR_TARGET=	etr
+MAKE_TARGET=	maketab
 MON_TARGET=	monst
 SNS_TARGET=	sns
 SRN_TARGET=	srn
@@ -123,6 +124,7 @@ EMU_MODULES=	command emu files map memory parse system utils
 ESAD_MODULES=	add esad elements endian files header map map_or_row maps memory parse primes read rows system utils write
 ESID_MODULES=	elements endian esid exrows files header map memory parse primes rows utils write
 ETR_MODULES=	elements endian etr files header map maps matrix memory parse primes read rows tra utils write
+MAKE_MODULES=	maketab primes utils
 MON_MODULES=	elements endian exrows files header map memory mmat mop mtx parse primes rows utils write
 SNS_MODULES=	clean elements endian grease header matrix memory parse primes read rows sns utils write
 SRN_MODULES=	clean elements endian grease header matrix memory parse primes read rows srn utils
@@ -225,6 +227,7 @@ MODULES=	$(CONS_MODULES) \
 	$(ESAD_MODULES) \
 	$(ESID_MODULES) \
 	$(ETR_MODULES) \
+	$(MAKE_MODULES) \
 	$(MON_MODULES) \
 	$(SNS_MODULES) \
 	$(SRN_MODULES) \
@@ -384,6 +387,9 @@ TARGET:=ESID
 include targets.txt
 
 TARGET:=ETR
+include targets.txt
+
+TARGET:=MAKE
 include targets.txt
 
 TARGET:=MON

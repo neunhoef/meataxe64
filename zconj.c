@@ -1,7 +1,7 @@
 /*
- * $Id: zconj.c,v 1.2 2002/07/09 09:08:12 jon Exp $
+ * $Id: zconj.c,v 1.3 2003/07/20 18:13:53 jon Exp $
  *
- * Algebriac conjugate a matrix
+ * Algebraic conjugate a matrix
  *
  */
 
