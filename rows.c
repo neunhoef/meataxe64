@@ -1,5 +1,5 @@
 /*
- * $Id: rows.c,v 1.13 2001/11/19 18:31:49 jon Exp $
+ * $Id: rows.c,v 1.14 2001/11/22 20:04:03 jon Exp $
  *
  * Row manipulation for meataxe
  *
@@ -173,7 +173,7 @@ static void scaled_row_inc_3(const unsigned int *row1, unsigned int *row2,
     assert(4 == sizeof(unsigned int));
     a = *(row1++);
     b = *(row2);
-    b = scale_mod_3(b); /* Negate b */
+    a = scale_mod_3(a); /* Negate a */
     mod_3_add(a,b,c,d,e,f,g,h);
     assert(check_for_3(c - (h * 3)));
     *(row2++) = c - (h * 3); /* Reduce mod 3 if needed */
@@ -281,7 +281,7 @@ static void scaled_row_inc_4(const unsigned int *row1, unsigned int *row2,
     assert(4 == sizeof(unsigned int));
     a = *(row1++);
     b = *(row2);
-    scale_mod_4(b,c,d,e,f,g,h,elt);
+    scale_mod_4(a,c,d,e,f,g,h,elt);
     *(row2++) = a ^ b;
   }
 }
@@ -450,7 +450,7 @@ static void scaled_row_inc_5(const unsigned int *row1, unsigned int *row2,
     assert(4 == sizeof(unsigned int));
     a = *(row1++);
     b = *(row2);
-    scale_mod_5(b,d,c,e,f,g,h,j,elt);
+    scale_mod_5(a,d,c,e,f,g,h,j,elt);
     mod_5_add(a,b,c,d,e,f,g,h,j,k);
     assert(check_for_5(f - (k * 5)));
     *(row2++) = f - (k * 5); /* Reduce mod 5 if needed */

@@ -51,3 +51,5 @@
 20011118 - ns produced
 20011119 - Produced mul_from_store
 20011120 - Started on in store spin
+20011121 - Complete first attempt at spin
+20011122 - Debug spin to work with B
