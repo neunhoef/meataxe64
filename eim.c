@@ -1,5 +1,5 @@
 /*
- * $Id: eim.c,v 1.2 2001/10/07 18:02:56 jon Exp $
+ * $Id: eim.c,v 1.3 2001/10/11 07:47:13 jon Exp $
  *
  * implode a matrix (ie glue exploded matrices together)
  *
@@ -8,6 +8,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 #include "elements.h"
 #include "endian.h"
 #include "files.h"
@@ -28,7 +29,10 @@ static void eim_usage(void)
 static void fail(FILE **inputs, FILE *output, unsigned int cols)
 {
   unsigned int i;
+  assert(NULL != output);
+  assert(NULL != inputs);
   for (i = 0; i < cols; i++) {
+    assert(NULL != inputs[i]);
     fclose(inputs[i]);
   }
   fclose(output);
@@ -40,7 +44,7 @@ int main(int argc,  const char *const argv[])
   FILE *input, *output;
   FILE **inputs;
   const char *matrix;
-  const header *h, *outh;
+  const header *h = NULL, *outh;
   const header **headers;
   unsigned int *row1, *row2;
   unsigned int nob, nod, nor, len, prime;
@@ -70,6 +74,7 @@ int main(int argc,  const char *const argv[])
       fclose(input);
       exit(1);
     }
+    assert(NULL != h);
     fclose(input);
     cols += header_get_noc(h);
   }
@@ -85,13 +90,16 @@ int main(int argc,  const char *const argv[])
       fclose(input);
       exit(1);
     }
+    assert(NULL != h);
     fclose(input);
     rows += header_get_nor(h);
   }
+  assert(NULL != h);
   prime = header_get_prime(h);
   nob = header_get_nob(h);
   nod = header_get_nod(h);
   outh = header_create(prime, nob, nod, cols, rows);
+  assert(NULL != outh);
   len = header_get_len(outh);
   output = fopen(argv[1], "wb");
   if (NULL == output) {
@@ -126,6 +134,7 @@ int main(int argc,  const char *const argv[])
         fprintf(stderr, "%s cannot read header from %s, terminating\n", name, piece_name);
         fail(inputs, output, j + 1);
       }
+      assert(NULL != headers[j]);
     }
     /* Now check for consistent headers */
     nor = header_get_nor(headers[0]);

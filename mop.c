@@ -1,5 +1,5 @@
 /*
- * $Id: mop.c,v 1.3 2001/10/09 19:36:26 jon Exp $
+ * $Id: mop.c,v 1.4 2001/10/11 07:47:13 jon Exp $
  *
  * Monster operations for meataxe
  *
@@ -13,7 +13,7 @@
 #include "mop.h"
 
 unsigned char vectemp[24712];
-long ptr1, ptr2;
+unsigned long ptr1, ptr2;
 int PRINT;
 unsigned char vec1[24712],vec2[24712];
 char suz1head[8],Thead[8],suz2head[8];
@@ -46,7 +46,7 @@ static unsigned char FFRV2(unsigned char* a, long b)
     return ( c >> ( 7 - (b&7) ) ) & 1;
 }
  
-void FTOV(unsigned char* a, long b, unsigned char c)
+void FTOV(unsigned char *a, unsigned long b, unsigned char c)
 {
     char f;
     long d,e;
@@ -58,17 +58,17 @@ void FTOV(unsigned char* a, long b, unsigned char c)
     return;
 }
 
-void FGAP(unsigned char * d, unsigned char * e,long f, long g)
+void FGAP(unsigned char *d, unsigned char *e, unsigned long f, unsigned long g)
 {
-    int h;
+    unsigned int h;
     for (h=0;h<f;h++)
         FTOV(e,ptr2++,FFRV(d,ptr1++));
     ptr2 += g;
 }
 
-void FUNGAP(unsigned char * d, unsigned char * e,long f, long g)
+void FUNGAP(unsigned char *d, unsigned char *e, unsigned long f, unsigned long g)
 {
-    int h;
+    unsigned int h;
     for (h=0;h<f;h++)
         FTOV(e,ptr2++,FFRV(d,ptr1++));
     ptr1 += g;

@@ -1,5 +1,5 @@
 /*
- * $Id: emu.c,v 1.7 2001/10/10 20:07:43 jon Exp $
+ * $Id: emu.c,v 1.8 2001/10/11 07:47:13 jon Exp $
  *
  * Exploded multiply
  *
@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
 #include "command.h"
 #include "files.h"
 #include "map.h"
@@ -29,7 +30,7 @@ static void emu_usage(void)
   fprintf(stderr, "%s: usage: %s <dir1> <dir2> <dir3> <dir4> <limit>\n", name, name);
 }
 
-int main(int argc,  char **argv)
+int main(int argc,  const char *const argv[])
 {
   unsigned int col_pieces1, row_pieces1;
   unsigned int col_pieces2, row_pieces2;
@@ -38,19 +39,28 @@ int main(int argc,  char **argv)
   t_uid *tmp_ids;
   job *jobs;
   memory_init(name, 0);
-  printf("emu starting\n");
   init_system();
   if (argc != 6) {
     emu_usage();
     exit(1);
   }
   limit = strtoul(argv[5], NULL, 0);
+  if (0 == limit) {
+    fprintf(stderr, "%s: cannot run with limit zero\n", name);
+    exit(1);
+  }
   init_tasks(limit, argv[4], "emu");
   /* Now look at the map file */
   input_map(name, argv[1], &col_pieces1, &row_pieces1, &names1);
+  assert(NULL != names1);
   input_map(name, argv[2], &col_pieces2, &row_pieces2, &names2);
+  assert(NULL != names2);
   if (col_pieces1 != row_pieces2) {
     fprintf(stderr, "%s: incompatible explosion points, terminating\n", name);
+    exit(1);
+  }
+  if (0 == col_pieces1 || 0 == col_pieces2 || 0 == row_pieces1 || 0 == row_pieces2) {
+    fprintf(stderr, "%s: cannot run with dimension zero, terminating\n", name);
     exit(1);
   }
   /* Now we have all relevant input names */
@@ -60,6 +70,7 @@ int main(int argc,  char **argv)
   /* Now create the output names */
   output_map(name, argv[3], col_pieces2, row_pieces1, &names3);
   /* Now generate the temporary names for the multiplies */
+  assert(NULL != names3);
   jobs = my_malloc(col_pieces1*col_pieces2*row_pieces1*sizeof(job));
   tmp_ids = my_malloc(col_pieces1*col_pieces2*row_pieces1*sizeof(t_uid));
   for (i = 0; i < row_pieces1; i++) {

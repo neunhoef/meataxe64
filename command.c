@@ -1,5 +1,5 @@
 /*
- * $Id: command.c,v 1.5 2001/10/10 20:07:43 jon Exp $
+ * $Id: command.c,v 1.6 2001/10/11 07:47:13 jon Exp $
  *
  * Interface to task manager (definition)
  *
@@ -70,6 +70,7 @@ static int can_start(task *task)
 
 static void print_output_name(FILE *file, output *out)
 {
+  assert(TEMP == out->type || PERM == out->type);
   switch (out->type) {
   case TEMP:
     fprintf(file, " %s/tmp%lu", tmp_dir, out->value.uid);
@@ -91,6 +92,7 @@ static void print_task(task *task)
       printf(" result %u of job %lu ", inputs[i].value.result.number, inputs[i].value.result.job);
     } else {
       assert(inputs[i].type == FILE_NAME);
+      assert(TEMP == inputs[i].value.output.type || PERM == inputs[i].value.output.type);
       switch(inputs[i].value.output.type) {
       case TEMP:
 	printf(" temporary");
@@ -103,6 +105,7 @@ static void print_task(task *task)
   }
   printf(" outputs ");
   for (i = 0; i < task->output_size; i++) {
+    assert(TEMP == outputs[i].type || PERM == outputs[i].type);
     switch(outputs[i].type) {
     case TEMP:
       printf("temporary ");
@@ -164,6 +167,7 @@ static int produces(task *task)
   unsigned int j = 0;
   output *outputs = task->outputs;
   while (i < task->output_size) {
+    assert(TEMP == outputs[i].type || PERM == outputs[i].type);
     if (outputs[i++].type == TEMP) {
       j++;
     }
@@ -447,6 +451,8 @@ static void process_line(const char *line, task *tasks, unsigned int size, FILE 
 	  fflush(stdout);
 	  for (i = 0; i < task->input_size; i++) {
 	    char name[MAX_LINE];
+            assert(TEMP == task->inputs[i].value.output.type ||
+                   PERM == task->inputs[i].value.output.type);
 	    switch(task->inputs[i].value.output.type) {
 	    case TEMP:
 	      printf("Deleting temporary");
@@ -646,22 +652,16 @@ static int schedule(task *tasks, unsigned int *size, unsigned int max_commands)
   if (waiting_count == 0) {
     /* No tasks waiting to be added */
     /* See if any still in progress, if not we've finished */
-    int j = 0;
     for (i = 0; i < *size; i++) {
       task_status status = tasks[i].status;
       if (status == FREE || status == IN_PROGRESS) {
-	j = 1;
-	break;
+        /* See if any have changed status */
+        update(tasks, *size);
+        return 1;
       }
     }
-    if (j == 0) {
-      /* We've finished all our tasks */
-      return 0;
-    } else {
-      /* See if any have changed status */
-      update(tasks, *size);
-      return 1;
-    }
+    /* We've finished all our tasks */
+    return 0;
   } else {
     if (count < max_commands) {
       unsigned int available = max_commands - count;

@@ -1,5 +1,5 @@
 /*
- * $Id: mop.h,v 1.1 2001/09/13 21:16:44 jon Exp $
+ * $Id: mop.h,v 1.2 2001/10/11 07:47:13 jon Exp $
  *
  * Monster operations for meataxe
  *
@@ -11,7 +11,7 @@
 #define included__mop
 
 extern unsigned char vectemp[24712];
-extern long ptr1, ptr2;
+extern unsigned long ptr1, ptr2;
 extern int PRINT;
 extern unsigned char  vec1[24712],vec2[24712];
 extern char suz1head[8],Thead[8],suz2head[8];
@@ -36,7 +36,6 @@ extern unsigned char Tbact[87752];
 #define l324 ((((324-1)/4)/sizeof(long))+1)
 #define l538 ((((538-1)/4)/sizeof(long))+1)
 
-/* long l729,l90,l142,l324,l538;*/
 typedef struct suzy {
     long * m729;
     long * w729;
@@ -50,15 +49,16 @@ typedef struct suzy {
     unsigned char * b32760;
     long * m142;
 } suzex;
-typedef struct suzy * suzel;
 
-extern suzel A, B, C, E,suzwork;
+typedef struct suzy *suzel;
 
-extern void FTOV(unsigned char *a, long b, unsigned char c);
+extern suzel A, B, C, E, suzwork;
 
-extern void FGAP(unsigned char *d, unsigned char *e, long f, long g);
+extern void FTOV(unsigned char *a, unsigned long b, unsigned char c);
 
-extern void FUNGAP(unsigned char *d, unsigned char *e, long f, long g);
+extern void FGAP(unsigned char *d, unsigned char *e, unsigned long f, unsigned long g);
+
+extern void FUNGAP(unsigned char *d, unsigned char *e, unsigned long f, unsigned long g);
 
 extern void init(void);
 
