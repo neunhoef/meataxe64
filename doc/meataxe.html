@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.56 2004/04/01 20:55:46 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.57 2004/04/11 22:10:38 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -4685,6 +4685,7 @@ dimension increases.
 <li><a href="#sym_basis">sym_basis</a></li>
 <li><a href="#sym_basis_delta">sym_basis_delta</a></li>
 <li><a href="#tensor_split_with_subspace">tensor_split_with_subspace</a></li>
+<li><a href="#three">three</a></li>
 <li><a href="#tspin_vectors">tspin_vectors</a></li>
 <li><a href="#two">two</a></li>
 </ol>
@@ -8424,6 +8425,35 @@ representation for parameter 1</td>
 Commentary: This is really just a script to wrap up the relevant use
 of <a href="#ztmu">ztmu</a>, <a href="#zss">zss</a> and <a
 href="#zqs">zqs</a> for the same parameters.
+</li>
+<li>
+<h3><a name="three">three</a></h3>
+Purpose: Given a name *_1, produce *_3
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>The name *_1</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>The name *_3</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+</table>
+Commentary: A useful script when one wishes to perform the same
+operations eg for several irreducibles, and one has used either
+wildcarding or filename completion to produce a representative for
+each. Eg for x in irreds/*_1; do signature $x `two $x` `three $x`;
+done
 </li>
 <li>
 <h3><a name="tspin_vectors">tspin_vectors</a></h3> Purpose: A version

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: sym_basis_delta,v 1.4 2003/06/29 21:27:57 jon Exp $
+# $Id: sym_basis_delta,v 1.5 2004/04/11 22:10:38 jon Exp $
 #
 # Script to compute a symmetry basis wrt an ordered set of irreducibles,
 # using delta words
@@ -87,6 +87,7 @@ for x in `cat $irreds`; do
         echo Found ${w} at number $irred_num
         break
       fi
+      let i=$i+1
     done
   fi
   i=1

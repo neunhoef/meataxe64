@@ -287,3 +287,4 @@ skew seventh
 20040329 - Fix slow skew powers and memory corruption bug in ztco
 20040330 - Fix further fault in ztco with very low memory
 20040401 - Added count_irreds
+20040411 - Fix bug in sym_basis_delta when dualising
