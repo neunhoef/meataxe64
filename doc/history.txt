@@ -299,3 +299,4 @@ skew seventh
 20040504 - Fix faulty error message from tco
 20040504 - Fix accidental fault in mul
 20040505 - Reduce amount of tensor product made, where the multiplying column is zero
+20040506 - Correct minor bug in tco 1 x 1 matrix optimisation

@@ -1,5 +1,5 @@
 /*
- * $Id: tco.c,v 1.17 2004/05/05 21:42:38 jon Exp $
+ * $Id: tco.c,v 1.18 2004/05/06 20:27:44 jon Exp $
  *
  * Tensor condense one group element
  *
@@ -483,7 +483,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
                      nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, NULL,
                      NULL, NULL, p, q, h_p, h_q, s, h_o, NULL, rows, lrows, rrows);
     }
-    for (j = 0; j < max_irr2; j++) {
+    for (j = 0; j < noc_qi; j++) {
       unsigned int acc = 0;
       for (k = 0; k < nor_q[i]; k++) {
         unsigned int elt = get_element_from_row(nob, j, q_rows[k]);
@@ -525,6 +525,8 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
           const char *argv2j1 = argv[2 * j + 1];
           unsigned int left_multiplicitiesj = left_multiplicities[j];
           unsigned int right_multiplicitiesj = right_multiplicities[j];
+          unsigned int **p_rowsj = p_rows + j * max_irr2;
+          unsigned int p_rowsj_elt = get_element_from_row(nob, 0, *p_rowsj);
           for (gamma = 0; gamma < left_multiplicitiesj; gamma++) {
             /* Column loop over multiplicity of Sj */
             for (delta = 0; delta < right_multiplicitiesj; delta++) {
@@ -587,8 +589,8 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
                   te_o_r++;
                 }
               }
-              if (1 == noc_qi) {
-                /* 1 x 1 matrix qi, no point in multiply */
+              if (1 == noc_qi && 1 == *q_row) {
+                /* 1 x 1 identity matrix qi, no point in multiply */
                 arg1 = te_rows;
                 arg2 = end_rows;
               } else {
@@ -612,11 +614,11 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r, const ch
                 arg2 = te_rows;
               }
               /* arg1 is the input to the second multiply, and arg2 the result */
-              if (1 == noc_qj) {
-                /* 1 x 1 matrix pj, no point in multiply */
+              if (1 == noc_qj && 1 == p_rowsj_elt) {
+                /* 1 x 1 identity matrix pj, no point in multiply */
                 arg2 = arg1; /* Result is the same as input */
               } else {
-                if (0 == mul_in_store(arg1, p_rows + j * max_irr2, arg2, 0 /*is_map1*/, 0 /* is_map2 */, noc_qj,
+                if (0 == mul_in_store(arg1, p_rowsj, arg2, 0 /*is_map1*/, 0 /* is_map2 */, noc_qj,
                                       len_pj, nob, dim_endi, dim_endj, prime,
                                       &grease, "sub-tensor", argv2j1, name)) {
                   matrix_free(te_rows);
