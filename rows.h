@@ -1,5 +1,5 @@
 /*
- * $Id: rows.h,v 1.1 2001/08/30 18:31:45 jon Exp $
+ * $Id: rows.h,v 1.2 2001/09/02 22:16:41 jon Exp $
  *
  * Row manipulation for meataxe
  *
@@ -11,5 +11,12 @@
 extern int row_add(const unsigned int *, const unsigned int *,
                    unsigned int *, unsigned int,
                    unsigned int, unsigned int);
+
+extern void row_copy(const unsigned int *, unsigned int *,
+                     unsigned int, unsigned int);
+
+extern int row_malloc(unsigned int nob, unsigned int noc, unsigned int **row);
+
+extern void row_init(unsigned int *, unsigned int nob, unsigned int noc);
 
 #endif

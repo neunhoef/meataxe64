@@ -1,5 +1,5 @@
 /*
- * $Id: mu.c,v 1.1 2001/08/30 23:13:38 jon Exp $
+ * $Id: mu.c,v 1.2 2001/09/02 22:16:41 jon Exp $
  *
  * Multiply two matrices to give a third
  *
@@ -27,7 +27,7 @@ int main(int argc, const char * const argv[])
   in1 = argv[1];
   in2 = argv[2];
   out = argv[3];
-  if (0 == mul(in1, in2, out)) {
+  if (0 == mul(in1, in2, out, "mu")) {
     exit(1);
   }
   return 1;

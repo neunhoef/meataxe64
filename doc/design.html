@@ -25,14 +25,18 @@ boundaries, if the prime power does not require a number of bits which
 is a power of two (eg 5 or 7).
 </li>
 <li>
-Binary matrices are held in essentially the same as form as intenally,
-except that they are always little endian. Endian conversion takes
-place on input and output. This allows different endian machines, eg
-Sparcs and PCs, to use the same binary format whilst achieving
-internal efficiency. Each binary matrix contains a four word header,
-consisting of nob (number of bytes), prime power, nor, noc.
+Binary matrices are held in essentially the same as form as
+internally, except that they are always little endian. Endian
+conversion takes place on input and output. This allows different
+endian machines, eg Sparcs and PCs, to use the same binary format
+whilst achieving internal efficiency. Each binary matrix contains a
+four word header, consisting of nob (number of bytes), prime power,
+nor, noc.
 </li>
 <li>
+-1 is represented as p-1, and indeed all elements of GF(p) are
+represented as their integer minimal non-negative coset
+representatives.
 </li>
 <li>
 </li>

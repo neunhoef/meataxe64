@@ -1,5 +1,5 @@
 /*
- * $Id: utils.c,v 1.2 2001/08/30 18:31:45 jon Exp $
+ * $Id: utils.c,v 1.3 2001/09/02 22:16:41 jon Exp $
  *
  * Utils for meataxe
  *
@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <limits.h>
+#include <ctype.h>
 #include "utils.h"
 
 unsigned int bits_in_unsigned_int = CHAR_BIT * sizeof(unsigned int);
@@ -80,4 +81,52 @@ int alloc_matrix(unsigned int nob, unsigned int noc,
     return 0; /* maloc can't cope */
   *res = t;
   return 1;
+}
+
+unsigned int read_decimal(const char *str, unsigned int len)
+{
+  unsigned int res = 0;
+
+  assert(0 < len);
+  assert(len <= 6);
+  while (isspace(*str) && len > 0) {
+    len--;
+    str++;
+  }
+  while (len > 0) {
+    if (isdigit(*str)) {
+      res = res*10 + (*str-'0');
+      str++;
+      len--;
+    } else {
+      fprintf(stderr, "Unrecognised digit '%c', terminating\n", *str);
+      exit(1);
+    }
+  }
+  return res;
+}
+
+unsigned int bits_of(unsigned int n)
+{
+  unsigned int i = 0;
+  assert(n >= 1);
+  n -= 1;
+  while(n > 0) {
+    n >>= 1;
+    i++;
+  }
+  return i;
+}
+
+/* Compute the number of decimal digits needed to represent 0 - n-1 */
+unsigned int digits_of(unsigned int n)
+{
+  unsigned int i = 0;
+  assert(n >= 1);
+  n -= 1;
+  while(n > 0) {
+    n /= 10;
+    i++;
+  }
+  return i;
 }

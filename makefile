@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.3 2001/08/30 23:13:38 jon Exp $
+# $Id: makefile,v 1.4 2001/09/02 22:16:41 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -14,6 +14,7 @@ OS= unix
 ARCH= i386
 
 AD_TARGET=	ad
+ID_TARGET=	id
 IP_TARGET=	ip
 MU_TARGET=	mu
 PR_TARGET=	pr
@@ -21,9 +22,10 @@ DTOU_TARGET=	dtou
 
 TARGETS=	$(IP_TARGET) $(DTOU_TARGET)
 
-IP_MODULES=	elements endian header ip primes read utils write
 AD_MODULES=	ad add elements endian header primes read rows utils write
-MU_MODULES=	mu mul elements endian header primes read rows utils write
+ID_MODULES=	id elements endian header primes rows utils write
+IP_MODULES=	elements endian header ip primes read utils write
+MU_MODULES=	elements endian grease header matrix mu mul primes read rows utils write
 PR_MODULES=	elements endian header pr primes read utils write
 DTOU_MODULES=	dtou
 
@@ -88,6 +90,9 @@ PROFTARGETS:=
 PROFNATARGETS:=
 
 TARGET:=AD
+include targets.txt
+
+TARGET:=ID
 include targets.txt
 
 TARGET:=IP

@@ -1,5 +1,5 @@
 /*
- * $Id: read.c,v 1.3 2001/08/30 23:13:38 jon Exp $
+ * $Id: read.c,v 1.4 2001/09/02 22:16:41 jon Exp $
  *
  * Read a header
  *
@@ -22,57 +22,6 @@
 /* Format is %2d%6d%6d%6d\n with leading spaces */
 
 #define LINE_LENGTH (2+6+6+6)
-
-/* Read an unsigned of length at most len */
-
-static unsigned int read_decimal(const char *str, unsigned int len, const char *name)
-{
-  unsigned int res = 0;
-
-  assert(0 < len);
-  assert(len <= 6);
-  while (isspace(*str) && len > 0) {
-    len--;
-    str++;
-  }
-  while (len > 0) {
-    if (isdigit(*str)) {
-      res = res*10 + (*str-'0');
-      str++;
-      len--;
-    } else {
-      fprintf(stderr, "Unrecognised digit '%c' in header of %s, terminating\n", *str, name);
-      exit(1);
-    }
-  }
-  return res;
-}
-
-/* Compute the number of bits needed to represent 0 - n-1 */
-static unsigned int bits_of(unsigned int n)
-{
-  unsigned int i = 0;
-  assert(n >= 1);
-  n -= 1;
-  while(n > 0) {
-    n >>= 1;
-    i++;
-  }
-  return i;
-}
-
-/* Compute the number of decimal digits needed to represent 0 - n-1 */
-static unsigned int digits_of(unsigned int n)
-{
-  unsigned int i = 0;
-  assert(n >= 1);
-  n -= 1;
-  while(n > 0) {
-    n /= 10;
-    i++;
-  }
-  return i;
-}
 
 int read_text_header(const FILE *fp, header *hp, const char *name)
 {
@@ -104,14 +53,14 @@ int read_text_header(const FILE *fp, header *hp, const char *name)
     fprintf(stderr, "Newline expected reading '%s', terminating\n", name);
     exit(1);
   }
-  nod = read_decimal(str, 2, name);
-  prime = read_decimal(str+2, 6, name);
+  nod = read_decimal(str, 2);
+  prime = read_decimal(str+2, 6);
   if (0 == is_a_prime_power(prime)) {
     fprintf(stderr, "Prime power expected, found %d reading %s, terminating\n", prime, name);
     exit(1);
   }
-  nor = read_decimal(str+2+6, 6, name);
-  noc = read_decimal(str+2+6+6, 6, name);
+  nor = read_decimal(str+2+6, 6);
+  noc = read_decimal(str+2+6+6, 6);
   nob = bits_of(prime);
   *hp = header_create(prime, nob, nod, noc, nor);
   return 1;

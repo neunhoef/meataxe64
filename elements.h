@@ -1,5 +1,5 @@
 /*
- * $Id: elements.h,v 1.2 2001/08/30 18:31:45 jon Exp $
+ * $Id: elements.h,v 1.3 2001/09/02 22:16:41 jon Exp $
  *
  * Element manipulation for meataxe
  *
@@ -20,5 +20,9 @@ extern int get_element_from_text(const FILE *, unsigned int nob,
 /* Extract an element from a row at given position */
 extern unsigned int get_element_from_row(unsigned int nob, unsigned int index,
                                          const unsigned int *row);
+
+/* Insert an element into a row at given position */
+extern void put_element_to_row(unsigned int nob, unsigned int index,
+                               unsigned int *row, unsigned int elt);
 
 #endif
