@@ -3,6 +3,7 @@ Worry about return (NULL == s) code generation error
 Documentation changes for proj_base, sub_quot
 Think about better instruction ordering for rows.c
 Think about better use of grease for ztmu
+Test fix for o bug in real_indicate
 Write span_and_spin for spins on large nullspaces
 Profile multiply (eg on 26750 for Co1) for different memory sizes
 Profile zns on 3584.e.3 for McL for different memory sizes. Think about grease strategy.
