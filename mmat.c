@@ -1,5 +1,5 @@
 /*
- * $Id: mmat.c,v 1.1 2001/09/13 21:16:44 jon Exp $
+ * $Id: mmat.c,v 1.2 2001/09/30 17:51:20 jon Exp $
  *
  * Monster program
  * Based on Version 1 - 30th November 1998 by R.A.Parker and R.A.Wilson
@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
     exit(1);
   }
   if (strcmp(argv[1], "a") != 0 && strcmp(argv[1], "b") != 0) {
-    fprintf(stderr, "Incorrect parameters to monster, shold be 'a' or 'b'\n");
+    fprintf(stderr, "Incorrect parameters to monster, should be 'a' or 'b'\n");
     exit(1);
   }
   type = (strcmp(argv[1], "a") == 0) ? 1 : 2;
@@ -141,3 +141,4 @@ int main(int argc, char *argv[])
   }
   return 0;
 }
+

@@ -19,7 +19,7 @@ typedef enum commands
   FLU
 } command;
 
-#define string_task(task) (((task) == ADD) ? "ad" : ((task) == MUL) ? "mu" : ((task) == TRA) ? "tr" : "unknown")
+#define string_task(task) (((task) == ADD) ? "ad" : ((task) == MUL) ? "mu" : ((task) == TRA) ? "tr" : ((task) == SUM) ? "sum" : ((task) == FLU) ? "flu" : "unknown")
 
 /* A unique id for tasks */
 typedef unsigned long uid;

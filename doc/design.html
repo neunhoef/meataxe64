@@ -22,7 +22,8 @@ Internally, all matrices are held as arrays of unsigned ints. Field
 values are packed into these, with the least significant bits
 corresponding to lower column numbers. Some wastage may occur at word
 boundaries, if the prime power does not require a number of bits which
-is a power of two (eg 5 or 7).
+is a power of two (eg 5 or 7). This contrasts with meataxe 6, which
+appears to use unsigned chars in a bit big endian fashion.
 </li>
 <li>
 Binary matrices are held in essentially the same as form as
@@ -31,7 +32,10 @@ conversion takes place on input and output. This allows different
 endian machines, eg Sparcs and PCs, to use the same binary format
 whilst achieving internal efficiency. Each binary matrix contains a
 four word header, consisting of nob (number of bytes), prime power,
-nor, noc.
+nor, noc. Again, this is in contrast to meataxe 6. As far as I can
+tell, meataxe six did not consider the problem of a consistent
+external binary representation, and hence big and little endian
+machines would be unable to operate on the same file data.
 </li>
 <li>
 -1 is represented as p-1, and indeed all elements of GF(p) are
@@ -40,9 +44,16 @@ representatives.
 </li>
 <li>
 Permutations are represented as a list of images of 1 .. n, rather
-than in cycle notation.
+than in cycle notation for example.
 </li>
 <li>
+Split matrices for the extended operations system are represented as a
+directory containing a special file called map. map has two six digit
+fields as its first row, indicating respectively the number of rows
+and columns into which the matrix has been split. The remaining lines
+of map are one per row, and each entry is the name of a file
+representing that row and column position in the matrix. The names
+used are typically of the form n_m, although this is not a requirement.
 </li>
 <li>
 </li>

@@ -24,3 +24,4 @@
 20010925 - First cut at conversion of emu and slave
 20010926 - First emu running single machine
 20010927 - Better modularisation of makefile
+20010930 - First successful monster multiply on element A (the involution)

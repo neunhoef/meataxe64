@@ -11,11 +11,10 @@
  *
  */
 
-#include "command.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
+#include "command.h"
 #include "memory.h"
 #include "utils.h"
 #include "system.h"
@@ -88,7 +87,8 @@ static void nextline(FILE *f)
 static char *get_str(FILE *f, char **name, unsigned int depth)
 {
   int c = fgetc(f);
-  if (my_isspace(c)) {
+  if (c < 0 || my_isspace(c)) {
+    if ('\n' == c) hadcr = 1;
     *name = my_malloc(depth + 1);
     (*name)[depth] = '\0';
     return *name;
@@ -125,10 +125,6 @@ int main(int argc,  char **argv)
   m1 = pathname(argv[1], "map");
   input1 = fopen(m1, "rb");
   if (NULL == input1) {
-    /*
-    fprintf(stderr, "Attempting to open %s\n", m1);
-    fflush(stderr);
-    */
     fprintf(stderr, "%s: cannot open first input map %s", name, m1);
     exit(1);
   }
@@ -208,32 +204,52 @@ int main(int argc,  char **argv)
       input *inputs = my_malloc(col_pieces1*sizeof(input));
       output *outputs = my_malloc(sizeof(output));
       /* Multiply and add to get a piece of the answer */
-      for (k = 0; k < col_pieces1; k++) {
-	input *inputs = my_malloc(2*sizeof(input));
-	output *outputs = my_malloc(sizeof(output));
-	inputs[0].type = FILE_NAME;
-	inputs[0].value.output.type = PERM;
-	inputs[0].value.output.value.name = pathname(argv[1], names1[i*col_pieces1 + k]);
-	inputs[1].type = FILE_NAME;
-	inputs[1].value.output.type = PERM;
-	inputs[1].value.output.value.name = pathname(argv[2], names2[k*col_pieces2 + j]);
-	outputs->type = TEMP;
-	outputs->value.uid = tmp_ids[i*col_pieces1*col_pieces2 + j*col_pieces1 + k];
-	add_command(jobs[i*col_pieces1*col_pieces2 + j*col_pieces1 + k],
-		    MUL,
-		    2,
-		    inputs,
-		    1,
-		    outputs);
+      if (col_pieces1 > 1) {
+        for (k = 0; k < col_pieces1; k++) {
+          input *inputs = my_malloc(2*sizeof(input));
+          output *outputs = my_malloc(sizeof(output));
+          inputs[0].type = FILE_NAME;
+          inputs[0].value.output.type = PERM;
+          inputs[0].value.output.value.name = pathname(argv[1], names1[i*col_pieces1 + k]);
+          inputs[1].type = FILE_NAME;
+          inputs[1].value.output.type = PERM;
+          inputs[1].value.output.value.name = pathname(argv[2], names2[k*col_pieces2 + j]);
+          outputs->type = TEMP;
+          outputs->value.uid = tmp_ids[i*col_pieces1*col_pieces2 + j*col_pieces1 + k];
+          add_command(jobs[i*col_pieces1*col_pieces2 + j*col_pieces1 + k],
+                      MUL,
+                      2,
+                      inputs,
+                      1,
+                      outputs);
+        }
+        for (k = 0; k < col_pieces1; k++) {
+          inputs[k].type = RESULT;
+          inputs[k].value.result.job = jobs[i*col_pieces1*col_pieces2 + j*col_pieces1 + k];
+          inputs[k].value.result.number = 0;
+        }
+        outputs->type = PERM;
+        outputs->value.name = pathname(argv[3], names3[i*col_pieces2 + j]);
+        add_command(get_job(), (col_pieces1 == 2) ? ADD : SUM, col_pieces1, inputs, 1, outputs);
+      } else {
+        /* 1x1 multiply */
+        input *inputs = my_malloc(2*sizeof(input));
+        output *outputs = my_malloc(sizeof(output));
+        inputs[0].type = FILE_NAME;
+        inputs[0].value.output.type = PERM;
+        inputs[0].value.output.value.name = pathname(argv[1], names1[i]);
+        inputs[1].type = FILE_NAME;
+        inputs[1].value.output.type = PERM;
+        inputs[1].value.output.value.name = pathname(argv[2], names2[j]);
+        outputs->type = PERM;
+        outputs->value.name = pathname(argv[3], names3[i*col_pieces2 + j]);
+        add_command(jobs[i*col_pieces2 + j],
+                    MUL,
+                    2,
+                    inputs,
+                    1,
+                    outputs);
       }
-      for (k = 0; k < col_pieces1; k++) {
-	inputs[k].type = RESULT;
-	inputs[k].value.result.job = jobs[i*col_pieces1*col_pieces2 + j*col_pieces1 + k];
-	inputs[k].value.result.number = 0;
-      }
-      outputs->type = PERM;
-      outputs->value.name = pathname(argv[3], names3[i*col_pieces2 + j]);
-      add_command(get_job(), (col_pieces1 == 2) ? ADD : SUM, col_pieces1, inputs, 1, outputs);
     }
   }
   /* Now force the answer */
