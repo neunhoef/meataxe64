@@ -1,5 +1,5 @@
 /*
- * $Id: ztrace.c,v 1.7 2004/01/04 21:22:50 jon Exp $
+ * $Id: ztrace.c,v 1.8 2004/01/31 13:24:51 jon Exp $
  *
  * Compute the trace of a matrix
  *
@@ -35,7 +35,7 @@ int main(int argc, const char * const argv[])
   row_ops row_operations;
 
   endian_init();
-  memory_init(name, 0);
+  memory_init(name, memory);
   argv = parse_line(argc, argv, &argc);
   if (2 != argc) {
     trace_usage();

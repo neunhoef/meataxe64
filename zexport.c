@@ -1,5 +1,5 @@
 /*
- * $Id: zexport.c,v 1.11 2004/01/24 14:47:13 jon Exp $
+ * $Id: zexport.c,v 1.12 2004/01/31 13:24:51 jon Exp $
  *
  * Export matrix to old system
  *
@@ -59,7 +59,7 @@ int main(int argc, const char * const argv[])
   len = header_get_len(h_in);
   eperb = header_get_eperb(h_in);
   blen = header_get_blen(h_in);
-  memory_init(name, 0);
+  memory_init(name, memory);
   endian_init();
   if (memory_rows(len, 500) < 1 || memory_rows((blen + sizeof(unsigned int) - 1) / sizeof(unsigned int), 500) < 1) {
     fprintf(stderr, "%s: cannot fit row of %s for input and row of %s for output, terminating\n", name, in, out);

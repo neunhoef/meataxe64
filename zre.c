@@ -1,5 +1,5 @@
 /*
- * $Id: zre.c,v 1.6 2004/01/04 21:22:50 jon Exp $
+ * $Id: zre.c,v 1.7 2004/01/31 13:24:51 jon Exp $
  *
  * Convert a matrix from new to old
  *
@@ -40,7 +40,7 @@ int main(int argc, const char * const argv[])
   prime_ops prime_operations;
 
   endian_init();
-  memory_init(name, 0);
+  memory_init(name, memory);
   argv = parse_line(argc, argv, &argc);
   if (3 != argc) {
     re_usage();

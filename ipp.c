@@ -1,5 +1,5 @@
 /*
- * $Id: ipp.c,v 1.12 2004/01/04 21:22:50 jon Exp $
+ * $Id: ipp.c,v 1.13 2004/01/31 13:24:51 jon Exp $
  *
  * Read a permutation into a matrix
  *
@@ -64,7 +64,7 @@ int main(int argc, const char * const argv[])
     exit(1);
   }
   endian_init();
-  memory_init(name, 0);
+  memory_init(name, memory);
   if (0 == read_text_header_items(inp, &t1, &t2, &nor, &t3, in, name)) {
     exit(1);
   }

@@ -1,5 +1,5 @@
 /*
- * $Id: zcheck.c,v 1.6 2004/01/04 21:22:50 jon Exp $
+ * $Id: zcheck.c,v 1.7 2004/01/31 13:24:51 jon Exp $
  *
  * Check no non-zero values off ends of rows
  *
@@ -37,7 +37,7 @@ int main(int argc, const char * const argv[])
     exit(1);
   }
   in = argv[1];
-  memory_init(name, 0);
+  memory_init(name, memory);
   endian_init();
   if (0 == open_and_read_binary_header(&inp, &h, in, name)) {
     exit(1);

@@ -1,5 +1,5 @@
 /*
- * $Id: emu.c,v 1.10 2004/01/04 21:22:50 jon Exp $
+ * $Id: emu.c,v 1.11 2004/01/31 13:24:51 jon Exp $
  *
  * Exploded multiply
  *
@@ -40,7 +40,7 @@ int main(int argc,  const char *const argv[])
   t_uid *tmp_ids;
   job *jobs;
   argv = parse_line(argc, argv, &argc);
-  memory_init(name, 0);
+  memory_init(name, memory);
   init_system();
   if (argc != 6) {
     emu_usage();

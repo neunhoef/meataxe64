@@ -1,5 +1,5 @@
 /*
- * $Id: eim.c,v 1.11 2004/01/04 21:22:50 jon Exp $
+ * $Id: eim.c,v 1.12 2004/01/31 13:24:51 jon Exp $
  *
  * implode a matrix (ie glue exploded matrices together)
  *
@@ -61,7 +61,7 @@ int main(int argc,  const char *const argv[])
     eim_usage();
     exit(1);
   }
-  memory_init(name, 0);
+  memory_init(name, memory);
   /* Now get a look at the map file */
   input_map(name, argv[2], &col_pieces, &row_pieces, &names);
   /* Now determine full size */

@@ -1,5 +1,5 @@
 /*
- * $Id: zse.c,v 1.7 2004/01/04 21:22:50 jon Exp $
+ * $Id: zse.c,v 1.8 2004/01/31 13:24:51 jon Exp $
  *
  * Select a row of a matrix
  *
@@ -66,7 +66,7 @@ int main(int argc, const char * const argv[])
     exit(1);
   }
   endian_init();
-  memory_init(name, 0);
+  memory_init(name, memory);
   header_free(h_in);
   header_free(h_out);
   if (memory_rows(len, 1000) < 1) {

@@ -1,5 +1,5 @@
 /*
- * $Id: zrand.c,v 1.2 2004/01/04 21:22:50 jon Exp $
+ * $Id: zrand.c,v 1.3 2004/01/31 13:24:51 jon Exp $
  *
  * Generate random matrix
  *
@@ -34,7 +34,7 @@ int main(int argc, const char * const argv[])
   prime = strtoul(argv[1], NULL, 0);
   nor = strtoul(argv[2], NULL, 0);
   noc = strtoul(argv[3], NULL, 0);
-  memory_init(name, 0);
+  memory_init(name, memory);
   endian_init();
   if (0 == random(prime, nor, noc, out, name)) {
     exit(1);

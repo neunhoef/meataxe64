@@ -1,5 +1,5 @@
 /*
- * $Id: zfe.c,v 1.4 2004/01/04 21:22:50 jon Exp $
+ * $Id: zfe.c,v 1.5 2004/01/31 13:24:51 jon Exp $
  *
  * Field extend a matrix
  *
@@ -33,7 +33,7 @@ int main(int argc, const char * const argv[])
   in = argv[1];
   out = argv[2];
   out_prime = strtoul(argv[3], NULL, 0);
-  memory_init(name, 0);
+  memory_init(name, memory);
   endian_init();
   if (0 == extend_matrix(in, out, out_prime, name)) {
     exit(1);

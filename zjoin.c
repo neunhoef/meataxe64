@@ -1,5 +1,5 @@
 /*
- * $Id: zjoin.c,v 1.3 2004/01/04 21:22:50 jon Exp $
+ * $Id: zjoin.c,v 1.4 2004/01/31 13:24:51 jon Exp $
  *
  * Append two matrices to give a third
  *
@@ -33,7 +33,7 @@ int main(int argc, const char * const argv[])
   in1 = argv[1];
   in2 = argv[2];
   out = argv[3];
-  memory_init(name, 0);
+  memory_init(name, memory);
   endian_init();
   if (0 == join(in1, in2, out, name)) {
     exit(1);

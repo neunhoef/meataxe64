@@ -1,5 +1,5 @@
 /*
- * $Id: zrestrict.c,v 1.3 2004/01/04 21:22:50 jon Exp $
+ * $Id: zrestrict.c,v 1.4 2004/01/31 13:24:51 jon Exp $
  *
  * Restrict a matrix to a subfield
  *
@@ -33,7 +33,7 @@ int main(int argc, const char * const argv[])
   in = argv[1];
   out = argv[2];
   q = strtoul(argv[3], NULL, 0);
-  memory_init(name, 0);
+  memory_init(name, memory);
   endian_init();
   r = restrict(in, out, q, name);
   if (1 != r) {

@@ -1,5 +1,5 @@
 /*
- * $Id: esad.c,v 1.3 2004/01/04 21:22:50 jon Exp $
+ * $Id: esad.c,v 1.4 2004/01/31 13:24:51 jon Exp $
  *
  * Exploded scaled add
  *
@@ -35,7 +35,7 @@ int main(int argc,  const char *const argv[])
   unsigned int i, j, scalar;
   const char **names1, **names2, **names3;
   argv = parse_line(argc, argv, &argc);
-  memory_init(name, 0);
+  memory_init(name, memory);
   endian_init();
   /******  First check the number of input arguments  */
   if (argc != 5) {

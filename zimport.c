@@ -1,5 +1,5 @@
 /*
- * $Id: zimport.c,v 1.10 2004/01/24 14:47:13 jon Exp $
+ * $Id: zimport.c,v 1.11 2004/01/31 13:24:51 jon Exp $
  *
  * Import matrix from old system
  *
@@ -58,7 +58,7 @@ int main(int argc, const char * const argv[])
   nor = header_get_nor(h_in);
   len = header_get_len(h_in);
   eperb = header_get_eperb(h_in);
-  memory_init(name, 0);
+  memory_init(name, memory);
   endian_init();
   blen = header_get_blen(h_in);
   if (memory_rows(len, 500) < 1 || memory_rows((blen + sizeof(unsigned int) - 1) / sizeof(unsigned int), 500) < 1) {

@@ -1,5 +1,5 @@
 /*
- * $Id: eid.c,v 1.6 2004/01/04 21:22:50 jon Exp $
+ * $Id: eid.c,v 1.7 2004/01/31 13:24:51 jon Exp $
  *
  * Generate exploded identity matrix
  *
@@ -61,7 +61,7 @@ int main(int argc, const char * const argv[])
   outputs = my_malloc(cols * sizeof(FILE *));
   output_map(name, argv[5], cols, rows, &names);
   endian_init();
-  memory_init(name, 0);
+  memory_init(name, memory);
   len = (noc + elts_in_word - 1) / elts_in_word;
   if (memory_rows(len, 1000) < 1) {
     fprintf(stderr, "%s: cannot create output row\n", name);

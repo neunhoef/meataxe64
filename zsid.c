@@ -35,7 +35,7 @@ int main(int argc, const char * const argv[])
   nor = strtoul(argv[2], NULL, 0);
   noc = strtoul(argv[3], NULL, 0);
   elt = strtoul(argv[4], NULL, 0);
-  memory_init(name, 0);
+  memory_init(name, memory);
   endian_init();
   if (0 == ident(prime, nor, noc, elt, out, name)) {
     exit(1);

@@ -1,5 +1,5 @@
 /*
- * $Id: zspan.c,v 1.12 2004/01/04 21:22:50 jon Exp $
+ * $Id: zspan.c,v 1.13 2004/01/31 13:24:51 jon Exp $
  *
  * Compute the span of a matrix
  *
@@ -75,7 +75,7 @@ int main(int argc, const char * const argv[])
     exit(1);
   }
   endian_init();
-  memory_init(name, 0);
+  memory_init(name, memory);
   header_free(h_in);
   header_free(h_out);
   if (0 == rows_init(prime, &row_operations)) {
