@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: basef_with_vector,v 1.5 2002/09/11 21:20:47 jon Exp $
+# $Id: basef_with_vector,v 1.6 2002/10/14 09:05:57 jon Exp $
 #
 # Script to find a standard base for a representation, given a vector
 #
@@ -48,7 +48,7 @@ else
   exit 1
 fi
 shift 5
-dim=`zmsbf $e $s $dir $memory $a $*`
+dim=`zmsbf -m $memory $e $s $dir $a $*`
 ret=$?
 if [ 0 -eq $ret ]; then
   if [ $dim -ne $nor ]; then

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: basef_vectors,v 1.6 2002/09/23 13:42:43 jon Exp $
+# $Id: basef_vectors,v 1.7 2002/10/14 09:05:57 jon Exp $
 #
 # Script to find a representation in standard base
 # using intermediate files
@@ -50,7 +50,7 @@ else
 fi
 tmp=tmp${PPID}
 ok=0
-nullity=`znsf $e ${tmp}.0 $dir $memory`
+nullity=`znsf -m $memory $e ${tmp}.0 $dir`
 ret=$?
 if [ 0 -ne $ret ]; then
   rm -f ${tmp}*

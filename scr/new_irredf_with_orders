@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: new_irredf_with_orders,v 1.11 2002/09/24 19:54:02 jon Exp $
+# $Id: new_irredf_with_orders,v 1.12 2002/10/14 09:05:57 jon Exp $
 #
 # Script to classify an irreducible representation
 #
@@ -109,7 +109,7 @@ elif [ 254 -eq $ret ]; then
 # Find the nullspace
   ok=0
   while [ $ok -eq 0 ]; do
-    nullity=`znsf $e ${tmp}.0 ${tmp_dir} $memory 2>/dev/null`
+    nullity=`znsf -m $memory $e ${tmp}.0 ${tmp_dir} 2>/dev/null`
     ret=$?
     if [ $ret -eq 0 ]; then
       ok=1
