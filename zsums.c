@@ -1,5 +1,5 @@
 /*
- * $Id: zsums.c,v 1.3 2002/01/18 21:52:23 jon Exp $
+ * $Id: zsums.c,v 1.4 2002/01/26 00:36:06 jon Exp $
  *
  * Compute sums in the group algebra in two matrices
  *
@@ -21,6 +21,7 @@
 
 static const char *name = "zsums";
 
+#if 0
 static unsigned int elt_num(unsigned int base, unsigned int n, unsigned int prime)
 {
   unsigned int total;
@@ -30,6 +31,7 @@ static unsigned int elt_num(unsigned int base, unsigned int n, unsigned int prim
   NOT_USED(i);
   return base + total;
 }
+#endif
 
 static void sums_usage(void)
 {
@@ -179,7 +181,8 @@ int main(int argc, const char * const argv[])
     cur_power *= prime;
     for (l = 0; l < cur_power; l++) {
       for (r = 1; r < prime; r++) {
-        unsigned int pos = elt_num(l, i - 1, prime);
+        unsigned int pos = cur_power * r + l;
+        /* Range from cur_power to cur_power * prime - 1 */
         if (0 == scaled_add(elts[l], names[i - 1], elts[pos], r, name)) {
           fprintf(stderr, "%s: scaled add failed on %s + %d * %s, terminating\n",
                   name, elts[l], r, names[i - 1]);

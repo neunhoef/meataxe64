@@ -1,5 +1,5 @@
 #
-# $Id: split_all,v 1.3 2002/01/06 16:35:48 jon Exp $
+# $Id: split_all,v 1.4 2002/01/26 00:36:06 jon Exp $
 #
 # Script to split a representation completely
 #
@@ -49,8 +49,9 @@ else
   echo $res
   dim=`echo $res | sed -e "s/^.* dimension //g;s/,.*$//g"`
   codim=`echo $res | sed -e "s/^.*codimension //g"`
-  sub_name=`echo $res | sed -e "s/^.* subspace //g;s/ .*$//g"`
-  quot_name=`echo $res | sed -e "s/^.* quotient //g;s/ .*$//g"`
+# Cope with transposes if they happen
+  sub_name=`echo $res | sed -e "s/^.* subspace //g;s/ .*$//g" | sed -e "s/_tra//g"`
+  quot_name=`echo $res | sed -e "s/^.* quotient //g;s/ .*$//g" | sed -e "s/_tra//g"`
 # echo dim=$dim, codim=$codim, sub_name=$sub_name, quot_name=$quot_name
   split_all ${sub_name}_{1,2} ${o}
   split_all ${quot_name}_{1,2} ${o}

@@ -1,11 +1,11 @@
 /*
- * $Id: sp.c,v 1.11 2002/01/26 00:36:06 jon Exp $
+ * $Id: vp.c,v 1.1 2002/01/26 00:36:06 jon Exp $
  *
- * Function to spin some vectors under two generators
+ * Function to permute some vectors under two generators
  *
  */
 
-#include "sp.h"
+#include "vp.h"
 #include "clean.h"
 #include "elements.h"
 #include "endian.h"
@@ -43,15 +43,25 @@ static void cleanup(FILE *f1, FILE *f2, FILE *f3)
     fclose(f3);
 }
 
-unsigned int spin(const char *in, const char *out, const char *a,
-                  const char *b, const char *name)
+static unsigned int hash_fn(unsigned int *row, unsigned int len)
+{
+  unsigned int res = 0, i;
+  assert(NULL != row);
+  for (i = 0; i < len; i++) {
+    res ^= row[i];
+  }
+  return res;
+}
+
+unsigned int permute(const char *in, const char *out, const char *a,
+                     const char *b, const char *name)
 {
   FILE *inp = NULL, *outp = NULL, *f_a = NULL, *f_b = NULL;
   const header *h_in, *h_a, *h_b;
   header *h_out;
-  unsigned int prime, nob, noc, nor, len, max_rows, d;
+  unsigned int prime, nob, noc, nor, len, max_rows, d, hash_len;
   unsigned int **rows;
-  int *map, *new_map;
+  unsigned int *hashes;
   grease_struct grease;
   prime_ops prime_operations;
   row_ops row_operations;
@@ -89,6 +99,12 @@ unsigned int spin(const char *in, const char *out, const char *a,
     cleanup(inp, f_a, f_b);
     exit(1);
   }
+  hash_len = len / 10;
+  if (0 == hash_len) {
+    hash_len = 1;
+  } else if (10 < hash_len) {
+    hash_len = 10;
+  }
   assert(header_get_len(h_a) == len);
   assert(header_get_len(h_b) == len);
   h_out = header_create(prime, nob, header_get_nod(h_in), noc, nor);
@@ -114,6 +130,7 @@ unsigned int spin(const char *in, const char *out, const char *a,
     exit(2);
   }
   rows = matrix_malloc(max_rows);
+  hashes = my_malloc(max_rows * sizeof(unsigned int));
   for (d = 0; d < max_rows; d++) {
     rows[d] = memory_pointer_offset(0, d, len);
   }
@@ -123,23 +140,8 @@ unsigned int spin(const char *in, const char *out, const char *a,
     exit(1);
   }
   fclose(inp);
-  map = my_malloc(max_rows * sizeof(int));
-  if (1 != nor || 2 != prime) {
-    echelise(rows, nor, &d, &new_map, NULL, 0, grease.level, prime, len, nob, 900, 0, 0, 1, name);
-    /* Clean up either for multiple rows, or non-identity leading non-zero entry */
-    free(new_map);
-    if (d != nor) {
-      fprintf(stderr, "%s: %s contains dependent vectors, terminating\n", name, in);
-      cleanup(NULL, f_a, f_b);
-      exit(1);
-    }
-  }
   for (d = 0; d < nor; d++) {
-    unsigned int i;
-    unsigned int elt = first_non_zero(rows[d], nob, len, &i);
-    assert(0 != elt);
-    NOT_USED(elt);
-    map[d] = i;
+    hashes[d] = hash_fn(rows[d], hash_len);
   }
   if (0 == grease_allocate(prime, len, &grease, 900)){
     fprintf(stderr, "%s: unable to allocate grease, terminating\n", name);
@@ -157,27 +159,26 @@ unsigned int spin(const char *in, const char *out, const char *a,
       exit(1);
     }
     gen->nor += rows_to_do;
-    clean(rows, nor, rows + nor, rows_to_do, map, NULL, NULL, 0,
-          grease.level, prime, len, nob, 900, 0, 0, name);
-    echelise(rows + nor, rows_to_do, &d, &new_map, NULL, 0,
-             grease.level, prime, len, nob, 900, 0, 0, 1, name);
-    clean(rows + nor, rows_to_do, rows, nor, new_map, NULL, NULL, 0,
-          grease.level, prime, len, nob, 900, 0, 0, name);
     for (i = 0; i < rows_to_do; i++) {
-      if (new_map[i] >= 0) {
-        /* Got a useful row */
+      unsigned int hash = hash_fn(rows[nor + i], hash_len);
+      int ok = 1;
+      for (d = 0; d < nor + j; d++) {
+        if (hashes[d] == hash && 0 == memcmp(rows[d], rows[nor + i], len * sizeof(unsigned int))) {
+          ok = 0;
+        }
+      }
+      if (ok) {
+        /* Got a new row */
         unsigned int *row;
-        map[nor + j] = new_map[i];
         /* Swap pointers */
         row = rows[nor + j];
         rows[nor + j] = rows[nor + i];
         rows[nor + i] = row;
+        hashes[nor + j] = hash;
         j++;
       }
     }
-    free(new_map);
-    assert(j == d);
-    nor += d; /* The number of extra rows we made */
+    nor += j; /* The number of extra rows we made */
     gen = gen->next;
   }
   if (nor >= max_rows) {
@@ -204,6 +205,6 @@ unsigned int spin(const char *in, const char *out, const char *a,
   matrix_free(rows);
   grease_free(&grease);
   fclose(outp);
-  free(map);
+  free(hashes);
   return nor;
 }

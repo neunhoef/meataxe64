@@ -1,5 +1,5 @@
 /*
- * $Id: zspan.c,v 1.2 2001/12/11 01:00:44 jon Exp $
+ * $Id: zspan.c,v 1.3 2002/01/26 00:36:06 jon Exp $
  *
  * Compute the span of a matrix
  *
@@ -30,7 +30,7 @@ int main(int argc, const char * const argv[])
   const char *out;
   FILE *inp;
   FILE *outp;
-  unsigned int prime, nob, noc, nor, rows, len;
+  unsigned int prime, nob, noc, nor, rows, len, power = 1, index = 0, sum = 1;
   unsigned int i, vectors;
   const header *h_in, *h_out;
   unsigned int **mat, *row, *scalars;
@@ -61,6 +61,7 @@ int main(int argc, const char * const argv[])
     exit(1);
   }
   rows--;
+  rows /= (prime - 1); /* Only want projective representatives */
   h_out = header_create(prime, nob, header_get_nod(h_in), noc, rows);
   if (0 == open_and_write_binary_header(&outp, h_out, out, name)) {
     fprintf(stderr, "%s: cannot open %s, terminating\n", name, out);
@@ -92,16 +93,14 @@ int main(int argc, const char * const argv[])
   memset(scalars, 0, vectors * sizeof(unsigned int));
   for (i = 0; i < rows; i++) {
     unsigned int j;
-    for (j = 0; j < vectors; j++) {
-      if (scalars[j] + 1 < prime) {
-        scalars[j]++;
-        break;
-      } else {
-        scalars[j] = 0;
-        /* We'll increment the next one */
-      }
-    }
     row_init(row, len);
+    if (i >= sum) {
+      power *= prime;
+      sum += power;
+      index++;
+      memset(scalars, 0, vectors * sizeof(unsigned int));
+    }
+    scalars[index] = 1;
     for (j = 0; j < vectors; j++) {
       if (0 != scalars[j]) {
         if (1 != scalars[j]) {
@@ -114,6 +113,15 @@ int main(int argc, const char * const argv[])
     if (0 == endian_write_row(outp, row, len)) {
       fprintf(stderr, "%s: failed to write row %d to %s, terminating\n", name, i, out);
       exit(1);
+    }
+    for (j = 0; j < index; j++) {
+      if (scalars[j] + 1 < prime) {
+        scalars[j]++;
+        break;
+      } else {
+        scalars[j] = 0;
+        /* We'll increment the next one */
+      }
     }
   }
   fclose(inp);

@@ -71,3 +71,6 @@
 20020114 - add zdiag for use in indicator calculation
 20020118 - started on znsf
 20020121 - added intersect, join, zfe
+20020122 - debug zsums problem
+20020123 - work on vector permute
+20020125 - solve multipl McL irreds, bug in the scripts

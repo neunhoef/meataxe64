@@ -1,5 +1,5 @@
 #
-# $Id: split_with_element,v 1.7 2002/01/06 16:35:48 jon Exp $
+# $Id: split_with_element,v 1.8 2002/01/26 00:36:06 jon Exp $
 #
 # Script to split a representation given a particular element to work from
 #
@@ -71,6 +71,7 @@ while [ 0 -eq $ok ]; do
       let memory=`more_memory $memory`
 #     echo Allocating more memory for zns, now $memory
     else
+      rm -f ${tmp}*
       exit 1
     fi
   fi
@@ -78,6 +79,7 @@ done
 echo nullity $nullity
 if [ $nullity -eq 0 ]; then
   echo Failed to split
+  rm -f ${tmp}*
   exit 253
 fi
 ok=0
@@ -91,6 +93,7 @@ let vectors=$q**$count-1
 if [ 0 -eq $c ]; then
   zspan ${tmp}.2 ${tmp}.3 $count
   if [ $? -ne 0 ]; then
+    rm -f ${tmp}*
     exit 1
   fi
 else
@@ -116,6 +119,7 @@ while [ $vector -lt $vectors ]; do
         let memory=`more_memory $memory`
 #       echo Allocating more memory for zsp, now $memory
       else
+        rm -f ${tmp}*
         exit 1
       fi
     fi
@@ -149,19 +153,25 @@ else
 #   echo irred returns result $ret
     if [ $ret -eq 255 ]; then
       echo irreducible $a $b of dimension $nor found
+      rm -f ${tmp}*
       exit 255
     elif [ $ret -eq 254 ]; then
+      rm -f ${tmp}*
       exit 254
     elif [ $ret -eq 253 ]; then
       echo Serious bug found in split/irred \(nullity 0 passed to irred\)
+      rm -f ${tmp}*
       exit 1
     else
+      rm -f ${tmp}*
       exit $ret
     fi
   else
     if [ $count -eq $nullity ]; then
+      rm -f ${tmp}*
       exit 255
     else
+      rm -f ${tmp}*
       exit 254
     fi
   fi
@@ -172,4 +182,5 @@ zmu ${tmp}.5 $b ${tmp}.6 400 1>/dev/null
 zss ${tmp}.5 ${tmp}.6 ${ss_name}_2 $memory
 zqs ${tmp}.5 $a ${qs_name}_1 $memory
 zqs ${tmp}.5 $b ${qs_name}_2 $memory
+rm -f ${tmp}*
 exit 0
