@@ -1,5 +1,5 @@
 /*
- * $Id: zdiag.c,v 1.1 2002/01/14 23:43:45 jon Exp $
+ * $Id: zdiag.c,v 1.2 2002/04/10 23:33:27 jon Exp $
  *
  * Clear to zero the off diagonal elements of a matrix
  * This is a utility program for computation of quadratic forms
@@ -42,6 +42,12 @@ int main(int argc, const char * const argv[])
     exit(1);
   }
   prime = header_get_prime(h);
+  if (1 == prime) {
+    fprintf(stderr, "%s: cannot handle maps, terminating\n", name);
+    fclose(inp);
+    header_free(h);
+    exit(1);
+  }
   nob = header_get_nob(h);
   nor = header_get_nor(h);
   noc = header_get_noc(h);

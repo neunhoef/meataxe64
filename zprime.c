@@ -1,5 +1,5 @@
 /*
- * $Id: zprime.c,v 1.2 2002/01/14 23:43:45 jon Exp $
+ * $Id: zprime.c,v 1.3 2002/04/10 23:33:27 jon Exp $
  *
  * Print the field order from a matrix
  *
@@ -36,7 +36,7 @@ int main(int argc, const char * const argv[])
   }
   prime = header_get_prime(h);
   header_free(h);
-  assert(is_a_prime_power(prime));
+  assert(1 == prime || is_a_prime_power(prime));
   printf("%d\n", prime);
   fclose(inp);
   return 0;

@@ -1,5 +1,5 @@
 /*
- * $Id: ns.c,v 1.7 2001/12/15 20:47:27 jon Exp $
+ * $Id: ns.c,v 1.8 2002/04/10 23:33:27 jon Exp $
  *
  * Compute the null space of a matrix
  *
@@ -33,6 +33,11 @@ unsigned int nullspace(const char *m1, const char *m2, const char *name)
     exit(1);
   }
   prime = header_get_prime(h1);
+  if (1 == prime) {
+    fprintf(stderr, "%s: cannot handle maps, terminating\n", name);
+    fclose(inp);
+    exit(1);
+  }
   nob = header_get_nob(h1);
   nor = header_get_nor(h1);
   len1 = header_get_len(h1);

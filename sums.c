@@ -1,5 +1,5 @@
 /*
- * $Id: sums.c,v 1.5 2002/03/24 19:44:02 jon Exp $
+ * $Id: sums.c,v 1.6 2002/04/10 23:33:27 jon Exp $
  *
  * Function to compute linear sums of two matices
  *
@@ -51,6 +51,12 @@ int sums(const char *in1, const char *in2, const char *out,
     exit(1);
   }
   prime = header_get_prime(h);
+  if (1 == prime) {
+    fprintf(stderr, "%s: cannot handle maps, terminating\n", name);
+    fclose(f);
+    header_free(h);
+    exit(1);
+  }
   nor = header_get_nor(h);
   noc = header_get_noc(h);
   nod = header_get_nod(h); /* For printing element names */
@@ -80,8 +86,8 @@ int sums(const char *in1, const char *in2, const char *out,
     fprintf(stderr, "%s: too many elements requested (%d ** %d), terminating\n", name, prime, n);
     exit(1);
   }
-  names = my_malloc(n * sizeof(const char *));
-  words = my_malloc(n * sizeof(const char *));
+  names = my_malloc((n + 1) * sizeof(const char *));
+  words = my_malloc((n + 1) * sizeof(const char *));
   elts = my_malloc(count * sizeof(const char *));
   elt_names = my_malloc(count * sizeof(const char *));
   for (l = 0; l < count; l++) {
@@ -94,21 +100,12 @@ int sums(const char *in1, const char *in2, const char *out,
     exit(1);
   }
   elt_names[0] = "I";
-  words[0] = "A";
-  names[0] = in1;
+  words[0] = "";
+  names[0] = "I";
+  names[1] = in1;
+  names[2] = in2;
   if (0 != sub_order) {
     prime = sub_order; /* Restrict to subfield if requested */
-  }
-  for (l = 1; l < prime; l++) {
-    /* lambda names[0] + elts[0] */
-    if (0 == scaled_add(names[0], elts[0], elts[l], l, name)) {
-      fprintf(stderr, "%s: scaled add failed on %s + %d * %s, terminating\n",
-              name, elts[l], l, names[i - 1]);
-      exit(1);
-    }
-    buf = my_malloc(2 /*I+*/ + nod /* lambda */ + 1 /* A */ + 1 /* eos */);
-    sprintf(buf, "I+%d%s", l, words[0]);
-    elt_names[l] = buf;
   }
   while (i < n) {
     char *a;
@@ -116,9 +113,14 @@ int sums(const char *in1, const char *in2, const char *out,
     const char *c;
     const char *chosen_letter;
     unsigned int word_len;
-    buf = my_malloc(2 * k);
-    sprintf(buf, "%s%d", out, i - 1);
-    names[i] = buf;
+    if (i > 2) {
+      buf = my_malloc(2 * k);
+      sprintf(buf, "%s%d", out, i - 1);
+      names[i] = buf;
+    }
+/*
+    printf("New loop, i = %d\n", i);
+*/
     while (1) {
       const char *word = words[cur_word];
       char letter = (0 == m) ? 'A' : 'B';
@@ -161,10 +163,16 @@ int sums(const char *in1, const char *in2, const char *out,
     words[i] = a;
     c = names[cur_word];
     b = (0 == m) ? in1 : in2;
-    if (0 == mul(c, b, names[i], "zsums")) {
-      exit(1);
+    if (0 != word_len) {
+      if (0 == mul(c, b, names[i], "zsums")) {
+        exit(1);
+      }
+/*
+      printf("Multiplying %s(%s) * %s(%s) giving %s(%s)\n", c, words[cur_word], b, chosen_letter, names[i], words[i]);
+    } else {
+      printf("No multiplication required to produce %s\n", names[i]);
+*/
     }
-    i++;
     if (0 == m) {
       m = 1;
     } else {
@@ -172,23 +180,28 @@ int sums(const char *in1, const char *in2, const char *out,
       cur_word++;
     }
     /* Now compute the sums we require, and their ranks */
-    cur_power *= prime;
     for (l = 0; l < cur_power; l++) {
       for (r = 1; r < prime; r++) {
         unsigned int pos = cur_power * r + l;
         /* Range from cur_power to cur_power * prime - 1 */
-        /* scale names[i-1] and add to elts[l] */
-        if (0 == scaled_add(names[i - 1], elts[l], elts[pos], r, name)) {
+        /* scale names[i] and add to elts[l] */
+        buf = my_malloc(strlen(elt_names[l]) + 1 + nod + strlen(words[i]) + 1);
+        sprintf(buf, "%s+%d%s", elt_names[l], r, words[i]);
+        elt_names[pos] = buf;
+        if (0 == scaled_add(names[i], elts[l], elts[pos], r, name)) {
           fprintf(stderr, "%s: scaled add failed on %s + %d * %s, terminating\n",
                   name, elts[l], r, names[i - 1]);
+/*
+          printf("Scaled add %s(%s) + %d.%s(%s) giving %s(%s)\n", elts[l], elt_names[l], r, names[i], words[i], elts[pos], elt_names[pos]);
+*/
           exit(1);
         }
-        buf = my_malloc(strlen(elt_names[l]) + 1 + nod + strlen(words[i-1]) + 1);
-        sprintf(buf, "%s+%d%s", elt_names[l], r, words[i - 1]);
-        elt_names[pos] = buf;
         /* l != 0 mean we have 1 + old element + lambda * new element, ie at least 3 in sum */
         if (0 != l) {
           int res;
+/*
+          printf("Checking rank of %s(%s)\n", elts[pos], elt_names[pos]);
+*/
           if (0 == rank(elts[pos], &s, name)) {
             exit(1);
           }
@@ -204,6 +217,8 @@ int sums(const char *in1, const char *in2, const char *out,
         }
       }
     }
+    cur_power *= prime;
+    i++;
   }
   /* Failed to find a suitable element */
   printf("Failed to find a suitable element\n");

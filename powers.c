@@ -1,5 +1,5 @@
 /*
- * $Id: powers.c,v 1.5 2002/03/20 18:42:30 jon Exp $
+ * $Id: powers.c,v 1.6 2002/04/10 23:33:27 jon Exp $
  *
  * Function to compute tensor powers of a matrix, from file
  *
@@ -42,12 +42,14 @@ int skew_square(const char *m1, const char *m2, const char *name)
   assert(NULL != m2);
   assert(NULL != name);
   if (0 == open_and_read_binary_header(&inp, &h_in, m1, name)) {
-    if (NULL != h_in) {
-      header_free(h_in);
-    }
     return cleanup(inp, outp);
   }
   prime = header_get_prime(h_in);
+  if (1 == prime) {
+    fprintf(stderr, "%s: cannot handle maps, terminating\n", name);
+    header_free(h_in);
+    return cleanup(inp, outp);
+  }
   nob = header_get_nob(h_in);
   nod = header_get_nod(h_in);
   nor_in = header_get_nor(h_in);
@@ -174,12 +176,14 @@ int sym_square(const char *m1, const char *m2, const char *name)
   assert(NULL != m2);
   assert(NULL != name);
   if (0 == open_and_read_binary_header(&inp, &h_in, m1, name)) {
-    if (NULL != h_in) {
-      header_free(h_in);
-    }
     return cleanup(inp, outp);
   }
   prime = header_get_prime(h_in);
+  if (1 == prime) {
+    fprintf(stderr, "%s: cannot handle maps, terminating\n", name);
+    header_free(h_in);
+    return cleanup(inp, outp);
+  }
   nob = header_get_nob(h_in);
   nod = header_get_nod(h_in);
   nor_in = header_get_nor(h_in);
@@ -256,12 +260,14 @@ int skew_cube(const char *m1, const char *m2, const char *name)
   assert(NULL != m2);
   assert(NULL != name);
   if (0 == open_and_read_binary_header(&inp, &h_in, m1, name)) {
-    if (NULL != h_in) {
-      header_free(h_in);
-    }
     return cleanup(inp, outp);
   }
   prime = header_get_prime(h_in);
+  if (1 == prime) {
+    fprintf(stderr, "%s: cannot handle maps, terminating\n", name);
+    header_free(h_in);
+    return cleanup(inp, outp);
+  }
   nob = header_get_nob(h_in);
   nod = header_get_nod(h_in);
   nor_in = header_get_nor(h_in);
@@ -362,12 +368,14 @@ int skew_fourth(const char *m1, const char *m2, const char *name)
   assert(NULL != m2);
   assert(NULL != name);
   if (0 == open_and_read_binary_header(&inp, &h_in, m1, name)) {
-    if (NULL != h_in) {
-      header_free(h_in);
-    }
     return cleanup(inp, outp);
   }
   prime = header_get_prime(h_in);
+  if (1 == prime) {
+    fprintf(stderr, "%s: cannot handle maps, terminating\n", name);
+    header_free(h_in);
+    return cleanup(inp, outp);
+  }
   nob = header_get_nob(h_in);
   nod = header_get_nod(h_in);
   nor_in = header_get_nor(h_in);
@@ -503,12 +511,14 @@ int skew_fifth(const char *m1, const char *m2, const char *name)
   assert(NULL != m2);
   assert(NULL != name);
   if (0 == open_and_read_binary_header(&inp, &h_in, m1, name)) {
-    if (NULL != h_in) {
-      header_free(h_in);
-    }
     return cleanup(inp, outp);
   }
   prime = header_get_prime(h_in);
+  if (1 == prime) {
+    fprintf(stderr, "%s: cannot handle maps, terminating\n", name);
+    header_free(h_in);
+    return cleanup(inp, outp);
+  }
   nob = header_get_nob(h_in);
   nod = header_get_nod(h_in);
   nor_in = header_get_nor(h_in);
@@ -666,12 +676,14 @@ int skew_sixth(const char *m1, const char *m2, const char *name)
   assert(NULL != m2);
   assert(NULL != name);
   if (0 == open_and_read_binary_header(&inp, &h_in, m1, name)) {
-    if (NULL != h_in) {
-      header_free(h_in);
-    }
     return cleanup(inp, outp);
   }
   prime = header_get_prime(h_in);
+  if (1 == prime) {
+    fprintf(stderr, "%s: cannot handle maps, terminating\n", name);
+    header_free(h_in);
+    return cleanup(inp, outp);
+  }
   nob = header_get_nob(h_in);
   nod = header_get_nod(h_in);
   nor_in = header_get_nor(h_in);
@@ -839,12 +851,14 @@ int skew_seventh(const char *m1, const char *m2, const char *name)
   assert(NULL != m2);
   assert(NULL != name);
   if (0 == open_and_read_binary_header(&inp, &h_in, m1, name)) {
-    if (NULL != h_in) {
-      header_free(h_in);
-    }
     return cleanup(inp, outp);
   }
   prime = header_get_prime(h_in);
+  if (1 == prime) {
+    fprintf(stderr, "%s: cannot handle maps, terminating\n", name);
+    header_free(h_in);
+    return cleanup(inp, outp);
+  }
   nob = header_get_nob(h_in);
   nod = header_get_nod(h_in);
   nor_in = header_get_nor(h_in);

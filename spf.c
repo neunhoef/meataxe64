@@ -1,5 +1,5 @@
 /*
- * $Id: spf.c,v 1.1 2002/03/31 20:55:41 jon Exp $
+ * $Id: spf.c,v 1.2 2002/04/10 23:33:27 jon Exp $
  *
  * Function to spin some vectors under two generators
  *
@@ -32,6 +32,7 @@ struct gen_struct
   const char *m;	/* Name of the generator */
   unsigned int nor;	/* Rows from input already multiplied by this generator */
   gen next;		/* Next generator to be used */
+  int is_map;		/* This generator is a map */
   long base_ptr;	/* Pointer to row nor + 1 in output basis file */
 };
 
@@ -90,6 +91,8 @@ unsigned int spin(const char *in, const char *out, const char *a,
   }
   /* Check compatibility */
   prime = header_get_prime(h_in);
+  gen_a.is_map = 1 == header_get_prime(h_a);
+  gen_b.is_map = 1 == header_get_prime(h_b);
   nob = header_get_nob(h_in);
   noc = header_get_noc(h_in);
   nor = header_get_nor(h_in);
@@ -98,18 +101,18 @@ unsigned int spin(const char *in, const char *out, const char *a,
       noc != header_get_nor(h_a) ||
       noc != header_get_noc(h_b) ||
       noc != header_get_nor(h_b) ||
-      prime != header_get_prime(h_a) ||
-      prime != header_get_prime(h_b) ||
-      nob != header_get_nob(h_a) ||
-      nob != header_get_nob(h_b) ||
+      (prime != header_get_prime(h_a) && 0 == gen_a.is_map) ||
+      (prime != header_get_prime(h_b) && 0 == gen_b.is_map) ||
+      (nob != header_get_nob(h_a) && 0 == gen_a.is_map) ||
+      (nob != header_get_nob(h_b) && 0 == gen_b.is_map) ||
       1 != nor) {
     fprintf(stderr, "%s: incompatible/bad parameters for %s, %s, %s, terminating\n",
             name, in, a, b);
     cleanup(inp, f_a, f_b);
     exit(1);
   }
-  assert(header_get_len(h_a) == len);
-  assert(header_get_len(h_b) == len);
+  assert(gen_a.is_map || header_get_len(h_a) == len);
+  assert(gen_b.is_map || header_get_len(h_b) == len);
   h_out = header_create(prime, nob, header_get_nod(h_in), noc, noc);
   header_free(h_in);
   header_free(h_a);
@@ -221,8 +224,8 @@ unsigned int spin(const char *in, const char *out, const char *a,
         exit(1);
       }
       gen->base_ptr = ftell(echelised); /* Reset the pointer into the existing basis for this generator */
-      if (0 == mul_from_store(rows2, rows1, gen->f, noc, len, nob,
-                              stride, prime, &grease, gen->m, name)) {
+      if (0 == mul_from_store(rows2, rows1, gen->f, gen->is_map, noc, len, nob,
+                              stride, noc, prime, &grease, gen->m, name)) {
         fprintf(stderr, "%s: failed to multiply using %s, terminating\n", name, gen->m);
         cleanup_all(NULL, f_a, f_b, echelised, name_echelised);
         exit(1);

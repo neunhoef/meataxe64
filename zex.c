@@ -1,5 +1,5 @@
 /*
- * $Id: zex.c,v 1.5 2001/11/25 12:44:33 jon Exp $
+ * $Id: zex.c,v 1.6 2002/04/10 23:33:27 jon Exp $
  *
  * explode a matrix
  *
@@ -53,6 +53,12 @@ int main(int argc,  char **argv)
   }
   assert(NULL != h);
   prime = header_get_prime(h);
+  if (1 == prime) {
+    fprintf(stderr, "%s: cannot handle maps, terminating\n", name);
+    fclose(input);
+    header_free(h);
+    exit(1);
+  }
   nob = header_get_nob(h);
   nor = header_get_nor(h);
   noc = header_get_noc(h);

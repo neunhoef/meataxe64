@@ -1,5 +1,5 @@
 /*
- * $Id: rnf.c,v 1.6 2002/03/07 13:43:30 jon Exp $
+ * $Id: rnf.c,v 1.7 2002/04/10 23:33:27 jon Exp $
  *
  * Compute the rank of a matrix, using temporary files
  *
@@ -77,6 +77,11 @@ unsigned int rank(const char *m1, const char *dir, const char *m2,
   }
   f.f = inp;
   prime = header_get_prime(h);
+  if (1 == prime) {
+    fprintf(stderr, "%s: cannot handle maps, terminating\n", name);
+    fclose(inp);
+    exit(1);
+  }
   nob = header_get_nob(h);
   nor = header_get_nor(h);
   nod = header_get_nod(h);

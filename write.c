@@ -1,5 +1,5 @@
 /*
- * $Id: write.c,v 1.9 2002/03/07 13:43:30 jon Exp $
+ * $Id: write.c,v 1.10 2002/04/10 23:33:27 jon Exp $
  *
  * Write a header
  *
@@ -27,10 +27,17 @@ int write_text_header(FILE *fp, const header *h)
   nod = header_get_nod(h);
   nor = header_get_nor(h);
   noc = header_get_noc(h);
-  (void)sprintf(buf1, "%2d", nod);
-  (void)sprintf(buf2, "%6d", prime);
-  (void)sprintf(buf3, "%6d", nor);
-  (void)sprintf(buf4, "%6d", noc);
+  if (1 != prime) {
+    (void)sprintf(buf1, "%2d", nod);
+    (void)sprintf(buf2, "%6d", prime);
+    (void)sprintf(buf3, "%6d", nor);
+    (void)sprintf(buf4, "%6d", noc);
+  } else {
+    (void)sprintf(buf1, "%2d", 12);
+    (void)sprintf(buf2, "%6d", prime);
+    (void)sprintf(buf3, "%6d", nor);
+    (void)sprintf(buf4, "%6d", 1);
+  }
   if (2 != fwrite(buf1, 1, 2, fp) ||
       6 != fwrite(buf2, 1, 6, fp) ||
       6 != fwrite(buf3, 1, 6, fp) ||
@@ -44,7 +51,6 @@ int write_text_header(FILE *fp, const header *h)
 
 int write_binary_header(FILE *fp, const header *h, const char *name)
 {
-  unsigned int nob;
   unsigned int prime;
   unsigned int nor;
   unsigned int noc;
@@ -52,7 +58,6 @@ int write_binary_header(FILE *fp, const header *h, const char *name)
   assert(NULL != h);
   assert(NULL != fp);
   assert(NULL != name);
-  nob = header_get_nob(h);
   prime = header_get_prime(h);
   nor = header_get_nor(h);
   noc = header_get_noc(h);

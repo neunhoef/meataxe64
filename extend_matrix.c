@@ -1,5 +1,5 @@
 /*
- * $Id: extend_matrix.c,v 1.1 2002/01/22 08:40:24 jon Exp $
+ * $Id: extend_matrix.c,v 1.2 2002/04/10 23:33:27 jon Exp $
  *
  * Function to field extend a matrix
  *
@@ -32,6 +32,10 @@ int extend_matrix(const char *in, const char *out, unsigned int out_prime, const
     return 0;
   }
   in_prime = header_get_prime(h);
+  if (1 == in_prime) {
+    fprintf(stderr, "%s: cannot handle maps, terminating\n", name);
+    return 0;
+  }
   in_nob = header_get_nob(h);
   nor = header_get_nor(h);
   in_len = header_get_len(h);

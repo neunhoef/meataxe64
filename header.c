@@ -1,5 +1,5 @@
 /*
- * $Id: header.c,v 1.11 2002/03/10 22:45:28 jon Exp $
+ * $Id: header.c,v 1.12 2002/04/10 23:33:27 jon Exp $
  *
  * Header manipulation
  *
@@ -36,7 +36,7 @@ unsigned int header_get_prime(const header *h)
 void header_set_prime(header *h, unsigned int p)
 {
   assert(NULL != h);
-  assert(is_a_prime_power(p));
+  assert(1 == p || is_a_prime_power(p));
   h->prime = p;
 }
 
@@ -49,7 +49,7 @@ unsigned int header_get_nob(const header *h)
 void header_set_nob(header *h, unsigned int n)
 {
   assert(NULL != h);
-  assert(n >= 1);
+  assert(n >= 1 || 1 == h->prime);
   h->nob = n;
 }
 
@@ -62,7 +62,7 @@ unsigned int header_get_nod(const header *h)
 void header_set_nod(header *h, unsigned int n)
 {
   assert(NULL != h);
-  assert(n >= 1);
+  assert(n >= 1 || 1 == h->prime);
   h->nod = n;
 }
 
@@ -92,28 +92,35 @@ void header_set_noc(header *h, unsigned int n)
   h->noc = n;
 }
 
-static unsigned int get_len(unsigned int nob, unsigned int noc)
+unsigned int compute_len(unsigned int nob, unsigned int noc)
 {
-  unsigned int elts_in_word = bits_in_unsigned_int / nob;
-  return (noc + elts_in_word - 1) / elts_in_word;
+  if (0 == nob) {
+    return 0;
+  } else {
+    unsigned int elts_in_word = bits_in_unsigned_int / nob;
+    return (noc + elts_in_word - 1) / elts_in_word;
+  }
 }
 
 unsigned int header_get_len(const header *h)
 {
   assert(NULL != h);
-  assert(get_len(h->nob, h->noc) == h->len);
+  assert(compute_len(h->nob, h->noc) == h->len);
   return h->len;
 }
 
 void header_set_len(header *h)
 {
   assert(NULL != h);
-  assert(0 != h->nob);
-  h->len = get_len(h->nob, h->noc);
+  assert(0 != h->nob || 1 == h->prime);
+  h->len = compute_len(h->nob, h->noc);
 }
 
 static unsigned int get_eperb(unsigned int prime, unsigned int nob)
 {
+  if (1 == prime) {
+    return 1;
+  }
   if (0 == prime % 2) {
     return (CHAR_BIT) / nob;
   } else {
@@ -133,14 +140,19 @@ unsigned int header_get_eperb(const header *h)
 void header_set_eperb(header *h)
 {
   assert(NULL != h);
-  assert(0 != h->nob);
+  assert(0 != h->nob || 1 == h->prime);
   h->eperb = get_eperb(h->prime, h->nob);
 }
 
 static unsigned int get_blen(const header *h)
 {
-  assert(get_eperb(h->prime, h->nob) == h->eperb);
-  return (h->noc + h->eperb - 1) / h->eperb;
+  assert(NULL != h);
+  if (1 == h->prime) {
+    return 0;
+  } else {
+    assert(get_eperb(h->prime, h->nob) == h->eperb);
+    return (h->noc + h->eperb - 1) / h->eperb;
+  }
 }
 
 unsigned int header_get_blen(const header *h)
@@ -153,7 +165,7 @@ unsigned int header_get_blen(const header *h)
 void header_set_blen(header *h)
 {
   assert(NULL != h);
-  assert(0 != h->nob);
+  assert(0 != h->nob || 1 == h->prime);
   h->blen = get_blen(h);
 }
 

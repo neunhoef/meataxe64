@@ -1,5 +1,5 @@
 /*
- * $Id: restrict.c,v 1.1 2002/03/20 18:42:30 jon Exp $
+ * $Id: restrict.c,v 1.2 2002/04/10 23:33:27 jon Exp $
  *
  * Function to restrict a matrix from a big field to a smaller
  *
@@ -45,6 +45,11 @@ int restrict(const char *m1, const char *m2, unsigned int q, const char *name)
     return 0;
   }
   prime_in = header_get_prime(h_in);
+  if (1 == prime_in) {
+    fprintf(stderr, "%s: cannot handle maps, terminating\n", name);
+    fclose(inp);
+    return 0;
+  }
   nob_in = header_get_nob(h_in);
   nor = header_get_nor(h_in);
   noc = header_get_noc(h_in);

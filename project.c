@@ -1,5 +1,5 @@
 /*
- * $Id: project.c,v 1.1 2002/02/18 20:42:49 jon Exp $
+ * $Id: project.c,v 1.2 2002/04/10 23:33:27 jon Exp $
  *
  * Function to project into quotient space representation
  *
@@ -58,6 +58,11 @@ void project(const char *range, const char *in,
     exit(1);
   }
   prime = header_get_prime(h_in_r);
+  if (1 == prime) {
+    fprintf(stderr, "%s: cannot handle maps, terminating\n", name);
+    cleanup(inp_r, inp_g, NULL);
+    exit(1);
+  }
   nob = header_get_nob(h_in_r);
   nor_r = header_get_nor(h_in_r);
   nor_g = header_get_nor(h_in_g);
@@ -88,8 +93,8 @@ void project(const char *range, const char *in,
   header_free(h_in_g);
   assert(len >= len_o);
   max_rows = memory_rows(len, 450);
-  in_store = max_rows >= nor_g;
-  step = (0 != in_store) ? noc_r : max_rows;
+  in_store = max_rows >= nor_r;
+  step = (0 != in_store) ? nor_r : max_rows;
   if (0 == open_and_write_binary_header(&outp, h_out, out, name)) {
     cleanup(inp_r, inp_g, outp);
     exit(1);

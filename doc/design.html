@@ -43,8 +43,14 @@ represented as their integer minimal non-negative coset
 representatives.
 </li>
 <li>
-Permutations are represented as a list of images of 1 .. n, rather
-than in cycle notation for example.
+Permutations are represented (in printed form) as a list of images of
+1 .. n, rather than in cycle notation for example.
+</li>
+<li>
+Permutations are represented internally as a header with nor = range
+size, noc = image size (to allow non-bijective maps), and prime 1.
+Unfortunately, there is no way of representing this in the printed
+form.
 </li>
 <li>
 Split matrices for the extended operations system are represented as a
@@ -57,9 +63,15 @@ used are typically of the form n_m, although this is not a requirement.
 </li>
 <li>
 Return code 1 is a general failure. Return code 2 is out of memory,
-from which we may recover by rerunning with more memory.
+from which we may recover by rerunning with more memory. High value
+codes come only from scripts and indicate other failures which
+generally indicate inappropriate operations, eg nullity zero when
+nullity non-zero was required.
 </li>
 <li>
+Permutations may be used in many places where matrices were required,
+and may be added and multiplied. In the case of multiply, two
+permutations multiply to give a further permutation.
 </li>
 <li>
 </li>

@@ -98,3 +98,4 @@ skew seventh
 20020323 - first version of zsbf and basef
 20020324 - first version of ivf. Fix bug in znsf
 20020331 - Add zspf and find_element
+20020410 - Satrting adding support for permutations

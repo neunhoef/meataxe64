@@ -1,5 +1,5 @@
 /*
- * $Id: script.c,v 1.2 2002/03/20 18:42:30 jon Exp $
+ * $Id: script.c,v 1.3 2002/04/10 23:33:27 jon Exp $
  *
  * Function to compute a script in two generators
  *
@@ -168,6 +168,14 @@ int exec_script(const char *m1, const char *m2, const char *m3,
   }
   nor = header_get_nor(h1);
   prime = header_get_prime(h1);
+  if (1 == prime) {
+    fprintf(stderr, "%s: cannot handle maps, terminating\n", name);
+    fclose(inp1);
+    header_free(h1);
+    fclose(inp2);
+    header_free(h2);
+    return 0;
+  }
   if (0 == header_compare(h1, h2) || nor != header_get_noc(h1)) {
     fprintf(stderr, "%s: unsuitable inputs %s and %s, terminating", name, m1, m2);
     header_free(h1);

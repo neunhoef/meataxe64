@@ -1,5 +1,5 @@
 /*
- * $Id: zimport.c,v 1.2 2002/03/10 22:45:28 jon Exp $
+ * $Id: zimport.c,v 1.3 2002/04/10 23:33:27 jon Exp $
  *
  * Import matrix from old system
  *
@@ -45,6 +45,12 @@ int main(int argc, const char * const argv[])
     exit(1);
   }
   prime = header_get_prime(h_in);
+  if (1 == prime) {
+    fprintf(stderr, "%s: cannot handle maps, terminating\n", name);
+    fclose(f_in);
+    header_free(h_in);
+    exit(1);
+  }
   nob = header_get_nob(h_in);
   noc = header_get_noc(h_in);
   nor = header_get_nor(h_in);

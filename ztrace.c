@@ -1,5 +1,5 @@
 /*
- * $Id: ztrace.c,v 1.1 2001/12/03 00:07:48 jon Exp $
+ * $Id: ztrace.c,v 1.2 2002/04/10 23:33:27 jon Exp $
  *
  * Compute the trace of a matrix
  *
@@ -43,6 +43,12 @@ int main(int argc, const char * const argv[])
     exit(1);
   }
   prime = header_get_prime(h);
+  if (1 == prime) {
+    fprintf(stderr, "%s: cannot handle maps, terminating\n", name);
+    fclose(inp);
+    header_free(h);
+    exit(1);
+  }
   rows_init(prime, &row_operations);
   nob = header_get_nob(h);
   nor = header_get_nor(h);

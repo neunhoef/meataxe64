@@ -1,5 +1,5 @@
 /*
- * $Id: sp.c,v 1.12 2002/02/18 20:42:49 jon Exp $
+ * $Id: sp.c,v 1.13 2002/04/10 23:33:27 jon Exp $
  *
  * Function to spin some vectors under two generators
  *
@@ -30,6 +30,7 @@ struct gen_struct
   FILE *f;
   const char *m;
   unsigned int nor;
+  int is_map;
   gen next;
 };
 
@@ -72,6 +73,8 @@ unsigned int spin(const char *in, const char *out, const char *a,
     exit(1);
   }
   prime = header_get_prime(h_in);
+  gen_a.is_map = 1 == header_get_prime(h_a);
+  gen_b.is_map = 1 == header_get_prime(h_b);
   nob = header_get_nob(h_in);
   noc = header_get_noc(h_in);
   nor = header_get_nor(h_in);
@@ -80,17 +83,17 @@ unsigned int spin(const char *in, const char *out, const char *a,
       noc != header_get_nor(h_a) ||
       noc != header_get_noc(h_b) ||
       noc != header_get_nor(h_b) ||
-      prime != header_get_prime(h_a) ||
-      prime != header_get_prime(h_b) ||
-      nob != header_get_nob(h_a) ||
-      nob != header_get_nob(h_b)) {
+      (prime != header_get_prime(h_a) && 0 == gen_a.is_map) ||
+      (prime != header_get_prime(h_b) && 0 == gen_b.is_map) ||
+      (nob != header_get_nob(h_a) && 0 == gen_a.is_map) ||
+      (nob != header_get_nob(h_b) && 0 == gen_b.is_map)) {
     fprintf(stderr, "%s: incompatible parameters for %s, %s, %s, terminating\n",
             name, in, a, b);
     cleanup(inp, f_a, f_b);
     exit(1);
   }
-  assert(header_get_len(h_a) == len);
-  assert(header_get_len(h_b) == len);
+  assert(gen_a.is_map || header_get_len(h_a) == len);
+  assert(gen_b.is_map || header_get_len(h_b) == len);
   h_out = header_create(prime, nob, header_get_nod(h_in), noc, nor);
   gen_a.f = f_a;
   gen_a.m = a;
@@ -150,8 +153,8 @@ unsigned int spin(const char *in, const char *out, const char *a,
     unsigned int i, j = 0;
     /* Ensure we don't try to do too many */
     rows_to_do = (rows_to_do + gen->nor > nor) ? (nor - gen->nor) : rows_to_do;
-    if (0 == mul_from_store(rows + gen->nor, rows + nor, gen->f, noc, len, nob,
-                            rows_to_do, prime, &grease, gen->m, name)) {
+    if (0 == mul_from_store(rows + gen->nor, rows + nor, gen->f, gen->is_map, noc, len, nob,
+                            rows_to_do, noc, prime, &grease, gen->m, name)) {
       fprintf(stderr, "%s: failed to multiply using %s, terminating\n", name, gen->m);
       cleanup(NULL, f_a, f_b);
       exit(1);

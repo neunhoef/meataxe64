@@ -1,5 +1,5 @@
 /*
- * $Id: tra.c,v 1.8 2002/01/06 16:35:48 jon Exp $
+ * $Id: tra.c,v 1.9 2002/04/10 23:33:27 jon Exp $
  *
  * Function to transpose a matrix
  *
@@ -20,7 +20,7 @@ int tra(const char *m1, const char *m2, const char *name)
 {
   FILE *input;
   FILE *output;
-  unsigned int nob, noc, nor, len1, len2, max, total, t1;
+  unsigned int nob, noc, nor, prime, len1, len2, max, total, t1;
   unsigned int i, j, k, l;
   const header *h1, *h2;
   unsigned int *row1;
@@ -33,12 +33,19 @@ int tra(const char *m1, const char *m2, const char *name)
   if (0 == open_and_read_binary_header(&input, &h1, m1, name)) {
     return 0;
   }
+  prime = header_get_prime(h1);
+  if (1 == prime) {
+    fprintf(stderr, "%s: cannot handle maps, terminating\n", name);
+    fclose(input);
+    header_free(h1);
+    return 0;
+  }
   nob = header_get_nob(h1);
   nor = header_get_nor(h1);
   noc = header_get_noc(h1);
   len1 = header_get_len(h1);
   /* Create header for transpose */
-  h2 = header_create(header_get_prime(h1), nob, header_get_nod(h1), nor, noc);
+  h2 = header_create(prime, nob, header_get_nod(h1), nor, noc);
   len2 = header_get_len(h2);
   /* Maximum row size */
   max = (len1 > len2) ? len1 : len2;

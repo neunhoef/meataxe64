@@ -1,5 +1,5 @@
 /*
- * $Id: qs.c,v 1.7 2002/03/31 20:55:41 jon Exp $
+ * $Id: qs.c,v 1.8 2002/04/10 23:33:27 jon Exp $
  *
  * Function to compute quotient space representation
  *
@@ -38,7 +38,7 @@ void quotient(const char *range, const char *gen,
 {
   FILE *inp_r = NULL, *inp_g = NULL, *outp = NULL;
   const header *h_in_r, *h_in_g, *h_out;
-  unsigned int prime, nob, noc, nor_r, nor_g, nor_o, len, len_o, d, i, j, k, elt, step_r, step_i;
+  unsigned int prime, nob, noc, nor_r, nor_g, nor_o, len, len_o, d, i, j, k, elt, step_r, step_i, prime_g;
   unsigned int **rows1, **rows2;
   int *map_r, *map_g;
   unsigned int *map_o;
@@ -58,15 +58,22 @@ void quotient(const char *range, const char *gen,
     exit(1);
   }
   prime = header_get_prime(h_in_r);
+  if (1 == prime) {
+    fprintf(stderr, "%s: cannot handle map as range, terminating\n", name);
+    cleanup(inp_r, inp_g, NULL);
+    exit(1);
+  }
   nob = header_get_nob(h_in_r);
   nor_r = header_get_nor(h_in_r);
   nor_g = header_get_nor(h_in_g);
   noc = header_get_noc(h_in_r);
   len = header_get_len(h_in_r);
+  prime_g = header_get_prime(h_in_g);
   if (noc != header_get_noc(h_in_g) ||
       noc != nor_g ||
-      prime != header_get_prime(h_in_g) ||
-      nob != header_get_nob(h_in_g)) {
+      ((1 != prime_g) &&
+       (prime != prime_g ||
+        nob != header_get_nob(h_in_g)))) {
     fprintf(stderr, "%s: incompatible parameters for %s, %s, terminating\n",
             name, range, gen);
     cleanup(inp_r, inp_g, NULL);
@@ -78,7 +85,9 @@ void quotient(const char *range, const char *gen,
     cleanup(inp_r, inp_g, NULL);
     exit(1);
   }
-  assert(header_get_len(h_in_g) == len);
+  if (1 != prime_g) {
+    assert(header_get_len(h_in_g) == len);
+  }
   nor_o = nor_g - nor_r; /* Number of output rows and columns */
   h_out = header_create(prime, nob, header_get_nod(h_in_r), nor_o, nor_o);
   len_o = header_get_len(h_out);
@@ -155,10 +164,23 @@ void quotient(const char *range, const char *gen,
     unsigned int *row_o = memory_pointer(900);
     for (d = 0; d < stride_j; d++) {
       while (map_o[j + d] >= i) {
-        if (0 == endian_read_row(inp_g, rows2[d], len)) {
-          fprintf(stderr, "%s: failed to read row from %s, terminating\n", name, gen);
-          fclose(inp_g);
-          exit(1);
+        /* Handle permutation here */
+        if (1 == prime_g) {
+          if (0 == endian_read_int(&k, inp_g)) {
+            fprintf(stderr, "%s: failed to read element from %s, terminating\n", name, gen);
+            cleanup(inp_r, inp_g, outp);
+            exit(1);
+          }
+          if (map_o[j + d] == i) {
+            row_init(rows2[d], len);
+            put_element_to_row(nob, k, rows2[d], 1);
+          }
+        } else {
+          if (0 == endian_read_row(inp_g, rows2[d], len)) {
+            fprintf(stderr, "%s: failed to read row from %s, terminating\n", name, gen);
+            cleanup(inp_r, inp_g, outp);
+            exit(1);
+          }
         }
         i++;
         assert(i <= nor_g);

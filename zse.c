@@ -1,5 +1,5 @@
 /*
- * $Id: zse.c,v 1.2 2002/03/07 13:43:30 jon Exp $
+ * $Id: zse.c,v 1.3 2002/04/10 23:33:27 jon Exp $
  *
  * Select a row of a matrix
  *
@@ -45,6 +45,12 @@ int main(int argc, const char * const argv[])
     exit(1);
   }
   prime = header_get_prime(h_in);
+  if (1 == prime) {
+    fprintf(stderr, "%s: cannot handle maps, terminating\n", name);
+    fclose(inp);
+    header_free(h_in);
+    exit(1);
+  }
   nor = header_get_nor(h_in);
   noc = header_get_noc(h_in);
   nob = header_get_nob(h_in);

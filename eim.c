@@ -1,5 +1,5 @@
 /*
- * $Id: eim.c,v 1.6 2001/12/27 01:17:12 jon Exp $
+ * $Id: eim.c,v 1.7 2002/04/10 23:33:26 jon Exp $
  *
  * implode a matrix (ie glue exploded matrices together)
  *
@@ -91,6 +91,10 @@ int main(int argc,  const char *const argv[])
     }
     header_free(h);
   }
+  if (1 == prime) {
+    fprintf(stderr, "%s: cannot handle maps, terminating\n", name);
+    exit(1);
+  }
   assert(0 != nob);
   assert(0 != nod);
   assert(is_a_prime_power(prime));
@@ -120,6 +124,10 @@ int main(int argc,  const char *const argv[])
         fail(inputs, output, j + 1);
       }
       assert(NULL != headers[j]);
+      if (1 == header_get_prime(headers[j])) {
+        fprintf(stderr, "%s: cannot handle maps, terminating\n", name);
+        exit(1);
+      }
     }
     /* Now check for consistent headers */
     nor = header_get_nor(headers[0]);

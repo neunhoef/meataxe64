@@ -36,11 +36,13 @@ int main(int argc, const char * const argv[])
   }
   prime = header_get_prime(h);
   header_free(h);
-  assert(is_a_prime_power(prime));
-  ch = prime_divisor(prime);
-  if (0 == ch) {
-    fprintf(stderr, "%s: %s has bad prime power %d\n", name, argv[1], prime);
-    exit(1);
+  assert(1 == prime || is_a_prime_power(prime));
+  if (1 != prime) {
+    ch = prime_divisor(prime);
+    if (0 == ch) {
+      fprintf(stderr, "%s: %s has bad prime power %d\n", name, argv[1], prime);
+      exit(1);
+    }
   }
   printf("%d\n", ch);
   fclose(inp);

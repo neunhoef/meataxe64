@@ -1,5 +1,5 @@
 /*
- * $Id: ss.c,v 1.7 2002/02/27 19:06:17 jon Exp $
+ * $Id: ss.c,v 1.8 2002/04/10 23:33:27 jon Exp $
  *
  * Function to compute subspace representation
  * Will work entirely in RAM if possible, otherwise rereading basis file
@@ -57,6 +57,11 @@ void subspace(const char *range, const char *image,
     exit(1);
   }
   prime = header_get_prime(h_in1);
+  if (1 == prime) {
+    fprintf(stderr, "%s: cannot handle maps, terminating\n", name);
+    cleanup(inp1, inp2, NULL);
+    exit(1);
+  }
   nob = header_get_nob(h_in1);
   nor = header_get_nor(h_in1);
   noc = header_get_noc(h_in1);

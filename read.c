@@ -1,5 +1,5 @@
 /*
- * $Id: read.c,v 1.17 2002/03/09 19:18:02 jon Exp $
+ * $Id: read.c,v 1.18 2002/04/10 23:33:27 jon Exp $
  *
  * Read a header
  *
@@ -104,15 +104,15 @@ int read_binary_header(FILE *fp, const header **hp, const char *name)
     fprintf(stderr, "Failed to read header from binary input %s\n", name);
     return 0;
   }
-  if (0 == is_a_prime_power(prime)) {
-    fprintf(stderr, "Prime power expected, found %d while reading %s\n", prime, name);
+  if (1 != prime && 0 == is_a_prime_power(prime)) {
+    fprintf(stderr, "Prime power or 1 expected, found %d while reading %s\n", prime, name);
     return 0;
   }
   nod = digits_of(prime);
   nob = bits_of(prime);
+  header_set_prime(h, prime);
   header_set_nob(h, nob);
   header_set_nod(h, nod);
-  header_set_prime(h, prime);
   header_set_nor(h, nor);
   header_set_noc(h, noc);
   header_set_len(h);

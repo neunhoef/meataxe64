@@ -1,5 +1,5 @@
 /*
- * $Id: pr.c,v 1.8 2001/11/29 01:13:09 jon Exp $
+ * $Id: pr.c,v 1.9 2002/04/10 23:33:27 jon Exp $
  *
  * Print a matrix
  *
@@ -62,62 +62,74 @@ int main(int argc, const char * const argv[])
     exit(1);
   }
   header_free(h);
-  if (memory_rows(len, 1000) < 1) {
-    fprintf(stderr, "%s: cannot allocate row for %s, terminating\n", name, in);
-    fclose(inp);
-    exit(1);
-  }
-  row = memory_pointer_offset(0, 0, len);
-  if (0 == primes_init(prime, &prime_operations)) {
-    fprintf(stderr, "%s: cannot initialise prime operations, terminating\n", name);
-    fclose(inp);
-    exit(1);
-  }
-  for (i = 0; i < nor; i++) {
-    unsigned int m = 0;
-    if (0 == endian_read_row(inp, row, len)) {
-      fprintf(stderr, "%s: cannot read row %d from %s, terminating\n", name, i, in);
+  if (1 == prime) {
+    /* A permutation or map */
+    for (i = 0; i < nor; i++) {
+      if (1 != endian_read_int(&j, inp)) {
+        fprintf(stderr, "%s: failed to read entry %d from %s, terminating\n", name, i, in);
+        fclose(inp);
+        exit(1);
+      }
+      printf("%12d\n", j + 1);
+    }
+  } else {
+    if (memory_rows(len, 1000) < 1) {
+      fprintf(stderr, "%s: cannot allocate row for %s, terminating\n", name, in);
       fclose(inp);
       exit(1);
     }
-    for (j = 0; j < noc; j++) {
-      unsigned int e;
-      char buf[12];
-      unsigned int k;
-      m = j; /* To survive the loop */
-      e = get_element_from_row(nob, j, row);
-      if (0 == (*prime_operations.decimal_rep)(&e)) {
-        fprintf(stderr, "%s: cannot convert %d with prime %d from %s, terminating\n", name, e, prime, in);
+    row = memory_pointer_offset(0, 0, len);
+    if (0 == primes_init(prime, &prime_operations)) {
+      fprintf(stderr, "%s: cannot initialise prime operations, terminating\n", name);
+      fclose(inp);
+      exit(1);
+    }
+    for (i = 0; i < nor; i++) {
+      unsigned int m = 0;
+      if (0 == endian_read_row(inp, row, len)) {
+        fprintf(stderr, "%s: cannot read row %d from %s, terminating\n", name, i, in);
         fclose(inp);
         exit(1);
       }
-      (void)sprintf(buf, "%0d", e);
-      k = strlen(buf);
-      if (k > nod) {
-        /* Some precision will be lost */
-        /* This shouldn't happen */
-        fprintf(stderr, "%s: cannot print %d to precision %d without loss of data, terminating\n", name, e, nod);
-        fclose(inp);
-        exit(1);
-      } else if (k < nod) {
-        while (k < nod) {
-          printf(" ");
-          k++;
+      for (j = 0; j < noc; j++) {
+        unsigned int e;
+        char buf[12];
+        unsigned int k;
+        m = j; /* To survive the loop */
+        e = get_element_from_row(nob, j, row);
+        if (0 == (*prime_operations.decimal_rep)(&e)) {
+          fprintf(stderr, "%s: cannot convert %d with prime %d from %s, terminating\n", name, e, prime, in);
+          fclose(inp);
+          exit(1);
         }
-      } else {
-        assert(k == nod);
-        /* Nothing else to be done */
+        (void)sprintf(buf, "%0d", e);
+        k = strlen(buf);
+        if (k > nod) {
+          /* Some precision will be lost */
+          /* This shouldn't happen */
+          fprintf(stderr, "%s: cannot print %d to precision %d without loss of data, terminating\n", name, e, nod);
+          fclose(inp);
+          exit(1);
+        } else if (k < nod) {
+          while (k < nod) {
+            printf(" ");
+            k++;
+          }
+        } else {
+          assert(k == nod);
+          /* Nothing else to be done */
+        }
+        printf(buf);
+        if (BITS_PER_ROW - 1 == j % BITS_PER_ROW) {
+          printf("\n");
+        }
       }
-      printf(buf);
-      if (BITS_PER_ROW - 1 == j % BITS_PER_ROW) {
+      if (BITS_PER_ROW - 1 != m % BITS_PER_ROW) {
         printf("\n");
       }
     }
-    if (BITS_PER_ROW - 1 != m % BITS_PER_ROW) {
-      printf("\n");
-    }
+    fclose(inp);
+    memory_dispose();
   }
-  fclose(inp);
-  memory_dispose();
   return 0;
 }

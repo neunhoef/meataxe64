@@ -1,5 +1,5 @@
 #
-# $Id: split_with_subspace,v 1.2 2002/02/27 19:06:17 jon Exp $
+# $Id: split_with_subspace,v 1.3 2002/04/10 23:33:27 jon Exp $
 #
 # Script to split a representation given a particular subspace to work from
 #
@@ -42,7 +42,7 @@ if [ -e $a -a -e $s ]; then
     echo "$0: $a is not square"
     exit 1
   fi
-  if [ $noc -ne `znoc $s` -o $q -ne `zprime $s` ]; then
+  if [ $noc -ne `znoc $s` -o \( $q -ne `zprime $s` -a 1 -ne $q \) ]; then
     echo "$0: $a and $s are not compatible"
     exit 1
   fi

@@ -1,5 +1,5 @@
 /*
- * $Id: diff.c,v 1.2 2002/01/06 16:35:48 jon Exp $
+ * $Id: diff.c,v 1.3 2002/04/10 23:33:26 jon Exp $
  *
  * Function to find the differences between two matrices
  *
@@ -33,6 +33,14 @@ int diff(const char *m1, const char *m2, const char *name)
     return 0;
   }
   prime = header_get_prime(h1);
+  if (1 == prime) {
+    fprintf(stderr, "%s: cannot handle maps, terminating\n", name);
+    fclose(inp1);
+    fclose(inp2);
+    header_free(h1);
+    header_free(h2);
+    return 0;
+  }
   nob = header_get_nob(h1);
   nor = header_get_nor(h1);
   noc = header_get_noc(h1);

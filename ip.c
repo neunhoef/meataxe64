@@ -1,5 +1,5 @@
 /*
- * $Id: ip.c,v 1.10 2001/11/29 01:13:09 jon Exp $
+ * $Id: ip.c,v 1.11 2002/04/10 23:33:27 jon Exp $
  *
  * Read a matrix
  *
@@ -50,51 +50,74 @@ int main(int argc, const char * const argv[])
     fclose(inp);
     exit(1);
   }
+  prime = header_get_prime(h);
+  nor = header_get_nor(h);
+  if ( 1 == prime) {
+    header_set_noc((header *)h, nor);
+  }
   if (0 == open_and_write_binary_header(&outp, h, out, name)) {
     fclose(inp);
     header_free(h);
     exit(1);
   }
-  prime = header_get_prime(h);
-  nob = header_get_nob(h);
-  nod = header_get_nod(h);
-  nor = header_get_nor(h);
-  noc = header_get_noc(h);
-  header_free(h);
-  base_mask = (1 << nob) - 1;
-  for (i = 0; i < nor; i++) {
-    unsigned int a = 0;
-    unsigned int k = 0;
-    for (j = 0; j < noc; j++) {
-      unsigned int e;
-      if (get_element_from_text(inp, nod, prime, &e)) {
-        a |= e << (k * nob);
-        k++;
-        if ((k + 1) * nob > bits_in_unsigned_int) {
-          if (0 == endian_write_int(a, outp)) {
-            fprintf(stderr, "Failed to write element to %s at (%d, %d)\n",
-                    out, i, j);
-            fclose(inp);
-            fclose(outp);
-            exit(1);
-          }
-          k = 0;
-          a = 0;
-        }
-      } else {
-        fprintf(stderr, "Failed to read element from %s at (%d, %d)\n",
-                in, i, j);
+  if (1 == prime) {
+    /* Input of a map or permutation */
+    header_free(h);
+    noc = nor;
+    for (i = 0; i < nor; i++) {
+      unsigned int j;
+      j = getin(inp, 7);
+      if (0 == j || j > noc) {
+        fprintf(stderr, "%s: %d (out of range 1 - %d) found as permutation image, terminating\n", name, j, noc);
+        exit(1);
+      }
+      if (0 == endian_write_int(j - 1, outp)) {
+        fprintf(stderr, "%s: cannot write output value %d in row %d to %s\n", name, j - 1, i, out);
         fclose(inp);
         fclose(outp);
         exit(1);
       }
     }
-    if (0 != k && 0 == endian_write_int(a, outp)) {
-      fprintf(stderr, "Failed to write element to %s at (%d, %d)\n",
-              out, i, j);
-      fclose(inp);
-      fclose(outp);
-      exit(1);
+  } else {
+    noc = header_get_noc(h);
+    nob = header_get_nob(h);
+    nod = header_get_nod(h);
+    header_free(h);
+    base_mask = (1 << nob) - 1;
+    for (i = 0; i < nor; i++) {
+      unsigned int a = 0;
+      unsigned int k = 0;
+      for (j = 0; j < noc; j++) {
+        unsigned int e;
+        if (get_element_from_text(inp, nod, prime, &e)) {
+          a |= e << (k * nob);
+          k++;
+          if ((k + 1) * nob > bits_in_unsigned_int) {
+            if (0 == endian_write_int(a, outp)) {
+              fprintf(stderr, "Failed to write element to %s at (%d, %d)\n",
+                      out, i, j);
+              fclose(inp);
+              fclose(outp);
+              exit(1);
+            }
+            k = 0;
+            a = 0;
+          }
+        } else {
+          fprintf(stderr, "Failed to read element from %s at (%d, %d)\n",
+                  in, i, j);
+          fclose(inp);
+          fclose(outp);
+          exit(1);
+        }
+      }
+      if (0 != k && 0 == endian_write_int(a, outp)) {
+        fprintf(stderr, "Failed to write element to %s at (%d, %d)\n",
+                out, i, j);
+        fclose(inp);
+        fclose(outp);
+        exit(1);
+      }
     }
   }
   fclose(inp);

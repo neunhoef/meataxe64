@@ -1,5 +1,5 @@
 /*
- * $Id: scale.c,v 1.1 2002/03/10 22:45:28 jon Exp $
+ * $Id: scale.c,v 1.2 2002/04/10 23:33:27 jon Exp $
  *
  * Function to scale a matrix
  *
@@ -42,13 +42,14 @@ int scale(const char *m1, const char *m2, unsigned int elt, const char *name)
   row_scaler_in_place scaler;
 
   if (0 == open_and_read_binary_header(&inp, &h, m1, name)) {
-    if (NULL != inp) {
-      fclose(inp);
-      header_free(h);
-    }
     return 0;
   }
   prime = header_get_prime(h);
+  if (1 == prime) {
+    fprintf(stderr, "%s: cannot handle maps, terminating\n", name);
+    fclose(inp);
+    header_free(h);
+  }
   nob = header_get_nob(h);
   nor = header_get_nor(h);
   noc = header_get_noc(h);

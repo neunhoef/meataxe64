@@ -1,5 +1,5 @@
 /*
- * $Id: nsf.c,v 1.4 2002/03/24 19:44:02 jon Exp $
+ * $Id: nsf.c,v 1.5 2002/04/10 23:33:27 jon Exp $
  *
  * Compute the nullspace of a matrix, using temporary files
  *
@@ -86,6 +86,12 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
     exit(1);
   }
   prime = header_get_prime(h);
+  if (1 == prime) {
+    fprintf(stderr, "%s: cannot handle maps, terminating\n", name);
+    header_free(h);
+    fclose(f.f);
+    exit(1);
+  }
   nob = header_get_nob(h);
   nod = header_get_nod(h);
   nor = header_get_nor(h);
@@ -93,6 +99,7 @@ unsigned int nullspace(const char *m1, const char *m2, const char *dir, const ch
   header_free(h);
   /* Create an identity */
   if (0 == ident(prime, nor, nor, 1, name4, name)) {
+    fclose(f.f);
     exit(1);
   }
   if (0 == open_and_read_binary_header(&f.f_id, &h, name4, name)) {

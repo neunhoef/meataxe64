@@ -1,5 +1,5 @@
 /*
- * $Id: te.c,v 1.4 2002/02/05 19:50:56 jon Exp $
+ * $Id: te.c,v 1.5 2002/04/10 23:33:27 jon Exp $
  *
  * Function to tensor two matrices to give a third
  *
@@ -49,12 +49,15 @@ int tensor(const char *m1, const char *m2, const char *m3, const char *name)
     if (NULL != h1) {
       header_free(h1);
     }
-    if (NULL != h2) {
-      header_free(h2);
-    }
     return cleanup(inp1, inp2, outp);
   }
   prime = header_get_prime(h1);
+  if (1 == prime) {
+    fprintf(stderr, "%s: cannot handle maps, terminating\n", name);
+    header_free(h1);
+    header_free(h2);
+    return cleanup(inp1, inp2, outp);
+  }
   nob = header_get_nob(h1);
   nor1 = header_get_nor(h1);
   noc1 = header_get_noc(h1);

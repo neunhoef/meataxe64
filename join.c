@@ -1,5 +1,5 @@
 /*
- * $Id: join.c,v 1.1 2002/01/22 08:40:24 jon Exp $
+ * $Id: join.c,v 1.2 2002/04/10 23:33:27 jon Exp $
  *
  * Function to append two matrices to give a third
  *
@@ -34,6 +34,14 @@ int join(const char *m1, const char *m2, const char *m3, const char *name)
     return 0;
   }
   prime = header_get_prime(h1);
+  if (1 == prime) {
+    fprintf(stderr, "%s: cannot handle maps, terminating\n", name);
+    header_free(h1);
+    header_free(h2);
+    fclose(inp1);
+    fclose(inp2);
+    return 0;
+  }
   nob = header_get_nob(h1);
   nod = header_get_nod(h1);
   nor1 = header_get_nor(h1);
@@ -41,8 +49,11 @@ int join(const char *m1, const char *m2, const char *m3, const char *name)
   len = header_get_len(h1);
   if (memory_rows(len, 1000) < 1) {
     fprintf(stderr, "%s cannot allocate rows for %s, %s, %s, terminating\n", name, m1, m2, m3);
+    header_free(h1);
+    header_free(h2);
     fclose(inp1);
     fclose(inp2);
+    return 0;
   }
   if (header_get_prime(h2) != prime ||
       header_get_nob(h2) != nob ||

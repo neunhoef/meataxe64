@@ -1,5 +1,5 @@
 /*
- * $Id: zre.c,v 1.1 2001/11/29 01:13:09 jon Exp $
+ * $Id: zre.c,v 1.2 2002/04/10 23:33:27 jon Exp $
  *
  * Convert a matrix from new to old
  *
@@ -47,6 +47,12 @@ int main(int argc, const char * const argv[])
     exit(1);
   }
   prime = header_get_prime(h_in);
+  if (1 == prime) {
+    fprintf(stderr, "%s: cannot handle maps, terminating\n", name);
+    fclose(inp);
+    header_free(h_in);
+    exit(1);
+  }
   nob = header_get_nob(h_in);
   nod = header_get_nod(h_in);
   nor = header_get_nor(h_in);

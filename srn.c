@@ -1,5 +1,5 @@
 /*
- * $Id: srn.c,v 1.5 2001/12/11 01:00:44 jon Exp $: zrn.c,v 1.1 2001/11/12 13:43:38 jon Exp $
+ * $Id: srn.c,v 1.6 2002/04/10 23:33:27 jon Exp $: zrn.c,v 1.1 2001/11/12 13:43:38 jon Exp $
  *
  * Simple compute of the rank of a matrix
  *
@@ -41,6 +41,12 @@ int main(int argc, const char * const argv[])
     exit(1);
   }
   prime = header_get_prime(h);
+  if (1 == prime) {
+    fprintf(stderr, "%s: cannot handle maps, terminating\n", name);
+    fclose(inp);
+    header_free(h);
+    exit(1);
+  }
   nob = header_get_nob(h);
   nor = header_get_nor(h);
   len = header_get_len(h);
