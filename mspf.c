@@ -1,5 +1,5 @@
 /*
- * $Id: mspf.c,v 1.14 2003/06/21 13:19:13 jon Exp $
+ * $Id: mspf.c,v 1.15 2004/02/21 08:57:44 jon Exp $
  *
  * Function to spin some vectors under multiple generators
  * using intermediate files in a temporary directory.
@@ -85,6 +85,7 @@ unsigned int spin(const char *in, const char *out, const char *dir,
   char *name_echelised = NULL;
   const char *tmp = tmp_name();
   unsigned int prime, nob, noc, nor, len, max_rows, d, i, clean_nor;
+  unsigned int elts_per_word;
   unsigned int **rows1, **rows2;
   int *map;
   grease_struct grease;
@@ -220,6 +221,7 @@ unsigned int spin(const char *in, const char *out, const char *dir,
     cleanup_all(NULL, argc, files, echelised, name_echelised);
     exit(1);
   }
+  (void)get_mask_and_elts(nob, &elts_per_word);
   while (nor < noc && nor < noc && unfinished(gens, argc, nor)) {
     unsigned int rows_to_do = nor - gen->nor;
     unsigned int k, old_nor = nor;
@@ -228,6 +230,7 @@ unsigned int spin(const char *in, const char *out, const char *dir,
     while (k < rows_to_do) {
       unsigned int stride = (k + max_rows <= rows_to_do) ? max_rows : rows_to_do - k;
       unsigned int step = (nor > max_rows) ? max_rows : nor;
+      unsigned int elt_index = noc, index, i;
       /* We place the rows to multiply into rows2 */
       /* and produce the product in rows1 */
       /* Seek to correct place in echelised basis */
@@ -242,8 +245,17 @@ unsigned int spin(const char *in, const char *out, const char *dir,
         exit(1);
       }
       gen->base_ptr = ftello64(echelised); /* Reset the pointer into the existing basis for this generator */
-      if (0 == mul_from_store(rows2, rows1, gen->f, gen->is_map, noc, len, nob,
-                              stride, noc, prime, &grease, verbose, gen->m, name)) {
+      /* TODO: convert to use skip_mul */
+      for (i = 0; i < stride; i++) {
+        int m = map[i + gen->nor];
+        assert(m >= 0);
+        if ((unsigned int)m < elt_index) {
+          elt_index = m;
+        }
+      }
+      index = elt_index / elts_per_word;
+      if (0 == skip_mul_from_store(index, rows2, rows1, gen->f, gen->is_map, noc, len, nob,
+                                   stride, noc, prime, &grease, verbose, gen->m, name)) {
         fprintf(stderr, "%s: failed to multiply using %s, terminating\n", name, gen->m);
         cleanup_all(NULL, argc, files, echelised, name_echelised);
         exit(1);

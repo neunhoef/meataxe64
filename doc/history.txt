@@ -283,3 +283,4 @@ skew seventh
 20040131 - Echo failure message when find_nullity_onef_with_orders gets unexpected ret
 20040215 - Add skip_mul, plus general improvements to zsign
 20040217 - Improve grease_inc by gnoring the leading zero parts of the rows
+20040221 - Use skip_mul in msp and mspf

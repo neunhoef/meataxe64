@@ -1,5 +1,5 @@
 /*
- * $Id: msp.c,v 1.11 2003/06/21 13:19:13 jon Exp $
+ * $Id: msp.c,v 1.12 2004/02/21 08:57:44 jon Exp $
  *
  * Function to spin some vectors under multiple generators
  *
@@ -70,6 +70,7 @@ unsigned int spin(const char *in, const char *out,
   const header *h_in;
   header *h_out;
   unsigned int prime, nob, noc, nor, len, max_rows, d, j;
+  unsigned int elts_per_word;
   unsigned int **rows;
   int *map, *new_map;
   grease_struct grease;
@@ -181,13 +182,23 @@ unsigned int spin(const char *in, const char *out,
     cleanup(inp, argc, files);
     exit(1);
   }
+  (void)get_mask_and_elts(nob, &elts_per_word);
   while (nor < max_rows && nor < noc && unfinished(gens, argc, nor)) {
     unsigned int rows_to_do = max_rows - nor;
     unsigned int i, j = 0;
+    unsigned int elt_index = noc, index;
     /* Ensure we don't try to do too many */
     rows_to_do = (rows_to_do + gen->nor > nor) ? (nor - gen->nor) : rows_to_do;
-    if (0 == mul_from_store(rows + gen->nor, rows + nor, gen->f, gen->is_map, noc, len, nob,
-                            rows_to_do, noc, prime, &grease, verbose, gen->m, name)) {
+    for (i = 0; i < rows_to_do; i++) {
+      int m = map[i + gen->nor];
+      assert(m >= 0);
+      if ((unsigned int)m < elt_index) {
+        elt_index = m;
+      }
+    }
+    index = elt_index / elts_per_word;
+    if (0 == skip_mul_from_store(index, rows + gen->nor, rows + nor, gen->f, gen->is_map, noc, len, nob,
+                                 rows_to_do, noc, prime, &grease, verbose, gen->m, name)) {
       fprintf(stderr, "%s: failed to multiply using %s, terminating\n", name, gen->m);
       cleanup(NULL, argc, files);
       exit(1);
