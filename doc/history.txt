@@ -74,3 +74,7 @@
 20020122 - debug zsums problem
 20020123 - work on vector permute
 20020125 - solve multipl McL irreds, bug in the scripts
+20020126 - add esad and zsad
+20020202 - add algebraic conjugate
+20020203 - add skew square
+20020205 - add split_with_vector

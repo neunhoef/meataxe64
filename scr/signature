@@ -1,5 +1,5 @@
 #
-# $Id: signature,v 1.4 2002/01/14 23:43:45 jon Exp $
+# $Id: signature,v 1.5 2002/02/05 19:50:56 jon Exp $
 #
 # Script to give a signature for a representation
 #
@@ -68,5 +68,5 @@ for i in 1 2 3 4 5 6 7 8 9 10; do
     fi
   done
 done
-rm -f tmp*
+rm -f ${tmp}*
 exit 0

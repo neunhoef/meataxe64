@@ -1,5 +1,5 @@
 /*
- * $Id: elements.c,v 1.12 2001/11/07 22:35:27 jon Exp $
+ * $Id: elements.c,v 1.13 2002/02/05 19:50:56 jon Exp $
  *
  * Element manipulation for meataxe
  *
@@ -12,7 +12,7 @@
 #include "utils.h"
 #include "primes.h"
 
-static prime_ops prime_operations = { NULL, NULL, NULL, NULL};
+static prime_ops prime_operations = { NULL, NULL, NULL, NULL, NULL, NULL, NULL};
 static int inited = 0;
 
 int get_element_from_text(FILE *fp, unsigned int nod,

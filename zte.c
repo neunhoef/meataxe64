@@ -1,5 +1,5 @@
 /*
- * $Id: zte.c,v 1.1 2001/12/01 10:46:02 jon Exp $
+ * $Id: zte.c,v 1.2 2002/02/05 19:50:56 jon Exp $
  *
  * Tensor two matrices to give a third
  *
@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "endian.h"
 #include "memory.h"
 #include "utils.h"
 #include "te.h"
@@ -36,6 +37,7 @@ int main(int argc, const char * const argv[])
   if (5 == argc) {
     memory = strtoul(argv[4], NULL, 0);
   }
+  endian_init();
   memory_init(name, memory);
   if (0 == tensor(in1, in2, out, name)) {
     exit(1);

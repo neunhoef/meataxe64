@@ -1,5 +1,5 @@
 #
-# $Id: split,v 1.4 2002/01/26 00:36:06 jon Exp $
+# $Id: split,v 1.5 2002/02/05 19:50:56 jon Exp $
 #
 # Script to split a representation
 #
@@ -85,7 +85,7 @@ ret=$?
 if [ 0 -ne $ret ]; then
   echo Cannot compute order of $b
   rm -f ${tmp}*
-  exit 1
+  exit 254
 fi
 ok=0
 memory=200

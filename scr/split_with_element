@@ -1,5 +1,5 @@
 #
-# $Id: split_with_element,v 1.8 2002/01/26 00:36:06 jon Exp $
+# $Id: split_with_element,v 1.9 2002/02/05 19:50:56 jon Exp $
 #
 # Script to split a representation given a particular element to work from
 #
@@ -88,7 +88,6 @@ if [ $count -gt 5 ]; then
   echo Restricting span to 5 vectors
   count=5
 fi
-let vectors=$q**$count-1
 #echo Considering $vectors vectors
 if [ 0 -eq $c ]; then
   zspan ${tmp}.2 ${tmp}.3 $count
@@ -96,9 +95,11 @@ if [ 0 -eq $c ]; then
     rm -f ${tmp}*
     exit 1
   fi
+  vectors=`znor ${tmp}.3`
 else
 # Only consider one vector when called from irred
   cp ${tmp}.2 ${tmp}.3
+  vectors=1
 fi
 vector=0;
 while [ $vector -lt $vectors ]; do

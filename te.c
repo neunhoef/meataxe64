@@ -1,5 +1,5 @@
 /*
- * $Id: te.c,v 1.3 2002/01/06 16:35:48 jon Exp $
+ * $Id: te.c,v 1.4 2002/02/05 19:50:56 jon Exp $
  *
  * Function to tensor two matrices to give a third
  *
@@ -44,7 +44,6 @@ int tensor(const char *m1, const char *m2, const char *m3, const char *name)
   assert(NULL != m2);
   assert(NULL != m3);
   assert(NULL != name);
-  endian_init();
   if (0 == open_and_read_binary_header(&inp1, &h1, m1, name) ||
       0 == open_and_read_binary_header(&inp2, &h2, m2, name)) {
     if (NULL != h1) {
@@ -130,7 +129,7 @@ int tensor(const char *m1, const char *m2, const char *m3, const char *name)
         offset += noc2;
       }
       if (0 == endian_write_row(outp, row_out, len3)) {
-        fprintf(stderr, "%s: cannot read some of %s or %s, terminating\n", name, m1, m2);
+        fprintf(stderr, "%s: cannot write some of %s, terminating\n", name, m3);
         fclose(outp);
         return 0;
       }

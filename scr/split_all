@@ -1,5 +1,5 @@
 #
-# $Id: split_all,v 1.4 2002/01/26 00:36:06 jon Exp $
+# $Id: split_all,v 1.5 2002/02/05 19:50:56 jon Exp $
 #
 # Script to split a representation completely
 #
@@ -31,12 +31,11 @@ res=`grep dimension poo 2>/dev/null`
 rm poo
 #echo res = $res, ret = $ret
 if [ 1 -eq $ret ]; then
+  echo "parameter problem with module $a $b"
   exit 1
 elif [ 255 -eq $ret ]; then
   echo "irreducible module $a $b found"
   new_irred $a $b
-  ret=$?
-# echo new_irred returns $ret
   exit 0
 elif [ 254 -eq $ret ]; then
   echo "unable to split module $a $b (unexpected)"

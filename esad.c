@@ -1,0 +1,67 @@
+/*
+ * $Id: esad.c,v 1.1 2002/02/05 19:50:56 jon Exp $
+ *
+ * Exploded scaled add
+ *
+ * Three arguments
+ * 1) First addend dir
+ * 2) Second addend dir
+ * 3) Result dir
+ *
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "add.h"
+#include "endian.h"
+#include "files.h"
+#include "map.h"
+#include "memory.h"
+#include "utils.h"
+
+static const char *name = "esad";
+
+static void esad_usage(void)
+{
+  fprintf(stderr, "%s: usage: %s <dir1> <dir2> <dir3> <scalar>\n", name, name);
+}
+
+int main(int argc,  const char *const argv[])
+{
+  unsigned int col_pieces1, row_pieces1;
+  unsigned int col_pieces2, row_pieces2;
+  unsigned int i, j, scalar;
+  const char **names1, **names2, **names3;
+  memory_init(name, 0);
+  endian_init();
+  /******  First check the number of input arguments  */
+  if (argc != 5) {
+    esad_usage();
+    exit(1);
+  }
+  scalar = strtoul(argv[4], NULL, 0);
+  /* Now get a look at the map file */
+  input_map(name, argv[1], &col_pieces1, &row_pieces1, &names1);
+  input_map(name, argv[2], &col_pieces2, &row_pieces2, &names2);
+  if (row_pieces1 != row_pieces2 || col_pieces1 != col_pieces2) {
+    fprintf(stderr, "%s: incompatible explosion points, terminating\n", name);
+    exit(1);
+  }
+  /* Now we have all relevant names */
+  /* We could now check for addition compatibility */
+  /* Or we could assume the user has got it right, */
+  /* and only fail when a spawned add fails */
+  /* Now create the output names */
+  output_map(name, argv[3], col_pieces1, row_pieces1, &names3);
+  /* Now loop doing the adds */
+  for (i = 0; i < row_pieces1; i++) {
+    for (j = 0; j < col_pieces1; j++) {
+      scaled_add(pathname(argv[1], names1[i * col_pieces1 + j]),
+                 pathname(argv[2], names2[i * col_pieces1 + j]),
+                 pathname(argv[3], names3[i * col_pieces1 + j]),
+                 scalar, name);
+    }
+  }
+  return 0;
+}

@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.45 2002/01/26 00:36:05 jon Exp $
+# $Id: makefile,v 1.46 2002/02/05 19:50:56 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -16,6 +16,7 @@ EID_TARGET=	eid
 EIM_TARGET=	eim
 EIP_TARGET=	eip
 EMU_TARGET=	emu
+ESAD_TARGET=	esad
 ESID_TARGET=	esid
 ETR_TARGET=	etr
 MON_TARGET=	monst
@@ -26,6 +27,7 @@ ZAD_TARGET=	zad
 ZBASE_TARGET=	zbase
 ZCHAR_TARGET=	zchar
 ZCHECK_TARGET=	zcheck
+ZCONJ_TARGET=	zconj
 ZCT_TARGET=	zct
 ZCV_TARGET=	zcv
 ZDIAG_TARGET=	zdiag
@@ -48,10 +50,12 @@ ZNS_TARGET=	zns
 ZNSF_TARGET=	znsf
 ZQF_TARGET=	zqf
 ZQS_TARGET=	zqs
+ZSAD_TARGET=	zsad
 ZSB_TARGET=	zsb
 ZSEL_TARGET=	zsel
 ZSID_TARGET=	zsid
 ZSL_TARGET=	zsl
+ZSKSQ_TARGET=	zsksq
 ZSB_TARGET=	zsb
 ZSP_TARGET=	zsp
 ZSPAN_TARGET=	zspan
@@ -70,6 +74,7 @@ EID_MODULES=	eid elements endian exrows files header map memory primes rows util
 EIM_MODULES=	eim elements endian exrows files header map memory primes read utils write
 EIP_MODULES=	eip elements endian exrows files header map memory primes read rows utils write
 EMU_MODULES=	command emu files map memory system utils
+ESAD_MODULES=	add esad endian files header map memory primes read rows system utils write
 ESID_MODULES=	elements endian esid exrows files header map memory primes rows utils write
 ETR_MODULES=	elements endian etr files header map matrix memory primes read tra utils write
 MON_MODULES=	elements endian exrows files header map memory mmat mop mtx primes rows utils write
@@ -80,6 +85,7 @@ ZAD_MODULES=	ad add elements endian header memory primes read rows utils write
 ZBASE_MODULES=	clean elements endian grease header matrix memory primes read rnf rows system utils write zbase
 ZCHAR_MODULES=	endian header primes read utils zchar
 ZCHECK_MODULES=	elements endian header memory primes read utils zcheck
+ZCONJ_MODULES=	conj elements endian header memory primes read utils write zconj
 ZCT_MODULES=	count ct elements endian header memory primes read utils
 ZCV_MODULES=	elements endian header ip primes read utils write
 ZDIAG_MODULES=	elements endian header memory primes read rows utils write zdiag
@@ -102,9 +108,11 @@ ZQS_MODULES=	clean elements endian grease header matrix memory primes qs read ro
 ZRE_MODULES=	elements endian header memory primes read utils write zre
 ZRN_MODULES=	clean elements endian grease header matrix memory primes read rn rows utils zrn
 ZRNF_MODULES=	clean elements endian grease header matrix memory primes read rnf rows system utils write zrnf
+ZSAD_MODULES=	add elements endian header memory primes read rows utils write zsad
 ZSB_MODULES=	clean elements endian grease header matrix memory mul primes read rows sb utils write zsb
 ZSEL_MODULES=	endian header memory primes read utils write zse
 ZSID_MODULES=	ident elements endian header memory primes rows utils write zsid
+ZSKSQ_MODULES=	elements endian header matrix memory powers primes read rows utils write zsksq
 ZSL_MODULES=	add elements endian files grease header matrix memory mul primes read rows slave system utils write
 ZSP_MODULES=	clean elements endian grease header matrix memory mul primes read rows sp utils write zsp
 ZSPAN_MODULES=	elements endian header matrix memory primes read rows utils write zspan
@@ -116,7 +124,62 @@ ZTRACE_MODULES=	elements endian header memory primes read rows utils ztrace
 ZVP_MODULES=	elements endian grease header matrix memory mul primes read rows vp utils write zvp
 ZWORDS_MODULES=	elements endian grease header matrix memory mul primes read rows utils write zwords
 
-MODULES=	$(DTOU_MODULES) $(EAD_MODULES) $(ECT_MODULES) $(EID_MODULES) $(EIM_MODULES) $(EIP_MODULES) $(EMU_MODULES) $(ESID_MODULES) $(ETR_MODULES) $(MON_MODULES) $(SNS_MODULES) $(SRN_MODULES) $(STOP_MODULES) $(ZAD_MODULES) $(ZBASE_MODULES) $(ZCHAR_MODULES) $(ZCHECK_MODULES) $(ZCT_MODULES) $(ZCV_MODULES) $(ZDIAG_MODULES) $(ZDIFF_MODULES) $(ZEX_MODULES) $(ZQE_MODULES) $(ZID_MODULES) $(ZIP_MODULES) $(ZIV_MODULES) $(ZJOIN_MODULES) $(ZMU_MODULES) $(ZNOC_MODULES) $(ZNOR_MODULES) $(ZNS_MODULES) $(ZNSF_MODULES) $(ZPR_MODULES) $(ZPRIME_MODULES) $(ZQF_MODULES) $(ZQS_MODULES) $(ZRE_MODULES) $(ZRN_MODULES) $(ZRNF_MODULES) $(ZSEL_MODULES) $(ZSID_MODULES) $(ZSL_MODULES) $(ZSP_MODULES) $(ZSPAN_MODULES) $(ZSS_MODULES) $(ZSUMS_MODULES) $(ZTE_MODULES) $(ZTR_MODULES) $(ZTRACE_MODULES) $(ZVP_MODULES) $(ZWORDS_MODULES)
+MODULES=	$(DTOU_MODULES) \
+	$(EAD_MODULES) \
+	$(ECT_MODULES) \
+	$(EID_MODULES) \
+	$(EIM_MODULES) \
+	$(EIP_MODULES) \
+	$(EMU_MODULES) \
+	$(ESAD_MODULES) \
+	$(ESID_MODULES) \
+	$(ETR_MODULES) \
+	$(MON_MODULES) \
+	$(SNS_MODULES) \
+	$(SRN_MODULES) \
+	$(STOP_MODULES) \
+	$(ZAD_MODULES) \
+	$(ZBASE_MODULES) \
+	$(ZCHAR_MODULES) \
+	$(ZCHECK_MODULES) \
+	$(ZCONJ_MODULES) \
+	$(ZCT_MODULES) \
+	$(ZCV_MODULES) \
+	$(ZDIAG_MODULES) \
+	$(ZDIFF_MODULES) \
+	$(ZEX_MODULES) \
+	$(ZFE_MODULES) \
+	$(ZID_MODULES) \
+	$(ZIP_MODULES) \
+	$(ZIV_MODULES) \
+	$(ZJOIN_MODULES) \
+	$(ZMU_MODULES) \
+	$(ZNOC_MODULES) \
+	$(ZNOR_MODULES) \
+	$(ZNS_MODULES) \
+	$(ZNSF_MODULES) \
+	$(ZPR_MODULES) \
+	$(ZPRIME_MODULES) \
+	$(ZQF_MODULES) \
+	$(ZQS_MODULES) \
+	$(ZRE_MODULES) \
+	$(ZRN_MODULES) \
+	$(ZRNF_MODULES) \
+	$(ZSAD_MODULES) \
+	$(ZSB_MODULES) \
+	$(ZSEL_MODULES) \
+	$(ZSID_MODULES) \
+	$(ZSKSQ_MODULES) \
+	$(ZSL_MODULES) \
+	$(ZSP_MODULES) \
+	$(ZSPAN_MODULES) \
+	$(ZSS_MODULES) \
+	$(ZSUMS_MODULES) \
+	$(ZTE_MODULES) \
+	$(ZTR_MODULES) \
+	$(ZTRACE_MODULES) \
+	$(ZVP_MODULES) \
+	$(ZWORDS_MODULES)
 
 include dirs.txt
 
@@ -157,6 +220,9 @@ TARGET:=DTOU
 include targets.txt
 
 TARGET:=EAD
+include targets.txt
+
+TARGET:=ESAD
 include targets.txt
 
 TARGET:=ECT
@@ -202,6 +268,9 @@ TARGET:=ZCHAR
 include targets.txt
 
 TARGET:=ZCHECK
+include targets.txt
+
+TARGET:=ZCONJ
 include targets.txt
 
 TARGET:=ZCT
@@ -270,6 +339,9 @@ include targets.txt
 TARGET:=ZRNF
 include targets.txt
 
+TARGET:=ZSAD
+include targets.txt
+
 TARGET:=ZSB
 include targets.txt
 
@@ -277,6 +349,9 @@ TARGET:=ZSEL
 include targets.txt
 
 TARGET:=ZSID
+include targets.txt
+
+TARGET:=ZSKSQ
 include targets.txt
 
 TARGET:=ZSL

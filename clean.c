@@ -1,5 +1,5 @@
 /*
- * $Id: clean.c,v 1.11 2001/12/27 01:17:12 jon Exp $
+ * $Id: clean.c,v 1.12 2002/02/05 19:50:56 jon Exp $
  *
  * Cleaning and echilisation for meataxe
  *
@@ -17,7 +17,7 @@
 #include "rows.h"
 #include "utils.h"
 
-static prime_ops prime_operations = {NULL, NULL, NULL, NULL};
+static prime_ops prime_operations = {NULL, NULL, NULL, NULL, NULL, NULL, NULL};
 
 static row_ops row_operations = {NULL, NULL, NULL, NULL, NULL, NULL};
 
