@@ -1,8 +1,7 @@
 Worry about isspace failure (can't detect \n) (still occurs on RH 7.2) ctype is buggered
 Worry about return (NULL == s) code generation error
 Add in use of put_element_to_row_with_params and put_element_to_clean_row_with_params *
-Documentation changes for proj_base, sub_quot, singular_vector, singular_vector_in_space, zsing, zsign
-Use memory size from parser for all executables
+Documentation changes for proj_base, sub_quot
 Read memory size from environment
 Use memory size from argument parser
 Think about better use of grease for ztmu

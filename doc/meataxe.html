@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.35 2002/10/13 14:30:24 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.36 2002/10/13 14:34:58 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -4637,7 +4637,6 @@ dimension increases.
 <li><a href="#conjugate">conjugate</a></li>
 <li><a href="#conjugatef">conjugatef</a></li>
 <li><a href="#cut_cols">cut_cols</a></li>
-<li><a href="#definite">definite</a></li>
 <li><a href="#dual">dual</a></li>
 <li><a href="#dual_subspace">dual_subspace</a></li>
 <li><a href="#dual_with_order">dual_with_order</a></li>
@@ -4659,7 +4658,6 @@ dimension increases.
 <li><a href="#find_restricted_nullity_one_with_orders">find_restricted_nullity_one_with_orders</a></li>
 <li><a href="#find_restricted_nullity_onef_with_orders">find_restricted_nullity_onef_with_orders</a></li>
 <li><a href="#functions">functions</a></li>
-<li><a href="#hyperbolic">hyperbolic</a></li>
 <li><a href="#indicate">indicate</a></li>
 <li><a href="#indicate_with_element">indicate_with_element</a></li>
 <li><a href="#indicate_with_orders">indicate_with_orders</a></li>
@@ -5229,44 +5227,6 @@ Purpose: Discard columns
 </table>
 Commentary: This script is part of the mechanism for computing
 intersections. It is not expected to be invoked directly by users.
-</li>
-<li>
-<h3><a name="definite">definite</a></h3>
-Purpose: Check a quadratic form on a two space for being definite
-<table>
-<thead>
-<td valign=top>Parameters:</td>
-</thead>
-<tr>
-<td valign=top>1</td><td valign=top>Memory available</td>
-</tr>
-<tr>
-<td valign=top>2</td><td valign=top>The rows of the space</td>
-</tr>
-<tr>
-<td valign=top>2</td><td valign=top>The quadratic form</td>
-</tr>
-<tr>
-<td valign=top>Textual output on stdout:</td><td valign=top>None</td>
-</tr>
-</table>
-<table>
-<thead>Return codes:</thead>
-<tr>
-<td valign=top>0</td><td valign=top>Space is definite</td>
-</tr>
-<tr>
-<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
-</tr>
-<tr>
-<td valign=top>254</td><td valign=top>Space does not have dimension 2</td>
-</tr>
-<tr>
-<td valign=top>255</td><td valign=top>Space is hyperbolic</td>
-</tr>
-</table>
-Commentary: This script is part of the mechanism for computing
-orthogonal group signs in even dimensions
 </li>
 <li>
 <h3><a name="dual">dual</a></h3>
@@ -6225,45 +6185,6 @@ Purpose: A set of functions used as subroutines by other scripts
 </tr>
 </table>
 Commentary: Contains no user servicable parts
-</li>
-<li>
-<h3><a name="hyperbolic">hyperbolic</a></h3>
-Purpose: Check a quadratic form on a two space for being hyperbolic
-<table>
-<thead>
-<td valign=top>Parameters:</td>
-</thead>
-<tr>
-<td valign=top>1</td><td valign=top>Memory available</td>
-</tr>
-<tr>
-<td valign=top>2</td><td valign=top>The rows of the space</td>
-</tr>
-<tr>
-<td valign=top>2</td><td valign=top>The quadratic form</td>
-</tr>
-<tr>
-<td valign=top>Textual output on stdout:</td><td valign=top>None</td>
-</tr>
-</table>
-<table>
-<thead>Return codes:</thead>
-<tr>
-<td valign=top>0</td><td valign=top>Space is hyperbolic</td>
-</tr>
-<tr>
-<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
-</tr>
-<tr>
-<td valign=top>254</td><td valign=top>Space does not have dimension 2</td>
-</tr>
-<tr>
-<td valign=top>255</td><td valign=top>Space is definite</td>
-</tr>
-</table>
-Commentary: This script is part of the mechanism for computing
-orthogonal group signs in even dimensions. It works by calling <a
-href="#definite">definite</a> and inverting the answer.
 </li>
 <li>
 <h3><a name="indicate">indicate</a></h3>
