@@ -1,5 +1,5 @@
 /*
- * $Id: mul.c,v 1.33 2003/03/23 19:35:24 jon Exp $
+ * $Id: mul.c,v 1.34 2004/02/15 10:27:17 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
@@ -422,10 +422,10 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
 
 #define LAZY_GREASE 1
 
-int mul_from_store(unsigned int **rows1, unsigned int **rows3,
-                   FILE *inp, int is_map, unsigned int noc, unsigned int len,
-                   unsigned int nob, unsigned int nor, unsigned int noc_o, unsigned int prime,
-                   grease grease, int verbose, const char *m, const char *name)
+int skip_mul_from_store(unsigned int offset, unsigned int **rows1, unsigned int **rows3,
+                        FILE *inp, int is_map, unsigned int noc, unsigned int len,
+                        unsigned int nob, unsigned int nor, unsigned int noc_o, unsigned int prime,
+                        grease grease, int verbose, const char *m, const char *name)
 {
   long long pos;
   unsigned int i, j, l;
@@ -456,8 +456,12 @@ int mul_from_store(unsigned int **rows1, unsigned int **rows3,
     }
   } else {
     assert(0 != len); /* len may have come from m, and hence would be zero for a map */
+    /* Now skip rows if necessary */
+    for (i = 0; i < offset; i += 1) {
+      endian_skip_row(inp, len);
+    }
     /* Then multiply */
-    for (i = 0; i < noc; i += grease->level) {
+    for (i = offset; i < noc; i += grease->level) {
       unsigned int size = (grease->level + i <= noc) ? grease->level : noc - i;
       unsigned int width = size * nob;
       unsigned int word_offset, bit_offset, mask;
@@ -480,7 +484,7 @@ int mul_from_store(unsigned int **rows1, unsigned int **rows3,
       for (j = 0; j < nor; j++) {
         unsigned int *row1 = rows1[j];
         unsigned int elt = get_elements_from_row(row1 + word_offset, width, nob, bit_offset, mask);
-        if (0 == i) {
+        if (offset == i) {
           row_init(rows3[j], len);
         }
         if (0 != elt) {
@@ -495,6 +499,15 @@ int mul_from_store(unsigned int **rows1, unsigned int **rows3,
     return 0;
   }
   return 1;
+}
+
+int mul_from_store(unsigned int **rows1, unsigned int **rows3,
+                   FILE *inp, int is_map, unsigned int noc, unsigned int len,
+                   unsigned int nob, unsigned int nor, unsigned int noc_o, unsigned int prime,
+                   grease grease, int verbose, const char *m, const char *name)
+{
+  return skip_mul_from_store(0, rows1, rows3, inp, is_map, noc, len,
+                             nob, nor, noc_o, prime, grease, verbose, m, name);
 }
 
 /* If parameter 1 is a map, then then map is in rows1[0] */

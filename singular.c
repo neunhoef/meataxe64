@@ -1,5 +1,5 @@
 /*
- * $Id: singular.c,v 1.5 2003/02/24 18:02:43 jon Exp $
+ * $Id: singular.c,v 1.6 2004/02/15 10:27:17 jon Exp $
  *
  * Function to find a singular vector, given a quadratic form
  *
@@ -27,7 +27,7 @@ int singular_vector(unsigned int **rows, unsigned int **work,
                     unsigned int *out, unsigned int *out_num, FILE *formp,
                     unsigned int noc, unsigned int nor, unsigned int nob,
                     unsigned int len, unsigned int prime, grease grease,
-                    const char *form, const char *name)
+                    unsigned int index, const char *form, const char *name)
 {
   unsigned int products[3][3], vector[3];
   unsigned int i, j, power = 1;
@@ -51,8 +51,8 @@ int singular_vector(unsigned int **rows, unsigned int **work,
   if (nor >= 3) {
     nor = 3;
   }
-  if (0 == mul_from_store(rows, work, formp, 0, noc, len, nob, nor, noc, prime,
-                          grease, 0, form, name)) {
+  if (0 == skip_mul_from_store(index, rows, work, formp, 0, noc, len, nob, nor, noc, prime,
+                               grease, 0, form, name)) {
     return 1;
   }
   for (i = 0; i < nor; i++) {
@@ -236,7 +236,7 @@ int singular(const char *space, const char *form, const char *out, const char *n
   }
   fclose(inp1);
   res = singular_vector(mat, mat + 3, out_row, &out_num, inp2,
-                        nor, nor, nob, len, prime, &grease, form, name);
+                        nor, nor, nob, len, prime, &grease, 0, form, name);
   matrix_free(mat);
   fclose(inp2);
   if (0 == res || 255 == res) {

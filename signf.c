@@ -1,5 +1,5 @@
 /*
- * $Id: signf.c,v 1.1 2003/12/31 16:46:51 jon Exp $
+ * $Id: signf.c,v 1.2 2004/02/15 10:27:17 jon Exp $
  *
  * Function compute the orthogonal group sign
  *
@@ -134,6 +134,7 @@ int sign(const char *qform, const char *bform, const char *dir, const char *name
   }
   /* Now set up the identity */
   row_init(mat[0], len);
+  /* TODO: Reflect the identity */
   for (n = 0; n < nor; n++) {
     put_element_to_row(nob, n, mat[0], 1);
     posns[n] = ftello64(idp);
@@ -173,8 +174,10 @@ int sign(const char *qform, const char *bform, const char *dir, const char *name
       free(products);
       return 1;
     }
+    assert(nor >= 3);
     res = singular_vector(mat, mat + 3, sing_row1, &out_num, qinp,
-                          noc, 3, nob, len, prime, &grease, qform, name);
+                          noc, 3, nob, len, prime, &grease, 0, qform, name);
+    /* TODO: to use nor - 3 above */
     if (0 != res) {
       fprintf(stderr, "%s: cannot find a singular vector, terminating\n", name);
       fclose(binp);
@@ -186,6 +189,7 @@ int sign(const char *qform, const char *bform, const char *dir, const char *name
       return 1;
     }
     assert(nor > 3);
+    /* TODO: Use shuffle */
     fseeko64(idp, posns[nor - 1], SEEK_SET);
     errno = 0;
     if (0 == endian_read_row(idp, mat[0], len)) {
@@ -216,6 +220,7 @@ int sign(const char *qform, const char *bform, const char *dir, const char *name
       free(posns);
       return 1;
     }
+    /* TODO: use skip_mul_from_store */
     if (0 == mul_from_store(&sing_row1, &sing_row2, binp, 0, noc, len, nob, 1, noc, prime,
                             &grease, 0, bform, name)) {
       fclose(binp);
@@ -335,6 +340,7 @@ int sign(const char *qform, const char *bform, const char *dir, const char *name
       }
       n++;
     }
+    /* TODO: Use shuffle */
     /* Now remove mat[res] as this isn't a null vector */
     assert(nor > 3);
     fseeko64(idp, posns[nor - 2], SEEK_SET);
@@ -385,8 +391,9 @@ int sign(const char *qform, const char *bform, const char *dir, const char *name
     free(posns);
     return 1;
   }
+  /* TODO: Use the right vectors */
   res = singular_vector(mat, mat + 2, sing_row1, &out_num, qinp,
-                        noc, nor, nob, len, prime, &grease, qform, name);
+                        noc, nor, nob, len, prime, &grease, 0, qform, name);
   fclose(idp);
   (void)remove(id_name);
   matrix_free(mat);

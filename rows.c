@@ -1,5 +1,5 @@
 /*
- * $Id: rows.c,v 1.20 2003/07/20 18:13:53 jon Exp $
+ * $Id: rows.c,v 1.21 2004/02/15 10:27:17 jon Exp $
  *
  * Row manipulation for meataxe
  *
@@ -81,39 +81,38 @@ static void row_inc_2(const unsigned int *row1,
                       unsigned int *row2, unsigned int len)
 {
   if (len > 10) {
+    const unsigned int *rowa = row1 + len, *rowb = row1;
     /* Search for first non-zero */
-    while (len > 0) {
+    while (row1 < rowa) {
       if (0 != *row1) {
+        unsigned int len1 = row1 - rowb;
+        len -= len1;
+        row2 += len1;
         row_inc_2_sub(row1, row2, len);
         return;
       }
       row1++;
-      row2++;
-      len--;
     }
   } else {
     row_inc_2_sub(row1, row2, len);
   }
 }
 
-static unsigned int prod_table_2[256];
+static unsigned char prod_table_2[0x10000];
 
 static unsigned int row_product_2(const unsigned int *row1, const unsigned int *row2, unsigned int len)
 {
-  unsigned int res = 0;
-  while (len > 0) {
+  unsigned char res = 0;
+  const unsigned int *row = row1 + len;
+  while (row1 < row) {
     unsigned int a = *row1;
     if (0 != a) {
       unsigned int b = *row2;
       if (0 != b) {
         unsigned int prod = a & b;
-        while (0 != prod) {
-          res ^= prod_table_2[(prod & 0xff)];
-          prod >>= 8;
-        }
+        res ^= prod_table_2[((prod ^ (prod >> 16)) & 0xffff)];
       }
     }
-    len--;
     row1++;
     row2++;
   }
@@ -911,12 +910,12 @@ int rows_init(unsigned int prime, row_opsp ops)
     ops->scaler = NULL; /* Should never be called */
     ops->scaler_in_place = NULL; /* Should never be called */
     ops->product = &row_product_2;
-    for (i = 0; i < 256; i++) {
-      unsigned int prod = 0;
+    for (i = 0; i < 0x10000; i++) {
+      unsigned char prod = 0;
       unsigned int j = i;
       while (0 != j) {
-        prod ^= (j & 1);
-        j >>= 1;
+        prod ^= 1;
+        j &= (j - 1);
       }
       prod_table_2[i] = prod;
     }

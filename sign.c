@@ -1,5 +1,5 @@
 /*
- * $Id: sign.c,v 1.7 2003/12/31 16:46:51 jon Exp $
+ * $Id: sign.c,v 1.8 2004/02/15 10:27:17 jon Exp $
  *
  * Function compute the orthogonal group sign
  *
@@ -25,12 +25,30 @@
 #include "utils.h"
 #include "write.h"
 
+#define shuffle_rows
+
+#ifdef shuffle_rows
+static void shuffle(unsigned int from, unsigned int to, unsigned int **mat)
+{
+  unsigned int i;
+  unsigned int *row = mat[to];
+  assert(from <= to);
+  for (i = to; i > from; i--) {
+    mat[i] = mat[i - 1];
+  }
+  mat[from] = row;
+}
+#endif
+
 int sign(const char *qform, const char *bform, const char *name)
 {
   FILE *qinp = NULL, *binp = NULL;
   const header *h_inq, *h_inb;
   unsigned int prime, nob, nor, noc, len, n, **mat;
-  unsigned int *sing_row1, *sing_row2, *products, *row, out_num;
+  unsigned int *sing_row1, *sing_row2, *products, out_num, start = 0, elts_per_word;
+#ifndef shuffle_rows
+  unsigned int *row;
+#endif
   int res;
   grease_struct grease;
   prime_ops prime_operations;
@@ -92,9 +110,13 @@ int sign(const char *qform, const char *bform, const char *name)
     exit(2);
   }
   (void)grease_level(prime, &grease, n);
+  if (grease.level > 1) {
+    grease.level = 1;
+  }
   primes_init(prime, &prime_operations);
   rows_init(prime, &row_operations);
   grease_init(&row_operations, &grease);
+  (void)get_mask_and_elts(nob, &elts_per_word);
   if (0 == grease_allocate(prime, len, &grease, 900)){
     fprintf(stderr, "%s: unable to allocate grease, terminating\n", name);
     fclose(qinp);
@@ -116,8 +138,24 @@ int sign(const char *qform, const char *bform, const char *name)
   products = my_malloc(nor * sizeof(unsigned int));
   while (nor > 2) {
     int start_pos = -1;
-    res = singular_vector(mat, mat + noc, sing_row1, &out_num, qinp,
-                          noc, 3, nob, len, prime, &grease, qform, name);
+    assert(nor >= 3);
+#ifndef NDEBUG
+    /* Validate that nor - 3 will be ok */
+    {
+      unsigned int pos, elt = first_non_zero(mat[start], nob, len, &pos);
+      NOT_USED(elt);
+      assert(0 != elt && nor >= 4);
+      assert(pos + 3 >= nor);
+      elt = first_non_zero(mat[start + 1], nob, len, &pos);
+      assert(0 != elt);
+      assert(pos + 3 >= nor);
+      elt = first_non_zero(mat[start + 2], nob, len, &pos);
+      assert(0 != elt);
+      assert(pos + 3 >= nor);
+    }
+#endif
+    res = singular_vector(mat + start, mat + noc, sing_row1, &out_num, qinp,
+                          noc, 3, nob, len, prime, &grease, nor - 3, qform, name);
     if (0 != res) {
       fclose(binp);
       fclose(qinp);
@@ -127,11 +165,27 @@ int sign(const char *qform, const char *bform, const char *name)
       return 1;
     }
     assert(nor > 3);
+#ifndef shuffle_rows
     row = mat[out_num];
     mat[out_num] = mat[nor - 1];
     mat[nor - 1] = row;
-    if (0 == mul_from_store(&sing_row1, &sing_row2, binp, 0, noc, len, nob, 1, noc, prime,
-                            &grease, 0, bform, name)) {
+#else
+    shuffle(start, start + out_num, mat);
+    start++;
+    assert(start < noc);
+#endif
+    /* Use skip_mul_from_store here, from offset nor - 3 */
+#ifndef NDEBUG
+    /* Validate that nor - 3 is ok */
+    {
+      unsigned int pos, elt = first_non_zero(sing_row1, nob, len, &pos);
+      NOT_USED(elt);
+      assert(0 != elt && nor >= 4);
+      assert(pos + 3 >= nor);
+    }
+#endif
+    if (0 == skip_mul_from_store(nor - 3, &sing_row1, &sing_row2, binp, 0, noc, len, nob, 1, noc, prime,
+                                 &grease, 0, bform, name)) {
       fclose(binp);
       fclose(qinp);
       matrix_free(mat);
@@ -145,12 +199,23 @@ int sign(const char *qform, const char *bform, const char *name)
       }
     }
     assert(start_pos >= 0);
-    for (n = 0; n + 1 < nor; n++) {
-      products[n] = (*row_operations.product)(mat[n] + start_pos, sing_row2 + start_pos, len - start_pos);
+    /* Compute the product of the chosen norm zero vector with the remaining vectors */
+    for (n = start; n < noc; n++) {
+      unsigned int i = (noc - 1 - n) / elts_per_word;
+#ifndef NDEBUG
+      unsigned int j;
+      for (j = 0; j < i; j++) {
+        assert(0 == mat[n][j]);
+      }
+#endif
+      if (i <= (unsigned int)start_pos) {
+        i = start_pos;
+      }
+      products[n] = (*row_operations.product)(mat[n] + i, sing_row2 + i, len - i);
     }
-    n = 0;
+    n = start;
     res = -1;
-    while (n + 1 < nor) {
+    while (n < noc) {
       if (0 != products[n]) {
         unsigned int elt = products[n];
         if (res < 0) {
@@ -174,13 +239,21 @@ int sign(const char *qform, const char *bform, const char *name)
     }
     /* Now remove mat[res] as this isn't a null vector */
     assert(nor > 3);
-    row = mat[res];
-    mat[res] = mat[nor - 2];
-    mat[nor - 2] = row;
     nor -= 2;
+#ifndef shuffle_rows
+    row = mat[res];
+    mat[res] = mat[nor];
+    mat[nor] = row;
+#else
+    shuffle(start, res, mat);
+    start++;
+    assert(start < noc);
+    assert (start + nor == noc);
+#endif
   }
-  res = singular_vector(mat, mat + noc, sing_row1, &out_num, qinp,
-                        noc, nor, nob, len, prime, &grease, qform, name);
+  assert(nor == 2 && noc == nor + start);
+  res = singular_vector(mat + start, mat + noc, sing_row1, &out_num, qinp,
+                        noc, nor, nob, len, prime, &grease, 0, qform, name);
   matrix_free(mat);
   free(products);
   fclose(binp);

@@ -281,3 +281,4 @@ skew seventh
 20040124 - Changed char row interface to use unsigned char
 20040131 - Made sure memory setting is always used
 20040131 - Echo failure message when find_nullity_onef_with_orders gets unexpected ret
+20040215 - Add skip_mul, plus general improvements to zsign

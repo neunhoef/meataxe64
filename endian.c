@@ -1,5 +1,5 @@
 /*
- * $Id: endian.c,v 1.10 2002/07/08 19:39:38 jon Exp $
+ * $Id: endian.c,v 1.11 2004/02/15 10:27:17 jon Exp $
  *
  * Endian handling for meataxe
  *
@@ -68,6 +68,11 @@ unsigned int endian_get_int(unsigned int i, const unsigned int *row)
   } else {
     return row[i];
   }
+}
+
+void endian_skip_row(FILE *fp, unsigned int len)
+{
+  fseeko64(fp, len * sizeof(unsigned int), SEEK_CUR);
 }
 
 int endian_read_row(FILE *fp, unsigned int *row, unsigned int len)
