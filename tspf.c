@@ -1,5 +1,5 @@
 /*
- * $Id: tspf.c,v 1.12 2003/06/21 21:56:57 jon Exp $
+ * $Id: tspf.c,v 1.13 2003/06/28 10:15:50 jon Exp $
  *
  * Function to spin some vectors under two generators in tensor space
  * using intermediate files in a temporary directory.
@@ -75,10 +75,11 @@ unsigned int spin(const char *in, const char *out,
   header *h_out;
   char *name_echelised = NULL;
   const char *tmp = tmp_name();
-  unsigned int prime, nob, noc, nor, noc1, nor1, noc2, nor2, len, len1, len2, len_o, max_rows, max_nor, max_len, d, clean_nor, len_in, size, limit;
+  unsigned int prime, nob, noc, nor, noc1, nor1, noc2, nor2, len, len1, len2, len_o, max_rows, d, clean_nor, len_in, size1, size2, limit;
   unsigned int **rows1, **rows2, *work_row;
-  unsigned int **rows_a1, **rows_a2, **rows_b1, **rows_b2, **mat_rows, **work_rows;
+  unsigned int **rows_a1, **rows_a2 = NULL, **rows_b1, **rows_b2 = NULL, **mat_rows, **work_rows;
   int *map;
+  int all_in_store = 1;
   grease_struct grease;
   prime_ops prime_operations;
   row_ops row_operations;
@@ -115,7 +116,6 @@ unsigned int spin(const char *in, const char *out,
   nor1 = header_get_nor(h_a1);
   noc2 = header_get_noc(h_a2);
   nor2 = header_get_nor(h_a2);
-  max_nor = (nor1 > nor2) ? nor1 : nor2;
   /* Check all matrices correspond where they should */
   /* a1, b1 to be square and same size, ditto a2 and b2 */
   /* Tensor size of a1, a2 to be # columns in seed vector */
@@ -146,7 +146,6 @@ unsigned int spin(const char *in, const char *out,
   work_rows = matrix_malloc(nor1);
   len1 = header_get_len(h_a1);
   len2 = header_get_len(h_a2);
-  max_len = (len1 > len2) ? len1 : len2;
   len = noc1 * len2; /* Space for matrix form */
   h_out = header_create(prime, nob, header_get_nod(h_in), noc, 1);
   assert(header_get_len(h_out) <= len);
@@ -172,28 +171,39 @@ unsigned int spin(const char *in, const char *out,
   primes_init(prime, &prime_operations);
   rows_init(prime, &row_operations);
   grease_init(&row_operations, &grease);
-  size = find_extent(max_nor, max_len);
-  max_rows = memory_rows(max_len, size);
-  if (max_rows < max_nor || size > 200) {
-    fprintf(stderr, "%s: failed to allocate space for one of %s, %s, %s, %s, terminating\n",
-            name, a1, b1, a2, b2);
-    cleanup(inp, f_a1, f_b1, f_a2, f_b2);
-    exit(2);
+  size1 = find_extent(nor1, len1);
+  size2 = find_extent(nor2, len2);
+  if (memory_rows(len1, size1) < nor1 || memory_rows(len2, size2) < nor2 || size1 + size2 > 400) {
+    all_in_store = 0;
+    if (memory_rows(len1, size1) < nor1 || memory_rows(len2, size2) < nor2 || size1 > 200) {
+      fprintf(stderr, "%s: failed to allocate space for one of %s, %s, %s, %s, terminating\n",
+              name, a1, b1, a2, b2);
+      cleanup(inp, f_a1, f_b1, f_a2, f_b2);
+      exit(2);
+    }
   }
-  limit = 900 - 4 * size;
-  rows_a1 = matrix_malloc(max_nor);
-  rows_b1 = matrix_malloc(max_nor);
-  rows_a2 = matrix_malloc(max_nor);
-  rows_b2 = matrix_malloc(max_nor);
+  limit = (all_in_store) ? 900 - 2 * (size1 + size2) : 900 - 2 * size1;
+  rows_a1 = matrix_malloc(nor1);
+  rows_b1 = matrix_malloc(nor1);
+  if (all_in_store) {
+    rows_a2 = matrix_malloc(nor2);
+    rows_b2 = matrix_malloc(nor2);
+  }
   gen_a.rows_1 = rows_a1;
   gen_b.rows_1 = rows_b1;
-  gen_a.rows_2 = rows_a2;
-  gen_b.rows_2 = rows_b2;
-  for (d = 0; d < max_nor; d++) {
-    rows_a1[d] = memory_pointer_offset(limit, d, max_len);
-    rows_b1[d] = memory_pointer_offset(limit + size, d, max_len);
-    rows_a2[d] = memory_pointer_offset(limit + 2 * size, d, max_len);
-    rows_b2[d] = memory_pointer_offset(limit + 3 * size, d, max_len);
+  if (all_in_store) {
+    gen_a.rows_2 = rows_a2;
+    gen_b.rows_2 = rows_b2;
+  }
+  for (d = 0; d < nor1; d++) {
+    rows_a1[d] = memory_pointer_offset(limit, d, len1);
+    rows_b1[d] = memory_pointer_offset(limit + size1, d, len1);
+  }
+  if (all_in_store) {
+    for (d = 0; d < nor2; d++) {
+      rows_a2[d] = memory_pointer_offset(limit + 2 * size1, d, len2);
+      rows_b2[d] = memory_pointer_offset(limit + 2 * size1 + size2, d, len2);
+    }
   }
   /* Now compute the maximum space for the subspace */
   max_rows = memory_rows(len, limit / 2);
@@ -298,22 +308,24 @@ unsigned int spin(const char *in, const char *out,
   /* Transpose the first group action */
   tra_in_situ(rows_a1, nor1, nob);
   tra_in_situ(rows_b1, nor1, nob);
-  /* Read the second group action */
-  errno = 0;
-  if (0 == endian_read_matrix(f_a2, rows_a2, len2, nor2) ||
-      0 == endian_read_matrix(f_b2, rows_b2, len2, nor2)) {
-    if ( 0 != errno) {
-      perror(name);
-    }
-    fprintf(stderr, "%s: unable to read %s or %s, terminating\n",
-            name, a2, b2);
-    cleanup(NULL, f_a1, f_b1, f_a2, f_b2);
-    exit(1);
-  }
   fclose(f_a1);
   fclose(f_b1);
-  fclose(f_a2);
-  fclose(f_b2);
+  if (all_in_store) {
+    /* Read the second group action */
+    errno = 0;
+    if (0 == endian_read_matrix(f_a2, rows_a2, len2, nor2) ||
+        0 == endian_read_matrix(f_b2, rows_b2, len2, nor2)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
+      fprintf(stderr, "%s: unable to read %s or %s, terminating\n",
+              name, a2, b2);
+      cleanup(NULL, f_a1, f_b1, f_a2, f_b2);
+      exit(1);
+    }
+    fclose(f_a2);
+    fclose(f_b2);
+  }
   errno = 0;
   while (nor < noc && (gen_a.nor < nor || gen_b.nor < nor)) {
     unsigned int i, rows_to_do = nor - gen->nor;
@@ -343,20 +355,34 @@ unsigned int spin(const char *in, const char *out,
       gen->base_ptr = ftello64(echelised); /* Reset the pointer into the existing basis for this generator */
       for (i = 0; i < stride; i++) {
         create_pointers(rows2[i], mat_rows, nor1, len2, prime);
-        if (0 == mul_in_store(mat_rows, gen->rows_2, work_rows,
-                              0, gen->is_map2, noc2, len2,
-                              nob, nor1, noc2, prime,
-                              &grease, gen->m1, gen->m2, name)) {
+        if (all_in_store) {
+          if (0 == mul_in_store(mat_rows, gen->rows_2, work_rows,
+                                0, gen->is_map2, noc2, len2,
+                                nob, nor1, noc2, prime,
+                                &grease, gen->m1, gen->m2, name)) {
             fprintf(stderr, "%s: failed to multiply using %s, terminating\n", name, gen->m1);
             exit(1);
+          }
+        } else {
+          if (0 == mul_from_store(mat_rows, work_rows, gen->f2, gen->is_map2, noc2, len2, nob,
+                                  nor1, noc2, prime, &grease, 0, gen->m2, name)) {
+            fprintf(stderr, "%s: failed to multiply using %s, terminating\n", name, gen->m1);
+            fclose(f_a2);
+            fclose(f_b2);
+            exit(1);
+          }
         }
         create_pointers(rows1[i], mat_rows, nor1, len2, prime);
         if (0 == mul_in_store(gen->rows_1, work_rows, mat_rows,
                               gen->is_map1, 0, noc1, len2,
                               nob, nor1, noc2, prime,
                               &grease, gen->m1, gen->m2, name)) {
-            fprintf(stderr, "%s: failed to multiply using %s, terminating\n", name, gen->m1);
-            exit(1);
+          fprintf(stderr, "%s: failed to multiply using %s, terminating\n", name, gen->m1);
+          if (0 == all_in_store) {
+            fclose(f_a2);
+            fclose(f_b2);
+          }
+          exit(1);
         }
       }
       gen->nor += stride;
@@ -369,6 +395,10 @@ unsigned int spin(const char *in, const char *out,
                           map, NULL, 0, grease.level, prime,
                           len, nob, 900, name)) {
         cleanup_tmp(echelised, name_echelised);
+        if (0 == all_in_store) {
+          fclose(f_a2);
+          fclose(f_b2);
+        }
         exit(1);
       }
       if (verbose) {
@@ -381,6 +411,10 @@ unsigned int spin(const char *in, const char *out,
     assert(gen->nor == old_nor);
     NOT_USED(old_nor);
     gen = gen->next;
+  }
+  if (0 == all_in_store) {
+    fclose(f_a2);
+    fclose(f_b2);
   }
   header_set_nor(h_out, nor);
   if (0 == open_and_write_binary_header(&outp, h_out, out, name)) {
