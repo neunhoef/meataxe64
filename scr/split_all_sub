@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: split_all_sub,v 1.2 2002/07/02 16:16:16 jon Exp $
+# $Id: split_all_sub,v 1.3 2002/07/17 12:49:37 jon Exp $
 #
 # Script to split a representation completely
 # and possibly classify the irreducibles
@@ -45,7 +45,7 @@ if [ 1 -eq $ret ]; then
 elif [ 255 -eq $ret ]; then
   echo "irreducible module $a found"
   if [ 0 -ne $classify ]; then
-    new_irred_and_indicate $a $1
+    new_irred_and_indicate 400 $a $1
   else
     new_irred 400 $a $*
   fi
