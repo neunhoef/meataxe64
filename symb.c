@@ -1,5 +1,5 @@
 /*
- * $Id%
+ * $Id: symb.c,v 1.3 2003/06/13 22:54:10 jon Exp $
  *
  * Function to compute a symmetry basis
  *
@@ -7,6 +7,7 @@
 
 #include "symb.h"
 #include "clean.h"
+#include "clean_file.h"
 #include "endian.h"
 #include "grease.h"
 #include "header.h"
@@ -19,6 +20,7 @@
 #include "rows.h"
 #include "system.h"
 #include "utils.h"
+#include "write.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -67,11 +69,11 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
                   unsigned int argc, const char * const args[],
                   const char *name)
 {
-  unsigned int prime, noc, nob, len, nor, rows_available, outer_stride, rows_per_space, total_rows, ech_size;
+  unsigned int prime, noc, nob, nod, len, nor, rows_available, outer_stride, rows_per_space, total_rows, ech_size, count;
   unsigned int i;
   int *map, *new_map;
   unsigned int **mat, **ech_rows;
-  FILE *outp, **files = NULL, *o;
+  FILE *outp, *temp, **files = NULL, *o;
   const header *h_in;
   header *h_out;
   const char *tmp = tmp_name();
@@ -82,9 +84,6 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
   row_ops row_operations;
   file_struct f, t1, t2;
   file t_in, t_out;
-  NOT_USED(out);
-  NOT_USED(outp);
-  NOT_USED(h_out);
   assert(NULL != in);
   assert(NULL != out);
   assert(NULL != dir);
@@ -95,8 +94,8 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
   name_o2 = my_malloc(i + 4);
   sprintf(name1, "%s/%s.0", dir, tmp);
   sprintf(name2, "%s/%s.1", dir, tmp); /* Swap between these */
-  sprintf(name_o1, "%s/%s.0", dir, tmp); /* For output from the first pass */
-  sprintf(name_o2, "%s/%s.1", dir, tmp); /* For output after weeding in the second pass */
+  sprintf(name_o1, "%s/%s.2", dir, tmp); /* For output from the first pass */
+  sprintf(name_o2, "%s/%s.3", dir, tmp); /* For output after weeding in the second pass */
   if (0 == spaces || 0 == space_size) {
     fprintf(stderr, "%s: no spaces expected, or zero space size, terminating\n", name);
     exit(1);
@@ -109,9 +108,21 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
   nor = header_get_nor(h_in);
   len = header_get_len(h_in);
   nob = header_get_nob(h_in);
+  nod = header_get_nod(h_in);
+  header_free(h_in);
   primes_init(prime, &prime_operations);
   rows_init(prime, &row_operations);
   grease_init(&row_operations, &grease);
+  if (0 == grease_level(prime, &grease, memory_rows(len, 100))) {
+    fprintf(stderr, "%s: failed to get grease for %s, terminating\n",
+            name, in);
+    cleanup();
+    exit(2);
+  }
+  if (0 == grease_allocate(prime, len, &grease, 900)){
+    fprintf(stderr, "%s: unable to allocate grease, terminating\n", name);
+    cleanup();
+  }
   if (0 == nor || 0 != nor % spaces) {
     fprintf(stderr, "%s: no input rows, or not a multiple of number of spaces\n", name);
     cleanup();
@@ -167,8 +178,7 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
         noc != header_get_nor(h) ||
         (prime != header_get_prime(h) && 0 == gens[i].is_map) ||
         (nob != header_get_nob(h) && 0 == gens[i].is_map) ||
-        (nob != header_get_nob(h) && 0 == gens[i].is_map) ||
-        1 != nor) {
+        (nob != header_get_nob(h) && 0 == gens[i].is_map)) {
       fprintf(stderr, "%s: incompatible parameters for %s, %s, terminating\n",
               name, in, gen_name);
       cleanup();
@@ -185,8 +195,9 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
   t2.next = &t1;
   t1.created = 0;
   t2.created = 0;
-  map = my_malloc(ech_size * sizeof(int));
-  o = fopen64("name_o1", "wb");
+  map = my_malloc((ech_size + space_size * nor) * sizeof(int));
+  errno = 0;
+  o = fopen64(name_o1, "wb");
   if (NULL == o) {
     if ( 0 != errno) {
       perror(name);
@@ -198,17 +209,17 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
   /* loop until input all consumed */
   for (i = 0; i < nor; i += outer_stride) {
     /* How many rows this time round */
-    unsigned int rows_per_loop = (i + outer_stride > nor) ? nor - i : outer_stride;
+    unsigned int spaces_per_loop = (i + outer_stride > nor) ? nor - i : outer_stride;
     unsigned int sub_nor = 1;
     unsigned int d;
     /* Remember file pointer into f.f */
     long long ptr = ftello64(f.f);
     /* Read one row into ech_rows */
-    if (0 != endian_read_row(f.f, ech_rows[0], len)) {
+    if (0 == endian_read_row(f.f, ech_rows[0], len)) {
       if ( 0 != errno) {
         perror(name);
       }
-      fprintf(stderr, "%s: failed to read rows from %s, terminating\n",
+      fprintf(stderr, "%s: failed to read row from %s, terminating\n",
               name, f.name);
       cleanup();
       exit(1);
@@ -231,7 +242,7 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
     t_in = &f; /* Point to correct input and output */
     t_out = &t1;
     while (sub_nor < space_size && unfinished(gens, argc, sub_nor)) {
-      unsigned int rows_to_do = sub_nor - gen->nor;
+      unsigned int rows_to_do = sub_nor - gen->nor, new_nor = sub_nor;
       if (0 != rows_to_do) {
         /* Remember file pointer into t_in */
         ptr = ftello64(t_in->f);
@@ -279,7 +290,16 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
           /* We produce some new rows. Note that this can all be done in memory */
           /* The rows we want are those for which new_map[x] >= 0 */
           unsigned int j, k, l = 0;
-          for (j = 0; j < rows_per_loop; j++) {
+          new_nor += d;
+          /* Update map with new row info */
+          k = sub_nor;
+          for (j = 0; j < rows_to_do; j++) {
+            if (0 <= new_map[j]) {
+              map[k++] = new_map[j];
+            }
+          }
+          assert(sub_nor + d == k);
+          for (j = 0; j < spaces_per_loop; j++) {
             /* First ignore the ones we've already done */
             if (0 == endian_read_matrix(t_in->f, mat + l, len, gen->nor)) {
               if ( 0 != errno) {
@@ -292,7 +312,7 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
             }
             /* Now get the ones we want */
             for (k = 0; k < rows_to_do; k++) {
-              if (0 != endian_read_row(t_in->f, mat[l], len)) {
+              if (0 == endian_read_row(t_in->f, mat[l], len)) {
                 if ( 0 != errno) {
                   perror(name);
                 }
@@ -315,6 +335,7 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
             cleanup();
             exit(1);
           }
+          errno = 0;
           t_out->f = fopen64(t_out->name, "wb");
           t_out->created = 1;
           if (NULL == t_out->f) {
@@ -325,8 +346,10 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
             cleanup();
             exit(1);
           }
+          /* Back to start of input rows for this time round loop */
+          fseeko64(t_in->f, ptr, SEEK_SET);
           /* Copy old space to new, adding new rows */
-          for (j = 0; j < rows_per_loop; j++) {
+          for (j = 0; j < spaces_per_loop; j++) {
             /* Read sub_nor rows from t_in */
             if (0 == endian_read_matrix(t_in->f, mat, len, sub_nor)) {
               if ( 0 != errno) {
@@ -366,6 +389,7 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
           fclose(t_out->f);
           t_in = t_in->next;
           t_out = t_out->next;
+          errno = 0;
           t_in->f = fopen64(t_in->name, "rb");
           if (NULL == t_in->f) {
             if ( 0 != errno) {
@@ -378,10 +402,12 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
         }
         free(new_map);
       }
+      gen->nor = sub_nor;
+      sub_nor = new_nor;
       gen = gen->next;
     }
     /* At this point, t_in->f has the vectors */
-    if (0 == endian_read_matrix(t_in->f, mat, len, rows_per_loop * space_size)) {
+    if (0 == endian_read_matrix(t_in->f, mat, len, spaces_per_loop * space_size)) {
       if ( 0 != errno) {
         perror(name);
       }
@@ -390,7 +416,7 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
       cleanup();
       exit(1);
     }
-    if (0 == endian_write_matrix(o, mat, len, rows_per_loop * space_size)) {
+    if (0 == endian_write_matrix(o, mat, len, spaces_per_loop * space_size)) {
       if ( 0 != errno) {
         perror(name);
       }
@@ -414,5 +440,81 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
   fclose(o);
   /* TODO: weed the output from name_o1 to name_o2 */
   /* cf base */
-  return 0; /* TODO: fix this */
+  h_out = header_create(prime, nob, nod, noc, space_size * spaces);
+  if (0 == open_and_write_binary_header(&outp, h_out, out, name)) {
+    cleanup();
+    exit(1);
+  }
+  header_free(h_out);
+  errno = 0;
+  f.f = fopen64(name_o1, "rb");
+  if (NULL == f.f) {
+    if ( 0 != errno) {
+      perror(name);
+    }
+    fprintf(stderr, "%s: cannot open %s, terminating\n", name, name_o1);
+    cleanup();
+    exit(1);
+  }
+  errno = 0;
+  temp = fopen64(name_o2, "w+b");
+  if (NULL == temp) {
+    if ( 0 != errno) {
+      perror(name);
+    }
+    fprintf(stderr, "%s: cannot open %s, terminating\n", name, name_o2);
+    cleanup();
+    exit(1);
+  }
+  count = 0;
+  for (i = 0; i < nor; i++) {
+    unsigned int d = count, j;
+    if (0 == endian_read_matrix(f.f, mat, len, space_size)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
+      fprintf(stderr, "%s: failed to read rows from %s, terminating\n",
+              name, name_o1);
+      cleanup();
+      exit(1);
+    }
+    /* Now copy to a safe place so the echelisation doesn't corrupt the original */
+    for (j = 0; j < space_size; j++) {
+      memcpy(ech_rows[j], mat[j], len * sizeof(unsigned int));
+    }
+    if (0 == clean_file(temp, &count, ech_rows, space_size, mat + space_size, total_rows - space_size,
+                        map, NULL, 0, grease.level, prime, len, nob, 900, name)) {
+      cleanup();
+      exit(1);
+    }
+    /* Now check the answer */
+    if (space_size + d == count) {
+      /* Copy */
+      if (0 == endian_write_matrix(outp, mat, len, space_size)) {
+        if ( 0 != errno) {
+          perror(name);
+        }
+        fprintf(stderr, "%s: failed to write rows to %s, terminating\n",
+                name, out);
+        cleanup();
+        exit(1);
+      }
+    } else if (count != d) {
+      /*Error */
+      fprintf(stderr, "%s: unexpected %d rows added, when expecting 0 or %d, terminating\n",
+              name, count - d, space_size);
+      cleanup();
+      exit(1);
+    }
+  }
+  /* Check the size of answer */
+  if (space_size * spaces != count) {
+    /* Error */
+    fprintf(stderr, "%s: unexpected %d spaces found, when expecting %d spaces, terminating\n",
+            name, count, spaces);
+    cleanup();
+  }
+  fclose(outp);
+  free(map);
+  return count;
 }
