@@ -1,5 +1,5 @@
 /*
- * $Id: clean.c,v 1.5 2001/11/17 10:02:43 jon Exp $
+ * $Id: clean.c,v 1.6 2001/11/18 16:43:45 jon Exp $
  *
  * Cleaning and echilisation for meataxe
  *
@@ -29,7 +29,7 @@ void clean(unsigned int **m1, unsigned int d1,
 {
   unsigned int dout = 0;
   unsigned int i = 0, inc = grease_level;
-  unsigned int **grease_rows;
+  grease_struct grease;
   assert(NULL != m1);
   assert(NULL != m2);
   assert(NULL != d_out);
@@ -41,20 +41,21 @@ void clean(unsigned int **m1, unsigned int d1,
   assert(0 != nob);
   assert(0 != len);
   assert(0 != grease_level);
+  grease.level = grease_level;
   primes_init(prime, &prime_operations);
   rows_init(prime, &row_operations);
-  grease_init(&row_operations);
-  grease_allocate_rows(grease_level, prime, len, &grease_rows, start);
+  grease_init(&row_operations, &grease);
+  grease_allocate(prime, len, &grease, start);
   while (i < d1) {
     unsigned int count; /* Actual amount we'll grease */
     unsigned int j = 0, k = 1;
     count = 0;
-    grease_init_rows(grease_level, prime);
-    /* Now insert the initial elements into grease_rows */
+    grease_init_rows(&grease, prime);
+    /* Now insert the initial elements into grease.rows */
     while (count < grease_level && i + j < d1) {
       assert(NULL != m1[i + j]);
       if (map[i + j] >= 0) {
-        grease_rows[k - 1] = m1[i + j];
+        grease.rows[k - 1] = m1[i + j];
         /* Only insert if a useful row */
         k *= prime;
         count++;
@@ -62,7 +63,7 @@ void clean(unsigned int **m1, unsigned int d1,
       j++;
     }
     /* Now compute grease */
-    if (0 == grease_make_rows(count, prime, len)) {
+    if (0 == grease_make_rows(&grease, count, prime, len)) {
       fprintf(stderr, "%s: unable to compute grease, terminating\n", name);
       exit(1);
     }
@@ -79,7 +80,7 @@ void clean(unsigned int **m1, unsigned int d1,
       }
       if (0 != elts) {
         elts = negate_elements(elts, nob, prime);
-        (*row_operations.incer)(grease_rows[elements_contract(elts, prime, nob) - 1], m2[j], len);
+        (*row_operations.incer)(grease.rows[elements_contract(elts, prime, nob) - 1], m2[j], len);
       }
     } /* for */
     i += inc;
@@ -90,26 +91,22 @@ void clean(unsigned int **m1, unsigned int d1,
       dout++;
     }
   }
-  grease_free_rows(grease_rows);
+  grease_free(&grease);
   *d_out = dout;
 }
 
 void echelise(unsigned int **m, unsigned int d,
               unsigned int *d_out, int **map,
-              unsigned int ***m_out,
               unsigned int grease_level, unsigned int prime,
               unsigned int len, unsigned int nob,
-              unsigned int start, const char *name)
+              unsigned int start, int full, const char *name)
 {
   unsigned int dout = 0;
   unsigned int i = 0, j = 0, inc = grease_level;
-  unsigned int **new_mat;
   int *bits; /* The map for m */
-  int *new_map;       /* For internal use only */
   assert(NULL != m);
   assert(NULL != d_out);
   assert(NULL != map);
-  assert(NULL != m_out);
   assert(0 != d);
   assert(0 != prime);
   assert(0 != nob);
@@ -117,11 +114,8 @@ void echelise(unsigned int **m, unsigned int d,
   assert(0 != grease_level);
   primes_init(prime, &prime_operations);
   rows_init(prime, &row_operations);
-  matrix_malloc(d, (void **)&new_mat);
   bits = my_malloc(d * sizeof(int));
-  new_map = my_malloc(d * sizeof(int));
-  memset(new_mat, 0, d * sizeof(unsigned int *));
-  /* i counts through m. j counts through new_mat */
+  /* i counts through m. j counts dimension */
   while (i < d) {
     unsigned int k = 0, l = 0, n;
     while (k < inc && i + l < d) {
@@ -150,51 +144,48 @@ void echelise(unsigned int **m, unsigned int d,
           elt = (*prime_operations.invert)(elt);
           (*row_operations.scaler_in_place)(m[i + l], len, elt);
         }
-        new_mat[j + k] = m[i + l];
-        new_map[j + k] = pos;
         bits[i + l] = pos;
-/*
-        printf("row %d significant at %d\n", i + l, pos);
-*/
         k++;
       } else {
         /* This row not significant */
         bits[i + l] = -1;
-/*
-        printf("row %d not significant\n", i + l);
-*/
       }
       l++; /* Next input row */
     } /* while */
-    /* Now back clean new_mat with itself */
-    for (n = 1; n < k; n++) {
-      unsigned int r;
-      for (r = 0; r < n; r++) {
-        unsigned int elt = get_element_from_row(nob, new_map[j + n], new_mat[j + r]);
-        if (0 != elt) {
-          elt = (*prime_operations.negate)(elt);
-          if (1 == elt) {
-            (*row_operations.incer)(new_mat[j + n], new_mat[j + r], len);
-          } else {
-            (*row_operations.scaled_adder)(new_mat[j + n], new_mat[j + r], new_mat[j + r], len, elt);
+    /* Now back clean m[i, i + l] with itself */
+    for (n = 1; n < l; n++) {
+      if (bits[i + n] >= 0) {
+        unsigned int r;
+        for (r = 0; r < n; r++) {
+          unsigned int elt = get_element_from_row(nob, bits[i + n], m[i + r]);
+          if (0 != elt) {
+            elt = (*prime_operations.negate)(elt);
+            if (1 == elt) {
+              (*row_operations.incer)(m[i + n], m[i + r], len);
+            } else {
+              (*row_operations.scaled_adder)(m[i + n], m[i + r], m[i + r], len, elt);
+            }
           }
         }
       }
     }
-    /* Now clean m[0, i] with new_mat[j, j + k] */
-    if (0 != i) {
-      clean(new_mat + j, k, m, i, &n, new_map + j, k, prime, len, nob, start, name);
-    }
-    /* Now clean m[i + l, d] with new_mat[j, j + k] */
-    if (d > i + l) {
-      clean(new_mat + j, k, m + i + l, d - i - l, &n, new_map + j, k, prime, len, nob, start, name);
+    if (0 != k) {
+      if (0 != full) {
+        /* Only back clean for full echelise */
+        /* Now clean m[0, i] with m[i, i + l] */
+        if (0 != i) {
+          clean(m + i, l, m, i, &n, bits + i, k, prime, len, nob, start, name);
+        }
+      }
+      /* Now clean m[i + l, d] with m[i, i + l] */
+      if (d > i + l) {
+        clean(m + i, l, m + i + l, d - i - l, &n, bits + i, k, prime, len, nob, start, name);
+      }
     }
     i += l;
     j += k;
     dout += k;
   } /* while */
-  free(new_map);
-  *m_out = new_mat;
   *d_out = dout;
   *map = bits;
 }

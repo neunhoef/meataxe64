@@ -1,5 +1,5 @@
 /*
- * $Id: rn.c,v 1.3 2001/11/14 00:07:42 jon Exp $
+ * $Id: rn.c,v 1.4 2001/11/18 16:43:45 jon Exp $
  *
  * Compute the rank of a matrix
  *
@@ -19,8 +19,9 @@ unsigned int rank(const char *m, const char *name)
 {
   FILE *inp;
   const header *h;
-  unsigned int prime, nob, nor, len, n, r, grease_level, **mat, **new_mat;
+  unsigned int prime, nob, nor, len, n, r, **mat;
   int *map;
+  grease_struct grease;
   inp = fopen(m, "rb");
   if (NULL == inp) {
     fprintf(stderr, "%s: cannot open %s, terminating\n", name, m);
@@ -40,7 +41,7 @@ unsigned int rank(const char *m, const char *name)
     fclose(inp);
     exit(1);
   }
-  (void)grease(prime, &grease_level, r);
+  (void)grease_level(prime, &grease, r);
   /* Now read the matrix */
   matrix_malloc(nor, (void **)&mat);
   for (n = 0; n < nor; n++) {
@@ -51,10 +52,9 @@ unsigned int rank(const char *m, const char *name)
     fclose(inp);
     exit(1);
   }
-  echelise(mat, nor, &n, &map, &new_mat, grease_level, prime, len, nob, 900, name);
+  echelise(mat, nor, &n, &map, grease.level, prime, len, nob, 900, 0, name);
   free(mat);
   free(map);
-  free(new_mat);
   fclose(inp);
   return n;
 }

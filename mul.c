@@ -1,5 +1,5 @@
 /*
- * $Id: mul.c,v 1.12 2001/11/14 00:07:42 jon Exp $
+ * $Id: mul.c,v 1.13 2001/11/18 16:43:45 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
@@ -41,17 +41,15 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
   FILE *outp;
   unsigned int prime, nob, noc1, nor1, len1, noc2, nor2, len2;
   unsigned int i, j, k, l;
-  unsigned int step;
   unsigned int nox1, nox2, nox3, nox;
   void *t1, *t2;
   const header *h1, *h2, *h3;
   unsigned int **rows1, **rows3;
-  unsigned int **grease_rows;
-  int greased = 1;
   row_ops row_operations;
   row_adder adder;
   row_incer incer;
   scaled_row_adder scaled_adder;
+  grease_struct grease;
   endian_init();
   inp1 = fopen(m1, "rb");
   if (NULL == inp1) {
@@ -98,7 +96,7 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
     fprintf(stderr, "%s: cannot initialise row operations for %s, %s, terminating\n", name, m1, m2);
     return cleanup(inp1, inp2, outp);
   }
-  grease_init(&row_operations);
+  grease_init(&row_operations, &grease);
   adder = row_operations.adder;
   incer = row_operations.incer;
   scaled_adder = row_operations.scaled_adder;
@@ -114,19 +112,14 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
   printf("mul handling %d rows from %d at a time\n", nox, nor1);
   printf("mul nox2 = %d rows\n", nox2);
   /* Compute best lazy grease given nox2 */
-  if (0 == grease(prime, &step, nox2)) {
-      greased = 0;
+  if (0 == grease_level(prime, &grease, nox2)) {
+    fprintf(stderr, "%s: cannot allocate grease space, terminating\n", name);
+    exit(1);
   }
   /* Allocate the grease space */
-  if (greased) {
-    if (0 == grease_allocate_rows(step, prime, len2, &grease_rows, M1_SIZE)){
-      fprintf(stderr, "%s: unable to allocate grease, terminating\n", name);
-      return cleanup(inp1, inp2, outp);
-    }
-  } else {
-    matrix_malloc(1, &t1);
-    grease_rows = t1;
-    *grease_rows = memory_pointer(M1_SIZE);
+  if (0 == grease_allocate(prime, len2, &grease, M1_SIZE)){
+    fprintf(stderr, "%s: unable to allocate grease, terminating\n", name);
+    return cleanup(inp1, inp2, outp);
   }
   matrix_malloc(nox, &t1);
   matrix_malloc(nox, &t2);
@@ -148,22 +141,22 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
     /* Remember where we are in row 2 */
     pos = ftell(inp2);
     /* Then multiply */
-    for (i = 0; i < noc1; i += step) {
-      unsigned int size = (step + i <= noc1) ? step : noc1 - i;
+    for (i = 0; i < noc1; i += grease.level) {
+      unsigned int size = (grease.level + i <= noc1) ? grease.level : noc1 - i;
       unsigned int word_offset, bit_offset, mask;
       /* Read size rows from matrix 2 into rows 2 */
       /* This sets the inital rows */
       l = 1;
       for (j = 0; j < size; j++) {
-        if (0 == endian_read_row(inp2, grease_rows[l - 1], len2)) {
+        if (0 == endian_read_row(inp2, grease.rows[l - 1], len2)) {
           fprintf(stderr, "%s: unable to read %s, terminating\n", name, m2);
           return cleanup(inp1, inp2, outp);
         }
         l *= prime;
       }
       element_access_init(nob, i, size, &word_offset, &bit_offset, &mask);
-      grease_init_rows(size, prime);
-      if (0 == grease_make_rows(size, prime, len2)) {
+      grease_init_rows(&grease, prime);
+      if (0 == grease_make_rows(&grease, size, prime, len2)) {
         fprintf(stderr, "%s: unable to compute grease, terminating\n", name);
         return cleanup(inp1, inp2, outp);
       }
@@ -174,15 +167,7 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
           row_init(rows3[j], len2);
         }
         if (0 != elt) {
-          if (greased) {
-            (*incer)(grease_rows[contract(elt, prime, nob) - 1], rows3[j], len2);
-          } else {
-            if (1 == elt) {
-              (*incer)(grease_rows[0], rows3[j], len2);
-            } else {
-              (*scaled_adder)(rows3[j], grease_rows[0], rows3[j], len2, elt);
-            }
-          }
+          (*incer)(grease.rows[contract(elt, prime, nob) - 1], rows3[j], len2);
         }
       }
     }
@@ -197,8 +182,7 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
       return cleanup(inp1, inp2, outp);
     }
   }
-  if (greased)
-    grease_free_rows(grease_rows);
+  grease_free(&grease);
   matrix_free(rows1);
   matrix_free(rows3);
   fclose(inp1);
