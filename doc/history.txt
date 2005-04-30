@@ -340,3 +340,4 @@ skew seventh
 20050321 - Remove dualise parameter from sym_basis scripts
 20050404 - Fix some documentation errors
 20050406 - Fix bug in nsf for very non-square matrices
+20050428 - Modify split so as to avoid some large nullities from zsums

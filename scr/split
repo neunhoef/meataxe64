@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: split,v 1.18 2003/08/24 12:05:12 jon Exp $
+# $Id: split,v 1.19 2005/04/30 12:44:40 jon Exp $
 #
 # Script to split a representation
 #
@@ -117,12 +117,6 @@ if [ 2 -ne $i ]; then
 fi
 ok=0
 memory=200
-max_null=5
-if [ 2 -eq $q ]; then
-  max_null=30
-elif [ 3 -le $q ]; then
-  max_null=15
-fi
 q=1
 for x in $a $b $*; do
   r=`zprime $x`
@@ -132,28 +126,42 @@ for x in $a $b $*; do
   fi
 done
 depth=`max_depth $q 1023`
+max_null=5
+if [ 2 -eq $q ]; then
+  max_null=30
+elif [ 3 -le $q ]; then
+  max_null=15
+fi
 while [ $ok -eq 0 ]; do
-  out=`zsums -m $memory ${tmp}.zsums $depth $max_null ${y[0]} ${order[0]} ${y[1]} ${order[1]} 2>/dev/null`
-  ret=$?
-  if [ 2 -eq $ret ]; then
-    let memory=`more_memory $memory`
-  elif [ 0 -eq $ret ]; then
-    ok=1
-    name=`echo $out | sed -e "s/^.*element //g;s/ of nullity.*$//g"`
-    split_with_element ${name} $o 0 0 ${tmp}.2 $a $*
+  null=5
+  while [ $null -le $max_null ]; do
+    echo Trying zsums with nullity $null
+    out=`zsums -m $memory ${tmp}.zsums $depth $null ${y[0]} ${order[0]} ${y[1]} ${order[1]} 2>/dev/null`
     ret=$?
-    if [ $ret -eq 255 -o $ret -eq 0 ]; then
+    if [ 2 -eq $ret ]; then
+      let memory=`more_memory $memory`
+    elif [ 0 -eq $ret ]; then
+      ok=1
+      name=`echo $out | sed -e "s/^.*element //g;s/ of nullity.*$//g"`
+      split_with_element ${name} $o 0 0 ${tmp}.2 $a $*
+      ret=$?
+      if [ $ret -eq 255 -o $ret -eq 0 ]; then
+        rm -f ${tmp}*
+        exit $ret
+      fi
+      let null=$null+5
+    elif [ 255 -eq $ret ]; then
+      if [ $null -ge $max_null ]; then
+        echo "Failed to find an element of nullity <= $max_null"
+        ok=1
+      fi
+      let null=$null+5
+    else
+      echo zsums unexpectedly returns $ret, terminating
       rm -f ${tmp}*
-      exit $ret
+      exit 1
     fi
-  elif [ 255 -eq $ret ]; then
-    echo "Failed to find an element of nullity <= $max_null"
-    break
-  else
-    echo zsums unexpectedly returns $ret, terminating
-    rm -f ${tmp}*
-    exit 1
-  fi
+  done
 done
 ok=0
 let max_null=$nor-1
