@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: find_best_nullity_with_orders,v 1.8 2002/10/14 08:55:31 jon Exp $
+# $Id: find_best_nullity_with_orders,v 1.9 2005/05/01 10:11:32 jon Exp $
 #
 # Script to find an element of best nullity in two generators
 #
@@ -54,9 +54,15 @@ while [ $ok -eq 0 ]; do
     cp ${name} $e
     echo $out | sed -e "s/^.*form //g;s/ .*$//g"
   elif [ 255 -eq $ret ]; then
-    echo Failed to find a suitable element
-    rm -f ${tmp}*
-    exit 254
+#
+# Try reducing the number of args to handle small cyclic groups
+#
+    if [ 2 -lt $# ]; then
+      shift 2
+    else
+      rm -f ${tmp}*
+      exit 254
+    fi
   else
     echo zfln unexpectedly returns $ret, terminating
     rm -f ${tmp}*
