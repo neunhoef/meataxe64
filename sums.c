@@ -1,5 +1,5 @@
 /*
- * $Id: sums.c,v 1.16 2004/11/06 22:32:08 jon Exp $
+ * $Id: sums.c,v 1.17 2005/05/01 10:10:58 jon Exp $
  *
  * Function to compute linear sums of two matices
  *
@@ -49,7 +49,7 @@ int sums(const char *out, unsigned int n, unsigned int argc, const char *const a
   assert(NULL != out);
   assert(NULL != name);
   assert(NULL != args);
-  assert(2 < argc && 0 == argc % 2);
+  assert(1 < argc && 0 == argc % 2);
   if (argc2 > 8) {
     fprintf(stderr, "%s: too many generators (%d), terminating\n", name, argc2);
     exit(1);
@@ -112,7 +112,12 @@ int sums(const char *out, unsigned int n, unsigned int argc, const char *const a
   m = -1;
   j = strlen(out);
   k = j + 13;
-  n += 1;
+  if (2 == argc) {
+    n = orders[0];
+    /* If only one generator, can't go beyond the point where it wraps */
+  } else {
+    n += 1;
+  }
   if (0 == int_pow((0 != sub_order) ? sub_order : prime, n, &count)) {
     fprintf(stderr, "%s: too many elements requested (%d ** %d), terminating\n", name, prime, n);
     cleanup(orders);

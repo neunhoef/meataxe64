@@ -1,5 +1,5 @@
 /*
- * $Id: zfln.c,v 1.11 2004/11/18 15:29:44 jon Exp $
+ * $Id: zfln.c,v 1.12 2005/05/01 10:10:58 jon Exp $
  *
  * Compute sums in the group algebra in two matrices finding one of lowest non-zero nullity
  * Expected to be used during computation of standard bases of irreducible but not absolutely
@@ -106,7 +106,7 @@ int main(int argc, const char * const argv[])
   int res;
 
   argv = parse_line(argc, argv, &argc);
-  if (8 > argc || 0 != argc % 2) {
+  if (6 > argc || 0 != argc % 2) {
     fln_usage();
     exit(1);
   }

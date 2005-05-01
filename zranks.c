@@ -1,5 +1,5 @@
 /*
- * $Id: zranks.c,v 1.12 2004/11/06 22:32:08 jon Exp $
+ * $Id: zranks.c,v 1.13 2005/05/01 10:10:58 jon Exp $
  *
  * Compute sums in the group algebra in two matrices finding all of given nullity
  *
@@ -39,7 +39,7 @@ int main(int argc, const char * const argv[])
   int res;
 
   argv = parse_line(argc, argv, &argc);
-  if (8 > argc || 0 != argc % 2) {
+  if (6 > argc || 0 != argc % 2) {
     ranks_usage();
     exit(1);
   }

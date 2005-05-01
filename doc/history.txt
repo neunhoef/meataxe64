@@ -341,3 +341,4 @@ skew seventh
 20050404 - Fix some documentation errors
 20050406 - Fix bug in nsf for very non-square matrices
 20050428 - Modify split so as to avoid some large nullities from zsums
+20050501 - Improve sums, zfln and zranks to allow single generator algebras
