@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: functions,v 1.6 2002/09/16 09:26:47 jon Exp $
+# $Id: functions,v 1.7 2005/05/06 22:06:33 jon Exp $
 #
 # Functions to support the meataxe scripts
 #
@@ -76,4 +76,10 @@ function max_depth()
     let total=$total*$q
   done
   echo $depth
+}
+
+function rm_all()
+{
+  echo Removing $1
+  find . -name $1\* -exec rm -f {} \;
 }

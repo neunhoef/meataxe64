@@ -343,3 +343,4 @@ skew seventh
 20050428 - Modify split so as to avoid some large nullities from zsums
 20050501 - Improve sums, zfln and zranks to allow single generator algebras
 20050501 - Improve find_best_nullity_with_orders to retry with less generators if it fails completely
+20050506 - Added an rm_all function to deal with large quantities of temporary files
