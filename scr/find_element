@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: find_element,v 1.7 2003/05/27 21:53:23 jon Exp $
+# $Id: find_element,v 1.8 2005/05/11 22:38:24 jon Exp $
 #
 # Script to find an element of given nullity on one representation
 # and if possible nullity zero on a sequence of others
@@ -132,4 +132,5 @@ echo
 echo fours are :- $fours
 echo
 echo fives are :- $fives
-rm -f poo ${tmp}*
+rm -f poo
+rm_all ${tmp}
