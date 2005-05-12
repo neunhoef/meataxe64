@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: commutate,v 1.1 2005/05/10 20:33:33 jon Exp $
+# $Id: commutate,v 1.2 2005/05/12 18:14:59 jon Exp $
 #
 # Script to produce a commutator
 #
@@ -30,19 +30,13 @@ else
   memory=400
 fi
 if [ -e $1 -a -e $2 ]; then
-  zivf -m $memory $a ${tmp}_a_iv .
+  zmu -m $memory $b $a ${tmp}_ba
   ret=$?
   if [ 0 -ne $ret ]; then
     rm ${tmp}*
     exit $ret
   fi
-  zivf -m $memory $b ${tmp}_b_iv .
-  ret=$?
-  if [ 0 -ne $ret ]; then
-    rm ${tmp}*
-    exit $ret
-  fi
-  zmu -m $memory ${tmp}_a_iv ${tmp}_b_iv  ${tmp}_ba_iv
+  zivf -m $memory ${tmp}_ba ${tmp}_ba_iv .
   ret=$?
   if [ 0 -ne $ret ]; then
     rm ${tmp}*

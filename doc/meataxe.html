@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.64 2005/04/04 20:47:33 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.65 2005/05/12 18:14:59 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -4532,6 +4532,7 @@ dimension increases.
 <li><a href="#checkorder">checkorder</a></li>
 <li><a href="#check_irred">check_irred</a></li>
 <li><a href="#check_irredf">check_irredf</a></li>
+<li><a href="#commutate">commutate</a></li>
 <li><a href="#conjugate">conjugate</a></li>
 <li><a href="#conjugatef">conjugatef</a></li>
 <li><a href="#count_irreds">count_irreds</a></li>
@@ -5193,6 +5194,45 @@ Purpose: Conjugate some elements, given an invertible matrix
 Commentary: This script uses invert, and forms G E (G inverse) for
 each input G. Generally, users are not expected to invoke this script
 directly.
+</li>
+<li>
+<h3><a name="commutate">commutate</a></h3>
+Purpose: Form the commutator [a,b] of a pair of invertible matrices a
+and b
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>a</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>b</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>result</td>
+</tr>
+<tr>
+<td valign=top>4</td><td valign=top>Available memory (optional)</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>None</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient memory for workspace</td>
+</tr>
+</table>
+Commentary: Does what it says on the tin, using two inversions and
+three multiplies
 </li>
 <li>
 <h3><a name="conjugatef">conjugatef</a></h3>
