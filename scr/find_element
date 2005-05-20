@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: find_element,v 1.8 2005/05/11 22:38:24 jon Exp $
+# $Id: find_element,v 1.9 2005/05/20 08:08:16 jon Exp $
 #
 # Script to find an element of given nullity on one representation
 # and if possible nullity zero on a sequence of others
@@ -19,6 +19,7 @@
 # Return codes
 # 1: error in parameters
 # 0: success
+# 255: no elements of required nullity found
 #
 #set -v
 . functions
@@ -81,7 +82,8 @@ zranks -m $memory ${tmp} $depth $nullity $line | grep "of nullity" > ${out}.1
 grep "of nullity $nullity" ${out}.1 | sed -e "s/^.*element //g;s/ of nullity .*$//g" >poo
 if [ -z "`cat poo`" ]; then
   echo No elements of nullity $nullity found, terminating
-  rm -f ${tmp}* poo
+  rm -f poo
+  rm_all ${tmp}
   exit 255
 fi
 echo >$out
