@@ -1,5 +1,5 @@
 /*
- * $Id: sums.c,v 1.17 2005/05/01 10:10:58 jon Exp $
+ * $Id: sums.c,v 1.18 2005/05/20 18:18:02 jon Exp $
  *
  * Function to compute linear sums of two matices
  *
@@ -112,7 +112,7 @@ int sums(const char *out, unsigned int n, unsigned int argc, const char *const a
   m = -1;
   j = strlen(out);
   k = j + 13;
-  if (2 == argc) {
+  if (2 == argc && n >= orders[0]) {
     n = orders[0];
     /* If only one generator, can't go beyond the point where it wraps */
   } else {

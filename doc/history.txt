@@ -346,3 +346,4 @@ skew seventh
 20050506 - Added an rm_all function to deal with large quantities of temporary files
 20050510 - Added commutate
 20050511 - Use rm_all in find_element
+20050520 - Fix bug in sums when only one element
