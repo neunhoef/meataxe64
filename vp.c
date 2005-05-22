@@ -1,5 +1,5 @@
 /*
- * $Id: vp.c,v 1.8 2003/02/24 18:02:43 jon Exp $
+ * $Id: vp.c,v 1.9 2005/05/22 09:10:34 jon Exp $
  *
  * Function to permute some vectors under two generators
  *
@@ -87,6 +87,7 @@ unsigned int permute(const char *in, const char *out, const char *a,
   const header *h_in, *h_a, *h_b;
   header *h_out, *h_map;
   unsigned int prime, nob, noc, nor, len, max_rows, d, hash_len;
+  unsigned int grease_memory, grease_start;
   unsigned int **rows, *map_a, *map_b;
   unsigned int *hashes;
   grease_struct grease;
@@ -149,17 +150,20 @@ unsigned int permute(const char *in, const char *out, const char *a,
   primes_init(prime, &prime_operations);
   rows_init(prime, &row_operations);
   grease_init(&row_operations, &grease);
-  max_rows = memory_rows(len, 900);
-  if (0 == nor) {
-    fprintf(stderr, "%s: no rows in input %s, terminating\n", name, in);
-    cleanup(inp, f_a, f_b);
-    exit(1);
-  }
   if (0 == grease_level(prime, &grease, memory_rows(len, 100))) {
     fprintf(stderr, "%s: failed to get grease for %s, %s, %s, terminating\n",
             name, in, a, b);
     cleanup(inp, f_a, f_b);
     exit(2);
+  }
+  grease_memory = find_extent(grease.size, len);
+  assert(grease_memory <= 100);
+  grease_start = 1000 - grease_memory;
+  max_rows = memory_rows(len, grease_start);
+  if (0 == nor) {
+    fprintf(stderr, "%s: no rows in input %s, terminating\n", name, in);
+    cleanup(inp, f_a, f_b);
+    exit(1);
   }
   rows = matrix_malloc(max_rows);
   map_a = malloc_map(max_rows);
@@ -191,7 +195,7 @@ unsigned int permute(const char *in, const char *out, const char *a,
     records[d].index = d;
     records[d].row = rows[d];
   }
-  if (0 == grease_allocate(prime, len, &grease, 900)){
+  if (0 == grease_allocate(prime, len, &grease, grease_start)){
     fprintf(stderr, "%s: unable to allocate grease, terminating\n", name);
     cleanup(inp, f_a, f_b);
   }
