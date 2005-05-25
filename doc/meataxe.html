@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.65 2005/05/12 18:14:59 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.66 2005/05/25 20:53:53 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -347,6 +347,7 @@ Turn on verbose mode
 <li><a href="#zivf">zivf</a></li>
 <li><a href="#zjoin">zjoin</a></li>
 <li><a href="#zlp">zlp</a></li>
+<li><a href="#zlpf">zlpf</a></li>
 <li><a href="#zlv">zlv</a></li>
 <li><a href="#zmsb">zmsb</a></li>
 <li><a href="#zmsbf">zmsbf</a></li>
@@ -406,6 +407,7 @@ Turn on verbose mode
 <li><a href="#ztsp">ztsp</a></li>
 <li><a href="#ztspf">ztspf</a></li>
 <li><a href="#zvp">zvp</a></li>
+<li><a href="#zvpf">zvpf</a></li>
 <li><a href="#zwords">zwords</a></li>
 </ol>
 <ul>
@@ -1874,6 +1876,53 @@ Commentary: This is similar to <a href="#zvp">zvp</a>, except that
 lines rather than points are permuted. One could also regard it as the
 dimension 1 case of subspace permute, although that program is not yet
 available.
+</li>
+<li>
+<h3><a name="zlpf">zlpf</a></h3>
+Purpose: Line permute using intermediate file
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Directory for temporary files</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Input vector</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>Output set of vectors</td>
+</tr>
+<tr>
+<td valign=top>4</td><td valign=top>Generator 1</td>
+</tr>
+<tr>
+<td valign=top>5</td><td valign=top>Generator 2</td>
+</tr>
+<tr>
+<td valign=top>6</td><td valign=top>Permutation for generator 1</td>
+</tr>
+<tr>
+<td valign=top>7</td><td valign=top>Permutation for generator 2</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>The number of points in the orbit</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient memory</td>
+</tr>
+</table>
+Commentary: This is similar to <a href="#zlp">zlp</a>, but without
+constraining the number of vectors to the total available memory.
 </li>
 <li>
 <h3><a name="zlv">zlv</a></h3>
@@ -4418,6 +4467,53 @@ wanting to produce seriously large permutation representations is
 advised to use other published methods. It also produces the
 permutations, since this information is calculated for free during the
 process.
+</li>
+<li>
+<h3><a name="zvpf">zvpf</a></h3>
+Purpose: Vector permute using intermediate files
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Directory for temporary files</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Input vector</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>Output set of vectors</td>
+</tr>
+<tr>
+<td valign=top>4</td><td valign=top>Generator 1</td>
+</tr>
+<tr>
+<td valign=top>5</td><td valign=top>Generator 2</td>
+</tr>
+<tr>
+<td valign=top>6</td><td valign=top>Permutation for generator 1</td>
+</tr>
+<tr>
+<td valign=top>7</td><td valign=top>Permutation for generator 2</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>The number of points in the orbit</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient memory</td>
+</tr>
+</table>
+Commentary: This is similar to <a href="#zlp">zlp</a>, but without
+constraining the number of vectors to the total available memory.
 </li>
 <li>
 <h3><a name="zwords">zwords</a></h3>
