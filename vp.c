@@ -1,5 +1,5 @@
 /*
- * $Id: vp.c,v 1.9 2005/05/22 09:10:34 jon Exp $
+ * $Id: vp.c,v 1.10 2005/05/25 18:35:56 jon Exp $
  *
  * Function to permute some vectors under two generators
  *
@@ -29,22 +29,56 @@ typedef struct vec_struct
 {
   unsigned int index;
   unsigned int hash;
-  unsigned int *row;
 } vec;
 
 static unsigned int row_len = 0;
 
-static int compar(const void *e1, const void *e2)
+static unsigned int **rows;
+
+static unsigned int row_index = 0; /* Where the rows start */
+
+static unsigned int search_hash_fails = 0;
+
+static unsigned int sort_hash_fails = 0;
+
+static int compar1(const void *e1, const void *e2)
 {
   vec **v1 = (vec **)e1;
   vec **v2 = (vec **)e2;
   unsigned int h1 = (*v1)->hash;
   unsigned int h2 = (*v2)->hash;
+  int res;
   if (h1 != h2) {
     return (h1 < h2) ? -1 : 1;
   }
   /* Hashes equal */
-  return memcmp((*v1)->row, (*v2)->row, row_len * sizeof(unsigned int));
+  res = memcmp(rows[(*v1)->index - row_index],
+               rows[(*v2)->index - row_index],
+               row_len * sizeof(unsigned int));
+  if (0 != res) {
+    search_hash_fails++;
+  }
+  return res;
+}
+
+static int compar2(const void *e1, const void *e2)
+{
+  vec **v1 = (vec **)e1;
+  vec **v2 = (vec **)e2;
+  unsigned int h1 = (*v1)->hash;
+  unsigned int h2 = (*v2)->hash;
+  int res;
+  if (h1 != h2) {
+    return (h1 < h2) ? -1 : 1;
+  }
+  /* Hashes equal */
+  res = memcmp(rows[(*v1)->index - row_index],
+               rows[(*v2)->index - row_index],
+               row_len * sizeof(unsigned int));
+  if (0 != res) {
+    sort_hash_fails++;
+  }
+  return res;
 }
 
 typedef struct gen_struct *gen;
@@ -88,7 +122,7 @@ unsigned int permute(const char *in, const char *out, const char *a,
   header *h_out, *h_map;
   unsigned int prime, nob, noc, nor, len, max_rows, d, hash_len;
   unsigned int grease_memory, grease_start;
-  unsigned int **rows, *map_a, *map_b;
+  unsigned int *map_a, *map_b;
   unsigned int *hashes;
   grease_struct grease;
   prime_ops prime_operations;
@@ -193,7 +227,6 @@ unsigned int permute(const char *in, const char *out, const char *a,
     hashes[d] = hash_fn(rows[d], hash_len);
     records[d].hash = hashes[d];
     records[d].index = d;
-    records[d].row = rows[d];
   }
   if (0 == grease_allocate(prime, len, &grease, grease_start)){
     fprintf(stderr, "%s: unable to allocate grease, terminating\n", name);
@@ -210,7 +243,7 @@ unsigned int permute(const char *in, const char *out, const char *a,
       }
     }
   }
-  qsort(record_ptrs, nor, sizeof(vec *), &compar);
+  qsort(record_ptrs, nor, sizeof(vec *), &compar2);
   while (nor < max_rows && (gen_a.nor < nor || gen_b.nor < nor)) {
     unsigned int rows_to_do = max_rows - nor;
     unsigned int i, j = 0;
@@ -236,9 +269,8 @@ unsigned int permute(const char *in, const char *out, const char *a,
       }
       hash = hash_fn(rows[nor + i], hash_len);
       row_vec.hash = hash;
-      row_vec.index = 0xffffffff;
-      row_vec.row = rows[nor + i];
-      found_row = bsearch(&row_vec_ptr, record_ptrs, nor, sizeof(vec *), &compar);
+      row_vec.index = nor + i;
+      found_row = bsearch(&row_vec_ptr, record_ptrs, nor, sizeof(vec *), &compar1);
       if (NULL == found_row) {
         /* Got a new row */
         /* The image of row gen->nor + i under gen is row nor + j */
@@ -260,7 +292,7 @@ unsigned int permute(const char *in, const char *out, const char *a,
     gen->nor += rows_to_do;
     nor += j; /* The number of extra rows we made */
     /* Now sort the new rows in */
-    qsort(record_ptrs, nor, sizeof(vec *), &compar);
+    qsort(record_ptrs, nor, sizeof(vec *), &compar2);
     gen = gen->next;
   }
   if (nor >= max_rows) {
@@ -305,6 +337,8 @@ unsigned int permute(const char *in, const char *out, const char *a,
     fclose(outp);
     exit(1);
   }
+  printf("%d search hash failures\n", search_hash_fails);
+  printf("%d sort hash failures\n", sort_hash_fails);
   fclose(outp);
   map_free(map_b);
   header_free(h_map);

@@ -1,5 +1,5 @@
 /*
- * $Id: parse.h,v 1.4 2004/06/05 22:16:11 jon Exp $
+ * $Id: parse.h,v 1.5 2005/05/25 18:35:56 jon Exp $
  *
  * Function to parse command line flags
  *
@@ -13,6 +13,8 @@ extern int verbose;
 extern unsigned int memory;
 
 extern unsigned int max_grease;
+
+extern unsigned int maximum_rows;
 
 /* NULL return means parse failure, already reported */
 extern const char *const *parse_line(int argc, const char *const argv[], int *new_argc);

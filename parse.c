@@ -1,5 +1,5 @@
 /*
- * $Id: parse.c,v 1.6 2004/06/05 22:16:11 jon Exp $
+ * $Id: parse.c,v 1.7 2005/05/25 18:35:56 jon Exp $
  *
  * Function to parse command line flags
  *
@@ -32,6 +32,8 @@ unsigned int memory = MEM_SIZE;
 
 unsigned int max_grease = 32;
 
+unsigned int maximum_rows = 0;
+
 static parse_element parse_table[] =
 {
   {
@@ -40,6 +42,13 @@ static parse_element parse_table[] =
     unary,
     "-mg",
     "mtx_max_grease"
+  },
+  {
+    &maximum_rows,
+    1,
+    unary,
+    "-mr",
+    "mtx_max_rows"
   },
   {
     &memory,
@@ -82,7 +91,7 @@ static void set_env_values(void)
           return;
         default:
           assert(0);
-      }
+        }
       }
     }
   }

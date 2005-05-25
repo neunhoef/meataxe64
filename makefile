@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.94 2004/08/28 21:19:01 jon Exp $
+# $Id: makefile,v 1.95 2005/05/25 18:35:56 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -51,6 +51,7 @@ ZIV_TARGET=	ziv
 ZIVF_TARGET=	zivf
 ZJOIN_TARGET=	zjoin
 ZLP_TARGET=	zlp
+ZLPF_TARGET=	zlpf
 ZLV_TARGET=	zlv
 ZMSB_TARGET=	zmsb
 ZMSBF_TARGET=	zmsbf
@@ -112,9 +113,10 @@ ZTSP_TARGET=	ztsp
 ZTSPF_TARGET=	ztspf
 ZTTR_TARGET=	zttr
 ZVP_TARGET=	zvp
+ZVPF_TARGET=	zvpf
 ZWORDS_TARGET=	zwords
 
-LIB_MODULES=	add clean clean_file clean_vectors command conj count dets diff diffd elements endian exrows extend extend_matrix files grease header ident join map map_or_row maps matrix memory msb msbf msp mspf mul mv ns nsf orbit parse pco powers primes project ps qs rand read restrict rn rnf scale script singular span spanmsp ss ss_map sums sumsf sums_utils symb system tco te tmul tra tsp tspf ttr utils vp write
+LIB_MODULES=	add clean clean_file clean_vectors command conj count dets diff diffd elements endian exrows extend extend_matrix files grease header ident join map map_or_row maps matrix memory msb msbf msp mspf mul mv ns nsf orbit parse pco powers primes project ps qs rand read restrict rn rnf scale script singular span spanmsp ss ss_map sums sumsf sums_utils symb system tco te tmul tra tsp tspf ttr utils vp vpf write
 
 CONS_MODULES=	constrain
 DTOU_MODULES=	dtou
@@ -158,6 +160,7 @@ ZIV_MODULES=	iv rows ziv
 ZIVF_MODULES=	ivf rows zivf
 ZJOIN_MODULES=	rows zjoin
 ZLP_MODULES=	rows zlp
+ZLPF_MODULES=	rows zlpf
 ZLV_MODULES=	lv rows zlv
 ZMSB_MODULES=	rows zmsb
 ZMSBF_MODULES=	rows zmsbf
@@ -219,6 +222,7 @@ ZTSP_MODULES=	rows ztsp
 ZTSPF_MODULES=	rows ztspf
 ZTTR_MODULES=	rows zttr
 ZVP_MODULES=	rows zvp
+ZVPF_MODULES=	rows zvpf
 ZWORDS_MODULES=	rows zwords
 
 MODULES=	$(LIB_MODULES) \
@@ -264,6 +268,7 @@ MODULES=	$(LIB_MODULES) \
 	$(ZIVF_MODULES) \
 	$(ZJOIN_MODULES) \
 	$(ZLP_MODULES) \
+	$(ZLPF_MODULES) \
 	$(ZLV_MODULES) \
 	$(ZMSB_MODULES) \
 	$(ZMSBF_MODULES) \
@@ -325,6 +330,7 @@ MODULES=	$(LIB_MODULES) \
 	$(ZTSPF_MODULES) \
 	$(ZTTR_MODULES) \
 	$(ZVP_MODULES) \
+	$(ZVPF_MODULES) \
 	$(ZWORDS_MODULES)
 
 include dirs.txt
@@ -490,6 +496,9 @@ TARGET:=ZJOIN
 include targets.txt
 
 TARGET:=ZLP
+include targets.txt
+
+TARGET:=ZLPF
 include targets.txt
 
 TARGET:=ZLV
@@ -673,6 +682,9 @@ TARGET:=ZTSPF
 include targets.txt
 
 TARGET:=ZVP
+include targets.txt
+
+TARGET:=ZVPF
 include targets.txt
 
 TARGET:=ZWORDS

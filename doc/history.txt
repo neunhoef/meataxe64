@@ -347,4 +347,5 @@ skew seventh
 20050510 - Added commutate
 20050511 - Use rm_all in find_element
 20050520 - Fix bug in sums when only one element
-20050521 - Improved memoy usage in vp
+20050521 - Improved memory usage in vp
+20050525 - Added intermediate file versions of zvp znd zlp
