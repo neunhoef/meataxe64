@@ -349,3 +349,4 @@ skew seventh
 20050520 - Fix bug in sums when only one element
 20050521 - Improved memory usage in vp
 20050525 - Added intermediate file versions of zvp znd zlp
+20050604 - Fix bug in zlpf due to 64 bit vs 32 arithmetic
