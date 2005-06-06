@@ -1,5 +1,5 @@
 /*
- * $Id: pcv.c,v 1.5 2002/10/13 16:38:07 jon Exp $
+ * $Id: pcv.c,v 1.6 2005/06/06 08:01:37 jon Exp $
  *
  * Function to lift vectors from a quotient space
  *
@@ -31,7 +31,7 @@ static void cleanup(FILE *f1, FILE *f2, FILE *f3)
     fclose(f3);
 }
 
-void lift(const char *range, const char *vectors,
+void pco_lift(const char *range, const char *vectors,
           const char *out, const char *name)
 {
   FILE *inp1 = NULL, *inp2 = NULL, *outp = NULL;

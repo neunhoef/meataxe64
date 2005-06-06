@@ -1,5 +1,5 @@
 /*
- * $Id: zlv.c,v 1.5 2004/08/21 13:22:31 jon Exp $: zss.c,v 1.1 2001/11/25 00:17:19 jon Exp $
+ * $Id: zlv.c,v 1.6 2005/06/06 08:01:37 jon Exp $: zss.c,v 1.1 2001/11/25 00:17:19 jon Exp $
  *
  * Calculate inverse quotient space representation, ie lift
  *
@@ -28,7 +28,7 @@ int main(int argc, const char * const argv[])
   }
   endian_init();
   memory_init(name, memory);
-  lift(argv[1], argv[2], argv[3], name);
+  lift_vectors(argv[1], argv[2], argv[3], name);
   memory_dispose();
   return 0;
 }

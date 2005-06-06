@@ -1,5 +1,5 @@
 /*
- * $Id: vpf.c,v 1.2 2005/06/04 15:27:40 jon Exp $
+ * $Id: vpf.c,v 1.3 2005/06/06 08:01:37 jon Exp $
  *
  * Function to permute some vectors under two generators,
  * using intermediate file
@@ -323,7 +323,6 @@ unsigned int permute_file(const char *tmp_dir, const char *in,
         /* Check the file */
         /* First see how many to read */
         int match = 0;
-        unsigned int count = 0;
         k = -1;
         /* Check to see if any before this element */
         while (found_row + k >= record_ptrs) {
@@ -339,7 +338,6 @@ unsigned int permute_file(const char *tmp_dir, const char *in,
             /* Read this row into rows[0] */
             unsigned int index = found_row[k]->index;
             fseeko64(vectors, ((long long)index) * ((long long)len) * ((long long)sizeof(**rows)), SEEK_SET);
-            count++;
             if (0 == endian_read_row(vectors, *rows, len)) {
               fprintf(stderr, "%s: failed to read row %d from %s, terminating\n",
                       name, index, name_tmp);
@@ -357,12 +355,6 @@ unsigned int permute_file(const char *tmp_dir, const char *in,
             }
           }
           k++;
-        }
-        if (verbose) {
-          printf("%s: searched %d rows of same hash\n", name, count);
-          fflush(stdout);
-        } else {
-          NOT_USED(count);
         }
         if (0 == match) {
           found_row = NULL;

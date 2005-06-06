@@ -1,5 +1,5 @@
 /*
- * $Id: tcv.c,v 1.7 2003/02/24 18:02:43 jon Exp $
+ * $Id: tcv.c,v 1.8 2005/06/06 08:01:37 jon Exp $
  *
  * Function to lift vectors from a tensor condensation representation
  *
@@ -109,7 +109,7 @@ static void positions(unsigned int cf, unsigned int l, unsigned int r, unsigned 
   *cpos += (l * right_multiplicities[cf] + r) * nor_q[cf];
 }
 
-int lift(unsigned int s, const char *mults_l, const char *mults_r, const char *in,
+int tco_lift(unsigned int s, const char *mults_l, const char *mults_r, const char *in,
          const char *out, int argc, const char *const *argv, const char *name)
 {
   unsigned int *left_multiplicities = NULL, *right_multiplicities = NULL;

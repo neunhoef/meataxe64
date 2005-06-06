@@ -1,5 +1,5 @@
 /*
- * $Id: ztcv.c,v 1.4 2004/08/21 13:22:32 jon Exp $
+ * $Id: ztcv.c,v 1.5 2005/06/06 08:01:37 jon Exp $
  *
  * Calculate lift from tensor condensation representation
  *
@@ -40,7 +40,7 @@ int main(int argc, const char * const argv[])
   in = argv[4];
   out = argv[5];
   memory_init(name, memory);
-  ret = lift(s, mults_l, mults_r, in, out, argc - 6, argv + 6, name);
+  ret = tco_lift(s, mults_l, mults_r, in, out, argc - 6, argv + 6, name);
   memory_dispose();
   if (1 == ret) {
     return 0;
