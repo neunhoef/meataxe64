@@ -1,5 +1,5 @@
 /*
- * $Id: parse.c,v 1.7 2005/05/25 18:35:56 jon Exp $
+ * $Id: parse.c,v 1.8 2005/06/07 20:56:13 jon Exp $
  *
  * Function to parse command line flags
  *
@@ -137,10 +137,12 @@ const char *const *parse_line(int argc, const char *const argv[], int *new_argc)
   return argv;
 }
 
-static const char *usage = "[-v] [-m <memory>] [-mg <maximum grease level>]";
+static const char *usage =
+  "[-v] [-m <memory>]"
+  " [-mg <maximum grease level>]"
+  " [-mr <maximum rows>]";
 
 const char *parse_usage(void)
 {
   return usage;
 }
-
