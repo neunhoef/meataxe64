@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.96 2005/06/07 20:56:13 jon Exp $
+# $Id: makefile,v 1.97 2005/06/07 20:57:36 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -29,7 +29,6 @@ STOP_TARGET=	stop
 ZAD_TARGET=	zad
 ZAH_TARGET=	zah
 ZBASE_TARGET=	zbase
-ZCH_TARGET=	zch
 ZCHAR_TARGET=	zchar
 ZCHECK_TARGET=	zcheck
 ZCLEAN_TARGET=	zclean
@@ -139,7 +138,6 @@ STOP_MODULES=	stop
 ZAD_MODULES=	ad rows
 ZAH_MODULES=	zah
 ZBASE_MODULES=	base rows zbase
-ZCH_MODULES=	zch
 ZCHAR_MODULES=	zchar
 ZCHECK_MODULES=	zcheck
 ZCLEAN_MODULES=	rows zclean
@@ -248,7 +246,6 @@ MODULES=	$(LIB_MODULES) \
 	$(ZAD_MODULES) \
 	$(ZAH_MODULES) \
 	$(ZBASE_MODULES) \
-	$(ZCH_MODULES) \
 	$(ZCHAR_MODULES) \
 	$(ZCHECK_MODULES) \
 	$(ZCLEAN_MODULES) \
@@ -433,9 +430,6 @@ TARGET:=ZAH
 include targets.txt
 
 TARGET:=ZBASE
-include targets.txt
-
-TARGET:=ZCH
 include targets.txt
 
 TARGET:=ZCHAR
