@@ -1,0 +1,89 @@
+#!/bin/sh
+#
+# $Id: xn,v 1.1 2005/06/21 19:43:40 jon Exp $
+#
+# Compute xn(x), continuing on from bn, cn etc
+#
+# Inputs: None
+# Values in scope
+# powers: an array of the powers to be made
+# n: the original n value
+# x: the number of powers to be made
+# a: the original matrix
+# o: where to output to
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+#
+#set -x
+tmp=tmp${PPID}
+# First sort powers
+sorted=0
+while [ 0 -eq $sorted ]; do
+  sorted=1
+  i=1
+  while [ $i -lt $x ]; do
+    let j=$i+1
+    if [ ${powers[$i]} -gt ${powers[$j]} ]; then
+      sorted=0
+      t=${powers[$i]}
+      powers[$i]=${powers[$j]}
+      powers[$j]=$t
+    fi
+    i=$j
+  done
+done
+i=1
+while [ $i -le $x ]; do
+  echo powers[$i] = ${powers[$i]}
+  let i=$i+1
+done
+i=1
+while [ $i -lt $x ]; do
+  let j=$i+1
+  let d=${powers[$j]}-${powers[$i]}
+  diffs[$i]=$d
+  let i=$j
+done
+# Find max diff, and make all intermediate powers
+max_diff=1
+i=1
+let x1=$x-1
+while [ $i -le $x1 ]; do
+  if [ ${diffs[$i]} -gt $max_diff ]; then
+    max_diff=${diffs[$i]}
+  fi
+  let i=$i+1
+done
+# Make intermediate powers
+mat=${tmp}.mat
+cp $a ${mat}.1
+i=1
+while [ $i -le $max_diff ]; do
+  let j=$i+1
+  zmu -m 100000 $a ${mat}.$i ${mat}.$j
+  let i=$i+1
+done
+sum=${tmp}.sum
+cur=${tmp}.cur
+cp $a ${sum}
+cp $a ${cur}
+i=2
+k=1
+while [ $i -le $x ]; do
+  let j=${powers[$i]}-$k
+  if [ 0 -eq $j ]; then
+    echo Square of $i = square of $i - 1?
+    cp ${cur} ${cur}.1
+  else
+    zmu -m 100000 ${cur} ${mat}.$j ${cur}.1
+  fi
+  zad -m 10000 ${sum} ${cur}.1 ${tmp}.1
+  mv ${tmp}.1 ${sum}
+  mv ${cur}.1 ${cur}
+  let k=${k}+${j}
+  let i=$i+1
+done
+cp ${sum} $o
+rm ${tmp}.*
