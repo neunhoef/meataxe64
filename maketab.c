@@ -1,5 +1,5 @@
 /*
- * $Id: maketab.c,v 1.1 2003/07/20 18:13:53 jon Exp $
+ * $Id: maketab.c,v 1.2 2005/06/22 21:52:53 jon Exp $
  *
  * Produce the addition and multiplication tables for a Galois field
  *
@@ -49,7 +49,7 @@ int main(int argc, const char * const argv[])
   }
   switch (prime) {
   case 9:
-    fprintf(outp, "static unsigned int prod_table_%d[256] = {\n", prime);
+    fprintf(outp, "static word prod_table_%d[256] = {\n", prime);
     for (i = 0; i < 256; i++) {
       unsigned int prod = 0;
       unsigned int k = (i & 0xf0) >> 4;
@@ -67,7 +67,7 @@ int main(int argc, const char * const argv[])
       }
     }
     fprintf(outp, "};\n");
-    fprintf(outp, "static unsigned int add_table_%d[65536] = {\n", prime);
+    fprintf(outp, "static word add_table_%d[65536] = {\n", prime);
     for (i = 0; i < 256; i++) {
       for (j = 0; j < 256; j++) {
         unsigned int a = i & 0xf, b = (i & 0xf0) >> 4, c = j & 0xf, d = (j & 0xf0) >> 4, sum = 0;
@@ -88,7 +88,7 @@ int main(int argc, const char * const argv[])
       }
     }
     fprintf(outp, "};\n");
-    fprintf(outp, "static unsigned int scale_table_%d[7][256] = {\n", prime);
+    fprintf(outp, "static word scale_table_%d[7][256] = {\n", prime);
     for (i = 2; i < 9; i++) {
       fprintf(outp, "  {\n");
       for (j = 0; j < 256; j++) {

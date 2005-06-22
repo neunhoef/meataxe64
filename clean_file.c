@@ -1,5 +1,5 @@
 /*
- * $Id: clean_file.c,v 1.5 2004/04/25 16:31:47 jon Exp $
+ * $Id: clean_file.c,v 1.6 2005/06/22 21:52:53 jon Exp $
  *
  * Cleaning and echilisation, when the already clean vectors
  * are in a file which is to be updated
@@ -23,15 +23,15 @@
 /* nor2 is space available in rows2 (scratch) */
 /* Also, if asked, return the map for input rows (needed for standard base) */
 int clean_file(row_ops *row_operations,
-               FILE *clean_vectors, unsigned int *nor,
-               unsigned int **rows1, unsigned int nor1,
-               unsigned int **rows2, unsigned int nor2,
+               FILE *clean_vectors, u32 *nor,
+               word **rows1, u32 nor1,
+               word **rows2, u32 nor2,
                int *map, int *new_map, int record,
-               unsigned int grease_level, unsigned int prime,
-               unsigned int len, unsigned int nob,
-               unsigned int start, const char *name)
+               u32 grease_level, u32 prime,
+               u32 len, u32 nob,
+               u32 start, const char *name)
 { 
-  unsigned int i, j = 0, my_nor, d;
+  u32 i, j = 0, my_nor, d;
   int *internal_new_map;
   long long ptr;
   assert(NULL != clean_vectors);
@@ -51,7 +51,7 @@ int clean_file(row_ops *row_operations,
   if (0 != my_nor) {
     fseeko64(clean_vectors, 0, SEEK_SET);
     for (i = 0; i < my_nor; i += nor2) {
-      unsigned int stride = (i + nor2 > my_nor) ? my_nor - i : nor2;
+      u32 stride = (i + nor2 > my_nor) ? my_nor - i : nor2;
       errno = 0;
       if (0 == endian_read_matrix(clean_vectors, rows2, len, stride)) {
         if ( 0 != errno) {
@@ -70,7 +70,7 @@ int clean_file(row_ops *row_operations,
     if (0 != my_nor) {
       ptr = 0; /* where we are in echelised */
       for (i = 0; i < my_nor; i += nor2) {
-        unsigned int stride2 = (nor2 + i > my_nor) ? my_nor - i : nor2;
+        u32 stride2 = (nor2 + i > my_nor) ? my_nor - i : nor2;
         /* Read stride2 rows from echelised at offset ptr */
         fseeko64(clean_vectors, ptr, SEEK_SET);
         errno = 0;

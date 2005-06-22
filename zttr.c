@@ -1,5 +1,5 @@
 /*
- * $Id: zttr.c,v 1.2 2004/01/04 21:22:50 jon Exp $
+ * $Id: zttr.c,v 1.3 2005/06/22 21:52:55 jon Exp $
  *
  * Transpose the order of a tensor product vector
  *
@@ -23,7 +23,7 @@ int main(int argc, const char * const argv[])
 {
   const char *in;
   const char *out;
-  unsigned int noc;
+  u32 noc;
 
   argv = parse_line(argc, argv, &argc);
   if (4 != argc) {

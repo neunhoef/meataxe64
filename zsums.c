@@ -1,5 +1,5 @@
 /*
- * $Id: zsums.c,v 1.15 2004/01/04 21:22:50 jon Exp $
+ * $Id: zsums.c,v 1.16 2005/06/22 21:52:55 jon Exp $
  *
  * Compute sums in the group algebra in two matrices
  *
@@ -15,14 +15,14 @@
 
 static const char *name = "zsums";
 
-static unsigned int nullity = 0;
+static u32 nullity = 0;
 
 static void sums_usage(void)
 {
   fprintf(stderr, "%s: usage: %s %s <out_file_stem> <n> <nullity> <in_file a> <order a> <in_file b> <order b>\n", name, name, parse_usage());
 }
 
-static int acceptor(unsigned int rank, unsigned int nor, const char *file, const char *form)
+static int acceptor(u32 rank, u32 nor, const char *file, const char *form)
 {
   NOT_USED(file);
   NOT_USED(form);
@@ -35,7 +35,7 @@ static int acceptor(unsigned int rank, unsigned int nor, const char *file, const
 
 int main(int argc, const char * const argv[])
 {
-  unsigned int n;
+  u32 n;
   int res;
 
   argv = parse_line(argc, argv, &argc);

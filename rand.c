@@ -1,5 +1,5 @@
 /*
- * $Id: rand.c,v 1.3 2004/08/21 13:22:30 jon Exp $
+ * $Id: rand.c,v 1.4 2005/06/22 21:52:53 jon Exp $
  *
  * Subroutine to generate a random matrix
  *
@@ -19,11 +19,11 @@
 #include "utils.h"
 #include "write.h"
 
-int random(unsigned int prime, unsigned int nor, unsigned int noc,
+int random(u32 prime, u32 nor, u32 noc,
            const char *out, const char *name)
 {
-  unsigned int nob, nod, len, i, elts_per_word;
-  unsigned int *row;
+  u32 nob, nod, len, i, elts_per_word;
+  word *row;
   FILE *outp;
   const header *h;
 
@@ -57,10 +57,10 @@ int random(unsigned int prime, unsigned int nor, unsigned int noc,
     assert(NULL != row);
     (void)get_mask_and_elts(nob, &elts_per_word);
     for (i = 0; i < nor; i++) {
-      unsigned int j;
+      u32 j;
       row_init(row, len);
       for (j = 0; j < noc; j++) {
-        unsigned int k = rand() % prime;
+        u32 k = rand() % prime;
         put_element_to_clean_row_with_params(nob, j, elts_per_word, row, k);
       }
       errno = 0;

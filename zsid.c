@@ -23,7 +23,7 @@ static void sid_usage(void)
 int main(int argc, const char * const argv[])
 {
   const char *out;
-  unsigned int prime, noc, nor, elt;
+  u32 prime, noc, nor, elt;
 
   argv = parse_line(argc, argv, &argc);
   if (6 != argc) {

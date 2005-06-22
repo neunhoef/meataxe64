@@ -1,5 +1,5 @@
 /*
- * $Id: ct.c,v 1.6 2004/01/04 21:22:50 jon Exp $
+ * $Id: ct.c,v 1.7 2005/06/22 21:52:53 jon Exp $
  *
  * Count the non-zero elements in a matrix
  *
@@ -21,7 +21,7 @@ static void ct_usage(void)
 
 int main(int argc, const char * const argv[])
 {
-  unsigned int total;
+  u32 total;
   argv = parse_line(argc, argv, &argc);
   if (2 != argc) {
     ct_usage();

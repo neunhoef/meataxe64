@@ -1,5 +1,5 @@
 /*
- * $Id: tco.c,v 1.26 2004/11/28 11:36:53 jon Exp $
+ * $Id: tco.c,v 1.27 2005/06/22 21:52:54 jon Exp $
  *
  * Tensor condense one group element
  *
@@ -25,26 +25,26 @@
 
 #define use_minor_tensor 0
 #if use_minor_tensor
-static void minor_tensor(unsigned int **expanded_rrows, unsigned int beta_i, unsigned int te_j, unsigned int **te_rows,
-                         unsigned int te_o_r, unsigned int max_irr_len, unsigned int dim_irr_j, unsigned int *expanded_lrow,
-                         unsigned int base_i, row_ops row_operations, unsigned int *te_row, unsigned int nob, unsigned int elts_per_word_nob,
-                         unsigned int nobj)
+static void minor_tensor(word **expanded_rrows, u32 beta_i, u32 te_j, word **te_rows,
+                         u32 te_o_r, u32 max_irr_len, u32 dim_irr_j, word *expanded_lrow,
+                         u32 base_i, row_ops row_operations, word *te_row, u32 nob, u32 elts_per_word_nob,
+                         u32 nobj)
 {
-  unsigned int te_o_c_word = 0;
-  unsigned int te_o_c_offset = 0;
-  unsigned int word = 0;
-  unsigned int *expanded_rrow = expanded_rrows[beta_i + te_j];
-  unsigned int *te_rowsr = te_rows[te_o_r];
-  unsigned int *expanded_lrow1 = expanded_lrow + dim_irr_j;
-  unsigned int lim = bits_in_unsigned_int - nob;
-  assert(bits_in_unsigned_int >= nob);
+  u32 te_o_c_word = 0;
+  u32 te_o_c_offset = 0;
+  word elts = 0;
+  word *expanded_rrow = expanded_rrows[beta_i + te_j];
+  word *te_rowsr = te_rows[te_o_r];
+  word *expanded_lrow1 = expanded_lrow + dim_irr_j;
+  u32 lim = bits_in_word - nob;
+  assert(bits_in_word >= nob);
   row_init(te_rowsr, max_irr_len);
   while (expanded_lrow < expanded_lrow1) {
     /* Columns of M */
-    unsigned int elt = *expanded_lrow;
+    word elt = *expanded_lrow;
     if (0 != elt) {
-      unsigned int *row = expanded_rrow + base_i; /* was rrows */
-      unsigned int *row1;
+      word *row = expanded_rrow + base_i; /* was rrows */
+      word *row1;
       if (1 != elt) {
         (*row_operations.scaler)(row, te_row, dim_irr_j, elt);
         row = te_row;
@@ -52,34 +52,34 @@ static void minor_tensor(unsigned int **expanded_rrows, unsigned int beta_i, uns
       row1 = row + dim_irr_j;
       while (row < row1) {
         elt = *row;
-        word |= elt << te_o_c_offset;
+        elts |= elt << te_o_c_offset;
         te_o_c_offset += nob;
         if (te_o_c_offset > lim) {
           te_o_c_offset = 0;
-          te_rowsr[te_o_c_word] = word;
+          te_rowsr[te_o_c_word] = elts;
           te_o_c_word++;
-          word = 0;
+          elts = 0;
         }
         row++;
       }
     } else {
       te_o_c_offset += nobj;
       if (te_o_c_offset > lim) {
-        te_rowsr[te_o_c_word] = word;
+        te_rowsr[te_o_c_word] = elts;
         te_o_c_word += te_o_c_offset / elts_per_word_nob;
         te_o_c_offset %= elts_per_word_nob;
-        word = 0;
+        elts = 0;
       }
     }
     expanded_lrow++;
   }
-  te_rowsr[te_o_c_word] = word;
+  te_rowsr[te_o_c_word] = elts;
 }
 #endif
 
-static void close_files_and_headers(FILE **p, FILE **q, const header **h_p, const header **h_q, unsigned int i)
+static void close_files_and_headers(FILE **p, FILE **q, const header **h_p, const header **h_q, u32 i)
 {
-  unsigned int j;
+  u32 j;
   assert(NULL != p);
   assert(NULL != q);
   assert(NULL != h_p);
@@ -96,9 +96,9 @@ static void close_files_and_headers(FILE **p, FILE **q, const header **h_p, cons
   }
 }
 
-static void free_expanded(unsigned int **expanded, unsigned int nor)
+static void free_expanded(word **expanded, u32 nor)
 {
-  unsigned int i;
+  u32 i;
   assert(NULL != expanded);
   assert(0 != nor);
   for (i = 0; i < nor; i++) {
@@ -107,15 +107,15 @@ static void free_expanded(unsigned int **expanded, unsigned int nor)
   matrix_free(expanded);
 }
 
-static int cleanup(unsigned int *left_multiplicities, unsigned int *right_multiplicities,
-                   unsigned int *dim_irr, unsigned int *dim_end,
-                   unsigned int *nor_p, unsigned int *nor_q, unsigned int *noc_p,
-                   unsigned int *noc_q, unsigned int *len_p, unsigned int *len_q,
+static int cleanup(u32 *left_multiplicities, u32 *right_multiplicities,
+                   u32 *dim_irr, u32 *dim_end,
+                   u32 *nor_p, u32 *nor_q, u32 *noc_p,
+                   u32 *noc_q, u32 *len_p, u32 *len_q,
                    FILE *inp, FILE *leftp, FILE *rightp,
                    const header *h_l, const header *h_r,
-                   FILE **p, FILE **q, const header **h_p, const header **h_q, unsigned int i,
+                   FILE **p, FILE **q, const header **h_p, const header **h_q, u32 i,
                    const header *h_o, FILE *outp,
-                   unsigned int **rows, unsigned int **lrows, unsigned int **rrows)
+                   word **rows, word **lrows, word **rrows)
 {
   if (NULL != left_multiplicities) {
     free(left_multiplicities);
@@ -189,27 +189,28 @@ static int cleanup(unsigned int *left_multiplicities, unsigned int *right_multip
 
 #define GREASE_MAX 6
 
-int tcondense(unsigned int s, const char *mults_l, const char *mults_r,
+int tcondense(u32 s, const char *mults_l, const char *mults_r,
               const char *irr, const char *end,
               const char *left, const char *right, const char *out,
-              const char *in, unsigned int loop, unsigned int init,
+              const char *in, u32 loop, u32 init,
               int argc, const char *const *argv, const char *name)
 {
-  unsigned int *left_multiplicities = NULL, *right_multiplicities = NULL, *dim_irr = NULL, *dim_end = NULL;
+  u32 *left_multiplicities = NULL, *right_multiplicities = NULL, *dim_irr = NULL, *dim_end = NULL;
   FILE *inp = NULL, *leftp = NULL, *rightp = NULL, *outp = NULL, **p, **q;
-  unsigned int nor, nob, nod, len, prime, nor_l, noc_l, len_l, nor_r, noc_r, len_r,
+  u32 nor, nob, nod, len, prime, nor_l, noc_l, len_l, nor_r, noc_r, len_r,
     max_rows, max_irr, max_irr2, max_irr_len, max_end, i, j, k;
-  unsigned int *nor_p = NULL, *nor_q = NULL, *noc_p = NULL, *noc_q = NULL, *len_p = NULL, *len_q = NULL;
+  u32 *nor_p = NULL, *nor_q = NULL, *noc_p = NULL, *noc_q = NULL, *len_p = NULL, *len_q = NULL;
   const header *h_l, *h_r, *h_o, **h_p, **h_q;
-  unsigned int alpha, beta, gamma, delta, extent_l, extent_r, extent_te, extent_end, extent_q, extent_p, o_r, m_r, n_r;
-  unsigned int **rows, **lrows, **rrows, **te_rows, *te_row, **end_rows, **q_rows, **p_rows, *q_row;
-  unsigned int mask, elts_per_word, elts_per_word_nob;
-  unsigned int **expanded_lrows, **expanded_rrows;
-  unsigned int vector[3] = {0, 0, 0};
+  u32 alpha, beta, gamma, delta, extent_l, extent_r, extent_te, extent_end, extent_q, extent_p, o_r, m_r, n_r;
+  word **rows, **lrows, **rrows, **te_rows, *te_row, **end_rows, **q_rows, **p_rows, *q_row;
+  u32 elts_per_word, elts_per_word_nob;
+  word mask;
+  word **expanded_lrows, **expanded_rrows;
+  u32 vector[3] = {0, 0, 0};
   row_ops row_operations;
   grease_struct grease;
-  unsigned int powers[GREASE_MAX];
-  unsigned int lim;
+  u32 powers[GREASE_MAX];
+  u32 lim;
   assert(0 != s);
   assert(NULL != mults_l);
   assert(NULL != mults_r);
@@ -225,10 +226,10 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r,
     fprintf(stderr, "%s: incorrect number (%d) of arguments Pi, Qi, should be %d, terminating\n", name, argc, 2*s);
     return 0;
   }
-  left_multiplicities = my_malloc(s * sizeof(unsigned int));
-  right_multiplicities = my_malloc(s * sizeof(unsigned int));
-  dim_irr = my_malloc(s * sizeof(unsigned int));
-  dim_end = my_malloc(s * sizeof(unsigned int));
+  left_multiplicities = my_malloc(s * sizeof(u32));
+  right_multiplicities = my_malloc(s * sizeof(u32));
+  dim_irr = my_malloc(s * sizeof(u32));
+  dim_end = my_malloc(s * sizeof(u32));
   inp = fopen(mults_l, "r");
   if (NULL == inp) {
     fprintf(stderr, "%s: failed to open left multiplicities file '%s', terminating\n", name, mults_l);
@@ -372,7 +373,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r,
                    h_l, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL);
   }
   nob = header_get_nob(h_l);
-  lim = bits_in_unsigned_int - nob;
+  lim = bits_in_word - nob;
   mask = get_mask_and_elts(nob, &elts_per_word);
   elts_per_word_nob = elts_per_word * nob;
   nod = header_get_nod(h_l);
@@ -422,12 +423,12 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r,
                      h_l, h_r, p, q, h_p, h_q, i, NULL, NULL, NULL, NULL, NULL);
     }
   }
-  nor_p = my_malloc(s * sizeof(unsigned int));
-  noc_p = my_malloc(s * sizeof(unsigned int));
-  len_p = my_malloc(s * sizeof(unsigned int));
-  nor_q = my_malloc(s * sizeof(unsigned int));
-  noc_q = my_malloc(s * sizeof(unsigned int));
-  len_q = my_malloc(s * sizeof(unsigned int));
+  nor_p = my_malloc(s * sizeof(u32));
+  noc_p = my_malloc(s * sizeof(u32));
+  len_p = my_malloc(s * sizeof(u32));
+  nor_q = my_malloc(s * sizeof(u32));
+  noc_q = my_malloc(s * sizeof(u32));
+  len_q = my_malloc(s * sizeof(u32));
   for (i = 0; i < s; i++) {
     nor_p[i] = header_get_nor(h_p[i]);
     noc_p[i] = header_get_noc(h_p[i]);
@@ -496,8 +497,8 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r,
     /* Must copy some stuff first */
     FILE *inp;
     const header *h_i;
-    unsigned int nrows = 0;
-    unsigned int *row = memory_pointer(0);
+    u32 nrows = 0;
+    word *row = memory_pointer(0);
     /* Compute the number of rows */
     for (i = 0; i < vector[0]; i++) {
       nrows += left_multiplicities[i] * right_multiplicities[i] * dim_end[i];
@@ -551,7 +552,7 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r,
   }
   /* A workspace row for creating partial tensors in */
   te_row = /*memory_pointer_offset(extent_l + extent_r, max_irr2, max_irr_len)*/
-    my_malloc(noc_r * sizeof(unsigned int));
+    my_malloc(noc_r * sizeof(word));
   /* Rows for the Q matrices */
   for (i = 0; i < max_end; i++) {
     q_rows[i] = memory_pointer_offset(extent_l + extent_r + extent_te + extent_end, i, max_irr_len);
@@ -612,10 +613,10 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r,
   expanded_lrows = matrix_malloc(max_irr);
   expanded_rrows = matrix_malloc(nor_r);
   for (i = 0; i < max_irr; i++) {
-    expanded_lrows[i] = my_malloc(noc_l * sizeof(unsigned int));
+    expanded_lrows[i] = my_malloc(noc_l * sizeof(word));
   }
   for (i = 0; i < nor_r; i++) {
-    expanded_rrows[i] = my_malloc(noc_r * sizeof(unsigned int));
+    expanded_rrows[i] = my_malloc(noc_r * sizeof(word));
   }
   for (i = 0; i < nor_r; i++) {
     for (j = 0; j < noc_r; j++) {
@@ -628,9 +629,9 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r,
   q_row = matrix_malloc(max_irr2); /* Where to record the zero rows */
   for (i = 0; i < s; i++) {
     /* Row loop over distinct irreducibles of H */
-    unsigned int dim_irr_i = dim_irr[i];
-    unsigned int dim_endi = dim_end[i];
-    unsigned int noc_qi = noc_q[i];
+    u32 dim_irr_i = dim_irr[i];
+    u32 dim_endi = dim_end[i];
+    u32 noc_qi = noc_q[i];
     int skipping0 = i < vector[0];
     int equal0 = i == vector[0];
     /* Read ahead q[i], only needed once */
@@ -648,9 +649,9 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r,
                      NULL, NULL, p, q, h_p, h_q, s, h_o, outp, rows, lrows, rrows);
     }
     for (j = 0; j < noc_qi; j++) {
-      unsigned int acc = 0;
+      word acc = 0;
       for (k = 0; k < nor_q[i]; k++) {
-        unsigned int elt = get_element_from_row(nob, j, q_rows[k]);
+        word elt = get_element_from_row(nob, j, q_rows[k]);
         acc |= elt;
       }
       q_row[j] = acc;
@@ -681,35 +682,35 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r,
                  i, alpha, beta);
 #endif
         } else {
-          unsigned int beta_i = n_r + beta * dim_irr_i;
-          unsigned int o_c = 0, m_c = 0, n_c = 0;
+          u32 beta_i = n_r + beta * dim_irr_i;
+          u32 o_c = 0, m_c = 0, n_c = 0;
           for (j = 0; j < dim_endi; j++) {
             row_init(rows[j], len);
           }
           for (j = 0; j < s; j++) {
             /* Column loop over distinct irreducibles of H */
-            unsigned int dim_irr_j = dim_irr[j];
-            unsigned int nobj = nob * dim_irr_j;
-            unsigned int dim_endj = dim_end[j];
-            unsigned int len_pj = len_p[j];
-            unsigned int len_qj = len_q[j];
-            unsigned int noc_qj = noc_q[j];
-            unsigned int left_multiplicitiesj = left_multiplicities[j];
-            unsigned int right_multiplicitiesj = right_multiplicities[j];
-            unsigned int **p_rowsj = p_rows + j * max_irr2;
-            unsigned int p_rowsj_elt = get_element_from_row(nob, 0, *p_rowsj);
+            u32 dim_irr_j = dim_irr[j];
+            u32 nobj = nob * dim_irr_j;
+            u32 dim_endj = dim_end[j];
+            u32 len_pj = len_p[j];
+            u32 len_qj = len_q[j];
+            u32 noc_qj = noc_q[j];
+            u32 left_multiplicitiesj = left_multiplicities[j];
+            u32 right_multiplicitiesj = right_multiplicities[j];
+            word **p_rowsj = p_rows + j * max_irr2;
+            word p_rowsj_elt = get_element_from_row(nob, 0, *p_rowsj);
             for (gamma = 0; gamma < left_multiplicitiesj; gamma++) {
               /* Column loop over multiplicity of Sj */
               for (delta = 0; delta < right_multiplicitiesj; delta++) {
                 /* Column loop over multiplicity of Sj* */
-                unsigned int te_i, te_o_r;
-                unsigned int base_i = n_c + delta * dim_irr_j;
-                unsigned int **arg1, **arg2;
+                u32 te_i, te_o_r;
+                u32 base_i = n_c + delta * dim_irr_j;
+                word **arg1, **arg2;
                 te_o_r = 0;
                 for (te_i = 0; te_i < dim_irr_i; te_i++) {
                   /* Rows of M */
-                  unsigned int *expanded_lrow = expanded_lrows[te_i] + m_c + gamma * dim_irr_j;
-                  unsigned int te_j;
+                  word *expanded_lrow = expanded_lrows[te_i] + m_c + gamma * dim_irr_j;
+                  u32 te_j;
                   for (te_j = 0; te_j < dim_irr_i; te_j++) {
                     /* Rows of N */
                     if (0 != q_row[te_o_r]) {
@@ -718,20 +719,20 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r,
                                    te_o_r, max_irr_len, dim_irr_j, expanded_lrow,
                                    base_i, row_operations, te_row, nob, elts_per_word_nob, nobj);
 #else
-                      unsigned int te_o_c_word = 0;
-                      unsigned int te_o_c_offset = 0;
-                      unsigned int word = 0;
-                      unsigned int *expanded_rrow = expanded_rrows[beta_i + te_j] + base_i;
-                      unsigned int *te_rowsr = te_rows[te_o_r];
-                      unsigned int *expanded_lrow1 = expanded_lrow;
-                      unsigned int *expanded_lrow2 = expanded_lrow + dim_irr_j;
+                      u32 te_o_c_word = 0;
+                      u32 te_o_c_offset = 0;
+                      word elts = 0;
+                      word *expanded_rrow = expanded_rrows[beta_i + te_j] + base_i;
+                      word *te_rowsr = te_rows[te_o_r];
+                      word *expanded_lrow1 = expanded_lrow;
+                      word *expanded_lrow2 = expanded_lrow + dim_irr_j;
                       row_init(te_rowsr, max_irr_len);
                       while (expanded_lrow1 < expanded_lrow2) {
                         /* Columns of M */
-                        unsigned int elt = *expanded_lrow1;
+                        word elt = *expanded_lrow1;
                         if (0 != elt) {
-                          unsigned int *row = expanded_rrow; /* was rrows */
-                          unsigned int *row1;
+                          word *row = expanded_rrow; /* was rrows */
+                          word *row1;
                           if (1 != elt) {
                             (*row_operations.scaler)(row, te_row, dim_irr_j, elt);
                             row = te_row;
@@ -739,28 +740,28 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r,
                           row1 = row + dim_irr_j;
                           while (row < row1) {
                             elt = *row;
-                            word |= elt << te_o_c_offset;
+                            elts |= elt << te_o_c_offset;
                             te_o_c_offset += nob;
                             if (te_o_c_offset > lim) {
                               te_o_c_offset = 0;
-                              te_rowsr[te_o_c_word] = word;
+                              te_rowsr[te_o_c_word] = elts;
                               te_o_c_word++;
-                              word = 0;
+                              elts = 0;
                             }
                             row++;
                           }
                         } else {
                           te_o_c_offset += nobj;
                           if (te_o_c_offset > lim) {
-                            te_rowsr[te_o_c_word] = word;
+                            te_rowsr[te_o_c_word] = elts;
                             te_o_c_word += te_o_c_offset / elts_per_word_nob;
                             te_o_c_offset %= elts_per_word_nob;
-                            word = 0;
+                            elts = 0;
                           }
                         }
                         expanded_lrow1++;
                       }
-                      te_rowsr[te_o_c_word] = word;
+                      te_rowsr[te_o_c_word] = elts;
 #endif
                     }
                     te_o_r++;
@@ -814,11 +815,11 @@ int tcondense(unsigned int s, const char *mults_l, const char *mults_r,
                 }
                 /* Write into the output */
                 for (k = 0; k < dim_endi; k++) {
-                  unsigned int *rowsk =  rows[k];
-                  unsigned int *te_rowsk =  arg2[k];
-                  unsigned int l;
+                  word *rowsk =  rows[k];
+                  word *te_rowsk =  arg2[k];
+                  u32 l;
                   for (l = 0; l < dim_endj; l++) {
-                    unsigned int elt = get_element_from_row_with_params(nob, l, mask, elts_per_word, te_rowsk);
+                    word elt = get_element_from_row_with_params(nob, l, mask, elts_per_word, te_rowsk);
                     if (0 != elt) {
                       put_element_to_row(nob, o_c + l, rowsk, elt);
                     }

@@ -1,5 +1,5 @@
 /*
- * $Id: vp.c,v 1.10 2005/05/25 18:35:56 jon Exp $
+ * $Id: vp.c,v 1.11 2005/06/22 21:52:54 jon Exp $
  *
  * Function to permute some vectors under two generators
  *
@@ -27,15 +27,13 @@
 
 typedef struct vec_struct
 {
-  unsigned int index;
-  unsigned int hash;
+  u32 index;
+  u32 hash;
 } vec;
 
-static unsigned int row_len = 0;
+static u32 row_len = 0;
 
-static unsigned int **rows;
-
-static unsigned int row_index = 0; /* Where the rows start */
+static word **rows;
 
 static unsigned int search_hash_fails = 0;
 
@@ -45,16 +43,16 @@ static int compar1(const void *e1, const void *e2)
 {
   vec **v1 = (vec **)e1;
   vec **v2 = (vec **)e2;
-  unsigned int h1 = (*v1)->hash;
-  unsigned int h2 = (*v2)->hash;
+  u32 h1 = (*v1)->hash;
+  u32 h2 = (*v2)->hash;
   int res;
   if (h1 != h2) {
     return (h1 < h2) ? -1 : 1;
   }
   /* Hashes equal */
-  res = memcmp(rows[(*v1)->index - row_index],
-               rows[(*v2)->index - row_index],
-               row_len * sizeof(unsigned int));
+  res = memcmp(rows[(*v1)->index],
+               rows[(*v2)->index],
+               row_len * sizeof(**rows));
   if (0 != res) {
     search_hash_fails++;
   }
@@ -72,9 +70,9 @@ static int compar2(const void *e1, const void *e2)
     return (h1 < h2) ? -1 : 1;
   }
   /* Hashes equal */
-  res = memcmp(rows[(*v1)->index - row_index],
-               rows[(*v2)->index - row_index],
-               row_len * sizeof(unsigned int));
+  res = memcmp(rows[(*v1)->index],
+               rows[(*v2)->index],
+               row_len * sizeof(**rows));
   if (0 != res) {
     sort_hash_fails++;
   }
@@ -87,9 +85,9 @@ struct gen_struct
 {
   FILE *f;
   const char *m;
-  unsigned int nor;
+  u32 nor;
   int is_map;
-  unsigned int *map;
+  word *map;
   gen next;
 };
 
@@ -103,9 +101,10 @@ static void cleanup(FILE *f1, FILE *f2, FILE *f3)
     fclose(f3);
 }
 
-static unsigned int hash_fn(unsigned int *row, unsigned int len)
+static u32 hash_fn(word *row, u32 len)
 {
-  unsigned int res = 0, i;
+  u32 i;
+  word res = 0;
   assert(NULL != row);
   for (i = 0; i < len; i++) {
     res ^= row[i];
@@ -113,17 +112,17 @@ static unsigned int hash_fn(unsigned int *row, unsigned int len)
   return res;
 }
 
-unsigned int permute(const char *in, const char *out, const char *a,
+u32 permute(const char *in, const char *out, const char *a,
                      const char *b, const char *a_out, const char *b_out,
                      int projective, const char *name)
 {
   FILE *inp = NULL, *outp = NULL, *f_a = NULL, *f_b = NULL;
   const header *h_in, *h_a, *h_b;
   header *h_out, *h_map;
-  unsigned int prime, nob, noc, nor, len, max_rows, d, hash_len;
-  unsigned int grease_memory, grease_start;
-  unsigned int *map_a, *map_b;
-  unsigned int *hashes;
+  u32 prime, nob, noc, nor, len, max_rows, d, hash_len;
+  u32 grease_memory, grease_start;
+  word *map_a, *map_b;
+  u32 *hashes;
   grease_struct grease;
   prime_ops prime_operations;
   row_ops row_operations;
@@ -204,9 +203,9 @@ unsigned int permute(const char *in, const char *out, const char *a,
   map_b = malloc_map(max_rows);
   gen_a.map = map_a;
   gen_b.map = map_b;
-  memset(map_a, 0, max_rows * sizeof(unsigned int));
-  memset(map_b, 0, max_rows * sizeof(unsigned int));
-  hashes = my_malloc(max_rows * sizeof(unsigned int));
+  memset(map_a, 0, max_rows * sizeof(word));
+  memset(map_b, 0, max_rows * sizeof(word));
+  hashes = my_malloc(max_rows * sizeof(u32));
   records = my_malloc(max_rows * sizeof(vec));
   record_ptrs = my_malloc(max_rows * sizeof(vec *));
   for (d = 0; d < max_rows; d++) {
@@ -234,8 +233,8 @@ unsigned int permute(const char *in, const char *out, const char *a,
   }
   if (projective) {
     for (d = 0; d < nor; d++) {
-      unsigned int pos;
-      unsigned int elt = first_non_zero(rows[d], nob, len, &pos);
+      u32 pos;
+      word elt = first_non_zero(rows[d], nob, len, &pos);
       NOT_USED(pos);
       if (0 != elt && 1 != elt) {
         elt = prime_operations.invert(elt);
@@ -245,8 +244,8 @@ unsigned int permute(const char *in, const char *out, const char *a,
   }
   qsort(record_ptrs, nor, sizeof(vec *), &compar2);
   while (nor < max_rows && (gen_a.nor < nor || gen_b.nor < nor)) {
-    unsigned int rows_to_do = max_rows - nor;
-    unsigned int i, j = 0;
+    u32 rows_to_do = max_rows - nor;
+    u32 i, j = 0;
     vec row_vec, **found_row, *row_vec_ptr = &row_vec;
     /* Ensure we don't try to do too many */
     rows_to_do = (rows_to_do + gen->nor > nor) ? (nor - gen->nor) : rows_to_do;
@@ -257,10 +256,10 @@ unsigned int permute(const char *in, const char *out, const char *a,
       exit(1);
     }
     for (i = 0; i < rows_to_do; i++) {
-      unsigned int hash;
+      word hash;
       if (projective) {
-        unsigned int pos;
-        unsigned int elt = first_non_zero(rows[nor + i], nob, len, &pos);
+        u32 pos;
+        word elt = first_non_zero(rows[nor + i], nob, len, &pos);
         NOT_USED(pos);
         if (0 != elt && 1 != elt) {
           elt = prime_operations.invert(elt);
@@ -274,7 +273,7 @@ unsigned int permute(const char *in, const char *out, const char *a,
       if (NULL == found_row) {
         /* Got a new row */
         /* The image of row gen->nor + i under gen is row nor + j */
-        unsigned int *row;
+        word *row;
         /* Swap pointers */
         row = rows[nor + j];
         rows[nor + j] = rows[nor + i];

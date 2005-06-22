@@ -1,5 +1,5 @@
 /*
- * $Id: project.c,v 1.10 2004/04/25 16:31:48 jon Exp $
+ * $Id: project.c,v 1.11 2005/06/22 21:52:53 jon Exp $
  *
  * Function to project into quotient space representation
  *
@@ -41,10 +41,11 @@ void project(const char *range, const char *in,
 {
   FILE *inp_r = NULL, *inp_g = NULL, *outp = NULL;
   const header *h_in_r, *h_in_g, *h_out;
-  unsigned int prime, prime_g, nob, noc_r, nor_r, nor_g, nor_o, noc_o, len, len_o, max_rows, d, i, j, k, elt, step, mask, elts_per_word;
-  unsigned int **rows1, **rows2;
+  u32 prime, prime_g, nob, noc_r, nor_r, nor_g, nor_o, noc_o, len, len_o, max_rows, d, i, j, k, step, elts_per_word;
+  word elt, mask;
+  word **rows1, **rows2;
   int *map_r;
-  unsigned int *map_o;
+  word *map_o;
   row_ops row_operations;
   grease_struct grease;
   long long pos;
@@ -112,13 +113,13 @@ void project(const char *range, const char *in,
     rows2[d] = memory_pointer_offset(450, d, len);
   }
   map_r = my_malloc(nor_r * sizeof(int));
-  map_o = my_malloc(noc_r * sizeof(int));
+  map_o = my_malloc(noc_r * sizeof(u32));
   memset(map_r, 0, nor_r * sizeof(int));
-  memset(map_o, 0, noc_r * sizeof(int));
+  memset(map_o, 0, noc_r * sizeof(u32));
   /* Now set up the map */
   pos = ftello64(inp_r); /* Where we are in the range */
   for (i = 0; i < nor_r; i += step) {
-    unsigned int j, stride_i = (i + step <= nor_r) ? step : nor_r - i;
+    u32 j, stride_i = (i + step <= nor_r) ? step : nor_r - i;
     errno = 0;
     if (0 == endian_read_matrix(inp_r, rows1, len, stride_i)) {
       if ( 0 != errno) {
@@ -162,8 +163,8 @@ void project(const char *range, const char *in,
   j = 0; /* Counting the rows from g */
   while (j < nor_o) {
     /* Read some rows from inp_g into rows2 */
-    unsigned int stride_j = (j + step <= nor_o) ? step : nor_o - j;
-    unsigned int *row_o = memory_pointer(900);
+    u32 stride_j = (j + step <= nor_o) ? step : nor_o - j;
+    word *row_o = memory_pointer(900);
     for (d = 0; d < stride_j; d++) {
       if (0 == read_row(1 == prime_g, inp_g, rows2[d],
                         nob, noc_r, len, d, in, name)) {
@@ -179,7 +180,7 @@ void project(const char *range, const char *in,
       exit(1);
     }
     for (k = 0; k < nor_r; k += step) {
-      unsigned int stride_k = (k + step <= nor_r) ? step : nor_r - k;
+      u32 stride_k = (k + step <= nor_r) ? step : nor_r - k;
       errno = 0;
       if (0 == in_store && 0 == endian_read_matrix(inp_r, rows1, len, stride_k)) {
         if ( 0 != errno) {

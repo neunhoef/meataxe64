@@ -1,5 +1,5 @@
 /*
- * $Id: zmsp.c,v 1.5 2004/08/21 13:22:31 jon Exp $
+ * $Id: zmsp.c,v 1.6 2005/06/22 21:52:54 jon Exp $
  *
  * Spin some vectors under multiple generators
  *
@@ -21,7 +21,7 @@ static void msp_usage(void)
 
 int main(int argc, const char * const argv[])
 {
-  unsigned int dim;
+  u32 dim;
 
   argv = parse_line(argc, argv, &argc);
   if (4 > argc) {

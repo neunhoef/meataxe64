@@ -1,5 +1,5 @@
 /*
- * $Id: eim.c,v 1.12 2004/01/31 13:24:51 jon Exp $
+ * $Id: eim.c,v 1.13 2005/06/22 21:52:53 jon Exp $
  *
  * implode a matrix (ie glue exploded matrices together)
  *
@@ -30,9 +30,9 @@ static void eim_usage(void)
   fprintf(stderr, "%s: usage: %s %s <mat> <dir>\n", name, name, parse_usage());
 }
 
-static void fail(FILE **inputs, FILE *output, unsigned int cols)
+static void fail(FILE **inputs, FILE *output, u32 cols)
 {
-  unsigned int i;
+  u32 i;
   assert(NULL != output);
   assert(NULL != inputs);
   for (i = 0; i < cols; i++) {
@@ -50,11 +50,11 @@ int main(int argc,  const char *const argv[])
   const char *matrix;
   const header *h = NULL, *outh;
   const header **headers;
-  unsigned int *row1, *row2;
-  unsigned int nob = 0, nod = 0, nor, len, prime = 0;
-  unsigned int col_pieces, row_pieces;
-  unsigned int rows, cols;
-  unsigned int i, j;
+  word *row1, *row2;
+  u32 nob = 0, nod = 0, nor, len, prime = 0;
+  u32 col_pieces, row_pieces;
+  u32 rows, cols;
+  u32 i, j;
   const char **names;
   argv = parse_line(argc, argv, &argc);
   if (3 != argc) {
@@ -116,7 +116,7 @@ int main(int argc,  const char *const argv[])
   inputs = my_malloc(row_pieces * sizeof(*inputs));
   headers = my_malloc(row_pieces * sizeof(*headers));
   for (i = 0; i < row_pieces; i++) {
-    unsigned int k;
+    u32 k;
     for (j = 0; j < col_pieces; j++) {
       const char *piece_name = pathname(argv[2], names[i * row_pieces + j]);
       if (0 == open_and_read_binary_header(inputs + j, headers + j, piece_name, name)) {

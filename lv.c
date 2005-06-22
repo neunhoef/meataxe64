@@ -1,5 +1,5 @@
 /*
- * $Id: lv.c,v 1.6 2005/06/06 08:01:37 jon Exp $
+ * $Id: lv.c,v 1.7 2005/06/22 21:52:53 jon Exp $
  *
  * Function to lift vectors from a quotient space
  *
@@ -33,14 +33,15 @@ static void cleanup(FILE *f1, FILE *f2, FILE *f3)
 }
 
 void lift_vectors(const char *range, const char *vectors,
-          const char *out, const char *name)
+                  const char *out, const char *name)
 {
   FILE *inp1 = NULL, *inp2 = NULL, *outp = NULL;
   const header *h_in1, *h_in2, *h_out;
-  unsigned int prime, nob, noc, nor, nor_o, noc_i, len_i, noc_o, len, len_o, i, j, elt, mask, elts_per_word;
-  unsigned int *row_in, *row_out;
+  u32 prime, nob, noc, nor, nor_o, noc_i, len_i, noc_o, len, len_o, i, j, elts_per_word;
+  word elt, mask;
+  word *row_in, *row_out;
   int *map;
-  unsigned int *col_incs;
+  u32 *col_incs;
   assert(NULL != range);
   assert(NULL != vectors);
   assert(NULL != out);
@@ -98,7 +99,7 @@ void lift_vectors(const char *range, const char *vectors,
   }
   header_free(h_out);
   map = my_malloc(nor * sizeof(int));
-  col_incs = my_malloc(noc * sizeof(unsigned int));
+  col_incs = my_malloc(noc * sizeof(u32));
   if (0 == subspace_map(inp1, map, nor, len, nob, row_in, range, name)) {
     cleanup(inp1, inp2, outp);
     exit(1);
@@ -106,10 +107,10 @@ void lift_vectors(const char *range, const char *vectors,
   /* inp1 no longer necessary */
   fclose(inp1);
   /* Set up the column increment points */
-  memset(col_incs, 0, noc * sizeof(unsigned int));
+  memset(col_incs, 0, noc * sizeof(u32));
   for (i = 0; i < nor; i += 1) {
     int k = map[i];
-    assert(0 <= k && (unsigned int)k < noc);
+    assert(0 <= k && (u32)k < noc);
     /* There's a column to be inserted here */
     assert(0 == col_incs[k]);
     col_incs[k]++;
@@ -118,7 +119,7 @@ void lift_vectors(const char *range, const char *vectors,
   /* Now step through vectors computing lifted representation */
   for (i = 0; i < nor_o; i += 1) {
     /* Initialise output row */
-    unsigned int l = 0;
+    u32 l = 0;
     row_init(row_out, len_o);
     /* Read row of vectors */
     errno = 0;

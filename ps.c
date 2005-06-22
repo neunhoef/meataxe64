@@ -1,5 +1,5 @@
 /*
- * $Id: ps.c,v 1.3 2002/06/28 08:39:16 jon Exp $
+ * $Id: ps.c,v 1.4 2005/06/22 21:52:53 jon Exp $
  *
  * Function to compute permutation space representation
  *
@@ -21,24 +21,24 @@
 
 typedef struct vec_struct
 {
-  unsigned int index;
-  unsigned int hash;
-  unsigned int *row;
+  u32 index;
+  word hash;
+  word *row;
 } vec;
 
-static unsigned int row_len = 0;
+static u32 row_len = 0;
 
 static int compar(const void *e1, const void *e2)
 {
   vec **v1 = (vec **)e1;
   vec **v2 = (vec **)e2;
-  unsigned int h1 = (*v1)->hash;
-  unsigned int h2 = (*v2)->hash;
+  word h1 = (*v1)->hash;
+  word h2 = (*v2)->hash;
   if (h1 != h2) {
     return (h1 < h2) ? -1 : 1;
   }
   /* Hashes equal */
-  return memcmp((*v1)->row, (*v2)->row, row_len * sizeof(unsigned int));
+  return memcmp((*v1)->row, (*v2)->row, row_len * sizeof(word));
 }
 
 static void cleanup(FILE *f1, FILE *f2, FILE *f3)
@@ -51,9 +51,10 @@ static void cleanup(FILE *f1, FILE *f2, FILE *f3)
     fclose(f3);
 }
 
-static unsigned int hash_fn(unsigned int *row, unsigned int len)
+static word hash_fn(word *row, u32 len)
 {
-  unsigned int res = 0, i;
+  word res = 0;
+  u32 i;
   assert(NULL != row);
   for (i = 0; i < len; i++) {
     res ^= row[i];
@@ -66,9 +67,9 @@ void permutation_space(const char *range, const char *image,
 {
   FILE *inp1 = NULL, *inp2 = NULL, *outp = NULL;
   const header *h_in1, *h_in2, *h_out;
-  unsigned int prime, nob, noc, nor, nor_o, noc_o, len, i, hash_len;
-  unsigned int *row_in, **rows;
-  unsigned int *hashes;
+  u32 prime, nob, noc, nor, nor_o, noc_o, len, i, hash_len;
+  word *row_in, **rows;
+  word *hashes;
   vec *records, **record_ptrs;
   assert(NULL != range);
   assert(NULL != image);
@@ -140,7 +141,7 @@ void permutation_space(const char *range, const char *image,
   }
   /* inp1 no longer necessary */
   fclose(inp1);
-  hashes = my_malloc(nor_o * sizeof(unsigned int));
+  hashes = my_malloc(nor_o * sizeof(word));
   for (i = 0; i < nor_o; i += 1) {
     hashes[i] = hash_fn(rows[i], hash_len);
     records[i].hash = hashes[i];
@@ -152,7 +153,8 @@ void permutation_space(const char *range, const char *image,
   /* Now step through image computing subspace representation */
   for (i = 0; i < nor_o; i += 1) {
     /* Read row of image */
-    unsigned int row_out = 0, hash;
+    u32 row_out = 0;
+    word hash;
     vec row_vec, **found_row, *row_vec_ptr = &row_vec;
     errno = 0;
     if (0 == endian_read_row(inp2, row_in, len)) {
@@ -177,7 +179,7 @@ void permutation_space(const char *range, const char *image,
       exit(1);
     }
     errno = 0;
-    if (0 == endian_write_int(row_out, outp)) {
+    if (0 == endian_write_word(row_out, outp)) {
       if ( 0 != errno) {
         perror(name);
       }

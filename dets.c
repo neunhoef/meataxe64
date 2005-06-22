@@ -1,5 +1,5 @@
 /*
- * $Id: dets.c,v 1.5 2004/03/29 21:43:16 jon Exp $
+ * $Id: dets.c,v 1.6 2005/06/22 21:52:53 jon Exp $
  *
  * Functions to compute determinants
  *
@@ -14,17 +14,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-static unsigned int det(unsigned int **rows, prime_ops prime_operations,
-                        row_ops *row_operations, unsigned int nor)
+static word det(word **rows, prime_ops prime_operations,
+                row_ops *row_operations, u32 nor)
 {
-  unsigned int i, j, k, det = 1, prime, nob, elts_per_word;
+  u32 i, j, k, prime, nob, elts_per_word;
+  word det = 1;
   prime = prime_operations.prime;
   assert(is_a_prime_power(prime));
   assert(NULL != rows);
   nob = bits_of(prime);
-  elts_per_word = bits_in_unsigned_int / nob;
+  elts_per_word = bits_in_word / nob;
   for (i = 0; i < nor; i++) {
-    unsigned int elt = first_non_zero(rows[i], nob, nor, &j);
+    word elt = first_non_zero(rows[i], nob, nor, &j);
     if (0 == elt) {
       return 0;
     } else {
@@ -57,10 +58,10 @@ static unsigned int det(unsigned int **rows, prime_ops prime_operations,
       fprintf(stderr, "Cannot handle determinants greater than 10x10\n");
       exit(1);
     } else {
-      unsigned int perm[10];
+      u32 perm[10];
       int sign = 0;
       for (i = 0; i < nor; i++) {
-        unsigned int elt = first_non_zero(rows[i], nob, nor, &j);
+        word elt = first_non_zero(rows[i], nob, nor, &j);
         NOT_USED(elt);
         perm[i] = j / elts_per_word;
       }
@@ -68,7 +69,7 @@ static unsigned int det(unsigned int **rows, prime_ops prime_operations,
         j = perm[i];
         if (i != j) {
           /* Post multiply by the cycle (i j) */
-          unsigned int k;
+          u32 k;
           assert(j > i);
           sign = 1 - sign;
           for (k = i + 1; k < nor; k++) {
@@ -88,21 +89,22 @@ static unsigned int det(unsigned int **rows, prime_ops prime_operations,
   return det;
 }
 
-unsigned int det2(prime_ops prime_operations,
-                  unsigned int e11, unsigned int e12,
-                  unsigned int e21, unsigned int e22)
+word det2(prime_ops prime_operations,
+          word e11, word e12,
+          word e21, word e22)
 {
-  unsigned int e1, e2;
+  word e1, e2;
   e1 = (*prime_operations.mul)(e11, e22);
   e2 = (*prime_operations.negate)((*prime_operations.mul)(e12, e21));
   return (*prime_operations.add)(e1, e2);
 }
 
-unsigned int det2_ptr(unsigned int **rows, unsigned int nob, prime_ops prime_operations,
-                  unsigned int row_i1, unsigned int col_i1,
-                  unsigned int row_i2, unsigned int col_i2)
+word det2_ptr(word **rows, u32 nob, prime_ops prime_operations,
+              u32 row_i1, u32 col_i1,
+              u32 row_i2, u32 col_i2)
 {
-  unsigned int e11, e21, e12, e22, mask, elts_per_word;
+  word e11, e21, e12, e22, mask;
+  u32 elts_per_word;
   assert(NULL != rows);
   mask = get_mask_and_elts(nob, &elts_per_word);
   e11 = get_element_from_row_with_params(nob, col_i1, mask, elts_per_word, rows[row_i1]);
@@ -112,12 +114,12 @@ unsigned int det2_ptr(unsigned int **rows, unsigned int nob, prime_ops prime_ope
   return det2(prime_operations, e11, e12, e21, e22);
 }
 
-unsigned int det3(prime_ops prime_operations,
-                  unsigned int e11, unsigned int e12, unsigned int e13,
-                  unsigned int e21, unsigned int e22, unsigned int e23,
-                  unsigned int e31, unsigned int e32, unsigned int e33)
+word det3(prime_ops prime_operations,
+          word e11, word e12, word e13,
+          word e21, word e22, word e23,
+          word e31, word e32, word e33)
 {
-  unsigned int e1, e2, e3, f1, f2, f3;
+  word e1, e2, e3, f1, f2, f3;
   f1 = det2(prime_operations, e22, e23, e32, e33);
   f2 = det2(prime_operations, e21, e23, e31, e33);
   f3 = det2(prime_operations, e21, e22, e31, e32);
@@ -127,12 +129,13 @@ unsigned int det3(prime_ops prime_operations,
   return (*prime_operations.add)((*prime_operations.add)(e1, e2), e3);
 }
 
-unsigned int det3_ptr(unsigned int **rows, unsigned int nob, prime_ops prime_operations,
-                      unsigned int row_i1, unsigned int col_i1,
-                      unsigned int row_i2, unsigned int col_i2,
-                      unsigned int row_i3, unsigned int col_i3)
+word det3_ptr(word **rows, u32 nob, prime_ops prime_operations,
+              u32 row_i1, u32 col_i1,
+              u32 row_i2, u32 col_i2,
+              u32 row_i3, u32 col_i3)
 {
-  unsigned int e11, e12, e13, e21, e22, e23, e31, e32, e33, mask, elts_per_word;
+  word e11, e12, e13, e21, e22, e23, e31, e32, e33, mask;
+  u32 elts_per_word;
   assert(NULL != rows);
   mask = get_mask_and_elts(nob, &elts_per_word);
   e11 = get_element_from_row_with_params(nob, col_i1, mask, elts_per_word, rows[row_i1]);
@@ -147,18 +150,18 @@ unsigned int det3_ptr(unsigned int **rows, unsigned int nob, prime_ops prime_ope
   return det3(prime_operations, e11, e12, e13, e21, e22, e23, e31, e32, e33);
 }
 
-unsigned int det4(prime_ops prime_operations,
-                  row_ops *row_operations,
-                  unsigned int e11, unsigned int e12, unsigned int e13, unsigned int e14,
-                  unsigned int e21, unsigned int e22, unsigned int e23, unsigned int e24,
-                  unsigned int e31, unsigned int e32, unsigned int e33, unsigned int e34,
-                  unsigned int e41, unsigned int e42, unsigned int e43, unsigned int e44)
+word det4(prime_ops prime_operations,
+          row_ops *row_operations,
+          word e11, word e12, word e13, word e14,
+          word e21, word e22, word e23, word e24,
+          word e31, word e32, word e33, word e34,
+          word e41, word e42, word e43, word e44)
 {
-  unsigned int r1[4];
-  unsigned int r2[4];
-  unsigned int r3[4];
-  unsigned int r4[4];
-  unsigned int *rows[4];
+  word r1[4];
+  word r2[4];
+  word r3[4];
+  word r4[4];
+  word *rows[4];
   r1[0] = e11;
   r1[1] = e12;
   r1[2] = e13;
@@ -182,14 +185,15 @@ unsigned int det4(prime_ops prime_operations,
   return det(rows, prime_operations, row_operations, 4);
 }
 
-unsigned int det4_ptr(unsigned int **rows, unsigned int nob, prime_ops prime_operations,
-                      row_ops *row_operations,
-                      unsigned int row_i1, unsigned int col_i1,
-                      unsigned int row_i2, unsigned int col_i2,
-                      unsigned int row_i3, unsigned int col_i3,
-                      unsigned int row_i4, unsigned int col_i4)
+word det4_ptr(word **rows, u32 nob, prime_ops prime_operations,
+              row_ops *row_operations,
+              u32 row_i1, u32 col_i1,
+              u32 row_i2, u32 col_i2,
+              u32 row_i3, u32 col_i3,
+              u32 row_i4, u32 col_i4)
 {
-  unsigned int e11, e12, e13, e14, e21, e22, e23, e24, e31, e32, e33, e34, e41, e42, e43, e44, mask, elts_per_word;
+  word e11, e12, e13, e14, e21, e22, e23, e24, e31, e32, e33, e34, e41, e42, e43, e44, mask;
+  u32 elts_per_word;
   assert(NULL != rows);
   mask = get_mask_and_elts(nob, &elts_per_word);
   e11 = get_element_from_row_with_params(nob, col_i1, mask, elts_per_word, rows[row_i1]);
@@ -211,20 +215,20 @@ unsigned int det4_ptr(unsigned int **rows, unsigned int nob, prime_ops prime_ope
   return det4(prime_operations, row_operations, e11, e12, e13, e14, e21, e22, e23, e24, e31, e32, e33, e34, e41, e42, e43, e44);
 }
 
-unsigned int det5(prime_ops prime_operations,
-                  row_ops *row_operations,
-                  unsigned int e11, unsigned int e12, unsigned int e13, unsigned int e14, unsigned int e15,
-                  unsigned int e21, unsigned int e22, unsigned int e23, unsigned int e24, unsigned int e25,
-                  unsigned int e31, unsigned int e32, unsigned int e33, unsigned int e34, unsigned int e35,
-                  unsigned int e41, unsigned int e42, unsigned int e43, unsigned int e44, unsigned int e45,
-                  unsigned int e51, unsigned int e52, unsigned int e53, unsigned int e54, unsigned int e55)
+word det5(prime_ops prime_operations,
+          row_ops *row_operations,
+          word e11, word e12, word e13, word e14, word e15,
+          word e21, word e22, word e23, word e24, word e25,
+          word e31, word e32, word e33, word e34, word e35,
+          word e41, word e42, word e43, word e44, word e45,
+          word e51, word e52, word e53, word e54, word e55)
 {
-  unsigned int r1[5];
-  unsigned int r2[5];
-  unsigned int r3[5];
-  unsigned int r4[5];
-  unsigned int r5[5];
-  unsigned int *rows[5];
+  word r1[5];
+  word r2[5];
+  word r3[5];
+  word r4[5];
+  word r5[5];
+  word *rows[5];
   r1[0] = e11;
   r1[1] = e12;
   r1[2] = e13;
@@ -258,15 +262,16 @@ unsigned int det5(prime_ops prime_operations,
   return det(rows, prime_operations, row_operations, 5);
 }
 
-unsigned int det5_ptr(unsigned int **rows, unsigned int nob, prime_ops prime_operations,
-                      row_ops *row_operations,
-                      unsigned int row_i1, unsigned int col_i1,
-                      unsigned int row_i2, unsigned int col_i2,
-                      unsigned int row_i3, unsigned int col_i3,
-                      unsigned int row_i4, unsigned int col_i4,
-                      unsigned int row_i5, unsigned int col_i5)
+word det5_ptr(word **rows, u32 nob, prime_ops prime_operations,
+              row_ops *row_operations,
+              u32 row_i1, u32 col_i1,
+              u32 row_i2, u32 col_i2,
+              u32 row_i3, u32 col_i3,
+              u32 row_i4, u32 col_i4,
+              u32 row_i5, u32 col_i5)
 {
-  unsigned int e11, e12, e13, e14, e15, e21, e22, e23, e24, e25, e31, e32, e33, e34, e35, e41, e42, e43, e44, e45, e51, e52, e53, e54, e55, mask, elts_per_word;
+  word e11, e12, e13, e14, e15, e21, e22, e23, e24, e25, e31, e32, e33, e34, e35, e41, e42, e43, e44, e45, e51, e52, e53, e54, e55, mask;
+  u32 elts_per_word;
   assert(NULL != rows);
   mask = get_mask_and_elts(nob, &elts_per_word);
   e11 = get_element_from_row_with_params(nob, col_i1, mask, elts_per_word, rows[row_i1]);
@@ -302,23 +307,23 @@ unsigned int det5_ptr(unsigned int **rows, unsigned int nob, prime_ops prime_ope
               e51, e52, e53, e54, e55);
 }
 
-unsigned int det6(prime_ops prime_operations,
-                  row_ops *row_operations,
-                  unsigned int e11, unsigned int e12, unsigned int e13, unsigned int e14, unsigned int e15, unsigned int e16,
-                  unsigned int e21, unsigned int e22, unsigned int e23, unsigned int e24, unsigned int e25, unsigned int e26,
-                  unsigned int e31, unsigned int e32, unsigned int e33, unsigned int e34, unsigned int e35, unsigned int e36,
-                  unsigned int e41, unsigned int e42, unsigned int e43, unsigned int e44, unsigned int e45, unsigned int e46,
-                  unsigned int e51, unsigned int e52, unsigned int e53, unsigned int e54, unsigned int e55, unsigned int e56,
-                  unsigned int e61, unsigned int e62, unsigned int e63, unsigned int e64, unsigned int e65, unsigned int e66
+word det6(prime_ops prime_operations,
+          row_ops *row_operations,
+          word e11, word e12, word e13, word e14, word e15, word e16,
+          word e21, word e22, word e23, word e24, word e25, word e26,
+          word e31, word e32, word e33, word e34, word e35, word e36,
+          word e41, word e42, word e43, word e44, word e45, word e46,
+          word e51, word e52, word e53, word e54, word e55, word e56,
+          word e61, word e62, word e63, word e64, word e65, word e66
 )
 {
-  unsigned int r1[5];
-  unsigned int r2[5];
-  unsigned int r3[5];
-  unsigned int r4[5];
-  unsigned int r5[5];
-  unsigned int r6[6];
-  unsigned int *rows[6];
+  word r1[6];
+  word r2[6];
+  word r3[6];
+  word r4[6];
+  word r5[6];
+  word r6[6];
+  word *rows[6];
   r1[0] = e11;
   r1[1] = e12;
   r1[2] = e13;
@@ -364,16 +369,17 @@ unsigned int det6(prime_ops prime_operations,
   return det(rows, prime_operations, row_operations, 6);
 }
 
-unsigned int det6_ptr(unsigned int **rows, unsigned int nob, prime_ops prime_operations,
-                      row_ops *row_operations,
-                      unsigned int row_i1, unsigned int col_i1,
-                      unsigned int row_i2, unsigned int col_i2,
-                      unsigned int row_i3, unsigned int col_i3,
-                      unsigned int row_i4, unsigned int col_i4,
-                      unsigned int row_i5, unsigned int col_i5,
-                      unsigned int row_i6, unsigned int col_i6)
+word det6_ptr(word **rows, u32 nob, prime_ops prime_operations,
+              row_ops *row_operations,
+              u32 row_i1, u32 col_i1,
+              u32 row_i2, u32 col_i2,
+              u32 row_i3, u32 col_i3,
+              u32 row_i4, u32 col_i4,
+              u32 row_i5, u32 col_i5,
+              u32 row_i6, u32 col_i6)
 {
-  unsigned int e11, e12, e13, e14, e15, e16, e21, e22, e23, e24, e25, e26, e31, e32, e33, e34, e35, e36, e41, e42, e43, e44, e45, e46, e51, e52, e53, e54, e55, e56, e61, e62, e63, e64, e65, e66, mask, elts_per_word;
+  word e11, e12, e13, e14, e15, e16, e21, e22, e23, e24, e25, e26, e31, e32, e33, e34, e35, e36, e41, e42, e43, e44, e45, e46, e51, e52, e53, e54, e55, e56, e61, e62, e63, e64, e65, e66, mask;
+  u32 elts_per_word;
   assert(NULL != rows);
   mask = get_mask_and_elts(nob, &elts_per_word);
   e11 = get_element_from_row_with_params(nob, col_i1, mask, elts_per_word, rows[row_i1]);
@@ -421,24 +427,24 @@ unsigned int det6_ptr(unsigned int **rows, unsigned int nob, prime_ops prime_ope
               e61, e62, e63, e64, e65, e66);
 }
 
-unsigned int det7(prime_ops prime_operations,
-                  row_ops *row_operations,
-                  unsigned int e11, unsigned int e12, unsigned int e13, unsigned int e14, unsigned int e15, unsigned int e16, unsigned int e17,
-                  unsigned int e21, unsigned int e22, unsigned int e23, unsigned int e24, unsigned int e25, unsigned int e26, unsigned int e27,
-                  unsigned int e31, unsigned int e32, unsigned int e33, unsigned int e34, unsigned int e35, unsigned int e36, unsigned int e37,
-                  unsigned int e41, unsigned int e42, unsigned int e43, unsigned int e44, unsigned int e45, unsigned int e46, unsigned int e47,
-                  unsigned int e51, unsigned int e52, unsigned int e53, unsigned int e54, unsigned int e55, unsigned int e56, unsigned int e57,
-                  unsigned int e61, unsigned int e62, unsigned int e63, unsigned int e64, unsigned int e65, unsigned int e66, unsigned int e67,
-                  unsigned int e71, unsigned int e72, unsigned int e73, unsigned int e74, unsigned int e75, unsigned int e76, unsigned int e77)
+word det7(prime_ops prime_operations,
+          row_ops *row_operations,
+          word e11, word e12, word e13, word e14, word e15, word e16, word e17,
+          word e21, word e22, word e23, word e24, word e25, word e26, word e27,
+          word e31, word e32, word e33, word e34, word e35, word e36, word e37,
+          word e41, word e42, word e43, word e44, word e45, word e46, word e47,
+          word e51, word e52, word e53, word e54, word e55, word e56, word e57,
+          word e61, word e62, word e63, word e64, word e65, word e66, word e67,
+          word e71, word e72, word e73, word e74, word e75, word e76, word e77)
 {
-  unsigned int r1[5];
-  unsigned int r2[5];
-  unsigned int r3[5];
-  unsigned int r4[5];
-  unsigned int r5[5];
-  unsigned int r6[6];
-  unsigned int r7[7];
-  unsigned int *rows[7];
+  word r1[7];
+  word r2[7];
+  word r3[7];
+  word r4[7];
+  word r5[7];
+  word r6[7];
+  word r7[7];
+  word *rows[7];
   r1[0] = e11;
   r1[1] = e12;
   r1[2] = e13;
@@ -498,17 +504,18 @@ unsigned int det7(prime_ops prime_operations,
   return det(rows, prime_operations, row_operations, 7);
 }
 
-unsigned int det7_ptr(unsigned int **rows, unsigned int nob, prime_ops prime_operations,
-                      row_ops *row_operations,
-                      unsigned int row_i1, unsigned int col_i1,
-                      unsigned int row_i2, unsigned int col_i2,
-                      unsigned int row_i3, unsigned int col_i3,
-                      unsigned int row_i4, unsigned int col_i4,
-                      unsigned int row_i5, unsigned int col_i5,
-                      unsigned int row_i6, unsigned int col_i6,
-                      unsigned int row_i7, unsigned int col_i7)
+word det7_ptr(word **rows, u32 nob, prime_ops prime_operations,
+              row_ops *row_operations,
+              u32 row_i1, u32 col_i1,
+              u32 row_i2, u32 col_i2,
+              u32 row_i3, u32 col_i3,
+              u32 row_i4, u32 col_i4,
+              u32 row_i5, u32 col_i5,
+              u32 row_i6, u32 col_i6,
+              u32 row_i7, u32 col_i7)
 {
-  unsigned int e11, e12, e13, e14, e15, e16, e17, e21, e22, e23, e24, e25, e26, e27, e31, e32, e33, e34, e35, e36, e37, e41, e42, e43, e44, e45, e46, e47, e51, e52, e53, e54, e55, e56, e57, e61, e62, e63, e64, e65, e66, e67, e71, e72, e73, e74, e75, e76, e77, mask, elts_per_word;
+  word e11, e12, e13, e14, e15, e16, e17, e21, e22, e23, e24, e25, e26, e27, e31, e32, e33, e34, e35, e36, e37, e41, e42, e43, e44, e45, e46, e47, e51, e52, e53, e54, e55, e56, e57, e61, e62, e63, e64, e65, e66, e67, e71, e72, e73, e74, e75, e76, e77, mask;
+  u32 elts_per_word;
   assert(NULL != rows);
   mask = get_mask_and_elts(nob, &elts_per_word);
   e11 = get_element_from_row_with_params(nob, col_i1, mask, elts_per_word, rows[row_i1]);

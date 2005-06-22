@@ -1,5 +1,5 @@
 /*
- * $Id: span.c,v 1.1 2002/10/27 11:54:26 jon Exp $
+ * $Id: span.c,v 1.2 2005/06/22 21:52:54 jon Exp $
  *
  * Function to generate elements of the span of a set of rows
  *
@@ -10,10 +10,10 @@
 #include <assert.h>
 #include "primes.h"
 
-void span(unsigned int nor, unsigned int *vector, unsigned int prime,
-          unsigned int *out_num)
+void span(u32 nor, word *vector, u32 prime,
+          u32 *out_num)
 {
-  unsigned int i, j, k, l;
+  u32 i, j, k, l;
   assert(0 != nor);
   assert(NULL != vector);
   assert(NULL != out_num);

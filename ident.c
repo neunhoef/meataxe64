@@ -1,5 +1,5 @@
 /*
- * $Id: ident.c,v 1.10 2002/06/28 08:39:16 jon Exp $
+ * $Id: ident.c,v 1.11 2005/06/22 21:52:53 jon Exp $
  *
  * Subroutine to generate identity matrix
  *
@@ -19,19 +19,19 @@
 #include "utils.h"
 #include "write.h"
 
-int ident(unsigned int prime, unsigned int nor, unsigned int noc, unsigned int elt,
+int ident(u32 prime, u32 nor, u32 noc, u32 elt,
           const char *out, const char *name)
 {
-  unsigned int nob, nod, len;
-  unsigned int i;
-  unsigned int *row;
+  u32 nob, nod, len;
+  u32 i;
+  word *row;
   FILE *outp;
   const header *h;
 
   assert(NULL != out);
   assert(NULL != name);
   if (1 == prime) {
-    unsigned int *map;
+    word *map;
     if (1 != elt) {
       fprintf(stderr, "%s: cannot scale a permutation\n", name);
       return 0;

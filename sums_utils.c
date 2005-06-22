@@ -1,5 +1,5 @@
 /*
- * $Id: sums_utils.c,v 1.4 2004/11/18 15:29:44 jon Exp $
+ * $Id: sums_utils.c,v 1.5 2005/06/22 21:52:54 jon Exp $
  *
  * Utilities for sums, sumf etc
  *
@@ -27,9 +27,9 @@ void copy_string(char **out, const char *in)
   strcpy(*out, in);
 }
 
-char *make_elt_script(unsigned int prime_power, unsigned int cur_power,
-                      unsigned int r, unsigned int l, unsigned int i,
-                      unsigned int nod, const char **words)
+char *make_elt_script(u32 prime_power, u32 cur_power,
+                      u32 r, u32 l, u32 i,
+                      u32 nod, const char **words)
 {
   char *initial, *name;
   assert(r < prime_power);
@@ -38,7 +38,7 @@ char *make_elt_script(unsigned int prime_power, unsigned int cur_power,
   /* First see if a recursion is required */
   if (prime_power <= cur_power) {
     /* Need to recurse */
-    unsigned int s, m, n;
+    u32 s, m, n;
     n = cur_power / prime_power;
     s = l / n;
     m = l % n;
@@ -62,23 +62,23 @@ char *make_elt_script(unsigned int prime_power, unsigned int cur_power,
   return name;
 }
 
-char *make_elt_name(const char *base, unsigned int num)
+char *make_elt_name(const char *base, u32 num)
 {
-  unsigned int len = strlen(base);
-  unsigned int digits = ((CHAR_BIT) * sizeof(unsigned int) + 2) / 3;
+  u32 len = strlen(base);
+  u32 digits = ((CHAR_BIT) * sizeof(u32) + 2) / 3;
   /* Enought digits to print in decimal */
   char *name = my_malloc(len + 1 + 3 + digits);
   sprintf(name, "%s.e.%d", base, num);
   return name;
 }
 
-int make_element(unsigned int pos, unsigned int prime, unsigned int prime_power,
-                 unsigned int i, const char **names, const char *base, const char *name)
+int make_element(u32 pos, u32 prime, u32 prime_power,
+                 u32 i, const char **names, const char *base, const char *name)
 {
   assert(pos < prime_power);
   /* prime_power = prime ** (i - 1) */
   if (0 != pos) {
-    unsigned int l, r;
+    u32 l, r;
     char *elt_pos, *elt_l;
     if (pos >= prime) {
       assert(prime_power >= prime * prime);
@@ -117,14 +117,14 @@ int make_element(unsigned int pos, unsigned int prime, unsigned int prime_power,
   return 1;
 }
 
-int next_gen(unsigned int cur_gen, unsigned int max_gen, char *gen, const unsigned int *orders, const char *word)
+int next_gen(u32 cur_gen, u32 max_gen, char *gen, const u32 *orders, const char *word)
 {
   assert(NULL != gen);
   assert(NULL != orders);
   assert(NULL != word);
   while (1) {
     char letter;
-    unsigned int len;
+    u32 len;
     cur_gen++;
     if (cur_gen >= max_gen) {
       return -1;
@@ -141,7 +141,7 @@ int next_gen(unsigned int cur_gen, unsigned int max_gen, char *gen, const unsign
       *gen = letter;
       return cur_gen;
     } else {
-      unsigned int pos = len;
+      u32 pos = len;
       /* Count occurrences at end of word */
       while (pos > 0) {
         if (word[pos - 1] == letter) {
@@ -161,9 +161,9 @@ int next_gen(unsigned int cur_gen, unsigned int max_gen, char *gen, const unsign
   } /* while */
 }
 
-static int find_word(const char *word, const char **words, unsigned int max_gen)
+static int find_word(const char *word, const char **words, u32 max_gen)
 {
-  unsigned int i;
+  u32 i;
   assert(NULL != word);
   assert(NULL != words);
   for (i = 0; i < max_gen; i++) {
@@ -175,17 +175,17 @@ static int find_word(const char *word, const char **words, unsigned int max_gen)
   return -1; /* Not found */
 }
 
-int ignore_word(unsigned int word, unsigned int max_prod, const char **words, unsigned int gen, unsigned int order, unsigned int prime)
+int ignore_word(u32 word, u32 max_prod, const char **words, u32 gen, u32 order, u32 prime)
 {
   int found_I = 0, meets_current = 0, new_word = 0, ignore;
-  unsigned int scalar = 1, i, power = prime, prev_power = 1;
+  u32 scalar = 1, i, power = prime, prev_power = 1;
   char letter = 'A' + gen;
   assert(NULL != words);
   /* First look at left multiplication */
   for (i = 1; i < max_prod && 0 == new_word; i++) {
-    unsigned int coeff = (word % power) / prev_power;
+    u32 coeff = (word % power) / prev_power;
     if (0 != coeff) {
-      unsigned int len, j;
+      u32 len, j;
       int reduces = 1;
       char *w;
       assert(NULL != words[i]);
@@ -230,9 +230,9 @@ int ignore_word(unsigned int word, unsigned int max_prod, const char **words, un
     found_I = 0;
     meets_current = 0;
     for (i = 1; i < max_prod && 0 == new_word; i++) {
-      unsigned int coeff = (word % power) / prev_power;
+      u32 coeff = (word % power) / prev_power;
       if (0 != coeff) {
-        unsigned int len, j;
+        u32 len, j;
         int reduces = 1;
         char *w;
         assert(NULL != words[i]);

@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.97 2005/06/07 20:57:36 jon Exp $
+# $Id: makefile,v 1.98 2005/06/22 21:52:53 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -35,6 +35,9 @@ ZCLEAN_TARGET=	zclean
 ZCONJ_TARGET=	zconj
 ZCT_TARGET=	zct
 ZCV_TARGET=	zcv
+ZCV32_TARGET=	zcv32to64
+ZCV64_TARGET=	zcv64to32
+ZDC_TARGET=	zdc
 ZDIAG_TARGET=	zdiag
 ZDIFF_TARGET=	zdiff
 ZDIFFD_TARGET=	zdiffd
@@ -44,6 +47,7 @@ ZFE_TARGET=	zfe
 ZFLN_TARGET=	zfln
 ZFLNF_TARGET=	zflnf
 ZFO_TARGET=	zfo
+ZFOL_TARGET=	zfol
 ZID_TARGET=	zid
 ZIMPORT_TARGET=	zimport
 ZIP_TARGET=	zip
@@ -63,6 +67,7 @@ ZNOR_TARGET=	znor
 ZNS_TARGET=	zns
 ZNSF_TARGET=	znsf
 ZPCO_TARGET=	zpco
+ZPCOL_TARGET=	zpcol
 ZPCV_TARGET=	zpcv
 ZPR_TARGET=	zpr
 ZPRIME_TARGET=	zprime
@@ -116,7 +121,7 @@ ZVP_TARGET=	zvp
 ZVPF_TARGET=	zvpf
 ZWORDS_TARGET=	zwords
 
-LIB_MODULES=	add clean clean_file clean_vectors command conj count dets diff diffd elements endian exrows extend extend_matrix files grease header ident join map map_or_row maps matrix memory msb msbf msp mspf mul mv ns nsf orbit parse pco powers primes project ps qs rand read restrict rn rnf scale script singular span spanmsp ss ss_map sums sumsf sums_utils symb system tco te tmul tra tsp tspf ttr utils vp vpf write
+LIB_MODULES=	add clean clean_file clean_vectors command conj count dc dets diff diffd elements endian exrows extend extend_matrix files grease header ident join map map_or_row maps matrix memory msb msbf msp mspf mul mv ns nsf orbit parse pco pcol powers primes project ps qs rand read restrict rn rnf scale script singular span spanmsp ss ss_map sums sumsf sums_utils symb system tco te tmul tra tsp tspf ttr utils vp vpf write
 
 CONS_MODULES=	constrain
 DTOU_MODULES=	dtou
@@ -144,6 +149,9 @@ ZCLEAN_MODULES=	rows zclean
 ZCONJ_MODULES=	zconj
 ZCT_MODULES=	ct
 ZCV_MODULES=	ip
+ZCV32_MODULES=	zcv32to64
+ZCV64_MODULES=	zcv64to32
+ZDC_MODULES=	rows zdc
 ZDIAG_MODULES=	rows zdiag
 ZDIFF_MODULES=	rows zdiff
 ZDIFFD_MODULES=	rows zdiffd
@@ -153,6 +161,7 @@ ZFE_MODULES=	rows zfe
 ZFLN_MODULES=	rows zfln
 ZFLNF_MODULES=	rows zflnf
 ZFO_MODULES=	rows zfo
+ZFOL_MODULES=	rows zfol
 ZID_MODULES=	id rows
 ZIMPORT_MODULES=	rows zimport
 ZIP_MODULES=	ipp rows
@@ -172,6 +181,7 @@ ZNOR_MODULES=	znor
 ZNS_MODULES=	rows zns
 ZNSF_MODULES=	rows znsf
 ZPCO_MODULES=	rows zpco
+ZPCOL_MODULES=	rows zpcol
 ZPCV_MODULES=	pcv rows zpcv
 ZPR_MODULES=	pr rows
 ZPRIME_MODULES=	zprime
@@ -252,6 +262,9 @@ MODULES=	$(LIB_MODULES) \
 	$(ZCONJ_MODULES) \
 	$(ZCT_MODULES) \
 	$(ZCV_MODULES) \
+	$(ZCV32_MODULES) \
+	$(ZCV64_MODULES) \
+	$(ZDC_MODULES) \
 	$(ZDIAG_MODULES) \
 	$(ZDIFF_MODULES) \
 	$(ZDIFFD_MODULES) \
@@ -261,6 +274,7 @@ MODULES=	$(LIB_MODULES) \
 	$(ZFLN_MODULES) \
 	$(ZFLNF_MODULES) \
 	$(ZFO_MODULES) \
+	$(ZFOL_MODULES) \
 	$(ZID_MODULES) \
 	$(ZIMPORT_MODULES) \
 	$(ZIP_MODULES) \
@@ -280,6 +294,7 @@ MODULES=	$(LIB_MODULES) \
 	$(ZNS_MODULES) \
 	$(ZNSF_MODULES) \
 	$(ZPCO_MODULES) \
+	$(ZPCOL_MODULES) \
 	$(ZPCV_MODULES) \
 	$(ZPR_MODULES) \
 	$(ZPRIME_MODULES) \
@@ -450,7 +465,16 @@ include targets.txt
 TARGET:=ZCV
 include targets.txt
 
+TARGET:=ZCV32
+include targets.txt
+
+TARGET:=ZCV64
+include targets.txt
+
 TARGET:=ZDIAG
+include targets.txt
+
+TARGET:=ZDC
 include targets.txt
 
 TARGET:=ZDIFF
@@ -475,6 +499,9 @@ TARGET:=ZFLNF
 include targets.txt
 
 TARGET:=ZFO
+include targets.txt
+
+TARGET:=ZFOL
 include targets.txt
 
 TARGET:=ZID
@@ -532,6 +559,9 @@ TARGET:=ZNSF
 include targets.txt
 
 TARGET:=ZPCO
+include targets.txt
+
+TARGET:=ZPCOL
 include targets.txt
 
 TARGET:=ZPCV

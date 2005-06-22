@@ -1,5 +1,5 @@
 /*
- * $Id: tcv.c,v 1.8 2005/06/06 08:01:37 jon Exp $
+ * $Id: tcv.c,v 1.9 2005/06/22 21:52:54 jon Exp $
  *
  * Function to lift vectors from a tensor condensation representation
  *
@@ -22,9 +22,9 @@
 #include "utils.h"
 #include "write.h"
 
-static void close_files_and_headers(FILE **q, const header **h_q, unsigned int i)
+static void close_files_and_headers(FILE **q, const header **h_q, u32 i)
 {
-  unsigned int j;
+  u32 j;
   assert(NULL != q);
   assert(NULL != h_q);
   for (j = 0; j < i; j++) {
@@ -35,10 +35,10 @@ static void close_files_and_headers(FILE **q, const header **h_q, unsigned int i
   }
 }
 
-static int cleanup(unsigned int *left_multiplicities, unsigned int *right_multiplicities,
-                   unsigned int *nor_q, unsigned int *noc_q, unsigned int *len_q, unsigned int *irr_q,
+static int cleanup(u32 *left_multiplicities, u32 *right_multiplicities,
+                   u32 *nor_q, u32 *noc_q, u32 *len_q, u32 *irr_q,
                    FILE *inp,
-                   FILE **q, const header **h_q, unsigned int i,
+                   FILE **q, const header **h_q, u32 i,
                    const header *h_i,
                    const header *h_o, FILE *outp)
 {
@@ -80,11 +80,11 @@ static int cleanup(unsigned int *left_multiplicities, unsigned int *right_multip
   return 0;
 }
 
-static void positions(unsigned int cf, unsigned int l, unsigned int r, unsigned int dim_r,
-                      unsigned int *left_multiplicities, unsigned int *right_multiplicities,
-                      unsigned int *irr_q, unsigned int *nor_q, unsigned int *cpos, unsigned int *ucpos)
+static void positions(u32 cf, u32 l, u32 r, u32 dim_r,
+                      u32 *left_multiplicities, u32 *right_multiplicities,
+                      u32 *irr_q, u32 *nor_q, u32 *cpos, u32 *ucpos)
 {
-  unsigned int i, start_l = 0, start_r = 0;
+  u32 i, start_l = 0, start_r = 0;
   assert(NULL != left_multiplicities);
   assert(NULL != right_multiplicities);
   assert(NULL != irr_q);
@@ -109,15 +109,15 @@ static void positions(unsigned int cf, unsigned int l, unsigned int r, unsigned 
   *cpos += (l * right_multiplicities[cf] + r) * nor_q[cf];
 }
 
-int tco_lift(unsigned int s, const char *mults_l, const char *mults_r, const char *in,
-         const char *out, int argc, const char *const *argv, const char *name)
+int tco_lift(u32 s, const char *mults_l, const char *mults_r, const char *in,
+             const char *out, int argc, const char *const *argv, const char *name)
 {
-  unsigned int *left_multiplicities = NULL, *right_multiplicities = NULL;
+  u32 *left_multiplicities = NULL, *right_multiplicities = NULL;
   FILE *inp = NULL, *outp = NULL, **q;
   const header **h_q, *h_i, *h_o;
-  unsigned int i, j, row, nob, nor_i, noc_i, len_i, noc_o, len_o, prime, max_end, max_irr, max_irr_len, extent_q, extent_i, extent_o, dim_l, dim_r, elts_per_word;
-  unsigned int *nor_q = NULL, *noc_q = NULL, *len_q = NULL, *irr_q = NULL;
-  unsigned int *row_i, *row_o, *inter_row_i, *inter_row_o;
+  u32 i, j, row, nob, nor_i, noc_i, len_i, noc_o, len_o, prime, max_end, max_irr, max_irr_len, extent_q, extent_i, extent_o, dim_l, dim_r, elts_per_word;
+  u32 *nor_q = NULL, *noc_q = NULL, *len_q = NULL, *irr_q = NULL;
+  word *row_i, *row_o, *inter_row_i, *inter_row_o;
   grease_struct grease;
   row_ops row_operations;
   assert(0 != s);
@@ -132,8 +132,8 @@ int tco_lift(unsigned int s, const char *mults_l, const char *mults_r, const cha
     fprintf(stderr, "%s: incorrect number (%d) of arguments Qi, should be %d, terminating\n", name, argc, s);
     return 0;
   }
-  left_multiplicities = my_malloc(s * sizeof(unsigned int));
-  right_multiplicities = my_malloc(s * sizeof(unsigned int));
+  left_multiplicities = my_malloc(s * sizeof(u32));
+  right_multiplicities = my_malloc(s * sizeof(u32));
   inp = fopen(mults_l, "r");
   if (NULL == inp) {
     fprintf(stderr, "%s: failed to open left multiplicities file '%s', terminating\n", name, mults_l);
@@ -184,16 +184,16 @@ int tco_lift(unsigned int s, const char *mults_l, const char *mults_r, const cha
                      q, h_q, i, h_i, NULL, NULL);
     }
   }
-  nor_q = my_malloc(s * sizeof(unsigned int));
-  noc_q = my_malloc(s * sizeof(unsigned int));
-  len_q = my_malloc(s * sizeof(unsigned int));
-  irr_q = my_malloc(s * sizeof(unsigned int));
+  nor_q = my_malloc(s * sizeof(u32));
+  noc_q = my_malloc(s * sizeof(u32));
+  len_q = my_malloc(s * sizeof(u32));
+  irr_q = my_malloc(s * sizeof(u32));
   j = 0;
   for (i = 0; i < s; i++) {
     nor_q[i] = header_get_nor(h_q[i]);
     noc_q[i] = header_get_noc(h_q[i]);
     len_q[i] = header_get_len(h_q[i]);
-    irr_q[i] = (unsigned int)sqrt(noc_q[i]);
+    irr_q[i] = (u32)sqrt(noc_q[i]);
     if (header_get_nob(h_q[i]) != nob || header_get_prime(h_q[i]) != prime ||
         irr_q[i] * irr_q[i] != noc_q[i]) {
       fprintf(stderr, "%s: header incompatibility for '%s', terminating\n", name, argv[i]);
@@ -256,7 +256,7 @@ int tco_lift(unsigned int s, const char *mults_l, const char *mults_r, const cha
   }
   (void)get_mask_and_elts(nob, &elts_per_word);
   for (row = 0; row < nor_i; row++) {
-    unsigned int col_i, col_o;
+    u32 col_i, col_o;
     if (0 == endian_read_row(inp, row_i, len_i)) {
       fprintf(stderr, "%s: failed to read row %d from %s, terminating\n", name, i, in);
       return cleanup(left_multiplicities, right_multiplicities,
@@ -265,7 +265,7 @@ int tco_lift(unsigned int s, const char *mults_l, const char *mults_r, const cha
     }
     row_init(row_o, len_o);
     for (i = 0; i < s; i++) {
-      unsigned int k, l = left_multiplicities[i], r = right_multiplicities[i], m, n;
+      u32 k, l = left_multiplicities[i], r = right_multiplicities[i], m, n;
       for (j = 0; j < l; j++) {
         for (k = 0; k < r; k++) {
           positions(i, j, k, dim_r, left_multiplicities, right_multiplicities, irr_q, nor_q, &col_i, &col_o);
@@ -276,7 +276,7 @@ int tco_lift(unsigned int s, const char *mults_l, const char *mults_r, const cha
           */
           row_init(inter_row_i, len_i);
           for (m = 0; m < nor_q[i]; m++) {
-            unsigned int elt = get_element_from_row(nob, col_i + m, row_i);
+            word elt = get_element_from_row(nob, col_i + m, row_i);
             if (0 != elt) {
               put_element_to_clean_row_with_params(nob, m, elts_per_word, inter_row_i, elt);
             }
@@ -292,9 +292,9 @@ int tco_lift(unsigned int s, const char *mults_l, const char *mults_r, const cha
           n = 0;
           for (m = 0; m < irr_q[i]; m++) {
             /* Copy from inter_row_o to row_o starting at column col_o in row_o, column n in inter_row_o  and incrementing */
-            unsigned int t;
+            u32 t;
             for (t = 0; t < irr_q[i]; t++) {
-              unsigned int elt = get_element_from_row(nob, n + t, inter_row_o);
+              word elt = get_element_from_row(nob, n + t, inter_row_o);
               if (0 != elt) {
                 put_element_to_clean_row_with_params(nob, col_o + t, elts_per_word, row_o, elt);
               }

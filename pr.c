@@ -1,5 +1,5 @@
 /*
- * $Id: pr.c,v 1.16 2004/01/04 21:22:50 jon Exp $
+ * $Id: pr.c,v 1.17 2005/06/22 21:52:53 jon Exp $
  *
  * Print a matrix
  *
@@ -18,7 +18,6 @@
 #include "parse.h"
 #include "primes.h"
 #include "read.h"
-#include "rows.h"
 #include "utils.h"
 #include "write.h"
 
@@ -36,10 +35,11 @@ int main(int argc, const char * const argv[])
 {
   const char *in;
   FILE *inp;
-  unsigned int prime, nod, noc, nor, nob, len;
-  unsigned int i, j, mask, elts_per_word;
+  u32 prime, nod, noc, nor, nob, len;
+  u32 i, j, elts_per_word;
+  word mask;
   const header *h;
-  unsigned int *row;
+  word *row;
   prime_ops prime_operations;
 
   endian_init();
@@ -68,8 +68,9 @@ int main(int argc, const char * const argv[])
   if (1 == prime) {
     /* A permutation or map */
     for (i = 0; i < nor; i++) {
+      word e;
       errno = 0;
-      if (1 != endian_read_int(&j, inp)) {
+      if (1 != endian_read_word(&e, inp)) {
         if ( 0 != errno) {
           perror(name);
         }
@@ -77,7 +78,7 @@ int main(int argc, const char * const argv[])
         fclose(inp);
         exit(1);
       }
-      printf("%12d\n", j + 1);
+      printf("%12lld\n", (unsigned long long)(e + 1));
     }
   } else {
     mask = get_mask_and_elts(nob, &elts_per_word);
@@ -93,7 +94,7 @@ int main(int argc, const char * const argv[])
       exit(1);
     }
     for (i = 0; i < nor; i++) {
-      unsigned int m = 0;
+      u32 m = 0;
       errno = 0;
       if (0 == endian_read_row(inp, row, len)) {
         if ( 0 != errno) {
@@ -104,22 +105,22 @@ int main(int argc, const char * const argv[])
         exit(1);
       }
       for (j = 0; j < noc; j++) {
-        unsigned int e;
+        word e;
         char buf[12];
-        unsigned int k;
+        u32 k;
         m = j; /* To survive the loop */
         e = get_element_from_row_with_params(nob, j, mask, elts_per_word, row);
         if (0 == (*prime_operations.decimal_rep)(&e)) {
-          fprintf(stderr, "%s: cannot convert %d with prime %d from %s, terminating\n", name, e, prime, in);
+          fprintf(stderr, "%s: cannot convert %lld with prime %d from %s, terminating\n", name, (unsigned long long)e, prime, in);
           fclose(inp);
           exit(1);
         }
-        (void)sprintf(buf, "%0d", e);
+        (void)sprintf(buf, "%0d", (u32)e);
         k = strlen(buf);
         if (k > nod) {
           /* Some precision will be lost */
           /* This shouldn't happen */
-          fprintf(stderr, "%s: cannot print %d to precision %d without loss of data, terminating\n", name, e, nod);
+          fprintf(stderr, "%s: cannot print %lld to precision %d without loss of data, terminating\n", name, (unsigned long long)e, nod);
           fclose(inp);
           exit(1);
         } else if (k < nod) {

@@ -1,5 +1,5 @@
 /*
- * $Id: id.c,v 1.15 2004/01/31 13:24:51 jon Exp $: ad.c,v 1.1 2001/08/30 18:31:45 jon Exp $
+ * $Id: id.c,v 1.16 2005/06/22 21:52:53 jon Exp $: ad.c,v 1.1 2001/08/30 18:31:45 jon Exp $
  *
  * Generate identity matrix
  *
@@ -23,7 +23,7 @@ static void id_usage(void)
 int main(int argc, const char * const argv[])
 {
   const char *out;
-  unsigned int prime, noc, nor;
+  u32 prime, noc, nor;
 
   argv = parse_line(argc, argv, &argc);
   if (5 != argc) {

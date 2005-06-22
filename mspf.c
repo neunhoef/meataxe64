@@ -1,5 +1,5 @@
 /*
- * $Id: mspf.c,v 1.19 2004/11/24 21:42:43 jon Exp $
+ * $Id: mspf.c,v 1.20 2005/06/22 21:52:53 jon Exp $
  *
  * Function to spin some vectors under multiple generators
  * using intermediate files in a temporary directory.
@@ -33,13 +33,13 @@ struct gen_struct
 {
   FILE *f;		/* File containing the generator */
   const char *m;	/* Name of the generator */
-  unsigned int nor;	/* Rows from input already multiplied by this generator */
+  u32 nor;	/* Rows from input already multiplied by this generator */
   int is_map;		/* This generator is a map */
   long long base_ptr;	/* Pointer to row nor + 1 in output basis file */
   gen next;
 };
 
-static void cleanup(FILE *f1, unsigned int count, FILE **files)
+static void cleanup(FILE *f1, u32 count, FILE **files)
 {
   if (NULL != f1)
     fclose(f1);
@@ -54,7 +54,7 @@ static void cleanup(FILE *f1, unsigned int count, FILE **files)
   }
 }
 
-static void cleanup_all(FILE *f1, unsigned int count, FILE **files,
+static void cleanup_all(FILE *f1, u32 count, FILE **files,
                         FILE *echelised, const char *name_echelised)
 {
   assert(NULL != echelised);
@@ -65,7 +65,7 @@ static void cleanup_all(FILE *f1, unsigned int count, FILE **files,
 }
 
 static int unfinished(struct gen_struct *gens,
-                      unsigned int argc, unsigned int nor)
+                      unsigned int argc, u32 nor)
 {
   while(argc > 0) {
     if (nor > gens[argc - 1].nor) {
@@ -76,17 +76,17 @@ static int unfinished(struct gen_struct *gens,
   return 0;
 }
 
-unsigned int spinf(const char *in, const char *out, const char *dir,
-                   unsigned int argc, const char * const args[], const char *name)
+u32 spinf(const char *in, const char *out, const char *dir,
+          unsigned int argc, const char * const args[], const char *name)
 {
   FILE *inp = NULL, *outp = NULL, **files = NULL, *echelised = NULL;
   const header *h_in;
   header *h_out;
   char *name_echelised = NULL;
   const char *tmp = tmp_name();
-  unsigned int prime, nob, noc, nor, len, max_rows, d, i, clean_nor;
-  unsigned int elts_per_word;
-  unsigned int **rows1, **rows2;
+  u32 prime, nob, noc, nor, len, max_rows, d, i, clean_nor;
+  u32 elts_per_word;
+  word **rows1, **rows2;
   int *map;
   grease_struct grease;
   prime_ops prime_operations;
@@ -191,7 +191,7 @@ unsigned int spinf(const char *in, const char *out, const char *dir,
   map = my_malloc(noc * sizeof(int));
   clean_nor = 0;
   for (i = 0; i < nor; i += max_rows) {
-    unsigned int stride = (i + max_rows > nor) ? nor - i : max_rows;
+    u32 stride = (i + max_rows > nor) ? nor - i : max_rows;
     errno = 0;
     if (0 == endian_read_matrix(inp, rows1, len, stride)) {
       if ( 0 != errno) {
@@ -223,14 +223,14 @@ unsigned int spinf(const char *in, const char *out, const char *dir,
   }
   (void)get_mask_and_elts(nob, &elts_per_word);
   while (nor < noc && unfinished(gens, argc, nor)) {
-    unsigned int rows_to_do = nor - gen->nor;
-    unsigned int k, old_nor = nor;
+    u32 rows_to_do = nor - gen->nor;
+    u32 k, old_nor = nor;
     /* Ensure we don't try to do too many */
     k = 0;
     while (k < rows_to_do) {
-      unsigned int stride = (k + max_rows <= rows_to_do) ? max_rows : rows_to_do - k;
-      unsigned int step = (nor > max_rows) ? max_rows : nor;
-      unsigned int elt_index = noc, index, i;
+      u32 stride = (k + max_rows <= rows_to_do) ? max_rows : rows_to_do - k;
+      u32 step = (nor > max_rows) ? max_rows : nor;
+      u32 elt_index = noc, index, i;
       /* We place the rows to multiply into rows2 */
       /* and produce the product in rows1 */
       /* Seek to correct place in echelised basis */
@@ -249,7 +249,7 @@ unsigned int spinf(const char *in, const char *out, const char *dir,
       for (i = 0; i < stride; i++) {
         int m = map[i + gen->nor];
         assert(m >= 0);
-        if ((unsigned int)m < elt_index) {
+        if ((u32)m < elt_index) {
           elt_index = m;
         }
       }

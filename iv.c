@@ -1,5 +1,5 @@
 /*
- * $Id: iv.c,v 1.7 2004/04/25 16:31:48 jon Exp $
+ * $Id: iv.c,v 1.8 2005/06/22 21:52:53 jon Exp $
  *
  * Invert a matrix
  *
@@ -26,7 +26,8 @@ void invert(const char *m1, const char *m2, const char *name)
 {
   FILE *inp, *outp;
   const header *h;
-  unsigned int prime, nob, nor, len, n, r, **mat1, **mat2;
+  u32 prime, nob, nor, len, n, r;
+  word **mat1, **mat2;
   int *map1, *map2;
   int is_perm;
   assert(NULL != m1);

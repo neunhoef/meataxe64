@@ -1,5 +1,5 @@
 /*
- * $Id: zrnf.c,v 1.9 2004/08/28 19:58:01 jon Exp $
+ * $Id: zrnf.c,v 1.10 2005/06/22 21:52:54 jon Exp $
  *
  * Compute the rank of a matrix, using temporary files
  *
@@ -21,7 +21,7 @@ static void rnf_usage(void)
 
 int main(int argc, const char * const argv[])
 {
-  unsigned int n;
+  u32 n;
 
   argv = parse_line(argc, argv, &argc);
   if (3 != argc) {

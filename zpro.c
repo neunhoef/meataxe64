@@ -1,5 +1,5 @@
 /*
- * $Id: zpro.c,v 1.5 2004/01/04 21:22:50 jon Exp $
+ * $Id: zpro.c,v 1.6 2005/06/22 21:52:54 jon Exp $
  *
  * Print an orbit_set
  *
@@ -42,12 +42,6 @@ int main(int argc, const char * const argv[])
   }
   prime = header_get_prime(h);
   nor = header_get_nor(h);
-  if (1 != prime) {
-    fprintf(stderr, "%s: %s is not an orbits file, terminating\n", name, in);
-    header_free(h);
-    fclose(inp);
-    exit(1);
-  }
   if (0 == read_orbits(inp, nor, &orbits, in, name)) {
     fprintf(stderr, "%s: cannot read orbits, terminating\n", name);
     header_free(h);

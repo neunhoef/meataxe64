@@ -1,5 +1,5 @@
 /*
- * $Id: pco.h,v 1.1 2002/06/25 10:30:12 jon Exp $
+ * $Id: pco.h,v 1.2 2005/06/22 21:52:53 jon Exp $
  *
  * Permuation condense one group element
  *
@@ -9,7 +9,7 @@
 #define included__pco
 
 extern int pcondense(const char *in1, const char *in2,
-                     unsigned int field_order,
+                     u32 field_order,
                      const char *out, const char *name);
 
 #endif

@@ -1,5 +1,5 @@
 /*
- * $Id: maps.h,v 1.1 2002/04/10 23:33:27 jon Exp $
+ * $Id: maps.h,v 1.2 2005/06/22 21:52:53 jon Exp $
  *
  * Maps from {0 .. nor-1} -> {0 .. noc-1}
  *
@@ -11,22 +11,22 @@
 #include "header.h"
 #include <stdio.h>
 
-extern unsigned int *malloc_map(unsigned int);
+extern word *malloc_map(u32);
 
-extern void map_free(unsigned int *);
+extern void map_free(word *);
 
-extern int read_map(FILE *, unsigned int nor, unsigned int *, const char *name, const char *in);
+extern int read_map(FILE *, u32 nor, word *, const char *name, const char *in);
 
-extern int write_map(FILE *, unsigned int nor, unsigned int *, const char *name, const char *out);
+extern int write_map(FILE *, u32 nor, word *, const char *name, const char *out);
 
-extern int mul_map(unsigned int *in1, unsigned int *in2, unsigned int *out,
+extern int mul_map(word *in1, word *in2, word *out,
                    const header *h1, const header *h2, const char *);
 
-extern int map_rank(FILE *inp, const header *h, const char *m, unsigned int *r, const char *name);
+extern int map_rank(FILE *inp, const header *h, const char *m, u32 *r, const char *name);
 
 extern int map_iv(FILE *inp, const header *h, const char *m1, const char *m2, const char *name);
 
-extern int read_map_element_as_row(FILE *inp, unsigned int *row, unsigned int nob,
-                                   unsigned int noc, unsigned int len, const char *in, const char *name);
+extern int read_map_element_as_row(FILE *inp, word *row, u32 nob,
+                                   u32 noc, u32 len, const char *in, const char *name);
 
 #endif

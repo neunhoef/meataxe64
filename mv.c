@@ -1,5 +1,5 @@
 /*
- * $Id: mv.c,v 1.3 2002/10/13 16:38:07 jon Exp $
+ * $Id: mv.c,v 1.4 2005/06/22 21:52:53 jon Exp $
  *
  * Function to convert rows to matrices and vv
  * Used for multiplication in tensor space
@@ -15,12 +15,13 @@
 #include "rows.h"
 #include "utils.h"
 
-void v_to_m(unsigned int *row_in, unsigned int **rows_out,
-            unsigned int nor1, unsigned int nor2,
-            unsigned int prime)
+void v_to_m(word *row_in, word **rows_out,
+            u32 nor1, u32 nor2,
+            u32 prime)
 {
   const header *h;
-  unsigned int i, j, len, nob, mask, elts_per_word;
+  u32 i, j, len, nob, elts_per_word;
+  word mask;
   assert(NULL != row_in);
   assert(NULL != rows_out);
   assert(is_a_prime_power(prime));
@@ -33,8 +34,8 @@ void v_to_m(unsigned int *row_in, unsigned int **rows_out,
   for (i = 0; i < nor1; i++) {
     row_init(rows_out[i], len);
     for (j = 0; j < nor2; j++) {
-      unsigned int k = i * nor2;
-      unsigned int elt = get_element_from_row_with_params(nob, k + j, mask, elts_per_word, row_in);
+      u32 k = i * nor2;
+      word elt = get_element_from_row_with_params(nob, k + j, mask, elts_per_word, row_in);
       if (elt) {
         put_element_to_clean_row_with_params(nob, j, elts_per_word, rows_out[i], elt);
       }
@@ -43,12 +44,13 @@ void v_to_m(unsigned int *row_in, unsigned int **rows_out,
   header_free(h);
 }
 
-extern void m_to_v(unsigned int **rows_in, unsigned int *row_out,
-                   unsigned int nor, unsigned int noc,
-                   unsigned int prime)
+extern void m_to_v(word **rows_in, word *row_out,
+                   u32 nor, u32 noc,
+                   u32 prime)
 {
   const header *h;
-  unsigned int i, j, len, nob, mask, elts_per_word;
+  u32 i, j, len, nob, elts_per_word;
+  word mask;
   assert(NULL != rows_in);
   assert(NULL != row_out);
   assert(is_a_prime_power(prime));
@@ -60,8 +62,8 @@ extern void m_to_v(unsigned int **rows_in, unsigned int *row_out,
   row_init(row_out, len);
   for (i = 0; i < nor; i++) {
     for (j = 0; j < noc; j++) {
-      unsigned int k = i * noc;
-      unsigned int elt = get_element_from_row_with_params(nob, j, mask, elts_per_word, rows_in[i]);
+      u32 k = i * noc;
+      word elt = get_element_from_row_with_params(nob, j, mask, elts_per_word, rows_in[i]);
       if (elt) {
         put_element_to_clean_row_with_params(nob, k + j, elts_per_word, row_out, elt);
       }
@@ -70,11 +72,11 @@ extern void m_to_v(unsigned int **rows_in, unsigned int *row_out,
   header_free(h);
 }
 
-void create_pointers(unsigned int *row_in, unsigned int **rows_out,
-                     unsigned int nor, unsigned int len,
-                     unsigned int prime)
+void create_pointers(word *row_in, word **rows_out,
+                     u32 nor, u32 len,
+                     u32 prime)
 {
-  unsigned int i, nob;
+  u32 i, nob;
   assert(NULL != row_in);
   assert(NULL != rows_out);
   assert(is_a_prime_power(prime));

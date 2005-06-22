@@ -27,6 +27,6 @@ _$*
 core
 # CVS default ignores end
 poo*
-derived
+derived*
 install
 profiles/*

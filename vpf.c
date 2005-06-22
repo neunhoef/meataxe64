@@ -1,5 +1,5 @@
 /*
- * $Id: vpf.c,v 1.3 2005/06/06 08:01:37 jon Exp $
+ * $Id: vpf.c,v 1.4 2005/06/22 21:52:54 jon Exp $
  *
  * Function to permute some vectors under two generators,
  * using intermediate file
@@ -29,20 +29,20 @@
 
 typedef struct vec_struct
 {
-  unsigned int index;
-  unsigned int hash;
+  u32 index;
+  u32 hash;
 } vec;
 
-static unsigned int row_len = 0;
+static u32 row_len = 0;
 
-static unsigned int **rows;
+static word **rows;
 
 static int hash_compar(const void *e1, const void *e2)
 {
   vec **v1 = (vec **)e1;
   vec **v2 = (vec **)e2;
-  unsigned int h1 = (*v1)->hash;
-  unsigned int h2 = (*v2)->hash;
+  u32 h1 = (*v1)->hash;
+  u32 h2 = (*v2)->hash;
   return (h1 < h2) ? -1 : (h1 == h2) ? 0 : 1;
 }
 
@@ -52,10 +52,10 @@ struct gen_struct
 {
   FILE *f;
   const char *m;
-  unsigned int nor;
+  u32 nor;
   int is_map;
-  unsigned int *map;
-  long long base_ptr;	/* Pointer to row nor + 1 in output file */
+  word *map;
+  s64 base_ptr;	/* Pointer to row nor + 1 in output file */
   gen next;
 };
 
@@ -71,9 +71,10 @@ static void cleanup(FILE *f1, FILE *f2, FILE *f3, FILE *tmp)
     fclose(tmp);
 }
 
-static unsigned int hash_fn(unsigned int *row, unsigned int len)
+static u32 hash_fn(word *row, u32 len)
 {
-  unsigned int res = 0, i;
+  u32 i;
+  word res = 0;
   assert(NULL != row);
   for (i = 0; i < len; i++) {
     res ^= row[i];
@@ -81,19 +82,19 @@ static unsigned int hash_fn(unsigned int *row, unsigned int len)
   return res;
 }
 
-unsigned int permute_file(const char *tmp_dir, const char *in,
-                          const char *out, const char *a,
-                          const char *b, const char *a_out, const char *b_out,
-                          int projective, const char *name)
+u32 permute_file(const char *tmp_dir, const char *in,
+                 const char *out, const char *a,
+                 const char *b, const char *a_out, const char *b_out,
+                 int projective, const char *name)
 {
   FILE *inp = NULL, *outp = NULL, *f_a = NULL, *f_b = NULL, *vectors = NULL;
   const header *h_in, *h_a, *h_b;
   header *h_out, *h_map;
-  unsigned int prime, nob, noc, nor, len, max_rows, max_rows2, d, hash_len;
-  unsigned int grease_memory, grease_start;
-  unsigned int *map_a, *map_b;
-  unsigned int *hashes;
-  long long end_ptr = 0;
+  u32 prime, nob, noc, nor, len, max_rows, max_rows2, d, hash_len;
+  u32 grease_memory, grease_start;
+  word *map_a, *map_b;
+  u32 *hashes;
+  s64 end_ptr = 0;
   grease_struct grease;
   prime_ops prime_operations;
   row_ops row_operations;
@@ -220,8 +221,8 @@ unsigned int permute_file(const char *tmp_dir, const char *in,
   }
   if (projective) {
     for (d = 0; d < nor; d++) {
-      unsigned int pos;
-      unsigned int elt = first_non_zero(rows[d], nob, len, &pos);
+      u32 pos;
+      word elt = first_non_zero(rows[d], nob, len, &pos);
       NOT_USED(pos);
       if (0 != elt && 1 != elt) {
         elt = prime_operations.invert(elt);
@@ -257,15 +258,15 @@ unsigned int permute_file(const char *tmp_dir, const char *in,
     exit(1);
   }
   end_ptr = ftello64(vectors);
-  assert(end_ptr == ((long long)sizeof(**rows)) * ((long long)len) * ((long long)nor));
+  assert(end_ptr == ((s64)sizeof(**rows)) * ((s64)len) * ((s64)nor));
   /* Sort initial rows if necessary */
   if (nor > 1) {
     qsort(record_ptrs, nor, sizeof(vec *), &hash_compar);
   }
   while (nor < maximum_rows && (gen_a.nor < nor || gen_b.nor < nor)) {
-    unsigned int rows_to_do = maximum_rows - nor;
-    unsigned int temp_space;
-    unsigned int i, j = 0;
+    u32 rows_to_do = maximum_rows - nor;
+    u32 temp_space;
+    u32 i, j = 0;
     vec row_vec, **found_row, *row_vec_ptr = &row_vec;
     /* Ensure we don't try to do too many */
     rows_to_do = (rows_to_do + gen->nor > nor) ? (nor - gen->nor) : rows_to_do;
@@ -295,8 +296,8 @@ unsigned int permute_file(const char *tmp_dir, const char *in,
     /* First, deal with projectivity */
     for (i = 0; i < rows_to_do; i++) {
       if (projective) {
-        unsigned int pos;
-        unsigned int elt =
+        u32 pos;
+        word elt =
           first_non_zero(rows[max_rows + i - rows_to_do], nob, len, &pos);
         NOT_USED(pos);
         if (0 != elt && 1 != elt) {
@@ -312,8 +313,8 @@ unsigned int permute_file(const char *tmp_dir, const char *in,
       fflush(stdout);
     }
     for (i = 0; i < rows_to_do; i++) {
-      unsigned int hash;
-      int k;
+      word hash;
+      s32 k;
       hash = hash_fn(rows[temp_space + i], hash_len);
       row_vec.hash = hash;
       row_vec.index = temp_space + i;
@@ -336,8 +337,8 @@ unsigned int permute_file(const char *tmp_dir, const char *in,
         while (found_row + k < record_ptrs + nor) {
           if (found_row[k]->hash == hash) {
             /* Read this row into rows[0] */
-            unsigned int index = found_row[k]->index;
-            fseeko64(vectors, ((long long)index) * ((long long)len) * ((long long)sizeof(**rows)), SEEK_SET);
+            u32 index = found_row[k]->index;
+            fseeko64(vectors, ((s64)index) * ((s64)len) * ((s64)sizeof(**rows)), SEEK_SET);
             if (0 == endian_read_row(vectors, *rows, len)) {
               fprintf(stderr, "%s: failed to read row %d from %s, terminating\n",
                       name, index, name_tmp);
@@ -363,8 +364,8 @@ unsigned int permute_file(const char *tmp_dir, const char *in,
       if (NULL == found_row) {
         /* A new row */
         /* The image of row gen->nor + i under gen is row nor + j */
-        unsigned int *row;
-        unsigned int hash = hash_fn(rows[temp_space + i], hash_len);
+        word *row;
+        word hash = hash_fn(rows[temp_space + i], hash_len);
         /* Swap pointers */
         row = rows[temp_space + j];
         rows[temp_space + j] = rows[temp_space + i];

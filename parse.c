@@ -1,5 +1,5 @@
 /*
- * $Id: parse.c,v 1.8 2005/06/07 20:56:13 jon Exp $
+ * $Id: parse.c,v 1.9 2005/06/22 21:52:53 jon Exp $
  *
  * Function to parse command line flags
  *
@@ -28,9 +28,9 @@ typedef struct parse_element_struct
 
 int verbose = 0;
 
-unsigned int memory = MEM_SIZE;
+u32 memory = MEM_SIZE;
 
-unsigned int max_grease = 32;
+u32 max_grease = 32;
 
 unsigned int maximum_rows = 0;
 
@@ -75,8 +75,8 @@ static parse_element parse_table[] =
 
 static void set_env_values(void)
 {
-  unsigned int len = sizeof(parse_table) / sizeof(parse_element);
-  unsigned int i;
+  u32 len = sizeof(parse_table) / sizeof(parse_element);
+  u32 i;
   for(i = 0; i < len; i++) {
     pparse_element elt = parse_table + i;
     if (NULL != elt->env_tag) {
@@ -97,10 +97,10 @@ static void set_env_values(void)
   }
 }
 
-static unsigned int parse_tag(const char *tag, const char *val, int argc)
+static u32 parse_tag(const char *tag, const char *val, int argc)
 {
-  unsigned int len = sizeof(parse_table) / sizeof(parse_element);
-  unsigned int i;
+  u32 len = sizeof(parse_table) / sizeof(parse_element);
+  u32 i;
   for(i = 0; i < len; i++) {
     pparse_element elt = parse_table + i;
     if ((nullary == elt->type || (unary == elt->type && argc > 2)) && 0 == strcmp(tag, elt->tag)) {
@@ -121,7 +121,7 @@ static unsigned int parse_tag(const char *tag, const char *val, int argc)
 
 const char *const *parse_line(int argc, const char *const argv[], int *new_argc)
 {
-  unsigned int n;
+  u32 n;
   assert(NULL != argv);
   assert(NULL != new_argc);
   set_env_values();

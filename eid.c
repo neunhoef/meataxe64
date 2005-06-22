@@ -1,5 +1,5 @@
 /*
- * $Id: eid.c,v 1.7 2004/01/31 13:24:51 jon Exp $
+ * $Id: eid.c,v 1.8 2005/06/22 21:52:53 jon Exp $
  *
  * Generate exploded identity matrix
  *
@@ -29,11 +29,11 @@ static void id_usage(void)
 int main(int argc, const char * const argv[])
 {
   const char *out;
-  unsigned int prime, nob, noc, nor, len;
-  unsigned int split, elts_in_word;
-  unsigned int cols, rows;
-  unsigned int i;
-  unsigned int *row;
+  u32 prime, nob, noc, nor, len;
+  u32 split, elts_in_word;
+  u32 cols, rows;
+  u32 i;
+  word *row;
   const char **names;
   char *ptr;
   FILE **outputs;
@@ -53,7 +53,7 @@ int main(int argc, const char * const argv[])
   noc = strtoul(argv[3], NULL, 0);
   split = strtoul(argv[4], &ptr, 0);
   nob = bits_of(prime);
-  elts_in_word = bits_in_unsigned_int / nob;
+  elts_in_word = bits_in_word / nob;
   /* Align split to word boundary */
   split = ((split + elts_in_word - 1) / elts_in_word) * elts_in_word;
   cols = (noc + split - 1) / split;

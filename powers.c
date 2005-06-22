@@ -1,5 +1,5 @@
 /*
- * $Id: powers.c,v 1.12 2004/03/29 21:43:16 jon Exp $
+ * $Id: powers.c,v 1.13 2005/06/22 21:52:53 jon Exp $
  *
  * Function to compute tensor powers of a matrix, from file
  *
@@ -34,10 +34,11 @@ int skew_square(const char *m1, const char *m2, const char *name)
 {
   FILE *inp = NULL;
   FILE *outp = NULL;
-  unsigned int prime, nob, nod, nor_in, len_in, nor_out, len_out, mask, elts_per_word;
+  u32 prime, nob, nod, nor_in, len_in, nor_out, len_out, elts_per_word;
+  word mask;
   const header *h_in = NULL, *h_out = NULL;
-  unsigned int i, j, k, l;
-  unsigned int **rows, *row_out;
+  u32 i, j, k, l;
+  word **rows, *row_out;
   prime_ops prime_operations;
   assert(NULL != m1);
   assert(NULL != m2);
@@ -101,17 +102,17 @@ int skew_square(const char *m1, const char *m2, const char *name)
     /* Down the rows of m1 */
     for (j = i + 1; j < nor_in; j++) {
       /* Down the rows of m1 again */
-      unsigned int offset = 0;
+      u32 offset = 0;
       row_init(row_out, len_out);
       for (k = 0; k + 1 < nor_in; k++) {
         /* Along the columns of m1 */
-        unsigned int e11 = get_element_from_row_with_params(nob, k, mask, elts_per_word, rows[i]);
-        unsigned int e21 = get_element_from_row_with_params(nob, k, mask, elts_per_word, rows[j]);
+        word e11 = get_element_from_row_with_params(nob, k, mask, elts_per_word, rows[i]);
+        word e21 = get_element_from_row_with_params(nob, k, mask, elts_per_word, rows[j]);
         for (l = k + 1; l < nor_in; l++) {
           /* Along the columns of m1 again */
-          unsigned int e12 = get_element_from_row_with_params(nob, l, mask, elts_per_word, rows[i]);
-          unsigned int e22 = get_element_from_row_with_params(nob, l, mask, elts_per_word, rows[j]);
-          unsigned int e = det2(prime_operations, e11, e12, e21, e22);
+          word e12 = get_element_from_row_with_params(nob, l, mask, elts_per_word, rows[i]);
+          word e22 = get_element_from_row_with_params(nob, l, mask, elts_per_word, rows[j]);
+          word e = det2(prime_operations, e11, e12, e21, e22);
           put_element_to_clean_row_with_params(nob, offset, elts_per_word, row_out, e);
           offset++;
         }
@@ -133,12 +134,13 @@ int skew_square(const char *m1, const char *m2, const char *name)
   return 1;
 }
 
-static void make_row(unsigned int nob, unsigned int i, unsigned int j,
-                     prime_ops prime_operations, unsigned int *row_out, unsigned int **rows,
-                     unsigned int len_out, unsigned int nor_in, unsigned int nor_out)
+static void make_row(u32 nob, u32 i, u32 j,
+                     prime_ops prime_operations, word *row_out, word **rows,
+                     u32 len_out, u32 nor_in, u32 nor_out)
 {
-  unsigned int offset = 0;
-  unsigned int k, l, mask, elts_per_word;
+  u32 offset = 0;
+  u32 k, l, elts_per_word;
+  word mask;
   assert(NULL != rows);
   assert(NULL != row_out);
   assert(0 != nob);
@@ -150,24 +152,24 @@ static void make_row(unsigned int nob, unsigned int i, unsigned int j,
   mask = get_mask_and_elts(nob, &elts_per_word);
   for (k = 0; k + 1 < nor_in; k++) {
     /* Along the columns of m1 */
-    unsigned int elt1 = get_element_from_row_with_params(nob, k, mask, elts_per_word, rows[i]);
-    unsigned int elt2 = get_element_from_row_with_params(nob, k, mask, elts_per_word, rows[j]);
+    word elt1 = get_element_from_row_with_params(nob, k, mask, elts_per_word, rows[i]);
+    word elt2 = get_element_from_row_with_params(nob, k, mask, elts_per_word, rows[j]);
     for (l = k + 1; l < nor_in; l++) {
       /* Along the columns of m1 again */
-      unsigned int elt3 = get_element_from_row_with_params(nob, l, mask, elts_per_word, rows[i]);
-      unsigned int elt4 = get_element_from_row_with_params(nob, l, mask, elts_per_word, rows[j]);
-      unsigned int e1 = (*prime_operations.mul)(elt1, elt4);
-      unsigned int e2 = (*prime_operations.mul)(elt2, elt3);
-      unsigned int e = (*prime_operations.add)(e1, e2);
+      word elt3 = get_element_from_row_with_params(nob, l, mask, elts_per_word, rows[i]);
+      word elt4 = get_element_from_row_with_params(nob, l, mask, elts_per_word, rows[j]);
+      word e1 = (*prime_operations.mul)(elt1, elt4);
+      word e2 = (*prime_operations.mul)(elt2, elt3);
+      word e = (*prime_operations.add)(e1, e2);
       put_element_to_clean_row_with_params(nob, offset, elts_per_word, row_out, e);
       offset++;
     }
   }
   for (k = 0; k < nor_in; k++) {
     /* Along the columns of m1 */
-    unsigned int elt1 = get_element_from_row_with_params(nob, k, mask, elts_per_word, rows[i]);
-    unsigned int elt2 = get_element_from_row_with_params(nob, k, mask, elts_per_word, rows[j]);
-    unsigned int elt3 = (*prime_operations.mul)(elt1, elt2);
+    word elt1 = get_element_from_row_with_params(nob, k, mask, elts_per_word, rows[i]);
+    word elt2 = get_element_from_row_with_params(nob, k, mask, elts_per_word, rows[j]);
+    word elt3 = (*prime_operations.mul)(elt1, elt2);
     put_element_to_clean_row_with_params(nob, offset, elts_per_word, row_out, elt3);
     offset++;
   }
@@ -178,10 +180,11 @@ int sym_square(const char *m1, const char *m2, const char *name)
 {
   FILE *inp = NULL;
   FILE *outp = NULL;
-  unsigned int prime, nob, nod, nor_in, len_in, nor_out, len_out, mask, elts_per_word;
+  u32 prime, nob, nod, nor_in, len_in, nor_out, len_out, elts_per_word;
+  word mask;
   const header *h_in = NULL, *h_out = NULL;
-  unsigned int i, j;
-  unsigned int **rows, *row_out;
+  u32 i, j;
+  word **rows, *row_out;
   prime_ops prime_operations;
   assert(NULL != m1);
   assert(NULL != m2);
@@ -275,10 +278,11 @@ int skew_cube(const char *m1, const char *m2, const char *name)
 {
   FILE *inp = NULL;
   FILE *outp = NULL;
-  unsigned int prime, nob, nod, nor_in, len_in, nor_out, len_out, mask, elts_per_word;
+  u32 prime, nob, nod, nor_in, len_in, nor_out, len_out, elts_per_word;
+  word mask;
   const header *h_in = NULL, *h_out = NULL;
-  unsigned int i, j, k, l, m, n;
-  unsigned int **rows, *row_out;
+  u32 i, j, k, l, m, n;
+  word **rows, *row_out;
   prime_ops prime_operations;
   assert(NULL != m1);
   assert(NULL != m2);
@@ -344,7 +348,7 @@ int skew_cube(const char *m1, const char *m2, const char *name)
       /* Down the rows of m1 again */
       for (k = j + 1; k < nor_in; k++) {
         /* Down the rows of m1 again */
-        unsigned int offset = 0;
+        u32 offset = 0;
         row_init(row_out, len_out);
         for (l = 0; l + 2 < nor_in; l++) {
           /* Along the columns of m1 */
@@ -353,18 +357,18 @@ int skew_cube(const char *m1, const char *m2, const char *name)
           unsigned e31 = get_element_from_row_with_params(nob, l, mask, elts_per_word, rows[k]);
           for (m = l + 1; m + 1 < nor_in; m++) {
             /* Along the columns of m1 again */
-            unsigned int e12 = get_element_from_row_with_params(nob, m, mask, elts_per_word, rows[i]);
-            unsigned int e22 = get_element_from_row_with_params(nob, m, mask, elts_per_word, rows[j]);
-            unsigned int e32 = get_element_from_row_with_params(nob, m, mask, elts_per_word, rows[k]);
+            word e12 = get_element_from_row_with_params(nob, m, mask, elts_per_word, rows[i]);
+            word e22 = get_element_from_row_with_params(nob, m, mask, elts_per_word, rows[j]);
+            word e32 = get_element_from_row_with_params(nob, m, mask, elts_per_word, rows[k]);
             for (n = m + 1; n < nor_in; n++) {
               /* Along the columns of m1 again */
-              unsigned int e13 = get_element_from_row_with_params(nob, n, mask, elts_per_word, rows[i]);
-              unsigned int e23 = get_element_from_row_with_params(nob, n, mask, elts_per_word, rows[j]);
-              unsigned int e33 = get_element_from_row_with_params(nob, n, mask, elts_per_word, rows[k]);
+              word e13 = get_element_from_row_with_params(nob, n, mask, elts_per_word, rows[i]);
+              word e23 = get_element_from_row_with_params(nob, n, mask, elts_per_word, rows[j]);
+              word e33 = get_element_from_row_with_params(nob, n, mask, elts_per_word, rows[k]);
 /*
-              unsigned int elt = det3(rows, nob, prime_operations, i, l, j, m, k, n);
+              word elt = det3(rows, nob, prime_operations, i, l, j, m, k, n);
 */
-              unsigned int elt = det3(prime_operations, e11, e12, e13, e21, e22, e23, e31, e32, e33);
+              word elt = det3(prime_operations, e11, e12, e13, e21, e22, e23, e31, e32, e33);
               put_element_to_clean_row_with_params(nob, offset, elts_per_word, row_out, elt);
               offset++;
             }
@@ -392,10 +396,11 @@ int skew_fourth(const char *m1, const char *m2, const char *name)
 {
   FILE *inp = NULL;
   FILE *outp = NULL;
-  unsigned int prime, nob, nod, nor_in, len_in, nor_out, len_out, mask, elts_per_word;
+  u32 prime, nob, nod, nor_in, len_in, nor_out, len_out, elts_per_word;
+  word mask;
   const header *h_in = NULL, *h_out = NULL;
-  unsigned int i, i_1, i_2, i_3, i_4, j_1, j_2, j_3, j_4;
-  unsigned int **rows, *row_out, *row1, *row2, *row3, *row4;
+  u32 i, i_1, i_2, i_3, i_4, j_1, j_2, j_3, j_4;
+  word **rows, *row_out, *row1, *row2, *row3, *row4;
   prime_ops prime_operations;
   row_ops row_operations;
   assert(NULL != m1);
@@ -438,10 +443,10 @@ int skew_fourth(const char *m1, const char *m2, const char *name)
     (void) cleanup(inp, outp);
     exit(2);
   }
-  row1 = my_malloc(nor_in * sizeof(unsigned int));
-  row2 = my_malloc(nor_in * sizeof(unsigned int));
-  row3 = my_malloc(nor_in * sizeof(unsigned int));
-  row4 = my_malloc(nor_in * sizeof(unsigned int));
+  row1 = my_malloc(nor_in * sizeof(word));
+  row2 = my_malloc(nor_in * sizeof(word));
+  row3 = my_malloc(nor_in * sizeof(word));
+  row4 = my_malloc(nor_in * sizeof(word));
   rows = matrix_malloc(nor_in);
   for (i = 0; i < nor_in; i++) {
     rows[i] = memory_pointer_offset(0, i, len_in);
@@ -478,36 +483,36 @@ int skew_fourth(const char *m1, const char *m2, const char *name)
         }
         for (i_4 = i_3 + 1; i_4 < nor_in; i_4++) {
           /* Down the rows of m1 again */
-          unsigned int offset = 0;
+          u32 offset = 0;
           row_init(row_out, len_out);
           for (i = 0; i < nor_in; i++) {
             row4[i] = get_element_from_row_with_params(nob, i, mask, elts_per_word, rows[i_4]);
           }
           for (j_1 = 0; j_1 + 3 < nor_in; j_1++) {
             /* Along the columns of m1 */
-            unsigned int e11 = row1[j_1];
-            unsigned int e21 = row2[j_1];
-            unsigned int e31 = row3[j_1];
-            unsigned int e41 = row4[j_1];
+            word e11 = row1[j_1];
+            word e21 = row2[j_1];
+            word e31 = row3[j_1];
+            word e41 = row4[j_1];
             for (j_2 = j_1 + 1; j_2 + 2 < nor_in; j_2++) {
               /* Along the columns of m1 again */
-              unsigned int e12 = row1[j_2];
-              unsigned int e22 = row2[j_2];
-              unsigned int e32 = row3[j_2];
-              unsigned int e42 = row4[j_2];
+              word e12 = row1[j_2];
+              word e22 = row2[j_2];
+              word e32 = row3[j_2];
+              word e42 = row4[j_2];
               for (j_3 = j_2 + 1; j_3 + 1 < nor_in; j_3++) {
                 /* Along the columns of m1 again */
-                unsigned int e13 = row1[j_3];
-                unsigned int e23 = row2[j_3];
-                unsigned int e33 = row3[j_3];
-                unsigned int e43 = row4[j_3];
+                word e13 = row1[j_3];
+                word e23 = row2[j_3];
+                word e33 = row3[j_3];
+                word e43 = row4[j_3];
                 for (j_4 = j_3 + 1; j_4 < nor_in; j_4++) {
                   /* Along the columns of m1 again */
-                  unsigned int e14 = row1[j_4];
-                  unsigned int e24 = row2[j_4];
-                  unsigned int e34 = row3[j_4];
-                  unsigned int e44 = row4[j_4];
-                  unsigned int elt = det4(prime_operations,
+                  word e14 = row1[j_4];
+                  word e24 = row2[j_4];
+                  word e34 = row3[j_4];
+                  word e44 = row4[j_4];
+                  word elt = det4(prime_operations,
                                           &row_operations,
                                           e11, e12, e13, e14,
                                           e21, e22, e23, e24,
@@ -548,10 +553,11 @@ int skew_fifth(const char *m1, const char *m2, const char *name)
 {
   FILE *inp = NULL;
   FILE *outp = NULL;
-  unsigned int prime, nob, nod, nor_in, len_in, nor_out, len_out, mask, elts_per_word;
+  u32 prime, nob, nod, nor_in, len_in, nor_out, len_out, elts_per_word;
+  word mask;
   const header *h_in = NULL, *h_out = NULL;
-  unsigned int i, i_1, i_2, i_3, i_4, i_5, j_1, j_2, j_3, j_4, j_5;
-  unsigned int **rows, *row_out, *row1, *row2, *row3, *row4, *row5;
+  u32 i, i_1, i_2, i_3, i_4, i_5, j_1, j_2, j_3, j_4, j_5;
+  word **rows, *row_out, *row1, *row2, *row3, *row4, *row5;
   prime_ops prime_operations;
   row_ops row_operations;
   assert(NULL != m1);
@@ -594,11 +600,11 @@ int skew_fifth(const char *m1, const char *m2, const char *name)
     (void) cleanup(inp, outp);
     exit(2);
   }
-  row1 = my_malloc(nor_in * sizeof(unsigned int));
-  row2 = my_malloc(nor_in * sizeof(unsigned int));
-  row3 = my_malloc(nor_in * sizeof(unsigned int));
-  row4 = my_malloc(nor_in * sizeof(unsigned int));
-  row5 = my_malloc(nor_in * sizeof(unsigned int));
+  row1 = my_malloc(nor_in * sizeof(word));
+  row2 = my_malloc(nor_in * sizeof(word));
+  row3 = my_malloc(nor_in * sizeof(word));
+  row4 = my_malloc(nor_in * sizeof(word));
+  row5 = my_malloc(nor_in * sizeof(word));
   rows = matrix_malloc(nor_in);
   for (i = 0; i < nor_in; i++) {
     rows[i] = memory_pointer_offset(0, i, len_in);
@@ -640,47 +646,47 @@ int skew_fifth(const char *m1, const char *m2, const char *name)
           }
           for (i_5 = i_4 + 1; i_5 < nor_in; i_5++) {
             /* Down the rows of m1 again */
-            unsigned int offset = 0;
+            u32 offset = 0;
             for (i = 0; i < nor_in; i++) {
               row5[i] = get_element_from_row_with_params(nob, i, mask, elts_per_word, rows[i_5]);
             }
             row_init(row_out, len_out);
             for (j_1 = 0; j_1 + 4 < nor_in; j_1++) {
               /* Along the columns of m1 */
-              unsigned int e11 = row1[j_1];
-              unsigned int e21 = row2[j_1];
-              unsigned int e31 = row3[j_1];
-              unsigned int e41 = row4[j_1];
-              unsigned int e51 = row5[j_1];
+              word e11 = row1[j_1];
+              word e21 = row2[j_1];
+              word e31 = row3[j_1];
+              word e41 = row4[j_1];
+              word e51 = row5[j_1];
               for (j_2 = j_1 + 1; j_2 + 3 < nor_in; j_2++) {
                 /* Along the columns of m1 again */
-                unsigned int e12 = row1[j_2];
-                unsigned int e22 = row2[j_2];
-                unsigned int e32 = row3[j_2];
-                unsigned int e42 = row4[j_2];
-                unsigned int e52 = row5[j_2];
+                word e12 = row1[j_2];
+                word e22 = row2[j_2];
+                word e32 = row3[j_2];
+                word e42 = row4[j_2];
+                word e52 = row5[j_2];
                 for (j_3 = j_2 + 1; j_3 + 2 < nor_in; j_3++) {
                   /* Along the columns of m1 again */
-                  unsigned int e13 = row1[j_3];
-                  unsigned int e23 = row2[j_3];
-                  unsigned int e33 = row3[j_3];
-                  unsigned int e43 = row4[j_3];
-                  unsigned int e53 = row5[j_3];
+                  word e13 = row1[j_3];
+                  word e23 = row2[j_3];
+                  word e33 = row3[j_3];
+                  word e43 = row4[j_3];
+                  word e53 = row5[j_3];
                   for (j_4 = j_3 + 1; j_4 + 1 < nor_in; j_4++) {
                     /* Along the columns of m1 again */
-                    unsigned int e14 = row1[j_4];
-                    unsigned int e24 = row2[j_4];
-                    unsigned int e34 = row3[j_4];
-                    unsigned int e44 = row4[j_4];
-                    unsigned int e54 = row5[j_4];
+                    word e14 = row1[j_4];
+                    word e24 = row2[j_4];
+                    word e34 = row3[j_4];
+                    word e44 = row4[j_4];
+                    word e54 = row5[j_4];
                     for (j_5 = j_4 + 1; j_5 < nor_in; j_5++) {
                       /* Along the columns of m1 again */
-                      unsigned int e15 = row1[j_5];
-                      unsigned int e25 = row2[j_5];
-                      unsigned int e35 = row3[j_5];
-                      unsigned int e45 = row4[j_5];
-                      unsigned int e55 = row5[j_5];
-                      unsigned int elt = det5(prime_operations,
+                      word e15 = row1[j_5];
+                      word e25 = row2[j_5];
+                      word e35 = row3[j_5];
+                      word e45 = row4[j_5];
+                      word e55 = row5[j_5];
+                      word elt = det5(prime_operations,
                                               &row_operations,
                                               e11, e12, e13, e14, e15,
                                               e21, e22, e23, e24, e25,
@@ -725,10 +731,11 @@ int skew_sixth(const char *m1, const char *m2, const char *name)
 {
   FILE *inp = NULL;
   FILE *outp = NULL;
-  unsigned int prime, nob, nod, nor_in, len_in, nor_out, len_out, mask, elts_per_word;
+  u32 prime, nob, nod, nor_in, len_in, nor_out, len_out, elts_per_word;
+  word mask;
   const header *h_in = NULL, *h_out = NULL;
-  unsigned int i, j, i_1, i_2, i_3, i_4, i_5, i_6, j_1, j_2, j_3, j_4, j_5, j_6;
-  unsigned int **rows, *row_out, **int_rows, *row1, *row2, *row3, *row4, *row5, *row6;
+  u32 i, j, i_1, i_2, i_3, i_4, i_5, i_6, j_1, j_2, j_3, j_4, j_5, j_6;
+  word **rows, *row_out, **int_rows, *row1, *row2, *row3, *row4, *row5, *row6;
   prime_ops prime_operations;
   row_ops row_operations;
   assert(NULL != m1);
@@ -775,7 +782,7 @@ int skew_sixth(const char *m1, const char *m2, const char *name)
   int_rows = matrix_malloc(nor_in);
   for (i = 0; i < nor_in; i++) {
     rows[i] = memory_pointer_offset(0, i, len_in);
-    int_rows[i] = my_malloc(nor_in * sizeof(unsigned int));
+    int_rows[i] = my_malloc(nor_in * sizeof(word));
   }
   row_out = memory_pointer(900);
   errno = 0;
@@ -814,58 +821,58 @@ int skew_sixth(const char *m1, const char *m2, const char *name)
             row5 = int_rows[i_5];
             for (i_6 = i_5 + 1; i_6 < nor_in; i_6++) {
               /* Down the rows of m1 again */
-              unsigned int offset = 0;
+              u32 offset = 0;
               row_init(row_out, len_out);
               row6 = int_rows[i_6];
               for (j_1 = 0; j_1 + 5 < nor_in; j_1++) {
                 /* Along the columns of m1 */
-                unsigned int e11 = row1[j_1];
-                unsigned int e21 = row2[j_1];
-                unsigned int e31 = row3[j_1];
-                unsigned int e41 = row4[j_1];
-                unsigned int e51 = row5[j_1];
-                unsigned int e61 = row6[j_1];
+                word e11 = row1[j_1];
+                word e21 = row2[j_1];
+                word e31 = row3[j_1];
+                word e41 = row4[j_1];
+                word e51 = row5[j_1];
+                word e61 = row6[j_1];
                 for (j_2 = j_1 + 1; j_2 + 4 < nor_in; j_2++) {
                   /* Along the columns of m1 again */
-                  unsigned int e12 = row1[j_2];
-                  unsigned int e22 = row2[j_2];
-                  unsigned int e32 = row3[j_2];
-                  unsigned int e42 = row4[j_2];
-                  unsigned int e52 = row5[j_2];
-                  unsigned int e62 = row6[j_2];
+                  word e12 = row1[j_2];
+                  word e22 = row2[j_2];
+                  word e32 = row3[j_2];
+                  word e42 = row4[j_2];
+                  word e52 = row5[j_2];
+                  word e62 = row6[j_2];
                   for (j_3 = j_2 + 1; j_3 + 3 < nor_in; j_3++) {
                     /* Along the columns of m1 again */
-                    unsigned int e13 = row1[j_3];
-                    unsigned int e23 = row2[j_3];
-                    unsigned int e33 = row3[j_3];
-                    unsigned int e43 = row4[j_3];
-                    unsigned int e53 = row5[j_3];
-                    unsigned int e63 = row6[j_3];
+                    word e13 = row1[j_3];
+                    word e23 = row2[j_3];
+                    word e33 = row3[j_3];
+                    word e43 = row4[j_3];
+                    word e53 = row5[j_3];
+                    word e63 = row6[j_3];
                     for (j_4 = j_3 + 1; j_4 + 2 < nor_in; j_4++) {
                       /* Along the columns of m1 again */
-                      unsigned int e14 = row1[j_4];
-                      unsigned int e24 = row2[j_4];
-                      unsigned int e34 = row3[j_4];
-                      unsigned int e44 = row4[j_4];
-                      unsigned int e54 = row5[j_4];
-                      unsigned int e64 = row6[j_4];
+                      word e14 = row1[j_4];
+                      word e24 = row2[j_4];
+                      word e34 = row3[j_4];
+                      word e44 = row4[j_4];
+                      word e54 = row5[j_4];
+                      word e64 = row6[j_4];
                       for (j_5 = j_4 + 1; j_5 + 1 < nor_in; j_5++) {
                         /* Along the columns of m1 again */
-                        unsigned int e15 = row1[j_5];
-                        unsigned int e25 = row2[j_5];
-                        unsigned int e35 = row3[j_5];
-                        unsigned int e45 = row4[j_5];
-                        unsigned int e55 = row5[j_5];
-                        unsigned int e65 = row6[j_5];
+                        word e15 = row1[j_5];
+                        word e25 = row2[j_5];
+                        word e35 = row3[j_5];
+                        word e45 = row4[j_5];
+                        word e55 = row5[j_5];
+                        word e65 = row6[j_5];
                         for (j_6 = j_5 + 1; j_6 < nor_in; j_6++) {
                           /* Along the columns of m1 again */
-                          unsigned int e16 = row1[j_6];
-                          unsigned int e26 = row2[j_6];
-                          unsigned int e36 = row3[j_6];
-                          unsigned int e46 = row4[j_6];
-                          unsigned int e56 = row5[j_6];
-                          unsigned int e66 = row6[j_6];
-                          unsigned int elt = det6(prime_operations,
+                          word e16 = row1[j_6];
+                          word e26 = row2[j_6];
+                          word e36 = row3[j_6];
+                          word e46 = row4[j_6];
+                          word e56 = row5[j_6];
+                          word e66 = row6[j_6];
+                          word elt = det6(prime_operations,
                                                   &row_operations,
                                                   e11, e12, e13, e14, e15, e16,
                                                   e21, e22, e23, e24, e25, e26,
@@ -912,10 +919,11 @@ int skew_seventh(const char *m1, const char *m2, const char *name)
 {
   FILE *inp = NULL;
   FILE *outp = NULL;
-  unsigned int prime, nob, nod, nor_in, len_in, nor_out, len_out, mask, elts_per_word;
+  u32 prime, nob, nod, nor_in, len_in, nor_out, len_out, elts_per_word;
+  word mask;
   const header *h_in = NULL, *h_out = NULL;
-  unsigned int i, j, i_1, i_2, i_3, i_4, i_5, i_6, i_7, j_1, j_2, j_3, j_4, j_5, j_6, j_7;
-  unsigned int **rows, *row_out, **int_rows, *row1, *row2, *row3, *row4, *row5, *row6, *row7;
+  u32 i, j, i_1, i_2, i_3, i_4, i_5, i_6, i_7, j_1, j_2, j_3, j_4, j_5, j_6, j_7;
+  word **rows, *row_out, **int_rows, *row1, *row2, *row3, *row4, *row5, *row6, *row7;
   prime_ops prime_operations;
   row_ops row_operations;
   assert(NULL != m1);
@@ -962,7 +970,7 @@ int skew_seventh(const char *m1, const char *m2, const char *name)
   int_rows = matrix_malloc(nor_in);
   for (i = 0; i < nor_in; i++) {
     rows[i] = memory_pointer_offset(0, i, len_in);
-    int_rows[i] = my_malloc(nor_in * sizeof(unsigned int));
+    int_rows[i] = my_malloc(nor_in * sizeof(word));
   }
   row_out = memory_pointer(900);
   errno = 0;
@@ -1004,73 +1012,73 @@ int skew_seventh(const char *m1, const char *m2, const char *name)
               row6 = int_rows[i_6];
               for (i_7 = i_6 + 1; i_7 < nor_in; i_7++) {
                 /* Down the rows of m1 again */
-                unsigned int offset = 0;
+                u32 offset = 0;
                 row_init(row_out, len_out);
                 row7 = int_rows[i_7];
                 for (j_1 = 0; j_1 + 6 < nor_in; j_1++) {
                   /* Along the columns of m1 */
-                  unsigned int e11 = row1[j_1];
-                  unsigned int e21 = row2[j_1];
-                  unsigned int e31 = row3[j_1];
-                  unsigned int e41 = row4[j_1];
-                  unsigned int e51 = row5[j_1];
-                  unsigned int e61 = row6[j_1];
-                  unsigned int e71 = row7[j_1];
+                  word e11 = row1[j_1];
+                  word e21 = row2[j_1];
+                  word e31 = row3[j_1];
+                  word e41 = row4[j_1];
+                  word e51 = row5[j_1];
+                  word e61 = row6[j_1];
+                  word e71 = row7[j_1];
                   for (j_2 = j_1 + 1; j_2 + 5 < nor_in; j_2++) {
                     /* Along the columns of m1 again */
-                    unsigned int e12 = row1[j_2];
-                    unsigned int e22 = row2[j_2];
-                    unsigned int e32 = row3[j_2];
-                    unsigned int e42 = row4[j_2];
-                    unsigned int e52 = row5[j_2];
-                    unsigned int e62 = row6[j_2];
-                    unsigned int e72 = row7[j_2];
+                    word e12 = row1[j_2];
+                    word e22 = row2[j_2];
+                    word e32 = row3[j_2];
+                    word e42 = row4[j_2];
+                    word e52 = row5[j_2];
+                    word e62 = row6[j_2];
+                    word e72 = row7[j_2];
                     for (j_3 = j_2 + 1; j_3 + 4 < nor_in; j_3++) {
                       /* Along the columns of m1 again */
-                      unsigned int e13 = row1[j_3];
-                      unsigned int e23 = row2[j_3];
-                      unsigned int e33 = row3[j_3];
-                      unsigned int e43 = row4[j_3];
-                      unsigned int e53 = row5[j_3];
-                      unsigned int e63 = row6[j_3];
-                      unsigned int e73 = row7[j_3];
+                      word e13 = row1[j_3];
+                      word e23 = row2[j_3];
+                      word e33 = row3[j_3];
+                      word e43 = row4[j_3];
+                      word e53 = row5[j_3];
+                      word e63 = row6[j_3];
+                      word e73 = row7[j_3];
                       for (j_4 = j_3 + 1; j_4 + 3 < nor_in; j_4++) {
                         /* Along the columns of m1 again */
-                        unsigned int e14 = row1[j_4];
-                        unsigned int e24 = row2[j_4];
-                        unsigned int e34 = row3[j_4];
-                        unsigned int e44 = row4[j_4];
-                        unsigned int e54 = row5[j_4];
-                        unsigned int e64 = row6[j_4];
-                        unsigned int e74 = row7[j_4];
+                        word e14 = row1[j_4];
+                        word e24 = row2[j_4];
+                        word e34 = row3[j_4];
+                        word e44 = row4[j_4];
+                        word e54 = row5[j_4];
+                        word e64 = row6[j_4];
+                        word e74 = row7[j_4];
                         for (j_5 = j_4 + 1; j_5 + 2 < nor_in; j_5++) {
                           /* Along the columns of m1 again */
-                          unsigned int e15 = row1[j_5];
-                          unsigned int e25 = row2[j_5];
-                          unsigned int e35 = row3[j_5];
-                          unsigned int e45 = row4[j_5];
-                          unsigned int e55 = row5[j_5];
-                          unsigned int e65 = row6[j_5];
-                          unsigned int e75 = row7[j_5];
+                          word e15 = row1[j_5];
+                          word e25 = row2[j_5];
+                          word e35 = row3[j_5];
+                          word e45 = row4[j_5];
+                          word e55 = row5[j_5];
+                          word e65 = row6[j_5];
+                          word e75 = row7[j_5];
                           for (j_6 = j_5 + 1; j_6 + 1 < nor_in; j_6++) {
                             /* Along the columns of m1 again */
-                            unsigned int e16 = row1[j_6];
-                            unsigned int e26 = row2[j_6];
-                            unsigned int e36 = row3[j_6];
-                            unsigned int e46 = row4[j_6];
-                            unsigned int e56 = row5[j_6];
-                            unsigned int e66 = row6[j_6];
-                            unsigned int e76 = row7[j_6];
+                            word e16 = row1[j_6];
+                            word e26 = row2[j_6];
+                            word e36 = row3[j_6];
+                            word e46 = row4[j_6];
+                            word e56 = row5[j_6];
+                            word e66 = row6[j_6];
+                            word e76 = row7[j_6];
                             for (j_7 = j_6 + 1; j_7 < nor_in; j_7++) {
                               /* Along the columns of m1 again */
-                              unsigned int e17 = row1[j_7];
-                              unsigned int e27 = row2[j_7];
-                              unsigned int e37 = row3[j_7];
-                              unsigned int e47 = row4[j_7];
-                              unsigned int e57 = row5[j_7];
-                              unsigned int e67 = row6[j_7];
-                              unsigned int e77 = row7[j_7];
-                              unsigned int elt = det7(prime_operations,
+                              word e17 = row1[j_7];
+                              word e27 = row2[j_7];
+                              word e37 = row3[j_7];
+                              word e47 = row4[j_7];
+                              word e57 = row5[j_7];
+                              word e67 = row6[j_7];
+                              word e77 = row7[j_7];
+                              word elt = det7(prime_operations,
                                                       &row_operations,
                                                       e11, e12, e13, e14, e15, e16, e17,
                                                       e21, e22, e23, e24, e25, e26, e27,

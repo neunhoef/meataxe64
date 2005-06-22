@@ -1,5 +1,5 @@
 /*
- * $Id: mul.c,v 1.46 2004/09/17 17:05:30 jon Exp $
+ * $Id: mul.c,v 1.47 2005/06/22 21:52:53 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
@@ -45,8 +45,8 @@ static int cleanup(FILE *inp1, FILE *inp2, FILE *outp)
 static int mul_from_maps(FILE *inp1, FILE *inp2, const header *h1, const header *h2,
                          const char *m1, const char *m2, const char *m3, const char *name)
 {
-  unsigned int nor1, nor2, noc2;
-  unsigned int *map1, *map2, *map3;
+  u32 nor1, nor2, noc2;
+  word *map1, *map2, *map3;
   header *h3;
   FILE *outp;
   assert(NULL != inp1);
@@ -93,11 +93,12 @@ static int mul_from_maps(FILE *inp1, FILE *inp2, const header *h1, const header 
   return 1;
 }
 
-static int mul_row_by_map(unsigned int *row_in, unsigned int *row_out, unsigned int *map,
-                          unsigned int noc, unsigned int len, unsigned int nob,
-                          unsigned int noc_o, prime_opsp operations, const char *m, const char *name)
+static int mul_row_by_map(word *row_in, word *row_out, word *map,
+                          u32 noc, u32 len, u32 nob,
+                          u32 noc_o, prime_opsp operations, const char *m, const char *name)
 {
-  unsigned int j, mask, elts_per_word;
+  u32 j, elts_per_word;
+  word mask;
   assert(NULL != row_in);
   assert(NULL != row_out);
   assert(NULL != map);
@@ -110,11 +111,11 @@ static int mul_row_by_map(unsigned int *row_in, unsigned int *row_out, unsigned 
   mask = get_mask_and_elts(nob, &elts_per_word);
   row_init(row_out, len);
   for (j = 0; j < noc; j++) {
-    unsigned int elt = get_element_from_row_with_params(nob, j, mask, elts_per_word, row_in);
+    word elt = get_element_from_row_with_params(nob, j, mask, elts_per_word, row_in);
     if (0 != elt) {
-      unsigned int k = map[j], elt2;
+      word k = map[j], elt2;
       if (k >= noc_o) {
-        fprintf(stderr, "%s: element %d from map %s out of range (0 - %d), terminating\n", name, k, m, noc_o - 1);
+        fprintf(stderr, "%s: element %d from map %s out of range (0 - %d), terminating\n", name, (u32)k, m, noc_o - 1);
         return 0;
       }
       elt2 = get_element_from_row_with_params(nob, k, mask, elts_per_word, row_out);
@@ -127,13 +128,13 @@ static int mul_row_by_map(unsigned int *row_in, unsigned int *row_out, unsigned 
   return 1;
 }
 
-static int store_mul_rows_by_map(unsigned int **row_in, unsigned int **row_out,
-                                 unsigned int *map,
-                                 unsigned int noc, unsigned int nor, unsigned int len, unsigned int nob,
-                                 unsigned int noc_o, prime_opsp operations,
+static int store_mul_rows_by_map(word **row_in, word **row_out,
+                                 word *map,
+                                 u32 noc, u32 nor, u32 len, u32 nob,
+                                 u32 noc_o, prime_opsp operations,
                                  const char *m, const char *name)
 {
-  unsigned int i;
+  u32 i;
   assert(NULL != row_in);
   assert(NULL != row_out);
   assert(NULL != map);
@@ -147,11 +148,11 @@ static int store_mul_rows_by_map(unsigned int **row_in, unsigned int **row_out,
   return 1;
 }
 
-static int mul_rows_by_map(unsigned int **row_in, unsigned int **row_out, FILE *inp,
-                           unsigned int noc, unsigned int nor, unsigned int len, unsigned int nob,
-                           unsigned int noc_o, prime_opsp operations, const char *m, const char *name)
+static int mul_rows_by_map(word **row_in, word **row_out, FILE *inp,
+                           u32 noc, u32 nor, u32 len, u32 nob,
+                           u32 noc_o, prime_opsp operations, const char *m, const char *name)
 {
-  unsigned int *map;
+  word *map;
   int ret;
   assert(NULL != row_in);
   assert(NULL != row_out);
@@ -173,8 +174,8 @@ static int mul_rows_by_map(unsigned int **row_in, unsigned int **row_out, FILE *
 static int mul_by_map(FILE *inp1, FILE *inp2, const header *h1, const header *h2,
                       const char *m1, const char *m2, const char *m3, const char *name)
 {
-  unsigned int nor1, noc1, nor2, noc2, prime, nob, nod, len1, len3, len, i;
-  unsigned int *map2, *row1, *row2;
+  u32 nor1, noc1, nor2, noc2, prime, nob, nod, len1, len3, len, i;
+  word *map2, *row1, *row2;
   header *h3;
   FILE *outp;
   prime_ops operations;
@@ -264,11 +265,11 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
   FILE *inp1 = NULL;
   FILE *inp2 = NULL;
   FILE *outp = NULL;
-  unsigned int prime1, prime2, nob, noc1, nor1, len1, noc2, nor2, len2;
-  unsigned int k, j;
-  unsigned int nox1, nox2, nox3, nox;
+  u32 prime1, prime2, nob, noc1, nor1, len1, noc2, nor2, len2;
+  u32 k, j;
+  u32 nox1, nox2, nox3, nox;
   const header *h1 = NULL, *h2 = NULL, *h3 = NULL;
-  unsigned int **rows1, **rows3;
+  word **rows1, **rows3;
   int is_perm1, is_perm2;
   row_ops row_operations;
   row_adder adder;
@@ -357,21 +358,21 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
     rows3[k] = memory_pointer_offset(M1_SIZE + M2_SIZE, k, len2);
   }
   for (k = 0; k < nor1; k += nox) {
-    unsigned int rest = (nor1 >= k + nox) ? nox : nor1 - k;
+    u32 rest = (nor1 >= k + nox) ? nox : nor1 - k;
     /* Read matrix 1 */
     /* Convert permutation if necessary */
     if (is_perm1) {
-      unsigned int *map = malloc_map(rest);
+      word *map = malloc_map(rest);
       if (0 == read_map(inp1, rest, map, name, m1)) {
         grease_free(&grease);
         map_free(map);
         return cleanup(inp1, inp2, outp);
       }
       for (j = 0; j < rest; j++) {
-        unsigned int l = map[j];
+        word l = map[j];
         row_init(rows1[j], len1);
         if (l >= noc1) {
-          fprintf(stderr, "%s: map entry %d out of range (0 - %d), terminating\n", name, l, noc1 - 1);
+          fprintf(stderr, "%s: map entry %d out of range (0 - %d), terminating\n", name, (u32)l, noc1 - 1);
           grease_free(&grease);
           map_free(map);
           return cleanup(inp1, inp2, outp);
@@ -422,13 +423,13 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
 
 #define LAZY_GREASE 1
 
-int skip_mul_from_store(unsigned int offset, unsigned int **rows1, unsigned int **rows3,
-                        FILE *inp, int is_map, unsigned int noc, unsigned int len,
-                        unsigned int nob, unsigned int nor, unsigned int noc_o, unsigned int prime,
+int skip_mul_from_store(u32 offset, word **rows1, word **rows3,
+                        FILE *inp, int is_map, u32 noc, u32 len,
+                        u32 nob, u32 nor, u32 noc_o, u32 prime,
                         grease grease, int verbose, const char *m, const char *name)
 {
   long long pos;
-  unsigned int i, j, l, elts_per_word;
+  u32 i, j, l, elts_per_word;
   assert(NULL != rows1);
   assert(NULL != rows3);
   assert(NULL != inp);
@@ -462,13 +463,17 @@ int skip_mul_from_store(unsigned int offset, unsigned int **rows1, unsigned int 
       endian_skip_row(inp, len);
     }
     /* Then multiply */
+    for (j = 0; j < nor; j++) {
+      row_init(rows3[j], len);
+    }
     for (i = offset; i < noc; i += grease->level) {
-      unsigned int size = (grease->level + i <= noc) ? grease->level : noc - i;
-      unsigned int width = size * nob;
-      unsigned int word_offset, bit_offset, mask;
-      unsigned int elt_index = noc, index = 0;
+      u32 size = (grease->level + i <= noc) ? grease->level : noc - i;
+      u32 width = size * nob;
+      u32 word_offset, bit_offset;
+      word mask;
+      u32 elt_index = noc, index = 0;
       int in_word;
-      unsigned int shift = 0;
+      u32 shift = 0;
       /* Read size rows from matrix 2 into rows 2 */
       /* This sets the initial rows */
       l = 1;
@@ -482,7 +487,9 @@ int skip_mul_from_store(unsigned int offset, unsigned int **rows1, unsigned int 
           return 0;
         }
         if (nor > grease->level) {
-          unsigned int pos, elt = first_non_zero(grease->rows[l - 1], nob, len, &pos);
+          /* Only do this if the row will be reused */
+          unsigned int pos;
+          word elt = first_non_zero(grease->rows[l - 1], nob, len, &pos);
           if (0 != elt && pos < elt_index) {
             elt_index = pos;
           }
@@ -493,20 +500,20 @@ int skip_mul_from_store(unsigned int offset, unsigned int **rows1, unsigned int 
         index = elt_index / elts_per_word;
       }
       element_access_init(nob, i, size, &word_offset, &bit_offset, &mask);
-      in_word = bit_offset + width <= bits_in_unsigned_int;
+      in_word = bit_offset + width <= bits_in_word;
       if (0 == in_word) {
-        shift = ((bits_in_unsigned_int - bit_offset) / nob) * nob;
+        shift = ((bits_in_word - bit_offset) / nob) * nob;
       }
       grease_init_rows(grease, prime);
-      for (j = 0; j < nor; j++) {
-        unsigned int *row1 = rows1[j];
-        unsigned int elt = (in_word) ? get_elements_in_word_from_row(row1 + word_offset, bit_offset, mask) :
-          get_elements_out_word_from_row(row1 + word_offset, shift, bit_offset, mask);
-        if (offset == i) {
-          row_init(rows3[j], len);
-        }
-        if (0 != elt) {
-          grease_row_inc(grease, len, rows3[j], contract(elt, prime, nob), index);
+      if (index < len) {
+        /* We only do this if some non-zero rows exist */
+        for (j = 0; j < nor; j++) {
+          word *row1 = rows1[j];
+          word elt = (in_word) ? get_elements_in_word_from_row(row1 + word_offset, bit_offset, mask) :
+            get_elements_out_word_from_row(row1 + word_offset, shift, bit_offset, mask);
+          if (0 != elt) {
+            grease_row_inc(grease, len, rows3[j], contract(elt, prime, nob), index);
+          }
         }
       }
     }
@@ -519,9 +526,9 @@ int skip_mul_from_store(unsigned int offset, unsigned int **rows1, unsigned int 
   return 1;
 }
 
-int mul_from_store(unsigned int **rows1, unsigned int **rows3,
-                   FILE *inp, int is_map, unsigned int noc, unsigned int len,
-                   unsigned int nob, unsigned int nor, unsigned int noc_o, unsigned int prime,
+int mul_from_store(word **rows1, word **rows3,
+                   FILE *inp, int is_map, u32 noc, u32 len,
+                   u32 nob, u32 nor, u32 noc_o, u32 prime,
                    grease grease, int verbose, const char *m, const char *name)
 {
   return skip_mul_from_store(0, rows1, rows3, inp, is_map, noc, len,
@@ -529,18 +536,19 @@ int mul_from_store(unsigned int **rows1, unsigned int **rows3,
 }
 
 /* Does not handle maps */
-int mul_in_store(unsigned int **rows1, unsigned int **rows2, unsigned int **rows3,
-                 unsigned int noc, unsigned int len,
-                 unsigned int nob, unsigned int nor, unsigned int prime,
+int mul_in_store(word **rows1, word **rows2, word **rows3,
+                 u32 noc, u32 len,
+                 u32 nob, u32 nor, u32 prime,
                  int preserve_rows, grease grease)
 {
-  unsigned int i, j, l;
-  unsigned int level;
-  unsigned int **grease_rows = NULL;
-  unsigned int word_offset = 0, bit_offset = 0;
-  unsigned int elts_per_word = bits_in_unsigned_int / nob;
-  unsigned int bits_per_word = elts_per_word * nob;
-  unsigned int width, mask, size, spare, end;
+  u32 i, j, l;
+  u32 level;
+  word **grease_rows = NULL;
+  u32 word_offset = 0, bit_offset = 0;
+  u32 elts_per_word = bits_in_word / nob;
+  u32 bits_per_word = elts_per_word * nob;
+  u32 width, size, spare, end;
+  word mask;
   assert(NULL != rows1);
   assert(NULL != rows2);
   assert(NULL != rows3);
@@ -572,8 +580,8 @@ int mul_in_store(unsigned int **rows1, unsigned int **rows2, unsigned int **rows
   /* We will use our element instead */
   for (i = 0; i < end; i += level) {
     int in_word;
-    unsigned int shift = bits_per_word - bit_offset;
-    unsigned int **rows = grease->rows - 1;
+    u32 shift = bits_per_word - bit_offset;
+    word **rows = grease->rows - 1;
     if (level + i > noc) {
       size = noc - i;
       width = size * nob;
@@ -589,14 +597,14 @@ int mul_in_store(unsigned int **rows1, unsigned int **rows2, unsigned int **rows
     grease_init_rows(grease, prime);
     if (in_word) {
       for (j = 0; j < nor; j++) {
-        unsigned int elt = get_elements_in_word_from_row(rows1[j] + word_offset, bit_offset, mask);
+        word elt = get_elements_in_word_from_row(rows1[j] + word_offset, bit_offset, mask);
         if (0 != elt) {
           grease_row_inc(grease, len, rows3[j], contract(elt, prime, nob), 0);
         }
       }
     } else {
       for (j = 0; j < nor; j++) {
-        unsigned int elt = get_elements_out_word_from_row(rows1[j] + word_offset, shift, bit_offset, mask);
+        word elt = get_elements_out_word_from_row(rows1[j] + word_offset, shift, bit_offset, mask);
         if (0 != elt) {
           grease_row_inc(grease, len, rows3[j], contract(elt, prime, nob), 0);
         }
@@ -610,8 +618,8 @@ int mul_in_store(unsigned int **rows1, unsigned int **rows2, unsigned int **rows
   }
   if (0 != spare) {
     int in_word;
-    unsigned int shift = bits_per_word - bit_offset;
-    unsigned int **rows = grease->rows - 1;
+    u32 shift = bits_per_word - bit_offset;
+    word **rows = grease->rows - 1;
     size = spare;
     width = size * nob;
     mask = (1 << width) - 1;
@@ -624,7 +632,7 @@ int mul_in_store(unsigned int **rows1, unsigned int **rows2, unsigned int **rows
     in_word = width <= shift;
     grease_init_rows(grease, prime);
     for (j = 0; j < nor; j++) {
-      unsigned int elt = (in_word) ? get_elements_in_word_from_row(rows1[j] + word_offset, bit_offset, mask) :
+      word elt = (in_word) ? get_elements_in_word_from_row(rows1[j] + word_offset, bit_offset, mask) :
         get_elements_out_word_from_row(rows1[j] + word_offset, shift, bit_offset, mask);
       if (0 != elt) {
         grease_row_inc(grease, len, rows3[j], contract(elt, prime, nob), 0);

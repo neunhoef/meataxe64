@@ -1,5 +1,5 @@
 /*
- * $Id: memory.c,v 1.14 2003/02/10 23:20:55 jon Exp $
+ * $Id: memory.c,v 1.15 2005/06/22 21:52:53 jon Exp $
  *
  * Large memory manipulation for meataxe
  *
@@ -15,7 +15,7 @@
 #include <limits.h>
 #include "utils.h"
 
-static unsigned int *memory = NULL;
+static word *memory = NULL;
 static size_t extent = 0;
 
 /* Initialise the memory system with given size */
@@ -24,18 +24,18 @@ void memory_init(const char *name, size_t size)
 {
   assert(NULL == memory);
   extent = ((0 != size) ? size : (MEM_SIZE));
-  extent /= sizeof(unsigned int);
+  extent /= sizeof(word);
   errno = 0;
-  if (UINT_MAX / (1000 * sizeof(unsigned int)) < extent) {
-    fprintf(stderr, "%s: memory request %u exceeds system maximum, exiting\n", name, extent * sizeof(unsigned int));
+  if (UINT_MAX / (1000 * sizeof(word)) < extent) {
+    fprintf(stderr, "%s: memory request %u exceeds system maximum, exiting\n", name, extent * sizeof(word));
     exit(1);
   }
-  memory = malloc(extent * 1000 * sizeof(unsigned int));
+  memory = malloc(extent * 1000 * sizeof(word));
   if (NULL == memory) {
     if ( 0 != errno) {
       perror(name);
     }
-    fprintf(stderr, "%s: failed to allocate %u bytes, exiting\n", name, extent * 1000 * sizeof(unsigned int));
+    fprintf(stderr, "%s: failed to allocate %u bytes, exiting\n", name, extent * 1000 * sizeof(word));
     exit(1);
   }
 }
@@ -50,7 +50,7 @@ void memory_dispose(void)
 }
 
 /* Get a pointer to the first row n thousandths of the way through the memory */
-void *memory_pointer(unsigned int n)
+word *memory_pointer(u32 n)
 {
   assert(n < 1000);
   return memory + n * extent;
@@ -59,25 +59,25 @@ void *memory_pointer(unsigned int n)
 /* Get a pointer to the ith row of given size starting n thousandths of the way through the memory */
 /* len is number of words per row */
 
-void *memory_pointer_offset(unsigned int n, unsigned int i, unsigned int len)
+word *memory_pointer_offset(u32 n, u32 i, u32 len)
 {
-  unsigned int offset = i * len + n * extent;
+  u32 offset = i * len + n * extent;
   assert(n < 1000);
   assert(0 != len);
   assert(offset + len <= 1000 * extent);
   return memory + offset;
 }
 
-unsigned int memory_rows(unsigned int len, unsigned int size)
+u32 memory_rows(u32 len, u32 size)
 {
   assert(0 != len);
   assert(1000 >= size);
   return (size * extent) / len;
 }
 
-unsigned int find_extent(unsigned int nor, unsigned int len)
+u32 find_extent(u32 nor, u32 len)
 {
-  unsigned int avail, required = 1000;
+  u32 avail, required = 1000;
   assert(0 != nor);
   assert(0 != len);
   avail = memory_rows(len, 1000);
@@ -95,10 +95,10 @@ unsigned int find_extent(unsigned int nor, unsigned int len)
   return required + 1;
 }
 
-unsigned int split_memory(unsigned int len1, unsigned int len2, unsigned int ext)
+u32 split_memory(u32 len1, u32 len2, u32 ext)
 {
-  unsigned int total = len1 + len2;
-  unsigned int res;
+  u32 total = len1 + len2;
+  u32 res;
   assert(ext >= 20 && ext <= 1000);
   assert(0 != len1);
   assert(0 != len2);

@@ -1,5 +1,5 @@
 /*
- * $Id: msbf.c,v 1.13 2004/09/17 17:05:29 jon Exp $
+ * $Id: msbf.c,v 1.14 2005/06/22 21:52:53 jon Exp $
  *
  * Function to spin some vectors under multiple generators to obtain a standard base
  *
@@ -33,13 +33,13 @@ struct gen_struct
 {
   FILE *f;		/* File containing the generator */
   const char *m;	/* Name of the generator */
-  unsigned int nor;	/* Rows from input already multiplied by this generator */
+  u32 nor;	/* Rows from input already multiplied by this generator */
   gen next;		/* Next generator to be used */
   int is_map;		/* This generator is a map */
   long long base_ptr;	/* Pointer to row nor + 1 in output basis file */
 };
 
-static void cleanup(FILE *f1, unsigned int count, FILE **files)
+static void cleanup(FILE *f1, u32 count, FILE **files)
 {
   if (NULL != f1)
     fclose(f1);
@@ -54,7 +54,7 @@ static void cleanup(FILE *f1, unsigned int count, FILE **files)
   }
 }
 
-static void cleanup_all(FILE *f1, unsigned int count, FILE **files,
+static void cleanup_all(FILE *f1, u32 count, FILE **files,
                         FILE *basis, FILE *echelised,
                         const char *name_basis, const char *name_echelised)
 {
@@ -68,7 +68,7 @@ static void cleanup_all(FILE *f1, unsigned int count, FILE **files,
 }
 
 static int unfinished(struct gen_struct *gens,
-                      unsigned int argc, unsigned int nor)
+                      unsigned int argc, u32 nor)
 {
   while(argc > 0) {
     if (nor > gens[argc - 1].nor) {
@@ -79,9 +79,9 @@ static int unfinished(struct gen_struct *gens,
   return 0;
 }
 
-unsigned int msb_spinf(const char *in, const char *out, const char *dir,
-                       unsigned int argc, const char * const args[],
-                       const char *name)
+u32 msb_spinf(const char *in, const char *out, const char *dir,
+              unsigned int argc, const char * const args[],
+              const char *name)
 {
   FILE *inp = NULL, *outp = NULL, **files = NULL, *basis = NULL, *echelised = NULL;
   const header *h_in;
@@ -89,8 +89,9 @@ unsigned int msb_spinf(const char *in, const char *out, const char *dir,
   char *name_basis = NULL;
   char *name_echelised = NULL;
   const char *tmp = tmp_name();
-  unsigned int prime, nob, noc, nor, len, max_rows, d, i, elt;
-  unsigned int **rows1, **rows2, **rows3;
+  u32 prime, nob, noc, nor, len, max_rows, d, i;
+  word elt;
+  word **rows1, **rows2, **rows3;
   int *map, *new_map;
   grease_struct grease;
   prime_ops prime_operations;
@@ -215,7 +216,7 @@ unsigned int msb_spinf(const char *in, const char *out, const char *dir,
   }
   fclose(inp);
   assert(1 == nor);
-  memcpy(rows2[0], rows1[0], len * sizeof(unsigned int));
+  memcpy(rows2[0], rows1[0], len * sizeof(word));
   /* Set up the map for the echelised form of the basis */
   map = my_malloc(noc * sizeof(int));
   /* And compute the first entry */
@@ -252,16 +253,16 @@ unsigned int msb_spinf(const char *in, const char *out, const char *dir,
     exit(1);
   }
   while (nor < noc && unfinished(gens, argc, nor)) {
-    unsigned int rows_to_do = nor - gen->nor;
-    unsigned int i, k, old_nor = nor;
+    u32 rows_to_do = nor - gen->nor;
+    u32 i, k, old_nor = nor;
     /* Ensure we don't try to do too many */
     /* Note that the extra complexity vs sp.c */
     /* is due to the requirement to have a guaranteed */
     /* order of generated vectors, independent of basis or memory constraints */
     k = 0;
     while (k < rows_to_do) {
-      unsigned int stride = (k + max_rows <= rows_to_do) ? max_rows : rows_to_do - k;
-      unsigned int step = (nor > max_rows) ? max_rows : nor;
+      u32 stride = (k + max_rows <= rows_to_do) ? max_rows : rows_to_do - k;
+      u32 step = (nor > max_rows) ? max_rows : nor;
       /* We place the rows to multiply into rows2 */
       /* and produce the product in rows1 */
       /* Seek to correct place in basis */
@@ -284,7 +285,7 @@ unsigned int msb_spinf(const char *in, const char *out, const char *dir,
       }
       /* Now copy rows created to rows2, overwriting the rows we multiplied */
       for (i = 0; i < stride; i++) {
-        memcpy(rows2[i], rows1[i], len * sizeof(unsigned int));
+        memcpy(rows2[i], rows1[i], len * sizeof(word));
       }
       gen->nor += stride;
       d = nor;

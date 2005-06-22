@@ -1,5 +1,5 @@
 /*
- * $Id: signf.c,v 1.3 2004/04/25 16:31:48 jon Exp $
+ * $Id: signf.c,v 1.4 2005/06/22 21:52:54 jon Exp $
  *
  * Function compute the orthogonal group sign
  *
@@ -30,8 +30,9 @@ int sign(const char *qform, const char *bform, const char *dir, const char *name
 {
   FILE *qinp = NULL, *binp = NULL;
   const header *h_inq, *h_inb;
-  unsigned int prime, nob, nor, noc, len, m, n, **mat;
-  unsigned int *sing_row1, *sing_row2, *products, out_num;
+  u32 prime, nob, nor, noc, len, m, n, out_num;
+  word **mat;
+  word *sing_row1, *sing_row2, *products;
   int res;
   long long *posns;
   grease_struct grease;
@@ -155,7 +156,7 @@ int sign(const char *qform, const char *bform, const char *dir, const char *name
     put_element_to_row(nob, n, mat[0], 0);
   }
   fflush(idp);
-  products = my_malloc(nor * sizeof(unsigned int));
+  products = my_malloc(nor * sizeof(word));
   while (nor > 2) {
     int start_pos = -1;
     fseeko64(idp, posns[0], SEEK_SET);
@@ -258,7 +259,7 @@ int sign(const char *qform, const char *bform, const char *dir, const char *name
     }
     n = 0;
     while (n + 1 < nor) {
-      unsigned int elt = products[n];
+      word elt = products[n];
       if (0 != elt) {
         /* Read this row and possibly convert to a weight one vector */
         fseeko64(idp, posns[n], SEEK_SET);
@@ -298,7 +299,7 @@ int sign(const char *qform, const char *bform, const char *dir, const char *name
     }
     n++;
     while (n + 1 < nor) {
-      unsigned int elt = products[n];
+      word elt = products[n];
       if (0 != elt) {
         elt = (*prime_operations.negate)(elt);
         /* Read the row and add in a multiple of the discard vector to keep this row in the perp space */

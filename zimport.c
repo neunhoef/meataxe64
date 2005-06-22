@@ -1,5 +1,5 @@
 /*
- * $Id: zimport.c,v 1.11 2004/01/31 13:24:51 jon Exp $
+ * $Id: zimport.c,v 1.12 2005/06/22 21:52:54 jon Exp $
  *
  * Import matrix from old system
  *
@@ -31,7 +31,8 @@ int main(int argc, const char * const argv[])
   const char *in;
   const char *out;
   const header *h_in;
-  unsigned int prime, nob, noc, nor, eperb, i, j, *out_row, len, blen, elts_per_word;
+  u32 prime, nob, noc, nor, eperb, i, j, len, blen, elts_per_word;
+  word *out_row;
   unsigned char *in_row;
   FILE *f_in;
   FILE *f_out;
@@ -61,11 +62,11 @@ int main(int argc, const char * const argv[])
   memory_init(name, memory);
   endian_init();
   blen = header_get_blen(h_in);
-  if (memory_rows(len, 500) < 1 || memory_rows((blen + sizeof(unsigned int) - 1) / sizeof(unsigned int), 500) < 1) {
+  if (memory_rows(len, 500) < 1 || memory_rows((blen + sizeof(word) - 1) / sizeof(word), 500) < 1) {
     fprintf(stderr, "%s: cannot fit row of %s for input and row of %s for output, terminating\n", name, in, out);
     exit(1);
   }
-  in_row = memory_pointer(0);
+  in_row = (unsigned char *)memory_pointer(0);
   out_row = memory_pointer(500);
   if (0 == open_and_write_binary_header(&f_out, h_in, out, name)) {
     exit(1);
@@ -78,7 +79,7 @@ int main(int argc, const char * const argv[])
     }
     row_init(out_row, len);
     for (j = 0; j < noc; j++) {
-      unsigned int elt = get_element_from_char_row(eperb, prime, j, in_row);
+      word elt = get_element_from_char_row(eperb, prime, j, in_row);
       put_element_to_clean_row_with_params(nob, j, elts_per_word, out_row, elt);
     }
     errno = 0;

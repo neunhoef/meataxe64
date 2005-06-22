@@ -1,5 +1,5 @@
 /*
- * $Id: ipp.c,v 1.13 2004/01/31 13:24:51 jon Exp $
+ * $Id: ipp.c,v 1.14 2005/06/22 21:52:53 jon Exp $
  *
  * Read a permutation into a matrix
  *
@@ -34,11 +34,11 @@ int main(int argc, const char * const argv[])
   const char *out;
   FILE *inp;
   FILE *outp;
-  unsigned int prime, nob, nod, nor, len;
-  unsigned int i;
-  unsigned int t1, t2, t3;
+  u32 prime, nob, nod, nor, len;
+  u32 i;
+  u32 t1, t2, t3;
   const header *h;
-  unsigned int *row;
+  word *row;
 
   argv = parse_line(argc, argv, &argc);
   if (4 != argc) {
@@ -83,7 +83,7 @@ int main(int argc, const char * const argv[])
   }
   header_free(h);
   for (i = 0; i < nor; i++) {
-    unsigned int j;
+    u32 j;
     row_init(row, len);
     fscanf(inp, "%d", &j);
     if (0 == j || j > nor) {

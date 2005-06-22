@@ -1,5 +1,5 @@
 /*
- * $Id: srn.c,v 1.11 2004/08/21 13:22:31 jon Exp $: zrn.c,v 1.1 2001/11/12 13:43:38 jon Exp $
+ * $Id: srn.c,v 1.12 2005/06/22 21:52:54 jon Exp $: zrn.c,v 1.1 2001/11/12 13:43:38 jon Exp $
  *
  * Simple compute of the rank of a matrix
  *
@@ -25,10 +25,11 @@ static void rn_usage(void)
 
 int main(int argc, const char * const argv[])
 {
-  unsigned int n;
+  u32 n;
   FILE *inp;
   const header *h;
-  unsigned int prime, nob, nor, len, **mat;
+  u32 prime, nob, nor, len;
+  word **mat;
 
   argv = parse_line(argc, argv, &argc);
   if (2 != argc) {

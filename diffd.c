@@ -1,5 +1,5 @@
 /*
- * $Id: diffd.c,v 1.2 2003/01/14 12:04:54 jon Exp $
+ * $Id: diffd.c,v 1.3 2005/06/22 21:52:53 jon Exp $
  *
  * Function to find the differences between the diagonal of a matrix and a scalar
  *
@@ -18,13 +18,13 @@
 #include "read.h"
 #include "utils.h"
 
-int diffd(const char *m, unsigned int elt, const char *name)
+int diffd(const char *m, u32 elt, const char *name)
 {
   FILE *inp = NULL;
-  unsigned int prime, nob, noc, nor, len;
-  unsigned int i;
+  u32 prime, nob, noc, nor, len;
+  u32 i;
   const header *h;
-  unsigned int *row;
+  word *row;
 
   assert(NULL != m);
   assert(NULL != name);

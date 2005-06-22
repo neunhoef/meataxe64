@@ -1,5 +1,5 @@
 /*
- * $Id: mmat.c,v 1.7 2002/06/25 10:30:12 jon Exp $
+ * $Id: mmat.c,v 1.8 2005/06/22 21:52:53 jon Exp $
  *
  * Monster program
  * Based on Version 1 - 30th November 1998 by R.A.Parker and R.A.Wilson
@@ -15,9 +15,9 @@
 #include "mop.h"
 #include "mtx.h"
 
-static void mkvec(long pos, unsigned char *vecin)
+static void mkvec(u32 pos, unsigned char *vecin)
 {
-  unsigned int i;
+  u32 i;
   assert(NULL != vecin);
   memset(vectemp, 0, 24611);
   FTOV(vectemp, pos/2, (pos+1)%2+1);
@@ -32,9 +32,9 @@ static void mkvec(long pos, unsigned char *vecin)
   FGAP(vectemp, vecin, 71, 1);
 }
 
-static void wtrow(unsigned int row_num, unsigned char *vecout)
+static void wtrow(u32 row_num, unsigned char *vecout)
 {
-  unsigned int i;
+  u32 i;
   assert(NULL != vecout);
   memset(vectemp, 0, 24611);
   ptr1=0;
@@ -44,7 +44,7 @@ static void wtrow(unsigned int row_num, unsigned char *vecout)
   for (i=0; i<66; i++)     FUNGAP(vecout, vectemp, 162, 2);
   FUNGAP(vecout, vectemp, 198, 2);
   FUNGAP(vecout, vectemp, 71, 1);
-  put_row(row_num, 196882, 20000, vectemp);
+  put_row(row_num, 196882, 20032, vectemp);
 }
 
 static void monst_usage(void)
@@ -56,7 +56,7 @@ static void monst_usage(void)
 
 int main(int argc, char *argv[])
 {
-  unsigned int i;
+  u32 i;
   suzel H, G1, G2, G3, G4;
   suzel z1, z2, z3, z4, z5, z6, z7, z8, z9;
   int type = -1;

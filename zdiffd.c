@@ -1,5 +1,5 @@
 /*
- * $Id: zdiffd.c,v 1.4 2004/01/31 13:24:51 jon Exp $
+ * $Id: zdiffd.c,v 1.5 2005/06/22 21:52:54 jon Exp $
  *
  * Find the differences between two matrices
  *
@@ -22,7 +22,7 @@ static void diff_usage(void)
 int main(int argc, const char * const argv[])
 {
   const char *in1;
-  unsigned int elt;
+  u32 elt;
 
   argv = parse_line(argc, argv, &argc);
   if (3 != argc) {

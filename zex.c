@@ -1,5 +1,5 @@
 /*
- * $Id: zex.c,v 1.12 2004/01/31 13:24:51 jon Exp $
+ * $Id: zex.c,v 1.13 2005/06/22 21:52:54 jon Exp $
  *
  * explode a matrix
  *
@@ -30,15 +30,15 @@ static void zex_usage(void)
 int main(int argc,  const char *const argv[])
 {
   FILE *input;
-  unsigned int split;
-  unsigned int nob, nor, noc, len, prime;
-  unsigned int col_pieces, row_pieces;
-  unsigned int elts_per_word;
+  u32 split;
+  u32 nob, nor, noc, len, prime;
+  u32 col_pieces, row_pieces;
+  u32 elts_per_word;
   const char **names;
   const header *h;
-  unsigned int i;
+  u32 i;
   FILE **outputs;
-  unsigned int *row;
+  word *row;
   argv = parse_line(argc, argv, &argc);
   if (4 != argc) {
     zex_usage();
@@ -66,7 +66,7 @@ int main(int argc,  const char *const argv[])
   nor = header_get_nor(h);
   noc = header_get_noc(h);
   len = header_get_len(h);
-  elts_per_word = bits_in_unsigned_int / nob;
+  elts_per_word = bits_in_word / nob;
   /* Now compute the number of pieces for both rows and columns */
   /* And produce the description file */
   /* Align split to word boundary */

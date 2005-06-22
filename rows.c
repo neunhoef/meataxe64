@@ -1,5 +1,5 @@
 /*
- * $Id: rows.c,v 1.29 2004/06/12 16:54:27 jon Exp $
+ * $Id: rows.c,v 1.30 2005/06/22 21:52:53 jon Exp $
  *
  * Row manipulation for meataxe
  *
@@ -15,7 +15,7 @@
 
 static prime_ops prime_operations;
 
-int row_is_zero(unsigned int *row, unsigned int len)
+int row_is_zero(word *row, u32 len)
 {
   while (len > 0) {
     if (0 != *row) {
@@ -28,11 +28,11 @@ int row_is_zero(unsigned int *row, unsigned int len)
   return 1;
 }
 
-static void row_add_2(const unsigned int *row1, const unsigned int *row2,
-                     unsigned int *row3, unsigned int len)
+static void row_add_2(const word *row1, const word *row2,
+                     word *row3, u32 len)
 {
-  unsigned int i, j;
-  const unsigned int *rowa;
+  u32 i, j;
+  const word *rowa;
   assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
@@ -57,10 +57,10 @@ static void row_add_2(const unsigned int *row1, const unsigned int *row2,
   }
 }
 
-static void short_row_add_2(const unsigned int *row1, const unsigned int *row2,
-                            unsigned int *row3, unsigned int len)
+static void short_row_add_2(const word *row1, const word *row2,
+                            word *row3, u32 len)
 {
-  const unsigned int *rowa;
+  const word *rowa;
   assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
@@ -71,11 +71,11 @@ static void short_row_add_2(const unsigned int *row1, const unsigned int *row2,
   }
 }
 
-static void row_inc_2_sub(const unsigned int *row1,
-                          unsigned int *row2, unsigned int len)
+static void row_inc_2_sub(const word *row1,
+                          word *row2, u32 len)
 {
-  unsigned int i, j;
-  const unsigned int *rowa;
+  u32 i, j;
+  const word *rowa;
   assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
@@ -99,15 +99,15 @@ static void row_inc_2_sub(const unsigned int *row1,
   }
 }
 
-static void row_inc_2(const unsigned int *row1,
-                      unsigned int *row2, unsigned int len)
+static void row_inc_2(const word *row1,
+                      word *row2, u32 len)
 {
   if (len > 10) {
-    const unsigned int *rowa = row1 + len, *rowb = row1;
+    const word *rowa = row1 + len, *rowb = row1;
     /* Search for first non-zero */
     while (row1 < rowa) {
       if (0 != *row1) {
-        unsigned int len1 = row1 - rowb;
+        u32 len1 = row1 - rowb;
         len -= len1;
         row2 += len1;
         row_inc_2_sub(row1, row2, len);
@@ -120,10 +120,10 @@ static void row_inc_2(const unsigned int *row1,
   }
 }
 
-static void short_row_inc_2(const unsigned int *row1,
-                            unsigned int *row2, unsigned int len)
+static void short_row_inc_2(const word *row1,
+                            word *row2, u32 len)
 {
-  const unsigned int *rowa;
+  const word *rowa;
   assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
@@ -136,19 +136,22 @@ static void short_row_inc_2(const unsigned int *row1,
 static unsigned char prod_table_2[0x10000];
 static int prod_table_2_init = 0;
 
-static unsigned int row_product_2(const unsigned int *row1, const unsigned int *row2, unsigned int len)
+static word row_product_2(const word *row1, const word *row2, u32 len)
 {
   unsigned char res = 0;
-  const unsigned int *row = row1 + len;
+  const word *row = row1 + len;
   assert(NULL != row1);
   assert(NULL != row2);
   while (row1 < row) {
-    unsigned int a = *row1;
+    word a = *row1;
     if (0 != a) {
-      unsigned int b = *row2;
+      word b = *row2;
       if (0 != b) {
-        unsigned int prod = a & b;
-        res ^= prod_table_2[((prod ^ (prod >> 16)) & 0xffff)];
+        word prod = a & b;
+        while (0 != prod) {
+          res ^= prod_table_2[prod & 0xffff];
+          prod >>= 16;
+        }
       }
     }
     row1++;
@@ -158,10 +161,9 @@ static unsigned int row_product_2(const unsigned int *row1, const unsigned int *
 }
 
 #ifndef NDEBUG
-static int check_for_3(unsigned int a)
+static int check_for_3(word a)
 {
-  unsigned int i;
-  for (i = 0; i < 16; i++) {
+  while (0 != a) {
     if ((a & 3) == 3) {
       return 0;
     }
@@ -173,7 +175,11 @@ static int check_for_3(unsigned int a)
 
 #define new_add_mod_3 1
 
+#ifdef EIGHT_BYTE_WORD
+#define ONE_BITS_3 0x5555555555555555
+#else
 #define ONE_BITS_3 0x55555555
+#endif
 #define TWO_BITS_3 ((ONE_BITS_3) << 1)
 
 #if new_add_mod_3
@@ -196,18 +202,17 @@ static int check_for_3(unsigned int a)
   h = g | (f >> 1) /* 01 if answer was 3 or 4, otherwise 0 */
 #endif
 
-static void row_add_3(const unsigned int *row1, const unsigned int *row2,
-                     unsigned int *row3, unsigned int len)
+static void row_add_3(const word *row1, const word *row2,
+                     word *row3, u32 len)
 {
-  const unsigned int *rowa;
+  const word *rowa;
   assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
   assert(NULL != row3);
   rowa = row1 + len;
   while (row1 < rowa) {
-    unsigned int a, b, c, d, e, f, g, h;
-    assert(4 == sizeof(unsigned int));
+    word a, b, c, d, e, f, g, h;
     a = *(row1++);
     b = *(row2++);
 #if new_add_mod_3
@@ -222,16 +227,15 @@ static void row_add_3(const unsigned int *row1, const unsigned int *row2,
   }
 }
 
-static void row_inc_3_sub(const unsigned int *row1, unsigned int *row2, unsigned int len)
+static void row_inc_3_sub(const word *row1, word *row2, u32 len)
 {
-  const unsigned int *rowa;
+  const word *rowa;
   assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
   rowa = row1 + len;
   while (row1 < rowa) {
-    unsigned int a, b, c, d, e, f, g, h;
-    assert(4 == sizeof(unsigned int));
+    word a, b, c, d, e, f, g, h;
     a = *(row1++);
     b = *(row2);
 #if new_add_mod_3
@@ -246,15 +250,15 @@ static void row_inc_3_sub(const unsigned int *row1, unsigned int *row2, unsigned
   }
 }
 
-static void row_inc_3(const unsigned int *row1,
-                      unsigned int *row2, unsigned int len)
+static void row_inc_3(const word *row1,
+                      word *row2, u32 len)
 {
   if (len > 10) {
     /* Search for first non-zero */
-    const unsigned int *rowa = row1 + len, *rowb = row1;
+    const word *rowa = row1 + len, *rowb = row1;
     while (row1 < rowa) {
       if (0 != *row1) {
-        unsigned int len1 = row1 - rowb;
+        u32 len1 = row1 - rowb;
         len -= len1;
         row2 += len1;
         row_inc_3_sub(row1, row2, len);
@@ -269,10 +273,10 @@ static void row_inc_3(const unsigned int *row1,
 
 #define scale_mod_3(b) (((b) & (ONE_BITS_3)) << 1) | (((b) & (TWO_BITS_3)) >> 1)
 
-static void scaled_row_add_3(const unsigned int *row1, const unsigned int *row2,
-                             unsigned int *row3, unsigned int len, unsigned int elt)
+static void scaled_row_add_3(const word *row1, const word *row2,
+                             word *row3, u32 len, word elt)
 {
-  const unsigned int *rowa;
+  const word *rowa;
   assert(2 == elt);
   assert(0 != len);
   assert(NULL != row1);
@@ -281,8 +285,7 @@ static void scaled_row_add_3(const unsigned int *row1, const unsigned int *row2,
   NOT_USED(elt);
   rowa = row1 + len;
   while (row1 < rowa) {
-    unsigned int a, b, c, d, e, f, g, h;
-    assert(4 == sizeof(unsigned int));
+    word a, b, c, d, e, f, g, h;
     a = *(row1++);
     b = *(row2++);
     b = scale_mod_3(b); /* Negate b */
@@ -298,10 +301,10 @@ static void scaled_row_add_3(const unsigned int *row1, const unsigned int *row2,
   }
 }
 
-static void scaled_row_inc_3_sub(const unsigned int *row1, unsigned int *row2,
-                                 unsigned int len, unsigned int elt)
+static void scaled_row_inc_3_sub(const word *row1, word *row2,
+                                 u32 len, word elt)
 {
-  const unsigned int *rowa;
+  const word *rowa;
   assert(2 == elt);
   assert(0 != len);
   assert(NULL != row1);
@@ -309,8 +312,7 @@ static void scaled_row_inc_3_sub(const unsigned int *row1, unsigned int *row2,
   NOT_USED(elt);
   rowa = row1 + len;
   while (row1 < rowa) {
-    unsigned int a, b, c, d, e, f, g, h;
-    assert(4 == sizeof(unsigned int));
+    word a, b, c, d, e, f, g, h;
     a = *(row1++);
     b = *(row2);
     a = scale_mod_3(a); /* Negate a */
@@ -326,15 +328,15 @@ static void scaled_row_inc_3_sub(const unsigned int *row1, unsigned int *row2,
   }
 }
 
-static void scaled_row_inc_3(const unsigned int *row1, unsigned int *row2,
-                             unsigned int len, unsigned int elt)
+static void scaled_row_inc_3(const word *row1, word *row2,
+                             u32 len, word elt)
 {
   if (len > 10) {
     /* Search for first non-zero */
-    const unsigned int *rowa = row1 + len, *rowb = row1;
+    const word *rowa = row1 + len, *rowb = row1;
     while (row1 < rowa) {
       if (0 != *row1) {
-        unsigned int len1 = row1 - rowb;
+        u32 len1 = row1 - rowb;
         len -= len1;
         row2 += len1;
         scaled_row_inc_3_sub(row1, row2, len, elt);
@@ -347,10 +349,10 @@ static void scaled_row_inc_3(const unsigned int *row1, unsigned int *row2,
   }
 }
 
-static void row_scale_3(const unsigned int *row1, unsigned int *row2,
-                        unsigned int len, unsigned int elt)
+static void row_scale_3(const word *row1, word *row2,
+                        u32 len, word elt)
 {
-  const unsigned int *rowa;
+  const word *rowa;
   assert(2 == elt);
   assert(0 != len);
   assert(NULL != row1);
@@ -358,44 +360,42 @@ static void row_scale_3(const unsigned int *row1, unsigned int *row2,
   NOT_USED(elt);
   rowa = row1 + len;
   while (row1 < rowa) {
-    unsigned int a;
-    assert(4 == sizeof(unsigned int));
+    word a;
     a = *(row1++);
     *(row2++) = scale_mod_3(a);
   }
 }
 
-static void row_scale_in_place_3(unsigned int *row,
-                                 unsigned int len, unsigned int elt)
+static void row_scale_in_place_3(word *row,
+                                 u32 len, word elt)
 {
-  const unsigned int *rowa;
+  const word *rowa;
   assert(2 == elt);
   assert(0 != len);
   assert(NULL != row);
   NOT_USED(elt);
   rowa = row + len;
   while (row < rowa) {
-    unsigned int a;
-    assert(4 == sizeof(unsigned int));
+    word a;
     a = *(row);
     *(row++) = scale_mod_3(a);
   }
 }
 
-static unsigned int prod_table_3[0x10000];
+static word prod_table_3[0x10000];
 
-static unsigned int row_product_3(const unsigned int *row1, const unsigned int *row2, unsigned int len)
+static word row_product_3(const word *row1, const word *row2, u32 len)
 {
-  unsigned int res = 0;
-  const unsigned int *row = row1 + len;
+  word res = 0;
+  const word *row = row1 + len;
   assert(NULL != row1);
   assert(NULL != row2);
   while (row1 < row) {
-    unsigned int a = *row1;
+    word a = *row1;
     if (0 != a) {
-      unsigned int b = *row2;
+      word b = *row2;
       while (0 != b && 0 != a) {
-        unsigned int prod = ((a & 0xff) << 8) | (b & 0xff);
+        word prod = ((a & 0xff) << 8) | (b & 0xff);
         res += prod_table_3[prod];
         b >>= 8;
         a >>= 8;
@@ -408,34 +408,12 @@ static unsigned int row_product_3(const unsigned int *row1, const unsigned int *
   return res;
 }
 
+#ifdef EIGHT_BYTE_WORD
+#define ONE_BITS_4 0x5555555555555555
+#else
 #define ONE_BITS_4 0x55555555
-#define TWO_BITS_4 ((ONE_BITS_4) << 1)
-
-#if 0 /* These the same as GF(2) */
-static void row_add_4(const unsigned int *row1, const unsigned int *row2,
-                      unsigned int *row3, unsigned int len)
-{
-  unsigned int i;
-  assert(0 != len);
-  assert(NULL != row1);
-  assert(NULL != row2);
-  assert(NULL != row3);
-  for (i = 0; i < len; i++) {
-    *(row3++) = *(row1++) ^ *(row2++);
-  }
-}
-
-static void row_inc_4(const unsigned int *row1, unsigned int *row2, unsigned int len)
-{
-  unsigned int i;
-  assert(0 != len);
-  assert(NULL != row1);
-  assert(NULL != row2);
-  for (i = 0; i < len; i++) {
-    *(row2++) ^= *(row1++);
-  }
-}
 #endif
+#define TWO_BITS_4 ((ONE_BITS_4) << 1)
 
 #define scale_mod_4_X(b,c,d) \
     c = (b) & ONE_BITS_4; \
@@ -458,10 +436,10 @@ static void row_inc_4(const unsigned int *row1, unsigned int *row2, unsigned int
     h = c & d; /* Detect 3  * any */ \
     b = f - (g |  h) * 3 /* Subtract out the overflows */ 
 
-static void scaled_row_add_4(const unsigned int *row1, const unsigned int *row2,
-                             unsigned int *row3, unsigned int len, unsigned int elt)
+static void scaled_row_add_4(const word *row1, const word *row2,
+                             word *row3, u32 len, word elt)
 {
-  unsigned int i;
+  u32 i;
   assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
@@ -469,11 +447,10 @@ static void scaled_row_add_4(const unsigned int *row1, const unsigned int *row2,
   assert(2 <= elt && elt <= 3);
   for (i = 0; i < len; i++) {
 #if new_scale_mod_4
-    unsigned int a, b, c, d;
+    word a, b, c, d;
 #else
-    unsigned int a, b, c, d, e, f, g, h;
+    word a, b, c, d, e, f, g, h;
 #endif
-    assert(4 == sizeof(unsigned int));
     a = *(row1++);
     b = *(row2++);
 #if new_scale_mod_4
@@ -489,21 +466,20 @@ static void scaled_row_add_4(const unsigned int *row1, const unsigned int *row2,
   }
 }
 
-static void scaled_row_inc_4_sub(const unsigned int *row1, unsigned int *row2,
-                                 unsigned int len, unsigned int elt)
+static void scaled_row_inc_4_sub(const word *row1, word *row2,
+                                 u32 len, word elt)
 {
-  unsigned int i;
+  u32 i;
   assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
   assert(2 <= elt && elt <= 3);
   for (i = 0; i < len; i++) {
 #if new_scale_mod_4
-    unsigned int a, b, c, d;
+    word a, b, c, d;
 #else
-    unsigned int a, b, c, d, e, f, g, h;
+    word a, b, c, d, e, f, g, h;
 #endif
-    assert(4 == sizeof(unsigned int));
     a = *(row1++);
     b = *(row2);
 #if new_scale_mod_4
@@ -519,15 +495,15 @@ static void scaled_row_inc_4_sub(const unsigned int *row1, unsigned int *row2,
   }
 }
 
-static void scaled_row_inc_4(const unsigned int *row1, unsigned int *row2,
-                             unsigned int len, unsigned int elt)
+static void scaled_row_inc_4(const word *row1, word *row2,
+                             u32 len, word elt)
 {
   if (len > 10) {
-    const unsigned int *rowa = row1 + len, *rowb = row1;
+    const word *rowa = row1 + len, *rowb = row1;
     /* Search for first non-zero */
     while (row1 < rowa) {
       if (0 != *row1) {
-        unsigned int len1 = row1 - rowb;
+        u32 len1 = row1 - rowb;
         len -= len1;
         row2 += len1;
         scaled_row_inc_4_sub(row1, row2, len, elt);
@@ -540,10 +516,10 @@ static void scaled_row_inc_4(const unsigned int *row1, unsigned int *row2,
   }
 }
 
-static void row_scale_4(const unsigned int *row1, unsigned int *row2,
-                       unsigned int len, unsigned int elt)
+static void row_scale_4(const word *row1, word *row2,
+                       u32 len, word elt)
 {
-  unsigned int i;
+  u32 i;
   assert(2 <= elt && elt <= 3);
   assert(0 != len);
   assert(NULL != row1);
@@ -551,11 +527,10 @@ static void row_scale_4(const unsigned int *row1, unsigned int *row2,
   NOT_USED(elt);
   for (i = 0; i < len; i++) {
 #if new_scale_mod_4
-    unsigned int b, c, d;
+    word b, c, d;
 #else
-    unsigned int b, c, d, e, f, g, h;
+    word b, c, d, e, f, g, h;
 #endif
-    assert(4 == sizeof(unsigned int));
     b = *(row1++);
 #if new_scale_mod_4
     if (2 == elt) {
@@ -570,36 +545,35 @@ static void row_scale_4(const unsigned int *row1, unsigned int *row2,
   }
 }
 
-static void row_scale_in_place_4(unsigned int *row,
-                                 unsigned int len, unsigned int elt)
+static void row_scale_in_place_4(word *row,
+                                 u32 len, word elt)
 {
-  unsigned int i;
+  u32 i;
   assert(2 <= elt && elt <= 3);
   assert(0 != len);
   assert(NULL != row);
   for (i = 0; i < len; i++) {
-    unsigned int b, c, d, e, f, g, h;
-    assert(4 == sizeof(unsigned int));
+    word b, c, d, e, f, g, h;
     b = *(row);
     scale_mod_4(b,c,d,e,f,g,h,elt);
     *(row++) = b;
   }
 }
 
-static unsigned int prod_table_4[0x10000];
+static word prod_table_4[0x10000];
 
-static unsigned int row_product_4(const unsigned int *row1, const unsigned int *row2, unsigned int len)
+static word row_product_4(const word *row1, const word *row2, u32 len)
 {
-  unsigned int res = 0;
-  const unsigned int *row = row1 + len;
+  word res = 0;
+  const word *row = row1 + len;
   assert(NULL != row1);
   assert(NULL != row2);
   while (row1 < row) {
-    unsigned int a = *row1;
+    word a = *row1;
     if (0 != a) {
-      unsigned int b = *row2;
+      word b = *row2;
       while (0 != b && 0 != a) {
-        unsigned int prod = ((a & 0xff) << 8) | (b & 0xff);
+        word prod = ((a & 0xff) << 8) | (b & 0xff);
         res ^= prod_table_4[(prod)];
         b >>= 8;
         a >>= 8;
@@ -612,10 +586,9 @@ static unsigned int row_product_4(const unsigned int *row1, const unsigned int *
 }
 
 #ifndef NDEBUG
-static int check_for_5(unsigned int a)
+static int check_for_5(word a)
 {
-  unsigned int i;
-  for (i = 0; i < 10; i++) {
+  while (0 != a) {
     if ((a & 7) >= 5) {
       return 0;
     }
@@ -625,8 +598,13 @@ static int check_for_5(unsigned int a)
 }
 #endif
 
+#ifdef EIGHT_BYTE_WORD
+#define FOUR_BITS_5 0444444444444444444444 /* Detect overflow into next digit mod 5 */
+#define ONE_BITS_5 0111111111111111111111 /* Detect bit 0 one in digit */
+#else
 #define FOUR_BITS_5 04444444444 /* Detect overflow into next digit mod 5 */
 #define ONE_BITS_5 01111111111 /* Detect bit 0 one in digit */
+#endif
 #define TWO_BITS_5 ((ONE_BITS_5) << 1) /* Detect bit 1 one in digit */
 
 #define mod_5_add(a,b,c,d,e,f,g,h,j,k) \
@@ -639,18 +617,17 @@ static int check_for_5(unsigned int a)
   j = (f & (TWO_BITS_5)) >> 1; /* Detect possible 6s */ \
   k = (g >> 2) & (h | j); /* Detect 5s and 6s */
 
-static void row_add_5(const unsigned int *row1, const unsigned int *row2,
-                     unsigned int *row3, unsigned int len)
+static void row_add_5(const word *row1, const word *row2,
+                     word *row3, u32 len)
 {
-  const unsigned int *rowa;
+  const word *rowa;
   assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
   assert(NULL != row3);
   rowa = row1 + len;
   while (row1 < rowa) {
-    unsigned int a, b, c, d, e, f, g, h, j, k;
-    assert(4 == sizeof(unsigned int));
+    word a, b, c, d, e, f, g, h, j, k;
     a = *(row1++);
     b = *(row2++);
     mod_5_add(a,b,c,d,e,f,g,h,j,k);
@@ -659,16 +636,15 @@ static void row_add_5(const unsigned int *row1, const unsigned int *row2,
   }
 }
 
-static void row_inc_5_sub(const unsigned int *row1, unsigned int *row2, unsigned int len)
+static void row_inc_5_sub(const word *row1, word *row2, u32 len)
 {
-  const unsigned int *rowa;
+  const word *rowa;
   assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
   rowa = row1 + len;
   while (row1 < rowa) {
-    unsigned int a, b, c, d, e, f, g, h, j, k;
-    assert(4 == sizeof(unsigned int));
+    word a, b, c, d, e, f, g, h, j, k;
     a = *(row1++);
     b = *(row2);
     mod_5_add(a,b,c,d,e,f,g,h,j,k);
@@ -677,15 +653,15 @@ static void row_inc_5_sub(const unsigned int *row1, unsigned int *row2, unsigned
   }
 }
 
-static void row_inc_5(const unsigned int *row1,
-                      unsigned int *row2, unsigned int len)
+static void row_inc_5(const word *row1,
+                      word *row2, u32 len)
 {
   if (len > 10) {
     /* Search for first non-zero */
-    const unsigned int *rowa = row1 + len, *rowb = row1;
+    const word *rowa = row1 + len, *rowb = row1;
     while (row1 < rowa) {
       if (0 != *row1) {
-        unsigned int len1 = row1 - rowb;
+        u32 len1 = row1 - rowb;
         len -= len1;
         row2 += len1;
         row_inc_5_sub(row1, row2, len);
@@ -730,10 +706,10 @@ static void row_inc_5(const unsigned int *row1,
       assert(0); \
     }
 
-static void scaled_row_add_5(const unsigned int *row1, const unsigned int *row2,
-                             unsigned int *row3, unsigned int len, unsigned int elt)
+static void scaled_row_add_5(const word *row1, const word *row2,
+                             word *row3, u32 len, word elt)
 {
-  const unsigned int *rowa;
+  const word *rowa;
   assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
@@ -741,8 +717,7 @@ static void scaled_row_add_5(const unsigned int *row1, const unsigned int *row2,
   assert(2 <= elt && elt <= 4);
   rowa = row1 + len;
   while (row1 < rowa) {
-    unsigned int a, b, c, d, e, f, g, h, j, k;
-    assert(4 == sizeof(unsigned int));
+    word a, b, c, d, e, f, g, h, j, k;
     a = *(row1++);
     b = *(row2++);
     scale_mod_5(b,d,c,e,f,g,h,j,elt);
@@ -752,18 +727,17 @@ static void scaled_row_add_5(const unsigned int *row1, const unsigned int *row2,
   }
 }
 
-static void scaled_row_inc_5_sub(const unsigned int *row1, unsigned int *row2,
-                                 unsigned int len, unsigned int elt)
+static void scaled_row_inc_5_sub(const word *row1, word *row2,
+                                 u32 len, word elt)
 {
-  const unsigned int *rowa;
+  const word *rowa;
   assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
   assert(2 <= elt && elt <= 4);
   rowa = row1 + len;
   while (row1 < rowa) {
-    unsigned int a, b, c, d, e, f, g, h, j, k;
-    assert(4 == sizeof(unsigned int));
+    word a, b, c, d, e, f, g, h, j, k;
     a = *(row1++);
     b = *(row2);
     scale_mod_5(a,d,c,e,f,g,h,j,elt);
@@ -773,15 +747,15 @@ static void scaled_row_inc_5_sub(const unsigned int *row1, unsigned int *row2,
   }
 }
 
-static void scaled_row_inc_5(const unsigned int *row1, unsigned int *row2,
-                             unsigned int len, unsigned int elt)
+static void scaled_row_inc_5(const word *row1, word *row2,
+                             u32 len, word elt)
 {
   if (len > 10) {
     /* Search for first non-zero */
-    const unsigned int *rowa = row1 + len, *rowb = row1;
+    const word *rowa = row1 + len, *rowb = row1;
     while (row1 < rowa) {
       if (0 != *row1) {
-        unsigned int len1 = row1 - rowb;
+        u32 len1 = row1 - rowb;
         len -= len1;
         row2 += len1;
         scaled_row_inc_5_sub(row1, row2, len, elt);
@@ -794,53 +768,51 @@ static void scaled_row_inc_5(const unsigned int *row1, unsigned int *row2,
   }
 }
 
-static void row_scale_5(const unsigned int *row1, unsigned int *row2,
-                       unsigned int len, unsigned int elt)
+static void row_scale_5(const word *row1, word *row2,
+                       u32 len, word elt)
 {
-  const unsigned int *rowa;
+  const word *rowa;
   assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
   assert(2 <= elt && elt <= 4);
   rowa = row1 + len;
   while (row1 < rowa) {
-    unsigned int b, c, d, e, f, g, h, j;
-    assert(4 == sizeof(unsigned int));
+    word b, c, d, e, f, g, h, j;
     b = *(row1++);
     scale_mod_5(b,d,c,e,f,g,h,j,elt);
     *(row2++) = b;
   }
 }
 
-static void row_scale_in_place_5(unsigned int *row,
-                                 unsigned int len, unsigned int elt)
+static void row_scale_in_place_5(word *row,
+                                 u32 len, word elt)
 {
-  const unsigned int *rowa;
+  const word *rowa;
   assert(0 != len);
   assert(NULL != row);
   assert(2 <= elt && elt <= 4);
   rowa = row + len;
   while (row < rowa) {
-    unsigned int b, c, d, e, f, g, h, j;
-    assert(4 == sizeof(unsigned int));
+    word b, c, d, e, f, g, h, j;
     b = *(row);
     scale_mod_5(b,d,c,e,f,g,h,j,elt);
     *(row++) = b;
   }
 }
 
-static unsigned int row_product_5(const unsigned int *row1, const unsigned int *row2, unsigned int len)
+static word row_product_5(const word *row1, const word *row2, u32 len)
 {
-  unsigned int res = 0;
-  const unsigned int *row = row1 + len;
+  word res = 0;
+  const word *row = row1 + len;
   assert(NULL != row1);
   assert(NULL != row2);
   while (row1 < row) {
-    unsigned int a = *row1;
+    word a = *row1;
     if (0 != a) {
-      unsigned int b = *row2;
+      word b = *row2;
       while (0 != b && 0 != a) {
-        unsigned int prod = (a & 0x7) * (b & 0x7);
+        word prod = (a & 0x7) * (b & 0x7);
         res += prod;
         b >>= 3;
         a >>= 3;
@@ -858,9 +830,9 @@ static unsigned int row_product_5(const unsigned int *row1, const unsigned int *
 /* This macro only references its parameters once */
 #define word_add_9(in1,in2,out) \
 { \
-  unsigned int a = 0, b = in1, c = in2, j = 0; \
+  word a = 0, b = in1, c = in2, j = 0; \
   while (0 != b || 0 != c) { \
-    unsigned int d = b & 0xff, e = c & 0xff, f; \
+    word d = b & 0xff, e = c & 0xff, f; \
     f = add_table_9[(d << 8) | e]; \
     a |= f << j; \
     b >>= 8; \
@@ -870,10 +842,10 @@ static unsigned int row_product_5(const unsigned int *row1, const unsigned int *
   out = a; \
 }
 
-static void row_add_9(const unsigned int *row1, const unsigned int *row2,
-                     unsigned int *row3, unsigned int len)
+static void row_add_9(const word *row1, const word *row2,
+                     word *row3, u32 len)
 {
-  unsigned int i;
+  u32 i;
   assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
@@ -883,8 +855,8 @@ static void row_add_9(const unsigned int *row1, const unsigned int *row2,
   }
 }
 
-static void row_inc_9(const unsigned int *row1,
-                      unsigned int *row2, unsigned int len)
+static void row_inc_9(const word *row1,
+                      word *row2, u32 len)
 {
   if (len > 10) {
     /* Search for first non-zero */
@@ -912,7 +884,7 @@ static void row_inc_9(const unsigned int *row1,
 /* This macro only references its parameters once */
 #define word_scale_9_with_tab(in,out) \
 { \
-  unsigned int res = 0, idx = 0, icopy = in; \
+  word res = 0, idx = 0, icopy = in; \
   while (0 != icopy) { \
     res |= (tab[icopy & 0xff]) << idx; \
     icopy >>= 8; \
@@ -924,16 +896,17 @@ static void row_inc_9(const unsigned int *row1,
 /* This macro only references its parameters once */
 #define word_scale_9(in,out,n) \
 { \
-  unsigned int *tab; \
+  word *tab; \
   assert(2 <= (n) && (n) < 9); \
   tab = scale_table_9[n - 2]; \
   word_scale_9_with_tab(in,out);\
 }
 
-static void scaled_row_add_9(const unsigned int *row1, const unsigned int *row2,
-                             unsigned int *row3, unsigned int len, unsigned int elt)
+static void scaled_row_add_9(const word *row1, const word *row2,
+                             word *row3, u32 len, word elt)
 {
-  unsigned int i, *tab;
+  u32 i;
+  word *tab;
   assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
@@ -941,31 +914,32 @@ static void scaled_row_add_9(const unsigned int *row1, const unsigned int *row2,
   assert(2 <= elt && elt < 9);
   tab = scale_table_9[elt - 2];
   for (i = 0; i < len; i++) {
-    unsigned int out;
+    word out;
     word_scale_9_with_tab(*(row2++),out);
     word_add_9(*(row1++),out,*(row3++));
   }
 }
 
-static void scaled_row_inc_9_sub(const unsigned int *row1, unsigned int *row2,
-                                 unsigned int len, unsigned int elt)
+static void scaled_row_inc_9_sub(const word *row1, word *row2,
+                                 u32 len, word elt)
 {
-  unsigned int i, *tab;
+  u32 i;
+  word *tab;
   assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
   assert(2 <= elt && elt < 9);
   tab = scale_table_9[elt - 2];
   for (i = 0; i < len; i++) {
-    unsigned int out;
+    word out;
     word_scale_9_with_tab(*(row1++),out);
     word_add_9(*(row2),out,*(row2));
     row2++;
   }
 }
 
-static void scaled_row_inc_9(const unsigned int *row1, unsigned int *row2,
-                             unsigned int len, unsigned int elt)
+static void scaled_row_inc_9(const word *row1, word *row2,
+                             u32 len, word elt)
 {
   if (len > 10) {
     /* Search for first non-zero */
@@ -983,49 +957,51 @@ static void scaled_row_inc_9(const unsigned int *row1, unsigned int *row2,
   }
 }
 
-static void row_scale_9(const unsigned int *row1, unsigned int *row2,
-                        unsigned int len, unsigned int elt)
+static void row_scale_9(const word *row1, word *row2,
+                        u32 len, word elt)
 {
-  unsigned int i, *tab;
+  u32 i;
+  word *tab;
   assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
   assert(2 <= elt && elt < 9);
   tab = scale_table_9[elt - 2];
   for (i = 0; i < len; i++) {
-    unsigned int out;
+    word out;
     word_scale_9_with_tab(*(row1++),out);
     *(row2++) = out;
   }
 }
 
-static void row_scale_in_place_9(unsigned int *row,
-                                 unsigned int len, unsigned int elt)
+static void row_scale_in_place_9(word *row,
+                                 u32 len, word elt)
 {
-  unsigned int i, *tab;
+  u32 i;
+  word *tab;
   assert(0 != len);
   assert(NULL != row);
   assert(2 <= elt && elt < 9);
   tab = scale_table_9[elt - 2];
   for (i = 0; i < len; i++) {
-    unsigned int out;
+    word out;
     word_scale_9_with_tab(*(row),out);
     *(row++) = out;
   }
 }
 
-static unsigned int row_product_9(const unsigned int *row1, const unsigned int *row2, unsigned int len)
+static word row_product_9(const word *row1, const word *row2, u32 len)
 {
-  unsigned int res = 0;
-  const unsigned int *row = row1 + len;
+  word res = 0;
+  const word *row = row1 + len;
   assert(NULL != row1);
   assert(NULL != row2);
   while (row1 < row) {
-    unsigned int a = *row1;
+    word a = *row1;
     if (0 != a) {
-      unsigned int b = *row2;
+      word b = *row2;
       while (0 != b && 0 != a) {
-        unsigned int prod = ((a & 0xf) << 4) | (b & 0xf);
+        word prod = ((a & 0xf) << 4) | (b & 0xf);
         res = (*prime_operations.add)(res, prod_table_9[prod]);
         b >>= 4;
         a >>= 4;
@@ -1037,18 +1013,9 @@ static unsigned int row_product_9(const unsigned int *row1, const unsigned int *
   return res;
 }
 
-void row_copy(const unsigned int *row1, unsigned int *row2,
-              unsigned int len)
+void row_init(word *row, u32 len)
 {
-  assert(0 != len);
-  assert(NULL != row1);
-  assert(NULL != row2);
-  memcpy(row2, row1, len);
-}
-
-void row_init(unsigned int *row, unsigned int len)
-{
-  unsigned int *row1 = row + len;
+  word *row1 = row + len;
   assert(NULL != row);
   while (row < row1) {
     *row = 0;
@@ -1056,9 +1023,9 @@ void row_init(unsigned int *row, unsigned int len)
   }
 }
 
-int rows_init(unsigned int prime, row_opsp ops)
+int rows_init(u32 prime, row_opsp ops)
 {
-  unsigned int i;
+  u32 i;
   switch (prime) {
   case 2:
     ops->adder = &row_add_2;
@@ -1071,7 +1038,7 @@ int rows_init(unsigned int prime, row_opsp ops)
     if (0 == prod_table_2_init) {
       for (i = 0; i < 0x10000; i++) {
         unsigned char prod = 0;
-        unsigned int j = i;
+        u32 j = i;
         while (0 != j) {
           prod ^= 1;
           j &= (j - 1);
@@ -1090,12 +1057,12 @@ int rows_init(unsigned int prime, row_opsp ops)
     ops->scaler_in_place = &row_scale_in_place_3;
     ops->product = row_product_3;
     for (i = 0; i < 0x10000; i++) {
-      unsigned int prod = 0;
-      unsigned int j = i & 0xff;
-      unsigned int k = (i & 0xff00) >> 8;
+      word prod = 0;
+      u32 j = i & 0xff;
+      u32 k = (i & 0xff00) >> 8;
       while (0 != j && 0 != k) {
-        unsigned int l = j & 3;
-        unsigned int m = k & 3;
+        u32 l = j & 3;
+        u32 m = k & 3;
         switch (4 * l + m) {
         case 0x0:
         case 0x1:
@@ -1134,12 +1101,12 @@ int rows_init(unsigned int prime, row_opsp ops)
     ops->scaler_in_place = &row_scale_in_place_4;
     ops->product = &row_product_4;
     for (i = 0; i < 0x10000; i++) {
-      unsigned int prod = 0;
-      unsigned int j = i & 0xff;
-      unsigned int k = (i & 0xff00) >> 8;
+      word prod = 0;
+      u32 j = i & 0xff;
+      u32 k = (i & 0xff00) >> 8;
       while (0 != j && 0 != k) {
-        unsigned int l = j & 3;
-        unsigned int m = k & 3;
+        u32 l = j & 3;
+        u32 m = k & 3;
         switch (4 * l + m) {
         case 0x0:
         case 0x1:
@@ -1199,9 +1166,9 @@ int rows_init(unsigned int prime, row_opsp ops)
   return 1;
 }
 
-int short_rows_init(unsigned int prime, row_opsp ops)
+int short_rows_init(u32 prime, row_opsp ops)
 {
-  unsigned int i;
+  u32 i;
   switch (prime) {
   case 2:
     ops->adder = &short_row_add_2;
@@ -1214,7 +1181,7 @@ int short_rows_init(unsigned int prime, row_opsp ops)
     if (0 == prod_table_2_init) {
       for (i = 0; i < 0x10000; i++) {
         unsigned char prod = 0;
-        unsigned int j = i;
+        u32 j = i;
         while (0 != j) {
           prod ^= 1;
           j &= (j - 1);
@@ -1233,12 +1200,12 @@ int short_rows_init(unsigned int prime, row_opsp ops)
     ops->scaler_in_place = &row_scale_in_place_3;
     ops->product = row_product_3;
     for (i = 0; i < 0x10000; i++) {
-      unsigned int prod = 0;
-      unsigned int j = i & 0xff;
-      unsigned int k = (i & 0xff00) >> 8;
+      word prod = 0;
+      u32 j = i & 0xff;
+      u32 k = (i & 0xff00) >> 8;
       while (0 != j && 0 != k) {
-        unsigned int l = j & 3;
-        unsigned int m = k & 3;
+        u32 l = j & 3;
+        u32 m = k & 3;
         switch (4 * l + m) {
         case 0x0:
         case 0x1:
@@ -1277,12 +1244,12 @@ int short_rows_init(unsigned int prime, row_opsp ops)
     ops->scaler_in_place = &row_scale_in_place_4;
     ops->product = &row_product_4;
     for (i = 0; i < 0x10000; i++) {
-      unsigned int prod = 0;
-      unsigned int j = i & 0xff;
-      unsigned int k = (i & 0xff00) >> 8;
+      word prod = 0;
+      u32 j = i & 0xff;
+      u32 k = (i & 0xff00) >> 8;
       while (0 != j && 0 != k) {
-        unsigned int l = j & 3;
-        unsigned int m = k & 3;
+        u32 l = j & 3;
+        u32 m = k & 3;
         switch (4 * l + m) {
         case 0x0:
         case 0x1:

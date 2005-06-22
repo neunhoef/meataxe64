@@ -1,5 +1,5 @@
 /*
- * $Id: zspanmsp.c,v 1.3 2004/01/04 21:22:50 jon Exp $
+ * $Id: zspanmsp.c,v 1.4 2005/06/22 21:52:55 jon Exp $
  *
  * Compute subspaces from the span of a matrix until we find a proper subspace
  *
@@ -25,7 +25,7 @@ int main(int argc, const char * const argv[])
 {
   const char *in;
   const char *out;
-  unsigned int i;
+  u32 i;
 
   argv = parse_line(argc, argv, &argc);
   if (3 >= argc) {

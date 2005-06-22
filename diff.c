@@ -1,5 +1,5 @@
 /*
- * $Id: diff.c,v 1.6 2002/07/02 11:05:46 jon Exp $
+ * $Id: diff.c,v 1.7 2005/06/22 21:52:53 jon Exp $
  *
  * Function to find the differences between two matrices
  *
@@ -22,11 +22,11 @@ int diff(const char *m1, const char *m2, const char *name)
 {
   FILE *inp1 = NULL;
   FILE *inp2 = NULL;
-  unsigned int prime, nob, noc, nor, len;
-  unsigned int i;
+  u32 prime, nob, noc, nor, len;
+  u32 i;
   int res = 1;
   const header *h1, *h2;
-  unsigned int *row1, *row2;
+  word *row1, *row2;
 
   assert(NULL != m1);
   assert(NULL != m2);
@@ -47,7 +47,7 @@ int diff(const char *m1, const char *m2, const char *name)
   if (1 == prime) {
     if (1 == header_get_prime(h2)) {
       /* Pair of maps */
-      unsigned int *map1, *map2;
+      word *map1, *map2;
       if (header_get_prime(h2) != prime ||
         header_get_nob(h2) != nob ||
           header_get_noc(h2) != noc ||
@@ -71,7 +71,7 @@ int diff(const char *m1, const char *m2, const char *name)
       }
       fclose(inp1);
       fclose(inp2);
-      if (0 != memcmp(map1, map2, nor * sizeof(unsigned int))) {
+      if (0 != memcmp(map1, map2, nor * sizeof(word))) {
         return 0;
       } else {
         return 1;
@@ -122,12 +122,12 @@ int diff(const char *m1, const char *m2, const char *name)
       fclose(inp2);
       return 0;
     }
-    if (0 != memcmp(row1, row2, len * sizeof(unsigned int))) {
-      unsigned int j, k = 0;
+    if (0 != memcmp(row1, row2, len * sizeof(word))) {
+      u32 j, k = 0;
       for (j = 0; j < len; j++) {
         if (row1[j] != row2[j]) {
           printf("%s and %s differ in row %d near offset %d, with values 0x%x and 0x%x (diffs 0x%x)\n",
-                 m1, m2, i, j * (bits_in_unsigned_int / nob), row1[j], row2[j], row1[j] ^ row2[j]);
+                 m1, m2, i, j * (bits_in_word / nob), (u32)row1[j], (u32)row2[j], (u32)(row1[j] ^ row2[j]));
           res = 0;
           k++;
           if (k > 10) {

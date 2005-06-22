@@ -1,5 +1,5 @@
 /*
- * $Id: symb.c,v 1.8 2004/06/21 20:44:37 jon Exp $
+ * $Id: symb.c,v 1.9 2005/06/22 21:52:54 jon Exp $
  *
  * Function to compute a symmetry basis
  *
@@ -33,7 +33,7 @@ struct gen_struct
 {
   FILE *f;
   const char *m;
-  unsigned int nor;
+  u32 nor;
   int is_map;
   gen next;
 };
@@ -112,7 +112,7 @@ static void cleanup(struct gen_struct *gens, unsigned int argc,
 }
 
 static int unfinished(struct gen_struct *gens,
-                      unsigned int argc, unsigned int nor)
+                      unsigned int argc, u32 nor)
 {
   while(argc > 0) {
     if (nor > gens[argc - 1].nor) {
@@ -123,15 +123,15 @@ static int unfinished(struct gen_struct *gens,
   return 0;
 }
 
-unsigned int symb(unsigned int spaces, unsigned int space_size,
-                  const char *in, const char *out, const char *dir,
-                  unsigned int argc, const char * const args[],
-                  const char *name)
+u32 symb(u32 spaces, u32 space_size,
+         const char *in, const char *out, const char *dir,
+         unsigned int argc, const char * const args[],
+         const char *name)
 {
-  unsigned int prime, noc, nob, nod, len, nor, rows_available, outer_stride, rows_per_space, total_rows, ech_size, count;
-  unsigned int i;
+  u32 prime, noc, nob, nod, len, nor, rows_available, outer_stride, rows_per_space, total_rows, ech_size, count;
+  u32 i;
   int *map, *new_map;
-  unsigned int **mat, **ech_rows;
+  word **mat, **ech_rows;
   FILE *outp, *temp, **files = NULL, *o;
   const header *h_in;
   header *h_out;
@@ -273,9 +273,9 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
   /* loop until input all consumed */
   for (i = 0; i < nor; i += outer_stride) {
     /* How many rows this time round */
-    unsigned int spaces_per_loop = (i + outer_stride > nor) ? nor - i : outer_stride;
-    unsigned int sub_nor = 1;
-    unsigned int d;
+    u32 spaces_per_loop = (i + outer_stride > nor) ? nor - i : outer_stride;
+    u32 sub_nor = 1;
+    u32 d;
     /* Remember file pointer into f.f */
     long long ptr = ftello64(f.f);
     /* Read one row into ech_rows */
@@ -310,7 +310,7 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
       gens[d].nor = 0;
     }
     while (sub_nor < space_size && unfinished(gens, argc, sub_nor)) {
-      unsigned int rows_to_do = sub_nor - gen->nor, new_nor = sub_nor;
+      u32 rows_to_do = sub_nor - gen->nor, new_nor = sub_nor;
       if (0 != rows_to_do) {
         /* Remember file pointer into t_in */
         ptr = ftello64(t_in->f);
@@ -357,13 +357,13 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
         if (0 != d) {
           /* We produce some new rows. Note that this can all be done in memory */
           /* The rows we want are those for which new_map[x] >= 0 */
-          unsigned int j, k, l = 0;
+          u32 j, k, l = 0;
           new_nor += d;
           assert(new_nor <= space_size);
           /* Update map with new row info */
           k = sub_nor;
           for (j = 0; j < rows_to_do; j++) {
-            unsigned int *row;
+            word *row;
             if (0 <= new_map[j]) {
               /* Put the new row into ech_rows */
               row = mat[rows_to_do + j];
@@ -407,7 +407,7 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
           /* We need to put the results in a safe place that won't be corrupted by
            * when we copy in the next phase */
           {
-            unsigned int m = (sub_nor > l) ? sub_nor : l;
+            u32 m = (sub_nor > l) ? sub_nor : l;
             if (0 == mul_from_store(mat, mat + m, gen->f, gen->is_map, noc, len, nob,
                                     l, noc, prime, &grease, verbose, gen->m, name)) {
               fprintf(stderr, "%s: failed to multiply using %s, terminating\n", name, gen->m);
@@ -557,7 +557,7 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
   }
   count = 0;
   for (i = 0; i < nor; i++) {
-    unsigned int d = count, j;
+    u32 d = count, j;
     if (0 == endian_read_matrix(f.f, mat, len, space_size)) {
       if ( 0 != errno) {
         perror(name);
@@ -569,7 +569,7 @@ unsigned int symb(unsigned int spaces, unsigned int space_size,
     }
     /* Now copy to a safe place so the echelisation doesn't corrupt the original */
     for (j = 0; j < space_size; j++) {
-      memcpy(ech_rows[j], mat[j], len * sizeof(unsigned int));
+      memcpy(ech_rows[j], mat[j], len * sizeof(word));
     }
     if (0 == clean_file(&row_operations, temp, &count, ech_rows, space_size, mat + space_size, total_rows - space_size,
                         map, NULL, 0, grease.level, prime, len, nob, 900, name)) {

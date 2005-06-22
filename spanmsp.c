@@ -1,5 +1,5 @@
 /*
- * $Id: spanmsp.c,v 1.3 2004/03/30 20:11:23 jon Exp $
+ * $Id: spanmsp.c,v 1.4 2005/06/22 21:52:54 jon Exp $
  *
  * Function to spin from a span under multiple generators until a proper subspace is found
  *
@@ -19,14 +19,14 @@
 #include "rows.h"
 #include "utils.h"
 
-unsigned int spanmspin(const char *in, const char *out,
-                       unsigned int argc, const char * const args[],
-                       const char *name)
+u32 spanmspin(const char *in, const char *out,
+              unsigned int argc, const char * const args[],
+              const char *name)
 {
-  unsigned int nob, nor, noc, prime, len, scalar_len, i, j;
+  u32 nob, nor, noc, prime, len, scalar_len, i, j;
   const header *h_in;
   FILE *inp;
-  unsigned int *scalar_row, *seed_row;
+  word *scalar_row, *seed_row;
   grease_struct grease;
   row_ops row_operations;
   NOT_USED(out);
@@ -88,8 +88,8 @@ unsigned int spanmspin(const char *in, const char *out,
     /* TODO: call spin from stored vector seed_row */
     /* Now increment */
     for (j = 0; j < i; j++) {
-      unsigned int elt = get_element_from_row(nob, j, scalar_row);
-      unsigned int elt1 = (elt + 1) % prime;
+      word elt = get_element_from_row(nob, j, scalar_row);
+      word elt1 = (elt + 1) % prime;
       put_element_to_row(nob, j, scalar_row, elt1);
       if (0 != elt1) {
         broke = 1;

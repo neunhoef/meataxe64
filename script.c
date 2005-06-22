@@ -1,5 +1,5 @@
 /*
- * $Id: script.c,v 1.8 2002/11/14 22:44:39 jon Exp $
+ * $Id: script.c,v 1.9 2005/06/22 21:52:54 jon Exp $
  *
  * Function to compute a script in two generators
  *
@@ -18,11 +18,11 @@
 #include "scale.h"
 #include "utils.h"
 
-static unsigned id = 0;
+static u32 id = 0;
 
 static const char *new_id(const char *base)
 {
-  unsigned int len;
+  u32 len;
   char *res;
   assert(NULL != base);
   len = 11 + strlen(base);
@@ -32,9 +32,9 @@ static const char *new_id(const char *base)
   return res;
 }
 
-static int close_files(unsigned int s, FILE **files, const header **headers)
+static int close_files(u32 s, FILE **files, const header **headers)
 {
-  unsigned int i;
+  u32 i;
   assert(NULL != files);
   assert(NULL != headers);
   for (i = 0; i < s; i++) {
@@ -51,8 +51,8 @@ static int close_files(unsigned int s, FILE **files, const header **headers)
 /* Parse the incoming script up to the first plus */
 /* The result is returned, and the rest of the script is indicated in rest */
 /* rest is set to NULL if there is no plus */
-static const char *parse_plus(const char *script, const char **rest, unsigned int *scalar,
-                              unsigned int prime, const char *name)
+static const char *parse_plus(const char *script, const char **rest, u32 *scalar,
+                              u32 prime, const char *name)
 {
   const char *plus;
   const char *res;
@@ -66,7 +66,7 @@ static const char *parse_plus(const char *script, const char **rest, unsigned in
     res = script;
   } else {
     char *tmp;
-    unsigned int len = plus - script;
+    u32 len = plus - script;
     *rest = plus + 1; /* Point after plus */
     tmp = my_malloc(len + 1);
     strncpy(tmp, script, len);
@@ -76,7 +76,7 @@ static const char *parse_plus(const char *script, const char **rest, unsigned in
   /* Now check for the scale */
   if (my_isdigit(*res)) {
     char *rest;
-    unsigned int val = strtoul(res, &rest, 0);
+    u32 val = strtoul(res, &rest, 0);
     if (val >= prime || 0 == val) {
       fprintf(stderr, "%s: script scalar %d exceeds field order %d or is zero, terminating\n", name, val, prime);
       return NULL;
@@ -202,7 +202,7 @@ int exec_script(const char *out, const char *tmp, const char *script,
 {
   FILE **files = NULL;
   const header **headers;
-  unsigned int i, prime = 1, nor, scalar;
+  u32 i, prime = 1, nor, scalar;
   const char *id;
   const char *current, *new, *summand, *rest;
   int all_perm = 1;

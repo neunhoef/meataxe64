@@ -1,5 +1,5 @@
 /*
- * $Id: extend_matrix.c,v 1.4 2002/06/28 08:39:16 jon Exp $
+ * $Id: extend_matrix.c,v 1.5 2005/06/22 21:52:53 jon Exp $
  *
  * Function to field extend a matrix
  *
@@ -18,10 +18,10 @@
 #include "utils.h"
 #include "write.h"
 
-int extend_matrix(const char *in, const char *out, unsigned int out_prime, const char *name)
+int extend_matrix(const char *in, const char *out, u32 out_prime, const char *name)
 {
-  unsigned int nor, in_prime, noc, nod, in_nob, out_nob, in_len, out_len, i;
-  unsigned int *in_row, *out_row;
+  u32 nor, in_prime, noc, nod, in_nob, out_nob, in_len, out_len, i;
+  word *in_row, *out_row;
   const header *h;
   header *h_out;
   FILE *inp, *outp;

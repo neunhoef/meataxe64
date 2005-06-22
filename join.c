@@ -1,5 +1,5 @@
 /*
- * $Id: join.c,v 1.5 2003/02/25 18:53:09 jon Exp $
+ * $Id: join.c,v 1.6 2005/06/22 21:52:53 jon Exp $
  *
  * Function to append two matrices to give a third
  *
@@ -22,11 +22,11 @@ int join(const char *m1, const char *m2, const char *m3, const char *name)
   FILE *inp1 = NULL;
   FILE *inp2 = NULL;
   FILE *outp = NULL;
-  unsigned int prime, nob, nod, noc, nor1, nor2, len;
-  unsigned int i;
+  u32 prime, nob, nod, noc, nor1, nor2, len;
+  u32 i;
   const header *h1, *h2;
   header *h;
-  unsigned int *row;
+  word *row;
   int is_perm1, is_perm2;
   if (0 == open_and_read_binary_header(&inp1, &h1, m1, name) ||
       0 == open_and_read_binary_header(&inp2, &h2, m2, name)) {

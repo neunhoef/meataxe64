@@ -1,5 +1,5 @@
 /*
- * $Id: ivf.c,v 1.7 2004/04/25 16:31:48 jon Exp $
+ * $Id: ivf.c,v 1.8 2005/06/22 21:52:53 jon Exp $
  *
  * Invert a matrix using intermediate files
  *
@@ -42,7 +42,7 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
 {
   FILE *inp, *outp;
   const header *h;
-  unsigned int prime, nob, nor, len, n, r;
+  u32 prime, nob, nor, len, n, r;
   int *map1;
   int is_perm;
   assert(NULL != m1);
@@ -75,10 +75,10 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
     int tmps_created = 0;
     char *name_echelised = NULL, *name_id = NULL;
     FILE *echelised = NULL, *id = NULL;
-    unsigned int max_rows, work_rows;
+    u32 max_rows, work_rows;
     /* rows1, rows2 for area being worked on */
     /* rows3, rows4 for forward and backward cleaning */
-    unsigned int **rows1, **rows2, **rows3, **rows4;
+    word **rows1, **rows2, **rows3, **rows4;
     long long ptr_echelised = 0, ptr_id = 0;
     row_ops row_operations;
     grease_struct grease;
@@ -161,13 +161,13 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
       exit(1);
     }
     fclose(inp);
-    map1 = my_malloc(nor * sizeof(unsigned int));
+    map1 = my_malloc(nor * sizeof(int));
     /* Back to start of echelised and id */
     fseeko64(echelised, 0, SEEK_SET);
     fseeko64(id, 0, SEEK_SET);
     for (r = 0; r < nor; r += max_rows) {
       /* Now read the two submatrices */
-      unsigned int stride = (r + max_rows <= nor) ? max_rows : nor - r;
+      u32 stride = (r + max_rows <= nor) ? max_rows : nor - r;
       long long ptr_e1 = ftello64(echelised), ptr_i1 = ftello64(id);
       int *map;
       errno = 0;
@@ -200,7 +200,7 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
         exit(1);
       }
       /* Copy the new map into the right place in the existing one */
-      memcpy(map1 + r, map, n * sizeof(unsigned int));
+      memcpy(map1 + r, map, n * sizeof(int));
       /* Now write back the cleaning result */
       fseeko64(echelised, ptr_e1, SEEK_SET);
       fseeko64(id, ptr_i1, SEEK_SET);
@@ -220,7 +220,7 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
       ptr_e1 = 0; /* where we are in echelised */
       ptr_i1 = 0; /* where we are in id */
       for (n = 0; n < r; n += work_rows) {
-        unsigned int stride2 = (work_rows + n > r) ? r - n : work_rows;
+        u32 stride2 = (work_rows + n > r) ? r - n : work_rows;
         /* Read stride2 rows from echelised and id at offsets ptr_e1, ptr_i1 */
         fseeko64(echelised, ptr_e1, SEEK_SET);
         fseeko64(id, ptr_i1, SEEK_SET);
@@ -260,7 +260,7 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
       ptr_e1 = ptr_echelised; /* where we are in echelised */
       ptr_i1 = ptr_id; /* where we are in id */
       for (n = r + stride; n < nor; n += work_rows) {
-        unsigned int stride2 = (work_rows + n > nor) ? nor - n : work_rows;
+        u32 stride2 = (work_rows + n > nor) ? nor - n : work_rows;
         /* Read stride2 rows from echelised and id at offsets ptr_e1, ptr_i1 */
         fseeko64(echelised, ptr_e1, SEEK_SET);
         fseeko64(id, ptr_i1, SEEK_SET);
@@ -307,7 +307,7 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
     /* Now write out the result rows in the right order */
     for (r = 0; r < nor; r += max_rows) {
       /* Interested in stride rows */
-      unsigned int stride = (r + max_rows <= nor) ? max_rows : nor - r;
+      u32 stride = (r + max_rows <= nor) ? max_rows : nor - r;
       /* Back to start in id file */
       fseeko64(id, 0, SEEK_SET);
       for (n = 0; n < nor; n++) {
@@ -323,9 +323,9 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
         }
         if (map1[n] >= (int)r && map1[n] < (int)(r + stride)) {
           /* We want this row at map1[n] - r */
-          unsigned int offset = map1[n] - r;
+          u32 offset = map1[n] - r;
           /* Swap the pointers to retain this row */
-          unsigned int *row = rows2[0];
+          word *row = rows2[0];
           rows2[0] = rows1[offset];
           rows1[offset] = row;
         }

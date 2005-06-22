@@ -1,5 +1,5 @@
 /*
- * $Id: header.c,v 1.13 2002/06/28 08:39:16 jon Exp $
+ * $Id: header.c,v 1.14 2005/06/22 21:52:53 jon Exp $
  *
  * Header manipulation
  *
@@ -17,96 +17,140 @@
 
 struct header_struct
 {
-  unsigned int prime;	/* The prime(power) in use. 1 for permutations */
-  unsigned int nob;	/* The number of bits per element (binary) */
-  unsigned int nod;	/* The number of digits per element (text) */
-  unsigned int nor;	/* The number of rows */
-  unsigned int noc;	/* The number of columns */
-  unsigned int len;	/* The number of words in a row */
-  unsigned int blen;	/* The number of bytes required for a row for old meataxe */
-  unsigned int eperb;	/* The number of elements per byte for old meataxe */
+  u32 prime;	/* The prime(power) in use. 1 for permutations */
+  u32 nob;	/* The number of bits per element (binary) */
+  u32 nod;	/* The number of digits per element (text) */
+  u32 nor;	/* The number of rows */
+  u32 noc;	/* The number of columns */
+  u32 len;	/* The number of words in a row */
+  u32 blen;	/* The number of bytes required for a row for old meataxe */
+  u32 eperb;	/* The number of elements per byte for old meataxe */
 };
 
-unsigned int header_get_prime(const header *h)
+u32 header_get_prime(const header *h)
+{
+  assert(NULL != h);
+  return h->prime & PRIME_MASK;
+}
+
+u32 header_get_raw_prime(const header *h)
 {
   assert(NULL != h);
   return h->prime;
 }
 
-void header_set_prime(header *h, unsigned int p)
+void header_set_prime(header *h, u32 p)
 {
   assert(NULL != h);
   assert(1 == p || is_a_prime_power(p));
+  h->prime = p | PRIME_BIT;
+}
+
+void header_set_raw_prime(header *h, u32 p)
+{
+  assert(NULL != h);
   h->prime = p;
 }
 
-unsigned int header_get_nob(const header *h)
+u32 header_get_nob(const header *h)
 {
   assert(NULL != h);
   return h->nob;
 }
 
-void header_set_nob(header *h, unsigned int n)
+void header_set_nob(header *h, u32 n)
 {
   assert(NULL != h);
   assert(n >= 1 || 1 == h->prime);
   h->nob = n;
 }
 
-unsigned int header_get_nod(const header *h)
+u32 header_get_nod(const header *h)
 {
   assert(NULL != h);
   return h->nod;
 }
 
-void header_set_nod(header *h, unsigned int n)
+void header_set_nod(header *h, u32 n)
 {
   assert(NULL != h);
   assert(n >= 1 || 1 == h->prime);
   h->nod = n;
 }
 
-unsigned int header_get_nor(const header *h)
+u32 header_get_nor(const header *h)
 {
   assert(NULL != h);
   return h->nor;
 }
 
-void header_set_nor(header *h, unsigned int n)
+void header_set_nor(header *h, u32 n)
 {
   assert(NULL != h);
   assert(n >= 1);
   h->nor = n;
 }
 
-unsigned int header_get_noc(const header *h)
+u32 header_get_noc(const header *h)
 {
   assert(NULL != h);
   return h->noc;
 }
 
-void header_set_noc(header *h, unsigned int n)
+void header_set_noc(header *h, u32 n)
 {
   assert(NULL != h);
   assert(n >= 1);
   h->noc = n;
 }
 
-unsigned int compute_len(unsigned int nob, unsigned int noc)
+u32 compute_len(u32 nob, u32 noc)
 {
   if (0 == nob) {
     return 0;
   } else {
-    unsigned int elts_in_word = bits_in_unsigned_int / nob;
+    u32 elts_in_word = bits_in_word / nob;
     return (noc + elts_in_word - 1) / elts_in_word;
   }
 }
 
-unsigned int header_get_len(const header *h)
+static u32 compute_u32_len(u32 nob, u32 noc)
+{
+  if (0 == nob) {
+    return 0;
+  } else {
+    u32 elts_in_u32 = bits_in_u32 / nob;
+    return (noc + elts_in_u32 - 1) / elts_in_u32;
+  }
+}
+
+static u32 compute_u64_len(u32 nob, u32 noc)
+{
+  if (0 == nob) {
+    return 0;
+  } else {
+    u32 elts_in_u64 = bits_in_u64 / nob;
+    return (noc + elts_in_u64 - 1) / elts_in_u64;
+  }
+}
+
+u32 header_get_len(const header *h)
 {
   assert(NULL != h);
   assert(compute_len(h->nob, h->noc) == h->len);
   return h->len;
+}
+
+u32 header_get_u32_len(const header *h)
+{
+  assert(NULL != h);
+  return compute_u32_len(h->nob, h->noc);
+}
+
+u32 header_get_u64_len(const header *h)
+{
+  assert(NULL != h);
+  return compute_u64_len(h->nob, h->noc);
 }
 
 void header_set_len(header *h)
@@ -116,7 +160,7 @@ void header_set_len(header *h)
   h->len = compute_len(h->nob, h->noc);
 }
 
-static unsigned int get_eperb(unsigned int prime, unsigned int nob)
+static u32 get_eperb(u32 prime, u32 nob)
 {
   if (1 == prime) {
     return 1;
@@ -130,7 +174,7 @@ static unsigned int get_eperb(unsigned int prime, unsigned int nob)
   }
 }
 
-unsigned int header_get_eperb(const header *h)
+u32 header_get_eperb(const header *h)
 {
   assert(NULL != h);
   assert(get_eperb(h->prime, h->nob) == h->eperb);
@@ -144,7 +188,7 @@ void header_set_eperb(header *h)
   h->eperb = get_eperb(h->prime, h->nob);
 }
 
-static unsigned int get_blen(const header *h)
+static u32 get_blen(const header *h)
 {
   assert(NULL != h);
   if (1 == h->prime) {
@@ -155,7 +199,7 @@ static unsigned int get_blen(const header *h)
   }
 }
 
-unsigned int header_get_blen(const header *h)
+u32 header_get_blen(const header *h)
 {
   assert(NULL != h);
   assert(get_blen(h) == h->blen);
@@ -188,9 +232,9 @@ void header_free(const header *h)
   free((header *)h);
 }
 
-header *header_create(unsigned int prime, unsigned int nob,
-                      unsigned int nod, unsigned int noc,
-                      unsigned int nor)
+header *header_create(u32 prime, u32 nob,
+                      u32 nod, u32 noc,
+                      u32 nor)
 {
   header *h;
   int i = header_alloc(&h);
@@ -208,8 +252,15 @@ header *header_create(unsigned int prime, unsigned int nob,
   return h;
 }
 
-int header_compare(const header *a, const header *b)
+int header_check(const header *h)
 {
-  return (0 == memcmp(a, b, sizeof(*a)));
+  u32 prime_bits;
+  assert(NULL != h);
+  prime_bits = h->prime & PRIME_BITS;
+  if (prime_bits == PRIME_BIT) {
+    return 1;
+  } else {
+    return 0;
+  }
 }
 

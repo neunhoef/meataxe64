@@ -1,5 +1,5 @@
 /*
- * $Id: zpco.c,v 1.4 2004/01/04 21:22:50 jon Exp $
+ * $Id: zpco.c,v 1.5 2005/06/22 21:52:54 jon Exp $
  *
  * Permutation condense
  *
@@ -22,7 +22,7 @@ static void pco_usage(void)
 
 int main(int argc, const char * const argv[])
 {
-  unsigned int prime;
+  u32 prime;
   const char *in1, *in2, *out;
   endian_init();
   argv = parse_line(argc, argv, &argc);

@@ -1,5 +1,5 @@
 /*
- * $Id: tra.c,v 1.15 2003/06/21 21:56:57 jon Exp $
+ * $Id: tra.c,v 1.16 2005/06/22 21:52:54 jon Exp $
  *
  * Function to transpose a matrix
  *
@@ -20,26 +20,28 @@
 #include "utils.h"
 #include "write.h"
 
-void tra_in_situ(unsigned int **rows, unsigned int nor, unsigned int nob)
+void tra_in_situ(word **rows, u32 nor, u32 nob)
 {
-  unsigned int i, j, mask, elts_per_word;
+  u32 i, j, elts_per_word;
+  word mask;
   assert(NULL != rows);
   mask = get_mask_and_elts(nob, &elts_per_word);
   for (i = 0; i + 1 < nor; i++) {
     for (j = i; j < nor; j++) {
-      unsigned int elt1 = get_element_from_row_with_params(nob, j, mask, elts_per_word, rows[i]);
-      unsigned int elt2 = get_element_from_row_with_params(nob, i, mask, elts_per_word, rows[j]);
+      word elt1 = get_element_from_row_with_params(nob, j, mask, elts_per_word, rows[i]);
+      word elt2 = get_element_from_row_with_params(nob, i, mask, elts_per_word, rows[j]);
       put_element_to_row_with_params(nob, i, mask, elts_per_word, rows[j], elt1);
       put_element_to_row_with_params(nob, j, mask, elts_per_word, rows[i], elt2);
     }
   }
 }
 
-void tra_in_store(unsigned int **rows1, unsigned int **rows2,
-                  unsigned int nor, unsigned int noc,
-                  unsigned int nob, unsigned int col_len)
+void tra_in_store(word **rows1, word **rows2,
+                  u32 nor, u32 noc,
+                  u32 nob, u32 col_len)
 {
-  unsigned int i, j, mask, elts_per_word;
+  u32 i, j, elts_per_word;
+  word mask;
   assert(NULL != rows1);
   assert(NULL != rows2);
   for (i = 0; i < noc; i++) {
@@ -49,7 +51,7 @@ void tra_in_store(unsigned int **rows1, unsigned int **rows2,
   mask = get_mask_and_elts(nob, &elts_per_word);
   for (i = 0; i < nor; i++) {
     for (j = 0; j < noc; j++) {
-      unsigned int elt = get_element_from_row_with_params(nob, j, mask, elts_per_word, rows1[i]);
+      word elt = get_element_from_row_with_params(nob, j, mask, elts_per_word, rows1[i]);
       if (elt) {
         put_element_to_clean_row_with_params(nob, i, elts_per_word, rows2[j], elt);
       }
@@ -61,11 +63,12 @@ int tra(const char *m1, const char *m2, const char *name)
 {
   FILE *input;
   FILE *output;
-  unsigned int nob, noc, nor, prime, len1, len2, max, total, t1;
-  unsigned int i, j, k, l, mask, elts_per_word;
+  u32 nob, noc, nor, prime, len1, len2, max, total, t1;
+  u32 i, j, k, l, elts_per_word;
+  word mask;
   const header *h1, *h2;
-  unsigned int *row1;
-  unsigned int **rows;
+  word *row1;
+  word **rows;
   long long pos;
 
   assert(NULL != m1);
@@ -136,7 +139,7 @@ int tra(const char *m1, const char *m2, const char *name)
       /* Now write into k output rows starting at column j */
       for (l = i; l < i + k; l++) {
         /* Write into row l of output at column j */
-        unsigned int elt = get_element_from_row_with_params(nob, l, mask, elts_per_word, row1);
+        word elt = get_element_from_row_with_params(nob, l, mask, elts_per_word, row1);
         if (0 != elt) {
           put_element_to_clean_row_with_params(nob, j, elts_per_word, rows[l - i], elt);
         }

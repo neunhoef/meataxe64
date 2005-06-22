@@ -1,5 +1,5 @@
 /*
- * $Id: sums.c,v 1.18 2005/05/20 18:18:02 jon Exp $
+ * $Id: sums.c,v 1.19 2005/06/22 21:52:54 jon Exp $
  *
  * Function to compute linear sums of two matices
  *
@@ -22,22 +22,22 @@
 #include "sums_utils.h"
 #include "utils.h"
 
-static void cleanup(unsigned int *orders)
+static void cleanup(u32 *orders)
 {
   assert(NULL != orders);
   free(orders);
 }
 
-int sums(const char *out, unsigned int n, unsigned int argc, const char *const args[],
-         unsigned int sub_order, accept acceptor, int invertible, int keep, const char *name)
+int sums(const char *out, u32 n, unsigned int argc, const char *const args[],
+         u32 sub_order, accept acceptor, int invertible, int keep, const char *name)
 {
   char *buf;
   FILE *f;
-  unsigned int *orders;
+  u32 *orders;
   unsigned int argc2 = argc / 2;
-  unsigned int i, j, k, l, r, s, cur_word = 0, cur_power = 1, base_prime;
-  unsigned int prime = 1, nod = 0, nor = 0, noc = 0, count;
-  unsigned int order_sum = 0;
+  u32 i, j, k, l, r, s, cur_word = 0, cur_power = 1, base_prime;
+  u32 prime = 1, nod = 0, nor = 0, noc = 0, count;
+  u32 order_sum = 0;
   const header *h;
   int m;
   int found = 0;
@@ -54,7 +54,7 @@ int sums(const char *out, unsigned int n, unsigned int argc, const char *const a
     fprintf(stderr, "%s: too many generators (%d), terminating\n", name, argc2);
     exit(1);
   }
-  orders = my_malloc(argc2 * sizeof(unsigned int));
+  orders = my_malloc(argc2 * sizeof(u32));
   for (i = 0; i < argc2; i++) {
     orders[i] = strtoul(args[1 + 2 * i], NULL, 0);
     order_sum += orders[i];
@@ -145,7 +145,7 @@ int sums(const char *out, unsigned int n, unsigned int argc, const char *const a
     const char *b;
     const char *c;
     const char *chosen_letter;
-    unsigned int word_len;
+    u32 word_len;
     char letter;
     if (i > argc2) {
       buf = my_malloc(2 * k);
@@ -193,14 +193,14 @@ int sums(const char *out, unsigned int n, unsigned int argc, const char *const a
         }
       }
       for (r = 1; r < prime; r++) {
-        unsigned int pos = cur_power * r + l;
+        u32 pos = cur_power * r + l;
         /* Range from cur_power to cur_power * prime - 1 */
         int ignore = 0;
         char *elt_script;
         elt_script = make_elt_script(prime, cur_power, r, l, i, nod, words);
         /* Compute if this one can be ignored for rank purposes */
         if (0 != l) {
-          unsigned int j;
+          u32 j;
           if (invertible) {
             for (j = 0; j < argc2; j++) {
               if (verbose) {

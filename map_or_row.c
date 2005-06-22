@@ -1,5 +1,5 @@
 /*
- * $Id: map_or_row.c,v 1.2 2002/06/28 08:39:16 jon Exp $
+ * $Id: map_or_row.c,v 1.3 2005/06/22 21:52:53 jon Exp $
  *
  * Handle reading from a choice of map or row
  *
@@ -12,9 +12,9 @@
 #include "endian.h"
 #include "maps.h"
 
-int read_row(int is_perm, FILE *inp, unsigned int *row,
-             unsigned int nob, unsigned int noc, unsigned int len,
-             unsigned int i, const char *m, const char *name)
+int read_row(int is_perm, FILE *inp, word *row,
+             u32 nob, u32 noc, u32 len,
+             u32 i, const char *m, const char *name)
 {
   assert(NULL != inp);
   assert(NULL != row);
@@ -37,11 +37,11 @@ int read_row(int is_perm, FILE *inp, unsigned int *row,
   return 1;
 }
 
-int read_rows(int is_perm, FILE *inp, unsigned int **rows,
-              unsigned int nob, unsigned int noc, unsigned int len,
-              unsigned int nor, const char *m, const char *name)
+int read_rows(int is_perm, FILE *inp, word **rows,
+              u32 nob, u32 noc, u32 len,
+              u32 nor, const char *m, const char *name)
 {
-  unsigned int i;
+  u32 i;
   for (i = 0; i < nor; i++) {
     if (0 == read_row(is_perm, inp, rows[i], nob, noc, len, i, m, name)) {
       return 0;

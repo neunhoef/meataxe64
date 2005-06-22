@@ -1,5 +1,5 @@
 /*
- * $Id: ztcv.c,v 1.5 2005/06/06 08:01:37 jon Exp $
+ * $Id: ztcv.c,v 1.6 2005/06/22 21:52:55 jon Exp $
  *
  * Calculate lift from tensor condensation representation
  *
@@ -22,7 +22,8 @@ static void tcv_usage(void)
 int main(int argc, const char * const argv[])
 {
   const char *mults_l, *mults_r, *in, *out;
-  unsigned int s, ret;
+  unsigned int s;
+  int ret;
 
   argv = parse_line(argc, argv, &argc);
   if (7 > argc) {

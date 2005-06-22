@@ -1,5 +1,5 @@
 /*
- * $Id: dets.h,v 1.2 2004/03/29 21:43:16 jon Exp $
+ * $Id: dets.h,v 1.3 2005/06/22 21:52:53 jon Exp $
  *
  * Functions to compute determinants
  *
@@ -11,90 +11,90 @@
 #include "primes.h"
 #include "rows.h"
 
-extern unsigned int det2(prime_ops prime_operations,
-                         unsigned int e11, unsigned int e12,
-                         unsigned int e21, unsigned int e22);
+extern word det2(prime_ops prime_operations,
+                 word e11, word e12,
+                 word e21, word e22);
 
-extern unsigned int det2_ptr(unsigned int **rows, unsigned int nob, prime_ops prime_operations,
-                             unsigned int row_i1, unsigned int col_i1,
-                             unsigned int row_i2, unsigned int col_i2);
+extern word det2_ptr(word **rows, u32 nob, prime_ops prime_operations,
+                     u32 row_i1, u32 col_i1,
+                     u32 row_i2, u32 col_i2);
 
-extern unsigned int det3_ptr(unsigned int **rows, unsigned int nob, prime_ops prime_operations,
-                             unsigned int row_i1, unsigned int col_i1,
-                             unsigned int row_i2, unsigned int col_i2,
-                             unsigned int row_i3, unsigned int col_i3);
+extern word det3_ptr(word **rows, u32 nob, prime_ops prime_operations,
+                     u32 row_i1, u32 col_i1,
+                     u32 row_i2, u32 col_i2,
+                     u32 row_i3, u32 col_i3);
 
-extern unsigned int det3(prime_ops prime_operations,
-                         unsigned int e11, unsigned int e12, unsigned int e13,
-                         unsigned int e21, unsigned int e22, unsigned int e23,
-                         unsigned int e31, unsigned int e32, unsigned int e33);
+extern word det3(prime_ops prime_operations,
+                 word e11, word e12, word e13,
+                 word e21, word e22, word e23,
+                 word e31, word e32, word e33);
 
-extern unsigned int det4_ptr(unsigned int **rows, unsigned int nob, prime_ops prime_operations,
-                             row_ops *row_operations,
-                             unsigned int row_i1, unsigned int col_i1,
-                             unsigned int row_i2, unsigned int col_i2,
-                             unsigned int row_i3, unsigned int col_i3,
-                             unsigned int row_i4, unsigned int col_i4);
+extern word det4_ptr(word **rows, u32 nob, prime_ops prime_operations,
+                     row_ops *row_operations,
+                     u32 row_i1, u32 col_i1,
+                     u32 row_i2, u32 col_i2,
+                     u32 row_i3, u32 col_i3,
+                     u32 row_i4, u32 col_i4);
 
-extern unsigned int det4(prime_ops prime_operations,
-                         row_ops *row_operations,
-                         unsigned int e11, unsigned int e12, unsigned int e13, unsigned int e14,
-                         unsigned int e21, unsigned int e22, unsigned int e23, unsigned int e24,
-                         unsigned int e31, unsigned int e32, unsigned int e33, unsigned int e34,
-                         unsigned int e41, unsigned int e42, unsigned int e43, unsigned int e44);
+extern word det4(prime_ops prime_operations,
+                 row_ops *row_operations,
+                 word e11, word e12, word e13, word e14,
+                 word e21, word e22, word e23, word e24,
+                 word e31, word e32, word e33, word e34,
+                 word e41, word e42, word e43, word e44);
 
-extern unsigned int det5_ptr(unsigned int **rows, unsigned int nob, prime_ops prime_operations,
-                             row_ops *row_operations,
-                             unsigned int row_i1, unsigned int col_i1,
-                             unsigned int row_i2, unsigned int col_i2,
-                             unsigned int row_i3, unsigned int col_i3,
-                             unsigned int row_i4, unsigned int col_i4,
-                             unsigned int row_i5, unsigned int col_i5);
+extern word det5_ptr(word **rows, u32 nob, prime_ops prime_operations,
+                     row_ops *row_operations,
+                     u32 row_i1, u32 col_i1,
+                     u32 row_i2, u32 col_i2,
+                     u32 row_i3, u32 col_i3,
+                     u32 row_i4, u32 col_i4,
+                     u32 row_i5, u32 col_i5);
 
-extern unsigned int det5(prime_ops prime_operations,
-                         row_ops *row_operations,
-                         unsigned int e11, unsigned int e12, unsigned int e13, unsigned int e14, unsigned int e15,
-                         unsigned int e21, unsigned int e22, unsigned int e23, unsigned int e24, unsigned int e25,
-                         unsigned int e31, unsigned int e32, unsigned int e33, unsigned int e34, unsigned int e35,
-                         unsigned int e41, unsigned int e42, unsigned int e43, unsigned int e44, unsigned int e45,
-                         unsigned int e51, unsigned int e52, unsigned int e53, unsigned int e54, unsigned int e55);
+extern word det5(prime_ops prime_operations,
+                 row_ops *row_operations,
+                 word e11, word e12, word e13, word e14, word e15,
+                 word e21, word e22, word e23, word e24, word e25,
+                 word e31, word e32, word e33, word e34, word e35,
+                 word e41, word e42, word e43, word e44, word e45,
+                 word e51, word e52, word e53, word e54, word e55);
 
-extern unsigned int det6_ptr(unsigned int **rows, unsigned int nob, prime_ops prime_operations,
-                             row_ops *row_operations,
-                             unsigned int row_i1, unsigned int col_i1,
-                             unsigned int row_i2, unsigned int col_i2,
-                             unsigned int row_i3, unsigned int col_i3,
-                             unsigned int row_i4, unsigned int col_i4,
-                             unsigned int row_i5, unsigned int col_i5,
-                             unsigned int row_i6, unsigned int col_i6);
+extern word det6_ptr(word **rows, u32 nob, prime_ops prime_operations,
+                     row_ops *row_operations,
+                     u32 row_i1, u32 col_i1,
+                     u32 row_i2, u32 col_i2,
+                     u32 row_i3, u32 col_i3,
+                     u32 row_i4, u32 col_i4,
+                     u32 row_i5, u32 col_i5,
+                     u32 row_i6, u32 col_i6);
 
-extern unsigned int det6(prime_ops prime_operations,
-                         row_ops *row_operations,
-                         unsigned int e11, unsigned int e12, unsigned int e13, unsigned int e14, unsigned int e15, unsigned int e16,
-                         unsigned int e21, unsigned int e22, unsigned int e23, unsigned int e24, unsigned int e25, unsigned int e26,
-                         unsigned int e31, unsigned int e32, unsigned int e33, unsigned int e34, unsigned int e35, unsigned int e36,
-                         unsigned int e41, unsigned int e42, unsigned int e43, unsigned int e44, unsigned int e45, unsigned int e46,
-                         unsigned int e51, unsigned int e52, unsigned int e53, unsigned int e54, unsigned int e55, unsigned int e56,
-                         unsigned int e61, unsigned int e62, unsigned int e63, unsigned int e64, unsigned int e65, unsigned int e66);
+extern word det6(prime_ops prime_operations,
+                 row_ops *row_operations,
+                 word e11, word e12, word e13, word e14, word e15, word e16,
+                 word e21, word e22, word e23, word e24, word e25, word e26,
+                 word e31, word e32, word e33, word e34, word e35, word e36,
+                 word e41, word e42, word e43, word e44, word e45, word e46,
+                 word e51, word e52, word e53, word e54, word e55, word e56,
+                 word e61, word e62, word e63, word e64, word e65, word e66);
 
-extern unsigned int det7_ptr(unsigned int **rows, unsigned int nob, prime_ops prime_operations,
-                             row_ops *row_operations,
-                             unsigned int row_i1, unsigned int col_i1,
-                             unsigned int row_i2, unsigned int col_i2,
-                             unsigned int row_i3, unsigned int col_i3,
-                             unsigned int row_i4, unsigned int col_i4,
-                             unsigned int row_i5, unsigned int col_i5,
-                             unsigned int row_i6, unsigned int col_i6,
-                             unsigned int row_i7, unsigned int col_i7);
+extern word det7_ptr(word **rows, u32 nob, prime_ops prime_operations,
+                     row_ops *row_operations,
+                     u32 row_i1, u32 col_i1,
+                     u32 row_i2, u32 col_i2,
+                     u32 row_i3, u32 col_i3,
+                     u32 row_i4, u32 col_i4,
+                     u32 row_i5, u32 col_i5,
+                     u32 row_i6, u32 col_i6,
+                     u32 row_i7, u32 col_i7);
 
-unsigned int det7(prime_ops prime_operations,
-                  row_ops *row_operations,
-                  unsigned int e11, unsigned int e12, unsigned int e13, unsigned int e14, unsigned int e15, unsigned int e16, unsigned int e17,
-                  unsigned int e21, unsigned int e22, unsigned int e23, unsigned int e24, unsigned int e25, unsigned int e26, unsigned int e27,
-                  unsigned int e31, unsigned int e32, unsigned int e33, unsigned int e34, unsigned int e35, unsigned int e36, unsigned int e37,
-                  unsigned int e41, unsigned int e42, unsigned int e43, unsigned int e44, unsigned int e45, unsigned int e46, unsigned int e47,
-                  unsigned int e51, unsigned int e52, unsigned int e53, unsigned int e54, unsigned int e55, unsigned int e56, unsigned int e57,
-                  unsigned int e61, unsigned int e62, unsigned int e63, unsigned int e64, unsigned int e65, unsigned int e66, unsigned int e67,
-                  unsigned int e71, unsigned int e72, unsigned int e73, unsigned int e74, unsigned int e75, unsigned int e76, unsigned int e77);
+word det7(prime_ops prime_operations,
+          row_ops *row_operations,
+          word e11, word e12, word e13, word e14, word e15, word e16, word e17,
+          word e21, word e22, word e23, word e24, word e25, word e26, word e27,
+          word e31, word e32, word e33, word e34, word e35, word e36, word e37,
+          word e41, word e42, word e43, word e44, word e45, word e46, word e47,
+          word e51, word e52, word e53, word e54, word e55, word e56, word e57,
+          word e61, word e62, word e63, word e64, word e65, word e66, word e67,
+          word e71, word e72, word e73, word e74, word e75, word e76, word e77);
 
 #endif

@@ -1,5 +1,5 @@
 /*
- * $Id: primes.c,v 1.12 2003/07/20 18:13:53 jon Exp $
+ * $Id: primes.c,v 1.13 2005/06/22 21:52:53 jon Exp $
  *
  * Prime manipulation for meataxe
  *
@@ -11,7 +11,7 @@
 #include <limits.h>
 #include "utils.h"
 
-static unsigned int negatives_9[] =
+static word negatives_9[] =
 {
   0,
   2,
@@ -24,7 +24,7 @@ static unsigned int negatives_9[] =
   4
 };
 
-static unsigned int inverses_9[] =
+static word inverses_9[] =
 {
   0,
   1,
@@ -37,7 +37,7 @@ static unsigned int inverses_9[] =
   4
 };
 
-static unsigned int to_prim_9[] =
+static word to_prim_9[] =
 {
   0, /* 1 */
   4, /* 2 */
@@ -49,7 +49,7 @@ static unsigned int to_prim_9[] =
   6  /* 2X + 2 */
 };
 
-static unsigned int from_prim_9[] =
+static word from_prim_9[] =
 {
   1, /* 1 */
   3, /* X */
@@ -61,124 +61,124 @@ static unsigned int from_prim_9[] =
   5  /* X = 2 */
 };
 
-static int prime_rep_2(unsigned int *e)
+static int prime_rep_2(word *e)
 {
   NOT_USED(e);
   /* Prime and decimal rep for p = 2 are the same */
-  return 1;  
+  return 1;
 }
 
-static int decimal_rep_2(unsigned int *e)
+static int decimal_rep_2(word *e)
 {
   NOT_USED(e);
   /* Prime and decimal rep for p = 2 are the same */
-  return 1;  
+  return 1;
 }
 
-static unsigned int invert_2(unsigned int elt)
+static word invert_2(word elt)
 {
   assert(1 == elt);
   return elt;
 }
 
-static unsigned int power_2(unsigned int elt, unsigned int n)
+static word power_2(word elt, word n)
 {
   NOT_USED(n);
   return elt;
 }
 
-static unsigned int add_2(unsigned int elt1, unsigned int elt2)
+static word add_2(word elt1, word elt2)
 {
   assert(2 > elt1 && 2 > elt2);
   return elt1 ^ elt2;
 }
 
-static unsigned int add_4(unsigned int elt1, unsigned int elt2)
+static word add_4(word elt1, word elt2)
 {
   assert(4 > elt1 && 4 > elt2);
   return elt1 ^ elt2;
 }
 
-static unsigned int mul_2(unsigned int elt1, unsigned int elt2)
+static word mul_2(word elt1, word elt2)
 {
   assert(2 > elt1 && 2 > elt2);
   return elt1 * elt2;
 }
 
-static unsigned int negate_3(unsigned int elt)
+static word negate_3(word elt)
 {
   assert(3 > elt);
   return (0 == elt) ? elt : 3 - elt;
 }
 
-static unsigned int invert_3(unsigned int elt)
+static word invert_3(word elt)
 {
   assert(3 > elt && 0 != elt);
   return elt;
 }
 
-static unsigned int power_3(unsigned int elt, unsigned int n)
+static word power_3(word elt, word n)
 {
   assert(3 > elt);
   NOT_USED(n);
   return elt;
 }
 
-static unsigned int add_3(unsigned int elt1, unsigned int elt2)
+static word add_3(word elt1, word elt2)
 {
   assert(3 > elt1 && 3 > elt2);
   return (elt1 + elt2) % 3;
 }
 
-static unsigned int mul_3(unsigned int elt1, unsigned int elt2)
+static word mul_3(word elt1, word elt2)
 {
   assert(3 > elt1 && 3 > elt2);
   return (elt1 * elt2) % 3;
 }
 
-static unsigned int negate_5(unsigned int elt)
+static word negate_5(word elt)
 {
   assert(5 > elt);
   return (0 == elt) ? elt : 5 - elt;
 }
 
-static unsigned int invert_5(unsigned int elt)
+static word invert_5(word elt)
 {
   assert(5 > elt && 0 != elt);
   return (2 == elt) ? 3 : (3 == elt) ? 2 : elt;
 }
 
-static unsigned int power_5(unsigned int elt, unsigned int n)
+static word power_5(word elt, word n)
 {
   assert(5 > elt);
   NOT_USED(n);
   return elt;
 }
 
-static unsigned int add_5(unsigned int elt1, unsigned int elt2)
+static word add_5(word elt1, word elt2)
 {
   assert(5 > elt1 && 5 > elt2);
   return (elt1 + elt2) % 5;
 }
 
-static unsigned int mul_5(unsigned int elt1, unsigned int elt2)
+static word mul_5(word elt1, word elt2)
 {
   assert(5 > elt1 && 5 > elt2);
   return (elt1 * elt2) % 5;
 }
 
-static unsigned int negate_2_power(unsigned int elt)
+static word negate_2_power(word elt)
 {
   return elt;
 }
 
-static unsigned int invert_4(unsigned int elt)
+static word invert_4(word elt)
 {
   assert(4 > elt && 0 != elt);
   return (3 == elt) ? 2 : (2 == elt) ? 3 : elt;
 }
 
-static unsigned int power_4(unsigned int elt, unsigned int n)
+static word power_4(word elt, word n)
 {
   assert(4 > elt);
   n = n % 4;
@@ -186,28 +186,28 @@ static unsigned int power_4(unsigned int elt, unsigned int n)
   return (0 == n || 1 >= elt) ? elt : (2 == elt) ? 3 : 2;
 }
 
-static unsigned int mul_4(unsigned int elt1, unsigned int elt2)
+static word mul_4(word elt1, word elt2)
 {
   assert(4 > elt1 && 4 > elt2);
   return (0 == elt1 || 0 == elt2) ? 0 :
     (1 == elt1) ? elt2 :
-    (1 == elt2) ? elt1 : 
+    (1 == elt2) ? elt1 :
     (elt1 != elt2) ? 1 : 5 - elt1;
 }
 
-static unsigned int negate_9(unsigned int elt)
+static word negate_9(word elt)
 {
   assert(9 > elt);
   return negatives_9[elt];
 }
 
-static unsigned int invert_9(unsigned int elt)
+static word invert_9(word elt)
 {
   assert(9 > elt && 0 != elt);
   return inverses_9[elt];
 }
 
-static unsigned int power_9(unsigned int elt, unsigned int n)
+static word power_9(word elt, word n)
 {
   assert(9 > elt);
   if (elt < 3) {
@@ -216,16 +216,16 @@ static unsigned int power_9(unsigned int elt, unsigned int n)
     /* Not a member of GF(3) */
     /* Obtain a representation as a primitive root power */
     /* The primitive root used is X, so X^2 = X+1, (X+1)^2 = 2, 2^2 = 1 */
-    unsigned int power = to_prim_9[elt - 1];
+    word power = to_prim_9[elt - 1];
     n %= 9;
     power *= n;
     return from_prim_9[power % 8];
   }
 }
 
-static unsigned int add_9(unsigned int elt1, unsigned int elt2)
+static word add_9(word elt1, word elt2)
 {
-  unsigned int e11, e12, e21, e22;
+  word e11, e12, e21, e22;
   assert(9 > elt1 && 9 > elt2);
   e11 = elt1 % 3;
   e21 = elt2 % 3;
@@ -234,7 +234,7 @@ static unsigned int add_9(unsigned int elt1, unsigned int elt2)
   return ((e11 + e21) % 3) + 3 * ((e12 + e22) % 3);
 }
 
-static unsigned int mul_9(unsigned int elt1, unsigned int elt2)
+static word mul_9(word elt1, word elt2)
 {
   assert(9 > elt1 && 9 > elt2);
   if (0 == elt1 || 0 == elt2) {
@@ -244,15 +244,15 @@ static unsigned int mul_9(unsigned int elt1, unsigned int elt2)
   } else if (1 == elt2) {
     return elt1;
   } else {
-    unsigned int e1 = to_prim_9[elt1 - 1];
-    unsigned int e2 = to_prim_9[elt2 - 1];
+    word e1 = to_prim_9[elt1 - 1];
+    word e2 = to_prim_9[elt2 - 1];
     return from_prim_9[(e1 + e2) % 8];
   }
 }
 
-int is_a_prime(unsigned int p)
+int is_a_prime(word p)
 {
-  unsigned int i = 2;
+  word i = 2;
   while (i*i <= p) {
     if (p % i == 0) {
       return 0;
@@ -262,9 +262,9 @@ int is_a_prime(unsigned int p)
   return 1;
 }
 
-static int next_prime(unsigned int *i)
+static int next_prime(u32 *i)
 {
-  unsigned int j;
+  u32 j;
 
   assert(NULL != i);
   j = *i + 1;
@@ -278,9 +278,9 @@ static int next_prime(unsigned int *i)
   return 1;
 }
 
-int is_a_prime_power(unsigned int q)
+int is_a_prime_power(word q)
 {
-  unsigned int i = prime_divisor(q);
+  word i = prime_divisor(q);
   if (0 != i) {
     while (q % i ==  0) {
       q /= i;
@@ -290,9 +290,9 @@ int is_a_prime_power(unsigned int q)
   return 0;
 }
 
-unsigned int prime_divisor(unsigned int q)
+word prime_divisor(word q)
 {
-  unsigned int i = 2;
+  u32 i = 2;
   while (i <= q) {
     if (q % i ==  0) {
       return i;
@@ -305,7 +305,7 @@ unsigned int prime_divisor(unsigned int q)
   return 0;
 }
 
-static unsigned int prime_index_aux(unsigned int i, unsigned int q, unsigned int prime)
+static u32 prime_index_aux(u32 i, word q, u32 prime)
 {
   if (1 == q) {
     return i;
@@ -315,7 +315,7 @@ static unsigned int prime_index_aux(unsigned int i, unsigned int q, unsigned int
   }
 }
 
-unsigned int prime_index(unsigned int q, unsigned int prime)
+u32 prime_index(word q, u32 prime)
 {
   assert(0 != prime);
   assert(0 != q);
@@ -323,21 +323,21 @@ unsigned int prime_index(unsigned int q, unsigned int prime)
   return prime_index_aux(0, q, prime);
 }
 
-static unsigned int negate_unknown(unsigned int elt)
+static word negate_unknown(word elt)
 {
   NOT_USED(elt);
   assert(0);
   return 0;
 }
 
-static unsigned int invert_unknown(unsigned int elt)
+static word invert_unknown(word elt)
 {
   NOT_USED(elt);
   assert(0);
   return 0;
 }
 
-static unsigned int power_unknown(unsigned int elt, unsigned int n)
+static word power_unknown(word elt, word n)
 {
   NOT_USED(elt);
   NOT_USED(n);
@@ -345,7 +345,7 @@ static unsigned int power_unknown(unsigned int elt, unsigned int n)
   return 0;
 }
 
-static unsigned int add_unknown(unsigned int elt1, unsigned int elt2)
+static word add_unknown(word elt1, word elt2)
 {
   NOT_USED(elt1);
   NOT_USED(elt2);
@@ -353,7 +353,7 @@ static unsigned int add_unknown(unsigned int elt1, unsigned int elt2)
   return 0;
 }
 
-static unsigned int mul_unknown(unsigned int elt1, unsigned int elt2)
+static word mul_unknown(word elt1, word elt2)
 {
   NOT_USED(elt1);
   NOT_USED(elt2);
@@ -361,7 +361,7 @@ static unsigned int mul_unknown(unsigned int elt1, unsigned int elt2)
   return 0;
 }
 
-int primes_init(unsigned int prime, prime_opsp ops)
+int primes_init(u32 prime, prime_opsp ops)
 {
   ops->prime = prime;
   ops->prime_rep = &prime_rep_2;
@@ -403,7 +403,7 @@ int primes_init(unsigned int prime, prime_opsp ops)
     break;
   default:
     assert(0);
-    return 0;  
+    return 0;
   }
   return 1;
 }

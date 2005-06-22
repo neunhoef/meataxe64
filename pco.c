@@ -1,5 +1,5 @@
 /*
- * $Id: pco.c,v 1.6 2004/06/08 20:51:07 jon Exp $
+ * $Id: pco.c,v 1.7 2005/06/22 21:52:53 jon Exp $
  *
  * Permuation condense one group element
  *
@@ -24,13 +24,14 @@
 #include "write.h"
 
 int pcondense(const char *in1, const char *in2,
-              unsigned int field_order,
+              u32 field_order,
               const char *out, const char *name)
 {
   FILE *orbf, *genf, *outf;
   const header *orbh, *genh, *outh;
-  unsigned int characteristic, nor, nor_o, len, nob, i, elts_per_word;
-  unsigned int *map, *row, *int_row, *orbit_numbers;
+  u32 characteristic, nor, nor_o, len, nob, i, elts_per_word;
+  word *map, *row, *int_row;
+  u32 *orbit_numbers;
   prime_ops operations;
   orbit_set *orbits;
   assert(NULL != in1);
@@ -84,15 +85,15 @@ int pcondense(const char *in1, const char *in2,
     exit(1);
   }
   row = memory_pointer(0);
-  int_row = my_malloc(nor_o * sizeof(unsigned int));
-  orbit_numbers = my_malloc(nor * sizeof(unsigned int));
+  int_row = my_malloc(nor_o * sizeof(word));
+  orbit_numbers = my_malloc(nor * sizeof(u32));
   if (0 == open_and_write_binary_header(&outf, outh, out, name)) {
     exit(1);
   }
-  memset(orbit_numbers, 0xff, nor * sizeof(unsigned int));
+  memset(orbit_numbers, 0xff, nor * sizeof(u32));
   for (i = 0; i < nor_o; i++) {
     orbit *orb = orbits->orbits + i;
-    unsigned int j;
+    u32 j;
     for (j = 0; j < orb->size; j++) {
       assert(orb->values[j] < nor);
       orbit_numbers[orb->values[j]] = i;
@@ -101,14 +102,14 @@ int pcondense(const char *in1, const char *in2,
   (void)get_mask_and_elts(nob, &elts_per_word);
   for (i = 0; i < nor_o; i++) {
     orbit *orb = orbits->orbits + i;
-    unsigned int j, k;
+    u32 j, k;
     row_init(row, len);
 #if 1
     for (j = 0; j < nor_o; j++) {
       int_row[j] = 0;
     }
 #else
-    memset(int_row, 0, nor_o * sizeof(unsigned int));
+    memset(int_row, 0, nor_o * sizeof(word));
 #endif
     for (j = 0; j < orb->size; j++) {
       k = map[orb->values[j]];
@@ -130,7 +131,7 @@ int pcondense(const char *in1, const char *in2,
       k = operations.invert(k);
     }
     for (j = 0; j < nor_o; j++) {
-      unsigned int l = int_row[j] % characteristic;
+      word l = int_row[j] % characteristic;
       if ( 0 != l) {
         l = operations.mul(l, k);
         put_element_to_clean_row_with_params(nob, j, elts_per_word, row, l);
@@ -138,7 +139,7 @@ int pcondense(const char *in1, const char *in2,
     }
 #else
     for (j = 0; j < nor_o; j++) {
-      unsigned int l = int_row[j] % characteristic;
+      word l = int_row[j] % characteristic;
       if ( 0 != l) {
         k = (orbits->orbits[j]).size;
         if (0 == k % characteristic) {
@@ -172,5 +173,5 @@ int pcondense(const char *in1, const char *in2,
   map_free(map);
   free(int_row);
   free(orbit_numbers);
-  return 0;
+  return 1;
 }

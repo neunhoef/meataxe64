@@ -1,5 +1,5 @@
 /*
- * $Id: mop.c,v 1.20 2002/01/06 16:35:48 jon Exp $
+ * $Id: mop.c,v 1.21 2005/06/22 21:52:53 jon Exp $
  *
  * Monster operations for meataxe
  *
@@ -15,7 +15,7 @@
 #include "rows.h"
 
 unsigned char vectemp[VECLEN];
-unsigned long ptr1, ptr2;
+unsigned int ptr1, ptr2;
 int PRINT;
 unsigned char vec1[VECLEN], vec2[VECLEN];
 static char suz1head[8], suz2head[8];
@@ -27,11 +27,11 @@ static char w[256], ww[256], bar[256];
 static unsigned char vechead[12], mathead[12];
 static int s3[7][7];
 static char v3[4][7];
-static long suztab[32761];
-static long Tperm[87752];
-static long *T324a, *T324b, *T538;
-static long *t729, *tw729, *tww729;
-static unsigned int *vwork;
+static unsigned int suztab[32761];
+static int Tperm[87752];
+static word *T324a, *T324b, *T538;
+static word *t729, *tw729, *tww729;
+static word *vwork;
 static unsigned char Tbact[87752];
 static row_ops operations;
 
@@ -193,9 +193,9 @@ void init(void)
       v3[i][j+3] = (4+j-i)%3 + 1;
     }
   }
-  T324a = malloc(324*l324*sizeof(long));
-  T324b = malloc(324*l324*sizeof(long));
-  T538 = malloc(538*l538*sizeof(long));
+  T324a = malloc(324 * wl324 * sizeof(*T324a));
+  T324b = malloc(324 * wl324 * sizeof(*T324b));
+  T538 = malloc( 538 * wl538 * sizeof(*T538));
   j = 0xaa;
   for (i = 0; i < 256; i++) bar[i] = ((i&j)>>1)^i;
   for (i = 0; i < 256; i++) w[i] = (i&j)^((i&j)>>1)^((i<<1)&j);
@@ -203,10 +203,10 @@ void init(void)
     uc = (unsigned char)w[i];
     ww[i] = w[uc];
   }
-  t729 = malloc(90*l729*sizeof(long));
-  tw729 = malloc(90*l729*sizeof(long));
-  tww729 = malloc(90*l729*sizeof(long));
-  vwork = malloc(l729*sizeof(long));
+  t729 = malloc(90*wl729*sizeof(*t729));
+  tw729 = malloc(90*wl729*sizeof(*tw729));
+  tww729 = malloc(90*wl729*sizeof(*tww729));
+  vwork = malloc(wl729*sizeof(*vwork));
 
   k = 1;
   l = 65880;
@@ -253,14 +253,14 @@ void malsuz(suzel *m)
   suzel t;
   assert(NULL != m);
   t = (suzel)malloc(sizeof(suzex));
-  t->m729 = malloc(729*l729*sizeof(long));
-  t->w729 = malloc(729*l729*sizeof(long));
-  t->ww729 = malloc(729*l729*sizeof(long));
-  t->m90 = malloc(90*l90*sizeof(long));
-  t->w90 = malloc(90*l90*sizeof(long));
-  t->ww90 = malloc(90*l90*sizeof(long));
-  t->m142 = malloc(142*l142*sizeof(long));
-  t->p32760 = malloc(32761*sizeof(long));
+  t->m729 = malloc(729 * wl729 * sizeof(*t->m729));
+  t->w729 = malloc(729 * wl729 * sizeof(*t->w729));
+  t->ww729 = malloc(729 * wl729 * sizeof(*t->ww729));
+  t->m90 = malloc(90 * wl90 * sizeof(*t->m90));
+  t->w90 = malloc(90 * wl90 * sizeof(*t->w90));
+  t->ww90 = malloc(90 * wl90 * sizeof(*t->ww90));
+  t->m142 = malloc(142 * wl142 * sizeof(*t->m142));
+  t->p32760 = malloc(32761 * sizeof(unsigned int));
   t->b32760 = malloc(32761);
   *m = t;
 }
@@ -269,7 +269,7 @@ void rdsuz1(suzel m, const char *fn)
 {
   FILE *f ;
   char *ptr;
-  long *ptrl;
+  unsigned int *ptrl;
   unsigned char *ptrc;
   unsigned int i, j;
   unsigned char c[3];
@@ -289,21 +289,20 @@ void rdsuz1(suzel m, const char *fn)
     printf("File %s is not a Monster-Suzuki element\n", fn);
     exit(-1);
   }
-  ptrl = m->m729;
-  ptr = (char *)ptrl;
+  ptr = (char *)m->m729;
   for (i = 0; i < 729; i++) {
     fread(ptr, 1, 183, f);
-    ptr += l729*sizeof(long);
+    ptr += wl729 * sizeof(word);
   }
-  ptr = (char *) m->m90;
+  ptr = (char *)m->m90;
   for (i = 0; i < 90; i++) {
     fread(ptr, 1, 23, f);
-    ptr += l90*sizeof(long);
+    ptr += wl90 * sizeof(word);
   }
-  ptr = (char *) m->m142;
+  ptr = (char *)m->m142;
   for (i = 0; i < 142; i++) {
     fread(ptr, 1, 18, f);
-    ptr += l142*sizeof(long);
+    ptr += wl142 * sizeof(word);
   }
 
   ptrc = (m->b32760)+1;
@@ -333,17 +332,17 @@ static void rdT(const char *fn)
   ptr = (char *)T324a;
   for (i = 0; i < 324; i++) {
     fread(ptr, 1, 41, f);
-    ptr += l324*sizeof(long);
+    ptr += wl324 * sizeof(word);
   }
   ptr = (char *)T324b;
   for (i = 0; i < 324; i++) {
     fread(ptr, 1, 41, f);
-    ptr += l324*sizeof(long);
+    ptr += wl324 * sizeof(word);
   }
   ptr = (char *)T538;
   for (i = 0; i < 538; i++) {
     fread(ptr, 1, 68, f);
-    ptr += l538*sizeof(long);
+    ptr += wl538 * sizeof(word);
   }
   for (i = 0; i < 87750; i++) {
     fread(c, 1, 4, f);
@@ -374,44 +373,44 @@ static int grease(suzel m)
   unsigned int i, j;
   unsigned char uc;
   char *ptc1, *ptc2, *ptc3;
-  long *ptl1, *ptl2, *ptl3;
+  word *ptw1, *ptw2, *ptw3;
   assert(NULL != m);
   if (m->greased == 1) return(1);
-  ptl1 = m->m729;
-  ptl2 = m->w729;
-  ptl3 = m->ww729;
+  ptw1 = m->m729;
+  ptw2 = m->w729;
+  ptw3 = m->ww729;
   for (i = 0; i < 729; i++) {
-    ptc1 = (char *)ptl1;
-    ptc2 = (char *)ptl2;
-    ptc3 = (char *)ptl3;
-    memset(ptl2, 0, (l729) * sizeof(long));
-    memset(ptl3, 0, (l729) * sizeof(long));
-    ptl2 += (l729);
-    ptl3 += (l729);
+    ptc1 = (char *)ptw1;
+    ptc2 = (char *)ptw2;
+    ptc3 = (char *)ptw3;
+    memset(ptw2, 0, (wl729) * sizeof(*ptw2));
+    memset(ptw3, 0, (wl729) * sizeof(*ptw3));
+    ptw2 += (wl729);
+    ptw3 += (wl729);
     for (j = 0; j < 183; j++) {
       uc = (unsigned char)*(ptc1++);
       *(ptc2++) = w[uc];
       *(ptc3++) = ww[uc];
     }
-    ptl1 += l729;
+    ptw1 += wl729;
   }
-  ptl1 = m->m90;
-  ptl2 = m->w90;
-  ptl3 = m->ww90;
+  ptw1 = m->m90;
+  ptw2 = m->w90;
+  ptw3 = m->ww90;
   for (i = 0; i < 90; i++) {
-    ptc1 = (char *)ptl1;
-    ptc2 = (char *)ptl2;
-    ptc3 = (char *)ptl3;
-    memset(ptl2, 0, (l90) * sizeof(long));
-    memset(ptl3, 0, (l90) * sizeof(long));
-    ptl2 += (l90);
-    ptl3 += (l90);
+    ptc1 = (char *)ptw1;
+    ptc2 = (char *)ptw2;
+    ptc3 = (char *)ptw3;
+    memset(ptw2, 0, (wl90) * sizeof(unsigned int));
+    memset(ptw3, 0, (wl90) * sizeof(unsigned int));
+    ptw2 += (wl90);
+    ptw3 += (wl90);
     for (j = 0; j < 23; j++) {
       uc = (unsigned char)*(ptc1++);
       *(ptc2++) = w[uc];
       *(ptc3++) = ww[uc];
     }
-    ptl1 += l90;
+    ptw1 += wl90;
   }
   m->greased = 1;
   return(0);
@@ -423,73 +422,74 @@ void vecsuz(const unsigned char *vecin, suzel m, unsigned char *vecout)
   unsigned int i, j, k;
   unsigned char entry, bact;
   unsigned char *ptc1, *ptc2, *ptc3;
-  unsigned int *ptl1, *ptl2, *ptl3, *ptl2w, *ptl2ww;
+  unsigned int *ptl1;
+  word *ptw1, *ptw2, *ptw3, *ptw2w, *ptw2ww;
   assert(NULL != vecin);
   assert(NULL != m);
   assert(NULL != vecout);
   if (m->greased == 0) grease(m);
   memset(vecout, 0, VECLEN);
   j = 0;
-  ptl1 = (unsigned int *)t729;
+  ptw1 = t729;
   for (i = 0; i < 90; i++) {
-    memset(ptl1, 0, (l729) * sizeof(long));
-    ptl2 = (unsigned int *)m->m729;
-    ptl2w = (unsigned int *)m->w729;
-    ptl2ww = (unsigned int *)m->ww729;
+    memset(ptw1, 0, (wl729) * sizeof(word));
+    ptw2 = m->m729;
+    ptw2w = m->w729;
+    ptw2ww = m->ww729;
     for (k = 0; k < 729; k++) {
       entry = FFRV(vecin, j);
       if (entry != 0) {
-	ptl3 = ptl2;
-	if (entry == 2) ptl3 = ptl2w;
-	if (entry == 3) ptl3 = ptl2ww;
-        (*operations.incer)(ptl3, ptl1, l729);
+	ptw3 = ptw2;
+	if (entry == 2) ptw3 = ptw2w;
+	if (entry == 3) ptw3 = ptw2ww;
+        (*operations.incer)(ptw3, ptw1, wl729);
       }
-      ptl2 += l729;
-      ptl2w += l729;
-      ptl2ww += l729;
+      ptw2 += wl729;
+      ptw2w += wl729;
+      ptw2ww += wl729;
       j++;
     }
-    ptl1 += l729;
+    ptw1 += wl729;
     j += 3;
   }
-  ptl1 = (unsigned int *)t729;
-  ptl2 = (unsigned int *)tw729;
-  ptl3 = (unsigned int *)tww729;
+  ptw1 = t729;
+  ptw2 = tw729;
+  ptw3 = tww729;
   for (i = 0; i < 90; i++) {
-    ptc1 = (unsigned char *)ptl1;
-    ptc2 = (unsigned char *)ptl2;
-    ptc3 = (unsigned char *)ptl3;
-    memset(ptc2, 0, (l729) * sizeof(long));
-    memset(ptc3, 0, (l729) * sizeof(long));
-    ptl2 += l729;
-    ptl3 += l729;
+    ptc1 = (unsigned char *)ptw1;
+    ptc2 = (unsigned char *)ptw2;
+    ptc3 = (unsigned char *)ptw3;
+    memset(ptc2, 0, (wl729) * sizeof(word));
+    memset(ptc3, 0, (wl729) * sizeof(word));
+    ptw2 += wl729;
+    ptw3 += wl729;
     for (j = 0; j < 183; j++) {
       uc = (unsigned char)*(ptc1++);
       *(ptc2++) = w[uc];
       *(ptc3++) = ww[uc];
     }
-    ptl1 += l729;
+    ptw1 += wl729;
   }
   ptc1 = vecout;
-  ptl1 = (unsigned int *)m->m90;
+  ptw1 = m->m90;
   for (i = 0; i < 90; i++) {
-    memset(vwork, 0, (l729) * sizeof(long));
-    ptl2 = (unsigned int *)t729;
-    ptl2w = (unsigned int *)tw729;
-    ptl2ww = (unsigned int *)tww729;
+    memset(vwork, 0, (wl729) * sizeof(*vwork));
+    ptw2 = t729;
+    ptw2w = tw729;
+    ptw2ww = tww729;
     for (k = 0; k < 90; k++) {
-      entry = FFRV((unsigned char *)ptl1, k);
+      entry = FFRV((unsigned char *)ptw1, k);
       if (entry != 0) {
-	ptl3 = ptl2;
-	if (entry == 2) ptl3 = ptl2w;
-	if (entry == 3) ptl3 = ptl2ww;
-        (*operations.incer)(ptl3, vwork, l729);
+	ptw3 = ptw2;
+	if (entry == 2) ptw3 = ptw2w;
+	if (entry == 3) ptw3 = ptw2ww;
+        (*operations.incer)(ptw3, vwork, wl729);
       }
-      ptl2 += l729;
-      ptl2w += l729;
-      ptl2ww += l729;
+      ptw2 += wl729;
+      ptw2w += wl729;
+      ptw2ww += wl729;
     }
-    ptl1 += l90;
+    ptw1 += wl90;
     ptc2 = (unsigned char *)vwork;
     if (m->inout == 1) {
       memcpy(ptc1, ptc2, 183);
@@ -511,15 +511,15 @@ void vecsuz(const unsigned char *vecin, suzel m, unsigned char *vecout)
     if (entry != 0) FTOV(vecout, k, v3[entry][bact]);
   }
   j = 197552;
-  memset(vwork, 0, (l142) * (sizeof(long)));
-  ptl3 = (unsigned int *)m->m142;
+  memset(vwork, 0, (wl142) * (sizeof(word)));
+  ptw3 = m->m142;
   for (i = 0; i < 142; i++) {
     entry = FFRV2(vecin, j++);
     assert(0 == entry || 1 == entry);
     if (entry == 1) {
-      (*operations.incer)(ptl3, vwork, l729);
+      (*operations.incer)(ptw3, vwork, wl729);
     }
-    ptl3 += l142;
+    ptw3 += wl142;
   }
   memcpy(ptc1 + 8224, vwork, 18);
 }
@@ -530,13 +530,13 @@ void vecT(unsigned char *vecin, unsigned char *vecout)
   unsigned int i, j, l;
   unsigned char entry;
   unsigned char *ptc1;
-  unsigned int *ptl3;
+  word *ptw3;
 
   assert(NULL != vecin);
   assert(NULL != vecout);
   memset(vecout, 0, VECLEN);
   for (j = 0; j < 87750; j++) {
-    long k = Tperm[j];
+    int k = Tperm[j];
     if (k == -1) continue;
     entry = FFRV(vecin, j);
     if (entry != 0) FTOV(vecout, k, v3[entry][Tbact[j]]);
@@ -546,54 +546,54 @@ void vecT(unsigned char *vecin, unsigned char *vecout)
 
   ptc1 = vecout+21938;
   for (l = 0; l < 11; l++) {
-    memset(vwork, 0, (l324) * sizeof(long));
-    ptl3 = (unsigned int *)T324a;
+    memset(vwork, 0, (wl324) * sizeof(word));
+    ptw3 = T324a;
     for (i = 0; i < 324; i++) {
       entry = FFRV2(vecin, j++);
       assert(0 == entry || 1 == entry);
       if (1 == entry) {
-        (*operations.incer)(ptl3, vwork, l324);
+        (*operations.incer)(ptw3, vwork, wl324);
       }
-      ptl3 += l324;
+      ptw3 += wl324;
     }
     memcpy(ptc1, vwork, 41);
     ptc1 += 41;
     j += 4;
   }
   for (l = 0; l < 55; l++) {
-    memset(vwork, 0, (l324) * sizeof(long));
-    ptl3 = (unsigned int *)T324b;
+    memset(vwork, 0, (wl324) * sizeof(word));
+    ptw3 = T324b;
     for (i = 0; i < 324; i++) {
       entry = FFRV2(vecin, j++);
       assert(0 == entry || 1 == entry);
       if (1 == entry) {
-        (*operations.incer)(ptl3, vwork, l324);
+        (*operations.incer)(ptw3, vwork, wl324);
       }
-      ptl3 += l324;
+      ptw3 += wl324;
     }
 
     memcpy(ptc1, vwork, 41);
     ptc1 += 41;
     j += 4;
   }
-  memset(vwork, 0, (l538) * sizeof(long));
-  ptl3 = (unsigned int *)T538;
+  memset(vwork, 0, (wl538) * sizeof(word));
+  ptw3 = T538;
   for (i = 0; i < 396; i++) {
     entry = FFRV2(vecin, j++);
     assert(1 == entry || 0 == entry);
     if (1 == entry) {
-      (*operations.incer)(ptl3, vwork, l538);
+      (*operations.incer)(ptw3, vwork, wl538);
     }
-    ptl3 += l538;
+    ptw3 += wl538;
   }
   j += 4;
   for (i = 0; i < 142; i++) {
     entry = FFRV2(vecin, j++);
     assert(0 == entry || 1 == entry);
     if (1 == entry) {
-      (*operations.incer)(ptl3, vwork, l538);
+      (*operations.incer)(ptw3, vwork, wl538);
     }
-    ptl3 += l538;
+    ptw3 += wl538;
   }
   memcpy(ptc1, vwork, 68);
 }
@@ -604,16 +604,16 @@ void cpsuz(suzel a, suzel b)
   assert(NULL != b);
   b->greased = a->greased;
   b->inout = a->inout;
-  memcpy(b->m729, a->m729, 729*l729 * sizeof(long));
-  memcpy(b->m90, a->m90, 90*l90 * sizeof(long));
-  memcpy(b->m142, a->m142, 142*l142 * sizeof(long));
-  memcpy((b->p32760)+1, (a->p32760)+1, 32760 * sizeof(long));
+  memcpy(b->m729, a->m729, 729 * wl729 * sizeof(*a->m729));
+  memcpy(b->m90, a->m90, 90 * wl90 * sizeof(*a->m90));
+  memcpy(b->m142, a->m142, 142 * wl142 * sizeof(*a->m142));
+  memcpy((b->p32760)+1, (a->p32760)+1, 32760 * sizeof(unsigned int));
   memcpy((b->b32760)+1, (a->b32760)+1, 32760);
   if (1 == a->greased) {
-    memcpy(b->w729, a->w729, 729*l729 * sizeof(long));
-    memcpy(b->w90, a->w90, 90*l90 * sizeof(long));
-    memcpy(b->ww729, a->ww729, 729*l729 * sizeof(long));
-    memcpy(b->ww90, a->ww90, 90*l90 * sizeof(long));
+    memcpy(b->w729, a->w729, 729 * wl729 * sizeof(*a->w729));
+    memcpy(b->w90, a->w90, 90 * wl90 * sizeof(*a->w90));
+    memcpy(b->ww729, a->ww729, 729 * wl729 * sizeof(*a->ww729));
+    memcpy(b->ww90, a->ww90, 90 * wl90 * sizeof(*a->ww90));
   }
 }
 
@@ -624,7 +624,8 @@ void suzmult(suzel a, suzel b, suzel c)
   char unsigned entry;
   unsigned char uc;
   unsigned char *ptc1, *ptc2, *ptc3;
-  unsigned int *ptl1, *ptl2, *ptl2a, *ptl2w, *ptl2ww, *ptl3;
+  unsigned int *ptl1, *ptl2, *ptl3;
+  word *ptw1, *ptw2, *ptw3, *ptw2w, *ptw2ww, *ptw2a;
   assert(NULL != a);
   assert(NULL != b);
   assert(NULL != c);
@@ -632,77 +633,77 @@ void suzmult(suzel a, suzel b, suzel c)
 
   if (a->greased == 0) grease(a);
   if (a->inout == 2) {
-    ptl1 = (unsigned int *)suzwork->m90;
+    ptw1 = suzwork->m90;
     for (i = 0; i < 90; i++) {
-      ptc1 = (unsigned char *)ptl1;
+      ptc1 = (unsigned char *)ptw1;
       for (j = 0; j < 23; j++) {
         uc = (unsigned char) *(ptc1);
         *(ptc1++) = bar[uc];
       }
-      ptl1 += l90;
+      ptw1 += wl90;
     }
-    ptl1 = (unsigned int *)suzwork->m729;
+    ptw1 = suzwork->m729;
     for (i = 0; i < 729; i++) {
-      ptc1 = (unsigned char *)ptl1;
+      ptc1 = (unsigned char *)ptw1;
       for (j = 0; j < 183; j++) {
         uc = (unsigned char) *(ptc1);
         *(ptc1++) = bar[uc];
       }
-      ptl1 += l729;
+      ptw1 += wl729;
     }
     suzwork->greased = 0;
   }
   if (suzwork->greased == 0) grease (suzwork);
   c->greased = 0;
   c->inout = (((a->inout) + (suzwork->inout))%2) + 1;
-  ptl1 = (unsigned int *)a->m729;
-  ptl3 = (unsigned int *)c->m729;
+  ptw1 = a->m729;
+  ptw3 = c->m729;
   for (i = 0; i < 729; i++) {
-    memset(ptl3, 0, (l729) * (sizeof(long)));
-    ptl2 = (unsigned int *)suzwork->m729;
-    ptl2w = (unsigned int *)suzwork->w729;
-    ptl2ww = (unsigned int *)suzwork->ww729;
+    memset(ptw3, 0, (wl729) * (sizeof(*ptw3)));
+    ptw2 = suzwork->m729;
+    ptw2w = suzwork->w729;
+    ptw2ww = suzwork->ww729;
     for (k = 0; k < 729; k++) {
-      entry = FFRV( (unsigned char *)ptl1, k);
+      entry = FFRV((unsigned char *)ptw1, k);
       assert(entry <= 3);
       if (entry != 0) {
-        ptl2a = ptl2;
-        if (entry == 2) ptl2a = ptl2w;
-        if (entry == 3) ptl2a = ptl2ww;
-        (*operations.incer)(ptl2a, ptl3, l729);
+        ptw2a = ptw2;
+        if (entry == 2) ptw2a = ptw2w;
+        if (entry == 3) ptw2a = ptw2ww;
+        (*operations.incer)(ptw2a, ptw3, wl729);
       }
-      ptl2 += l729;
-      ptl2w += l729;
-      ptl2ww += l729;
+      ptw2 += wl729;
+      ptw2w += wl729;
+      ptw2ww += wl729;
     }
-    ptl1 += l729;
-    ptl3 += l729;
+    ptw1 += wl729;
+    ptw3 += wl729;
   }
-  ptl1 = (unsigned int *)suzwork->m90;
-  ptl3 = (unsigned int *)c->m90;
+  ptw1 = suzwork->m90;
+  ptw3 = c->m90;
   for (i = 0; i < 90; i++) {
-    memset(ptl3, 0, (l90) * sizeof(long));
-    ptl2 = (unsigned int *)a->m90;
-    ptl2w = (unsigned int *)a->w90;
-    ptl2ww = (unsigned int *)a->ww90;
+    memset(ptw3, 0, (wl90) * sizeof(*ptw3));
+    ptw2 = a->m90;
+    ptw2w = a->w90;
+    ptw2ww = a->ww90;
     for (k = 0; k < 90; k++) {
-      entry = FFRV( (unsigned char *)ptl1, k);
+      entry = FFRV( (unsigned char *)ptw1, k);
       if (entry != 0) {
-        ptl2a = ptl2;
-        if (entry == 2) ptl2a = ptl2w;
-        if (entry == 3) ptl2a = ptl2ww;
-        (*operations.incer)(ptl2a, ptl3, l90);
+        ptw2a = ptw2;
+        if (entry == 2) ptw2a = ptw2w;
+        if (entry == 3) ptw2a = ptw2ww;
+        (*operations.incer)(ptw2a, ptw3, wl90);
       }
-      ptl2 += l90;
-      ptl2w += l90;
-      ptl2ww += l90;
+      ptw2 += wl90;
+      ptw2w += wl90;
+      ptw2ww += wl90;
     }
-    ptl1 += l90;
-    ptl3 += l90;
+    ptw1 += wl90;
+    ptw3 += wl90;
   }
-  ptl1 = (unsigned int *)(a->p32760 + 1);
-  ptl2 = (unsigned int *)(suzwork->p32760);
-  ptl3 = (unsigned int *)(c->p32760 + 1);
+  ptl1 = (a->p32760 + 1);
+  ptl2 = (suzwork->p32760);
+  ptl3 = (c->p32760 + 1);
   ptc1 = (a->b32760)+1;
   ptc2 = (suzwork->b32760);
   ptc3 = (c->b32760)+1;
@@ -711,21 +712,21 @@ void suzmult(suzel a, suzel b, suzel c)
     *(ptl3++) = *(ptl2+k);
     *(ptc3++) = s3[*(ptc1++)][*(ptc2+k)];
   }
-  ptl1 = (unsigned int *)a->m142;
-  ptl3 = (unsigned int *)c->m142;
+  ptw1 = a->m142;
+  ptw3 = c->m142;
   for (i = 0; i < 142; i++) {
-    memset(ptl3, 0, (l142) * sizeof(long));
-    ptl2 = (unsigned int *)suzwork->m142;
+    memset(ptw3, 0, (wl142) * sizeof(*ptw3));
+    ptw2 = suzwork->m142;
     for (k = 0; k < 142; k++) {
-      entry = FFRV2((unsigned char *)ptl1, k);
+      entry = FFRV2((unsigned char *)ptw1, k);
       assert(0 == entry || 1 == entry);
       if (entry != 0) {
-        (*operations.incer)(ptl2, ptl3, l142);
+        (*operations.incer)(ptw2, ptw3, wl142);
       }
-      ptl2 += l142;
+      ptw2 += wl142;
     }
-    ptl1 += l142;
-    ptl3 += l142;
+    ptw1 += wl142;
+    ptw3 += wl142;
   }
 }
 

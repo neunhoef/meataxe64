@@ -1,5 +1,5 @@
 /*
- * $Id: ztcocon.c,v 1.1 2004/07/31 07:50:15 jon Exp $
+ * $Id: ztcocon.c,v 1.2 2005/06/22 21:52:55 jon Exp $
  *
  * Tensor condense continue
  *
@@ -23,7 +23,7 @@ static void tco_usage(void)
 int main(int argc, const char * const argv[])
 {
   const char *mults_l, *mults_r, *irr, *end, *left, *right, *out, *in;
-  unsigned int s, ret, loop, init;
+  u32 s, ret, loop, init;
   endian_init();
   argv = parse_line(argc, argv, &argc);
   if (14 > argc || 0 != (argc % 2)) {

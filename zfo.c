@@ -1,5 +1,5 @@
 /*
- * $Id: zfo.c,v 1.4 2004/01/04 21:22:50 jon Exp $
+ * $Id: zfo.c,v 1.5 2005/06/22 21:52:54 jon Exp $
  *
  * Find the orbits under multiple generators
  *
@@ -29,8 +29,9 @@ int main(int argc, const char * const argv[])
 {
   const char *in, *out;
   FILE *inp, *outp;
-  unsigned int prime, nor, noc, nob, max_orb, cur_point = 0, total_orbits = 0, i, j, count, im;
-  unsigned int *map;
+  u32 prime, nor, noc, nob, max_orb, cur_point = 0, total_orbits = 0, i, j, im;
+  unsigned int count;
+  word *map;
   const header *h;
   orbit_set *orbits;
   orbit **orb_ptr;
@@ -77,7 +78,7 @@ int main(int argc, const char * const argv[])
   /* All pointers NULL to start with */
   memset(orb_ptr, 0, nor * sizeof(orbit *));
   /* An orbit for working in */
-  orb.values = my_malloc(max_orb * sizeof(unsigned int));
+  orb.values = my_malloc(max_orb * sizeof(word));
   while (cur_point < nor) {
     /* Find the next untried point and compute its orbit in orb */
     if (NULL == orb_ptr[cur_point]) {
@@ -104,8 +105,8 @@ int main(int argc, const char * const argv[])
       /* Now we have a full orbit */
       orb_ptr[cur_point] = my_malloc(sizeof(orbit));
       orb_ptr[cur_point]->size = orb.size;
-      orb_ptr[cur_point]->values = my_malloc(orb.size * sizeof(unsigned int));
-      memcpy(orb_ptr[cur_point]->values, orb.values, orb.size * sizeof(unsigned int));
+      orb_ptr[cur_point]->values = my_malloc(orb.size * sizeof(word));
+      memcpy(orb_ptr[cur_point]->values, orb.values, orb.size * sizeof(word));
       /* No fusion yet */
       orb_ptr[cur_point]->next = NULL;
       /* Now make all points in orb_ptr point to this orbit */
@@ -163,7 +164,8 @@ int main(int argc, const char * const argv[])
             /* Look at images under map, and fuse orbits if necessary */
             im = map[orb->values[i]];
             if (NULL != orb_ptr[im]) {
-              unsigned int k, *values;
+              u32 k;
+              word *values;
 /*
               printf("Fusing orbit %d\n", im);
 */
@@ -198,18 +200,18 @@ int main(int argc, const char * const argv[])
         printf("Fusing orbits %d\n", cur_point);
 */
         if (NULL != orb->next) {
-          unsigned int size = orb->size;
-          unsigned int *values;
+          u32 size = orb->size;
+          word *values;
           orbit *ptr = orb->next;
           while (NULL != ptr) {
             size += ptr->size;
             ptr = ptr->next;
           }
-          values = my_malloc(size * sizeof(unsigned int));
+          values = my_malloc(size * sizeof(word));
           i = 0;
           ptr = orb;
           while (NULL != ptr) {
-            memcpy(values + i, ptr->values, ptr->size * sizeof(unsigned int));
+            memcpy(values + i, ptr->values, ptr->size * sizeof(word));
             i += ptr->size;
             ptr = ptr->next;
           }
@@ -240,7 +242,7 @@ int main(int argc, const char * const argv[])
       orbit *orb = orb_ptr[cur_point];
       if (NULL != orb && orb->values[0] == cur_point) {
         /* Only consider orbits that haven't been dealt with */
-        unsigned int size = orb->size;
+        u32 size = orb->size;
 /*
         printf("Recreating orbit %d\n", cur_point);
 */
@@ -263,7 +265,7 @@ int main(int argc, const char * const argv[])
   while (cur_point < nor) {
     if (NULL != orb_ptr[cur_point]) {
       /* Record the orbit in the structure */
-      unsigned int k = orb_ptr[cur_point]->size;
+      word k = orb_ptr[cur_point]->size;
       orbits->orbits[i] = *(orb_ptr[cur_point]);
       /* Now set all pointers to this orbit to NULL */
       for (j = 0; j < k; j++) {

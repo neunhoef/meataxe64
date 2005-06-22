@@ -1,5 +1,5 @@
 /*
- * $Id: zprime.c,v 1.6 2004/01/04 21:22:50 jon Exp $
+ * $Id: zprime.c,v 1.7 2005/06/22 21:52:54 jon Exp $
  *
  * Print the field order from a matrix
  *
@@ -24,7 +24,7 @@ static void prime_usage(void)
 int main(int argc, const char * const argv[])
 {
   FILE *inp;
-  unsigned int prime;
+  u32 prime;
   const header *h;
 
   endian_init();

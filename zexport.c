@@ -1,5 +1,5 @@
 /*
- * $Id: zexport.c,v 1.12 2004/01/31 13:24:51 jon Exp $
+ * $Id: zexport.c,v 1.13 2005/06/22 21:52:54 jon Exp $
  *
  * Export matrix to old system
  *
@@ -31,8 +31,8 @@ int main(int argc, const char * const argv[])
   const char *in;
   const char *out;
   const header *h_in;
-  unsigned int prime, nob, noc, nor, eperb, i, j, *in_row, len, blen, mask, elts_per_word;
-  unsigned int *out_row;
+  u32 prime, nob, noc, nor, eperb, i, j, len, blen, elts_per_word;
+  word mask, *in_row, *out_row;
   FILE *f_in;
   FILE *f_out;
 
@@ -61,7 +61,7 @@ int main(int argc, const char * const argv[])
   blen = header_get_blen(h_in);
   memory_init(name, memory);
   endian_init();
-  if (memory_rows(len, 500) < 1 || memory_rows((blen + sizeof(unsigned int) - 1) / sizeof(unsigned int), 500) < 1) {
+  if (memory_rows(len, 500) < 1 || memory_rows((blen + sizeof(word) - 1) / sizeof(word), 500) < 1) {
     fprintf(stderr, "%s: cannot fit row of %s for input and row of %s for output, terminating\n", name, in, out);
     exit(1);
   }
@@ -80,9 +80,9 @@ int main(int argc, const char * const argv[])
       fprintf(stderr, "%s: failed to read row %d from %s, terminating\n", name, i, in);
       exit(1);
     }
-    row_init(out_row, (blen + sizeof(unsigned int) - 1) / (sizeof(unsigned int)));
+    row_init(out_row, (blen + sizeof(word) - 1) / (sizeof(word)));
     for (j = 0; j < noc; j++) {
-      unsigned int elt = get_element_from_row_with_params(nob, j, mask, elts_per_word, in_row);
+      word elt = get_element_from_row_with_params(nob, j, mask, elts_per_word, in_row);
       put_element_to_char_row(eperb, prime, j, (unsigned char *)out_row, elt);
     }
     if (blen != fwrite(out_row, 1, blen, f_out)) {

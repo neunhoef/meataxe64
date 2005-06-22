@@ -1,5 +1,5 @@
 /*
- * $Id: base.c,v 1.6 2004/04/25 16:31:47 jon Exp $
+ * $Id: base.c,v 1.7 2005/06/22 21:52:53 jon Exp $
  *
  * Form an echelised basis from one file to another
  *
@@ -32,14 +32,14 @@ static void cleanup_tmp(FILE *echelised, const char *name_echelised)
   (void)remove(name_echelised);
 }
 
-unsigned int base(const char *in, const char *dir,
-                  const char *out, const char *name)
+u32 base(const char *in, const char *dir,
+         const char *out, const char *name)
 {
   FILE *inp = NULL, *outp = NULL, *echelised = NULL;
   const header *h_in;
   header *h_out;
-  unsigned int prime, nob, noc, nor = 0, nor1, len, d, max_rows;
-  unsigned int **rows1, **rows2;
+  u32 prime, nob, noc, nor = 0, nor1, len, d, max_rows;
+  word **rows1, **rows2;
   int *map;
   int tmps_created = 0;
   grease_struct grease;
@@ -114,7 +114,7 @@ unsigned int base(const char *in, const char *dir,
     rows2[d] = memory_pointer_offset(450, d, len);
   }
   for (d = 0; d < nor1; d += max_rows) {
-    unsigned int stride = (d + max_rows > nor1) ? nor1 - d : max_rows;
+    u32 stride = (d + max_rows > nor1) ? nor1 - d : max_rows;
     errno = 0;
     if (0 == endian_read_matrix(inp, rows1, len, stride)) {
       if ( 0 != errno) {

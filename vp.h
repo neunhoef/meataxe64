@@ -1,5 +1,5 @@
 /*
- * $Id: vp.h,v 1.3 2002/07/03 12:06:55 jon Exp $
+ * $Id: vp.h,v 1.4 2005/06/22 21:52:54 jon Exp $
  *
  * Function to permute some vectors under two generators
  *
@@ -10,8 +10,8 @@
 
 /* Projective indicates whether to permuate points, or lines */
 /* 0 => points, 1 => lines */
-extern unsigned int permute(const char *in, const char *out, const char *a,
-                            const char *b, const char *a_out, const char *b_out,
-                            int projective, const char *name);
+extern u32 permute(const char *in, const char *out, const char *a,
+                   const char *b, const char *a_out, const char *b_out,
+                   int projective, const char *name);
 
 #endif

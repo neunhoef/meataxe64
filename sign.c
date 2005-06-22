@@ -1,5 +1,5 @@
 /*
- * $Id: sign.c,v 1.9 2004/04/25 16:31:48 jon Exp $
+ * $Id: sign.c,v 1.10 2005/06/22 21:52:54 jon Exp $
  *
  * Function compute the orthogonal group sign
  *
@@ -28,10 +28,10 @@
 #define shuffle_rows
 
 #ifdef shuffle_rows
-static void shuffle(unsigned int from, unsigned int to, unsigned int **mat)
+static void shuffle(u32 from, u32 to, word **mat)
 {
-  unsigned int i;
-  unsigned int *row = mat[to];
+  u32 i;
+  word *row = mat[to];
   assert(from <= to);
   for (i = to; i > from; i--) {
     mat[i] = mat[i - 1];
@@ -44,10 +44,12 @@ int sign(const char *qform, const char *bform, const char *name)
 {
   FILE *qinp = NULL, *binp = NULL;
   const header *h_inq, *h_inb;
-  unsigned int prime, nob, nor, noc, len, n, **mat;
-  unsigned int *sing_row1, *sing_row2, *products, out_num, start = 0, elts_per_word;
+  u32 prime, nob, nor, noc, len, n;
+  word **mat;
+  word *sing_row1, *sing_row2;
+  u32 *products, out_num, start = 0, elts_per_word;
 #ifndef shuffle_rows
-  unsigned int *row;
+  word *row;
 #endif
   int res;
   grease_struct grease;
@@ -135,14 +137,15 @@ int sign(const char *qform, const char *bform, const char *name)
     row_init(mat[n], len);
     put_element_to_row(nob, nor - 1 - n, mat[n], 1);
   }
-  products = my_malloc(nor * sizeof(unsigned int));
+  products = my_malloc(nor * sizeof(u32));
   while (nor > 2) {
     int start_pos = -1;
     assert(nor >= 3);
 #ifndef NDEBUG
     /* Validate that nor - 3 will be ok */
     {
-      unsigned int pos, elt = first_non_zero(mat[start], nob, len, &pos);
+      u32 pos;
+      word elt = first_non_zero(mat[start], nob, len, &pos);
       NOT_USED(elt);
       assert(0 != elt && nor >= 4);
       assert(pos + 3 >= nor);
@@ -178,7 +181,8 @@ int sign(const char *qform, const char *bform, const char *name)
 #ifndef NDEBUG
     /* Validate that nor - 3 is ok */
     {
-      unsigned int pos, elt = first_non_zero(sing_row1, nob, len, &pos);
+      u32 pos;
+      word elt = first_non_zero(sing_row1, nob, len, &pos);
       NOT_USED(elt);
       assert(0 != elt && nor >= 4);
       assert(pos + 3 >= nor);
@@ -201,14 +205,14 @@ int sign(const char *qform, const char *bform, const char *name)
     assert(start_pos >= 0);
     /* Compute the product of the chosen norm zero vector with the remaining vectors */
     for (n = start; n < noc; n++) {
-      unsigned int i = (noc - 1 - n) / elts_per_word;
+      u32 i = (noc - 1 - n) / elts_per_word;
 #ifndef NDEBUG
-      unsigned int j;
+      u32 j;
       for (j = 0; j < i; j++) {
         assert(0 == mat[n][j]);
       }
 #endif
-      if (i <= (unsigned int)start_pos) {
+      if (i <= (u32)start_pos) {
         i = start_pos;
       }
       products[n] = (*row_operations.product)(mat[n] + i, sing_row2 + i, len - i);
@@ -217,7 +221,7 @@ int sign(const char *qform, const char *bform, const char *name)
     res = -1;
     while (n < noc) {
       if (0 != products[n]) {
-        unsigned int elt = products[n];
+        word elt = products[n];
         if (res < 0) {
           /* First instance, clean the row and remember it */
           if (1 != elt) {

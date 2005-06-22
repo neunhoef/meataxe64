@@ -1,5 +1,5 @@
 /*
- * $Id: tsp.c,v 1.17 2004/09/17 17:05:30 jon Exp $
+ * $Id: tsp.c,v 1.18 2005/06/22 21:52:54 jon Exp $
  *
  * Function to spin some vectors under two generators in tensor space
  *
@@ -34,10 +34,10 @@ struct gen_struct
 {
   FILE *f1, *f2;
   const char *m1, *m2;
-  unsigned int nor;
+  u32 nor;
   int is_map1, is_map2;
-  unsigned int **rows_1;
-  unsigned int **rows_2;
+  word **rows_1;
+  word **rows_2;
   gen next;
 };
 
@@ -55,16 +55,16 @@ static void cleanup(FILE *f1, FILE *f2, FILE *f3, FILE *f4, FILE *f5)
     fclose(f5);
 }
 
-unsigned int tensor_spin(const char *in, const char *out,
-                         const char *a1, const char *a2,
-                         const char *b1, const char *b2, const char *name)
+u32 tensor_spin(const char *in, const char *out,
+                const char *a1, const char *a2,
+                const char *b1, const char *b2, const char *name)
 {
   FILE *inp = NULL, *outp = NULL, *f_a1 = NULL, *f_a2 = NULL, *f_b1 = NULL, *f_b2 = NULL;
   const header *h_in, *h_a1, *h_a2, *h_b1, *h_b2;
   header *h_out;
-  unsigned int prime, nob, noc, nor, noc1, nor1, noc2, nor2, len, len1, len2, max_rows, max_nor, max_len, d, j, len_in, size, limit;
-  unsigned int **rows, *work_row;
-  unsigned int **rows_a1, **rows_a2, **rows_b1, **rows_b2, **mat_rows, **work_rows;
+  u32 prime, nob, noc, nor, noc1, nor1, noc2, nor2, len, len1, len2, max_rows, max_nor, max_len, d, j, len_in, size, limit;
+  word **rows, *work_row;
+  word **rows_a1, **rows_a2, **rows_b1, **rows_b2, **mat_rows, **work_rows;
   int *map, *new_map;
   grease_struct grease;
   prime_ops prime_operations;
@@ -218,7 +218,7 @@ unsigned int tensor_spin(const char *in, const char *out,
   j = 0;
   for (d = 0; d < nor; d++) {
     if (new_map[d] >= 0) {
-      unsigned int *row;
+      word *row;
       map[j] = new_map[d];
       /* Swap pointers */
       row = rows[j];
@@ -272,8 +272,8 @@ unsigned int tensor_spin(const char *in, const char *out,
   fclose(f_a2);
   fclose(f_b2);
   while (nor < max_rows && nor < noc && (gen_a.nor < nor || gen_b.nor < nor)) {
-    unsigned int rows_to_do = max_rows - nor;
-    unsigned int i, j = 0;
+    u32 rows_to_do = max_rows - nor;
+    u32 i, j = 0;
     /* Ensure we don't try to do too many */
     rows_to_do = (rows_to_do + gen->nor > nor) ? (nor - gen->nor) : rows_to_do;
     if (verbose) {
@@ -308,7 +308,7 @@ unsigned int tensor_spin(const char *in, const char *out,
     for (i = 0; i < rows_to_do; i++) {
       if (new_map[i] >= 0) {
         /* Got a useful row */
-        unsigned int *row;
+        word *row;
         map[nor + j] = new_map[i];
         /* Swap pointers */
         row = rows[nor + j];

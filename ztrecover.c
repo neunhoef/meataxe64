@@ -1,5 +1,5 @@
 /*
- * $Id: ztrecover.c,v 1.4 2004/01/04 21:22:50 jon Exp $
+ * $Id: ztrecover.c,v 1.5 2005/06/22 21:52:55 jon Exp $
  *
  * Recover a tensor subspace
  *
@@ -30,7 +30,8 @@ int main(int argc, const char * const argv[])
   const char *in;
   const char *out;
   FILE *inp, *outp;
-  unsigned int noc1, noc2, nor, nob, nod, prime, len2, len, len_o, *row_in, *row_out, d, **mat_rows;
+  u32 noc1, noc2, nor, nob, nod, prime, len2, len, len_o, d;
+  word *row_in, *row_out, **mat_rows;
   const header *h_in;
   header *h_out, *h_2;
 

@@ -1,5 +1,5 @@
 /*
- * $Id: zvp.c,v 1.7 2004/08/21 13:22:32 jon Exp $
+ * $Id: zvp.c,v 1.8 2005/06/22 21:52:55 jon Exp $
  *
  * Permute some vectors under two generators
  *
@@ -21,7 +21,7 @@ static void vp_usage(void)
 
 int main(int argc, const char * const argv[])
 {
-  unsigned int degree;
+  u32 degree;
 
   argv = parse_line(argc, argv, &argc);
   if (7 != argc) {

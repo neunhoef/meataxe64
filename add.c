@@ -1,5 +1,5 @@
 /*
- * $Id: add.c,v 1.20 2002/06/28 08:39:16 jon Exp $
+ * $Id: add.c,v 1.21 2005/06/22 21:52:53 jon Exp $
  *
  * Function to add two matrices to give a third
  *
@@ -36,16 +36,16 @@ static int cleanup(FILE *inp1, FILE *inp2, FILE *outp)
   return 0;
 }
 
-static int add_sub(const char *m1, const char *m2, const char *m3, const char *name, int scale, unsigned int elt)
+static int add_sub(const char *m1, const char *m2, const char *m3, const char *name, int scale, u32 elt)
 {
   FILE *inp1 = NULL;
   FILE *inp2 = NULL;
   FILE *outp = NULL;
-  unsigned int prime, nob, noc, nor, len;
-  unsigned int i;
+  u32 prime, nob, noc, nor, len;
+  u32 i;
   int is_perm1, is_perm2;
   const header *h1, *h2, *h;
-  unsigned int *row1, *row2;
+  word *row1, *row2;
   row_ops row_operations;
   row_incer incer;
   scaled_row_incer scaled_incer;
@@ -139,7 +139,7 @@ int add(const char *m1, const char *m2, const char *m3, const char *name)
   return add_sub(m1, m2, m3, name, 0, 0);
 }
 
-int scaled_add(const char *m1, const char *m2, const char *m3, unsigned int scalar, const char *name)
+int scaled_add(const char *m1, const char *m2, const char *m3, u32 scalar, const char *name)
 {
   return add_sub(m1, m2, m3, name, 1, scalar);
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: ss_map.c,v 1.2 2002/06/28 08:39:16 jon Exp $
+ * $Id: ss_map.c,v 1.3 2005/06/22 21:52:54 jon Exp $
  *
  * Function to compute subspace map
  *
@@ -13,12 +13,12 @@
 #include "elements.h"
 #include "utils.h"
 
-int subspace_map(FILE *inp, int *map, unsigned int nor,
-                 unsigned int len, unsigned int nob,
-                 unsigned int *row, const char *in,
+int subspace_map(FILE *inp, int *map, u32 nor,
+                 u32 len, u32 nob,
+                 word *row, const char *in,
                  const char *name)
 {
-  unsigned int i;
+  u32 i;
   assert(NULL != inp);
   assert(NULL != in);
   assert(NULL != map);
@@ -32,7 +32,8 @@ int subspace_map(FILE *inp, int *map, unsigned int nor,
     map[i] = -1;
   }
   for (i = 0; i < nor; i += 1) {
-    unsigned int j, elt;
+    u32 j;
+    word elt;
     errno = 0;
     if (0 == endian_read_row(inp, row, len)) {
       if ( 0 != errno) {

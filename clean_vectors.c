@@ -1,5 +1,5 @@
 /*
- * $Id: clean_vectors.c,v 1.6 2004/12/31 11:26:19 jon Exp $
+ * $Id: clean_vectors.c,v 1.7 2005/06/22 21:52:53 jon Exp $
  *
  * Clean one file of vectors with another
  *
@@ -30,8 +30,8 @@ int clean_vectors(const char *echelised, const char *vectors, const char *output
   FILE *inp1 = NULL, *inp2 = NULL, *outp = NULL;
   const header *h_in1, *h_in2;
   header *h_out;
-  unsigned int prime, nob, noc, nor2, nor1, len, d, i, j, max_rows;
-  unsigned int **rows1, **rows2;
+  u32 prime, nob, noc, nor2, nor1, len, d, i, j, max_rows;
+  word **rows1, **rows2;
   long long ptr;
   int *map;
   grease_struct grease;
@@ -135,7 +135,7 @@ int clean_vectors(const char *echelised, const char *vectors, const char *output
   ptr = ftello64(inp1);
   fseeko64(inp1, 0, SEEK_SET);
   for (i = 0; i < nor2; i += max_rows) {
-    unsigned int stride2 = (i + max_rows < nor2) ? max_rows : nor2 - i;
+    u32 stride2 = (i + max_rows < nor2) ? max_rows : nor2 - i;
     /* TODO: loop reading stuff from inp1 and cleaning with it */
     if (0 == endian_read_matrix(inp2, rows2, len, stride2)) {
       matrix_free(rows1);
@@ -148,7 +148,7 @@ int clean_vectors(const char *echelised, const char *vectors, const char *output
     }
     fseeko64(inp1, ptr, SEEK_SET);
     for (j = 0; j < nor1; j += max_rows) {
-      unsigned int stride1 = (j + max_rows < nor1) ? max_rows : nor1 - j;
+      u32 stride1 = (j + max_rows < nor1) ? max_rows : nor1 - j;
       if (0 == endian_read_matrix(inp1, rows1, len, stride1)) {
         matrix_free(rows1);
         matrix_free(rows2);
@@ -166,8 +166,8 @@ int clean_vectors(const char *echelised, const char *vectors, const char *output
       memset(map, 0, stride1 * sizeof(int));
 #endif
       for (d = 0; d < stride1; d++) {
-        unsigned int pos;
-        unsigned int elt = first_non_zero(rows1[d], nob, len, &pos);
+        u32 pos;
+        word elt = first_non_zero(rows1[d], nob, len, &pos);
         if (0 == elt) {
           fprintf(stderr, "%s: %s contains zero vectors, terminating\n", name, echelised);
           matrix_free(rows1);

@@ -1,5 +1,5 @@
 /*
- * $Id: te.c,v 1.9 2002/10/13 16:38:07 jon Exp $
+ * $Id: te.c,v 1.10 2005/06/22 21:52:54 jon Exp $
  *
  * Function to tensor two matrices to give a third
  *
@@ -38,10 +38,11 @@ int tensor(const char *m1, const char *m2, const char *m3, const char *name)
   FILE *inp1 = NULL;
   FILE *inp2 = NULL;
   FILE *outp = NULL;
-  unsigned int prime, nob, nod, noc1, nor1, len1, noc2, nor2, len2, noc3, nor3, len3, mask, elts_per_word;
+  u32 prime, nob, nod, noc1, nor1, len1, noc2, nor2, len2, noc3, nor3, len3, elts_per_word;
+  word mask;
   const header *h1 = NULL, *h2 = NULL, *h3 = NULL;
-  unsigned int i, j, k, l;
-  unsigned int **rows1, **rows2, *row_out, *row_copy;
+  u32 i, j, k, l;
+  word **rows1, **rows2, *row_out, *row_copy;
   row_ops row_operations;
   int is_perm1, is_perm2;
   assert(NULL != m1);
@@ -73,9 +74,9 @@ int tensor(const char *m1, const char *m2, const char *m3, const char *name)
   is_perm2 = (1 == header_get_prime(h2));
   if (is_perm1 && is_perm2) {
     /* A pair of maps, result is also a map */
-    unsigned int *map1 = malloc_map(nor1);
-    unsigned int *map2 = malloc_map(nor2);
-    unsigned int *map_o = malloc_map(nor3);
+    word *map1 = malloc_map(nor1);
+    word *map2 = malloc_map(nor2);
+    word *map_o = malloc_map(nor3);
     header_free(h1);
     header_free(h2);
     if (0 == read_map(inp1, nor1, map1, name, m1) ||
@@ -171,13 +172,13 @@ int tensor(const char *m1, const char *m2, const char *m3, const char *name)
       /* Down the rows of m1 */
       for (j = 0; j < nor2; j++) {
         /* Down the rows of m2 */
-        unsigned int offset = 0;
+        u32 offset = 0;
         row_init(row_out, len3);
         for (k = 0; k < noc1; k++) {
           /* Along the columns of m1 */
-          unsigned int elt = get_element_from_row_with_params(nob, k, mask, elts_per_word, rows1[i]);
+          word elt = get_element_from_row_with_params(nob, k, mask, elts_per_word, rows1[i]);
           if ( 0 != elt) {
-            unsigned int *row = rows2[j];
+            word *row = rows2[j];
             if (1 != elt) {
               (*row_operations.scaler)(row, row_copy, len2, elt);
               row = row_copy;

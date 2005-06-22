@@ -1,5 +1,5 @@
 /*
- * $Id: zns.c,v 1.6 2004/08/21 13:22:31 jon Exp $
+ * $Id: zns.c,v 1.7 2005/06/22 21:52:54 jon Exp $
  *
  * Compute the null space of a matrix
  *
@@ -21,7 +21,7 @@ static void ns_usage(void)
 
 int main(int argc, const char * const argv[])
 {
-  unsigned int n;
+  u32 n;
 
   argv = parse_line(argc, argv, &argc);
   if (3 != argc) {

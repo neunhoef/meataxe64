@@ -1,5 +1,5 @@
 /*
- * $Id: rn.c,v 1.15 2004/08/21 13:22:31 jon Exp $
+ * $Id: rn.c,v 1.16 2005/06/22 21:52:53 jon Exp $
  *
  * Compute the rank of a matrix
  *
@@ -19,11 +19,12 @@
 #include "memory.h"
 #include "read.h"
 
-int rank(const char *m, unsigned int *r, const char *name)
+int rank(const char *m, u32 *r, const char *name)
 {
   FILE *inp;
   const header *h;
-  unsigned int prime, nob, nor, len, n, **mat;
+  u32 prime, nob, nor, len, n;
+  word **mat;
   int *map;
   int is_perm;
   assert(NULL != m);

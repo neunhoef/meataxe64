@@ -1,5 +1,5 @@
 /*
- * $Id: qs.c,v 1.16 2004/04/25 16:31:48 jon Exp $
+ * $Id: qs.c,v 1.17 2005/06/22 21:52:53 jon Exp $
  *
  * Function to compute quotient space representation
  *
@@ -40,10 +40,11 @@ void quotient(const char *range, const char *gen,
 {
   FILE *inp_r = NULL, *inp_g = NULL, *outp = NULL;
   const header *h_in_r, *h_in_g, *h_out;
-  unsigned int prime, nob, noc, nor_r, nor_g, nor_o, len, len_o, d, i, j, k, elt, step_r, step_i, prime_g, mask, elts_per_word;
-  unsigned int **rows1, **rows2;
+  u32 prime, nob, noc, nor_r, nor_g, nor_o, len, len_o, d, i, j, k, step_r, step_i, prime_g, elts_per_word;
+  word **rows1, **rows2;
   int *map_r, *map_g;
-  unsigned int *map_o;
+  u32 *map_o;
+  word elt, mask;
   row_ops row_operations;
   grease_struct grease;
   long long pos;
@@ -117,13 +118,13 @@ void quotient(const char *range, const char *gen,
   }
   map_r = my_malloc(nor_r * sizeof(int));
   map_g = my_malloc(nor_g * sizeof(int));
-  map_o = my_malloc(nor_o * sizeof(unsigned int));
+  map_o = my_malloc(nor_o * sizeof(u32));
   memset(map_r, 0, nor_r * sizeof(int));
   memset(map_g, 0, nor_g * sizeof(int));
   /* Now set up the map */
   pos = ftello64(inp_r); /* Where we are in the range */
   for (i = 0; i < nor_r; i += step_r) {
-    unsigned int j, stride_i = (i + step_r <= nor_r) ? step_r : nor_r - i;
+    u32 j, stride_i = (i + step_r <= nor_r) ? step_r : nor_r - i;
     errno = 0;
     if (0 == endian_read_matrix(inp_r, rows1, len, stride_i)) {
       if ( 0 != errno) {
@@ -165,14 +166,14 @@ void quotient(const char *range, const char *gen,
   j = 0; /* Counting the significant rows from g */
   while (j < nor_o) {
     /* Read some rows from inp_g into rows2 */
-    unsigned int stride_j = (j + step_i <= nor_o) ? step_i : nor_o - j;
-    unsigned int *row_o = memory_pointer(900);
+    u32 stride_j = (j + step_i <= nor_o) ? step_i : nor_o - j;
+    word *row_o = memory_pointer(900);
     for (d = 0; d < stride_j; d++) {
       while (map_o[j + d] >= i) {
         /* Handle permutation here */
         if (1 == prime_g) {
           errno = 0;
-          if (0 == endian_read_int(&k, inp_g)) {
+          if (0 == endian_read_word(&elt, inp_g)) {
             if ( 0 != errno) {
               perror(name);
             }
@@ -182,7 +183,7 @@ void quotient(const char *range, const char *gen,
           }
           if (map_o[j + d] == i) {
             row_init(rows2[d], len);
-            put_element_to_clean_row_with_params(nob, k, elts_per_word, rows2[d], 1);
+            put_element_to_clean_row_with_params(nob, elt, elts_per_word, rows2[d], 1);
           }
         } else {
           errno = 0;
@@ -207,7 +208,7 @@ void quotient(const char *range, const char *gen,
       exit(1);
     }
     for (k = 0; k < nor_r; k += step_r) {
-      unsigned int stride_k = (k + step_r <= nor_r) ? step_r : nor_r - k;
+      u32 stride_k = (k + step_r <= nor_r) ? step_r : nor_r - k;
       errno = 0;
       if (0 == in_store && 0 == endian_read_matrix(inp_r, rows1, len, stride_k)) {
         if ( 0 != errno) {

@@ -1,5 +1,5 @@
 /*
- * $Id: maps.c,v 1.3 2002/06/28 08:39:16 jon Exp $
+ * $Id: maps.c,v 1.4 2005/06/22 21:52:53 jon Exp $
  *
  * Maps from {0 .. nor-1} -> {0 .. noc-1}
  *
@@ -16,27 +16,27 @@
 #include "utils.h"
 #include "write.h"
 
-unsigned int *malloc_map(unsigned int nor)
+word *malloc_map(u32 nor)
 {
-  return my_malloc(nor * sizeof(unsigned int));
+  return my_malloc(nor * sizeof(word));
 }
 
-void map_free(unsigned int *map)
+void map_free(word *map)
 {
   free(map);
 }
 
 /* Read one element from a map and set up as a matrix row */
-int read_map_element_as_row(FILE *inp, unsigned int *row, unsigned int nob,
-                            unsigned int noc, unsigned int len, const char *in, const char *name)
+int read_map_element_as_row(FILE *inp, word *row, u32 nob,
+                            u32 noc, u32 len, const char *in, const char *name)
 {
-  unsigned int i;
+  word i;
   assert(NULL != inp);
   assert(NULL != row);
   assert(NULL != in);
   assert(NULL != name);
   errno = 0;
-  if (1 != endian_read_int(&i, inp)) {
+  if (1 != endian_read_word(&i, inp)) {
     if ( 0 != errno) {
       perror(name);
     }
@@ -44,7 +44,7 @@ int read_map_element_as_row(FILE *inp, unsigned int *row, unsigned int nob,
     return 0;
   }
   if (i >= noc) {
-    fprintf(stderr, "%s: element %d from %s out of range (0 - %d), terminating\n", name, i, in, noc - 1);
+    fprintf(stderr, "%s: element %d from %s out of range (0 - %d), terminating\n", name, (u32)i, in, noc - 1);
     return 0;
   }
   row_init(row, len);
@@ -53,16 +53,17 @@ int read_map_element_as_row(FILE *inp, unsigned int *row, unsigned int nob,
 }
 
 /* Assumes file pointing after header */
-int read_map(FILE *inp, unsigned int nor, unsigned int *map, const char *name, const char *in)
+int read_map(FILE *inp, u32 nor, word *map, const char *name, const char *in)
 {
-  unsigned int i, j;
+  u32 i;
+  word j;
   assert(NULL != inp);
   assert(NULL != map);
   assert(NULL != name);
   assert(NULL != in);
   for (i = 0; i < nor; i++) {
     errno = 0;
-    if (1 != endian_read_int(&j, inp)) {
+    if (1 != endian_read_word(&j, inp)) {
       if ( 0 != errno) {
         perror(name);
       }
@@ -75,16 +76,16 @@ int read_map(FILE *inp, unsigned int nor, unsigned int *map, const char *name, c
   return 1;
 }
 
-int write_map(FILE *outp, unsigned int nor, unsigned int *map, const char *name, const char *out)
+int write_map(FILE *outp, u32 nor, word *map, const char *name, const char *out)
 {
-  unsigned int i;
+  u32 i;
   assert(NULL != outp);
   assert(NULL != map);
   assert(NULL != name);
   assert(NULL != out);
   for (i = 0; i < nor; i++) {
     errno = 0;
-    if (1 != endian_write_int(map[i], outp)) {
+    if (1 != endian_write_word(map[i], outp)) {
       if ( 0 != errno) {
         perror(name);
       }
@@ -96,10 +97,11 @@ int write_map(FILE *outp, unsigned int nor, unsigned int *map, const char *name,
   return 1;
 }
 
-int mul_map(unsigned int *in1, unsigned int *in2, unsigned int *out,
+int mul_map(word *in1, word *in2, word *out,
             const header *h1, const header *h2, const char *name)
 {
-  unsigned int i, j, k, nor1, nor2, noc1, noc2;
+  u32 i, nor1, nor2, noc1, noc2;
+  word j, k;
   assert(NULL != in1);
   assert(NULL != in2);
   assert(NULL != out);
@@ -119,12 +121,12 @@ int mul_map(unsigned int *in1, unsigned int *in2, unsigned int *out,
   for (i = 0; i < nor1; i++) {
     j = in1[i];
     if (j >= noc1) {
-      fprintf(stderr, "%s: map entry %d out of range (0 - %d), terminating\n", name, j, noc1 - 1);
+      fprintf(stderr, "%s: map entry %d out of range (0 - %d), terminating\n", name, (u32)j, noc1 - 1);
       return 0;
     }
     k = in2[j];
     if (k >= noc2) {
-      fprintf(stderr, "%s: map entry %d out of range (0 - %d), terminating\n", name, k, noc2 - 1);
+      fprintf(stderr, "%s: map entry %d out of range (0 - %d), terminating\n", name, (u32)k, noc2 - 1);
       return 0;
     }
     out[i] = k;
@@ -132,9 +134,10 @@ int mul_map(unsigned int *in1, unsigned int *in2, unsigned int *out,
   return 1;
 }
 
-int map_rank(FILE *inp, const header *h, const char *m, unsigned int *r, const char *name)
+int map_rank(FILE *inp, const header *h, const char *m, u32 *r, const char *name)
 {
-  unsigned int noc, nor, i, rn, *map1, *map2;
+  u32 noc, nor, i, rn;
+  word *map1, *map2;
   assert(NULL != r);
   assert(NULL != m);
   assert(NULL != name);
@@ -153,9 +156,9 @@ int map_rank(FILE *inp, const header *h, const char *m, unsigned int *r, const c
   }
   rn = nor;
   for (i = 0; i < nor; i++) {
-    unsigned int j = map1[i];
+    word j = map1[i];
     if (j >= noc) {
-      fprintf(stderr, "%s: map entry %d out of range (0 - %d), terminating\n", name, j, noc - 1);
+      fprintf(stderr, "%s: map entry %d out of range (0 - %d), terminating\n", name, (u32)j, noc - 1);
       map_free(map1);
       map_free(map2);
       return 0;
@@ -172,7 +175,8 @@ int map_rank(FILE *inp, const header *h, const char *m, unsigned int *r, const c
 
 int map_iv(FILE *inp, const header *h, const char *m1, const char *m2, const char *name)
 {
-  unsigned int noc, nor, i, j, *map1, *map2;
+  u32 noc, nor, i;
+  word j, *map1, *map2;
   FILE *outp;
   assert(NULL != inp);
   assert(NULL != h);
@@ -198,7 +202,7 @@ int map_iv(FILE *inp, const header *h, const char *m1, const char *m2, const cha
   for (i = 0; i < nor; i++) {
     j = map1[i];
     if (j >= nor) {
-      fprintf(stderr, "%s: map entry %d out of range (0 - %d), terminating\n", name, j, nor - 1);
+      fprintf(stderr, "%s: map entry %d out of range (0 - %d), terminating\n", name, (u32)j, nor - 1);
       map_free(map1);
       map_free(map2);
       return 0;

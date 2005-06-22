@@ -1,5 +1,5 @@
 /*
- * $Id: ttr.c,v 1.1 2003/06/21 14:04:24 jon Exp $
+ * $Id: ttr.c,v 1.2 2005/06/22 21:52:54 jon Exp $
  *
  * Function to transpose some tensor product vectors
  *
@@ -20,14 +20,14 @@
 #include "utils.h"
 #include "write.h"
 
-int ttr(unsigned int input_noc, const char *m1, const char *m2, const char *name)
+int ttr(u32 input_noc, const char *m1, const char *m2, const char *name)
 {
   FILE *input;
   FILE *output;
-  unsigned int nob, noc, nor, prime, len, input_nor;
-  unsigned int i, mask, elts_per_word;
+  u32 nob, noc, nor, prime, len, input_nor;
+  u32 i, elts_per_word;
   const header *h1;
-  unsigned int *row1, *row2;
+  word mask, *row1, *row2;
 
   assert(NULL != m1);
   assert(NULL != m2);
@@ -72,7 +72,7 @@ int ttr(unsigned int input_noc, const char *m1, const char *m2, const char *name
   row2 = memory_pointer_offset(0, 1, len);
   mask = get_mask_and_elts(nob, &elts_per_word);
   for (i = 0; i < nor; i++) {
-    unsigned int j, k, l;
+    u32 j, k, l;
     /* Read one row */
     errno = 0;
     if (0 == endian_read_row(input, row1, len)) {
@@ -89,7 +89,7 @@ int ttr(unsigned int input_noc, const char *m1, const char *m2, const char *name
     /* Create output row */
     for (j = 0; j < input_nor; j++) {
       for (k = 0; k < input_noc; k++) {
-        unsigned int elt;
+        word elt;
         l = j * input_noc + k;
         elt = get_element_from_row_with_params(nob, l, mask, elts_per_word, row1);
         if (0 != elt) {

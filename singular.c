@@ -1,5 +1,5 @@
 /*
- * $Id: singular.c,v 1.7 2004/04/25 16:31:48 jon Exp $
+ * $Id: singular.c,v 1.8 2005/06/22 21:52:54 jon Exp $
  *
  * Function to find a singular vector, given a quadratic form
  *
@@ -24,14 +24,15 @@
 #include "write.h"
 
 int singular_vector(row_ops *row_operations,
-                    unsigned int **rows, unsigned int **work,
-                    unsigned int *out, unsigned int *out_num, FILE *formp,
-                    unsigned int noc, unsigned int nor, unsigned int nob,
-                    unsigned int len, unsigned int prime, grease grease,
-                    unsigned int index, const char *form, const char *name)
+                    word **rows, word **work,
+                    word *out, u32 *out_num, FILE *formp,
+                    u32 noc, u32 nor, u32 nob,
+                    u32 len, u32 prime, grease grease,
+                    u32 index, const char *form, const char *name)
 {
-  unsigned int products[3][3], vector[3];
-  unsigned int i, j, power = 1;
+  u32 products[3][3];
+  word vector[3];
+  u32 i, j, power = 1;
   prime_ops prime_operations;
   assert(NULL != rows);
   assert(NULL != work);
@@ -62,56 +63,12 @@ int singular_vector(row_ops *row_operations,
       */
     }
   }
-#if 0
+  memset(vector, 0, 3 * sizeof(word));
   for (i = 0; i < nor; i++) {
-    unsigned int k, l, m;
-    memset(vector, 0, 3 * sizeof(unsigned int));
-    vector[i] = 1;
-    *out_num = i;
+    u32 l, m;
     j = 0;
     while (j < power) {
-      unsigned int sub_prod[3], prod = 0, tmp;
-      for (l = 0; l < nor; l++) {
-        sub_prod[l] = 0;
-        for (m = 0; m < nor; m++) {
-          tmp = (*prime_operations.mul)(vector[m], products[m][l]);
-          sub_prod[l] = (*prime_operations.add)(tmp, sub_prod[l]);
-        }
-        tmp = (*prime_operations.mul)(sub_prod[l], vector[l]);
-        prod = (*prime_operations.add)(prod, tmp);
-      }
-      if (0 == prod) {
-        row_init(out, len);
-        for (l = 0; l < nor; l++) {
-          if (0 != vector[l]) {
-            if (1 != vector[l]) {
-              (*row_operations->scaled_incer)(rows[l], out, len, vector[l]);
-            } else {
-              (*row_operations->incer)(rows[l], out, len);
-            }
-          }
-        }
-        return 0;
-      }
-      /* Now try the next vector in this set */
-      k = 0;
-      vector[k] += 1;
-      while (vector[k] >= prime && k + 1 < nor) {
-        vector[k] = 0;
-        k += 1;
-        vector[k] += 1;
-      }
-      j++;
-    }
-    power *= prime;
-  }
-#else
-  memset(vector, 0, 3 * sizeof(unsigned int));
-  for (i = 0; i < nor; i++) {
-    unsigned int l, m;
-    j = 0;
-    while (j < power) {
-      unsigned int sub_prod[3], prod = 0, tmp;
+      u32 sub_prod[3], prod = 0, tmp;
       span(nor, vector, prime, out_num);
       for (l = 0; l < nor; l++) {
         sub_prod[l] = 0;
@@ -139,7 +96,6 @@ int singular_vector(row_ops *row_operations,
     }
     power *= prime;
   }
-#endif
   return 255;
 }
 
@@ -148,8 +104,10 @@ int singular(const char *space, const char *form, const char *out, const char *n
   FILE *inp1, *inp2, *outp;
   const header *h_in1, *h_in2;
   header *h_out;
-  unsigned int prime, nob, nor, len, n, **mat;
-  unsigned int *out_row, out_num;
+  u32 prime, nob, nor, len, n;
+  word **mat;
+  word *out_row;
+  u32 out_num;
   int res;
   grease_struct grease;
   prime_ops prime_operations;

@@ -1,5 +1,5 @@
 /*
- * $Id: ss.c,v 1.14 2002/10/13 16:38:07 jon Exp $
+ * $Id: ss.c,v 1.15 2005/06/22 21:52:54 jon Exp $
  *
  * Function to compute subspace representation
  * Uses the computed map, rather than clean/echelise
@@ -38,8 +38,9 @@ void subspace(const char *range, const char *image,
 {
   FILE *inp1 = NULL, *inp2 = NULL, *outp = NULL;
   const header *h_in1, *h_in2, *h_out;
-  unsigned int prime, nob, noc, nor, nor_o, noc_o, len, len_e, i, j, elt, mask, elts_per_word;
-  unsigned int *row_in, *row_out;
+  u32 prime, nob, noc, nor, nor_o, noc_o, len, len_e, i, j, elts_per_word;
+  word *row_in, *row_out;
+  word elt, mask;
   int *map;
   assert(NULL != range);
   assert(NULL != image);
@@ -135,4 +136,5 @@ void subspace(const char *range, const char *image,
   }
   fclose(inp2);
   fclose(outp);
+  free(map);
 }

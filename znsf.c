@@ -1,5 +1,5 @@
 /*
- * $Id: znsf.c,v 1.6 2004/08/28 19:58:01 jon Exp $
+ * $Id: znsf.c,v 1.7 2005/06/22 21:52:54 jon Exp $
  *
  * Compute the nullspace of a matrix, using temporary files
  *
@@ -21,7 +21,7 @@ static void nsf_usage(void)
 
 int main(int argc, const char * const argv[])
 {
-  unsigned int n;
+  u32 n;
 
   argv = parse_line(argc, argv, &argc);
   if (4 != argc) {

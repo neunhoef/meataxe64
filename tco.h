@@ -1,5 +1,5 @@
 /*
- * $Id: tco.h,v 1.2 2004/07/31 07:50:15 jon Exp $
+ * $Id: tco.h,v 1.3 2005/06/22 21:52:54 jon Exp $
  *
  * Tensor condense one group element
  *
@@ -8,10 +8,10 @@
 #ifndef included__tco
 #define included__tco
 
-extern int tcondense(unsigned int s, const char *mults_l, const char *mults_r,
+extern int tcondense(u32 s, const char *mults_l, const char *mults_r,
                      const char *irr, const char *end,
                      const char *left, const char *right, const char *out,
-                     const char *in, unsigned int loop, unsigned int init,
+                     const char *in, u32 loop, u32 init,
                      int argc, const char *const *argv, const char *name);
 
 #endif

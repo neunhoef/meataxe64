@@ -1,5 +1,5 @@
 /*
- * $Id: zmsbf.c,v 1.7 2004/08/28 19:58:01 jon Exp $
+ * $Id: zmsbf.c,v 1.8 2005/06/22 21:52:54 jon Exp $
  *
  * Spin some vectors under multiple generators to obtain a standard base
  * using intermediate files in a temporary directory
@@ -22,7 +22,7 @@ static void msbf_usage(void)
 
 int main(int argc, const char * const argv[])
 {
-  unsigned int dim;
+  u32 dim;
 
   argv = parse_line(argc, argv, &argc);
   if (5 > argc) {

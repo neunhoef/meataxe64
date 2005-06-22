@@ -1,5 +1,5 @@
 /*
- * $Id: nsf.c,v 1.18 2005/04/06 21:41:02 jon Exp $
+ * $Id: nsf.c,v 1.19 2005/06/22 21:52:53 jon Exp $
  *
  * Compute the nullspace of a matrix, using temporary files
  *
@@ -46,14 +46,14 @@ static void cleanup(const file_struct t1, const file_struct t2, const char *name
   (void)remove(name5);
 }
 
-unsigned int nullspacef(const char *m1, const char *m2, const char *dir, const char *name)
+u32 nullspacef(const char *m1, const char *m2, const char *dir, const char *name)
 {
   FILE *inp, *outp;
   const header *h;
   header *h_out;
-  unsigned int prime, nob, nod, nor, len, len_id, space, space_id, sub, sub_id,
-      n, r, r1, **mat1, **mat2, **mat3, **mat4,
-      i, rows_to_do, max_rows, step1, step2;
+  u32 prime, nob, nod, nor, len, len_id, space, space_id, sub, sub_id,
+    n, r, r1, i, rows_to_do, max_rows, step1, step2;
+  word **mat1, **mat2, **mat3, **mat4;
   int *map;
   row_ops row_operations;
   grease_struct grease;
@@ -176,9 +176,9 @@ unsigned int nullspacef(const char *m1, const char *m2, const char *dir, const c
   }
   r = 0; /* Rank count */
   while (rows_to_do > 0) {
-    unsigned int rows_remaining = rows_to_do;
-    unsigned int stride = (step1 > rows_remaining) ? rows_remaining : step1;
-    unsigned int i;
+    u32 rows_remaining = rows_to_do;
+    u32 stride = (step1 > rows_remaining) ? rows_remaining : step1;
+    u32 i;
     errno = 0;
     /* Read input rows */
     if (0 == endian_read_matrix(in->f, mat1, len, stride)) {
@@ -230,7 +230,7 @@ unsigned int nullspacef(const char *m1, const char *m2, const char *dir, const c
       r += n;
       /* If still some input rows, then clean with newly echelised rows */
       if (rows_remaining > 0) {
-        unsigned int rows_written = 0;
+        u32 rows_written = 0;
         errno = 0;
         out->f = fopen64(out->name, "wb");
         if (NULL == out->f) {
@@ -260,8 +260,8 @@ unsigned int nullspacef(const char *m1, const char *m2, const char *dir, const c
           exit(1);
         }
         for (i = 0; i < rows_remaining; i += step2) {
-          unsigned int stride2 = (step2 + i > rows_remaining) ? rows_remaining - i : step2;
-          unsigned int j;
+          u32 stride2 = (step2 + i > rows_remaining) ? rows_remaining - i : step2;
+          u32 j;
           errno = 0;
           if (0 == endian_read_matrix(in->f, mat2, len, stride2)) {
             if ( 0 != errno) {
@@ -376,7 +376,7 @@ unsigned int nullspacef(const char *m1, const char *m2, const char *dir, const c
   fclose(outp);
   if (nor > r) {
     /* Found some NULL vectors */
-    unsigned int *row;
+    word *row;
     row = memory_pointer(0);
     h_out = header_create(prime, nob, nod, nor, nor - r);
     if (0 == open_and_write_binary_header(&outp, h_out, m2, name)) {

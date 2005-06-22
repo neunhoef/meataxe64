@@ -1,5 +1,5 @@
 /*
- * $Id: msb.c,v 1.10 2004/09/17 17:05:29 jon Exp $
+ * $Id: msb.c,v 1.11 2005/06/22 21:52:53 jon Exp $
  *
  * Function to spin some vectors under two generators to obtain a standard base
  *
@@ -31,12 +31,12 @@ struct gen_struct
 {
   FILE *f;
   const char *m;
-  unsigned int nor;
+  u32 nor;
   int is_map;
   gen next;
 };
 
-static void cleanup(FILE *f1, unsigned int count, FILE **files)
+static void cleanup(FILE *f1, u32 count, FILE **files)
 {
   if (NULL != f1)
     fclose(f1);
@@ -52,7 +52,7 @@ static void cleanup(FILE *f1, unsigned int count, FILE **files)
 }
 
 static int unfinished(struct gen_struct *gens,
-                      unsigned int argc, unsigned int nor)
+                      unsigned int argc, u32 nor)
 {
   while(argc > 0) {
     if (nor > gens[argc - 1].nor) {
@@ -63,14 +63,14 @@ static int unfinished(struct gen_struct *gens,
   return 0;
 }
 
-unsigned int msb_spin(const char *in, const char *out,
-                      unsigned int argc, const char * const args[], const char *name)
+u32 msb_spin(const char *in, const char *out,
+             u32 argc, const char * const args[], const char *name)
 {
   FILE *inp = NULL, *outp = NULL, **files = NULL;
   const header *h_in;
   header *h_out;
-  unsigned int prime, nob, noc, nor, len, max_rows, d;
-  unsigned int **rows1, **rows2;
+  u32 prime, nob, noc, nor, len, max_rows, d;
+  word **rows1, **rows2;
   int *map, *new_map;
   grease_struct grease;
   prime_ops prime_operations;
@@ -163,7 +163,7 @@ unsigned int msb_spin(const char *in, const char *out,
   fclose(inp);
   assert(1 == nor);
   for (d = 0; d < nor; d++) {
-    memcpy(rows2[d], rows1[d], len * sizeof(unsigned int));
+    memcpy(rows2[d], rows1[d], len * sizeof(word));
   }
   map = my_malloc(max_rows * sizeof(int));
   assert(1 == nor);
@@ -179,8 +179,8 @@ unsigned int msb_spin(const char *in, const char *out,
   }
   assert(1 == nor);
   {
-    unsigned int i;
-    unsigned int elt = first_non_zero(rows1[0], nob, len, &i);
+    u32 i;
+    word elt = first_non_zero(rows1[0], nob, len, &i);
     assert(0 != elt);
     NOT_USED(elt);
     map[0] = i;
@@ -190,16 +190,16 @@ unsigned int msb_spin(const char *in, const char *out,
     cleanup(NULL, argc, files);
   }
   while (nor < noc && unfinished(gens, argc, nor)) {
-    unsigned int rows_to_do = nor - gen->nor;
-    unsigned int i, j, k, old_nor = nor;
+    u32 rows_to_do = nor - gen->nor;
+    u32 i, j, k, old_nor = nor;
     /* Ensure we don't try to do too many */
     /* Note that the extra complexity vs sp.c */
     /* is due to the requirement to have a guaranteed */
     /* order of generated vectors, independent of basis or memory constraints */
     k = 0;
     while (k < rows_to_do) {
-      unsigned int rows_poss = max_rows - nor;
-      unsigned int stride = (k + rows_poss <= rows_to_do) ? rows_poss : rows_to_do - k;
+      u32 rows_poss = max_rows - nor;
+      u32 stride = (k + rows_poss <= rows_to_do) ? rows_poss : rows_to_do - k;
       if (0 == mul_from_store(rows1 + gen->nor, rows1 + nor, gen->f, gen->is_map, noc, len, nob,
                               stride, noc, prime, &grease, verbose, gen->m, name)) {
         fprintf(stderr, "%s: failed to multiply using %s, terminating\n", name, gen->m);
@@ -208,7 +208,7 @@ unsigned int msb_spin(const char *in, const char *out,
       }
       /* Now copy rows created to rows2 */
       for (i = 0; i < stride; i++) {
-        memcpy(rows2[nor + i], rows1[nor + i], len * sizeof(unsigned int));
+        memcpy(rows2[nor + i], rows1[nor + i], len * sizeof(word));
       }
       gen->nor += stride;
       clean(&row_operations, rows2, nor, rows2 + nor, stride, map, NULL, NULL, 0,
@@ -229,7 +229,7 @@ unsigned int msb_spin(const char *in, const char *out,
       for (i = 0; i < stride; i++) {
         if (new_map[i] >= 0) {
           /* Got a useful row */
-          unsigned int *row;
+          word *row;
           map[nor + j] = new_map[i];
           /* Swap pointers */
           row = rows1[nor + j];

@@ -1,5 +1,5 @@
 /*
- * $Id: utils.c,v 1.20 2002/09/01 12:33:40 jon Exp $
+ * $Id: utils.c,v 1.21 2005/06/22 21:52:54 jon Exp $
  *
  * Utils for meataxe
  *
@@ -14,7 +14,11 @@
 #include <ctype.h>
 #include <errno.h>
 
-unsigned int bits_in_unsigned_int = CHAR_BIT * sizeof(unsigned int);
+u32 bits_in_word = CHAR_BIT * sizeof(word);
+
+u32 bits_in_u32 = CHAR_BIT * sizeof(u32);
+
+u32 bits_in_u64 = CHAR_BIT * sizeof(u64);
 
 int my_isspace(int i)
 {
@@ -26,7 +30,7 @@ int my_isdigit(int i)
   return (i >= '0') && (i <= '9');
 }
 
-unsigned int read_decimal(const char *str, unsigned int len)
+u32 read_decimal(const char *str, u32 len)
 {
   char s[7];
 
@@ -38,9 +42,9 @@ unsigned int read_decimal(const char *str, unsigned int len)
   return strtoul(s, NULL, 0);
 }
 
-unsigned int getin(FILE *f, unsigned int a)
+u32 getin(FILE *f, u32 a)
 {
-  unsigned int j = 0;
+  u32 j = 0;
   char *s = my_malloc(a + 1);
   char *t = fgets(s, a + 1, f);
  
@@ -53,7 +57,7 @@ unsigned int getin(FILE *f, unsigned int a)
   return j;
 }
  
-static char *get_str_sub(FILE *f, unsigned int depth)
+static char *get_str_sub(FILE *f, u32 depth)
 {
   int c = fgetc(f);
   char *out;
@@ -84,9 +88,9 @@ const char *get_str(FILE *f)
   }
 }
 
-unsigned int bits_of(unsigned int n)
+u32 bits_of(u32 n)
 {
-  unsigned int i = 0;
+  u32 i = 0;
   assert(n >= 1);
   n -= 1;
   while(n > 0) {
@@ -97,9 +101,9 @@ unsigned int bits_of(unsigned int n)
 }
 
 /* Compute the number of decimal digits needed to represent 0 - n-1 */
-unsigned int digits_of(unsigned int n)
+u32 digits_of(u32 n)
 {
-  unsigned int i = 0;
+  u32 i = 0;
   assert(n >= 1);
   n -= 1;
   while(n > 0) {
@@ -127,10 +131,10 @@ void copy_rest(FILE *new, FILE *old)
 {
   char temp[1000];
   do {
-    unsigned int i = fread(temp, 1, 1000, old);
+    u32 i = fread(temp, 1, 1000, old);
     assert(i <= 1000);
     if (0 != i) {
-      unsigned int j = fwrite(temp, 1, i, new);
+      u32 j = fwrite(temp, 1, i, new);
       assert(j == i);
       NOT_USED(j);
     } else {
@@ -139,9 +143,9 @@ void copy_rest(FILE *new, FILE *old)
   } while (1);
 }
 
-unsigned int skip_whitespace(unsigned int i, const char *chars)
+u32 skip_whitespace(u32 i, const char *chars)
 {
-  unsigned int j = strlen(chars);
+  u32 j = strlen(chars);
   while (1) {
     if (i >= j-1) {
       return i;
@@ -156,9 +160,9 @@ unsigned int skip_whitespace(unsigned int i, const char *chars)
   }
 }
 
-unsigned int skip_non_white(unsigned int i, const char *chars)
+u32 skip_non_white(u32 i, const char *chars)
 {
-  unsigned int j = strlen(chars);
+  u32 j = strlen(chars);
   while (1) {
     if (i >= j-1) {
       return i;
@@ -175,7 +179,7 @@ unsigned int skip_non_white(unsigned int i, const char *chars)
 
 int get_task_line(char *line, FILE *input)
 {
-  unsigned int i;
+  u32 i;
   char *poo = fgets(line, MAX_LINE-1, input);
   if (poo == NULL || strlen(line) <= 1) {
     return 0;
@@ -189,7 +193,7 @@ int get_task_line(char *line, FILE *input)
   }
 }
 
-int int_pow(unsigned int n, unsigned int index, unsigned int *res)
+int int_pow(u32 n, u32 index, u32 *res)
 {
   assert(0 != n);
   if (0 == index) {
@@ -217,9 +221,9 @@ static int table_initialised = 0;
 
 static void init_table(void)
 {
-  unsigned int i;
+  u32 i;
   for (i = 0; i < 256; i++) {
-    unsigned int j = i, k = 0, l;
+    u32 j = i, k = 0, l;
     for (l = 0; l < 8; l++) {
       k = (k << 1) | (j & 1);
       j >>= 1;
@@ -237,9 +241,9 @@ unsigned char convert_char(unsigned char in)
   return table[in];
 }
 
-int read_numbers(FILE *inp, unsigned int s, unsigned int *out)
+int read_numbers(FILE *inp, u32 s, u32 *out)
 {
-  unsigned int i;
+  u32 i;
   assert(NULL != inp);
   assert(0 != s);
   assert(NULL != out);

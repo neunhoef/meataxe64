@@ -1,5 +1,5 @@
 /*
- * $Id: sns.c,v 1.12 2004/08/21 13:22:31 jon Exp $
+ * $Id: sns.c,v 1.13 2005/06/22 21:52:54 jon Exp $
  *
  * Simple compute of the null space of a matrix
  *
@@ -27,10 +27,11 @@ static void rn_usage(void)
 
 int main(int argc, const char * const argv[])
 {
-  unsigned int n, rank;
+  u32 n, rank;
   FILE *inp, *outp;
   const header *h_in, *h_out;
-  unsigned int prime, nob, nor, noc, len, **mat1, **mat2;
+  u32 prime, nob, nor, noc, len;
+  word **mat1, **mat2;
 
   argv = parse_line(argc, argv, &argc);
   if (3 != argc) {

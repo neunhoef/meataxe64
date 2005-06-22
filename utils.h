@@ -1,5 +1,5 @@
 /*
- * $Id: utils.h,v 1.18 2002/09/01 12:33:40 jon Exp $
+ * $Id: utils.h,v 1.19 2005/06/22 21:52:54 jon Exp $
  *
  * Utilities for meataxe
  *
@@ -18,17 +18,21 @@
 /* Large files */
 extern FILE *fopen64(const char *, const char *);
 
-extern int fseeko64(FILE *, long long, int);
+extern int fseeko64(FILE *, s64, int);
 
-extern long long ftello64(FILE *);
+extern s64 ftello64(FILE *);
 
-extern unsigned int read_decimal(const char *str, unsigned int len);
+extern u32 read_decimal(const char *str, u32 len);
 
-extern unsigned int bits_in_unsigned_int;
+extern u32 bits_in_word;
 
-extern unsigned int digits_of(unsigned int n);
+extern u32 bits_in_u32;
 
-extern unsigned int bits_of(unsigned int n);
+extern u32 bits_in_u64;
+
+extern u32 digits_of(u32 n);
+
+extern u32 bits_of(u32 n);
 
 extern int my_isspace(int);
 
@@ -36,26 +40,26 @@ extern int my_isdigit(int);
 
 extern void *my_malloc(size_t);
 
-extern unsigned int getin(FILE *f, unsigned int a);
+extern u32 getin(FILE *f, u32 a);
 
 extern const char *get_str(FILE *f);
 
 extern void copy_rest(FILE *new, FILE *old);
 
-extern unsigned int skip_whitespace(unsigned int i, const char *chars);
+extern u32 skip_whitespace(u32 i, const char *chars);
 
-extern unsigned int skip_non_white(unsigned int i, const char *chars);
+extern u32 skip_non_white(u32 i, const char *chars);
 
 extern int get_task_line(char *line, FILE *input);
 
-extern int int_pow(unsigned int n, unsigned int index,
-                   unsigned int *res);
+extern int int_pow(u32 n, u32 index,
+                   u32 *res);
 
 /* Swap the bit order in a char */
 extern unsigned char convert_char(unsigned char in);
 
 /* Read a file of numbers into an array */
 
-extern int read_numbers(FILE *inp, unsigned int s, unsigned int *out);
+extern int read_numbers(FILE *inp, u32 s, u32 *out);
 
 #endif

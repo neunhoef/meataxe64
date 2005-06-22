@@ -1,5 +1,5 @@
 /*
- * $Id: znor.c,v 1.4 2004/01/04 21:22:50 jon Exp $
+ * $Id: znor.c,v 1.5 2005/06/22 21:52:54 jon Exp $
  *
  * Print the number of rows of a matrix
  *
@@ -22,7 +22,7 @@ static void nor_usage(void)
 int main(int argc, const char * const argv[])
 {
   FILE *inp;
-  unsigned int nor;
+  u32 nor;
   const header *h;
 
   endian_init();

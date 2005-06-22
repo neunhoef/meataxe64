@@ -1,5 +1,5 @@
 /*
- * $Id: mv.h,v 1.1 2002/06/25 10:30:12 jon Exp $
+ * $Id: mv.h,v 1.2 2005/06/22 21:52:53 jon Exp $
  *
  * Function to convert rows to matrices and vv
  * Used for multiplication in tensor space
@@ -15,9 +15,9 @@
  * Hence the use of nor1 and nor2, rather than nor and noc
  * This routine cannot run in place
  */
-extern void v_to_m(unsigned int *row_in, unsigned int **rows_out,
-                   unsigned int nor1, unsigned int nor2,
-                   unsigned int prime);
+extern void v_to_m(word *row_in, word **rows_out,
+                   u32 nor1, u32 nor2,
+                   u32 prime);
 
 /* Convert vector to matrix
  * nor1 is number of rows, nor2 number of columns
@@ -25,12 +25,12 @@ extern void v_to_m(unsigned int *row_in, unsigned int **rows_out,
  * Hence the use of nor1 and nor2, rather than nor and noc
  * This routine cannot run in place
  */
-extern void m_to_v(unsigned int **rows_in, unsigned int *row_out,
-                   unsigned int nor, unsigned int noc,
-                   unsigned int prime);
+extern void m_to_v(word **rows_in, word *row_out,
+                   u32 nor, u32 noc,
+                   u32 prime);
 
-extern void create_pointers(unsigned int *row_in, unsigned int **rows_out,
-                            unsigned int nor, unsigned int len,
-                            unsigned int prime);
+extern void create_pointers(word *row_in, word **rows_out,
+                            u32 nor, u32 len,
+                            u32 prime);
 
 #endif

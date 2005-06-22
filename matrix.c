@@ -1,5 +1,5 @@
 /*
- * $Id: matrix.c,v 1.7 2001/11/19 19:08:49 jon Exp $
+ * $Id: matrix.c,v 1.8 2005/06/22 21:52:53 jon Exp $
  *
  * Row manipulation for meataxe
  *
@@ -12,9 +12,9 @@
 #include "utils.h"
 #include "rows.h"
 
-void *matrix_malloc(unsigned int nor)
+void *matrix_malloc(u32 nor)
 {
-  return my_malloc(nor * sizeof(unsigned int *));
+  return my_malloc(nor * sizeof(word *));
 }
 
 void matrix_free(void *rows)

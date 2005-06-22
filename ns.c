@@ -1,5 +1,5 @@
 /*
- * $Id: ns.c,v 1.12 2004/08/21 13:22:30 jon Exp $
+ * $Id: ns.c,v 1.13 2005/06/22 21:52:53 jon Exp $
  *
  * Compute the null space of a matrix
  *
@@ -21,12 +21,13 @@
 #include "read.h"
 #include "write.h"
 
-unsigned int nullspace(const char *m1, const char *m2, const char *name)
+u32 nullspace(const char *m1, const char *m2, const char *name)
 {
   FILE *inp, *outp;
   const header *h1;
   header *h2;
-  unsigned int prime, nob, nor, len1, len2, space1, space2, sub1, sub2, n, r, **mat1, **mat2;
+  u32 prime, nob, nor, len1, len2, space1, space2, sub1, sub2, n, r;
+  word **mat1, **mat2;
   int *map;
   row_ops row_operations;
   grease_struct grease;

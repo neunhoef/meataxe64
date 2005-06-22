@@ -1,5 +1,5 @@
 /*
- * $Id: span.h,v 1.1 2002/10/27 11:54:26 jon Exp $
+ * $Id: span.h,v 1.2 2005/06/22 21:52:54 jon Exp $
  *
  * Function to generate elements of the span of a set of rows
  *
@@ -10,10 +10,10 @@
 
 /* Produce the next vector in the span of rows */
 /* vector should be set to all zeroes to initialise */
-/* vector has one field element per unsigned int */
+/* vector has one field element per word */
 /* function does not detect run out of span, and will simply wrap */
 /* out_num indicates a vector guaranteed to be involved in the sum */
 /* and which could therefore be replaced by the sum in a basis */
-extern void span(unsigned int nor, unsigned int *vector, unsigned int prime, unsigned int *out_num);
+extern void span(u32 nor, word *vector, u32 prime, u32 *out_num);
 
 #endif

@@ -1,5 +1,5 @@
 /*
- * $Id: rnf.c,v 1.16 2004/08/28 19:58:00 jon Exp $
+ * $Id: rnf.c,v 1.17 2005/06/22 21:52:53 jon Exp $
  *
  * Compute the rank of a matrix, using temporary files
  *
@@ -43,11 +43,12 @@ static void cleanup(const file_struct t1, const file_struct t2)
   }
 }
 
-unsigned int rankf(const char *m1, const char *dir, const char *name)
+u32 rankf(const char *m1, const char *dir, const char *name)
 {
   FILE *inp;
   const header *h;
-  unsigned int prime, nob, nod, noc, nor, len, n, r, **mat1, **mat2, i, rows_to_do, max_rows, step1, step2;
+  u32 prime, nob, nod, noc, nor, len, n, r, i, rows_to_do, max_rows, step1, step2;
+  word **mat1, **mat2;
   int *map;
   row_ops row_operations;
   grease_struct grease;
@@ -117,8 +118,8 @@ unsigned int rankf(const char *m1, const char *dir, const char *name)
   }
   r = 0; /* Rank count */
   while (rows_to_do > 0) {
-    unsigned int rows_remaining = rows_to_do;
-    unsigned int stride = (step1 > rows_remaining) ? rows_remaining : step1;
+    u32 rows_remaining = rows_to_do;
+    u32 stride = (step1 > rows_remaining) ? rows_remaining : step1;
     errno = 0;
     if (0 == endian_read_matrix(in->f, mat1, len, stride)) {
       if ( 0 != errno) {
@@ -135,7 +136,7 @@ unsigned int rankf(const char *m1, const char *dir, const char *name)
       /* Some addition to the rank */
       r += n;
       if (rows_remaining > 0) {
-        unsigned int rows_written = 0;
+        u32 rows_written = 0;
         errno = 0;
         out->f = fopen64(out->name, "wb");
         out->created = 1;
@@ -149,8 +150,8 @@ unsigned int rankf(const char *m1, const char *dir, const char *name)
           exit(1);
         }
         for (i = 0; i < rows_remaining; i += step2) {
-          unsigned int stride2 = (step2 + i > rows_remaining) ? rows_remaining - i : step2;
-          unsigned int j;
+          u32 stride2 = (step2 + i > rows_remaining) ? rows_remaining - i : step2;
+          u32 j;
           errno = 0;
           if (0 == endian_read_matrix(in->f, mat2, len, stride2)) {
             if ( 0 != errno) {

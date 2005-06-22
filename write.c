@@ -1,5 +1,5 @@
 /*
- * $Id: write.c,v 1.13 2002/06/28 08:39:16 jon Exp $
+ * $Id: write.c,v 1.14 2005/06/22 21:52:54 jon Exp $
  *
  * Write a header
  *
@@ -16,7 +16,7 @@
 
 int write_text_header(FILE *fp, const header *h, const char *name)
 {
-  unsigned int prime, nod, noc, nor;
+  u32 prime, nod, noc, nor;
 
   assert(NULL != h);
   assert(NULL != fp);
@@ -37,22 +37,22 @@ int write_text_header(FILE *fp, const header *h, const char *name)
 
 int write_binary_header(FILE *fp, const header *h, const char *file, const char *name)
 {
-  unsigned int prime;
-  unsigned int nor;
-  unsigned int noc;
+  u32 prime;
+  u32 nor;
+  u32 noc;
 
   assert(NULL != h);
   assert(NULL != fp);
   assert(NULL != name);
   assert(NULL != file);
-  prime = header_get_prime(h);
+  prime = header_get_raw_prime(h);
   nor = header_get_nor(h);
   noc = header_get_noc(h);
 
   errno = 0;
-  if (1 != endian_write_int(prime, fp) ||
-      1 != endian_write_int(nor, fp) ||
-      1 != endian_write_int(noc, fp)) {
+  if (1 != endian_write_u32(prime, fp) ||
+      1 != endian_write_u32(nor, fp) ||
+      1 != endian_write_u32(noc, fp)) {
     if ( 0 != errno) {
       perror(name);
     }

@@ -1,5 +1,5 @@
 /*
- * $Id: clean_file.h,v 1.2 2004/04/25 16:31:47 jon Exp $
+ * $Id: clean_file.h,v 1.3 2005/06/22 21:52:53 jon Exp $
  *
  * Cleaning and echilisation, when the already clean vectors
  * are in a file which is to be updated
@@ -19,12 +19,12 @@
 /* nor2 is space available in rows2 (scratch) */
 /* Also, if asked, return the map for input rows (needed for standard base) */
 extern int clean_file(row_ops *row_operations,
-                      FILE *clean_vectors, unsigned int *nor,
-                      unsigned int **rows1, unsigned int nor1,
-                      unsigned int **rows2, unsigned int nor2,
+                      FILE *clean_vectors, u32 *nor,
+                      word **rows1, u32 nor1,
+                      word **rows2, u32 nor2,
                       int *map, int *new_map, int record,
-                      unsigned int grease_level, unsigned int prime,
-                      unsigned int len, unsigned int nob,
-                      unsigned int start, const char *name);
+                      u32 grease_level, u32 prime,
+                      u32 len, u32 nob,
+                      u32 start, const char *name);
 
 #endif

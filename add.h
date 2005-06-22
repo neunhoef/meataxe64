@@ -1,5 +1,5 @@
 /*
- * $Id: add.h,v 1.4 2002/03/20 18:42:30 jon Exp $
+ * $Id: add.h,v 1.5 2005/06/22 21:52:53 jon Exp $
  *
  * Function to add two matrices to give a third
  *
@@ -11,6 +11,6 @@
 extern int add(const char *m1, const char *m2, const char *m3, const char *name);
 
 /* Generate lambda * m1 + m2 */
-extern int scaled_add(const char *m1, const char *m2, const char *m3, unsigned int scalar, const char *name);
+extern int scaled_add(const char *m1, const char *m2, const char *m3, u32 scalar, const char *name);
 
 #endif

@@ -1,5 +1,5 @@
 /*
- * $Id: zsymb.c,v 1.3 2004/08/21 13:22:32 jon Exp $
+ * $Id: zsymb.c,v 1.4 2005/06/22 21:52:55 jon Exp $
  *
  * Create a symmetry basis
  *
@@ -21,8 +21,8 @@ static void symb_usage(void)
 
 int main(int argc, const char * const argv[])
 {
-  unsigned int dim;
-  unsigned int spaces, size;
+  u32 dim;
+  u32 spaces, size;
 
   argv = parse_line(argc, argv, &argc);
   if (6 > argc) {

@@ -1,5 +1,5 @@
 /*
- * $Id: ztrace.c,v 1.9 2004/08/21 13:22:32 jon Exp $
+ * $Id: ztrace.c,v 1.10 2005/06/22 21:52:55 jon Exp $
  *
  * Compute the trace of a matrix
  *
@@ -28,10 +28,11 @@ int main(int argc, const char * const argv[])
 {
   const char *in;
   FILE *inp;
-  unsigned int prime, noc, nor, nob, len, sum = 0;
-  unsigned int i, mask, elts_per_word;
+  u32 prime, noc, nor, nob, len;
+  u32 i, elts_per_word;
+  word mask, sum = 0;
   const header *h;
-  unsigned int *row;
+  word *row;
   prime_ops prime_operations;
   row_ops row_operations;
 
@@ -71,7 +72,7 @@ int main(int argc, const char * const argv[])
   }
   mask = get_mask_and_elts(nob, &elts_per_word);
   for (i = 0; i < nor; i++) {
-    unsigned int elt;
+    word elt;
     errno = 0;
     if (0 == endian_read_row(inp, row, len)) {
       if ( 0 != errno) {
@@ -86,6 +87,6 @@ int main(int argc, const char * const argv[])
   }
   fclose(inp);
   memory_dispose();
-  printf("%d\n", sum);
+  printf("%d\n", (unsigned int)sum);
   return 0;
 }

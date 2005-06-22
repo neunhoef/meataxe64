@@ -1,5 +1,5 @@
 /*
- * $Id: zmspf.c,v 1.7 2004/08/28 19:58:01 jon Exp $
+ * $Id: zmspf.c,v 1.8 2005/06/22 21:52:54 jon Exp $
  *
  * Spin some vectors under multiple generators, using intermediate files
  *
@@ -21,7 +21,7 @@ static void mspf_usage(void)
 
 int main(int argc, const char * const argv[])
 {
-  unsigned int dim;
+  u32 dim;
 
   argv = parse_line(argc, argv, &argc);
   if (5 > argc) {

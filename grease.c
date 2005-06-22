@@ -1,5 +1,5 @@
 /*
- * $Id: grease.c,v 1.25 2005/05/22 09:10:34 jon Exp $
+ * $Id: grease.c,v 1.26 2005/06/22 21:52:53 jon Exp $
  *
  * Functions to grease matrix rows
  *
@@ -19,9 +19,9 @@
 #include "rows.h"
 #include "utils.h"
 
-int grease_level(unsigned int prime, grease grease, unsigned int avail)
+int grease_level(u32 prime, grease grease, u32 avail)
 {
-  unsigned int i = 1, j = prime;
+  u32 i = 1, j = prime;
   assert(NULL != grease);
   assert(is_a_prime_power(prime));
   assert(0 != avail);
@@ -36,8 +36,8 @@ int grease_level(unsigned int prime, grease grease, unsigned int avail)
   return 1;
 }
 
-int grease_limit(unsigned int prime, unsigned int level,
-                 unsigned int grease_rows, unsigned int total_rows)
+int grease_limit(u32 prime, u32 level,
+                 u32 grease_rows, u32 total_rows)
 {
   while (level > 1) {
     if (5 * grease_rows > total_rows) {
@@ -58,10 +58,10 @@ void grease_init(row_opsp ops, grease grease)
 
 /* For an index into the table, determine the split as a sum of vector */
 /* quot * V[index] + V[rem] */
-static void split(unsigned int prime, unsigned int n,
-                  unsigned int *quot, unsigned int *rem, unsigned int *index)
+static void split(u32 prime, u32 n,
+                  u32 *quot, u32 *rem, u32 *index)
 {
-  unsigned int power, div;
+  u32 power, div;
   assert(0 != n);
   assert(0 != prime);
   assert(NULL != quot);
@@ -96,11 +96,11 @@ static void split(unsigned int prime, unsigned int n,
   }
 }
 
-int grease_allocate(unsigned int prime, unsigned int len,
-                    grease grease, unsigned int start)
+int grease_allocate(u32 prime, u32 len,
+                    grease grease, u32 start)
 {
-  unsigned int q_n;
-  unsigned int i;
+  u32 q_n;
+  u32 i;
   assert(NULL != grease);
   assert(0 != grease->level);
   assert(0 != len);
@@ -122,10 +122,10 @@ int grease_allocate(unsigned int prime, unsigned int len,
   return 1;
 }
 
-void grease_init_rows(grease grease, unsigned int prime)
+void grease_init_rows(grease grease, u32 prime)
 {
   /* Fill in grease->status */
-  unsigned int i, j, k, *l;
+  u32 i, j, k, *l;
   assert(NULL != grease);
   assert(0 != grease->level);
   j = grease->size;
@@ -158,10 +158,10 @@ void grease_free(grease grease)
 /* Compute, if necessary, grease row i */
 /* i is uncorrected for the table, so should not be zero */
 /* len is the revised length taking offset into account */
-static void grease_make_row(grease grease, unsigned int i, unsigned int len, unsigned int offset)
+static void grease_make_row(grease grease, u32 i, u32 len, u32 offset)
 {
-  unsigned int j = i - 1;
-  unsigned int quot, rem, index;
+  u32 j = i - 1;
+  u32 quot, rem, index;
   assert(0 < i);
   assert(0 == grease->status[j]);
   quot = grease->quot[j];
@@ -173,7 +173,7 @@ static void grease_make_row(grease grease, unsigned int i, unsigned int len, uns
     assert(1 != quot);
     (*grease->row_operations.scaler)(grease->rows[index - 1] + offset, grease->rows[j] + offset, len, quot);
   } else {
-    unsigned int k = index * quot - 1;
+    u32 k = index * quot - 1;
     if (0 == grease->status[rem - 1]) {
       grease_make_row(grease, rem, len, offset);
     }
@@ -187,11 +187,11 @@ static void grease_make_row(grease grease, unsigned int i, unsigned int len, uns
   grease->status[j] = 1;
 }
 
-void grease_row_inc(grease grease, unsigned int len, unsigned int *row,
-                    unsigned int element, unsigned int offset)
+void grease_row_inc(grease grease, u32 len, word *row,
+                    u32 element, u32 offset)
 {
-  unsigned int l = len - offset;
-  unsigned int e = element - 1;
+  u32 l = len - offset;
+  u32 e = element - 1;
   assert(NULL != row);
   assert(NULL != grease);
   assert(element >= 1);

@@ -1,5 +1,5 @@
 /*
- * $Id: exrows.h,v 1.3 2001/12/27 01:17:12 jon Exp $
+ * $Id: exrows.h,v 1.4 2005/06/22 21:52:53 jon Exp $
  *
  * Extended row manipulation for meataxe
  *
@@ -10,12 +10,12 @@
 
 #include "header.h"
 
-extern int ex_row_put(unsigned int row_num, unsigned int total_cols, unsigned int total_rows,
+extern int ex_row_put(u32 row_num, u32 total_cols, u32 total_rows,
                       const char *dir, const char *names[],
-                      unsigned int split_size, const unsigned int *row, FILE *outputs[]);
+                      u32 split_size, const word *row, FILE *outputs[]);
 
-extern int ex_row_get(unsigned int col_pieces, FILE **inputs, const header **headers,
-                      unsigned int *row1, unsigned int *row2, const char *name, const char **names,
-                      unsigned int i, unsigned int nob);
+extern int ex_row_get(u32 col_pieces, FILE **inputs, const header **headers,
+                      word *row1, word *row2, const char *name, const char **names,
+                      u32 i, u32 nob);
 
 #endif

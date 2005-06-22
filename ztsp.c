@@ -1,5 +1,5 @@
 /*
- * $Id: ztsp.c,v 1.6 2004/08/28 19:58:01 jon Exp $
+ * $Id: ztsp.c,v 1.7 2005/06/22 21:52:55 jon Exp $
  *
  * Spin some vectors under two generators in tensor space
  *
@@ -21,7 +21,7 @@ static void tsp_usage(void)
 
 int main(int argc, const char * const argv[])
 {
-  unsigned int dim;
+  u32 dim;
 
   argv = parse_line(argc, argv, &argc);
   if (7 != argc) {

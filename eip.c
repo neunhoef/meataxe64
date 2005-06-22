@@ -1,5 +1,5 @@
 /*
- * $Id: eip.c,v 1.10 2004/01/31 13:24:51 jon Exp $
+ * $Id: eip.c,v 1.11 2005/06/22 21:52:53 jon Exp $
  *
  * Read a permutation into an exploded matrix
  *
@@ -36,14 +36,14 @@ int main(int argc, const char * const argv[])
   const char *out;
   FILE *inp;
   FILE **outputs;
-  unsigned int prime, nob, nod, nor, len;
-  unsigned int row_pieces, split;
-  unsigned int elts_per_word;
+  u32 prime, nob, nod, nor, len;
+  u32 row_pieces, split;
+  u32 elts_per_word;
   const char **names;
-  unsigned int i;
-  unsigned int t1, t2, t3;
+  u32 i;
+  u32 t1, t2, t3;
   const header *h;
-  unsigned int *row;
+  word *row;
 
   argv = parse_line(argc, argv, &argc);
   if (5 != argc) {
@@ -79,7 +79,7 @@ int main(int argc, const char * const argv[])
     fclose(inp);
     exit(1);
   }
-  elts_per_word = bits_in_unsigned_int / nob;
+  elts_per_word = bits_in_word / nob;
   /* Now compute the number of pieces for both rows and columns */
   /* And produce the description file */
   /* Align split to word boundary */
@@ -97,7 +97,7 @@ int main(int argc, const char * const argv[])
   row = memory_pointer_offset(0, 0, len);
   assert(NULL != row);
   for (i = 0; i < nor; i++) {
-    unsigned int j;
+    u32 j;
     row_init(row, len);
     fscanf(inp, "%d", &j);
     assert(j >= 1);

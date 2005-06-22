@@ -1,5 +1,5 @@
 /*
- * $Id: tmul.c,v 1.6 2004/06/08 20:51:07 jon Exp $
+ * $Id: tmul.c,v 1.7 2005/06/22 21:52:54 jon Exp $
  *
  * Function to multiply a matrix by a tensor product
  *
@@ -40,8 +40,8 @@ int tmul(const char *m1, const char *m2, const char *m3,
 {
   FILE *in1 = NULL, *in2 = NULL, *in3 = NULL, *out = NULL;
   const header *h_in, *h1, *h2;
-  unsigned int prime, nor, noc, nor1, noc1, nor2, noc2, nob, len1, len2, len, max_len, max_nor, max_rows, i, j;
-  unsigned int **rows1, **rows2, *row1, *row2, **ptrs_row1, **ptrs_row2;
+  u32 prime, nor, noc, nor1, noc1, nor2, noc2, nob, len1, len2, len, max_len, max_nor, max_rows, i, j;
+  word **rows1, **rows2, *row1, *row2, **ptrs_row1, **ptrs_row2;
   int is_map1, is_map2;
   grease_struct grease;
   prime_ops prime_operations;

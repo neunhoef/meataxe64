@@ -1,5 +1,5 @@
 /*
- * $Id: ip.c,v 1.17 2004/01/04 21:22:50 jon Exp $
+ * $Id: ip.c,v 1.18 2005/06/22 21:52:53 jon Exp $
  *
  * Read a matrix
  *
@@ -31,9 +31,9 @@ int main(int argc, const char * const argv[])
   const char *out;
   FILE *inp;
   FILE *outp;
-  unsigned int prime, nob, nod, noc, nor;
-  unsigned int i, j;
-  unsigned int base_mask;
+  u32 prime, nob, nod, noc, nor;
+  u32 i, j;
+  word base_mask;
   const header *h;
 
   argv = parse_line(argc, argv, &argc);
@@ -62,6 +62,7 @@ int main(int argc, const char * const argv[])
   if ( 1 == prime) {
     header_set_noc((header *)h, nor);
   }
+  header_set_prime((header *)h, prime);
   if (0 == open_and_write_binary_header(&outp, h, out, name)) {
     fclose(inp);
     header_free(h);
@@ -72,14 +73,14 @@ int main(int argc, const char * const argv[])
     header_free(h);
     noc = nor;
     for (i = 0; i < nor; i++) {
-      unsigned int j;
+      u32 j;
       fscanf(inp, "%d", &j);
       if (0 == j || j > noc) {
         fprintf(stderr, "%s: %d (out of range 1 - %d) found as permutation image, terminating\n", name, j, noc);
         exit(1);
       }
       errno = 0;
-      if (0 == endian_write_int(j - 1, outp)) {
+      if (0 == endian_write_word(j - 1, outp)) {
         if ( 0 != errno) {
           perror(name);
         }
@@ -96,16 +97,16 @@ int main(int argc, const char * const argv[])
     header_free(h);
     base_mask = (1 << nob) - 1;
     for (i = 0; i < nor; i++) {
-      unsigned int a = 0;
-      unsigned int k = 0;
+      word a = 0;
+      u32 k = 0;
       for (j = 0; j < noc; j++) {
-        unsigned int e;
+        word e;
         if (get_element_from_text(inp, nod, prime, &e)) {
           a |= e << (k * nob);
           k++;
-          if ((k + 1) * nob > bits_in_unsigned_int) {
+          if ((k + 1) * nob > bits_in_word) {
             errno = 0;
-            if (0 == endian_write_int(a, outp)) {
+            if (0 == endian_write_word(a, outp)) {
               if ( 0 != errno) {
                 perror(name);
               }
@@ -127,7 +128,7 @@ int main(int argc, const char * const argv[])
         }
       }
       errno = 0;
-      if (0 != k && 0 == endian_write_int(a, outp)) {
+      if (0 != k && 0 == endian_write_word(a, outp)) {
         if ( 0 != errno) {
           perror(name);
         }

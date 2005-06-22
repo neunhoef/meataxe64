@@ -1,5 +1,5 @@
 /*
- * $Id: clean.h,v 1.8 2004/04/25 16:31:47 jon Exp $
+ * $Id: clean.h,v 1.9 2005/06/22 21:52:53 jon Exp $
  *
  * Cleaning and echilisation for meataxe
  *
@@ -13,30 +13,30 @@
 /* Clean m2 with m1 */
 /* Record in m2_e with m1_e if record != 0 */
 extern void clean(row_ops *row_operations,
-                  unsigned int **m1, unsigned int d1,
-                  unsigned int **m2, unsigned int d2, int *map,
-                  unsigned int **m1_e, unsigned int **m2_e, int record,
-                  unsigned int grease_level, unsigned int prime,
-                  unsigned int len, unsigned int nob,
-                  unsigned int start, unsigned int start_e,
-                  unsigned int len_e, int verbose, const char *name);
+                  word **m1, u32 d1,
+                  word **m2, u32 d2, int *map,
+                  word **m1_e, word **m2_e, int record,
+                  u32 grease_level, u32 prime,
+                  u32 len, u32 nob,
+                  u32 start, u32 start_e,
+                  u32 len_e, int verbose, const char *name);
 
 extern void echelise(row_ops *row_operations,
-                     unsigned int **m, unsigned int d,
-                     unsigned int *d_out, int **map,
-                     unsigned int **m_e, int record,
-                     unsigned int grease_level, unsigned int prime,
-                     unsigned int len, unsigned int nob,
-                     unsigned int start, unsigned int start_e,
-                     unsigned int len_e,
+                     word **m, u32 d,
+                     u32 *d_out, int **map,
+                     word **m_e, int record,
+                     u32 grease_level, u32 prime,
+                     u32 len, u32 nob,
+                     u32 start, u32 start_e,
+                     u32 len_e,
                      int full, const char *name);
 
-extern unsigned int simple_echelise(unsigned int **m, unsigned int d,
-                                    unsigned int prime,
-                                    unsigned int len, unsigned int nob);
+extern u32 simple_echelise(word **m, u32 d,
+                           u32 prime,
+                           u32 len, u32 nob);
 
-extern unsigned int simple_echelise_and_record(unsigned int **m1, unsigned int **m2,
-                                               unsigned int d, unsigned int prime,
-                                               unsigned int len, unsigned int nob);
+extern u32 simple_echelise_and_record(word **m1, word **m2,
+                                      u32 d, u32 prime,
+                                      u32 len, u32 nob);
 
 #endif

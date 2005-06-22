@@ -1,5 +1,5 @@
 /*
- * $Id: zcheck.c,v 1.7 2004/01/31 13:24:51 jon Exp $
+ * $Id: zcheck.c,v 1.8 2005/06/22 21:52:54 jon Exp $
  *
  * Check no non-zero values off ends of rows
  *
@@ -29,7 +29,8 @@ int main(int argc, const char * const argv[])
   const char *in;
   FILE *inp;
   const header *h;
-  unsigned int prime, nob, noc, nor, len, *row, i, j, mask, elts_per_word;
+  u32 prime, nob, noc, nor, len, i, j, elts_per_word;
+  word *row, mask;
 
   argv = parse_line(argc, argv, &argc);
   if (2 != argc) {
@@ -73,10 +74,10 @@ int main(int argc, const char * const argv[])
       }
       assert(noc < len * elts_per_word);
       for (j = noc; j < len * elts_per_word; j++) {
-        unsigned int elt = get_element_from_row_with_params(nob, j, mask, elts_per_word, row);
+        word elt = get_element_from_row_with_params(nob, j, mask, elts_per_word, row);
         if (0 != elt) {
           fprintf(stderr, "%s: found value %d at offset %d (>= %d) in row %d of %s\n",
-                  name, elt, j, noc, i, in);
+                  name, (unsigned int)elt, j, noc, i, in);
         }
       }
     }

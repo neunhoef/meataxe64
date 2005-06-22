@@ -1,5 +1,5 @@
 /*
- * $Id: msp.c,v 1.14 2004/09/17 17:05:29 jon Exp $
+ * $Id: msp.c,v 1.15 2005/06/22 21:52:53 jon Exp $
  *
  * Function to spin some vectors under multiple generators
  *
@@ -31,12 +31,12 @@ struct gen_struct
 {
   FILE *f;
   const char *m;
-  unsigned int nor;
+  u32 nor;
   int is_map;
   gen next;
 };
 
-static void cleanup(FILE *f1, unsigned int count, FILE **files)
+static void cleanup(FILE *f1, u32 count, FILE **files)
 {
   if (NULL != f1)
     fclose(f1);
@@ -52,7 +52,7 @@ static void cleanup(FILE *f1, unsigned int count, FILE **files)
 }
 
 static int unfinished(struct gen_struct *gens,
-                      unsigned int argc, unsigned int nor)
+                      unsigned int argc, u32 nor)
 {
   while(argc > 0) {
     if (nor > gens[argc - 1].nor) {
@@ -63,15 +63,15 @@ static int unfinished(struct gen_struct *gens,
   return 0;
 }
 
-unsigned int spin(const char *in, const char *out,
-                  unsigned int argc, const char * const args[], const char *name)
+u32 spin(const char *in, const char *out,
+         unsigned int argc, const char * const args[], const char *name)
 {
   FILE *inp = NULL, *outp = NULL, **files = NULL;
   const header *h_in;
   header *h_out;
-  unsigned int prime, nob, noc, nor, len, max_rows, d, j;
-  unsigned int elts_per_word;
-  unsigned int **rows;
+  u32 prime, nob, noc, nor, len, max_rows, d, j;
+  u32 elts_per_word;
+  word **rows;
   int *map, *new_map;
   grease_struct grease;
   prime_ops prime_operations;
@@ -166,7 +166,7 @@ unsigned int spin(const char *in, const char *out,
   j = 0;
   for (d = 0; d < nor; d++) {
     if (new_map[d] >= 0) {
-      unsigned int *row;
+      word *row;
       map[j] = new_map[d];
       /* Swap pointers */
       row = rows[j];
@@ -184,15 +184,15 @@ unsigned int spin(const char *in, const char *out,
   }
   (void)get_mask_and_elts(nob, &elts_per_word);
   while (nor < max_rows && nor < noc && unfinished(gens, argc, nor)) {
-    unsigned int rows_to_do = max_rows - nor;
-    unsigned int i, j = 0;
-    unsigned int elt_index = noc, index;
+    u32 rows_to_do = max_rows - nor;
+    u32 i, j = 0;
+    u32 elt_index = noc, index;
     /* Ensure we don't try to do too many */
     rows_to_do = (rows_to_do + gen->nor > nor) ? (nor - gen->nor) : rows_to_do;
     for (i = 0; i < rows_to_do; i++) {
       int m = map[i + gen->nor];
       assert(m >= 0);
-      if ((unsigned int)m < elt_index) {
+      if ((u32)m < elt_index) {
         elt_index = m;
       }
     }
@@ -213,7 +213,7 @@ unsigned int spin(const char *in, const char *out,
     for (i = 0; i < rows_to_do; i++) {
       if (new_map[i] >= 0) {
         /* Got a useful row */
-        unsigned int *row;
+        word *row;
         map[nor + j] = new_map[i];
         /* Swap pointers */
         row = rows[nor + j];

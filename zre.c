@@ -1,5 +1,5 @@
 /*
- * $Id: zre.c,v 1.7 2004/01/31 13:24:51 jon Exp $
+ * $Id: zre.c,v 1.8 2005/06/22 21:52:54 jon Exp $
  *
  * Convert a matrix from new to old
  *
@@ -32,11 +32,11 @@ static void re_usage(void)
 int main(int argc, const char * const argv[])
 {
   FILE *inp, *outp;
-  unsigned int prime, nod, noc, nor, nob, len;
-  unsigned int i;
+  u32 prime, nod, noc, nor, nob, len;
+  u32 i;
   const header *h_in;
   header *h_out;
-  unsigned int *row;
+  word *row;
   prime_ops prime_operations;
 
   endian_init();
@@ -62,10 +62,10 @@ int main(int argc, const char * const argv[])
   noc = header_get_noc(h_in);
   len = header_get_len(h_in);
   h_out = header_create(prime, nob, nod, noc, nor);
-  header_set_prime(h_out, endian_invert(prime));
-  header_set_nob(h_out, endian_invert(nob));
-  header_set_noc(h_out, endian_invert(noc));
-  header_set_nor(h_out, endian_invert(nor));
+  header_set_prime(h_out, endian_invert_u32(prime));
+  header_set_nob(h_out, endian_invert_u32(nob));
+  header_set_noc(h_out, endian_invert_u32(noc));
+  header_set_nor(h_out, endian_invert_u32(nor));
   if (memory_rows(len, 1000) < 1) {
     fprintf(stderr, "%s: cannot allocate row for %s, terminating\n", name, argv[1]);
     fclose(inp);
@@ -81,7 +81,7 @@ int main(int argc, const char * const argv[])
     exit(1);
   }
   for (i = 0; i < nor; i++) {
-    unsigned int j;
+    u32 j;
     unsigned char *char_row = (unsigned char *)row;
     errno = 0;
     if (0 == endian_read_row(inp, row, len)) {
@@ -94,7 +94,7 @@ int main(int argc, const char * const argv[])
       exit(1);
     }
     /* Invert the bits */
-    for (j = 0; j < len * sizeof(unsigned int); j++) {
+    for (j = 0; j < len * sizeof(word); j++) {
       char_row[j] = convert_char(char_row[j]);
     }
     errno = 0;

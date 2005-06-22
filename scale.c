@@ -1,5 +1,5 @@
 /*
- * $Id: scale.c,v 1.3 2002/06/28 08:39:16 jon Exp $
+ * $Id: scale.c,v 1.4 2005/06/22 21:52:54 jon Exp $
  *
  * Function to scale a matrix
  *
@@ -31,14 +31,14 @@ static int cleanup(FILE *inp, FILE *outp)
   return 0;
 }
 
-int scale(const char *m1, const char *m2, unsigned int elt, const char *name)
+int scale(const char *m1, const char *m2, u32 elt, const char *name)
 {
   FILE *inp = NULL;
   FILE *outp = NULL;
-  unsigned int prime, nob, noc, nor, len;
-  unsigned int i;
+  u32 prime, nob, noc, nor, len;
+  u32 i;
   const header *h;
-  unsigned int *row;
+  word *row;
   row_ops row_operations;
   row_scaler_in_place scaler;
 

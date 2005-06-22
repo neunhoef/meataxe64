@@ -1,5 +1,5 @@
 /*
- * $Id: zah.c,v 1.7 2004/01/04 21:22:50 jon Exp $
+ * $Id: zah.c,v 1.8 2005/06/22 21:52:54 jon Exp $
  *
  * Add a header to en intermediate file matrix
  * Essentially a disaster recovery program
@@ -33,8 +33,9 @@ int main(int argc, const char * const argv[])
   const char *out;
   FILE *inp, *text_inp;
   FILE *outp;
-  unsigned int nor, len, *row, memory = 0;
-  unsigned int i;
+  u32 nor, len, memory = 0;
+  word *row;
+  u32 i;
   long long ptr;
   const header *h;
 

@@ -1,9 +1,9 @@
 /*
- * $Id: elements.h,v 1.19 2004/05/02 19:33:19 jon Exp $
+ * $Id: elements.h,v 1.20 2005/06/22 21:52:53 jon Exp $
  *
  * Element manipulation for meataxe
  *
- * Internally, values are held in unsigned ints, with maximal
+ * Internally, values are held in words, with maximal
  * packing and the least offset value at the least significant end
  *
  */
@@ -15,66 +15,80 @@
 
 /* Read an element from the text input stream */
 /* Return 1 for success, 0 for failure */
-extern int get_element_from_text(FILE *, unsigned int nod,
-                                 unsigned int prime, unsigned int *);
+extern int get_element_from_text(FILE *, u32 nod,
+                                 u32 prime, word *);
 /* Extract an element from a row at given position */
-extern unsigned int get_element_from_row(unsigned int nob, unsigned int index,
-                                         const unsigned int *row);
+extern word get_element_from_row(u32 nob, u32 index,
+                                 const word *row);
 
 /* Extract an element from a character row at given position */
-extern unsigned int get_element_from_char_row(unsigned int eperb, unsigned int prime,
-                                              unsigned int index, const unsigned char *row);
+extern word get_element_from_char_row(u32 eperb, u32 prime,
+                                      u32 index, const unsigned char *row);
 
 /* Initialise for element access */
-extern void element_access_init(unsigned int nob, unsigned int from, unsigned int size,
-                                unsigned int *word_offset, unsigned int *bit_offset,
-                                unsigned int *mask);
+extern void element_access_init(u32 nob, u32 from, u32 size,
+                                u32 *word_offset, u32 *bit_offset,
+                                word *mask);
 
 /* Just get the mask */
-extern unsigned int get_mask_and_elts(unsigned int nob, unsigned int *elts_per_word);
+extern word get_mask_and_elts(u32 nob, u32 *elts_per_word);
 
 /* Extract an element from a row at given position, with fixed mask */
-extern unsigned int get_element_from_row_with_params(unsigned int nob, unsigned int index, unsigned int mask,
-                                                     unsigned int elts_per_word, const unsigned int *row);
+extern word get_element_from_row_with_params(u32 nob, u32 index, word mask,
+                                             u32 elts_per_word, const word *row);
 
 /* Extract some elements from a row at given position, from within one word only */
-extern unsigned int get_elements_in_word_from_row(const unsigned int *row,
-                                                  unsigned int bit_offset, unsigned int mask);
+extern word get_elements_in_word_from_row(const word *row,
+                                          u32 bit_offset, word mask);
 
 /* Extract some elements from a row at given position, across words */
-extern unsigned int get_elements_out_word_from_row(const unsigned int *row,
-                                                   unsigned int shift,
-                                                   unsigned int bit_offset, unsigned int mask);
+extern word get_elements_out_word_from_row(const word *row,
+                                           u32 shift,
+                                           u32 bit_offset, word mask);
 
 /* Extract some elements from a row at given position */
-extern unsigned int get_elements_from_row(const unsigned int *row, unsigned int width, unsigned int nob,
-                                          unsigned int bit_offset, unsigned int mask);
+extern word get_elements_from_row(const word *row, u32 width, u32 nob,
+                                  u32 bit_offset, word mask);
 
 /* Insert an element into a row at given position */
-extern void put_element_to_row(unsigned int nob, unsigned int index,
-                               unsigned int *row, unsigned int elt);
+extern void put_element_to_row(u32 nob, u32 index,
+                               word *row, word elt);
 
 /* Insert an element into a row at given position */
-extern void put_element_to_row_with_params(unsigned int nob, unsigned int index, unsigned int mask,
-                                           unsigned int elts_per_word, unsigned int *row, unsigned int elt);
+extern void put_element_to_row_with_params(u32 nob, u32 index, word mask,
+                                           u32 elts_per_word, word *row, word elt);
 
 /* Insert an element into a row at given position */
-extern void put_element_to_clean_row_with_params(unsigned int nob, unsigned int index,
-                                                 unsigned int elts_per_word, unsigned int *row, unsigned int elt);
+extern void put_element_to_clean_row_with_params(u32 nob, u32 index,
+                                                 u32 elts_per_word, word *row, word elt);
 
 /* Insert an element into a character row at given position */
-extern void put_element_to_char_row(unsigned int eperb, unsigned int prime,
-                                    unsigned int index, unsigned char *row, unsigned int elt);
+extern void put_element_to_char_row(u32 eperb, u32 prime,
+                                    u32 index, unsigned char *row, word elt);
 
-extern unsigned int elements_contract(unsigned int elts, unsigned int prime, unsigned int nob);
+extern word elements_contract(word elts, u32 prime, u32 nob);
 
-extern unsigned int count_word(unsigned int word, unsigned int nob);
+extern word count_word(word word, u32 nob);
 
-extern unsigned int negate_elements(unsigned int elts, unsigned int nob, unsigned int prime);
+extern word negate_elements(word elts, u32 nob, u32 prime);
 
-extern unsigned int invert_elements(unsigned int elts, unsigned int nob, unsigned int prime);
+extern word invert_elements(word elts, u32 nob, u32 prime);
 
-extern unsigned int first_non_zero(unsigned int *row, unsigned int nob,
-                                   unsigned int len, unsigned int *pos);
+extern u32 first_non_zero(word *row, u32 nob,
+                          u32 len, u32 *pos);
+
+/* Extra functions for conversion between 32 and 64 bit systems */
+
+extern u32 get_element_from_u32_row(u32 nob, u32 index,
+                                     const u32 *row);
+
+extern u64 get_element_from_u64_row(u32 nob, u32 index,
+                                     const u64 *row);
+
+extern void put_element_to_u32_row(u32 nob, u32 index,
+                                   u32 *row, u32 elt);
+
+extern void put_element_to_u64_row(u32 nob, u32 index,
+                                   u64 *row, u64 elt);
 
 #endif

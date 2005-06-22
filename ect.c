@@ -1,5 +1,5 @@
 /*
- * $Id: ect.c,v 1.5 2004/01/04 21:22:50 jon Exp $
+ * $Id: ect.c,v 1.6 2005/06/22 21:52:53 jon Exp $
  *
  * Count the non-zero elements in an exploded matrix
  *
@@ -23,9 +23,9 @@ static void ect_usage(void)
 
 int main(int argc, const char *const argv[])
 {
-  unsigned int total = 0, ototal, htotal = 0;
-  unsigned int col_pieces, row_pieces;
-  unsigned int i, j;
+  u32 total = 0, ototal, htotal = 0;
+  u32 col_pieces, row_pieces;
+  u32 i, j;
   const char **names;
   argv = parse_line(argc, argv, &argc);
   if (2 != argc) {

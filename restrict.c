@@ -1,5 +1,5 @@
 /*
- * $Id: restrict.c,v 1.7 2003/04/19 15:43:49 jon Exp $
+ * $Id: restrict.c,v 1.8 2005/06/22 21:52:53 jon Exp $
  *
  * Function to restrict a matrix from a big field to a smaller
  *
@@ -31,16 +31,17 @@ static int cleanup(FILE *inp, FILE *outp)
   return 0;
 }
 
-int restrict(const char *m1, const char *m2, unsigned int q, const char *name)
+int restrict(const char *m1, const char *m2, u32 q, const char *name)
 {
   FILE *inp = NULL;
   FILE *outp = NULL;
-  unsigned int prime_in, nob_in, noc, nor, len_in,
-      nob_out, nod_out, len_out, base_prime, index_in, index_out;
-  unsigned int i, in_mask, out_mask, elts_per_in_word, elts_per_out_word;
+  u32 prime_in, nob_in, noc, nor, len_in,
+    nob_out, nod_out, len_out, base_prime, index_in, index_out;
+  u32 i, elts_per_in_word, elts_per_out_word;
+  word in_mask, out_mask;
   const header *h_in;
   header *h_out;
-  unsigned int *row1, *row2;
+  word *row1, *row2;
 
   if (0 == open_and_read_binary_header(&inp, &h_in, m1, name)) {
     return 0;
@@ -97,7 +98,7 @@ int restrict(const char *m1, const char *m2, unsigned int q, const char *name)
   out_mask = get_mask_and_elts(nob_out, &elts_per_out_word);
   NOT_USED(out_mask);
   for (i = 0; i < nor; i++) {
-    unsigned int j;
+    u32 j;
     errno = 0;
     if (0 == endian_read_row(inp, row1, len_in)) {
       if ( 0 != errno) {
@@ -108,9 +109,9 @@ int restrict(const char *m1, const char *m2, unsigned int q, const char *name)
     }
     row_init(row2, len_out);
     for (j = 0; j < noc; j++) {
-      unsigned int elt = get_element_from_row_with_params(nob_in, j, in_mask, elts_per_in_word, row1);
+      word elt = get_element_from_row_with_params(nob_in, j, in_mask, elts_per_in_word, row1);
       if (elt >= q) {
-        fprintf(stderr, "%s: element %d from row %d, column %d of %s is not in field of order %d, terminating\n", name, elt, i, j, m1, q);
+        fprintf(stderr, "%s: element %d from row %d, column %d of %s is not in field of order %d, terminating\n", name, (unsigned int)elt, i, j, m1, q);
         (void)cleanup(inp, outp);
         return 255;
       }

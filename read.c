@@ -1,5 +1,5 @@
 /*
- * $Id: read.c,v 1.22 2002/10/02 16:47:59 jon Exp $
+ * $Id: read.c,v 1.23 2005/06/22 21:52:53 jon Exp $
  *
  * Read a header
  *
@@ -26,8 +26,8 @@
 
 #define LINE_LENGTH (2+6+6+6)
 
-int read_text_header_items(FILE *fp, unsigned int *nod, unsigned int *prime,
-                           unsigned int *nor, unsigned int *noc, const char *file, const char *name)
+int read_text_header_items(FILE *fp, u32 *nod, u32 *prime,
+                           u32 *nor, u32 *noc, const char *file, const char *name)
 {
   int i;
 
@@ -56,12 +56,12 @@ int read_text_header_items(FILE *fp, unsigned int *nod, unsigned int *prime,
 
 int read_text_header(FILE *fp, const header **hp, const char *file, const char *name)
 {
-  unsigned int nob;
-  unsigned int nod;
-  unsigned int prime;
-  unsigned int nor;
-  unsigned int noc;
-  
+  u32 nob;
+  u32 nod;
+  u32 prime;
+  u32 nor;
+  u32 noc;
+
   assert(NULL != fp);
   assert(NULL != hp);
   assert(NULL != file);
@@ -79,12 +79,13 @@ int read_text_header(FILE *fp, const header **hp, const char *file, const char *
 int read_binary_header(FILE *fp, const header **hp, const char *file, const char *name)
 {
   header *h;
-  unsigned int nob;
-  unsigned int nod;
-  unsigned int prime;
-  unsigned int nor;
-  unsigned int noc;
-  
+  u32 nob;
+  u32 nod;
+  u32 prime;
+  u32 nor;
+  u32 noc;
+  u32 masked_prime;
+
   assert(NULL != hp);
   assert(NULL != fp);
   assert(NULL != file);
@@ -94,22 +95,23 @@ int read_binary_header(FILE *fp, const header **hp, const char *file, const char
     return 0;
   }
   errno = 0;
-  if (1 != endian_read_int(&prime, fp) ||
-      1 != endian_read_int(&nor, fp) ||
-      1 != endian_read_int(&noc, fp)) {
+  if (1 != endian_read_u32(&prime, fp) ||
+      1 != endian_read_u32(&nor, fp) ||
+      1 != endian_read_u32(&noc, fp)) {
     if ( 0 != errno) {
       perror(name);
     }
     fprintf(stderr, "%s: failed to read header from binary input %s\n", name, file);
     return 0;
   }
-  if (1 != prime && 0 == is_a_prime_power(prime)) {
-    fprintf(stderr, "%s: prime power or 1 expected, found %d while reading %s\n", name, prime, file);
+  masked_prime = prime & PRIME_MASK;
+  if (1 != masked_prime && 0 == is_a_prime_power(masked_prime)) {
+    fprintf(stderr, "%s: prime power or 1 expected, found %d while reading %s\n", name, masked_prime, file);
     return 0;
   }
-  nod = digits_of(prime);
-  nob = bits_of(prime);
-  header_set_prime(h, prime);
+  nod = digits_of(masked_prime);
+  nob = bits_of(masked_prime);
+  header_set_raw_prime(h, prime);
   header_set_nob(h, nob);
   header_set_nod(h, nod);
   header_set_nor(h, nor);
@@ -140,6 +142,10 @@ int open_and_read_binary_header(FILE **inp, const header **h, const char *m, con
     return 0;
   }
   res = read_binary_header(in, h, m, name);
+  if (0 == header_check(*h)) {
+    fprintf(stderr, "%s: expected and found data size mismatch, terminating\n", name);
+    res = 0;
+  }
   if (0 == res) {
     fclose(in);
     *h = NULL;

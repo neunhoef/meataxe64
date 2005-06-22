@@ -1,5 +1,5 @@
 /*
- * $Id: orbit.h,v 1.1 2002/06/25 10:30:12 jon Exp $
+ * $Id: orbit.h,v 1.2 2005/06/22 21:52:53 jon Exp $
  *
  * Functions for handling orbits
  *
@@ -12,19 +12,19 @@
 
 typedef struct orbit
 {
-  unsigned int size;
-  unsigned int *values;
+  u32 size;
+  word *values;
   struct orbit *next;
 } orbit;
 
 typedef struct orbit_set
 {
-  unsigned int size;
+  u32 size;
   orbit *orbits;
 } orbit_set;
 
 /* Read binary form of an orbit_set */
-extern int read_orbits(FILE *, unsigned int nor, orbit_set **,
+extern int read_orbits(FILE *, u32 nor, orbit_set **,
                        const char *in, const char *name);
 
 /* Write binary form of an orbit_set */
@@ -42,5 +42,8 @@ extern void orbit_free(orbit *orb);
 
 /* Free a chain of orbits */
 extern void orbit_chain_free(orbit *orb);
+
+/* Allocate an orbit set and all orbits therein, copying an existing orbit */
+extern orbit_set *orbit_set_alloc(orbit_set *orbits);
 
 #endif
