@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: xn,v 1.1 2005/06/21 19:43:40 jon Exp $
+# $Id: xn,v 1.2 2005/06/23 21:48:47 jon Exp $
 #
 # Compute xn(x), continuing on from bn, cn etc
 #
@@ -11,6 +11,7 @@
 # x: the number of powers to be made
 # a: the original matrix
 # o: where to output to
+# repeat: the number of times each value is expected to repeat
 #
 # Return codes
 # 1: error in parameters
@@ -19,11 +20,12 @@
 #set -x
 tmp=tmp${PPID}
 # First sort powers
+let n1=$n-1
 sorted=0
 while [ 0 -eq $sorted ]; do
   sorted=1
   i=1
-  while [ $i -lt $x ]; do
+  while [ $i -lt $n1 ]; do
     let j=$i+1
     if [ ${powers[$i]} -gt ${powers[$j]} ]; then
       sorted=0
@@ -33,6 +35,13 @@ while [ 0 -eq $sorted ]; do
     fi
     i=$j
   done
+done
+# Now weed out repeats
+i=1
+while [ $i -le $x ]; do
+  let j=$i*$repeat
+  powers[$i]=${powers[$j]}
+  let i=$i+1
 done
 i=1
 while [ $i -le $x ]; do
@@ -74,7 +83,7 @@ k=1
 while [ $i -le $x ]; do
   let j=${powers[$i]}-$k
   if [ 0 -eq $j ]; then
-    echo Square of $i = square of $i - 1?
+    echo Power of $i = power of $i - 1?
     cp ${cur} ${cur}.1
   else
     zmu -m 100000 ${cur} ${mat}.$j ${cur}.1

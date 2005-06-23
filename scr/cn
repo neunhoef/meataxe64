@@ -1,8 +1,8 @@
 #!/bin/sh
 #
-# $Id: bn,v 1.3 2005/06/23 21:48:47 jon Exp $
+# $Id: cn,v 1.1 2005/06/23 21:48:47 jon Exp $
 #
-# Compute bn(x)
+# Compute cn(x)
 #
 # Inputs
 # $1: input
@@ -24,20 +24,20 @@ tmp=tmp${PPID}
 a=$1
 n=$2
 o=$3
-let x=$n/2
-let x2=$x*2
-let y=$n-$x2
+let x=$n/3
+let x3=$x*3
+let y=$n-$x3
 if [ 1 -ne $y ]; then
-  echo $n not congruent to 1 mod 2
+  echo $n not congruent to 1 mod 3
   exit 1
 fi
 i=1
-while [ $i -le $x2 ]; do
-  let y=$i*$i
+while [ $i -le $x3 ]; do
+  let y=$i*$i*$i
   let z=$y/$n
-  let j=$y-$z*$n # Square and reduce modulo n
+  let j=$y-$z*$n # Cube and reduce modulo n
   powers[$i]=$j
   let i=$i+1
 done
-repeat=2
+repeat=3
 . xn
