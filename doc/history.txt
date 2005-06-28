@@ -355,3 +355,4 @@ skew seventh
 20050619 - Add bn to compute the Atlas function bn on an element
 20050622 - Add 64 bit capability and use sized types
 20050619 - Add cn to compute the Atlas function cn on an element
+20050628 - Fix bug in commutate
