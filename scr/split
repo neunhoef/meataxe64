@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: split,v 1.19 2005/04/30 12:44:40 jon Exp $
+# $Id: split,v 1.20 2005/07/10 10:05:31 jon Exp $
 #
 # Script to split a representation
 #
@@ -97,7 +97,7 @@ for x in $a $*; do
     exit 1
   fi
   if [ 0 -eq $ret ]; then
-    order[$i]=$order
+    orders[$i]=$order
     y[$i]=$x
     let i=$i+1
     if [ 2 -le $i ]; then
@@ -136,7 +136,8 @@ while [ $ok -eq 0 ]; do
   null=5
   while [ $null -le $max_null ]; do
     echo Trying zsums with nullity $null
-    out=`zsums -m $memory ${tmp}.zsums $depth $null ${y[0]} ${order[0]} ${y[1]} ${order[1]} 2>/dev/null`
+    echo zsums -m $memory ${tmp}.zsums $depth $null ${y[0]} ${orders[0]} ${y[1]} ${orders[1]}
+    out=`zsums -m $memory ${tmp}.zsums $depth $null ${y[0]} ${orders[0]} ${y[1]} ${orders[1]} 2>/dev/null`
     ret=$?
     if [ 2 -eq $ret ]; then
       let memory=`more_memory $memory`
@@ -167,7 +168,7 @@ ok=0
 let max_null=$nor-1
 echo searching for any element using zsums
 while [ $ok -eq 0 ]; do
-  out=`zsums -m $memory ${tmp}.zsums $depth $max_null ${y[0]} ${order[0]} ${y[1]} ${order[1]} 2>/dev/null`
+  out=`zsums -m $memory ${tmp}.zsums $depth $max_null ${y[0]} ${orders[0]} ${y[1]} ${orders[1]} 2>/dev/null`
   ret=$?
   if [ 2 -eq $ret ]; then
     let memory=`more_memory $memory`

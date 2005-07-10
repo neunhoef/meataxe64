@@ -356,3 +356,4 @@ skew seventh
 20050622 - Add 64 bit capability and use sized types
 20050619 - Add cn to compute the Atlas function cn on an element
 20050628 - Fix bug in commutate
+20050710 - Fix bug in sit whereby element orders weren't correctly recorded
