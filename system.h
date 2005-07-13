@@ -19,8 +19,6 @@ extern void release_lock(void);
 
 extern int check_signal(void);
 
-extern void signal(void);
-
 extern const char *tmp_name(void);
 
 extern void init_system(void);

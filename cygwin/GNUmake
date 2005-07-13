@@ -1,0 +1,8 @@
+#
+# cygwin specific fragment for meataxe, same as unix
+#
+# $Id: GNUmake,v 1.1 2005/07/13 21:05:46 jon Exp $
+#
+
+include unix.txt
+

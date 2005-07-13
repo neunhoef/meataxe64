@@ -1,5 +1,5 @@
 /*
- * $Id: system.c,v 1.9 2005/07/13 21:05:46 jon Exp $
+ * $Id: system.c,v 1.1 2005/07/13 21:05:46 jon Exp $
  *
  * system dependent stuff for locking etc
  */
