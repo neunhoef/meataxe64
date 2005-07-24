@@ -1,5 +1,5 @@
 /*
- * $Id: base.c,v 1.7 2005/06/22 21:52:53 jon Exp $
+ * $Id: base.c,v 1.8 2005/07/24 09:32:45 jon Exp $
  *
  * Form an echelised basis from one file to another
  *
@@ -61,7 +61,7 @@ u32 base(const char *in, const char *dir,
   nor1 = header_get_nor(h_in);
   len = header_get_len(h_in);
   if (0 == is_a_prime_power(prime)) {
-    fprintf(stderr, "%s: prime %d from %s is not a prime power, terminating\n",
+    fprintf(stderr, "%s: prime %u from %s is not a prime power, terminating\n",
             name, prime, in);
     exit(1);
   }
@@ -99,7 +99,7 @@ u32 base(const char *in, const char *dir,
   }
   /* Give up if too few rows available */
   if (max_rows < 2 * (prime + 1)) {
-    fprintf(stderr, "%s: failed to get %d rows for %s, terminating\n",
+    fprintf(stderr, "%s: failed to get %u rows for %s, terminating\n",
             name, 2 * (prime + 1), in);
     fclose(inp);
     cleanup_tmp(echelised, name_echelised);

@@ -1,5 +1,5 @@
 /*
- * $Id: rows.c,v 1.30 2005/06/22 21:52:53 jon Exp $
+ * $Id: rows.c,v 1.31 2005/07/24 09:32:45 jon Exp $
  *
  * Row manipulation for meataxe
  *
@@ -703,7 +703,7 @@ static void row_inc_5(const word *row1,
       b ^= d; /* And normalise back (7 -> 3, 6 -> 2) */ \
       break; \
     default: \
-      assert(0); \
+      assert(assert_var_zero != 0); \
     }
 
 static void scaled_row_add_5(const word *row1, const word *row2,
@@ -1160,7 +1160,7 @@ int rows_init(u32 prime, row_opsp ops)
     ops->product = &row_product_9;
     break;
   default:
-    assert(0);
+    assert(assert_var_zero != 0);
     return 0;
   }
   return 1;
@@ -1303,7 +1303,7 @@ int short_rows_init(u32 prime, row_opsp ops)
     ops->product = &row_product_9;
     break;
   default:
-    assert(0);
+    assert(assert_var_zero != 0);
     return 0;
   }
   return 1;

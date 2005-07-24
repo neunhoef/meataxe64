@@ -1,5 +1,5 @@
 /*
- * $Id: eip.c,v 1.11 2005/06/22 21:52:53 jon Exp $
+ * $Id: eip.c,v 1.12 2005/07/24 09:32:45 jon Exp $
  *
  * Read a permutation into an exploded matrix
  *
@@ -55,11 +55,11 @@ int main(int argc, const char * const argv[])
   prime = strtoul(argv[3], NULL, 0);
   split = strtoul(argv[4], NULL, 0);
   if (0 == is_a_prime_power(prime)) {
-    fprintf(stderr, "%s: %d is not a prime power, terminating\n", name, prime);
+    fprintf(stderr, "%s: %u is not a prime power, terminating\n", name, prime);
     exit(1);
   }
   if (0 == split) {
-    fprintf(stderr, "%s: %d is not an acceptable split, terminating\n", name, split);
+    fprintf(stderr, "%s: %u is not an acceptable split, terminating\n", name, split);
     exit(1);
   }
   nob = bits_of(prime);
@@ -99,11 +99,11 @@ int main(int argc, const char * const argv[])
   for (i = 0; i < nor; i++) {
     u32 j;
     row_init(row, len);
-    fscanf(inp, "%d", &j);
+    fscanf(inp, "%u", &j);
     assert(j >= 1);
     put_element_to_clean_row_with_params(nob, j - 1, elts_per_word, row, 1);
     if (0 == ex_row_put(i, nor, nor, argv[2], names, split, row, outputs)) {
-      fprintf(stderr, "%s: cannot write output row %d\n", name, i);
+      fprintf(stderr, "%s: cannot write output row %u\n", name, i);
       fclose(inp);
       exit(1);
     }

@@ -1,5 +1,5 @@
 /*
- * $Id: slave.c,v 1.12 2004/01/04 21:22:50 jon Exp $
+ * $Id: slave.c,v 1.13 2005/07/24 09:32:45 jon Exp $
  *
  * Slave for extended operations
  * Based on zsl.c     MTX6 slave version 6.0.11 7.11.98 
@@ -59,7 +59,7 @@ static unsigned int parse_cmd_line(const char *(*line_ptrs)[], unsigned int (*le
       /* End of line */
     }
   }
-  assert(0); /* Shouldn't happen */
+  assert(assert_var_zero != 0); /* Shouldn't happen */
   return 0;
 }
 
@@ -74,7 +74,7 @@ int main(int argc, const char *const argv[])
   init_system();
   memory_init(name, memory);
   endian_init();
-  while(1) {
+  for (;;) {
     char line[MAX_LINE];
     const char *line_ptrs[MAX_LINE];
     unsigned int lengths[MAX_LINE];
@@ -191,7 +191,7 @@ int main(int argc, const char *const argv[])
           }
           mul(p[0], p[1], p[2], name);
         } else {
-          assert(0);
+          assert(assert_var_zero != 0);
         }
       }
       wait_lock(argv[1]);

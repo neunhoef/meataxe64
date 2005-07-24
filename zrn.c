@@ -1,5 +1,5 @@
 /*
- * $Id: zrn.c,v 1.7 2005/06/22 21:52:54 jon Exp $
+ * $Id: zrn.c,v 1.8 2005/07/24 09:32:46 jon Exp $
  *
  * Compute the rank of a matrix
  *
@@ -33,7 +33,7 @@ int main(int argc, const char * const argv[])
   if (0 == rank(argv[1], &n, name)) {
     exit(1);
   }
-  printf("%d\n", n);
+  printf("%u\n", n);
   memory_dispose();
   return 0;
 }

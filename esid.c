@@ -1,5 +1,5 @@
 /*
- * $Id: esid.c,v 1.6 2005/06/22 21:52:53 jon Exp $
+ * $Id: esid.c,v 1.7 2005/07/24 09:32:45 jon Exp $
  *
  * Generate exploded scaled identity matrix
  *
@@ -46,7 +46,7 @@ int main(int argc, const char * const argv[])
   out = argv[6];
   prime = strtoul(argv[1], NULL, 0);
   if (0 == is_a_prime_power(prime)) {
-    fprintf(stderr, "%s: non prime %d\n", name, prime);
+    fprintf(stderr, "%s: non prime %u\n", name, prime);
     exit(1);
   }
   nor = strtoul(argv[2], NULL, 0);
@@ -54,7 +54,7 @@ int main(int argc, const char * const argv[])
   elt = strtoul(argv[4], NULL, 0);
   split = strtoul(argv[5], NULL, 0);
   if (elt >= prime) {
-    fprintf(stderr, "%s: %d is too large for %d\n", name, (unsigned int)elt, prime);
+    fprintf(stderr, "%s: %u is too large for %u\n", name, (unsigned int)elt, prime);
     exit(1);
   }
   nob = bits_of(prime);

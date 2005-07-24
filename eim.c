@@ -1,5 +1,5 @@
 /*
- * $Id: eim.c,v 1.13 2005/06/22 21:52:53 jon Exp $
+ * $Id: eim.c,v 1.14 2005/07/24 09:32:45 jon Exp $
  *
  * implode a matrix (ie glue exploded matrices together)
  *
@@ -132,7 +132,7 @@ int main(int argc,  const char *const argv[])
     nor = header_get_nor(headers[0]);
     for (j = 1; j < col_pieces; j++) {
       if (header_get_nor(headers[j]) != nor || header_get_prime(headers[j]) != prime) {
-        fprintf(stderr, "%s header mismatch %d != %d or %d != %d from %s and %s, terminating\n",
+        fprintf(stderr, "%s header mismatch %u != %u or %u != %u from %s and %s, terminating\n",
                 name, nor, header_get_nor(headers[j]), prime, header_get_prime(headers[j]),
                 pathname(argv[2], names[i * col_pieces]), pathname(argv[2], names[i * col_pieces + j]));
         fail(inputs, output, col_pieces);

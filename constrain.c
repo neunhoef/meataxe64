@@ -1,5 +1,5 @@
 /*
- * $Id: constrain.c,v 1.1 2003/01/04 15:40:24 jon Exp $
+ * $Id: constrain.c,v 1.2 2005/07/24 09:32:45 jon Exp $
  *
  * Constraint based solution of decompositions
  * Constraints are inequalities (<=) or equalities
@@ -77,9 +77,9 @@ static unsigned int solve(unsigned int *vector, unsigned int depth, unsigned int
       /* Reached the last variable */
       if (check_equality_constraints(equalities, vector, max_depth, num_equalities)) {
         unsigned int i;
-        printf("solution: %d", vector[0]);
+        printf("solution: %u", vector[0]);
         for (i = 1; i < max_depth; i++) {
-          printf(", %d", vector[i]);
+          printf(", %u", vector[i]);
         }
         printf("\n");
         total++;
@@ -166,14 +166,14 @@ int main(int argc, const char *const argv[])
   fclose(equalities_file);
   qsort(indexes, num_vars, sizeof(unsigned int), &compar);
   /*
-  for (i = 0; i < num_vars; i++) { printf("%d, ", indexes[i]); };
+  for (i = 0; i < num_vars; i++) { printf("%u, ", indexes[i]); };
   printf("\n");
   */
   total = solve(vector, 0, num_vars);
   if (0 == total) {
     printf("No solutions found\n");
   } else {
-    printf("%d solutions found\n", total);
+    printf("%u solutions found\n", total);
   }
   return 0;
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: zqf.c,v 1.10 2005/06/22 21:52:54 jon Exp $
+ * $Id: zqf.c,v 1.11 2005/07/24 09:32:46 jon Exp $
  *
  * Clear to zero the upper triangle of a matrix, including the diagonal
  * This is a utility program for computation of quadratic forms
@@ -76,7 +76,7 @@ int main(int argc, const char * const argv[])
       if ( 0 != errno) {
         perror(name);
       }
-      fprintf(stderr, "%s cannot read row %d from %s, terminating\n", name, i, in);
+      fprintf(stderr, "%s cannot read row %u from %s, terminating\n", name, i, in);
       fclose(inp);
       fclose(outp);
       exit(1);
@@ -90,7 +90,7 @@ int main(int argc, const char * const argv[])
       if ( 0 != errno) {
         perror(name);
       }
-      fprintf(stderr, "%s cannot write row %d to %s, terminating\n", name, i, out);
+      fprintf(stderr, "%s cannot write row %u to %s, terminating\n", name, i, out);
       fclose(inp);
       fclose(outp);
       exit(1);

@@ -1,5 +1,5 @@
 /*
- * $Id: script.c,v 1.9 2005/06/22 21:52:54 jon Exp $
+ * $Id: script.c,v 1.10 2005/07/24 09:32:45 jon Exp $
  *
  * Function to compute a script in two generators
  *
@@ -27,7 +27,7 @@ static const char *new_id(const char *base)
   assert(NULL != base);
   len = 11 + strlen(base);
   res = my_malloc(len + 1);
-  sprintf(res, "%s.%d", base, id);
+  sprintf(res, "%s.%u", base, id);
   id++;
   return res;
 }
@@ -78,7 +78,7 @@ static const char *parse_plus(const char *script, const char **rest, u32 *scalar
     char *rest;
     u32 val = strtoul(res, &rest, 0);
     if (val >= prime || 0 == val) {
-      fprintf(stderr, "%s: script scalar %d exceeds field order %d or is zero, terminating\n", name, val, prime);
+      fprintf(stderr, "%s: script scalar %u exceeds field order %u or is zero, terminating\n", name, val, prime);
       return NULL;
     }
     *scalar = val;
@@ -254,7 +254,7 @@ int exec_script(const char *out, const char *tmp, const char *script,
   if (1 != scalar) {
     new = new_id(tmp);
     if (0 == scale(current, new, scalar, name)) {
-      fprintf(stderr, "%s: script scale of %s by %d failed, terminating\n", name, current, scalar);
+      fprintf(stderr, "%s: script scale of %s by %u failed, terminating\n", name, current, scalar);
       return 0;
     }
     current = new;

@@ -1,5 +1,5 @@
 /*
- * $Id: msp.c,v 1.15 2005/06/22 21:52:53 jon Exp $
+ * $Id: msp.c,v 1.16 2005/07/24 09:32:45 jon Exp $
  *
  * Function to spin some vectors under multiple generators
  *
@@ -225,7 +225,7 @@ u32 spin(const char *in, const char *out,
     free(new_map);
     assert(j == d);
     if (verbose) {
-      printf("%s: adding %d new rows giving %d rows for gen %s\n",
+      printf("%s: adding %u new rows giving %u rows for gen %s\n",
              name, d, nor + d, gen->m);
       fflush(stdout);
     }
@@ -233,7 +233,7 @@ u32 spin(const char *in, const char *out,
     gen = gen->next;
   }
   if (nor >= max_rows) {
-    fprintf(stderr, "%s: out of memory at %d rows, terminating\n",
+    fprintf(stderr, "%s: out of memory at %u rows, terminating\n",
             name, nor);
     exit(2);
   }
@@ -245,7 +245,7 @@ u32 spin(const char *in, const char *out,
     exit(1);
   }
   if (verbose) {
-    printf("%s: Writing %d rows to output\n", name, nor);
+    printf("%s: Writing %u rows to output\n", name, nor);
     fflush(stdout);
   }
   errno = 0;

@@ -1,5 +1,5 @@
 /*
- * $Id: tcv.c,v 1.9 2005/06/22 21:52:54 jon Exp $
+ * $Id: tcv.c,v 1.10 2005/07/24 09:32:45 jon Exp $
  *
  * Function to lift vectors from a tensor condensation representation
  *
@@ -99,7 +99,7 @@ static void positions(u32 cf, u32 l, u32 r, u32 dim_r,
   start_l += irr_q[cf] * l;
   start_r += irr_q[cf] * r;
   /*
-  printf("start_l = %d, start_r = %d\n", start_l, start_r);
+  printf("start_l = %u, start_r = %u\n", start_l, start_r);
   */
   *ucpos = start_l * dim_r + start_r;
   *cpos = 0;
@@ -129,7 +129,7 @@ int tco_lift(u32 s, const char *mults_l, const char *mults_r, const char *in,
   assert(NULL != argv);
   assert(0 != argc);
   if ((int)s != argc) {
-    fprintf(stderr, "%s: incorrect number (%d) of arguments Qi, should be %d, terminating\n", name, argc, s);
+    fprintf(stderr, "%s: incorrect number (%u) of arguments Qi, should be %u, terminating\n", name, argc, s);
     return 0;
   }
   left_multiplicities = my_malloc(s * sizeof(u32));
@@ -258,7 +258,7 @@ int tco_lift(u32 s, const char *mults_l, const char *mults_r, const char *in,
   for (row = 0; row < nor_i; row++) {
     u32 col_i, col_o;
     if (0 == endian_read_row(inp, row_i, len_i)) {
-      fprintf(stderr, "%s: failed to read row %d from %s, terminating\n", name, i, in);
+      fprintf(stderr, "%s: failed to read row %u from %s, terminating\n", name, i, in);
       return cleanup(left_multiplicities, right_multiplicities,
                      nor_q, noc_q, len_q, irr_q, inp,
                      q, h_q, s, h_i, h_o, outp);
@@ -272,7 +272,7 @@ int tco_lift(u32 s, const char *mults_l, const char *mults_r, const char *in,
           assert(col_i < noc_i);
           assert(col_o < noc_o);
           /*
-          printf("i = %d, j = %d, k = %d, col_i = %d, col_o = %d\n", i, j, k, col_i, col_o);
+          printf("i = %u, j = %u, k = %u, col_i = %u, col_o = %u\n", i, j, k, col_i, col_o);
           */
           row_init(inter_row_i, len_i);
           for (m = 0; m < nor_q[i]; m++) {
@@ -302,7 +302,7 @@ int tco_lift(u32 s, const char *mults_l, const char *mults_r, const char *in,
             n += irr_q[i];
             col_o += dim_r;
             /*
-            printf("Incrementing n to %d, col_o to %d\n", n, col_o);
+            printf("Incrementing n to %u, col_o to %u\n", n, col_o);
             */
           }
         }

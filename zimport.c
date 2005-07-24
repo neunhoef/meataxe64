@@ -1,5 +1,5 @@
 /*
- * $Id: zimport.c,v 1.12 2005/06/22 21:52:54 jon Exp $
+ * $Id: zimport.c,v 1.13 2005/07/24 09:32:46 jon Exp $
  *
  * Import matrix from old system
  *
@@ -74,7 +74,7 @@ int main(int argc, const char * const argv[])
   (void)get_mask_and_elts(nob, &elts_per_word);
   for (i = 0; i < nor; i++) {
     if (blen != fread(in_row, 1, blen, f_in)) {
-      fprintf(stderr, "%s: failed to read row %d from %s, terminating\n", name, i, in);
+      fprintf(stderr, "%s: failed to read row %u from %s, terminating\n", name, i, in);
       exit(1);
     }
     row_init(out_row, len);
@@ -87,7 +87,7 @@ int main(int argc, const char * const argv[])
       if ( 0 != errno) {
         perror(name);
       }
-      fprintf(stderr, "%s: failed to write row %d to %s, terminating\n", name, i, out);
+      fprintf(stderr, "%s: failed to write row %u to %s, terminating\n", name, i, out);
       exit(1);
     }
   }

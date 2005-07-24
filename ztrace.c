@@ -1,5 +1,5 @@
 /*
- * $Id: ztrace.c,v 1.10 2005/06/22 21:52:55 jon Exp $
+ * $Id: ztrace.c,v 1.11 2005/07/24 09:32:46 jon Exp $
  *
  * Compute the trace of a matrix
  *
@@ -78,7 +78,7 @@ int main(int argc, const char * const argv[])
       if ( 0 != errno) {
         perror(name);
       }
-      fprintf(stderr, "%s: cannot read row %d from %s, terminating\n", name, i, in);
+      fprintf(stderr, "%s: cannot read row %u from %s, terminating\n", name, i, in);
       fclose(inp);
       exit(1);
     }
@@ -87,6 +87,6 @@ int main(int argc, const char * const argv[])
   }
   fclose(inp);
   memory_dispose();
-  printf("%d\n", (unsigned int)sum);
+  printf("%u\n", (unsigned int)sum);
   return 0;
 }

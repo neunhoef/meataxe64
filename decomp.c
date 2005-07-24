@@ -1,5 +1,5 @@
 /*
- * $Id: decomp.c,v 1.2 2003/01/02 20:37:40 jon Exp $
+ * $Id: decomp.c,v 1.3 2005/07/24 09:32:45 jon Exp $
  *
  * Compute possible decompositions
  */
@@ -42,9 +42,9 @@ static void try_nth_component(unsigned int n, unsigned int limit, unsigned int r
   for (i = 0; i <= max_multiplicity; i++) {
     if (0 == remaining_degree) {
       /* This one works */
-      printf("Found a solution: %d = %d +\n", full_degree, degree);
+      printf("Found a solution: %u = %u +\n", full_degree, degree);
       for (j = 0; j < limit; j++) {
-        printf("%d: %d\n", irred_degrees[j], multiplicities[j]);
+        printf("%u: %u\n", irred_degrees[j], multiplicities[j]);
       }
       break;
     } else {
@@ -136,7 +136,7 @@ int main(int argc, const char *const argv[])
   for (i = 0; i < num_sub_irreds; i++) {
     full_degree += character[i] * sub_degrees[i];
   }
-  printf("character has degree %d\n", full_degree);
+  printf("character has degree %u\n", full_degree);
   memset(multiplicities, 0, num_irreds * sizeof(unsigned int));
   try_nth_component(0, num_irreds, full_degree - degree, character, multiplicities, num_sub_irreds);
   return 0;

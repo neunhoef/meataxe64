@@ -1,5 +1,5 @@
 /*
- * $Id: clean.c,v 1.21 2005/06/22 21:52:53 jon Exp $
+ * $Id: clean.c,v 1.22 2005/07/24 09:32:45 jon Exp $
  *
  * Cleaning and echilisation for meataxe
  *
@@ -49,7 +49,7 @@ void clean(row_ops *row_operations,
     assert(NULL != m2_e);
   }
   if (verbose) { 
-      printf("%s: cleaning %d rows\n", name, d2);
+      printf("%s: cleaning %u rows\n", name, d2);
       fflush(stdout);
   }
   mask = get_mask_and_elts(nob, &elts_per_word);

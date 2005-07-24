@@ -1,5 +1,5 @@
 /*
- * $Id: zcv32to64.c,v 1.1 2005/06/22 21:52:54 jon Exp $
+ * $Id: zcv32to64.c,v 1.2 2005/07/24 09:32:46 jon Exp $
  *
  * Convert from the 32 bit word meataxe to the 64 bit word meataxe
  *
@@ -78,14 +78,14 @@ int main(int argc, const char * const argv[])
       if (0 == endian_read_u32(&elt_in, inp)) {
         fclose(inp);
         fclose(outp);
-        fprintf(stderr, "%s: failed to read u32 %d from %s\n", name, i, in);
+        fprintf(stderr, "%s: failed to read u32 %u from %s\n", name, i, in);
         exit(1);
       }
       elt_out = elt_in;
       if (0 == endian_write_u64(elt_out, outp)) {
         fclose(inp);
         fclose(outp);
-        fprintf(stderr, "%s: failed to write u64 %d to %s\n", name, i, out);
+        fprintf(stderr, "%s: failed to write u64 %u to %s\n", name, i, out);
         exit(1);
       }
     }
@@ -97,7 +97,7 @@ int main(int argc, const char * const argv[])
       if (0 == endian_read_u32_row(inp, row_in, u32len)) {
         fclose(inp);
         fclose(outp);
-        fprintf(stderr, "%s: failed to read row %d from %s\n", name, i, in);
+        fprintf(stderr, "%s: failed to read row %u from %s\n", name, i, in);
         exit(1);
       }
       memset(row_out, 0, u64len * sizeof(u64));
@@ -108,7 +108,7 @@ int main(int argc, const char * const argv[])
       if (0 == endian_write_u64_row(outp, row_out, u64len)) {
         fclose(inp);
         fclose(outp);
-        fprintf(stderr, "%s: failed to write row %d to %s\n", name, i, out);
+        fprintf(stderr, "%s: failed to write row %u to %s\n", name, i, out);
         exit(1);
       }
     }

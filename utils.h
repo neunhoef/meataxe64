@@ -1,5 +1,5 @@
 /*
- * $Id: utils.h,v 1.19 2005/06/22 21:52:54 jon Exp $
+ * $Id: utils.h,v 1.20 2005/07/24 09:32:46 jon Exp $
  *
  * Utilities for meataxe
  *
@@ -61,5 +61,9 @@ extern unsigned char convert_char(unsigned char in);
 /* Read a file of numbers into an array */
 
 extern int read_numbers(FILE *inp, u32 s, u32 *out);
+
+/* A value to avoid assertions on constant expressions */
+
+extern int assert_var_zero;
 
 #endif

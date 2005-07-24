@@ -1,5 +1,5 @@
 /*
- * $Id: tco.c,v 1.27 2005/06/22 21:52:54 jon Exp $
+ * $Id: tco.c,v 1.28 2005/07/24 09:32:45 jon Exp $
  *
  * Tensor condense one group element
  *
@@ -223,7 +223,7 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
   assert(NULL != argv);
   assert(0 != argc);
   if (2*(int)s != argc) {
-    fprintf(stderr, "%s: incorrect number (%d) of arguments Pi, Qi, should be %d, terminating\n", name, argc, 2*s);
+    fprintf(stderr, "%s: incorrect number (%u) of arguments Pi, Qi, should be %u, terminating\n", name, argc, 2*s);
     return 0;
   }
   left_multiplicities = my_malloc(s * sizeof(u32));
@@ -311,7 +311,7 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
   }
   for (i = 0; i < s; i++) {
     if (0 == dim_irr[i]) {
-      fprintf(stderr, "%s: irreducible %d has dimension zero, terminating\n", name, i);
+      fprintf(stderr, "%s: irreducible %u has dimension zero, terminating\n", name, i);
       return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
                      NULL, NULL, NULL, NULL, NULL, NULL, inp, NULL, NULL,
                      NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL);
@@ -333,7 +333,7 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
   }
   for (i = 0; i < s; i++) {
     if (0 == dim_end[i]) {
-      fprintf(stderr, "%s: irreducible %d has endomorphism dimension zero, terminating\n", name, i);
+      fprintf(stderr, "%s: irreducible %u has endomorphism dimension zero, terminating\n", name, i);
       return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
                      NULL, NULL, NULL, NULL, NULL, NULL, inp, NULL, NULL,
                      NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL);
@@ -529,7 +529,7 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
     header_free(h_i);
     /* Copy */
     if (0 == endian_copy_matrix(inp, outp, row, len, nrows)) {
-      fprintf(stderr, "%s: failed to copy %d rows from %s to %s, terminating\n", name, nrows, in, out);
+      fprintf(stderr, "%s: failed to copy %u rows from %s to %s, terminating\n", name, nrows, in, out);
       fclose(inp);
       return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
                      nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, NULL,
@@ -591,7 +591,7 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
     grease.level = GREASE_MAX; /* No point in greasing these little multiplications */
   }
   if (verbose) {
-    printf("%s: using grease level %d\n", name, grease.level);
+    printf("%s: using grease level %u\n", name, grease.level);
     fflush(stdout);
   }
   if (0 == grease_allocate(prime, max_irr_len, &grease, 900)){
@@ -678,7 +678,7 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
         int skipping2 = skipping1 || (equal1 && (beta < vector[2]));
         if (skipping2) {
 #if 0
-          printf("Skipping with i = %d, alpha = %d, beta = %d\n",
+          printf("Skipping with i = %u, alpha = %u, beta = %u\n",
                  i, alpha, beta);
 #endif
         } else {

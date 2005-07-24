@@ -1,5 +1,5 @@
 /*
- * $Id: zfo.c,v 1.5 2005/06/22 21:52:54 jon Exp $
+ * $Id: zfo.c,v 1.6 2005/07/24 09:32:46 jon Exp $
  *
  * Find the orbits under multiple generators
  *
@@ -88,12 +88,12 @@ int main(int argc, const char * const argv[])
       orb.values[0] = cur_point;
       while (im != cur_point) {
         if (im >= nor) {
-          fprintf(stderr, "%s: orbit containing %d has out of range value %d, terminating\n", name, cur_point, im);
+          fprintf(stderr, "%s: orbit containing %u has out of range value %u, terminating\n", name, cur_point, im);
           fclose(outp);
           exit(1);
         }
         if (orb.size >= max_orb) {
-          fprintf(stderr, "%s: orbit containing %d has out of range size, terminating\n", name, cur_point);
+          fprintf(stderr, "%s: orbit containing %u has out of range size, terminating\n", name, cur_point);
           fclose(outp);
           exit(1);
         } else {
@@ -117,7 +117,7 @@ int main(int argc, const char * const argv[])
     }
     cur_point++;
   }
-  printf("A total of %d orbits were found under %s\n", total_orbits, in);
+  printf("A total of %u orbits were found under %s\n", total_orbits, in);
   count = 4;
   while (count < (unsigned int)argc) {
     /* Incoming conditions */
@@ -153,7 +153,7 @@ int main(int argc, const char * const argv[])
       orbit *orig = orb;
       if (NULL != orb) {
 /*
-        printf("Processing orbit %d\n", cur_point);
+        printf("Processing orbit %u\n", cur_point);
 */
         while (NULL != orb) {
           for (i = 0; i < orb->size; i++) {
@@ -167,7 +167,7 @@ int main(int argc, const char * const argv[])
               u32 k;
               word *values;
 /*
-              printf("Fusing orbit %d\n", im);
+              printf("Fusing orbit %u\n", im);
 */
               orb_ptr[im]->next = orb->next;
               orb->next = orb_ptr[im];
@@ -197,7 +197,7 @@ int main(int argc, const char * const argv[])
       orbit *orb = orb_ptr[cur_point];
       if (NULL != orb) {
 /*
-        printf("Fusing orbits %d\n", cur_point);
+        printf("Fusing orbits %u\n", cur_point);
 */
         if (NULL != orb->next) {
           u32 size = orb->size;
@@ -244,7 +244,7 @@ int main(int argc, const char * const argv[])
         /* Only consider orbits that haven't been dealt with */
         u32 size = orb->size;
 /*
-        printf("Recreating orbit %d\n", cur_point);
+        printf("Recreating orbit %u\n", cur_point);
 */
         for (i = 1; i < size; i++) {
           /* Reset the pointer to the relevant orbit */
@@ -254,7 +254,7 @@ int main(int argc, const char * const argv[])
       }
       cur_point++;
     }
-    printf("After processing %s, there are %d orbits\n", in, total_orbits);
+    printf("After processing %s, there are %u orbits\n", in, total_orbits);
     count++;
   }
   orbits = my_malloc(sizeof(*orbits));

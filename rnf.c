@@ -1,5 +1,5 @@
 /*
- * $Id: rnf.c,v 1.17 2005/06/22 21:52:53 jon Exp $
+ * $Id: rnf.c,v 1.18 2005/07/24 09:32:45 jon Exp $
  *
  * Compute the rank of a matrix, using temporary files
  *
@@ -99,7 +99,7 @@ u32 rankf(const char *m1, const char *dir, const char *name)
   max_rows = memory_rows(len, 800);
   r = memory_rows(len, 100);
   if (r < prime) {
-    fprintf(stderr, "%s: cannot allocate %d rows for %s, terminating\n", name, prime, m1);
+    fprintf(stderr, "%s: cannot allocate %u rows for %s, terminating\n", name, prime, m1);
     fclose(inp);
     exit(2);
   }

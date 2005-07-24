@@ -1,5 +1,5 @@
 /*
- * $Id: mul.c,v 1.47 2005/06/22 21:52:53 jon Exp $
+ * $Id: mul.c,v 1.48 2005/07/24 09:32:45 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
@@ -115,7 +115,7 @@ static int mul_row_by_map(word *row_in, word *row_out, word *map,
     if (0 != elt) {
       word k = map[j], elt2;
       if (k >= noc_o) {
-        fprintf(stderr, "%s: element %d from map %s out of range (0 - %d), terminating\n", name, (u32)k, m, noc_o - 1);
+        fprintf(stderr, "%s: element %u from map %s out of range (0 - %u), terminating\n", name, (u32)k, m, noc_o - 1);
         return 0;
       }
       elt2 = get_element_from_row_with_params(nob, k, mask, elts_per_word, row_out);
@@ -207,7 +207,7 @@ static int mul_by_map(FILE *inp1, FILE *inp2, const header *h1, const header *h2
   fclose(inp2);
   if (noc1 != nor2 ||
       0 == is_a_prime_power(prime)) {
-    fprintf(stderr, "%s: %s has bad prime power %d, terminating\n", name, m1, prime);
+    fprintf(stderr, "%s: %s has bad prime power %u, terminating\n", name, m1, prime);
     map_free(map2);
     return cleanup(inp1, NULL, NULL);
   }
@@ -372,7 +372,7 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
         word l = map[j];
         row_init(rows1[j], len1);
         if (l >= noc1) {
-          fprintf(stderr, "%s: map entry %d out of range (0 - %d), terminating\n", name, (u32)l, noc1 - 1);
+          fprintf(stderr, "%s: map entry %u out of range (0 - %u), terminating\n", name, (u32)l, noc1 - 1);
           grease_free(&grease);
           map_free(map);
           return cleanup(inp1, inp2, outp);
@@ -439,7 +439,7 @@ int skip_mul_from_store(u32 offset, word **rows1, word **rows3,
   assert(is_a_prime_power(prime)); /* prime refers to rows1 */
   assert(0 != nob); /* nob refers to rows1 */
   if (verbose) {
-    printf("%s: multiplying %d rows with %s\n", name, nor, m);
+    printf("%s: multiplying %u rows with %s\n", name, nor, m);
     fflush(stdout);
   }
   /* Remember where we are in row 2 */

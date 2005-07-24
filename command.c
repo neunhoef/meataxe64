@@ -1,5 +1,5 @@
 /*
- * $Id: command.c,v 1.11 2002/06/28 08:39:16 jon Exp $
+ * $Id: command.c,v 1.12 2005/07/24 09:32:45 jon Exp $
  *
  * Interface to task manager (definition)
  *
@@ -88,7 +88,7 @@ static void print_task(task *task)
   unsigned int i;
   input *inputs = task->inputs;
   output * outputs = task->outputs;
-  printf("job %ld, uid %ld, status %s, function %s inputs", task->job, task->uid, string_status(task->status), (task->command == SUM) ? "sum" : string_task(task->command));
+  printf("job %lu, uid %lu, status %s, function %s inputs", task->job, task->uid, string_status(task->status), (task->command == SUM) ? "sum" : string_task(task->command));
   for (i = 0; i < task->input_size; i++) {
     if (inputs[i].type == RESULT) {
       printf(" result %u of job %lu ", inputs[i].value.result.number, inputs[i].value.result.job);
@@ -355,12 +355,11 @@ static void process_line(const char *line, task *tasks, unsigned int size, FILE 
       if (task != NULL) {
 	if (task->status == status) {
 	  /* No change of status */
-	  printf("Curious, status for %ld unchanged\n", uid);
+	  printf("Curious, status for %lu unchanged\n", uid);
 	  fflush(stdout);
 	  fclose(copy);
 	  fclose(done);
 	  exit(1);
-	  break;
 	} else {
 	  unsigned int i;
 	  job job = task->job;
@@ -395,7 +394,7 @@ static void process_line(const char *line, task *tasks, unsigned int size, FILE 
               case FILE_NAME:
 		break;
 	      default:
-                assert(0);
+                assert(assert_var_zero != 0);
 		break;
 	      }
 	    }
@@ -578,7 +577,7 @@ static int schedule(task *tasks, unsigned int *size, unsigned int max_commands)
 {
   unsigned int waiting_count = 0, consumer_count = 0, producer_count = 0, count = 0;
   unsigned int i;
-  while (1) {
+  for (;;) {
     int j = 0;
     for (i = 0; i < *size; i++) {
       task *task = tasks + i;
@@ -689,7 +688,7 @@ void prepend_task(const char *task_line, const char *task_name)
   FILE *input, *output;
   assert(NULL != task_line);
   wait_lock(task_name);
-  do {
+  for (;;) {
     input = fopen(COMMAND_FILE, "rb");
     if (NULL == input) {
       /* Command file not created */
@@ -715,7 +714,7 @@ void prepend_task(const char *task_line, const char *task_name)
     /* Now copy to back original command file */
     copy_back(COMMAND_FILE, COMMAND_COPY, task_name);
     break;
-  } while (1);
+  };
   release_lock();
 }
 
@@ -724,7 +723,7 @@ void append_task(const char *task_line, const char *task_name)
   FILE *input, *output;
   assert(NULL != task_line);
   wait_lock(task_name);
-  do {
+  for (;;) {
     input = fopen(COMMAND_FILE, "rb");
     if (NULL == input) {
       /* Command file not created */
@@ -750,7 +749,7 @@ void append_task(const char *task_line, const char *task_name)
     /* Now copy to back original command file */
     copy_back(COMMAND_FILE, COMMAND_COPY, task_name);
     break;
-  } while (1);
+  };
   release_lock();
 }
 

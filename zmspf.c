@@ -1,5 +1,5 @@
 /*
- * $Id: zmspf.c,v 1.8 2005/06/22 21:52:54 jon Exp $
+ * $Id: zmspf.c,v 1.9 2005/07/24 09:32:46 jon Exp $
  *
  * Spin some vectors under multiple generators, using intermediate files
  *
@@ -31,7 +31,7 @@ int main(int argc, const char * const argv[])
   endian_init();
   memory_init(name, memory);
   dim = spinf(argv[1], argv[2], argv[3], argc - 4, argv + 4, name);
-  printf("%d\n", dim);
+  printf("%u\n", dim);
   memory_dispose();
   return 0;
 }

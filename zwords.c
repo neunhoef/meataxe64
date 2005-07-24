@@ -1,5 +1,5 @@
 /*
- * $Id: zwords.c,v 1.5 2004/01/04 21:22:50 jon Exp $
+ * $Id: zwords.c,v 1.6 2005/07/24 09:32:46 jon Exp $
  *
  * Compute words in two matrices
  *
@@ -65,9 +65,9 @@ int main(int argc, const char * const argv[])
     const char *c;
     const char *chosen_letter;
     unsigned int word_len;
-    sprintf(buf, "%s%d", out, i - 1);
+    sprintf(buf, "%s%u", out, i - 1);
     names[i] = buf;
-    while (1) {
+    for (;;) {
       const char *word = words[cur_word];
       char letter = (0 == m) ? 'A' : 'B';
       unsigned int order = (0 == m) ? o_a : o_b;

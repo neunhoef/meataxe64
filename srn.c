@@ -1,5 +1,5 @@
 /*
- * $Id: srn.c,v 1.12 2005/06/22 21:52:54 jon Exp $: zrn.c,v 1.1 2001/11/12 13:43:38 jon Exp $
+ * $Id: srn.c,v 1.13 2005/07/24 09:32:45 jon Exp $: zrn.c,v 1.1 2001/11/12 13:43:38 jon Exp $
  *
  * Simple compute of the rank of a matrix
  *
@@ -52,7 +52,7 @@ int main(int argc, const char * const argv[])
   nor = header_get_nor(h);
   len = header_get_len(h);
   if (memory_rows(len, 1000) < nor) {
-    fprintf(stderr, "%s: cannot allocate %d rows for %s, terminating\n", name, nor, argv[1]);
+    fprintf(stderr, "%s: cannot allocate %u rows for %s, terminating\n", name, nor, argv[1]);
     fclose(inp);
     exit(2);
   }
@@ -73,7 +73,7 @@ int main(int argc, const char * const argv[])
   n = simple_echelise(mat, nor, prime, len, nob);
   matrix_free(mat);
   fclose(inp);
-  printf("%d\n", n);
+  printf("%u\n", n);
   memory_dispose();
   return 0;
 }

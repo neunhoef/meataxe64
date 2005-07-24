@@ -1,5 +1,5 @@
 /*
- * $Id: ns.c,v 1.13 2005/06/22 21:52:53 jon Exp $
+ * $Id: ns.c,v 1.14 2005/07/24 09:32:45 jon Exp $
  *
  * Compute the null space of a matrix
  *
@@ -64,7 +64,7 @@ u32 nullspace(const char *m1, const char *m2, const char *name)
   n = memory_rows(len2, sub2);
   header_free(h1);
   if (memory_rows(len1, space1 - sub1) < nor || memory_rows(len2, space2 - sub2) < nor || r < prime || n < prime) {
-    fprintf(stderr, "%s: cannot allocate %d rows for %s and %s, terminating\n",
+    fprintf(stderr, "%s: cannot allocate %u rows for %s and %s, terminating\n",
             name, 2 * (nor + prime), m1, m2);
     fclose(inp);
     exit(2);
@@ -113,7 +113,7 @@ u32 nullspace(const char *m1, const char *m2, const char *name)
           if ( 0 != errno) {
             perror(name);
           }
-          fprintf(stderr, "%s cannot write row %d to %s, terminating\n", name, r, m2);
+          fprintf(stderr, "%s cannot write row %u to %s, terminating\n", name, r, m2);
           fclose(outp);
           exit(1);
         }

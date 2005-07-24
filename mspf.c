@@ -1,5 +1,5 @@
 /*
- * $Id: mspf.c,v 1.20 2005/06/22 21:52:53 jon Exp $
+ * $Id: mspf.c,v 1.21 2005/07/24 09:32:45 jon Exp $
  *
  * Function to spin some vectors under multiple generators
  * using intermediate files in a temporary directory.
@@ -163,7 +163,7 @@ u32 spinf(const char *in, const char *out, const char *dir,
   max_rows = memory_rows(len, 450);
   /* Give up if too few rows available */
   if (max_rows < 2 * (prime + 1)) {
-    fprintf(stderr, "%s: failed to get %d rows for %s, %s, terminating\n",
+    fprintf(stderr, "%s: failed to get %u rows for %s, %s, terminating\n",
             name, 2 * (prime + 1), in, args[0]);
     cleanup(inp, argc, files);
     exit(2);
@@ -240,7 +240,7 @@ u32 spinf(const char *in, const char *out, const char *dir,
         if ( 0 != errno) {
           perror(name);
         }
-        fprintf(stderr, "%s: failed to read %d rows from %s at offset %lld, terminating\n", name, stride, gen->m, gen->base_ptr);
+        fprintf(stderr, "%s: failed to read %u rows from %s at offset %lld, terminating\n", name, stride, gen->m, gen->base_ptr);
         cleanup_all(NULL, argc, files, echelised, name_echelised);
         exit(1);
       }
@@ -263,7 +263,7 @@ u32 spinf(const char *in, const char *out, const char *dir,
       gen->nor += stride;
       d = nor;
       if (verbose) {
-        printf("%s: cleaning %d rows out of %d for gen %s\n",
+        printf("%s: cleaning %u rows out of %u for gen %s\n",
                name, stride, rows_to_do, gen->m);
         fflush(stdout);
       }
@@ -274,7 +274,7 @@ u32 spinf(const char *in, const char *out, const char *dir,
         exit(1);
       }
       if (verbose) {
-        printf("%s: adding %d new rows giving %d rows\n", name, d - nor, d);
+        printf("%s: adding %u new rows giving %u rows\n", name, d - nor, d);
         fflush(stdout);
       }
       nor = d;
@@ -300,7 +300,7 @@ u32 spinf(const char *in, const char *out, const char *dir,
   header_free(h_out);
   fseeko64(echelised, 0, SEEK_SET);
   if (verbose) {
-    printf("%s: Copying %d rows to output\n", name, nor);
+    printf("%s: Copying %u rows to output\n", name, nor);
     fflush(stdout);
   }
   errno = 0;

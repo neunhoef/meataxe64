@@ -1,5 +1,5 @@
 /*
- * $Id: utils.c,v 1.21 2005/06/22 21:52:54 jon Exp $
+ * $Id: utils.c,v 1.22 2005/07/24 09:32:45 jon Exp $
  *
  * Utils for meataxe
  *
@@ -13,6 +13,8 @@
 #include <limits.h>
 #include <ctype.h>
 #include <errno.h>
+
+int assert_var_zero = 0;
 
 u32 bits_in_word = CHAR_BIT * sizeof(word);
 
@@ -84,7 +86,6 @@ const char *get_str(FILE *f)
   } else {
     fprintf(stderr, "Failed to read string, terminating\n");
     exit(1);
-    return NULL; /* Avoid compiler warning */
   }
 }
 
@@ -120,7 +121,7 @@ void *my_malloc(size_t size)
   errno = 0;
   ret = malloc(size);
   if (NULL == ret) {
-    fprintf(stderr, "Failed to allocate %d bytes with error reason '%s', terminating\n",
+    fprintf(stderr, "Failed to allocate %u bytes with error reason '%s', terminating\n",
             size, (0 != errno) ? strerror(errno) : "unknown");
     exit(1);
   }
@@ -130,7 +131,7 @@ void *my_malloc(size_t size)
 void copy_rest(FILE *new, FILE *old)
 {
   char temp[1000];
-  do {
+  for (;;) {
     u32 i = fread(temp, 1, 1000, old);
     assert(i <= 1000);
     if (0 != i) {
@@ -140,13 +141,13 @@ void copy_rest(FILE *new, FILE *old)
     } else {
       break;
     }
-  } while (1);
+  };
 }
 
 u32 skip_whitespace(u32 i, const char *chars)
 {
   u32 j = strlen(chars);
-  while (1) {
+  for (;;) {
     if (i >= j-1) {
       return i;
     } else {
@@ -163,7 +164,7 @@ u32 skip_whitespace(u32 i, const char *chars)
 u32 skip_non_white(u32 i, const char *chars)
 {
   u32 j = strlen(chars);
-  while (1) {
+  for (;;) {
     if (i >= j-1) {
       return i;
     } else {

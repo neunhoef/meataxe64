@@ -1,5 +1,5 @@
 /*
- * $Id: zlp.c,v 1.5 2004/08/21 13:22:31 jon Exp $
+ * $Id: zlp.c,v 1.6 2005/07/24 09:32:46 jon Exp $
  *
  * Projective (line) permute some vectors under two generators
  *
@@ -31,7 +31,7 @@ int main(int argc, const char * const argv[])
   endian_init();
   memory_init(name, memory);
   degree = permute(argv[1], argv[2], argv[3], argv[4], argv[5], argv[6], 1, name);
-  printf("%d\n", degree);
+  printf("%u\n", degree);
   memory_dispose();
   return 0;
 }

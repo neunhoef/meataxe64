@@ -1,5 +1,5 @@
 /*
- * $Id: singular.c,v 1.8 2005/06/22 21:52:54 jon Exp $
+ * $Id: singular.c,v 1.9 2005/07/24 09:32:45 jon Exp $
  *
  * Function to find a singular vector, given a quadratic form
  *
@@ -59,7 +59,7 @@ int singular_vector(row_ops *row_operations,
     for (j = 0; j < nor; j++) {
       products[i][j] = (*row_operations->product)(rows[i], work[j], len);
       /*
-      printf("products[%d][%d] = %d\n", i, j, products[i][j]);
+      printf("products[%u][%u] = %u\n", i, j, products[i][j]);
       */
     }
   }
@@ -158,7 +158,7 @@ int singular(const char *space, const char *form, const char *out, const char *n
   header_free(h_in1);
   header_free(h_in2);
   if (memory_rows(len, 900) < 3 + 4 || n < prime) {
-    fprintf(stderr, "%s: cannot allocate %d rows for %s and %s, terminating\n",
+    fprintf(stderr, "%s: cannot allocate %u rows for %s and %s, terminating\n",
             name, nor + prime, form, out);
     fclose(inp1);
     fclose(inp2);

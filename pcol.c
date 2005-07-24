@@ -1,5 +1,5 @@
 /*
- * $Id: pcol.c,v 1.1 2005/06/22 21:52:53 jon Exp $
+ * $Id: pcol.c,v 1.2 2005/07/24 09:32:45 jon Exp $
  *
  * Permuation condense one group element wrt non trivial linear representation
  *
@@ -192,7 +192,7 @@ int pcondense_lambda(const char *in1, const char *in2, const char *in3,
       if ( 0 != l) {
         k = (orbits->orbits[s]).size;
         if (0 == k % characteristic) {
-          fprintf(stderr, "%s: orbit size %d is divisible by field characteristic %d, terminating\n", name, k, characteristic);
+          fprintf(stderr, "%s: orbit size %u is divisible by field characteristic %u, terminating\n", name, k, characteristic);
           fclose(outf);
           header_free(outh);
           orbit_set_free(orbits);
@@ -219,7 +219,7 @@ int pcondense_lambda(const char *in1, const char *in2, const char *in3,
       if ( 0 != errno) {
         perror(name);
       }
-      fprintf(stderr, "%s: failed to output row %d to %s, terminating\n", name, i, out);
+      fprintf(stderr, "%s: failed to output row %u to %s, terminating\n", name, i, out);
       fclose(outf);
       header_free(outh);
       orbit_set_free(orbits);

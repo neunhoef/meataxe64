@@ -1,5 +1,5 @@
 /*
- * $Id: zsymb.c,v 1.4 2005/06/22 21:52:55 jon Exp $
+ * $Id: zsymb.c,v 1.5 2005/07/24 09:32:46 jon Exp $
  *
  * Create a symmetry basis
  *
@@ -34,7 +34,7 @@ int main(int argc, const char * const argv[])
   spaces = strtoul(argv[1], NULL, 0);
   size = strtoul(argv[2], NULL, 0);
   dim = symb(spaces, size, argv[3], argv[4], argv[5], argc - 6, argv + 6, name);
-  printf("%d\n", dim);
+  printf("%u\n", dim);
   memory_dispose();
   return 0;
 }

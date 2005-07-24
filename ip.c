@@ -1,5 +1,5 @@
 /*
- * $Id: ip.c,v 1.18 2005/06/22 21:52:53 jon Exp $
+ * $Id: ip.c,v 1.19 2005/07/24 09:32:45 jon Exp $
  *
  * Read a matrix
  *
@@ -74,9 +74,9 @@ int main(int argc, const char * const argv[])
     noc = nor;
     for (i = 0; i < nor; i++) {
       u32 j;
-      fscanf(inp, "%d", &j);
+      fscanf(inp, "%u", &j);
       if (0 == j || j > noc) {
-        fprintf(stderr, "%s: %d (out of range 1 - %d) found as permutation image, terminating\n", name, j, noc);
+        fprintf(stderr, "%s: %u (out of range 1 - %u) found as permutation image, terminating\n", name, j, noc);
         exit(1);
       }
       errno = 0;
@@ -84,7 +84,7 @@ int main(int argc, const char * const argv[])
         if ( 0 != errno) {
           perror(name);
         }
-        fprintf(stderr, "%s: cannot write output value %d in row %d to %s\n", name, j - 1, i, out);
+        fprintf(stderr, "%s: cannot write output value %u in row %u to %s\n", name, j - 1, i, out);
         fclose(inp);
         fclose(outp);
         exit(1);
@@ -110,7 +110,7 @@ int main(int argc, const char * const argv[])
               if ( 0 != errno) {
                 perror(name);
               }
-              fprintf(stderr, "Failed to write element to %s at (%d, %d)\n",
+              fprintf(stderr, "Failed to write element to %s at (%u, %u)\n",
                       out, i, j);
               fclose(inp);
               fclose(outp);
@@ -120,7 +120,7 @@ int main(int argc, const char * const argv[])
             a = 0;
           }
         } else {
-          fprintf(stderr, "Failed to read element from %s at (%d, %d)\n",
+          fprintf(stderr, "Failed to read element from %s at (%u, %u)\n",
                   in, i, j);
           fclose(inp);
           fclose(outp);
@@ -132,7 +132,7 @@ int main(int argc, const char * const argv[])
         if ( 0 != errno) {
           perror(name);
         }
-        fprintf(stderr, "Failed to write element to %s at (%d, %d)\n",
+        fprintf(stderr, "Failed to write element to %s at (%u, %u)\n",
                 out, i, j);
         fclose(inp);
         fclose(outp);

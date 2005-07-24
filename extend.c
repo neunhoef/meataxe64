@@ -1,5 +1,5 @@
 /*
- * $Id: extend.c,v 1.5 2005/06/22 21:52:53 jon Exp $
+ * $Id: extend.c,v 1.6 2005/07/24 09:32:45 jon Exp $
  *
  * Function to extend the field of a row
  *
@@ -22,7 +22,7 @@ int extend(const word *in, word *out,
   assert(NULL != in);
   assert(NULL != out);
   if (0 == is_a_prime(in_prime) || 0 == is_a_prime_power(out_prime) || 0 != out_prime % in_prime) {
-    fprintf(stderr, "%s: bad prime %d or prime power %d, terminating\n", name, in_prime, out_prime);
+    fprintf(stderr, "%s: bad prime %u or prime power %u, terminating\n", name, in_prime, out_prime);
     return 0;
   }
   in_mask = get_mask_and_elts(in_nob, &elts_per_in_word);

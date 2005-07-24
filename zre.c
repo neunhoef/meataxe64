@@ -1,5 +1,5 @@
 /*
- * $Id: zre.c,v 1.8 2005/06/22 21:52:54 jon Exp $
+ * $Id: zre.c,v 1.9 2005/07/24 09:32:46 jon Exp $
  *
  * Convert a matrix from new to old
  *
@@ -88,7 +88,7 @@ int main(int argc, const char * const argv[])
       if ( 0 != errno) {
         perror(name);
       }
-      fprintf(stderr, "%s: cannot read row %d from %s, terminating\n", name, i, argv[1]);
+      fprintf(stderr, "%s: cannot read row %u from %s, terminating\n", name, i, argv[1]);
       fclose(inp);
       fclose(outp);
       exit(1);
@@ -102,7 +102,7 @@ int main(int argc, const char * const argv[])
       if ( 0 != errno) {
         perror(name);
       }
-      fprintf(stderr, "%s: cannot write row %d to %s, terminating\n", name, i, argv[2]);
+      fprintf(stderr, "%s: cannot write row %u to %s, terminating\n", name, i, argv[2]);
       fclose(inp);
       fclose(outp);
       exit(1);

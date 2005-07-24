@@ -1,5 +1,5 @@
 /*
- * $Id: zmsb.c,v 1.7 2005/06/22 21:52:54 jon Exp $
+ * $Id: zmsb.c,v 1.8 2005/07/24 09:32:46 jon Exp $
  *
  * Spin some vectors under two generators to obtain a standard base
  *
@@ -31,7 +31,7 @@ int main(int argc, const char * const argv[])
   endian_init();
   memory_init(name, memory);
   dim = msb_spin(argv[1], argv[2], argc - 3, argv + 3, name);
-  printf("%d\n", dim);
+  printf("%u\n", dim);
   memory_dispose();
   return 0;
 }

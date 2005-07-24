@@ -1,5 +1,5 @@
 /*
- * $Id: orbit.c,v 1.3 2005/06/22 21:52:53 jon Exp $
+ * $Id: orbit.c,v 1.4 2005/07/24 09:32:45 jon Exp $
  *
  * Functions for handling orbits
  *
@@ -46,7 +46,7 @@ int read_orbits(FILE *inp, u32 nor, orbit_set **orbits,
       if ( 0 != errno) {
         perror(name);
       }
-      fprintf(stderr, "%s: failed to read orbit size for orbit %d to orbits file %s, terminating\n", name, i, in);
+      fprintf(stderr, "%s: failed to read orbit size for orbit %u to orbits file %s, terminating\n", name, i, in);
       return 0;
     }
     total_points += o_size;
@@ -59,11 +59,11 @@ int read_orbits(FILE *inp, u32 nor, orbit_set **orbits,
         if ( 0 != errno) {
           perror(name);
         }
-        fprintf(stderr, "%s: failed to read orbit value at offset %d for orbit %d to orbits file %s, terminating\n", name, j, i, in);
+        fprintf(stderr, "%s: failed to read orbit value at offset %u for orbit %u to orbits file %s, terminating\n", name, j, i, in);
         return 0;
       }
       if (orb->values[j] >= nor) {
-        fprintf(stderr, "%s: orbit value %d out of range offset %d for orbit %d in orbits file %s, terminating\n", name, (unsigned int)orb->values[j], j, i, in);
+        fprintf(stderr, "%s: orbit value %u out of range offset %u for orbit %u in orbits file %s, terminating\n", name, (unsigned int)orb->values[j], j, i, in);
         return 0;
       }
     }
@@ -105,7 +105,7 @@ int write_orbits(FILE *outp, const orbit_set *orbits,
       if ( 0 != errno) {
         perror(name);
       }
-      fprintf(stderr, "%s: failed to write orbit size for orbit %d to orbits file %s, terminating\n", name, i, out);
+      fprintf(stderr, "%s: failed to write orbit size for orbit %u to orbits file %s, terminating\n", name, i, out);
       return 0;
     }
     /* Now write the orbit entries */
@@ -115,7 +115,7 @@ int write_orbits(FILE *outp, const orbit_set *orbits,
         if ( 0 != errno) {
           perror(name);
         }
-        fprintf(stderr, "%s: failed to write orbit value at offset %d for orbit %d to orbits file %s, terminating\n", name, j, i, out);
+        fprintf(stderr, "%s: failed to write orbit value at offset %u for orbit %u to orbits file %s, terminating\n", name, j, i, out);
         return 0;
       }
     }
@@ -130,16 +130,16 @@ void write_text_orbits(const orbit_set *orbits)
   assert(NULL != orbits);
   size = orbits->size;
   /* Write the total number of orbits */
-  printf("%d\n", size);
+  printf("%u\n", size);
   /* Now write each orbit */
   for (i = 0; i < size; i++) {
     orbit *orb = orbits->orbits + i;
     u32 o_size = orb->size;
     /* Now write the size of the orbit */
-    printf("%d\n", o_size);
+    printf("%u\n", o_size);
     /* Now write the orbit entries */
     for (j = 0; j < o_size; j++) {
-      printf("%d ", (unsigned int)orb->values[j]);
+      printf("%u ", (unsigned int)orb->values[j]);
     }
     printf("\n");
   }

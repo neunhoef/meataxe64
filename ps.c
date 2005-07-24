@@ -1,5 +1,5 @@
 /*
- * $Id: ps.c,v 1.4 2005/06/22 21:52:53 jon Exp $
+ * $Id: ps.c,v 1.5 2005/07/24 09:32:45 jon Exp $
  *
  * Function to compute permutation space representation
  *
@@ -102,7 +102,7 @@ void permutation_space(const char *range, const char *image,
     exit(1);
   }
   if (memory_rows(len, 1000) < nor + 1) {
-    fprintf(stderr, "%s: cannot allocate space for %d rows from %s, terminating\n",
+    fprintf(stderr, "%s: cannot allocate space for %u rows from %s, terminating\n",
             name, nor + 1, range);
     cleanup(inp1, inp2, NULL);
     exit(1);
@@ -174,7 +174,7 @@ void permutation_space(const char *range, const char *image,
     if (NULL != found_row) {
       row_out = (*found_row)->index;
     } else {
-      fprintf(stderr, "%s: cannot find image %d from %s, terminating\n", name, i, image);
+      fprintf(stderr, "%s: cannot find image %u from %s, terminating\n", name, i, image);
       cleanup(inp1, inp2, outp);
       exit(1);
     }

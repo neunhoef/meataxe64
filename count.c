@@ -1,5 +1,5 @@
 /*
- * $Id: count.c,v 1.10 2005/06/22 21:52:53 jon Exp $
+ * $Id: count.c,v 1.11 2005/07/24 09:32:45 jon Exp $
  *
  * Function to count the non-zero elements in a matrix
  *
@@ -48,7 +48,7 @@ u32 count(const char *matrix, const char *name)
   row = memory_pointer_offset(0, 0, len);
   for (i = 0; i < nor; i++) {
     if (0 == endian_read_row(input, row, len)) {
-      fprintf(stderr, "%s: cannot read row %d from %s, terminating\n", name, i, matrix);
+      fprintf(stderr, "%s: cannot read row %u from %s, terminating\n", name, i, matrix);
       fclose(input);
       header_free(h);
       exit(1);

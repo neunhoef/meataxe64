@@ -1,5 +1,5 @@
 /*
- * $Id: vpf.c,v 1.4 2005/06/22 21:52:54 jon Exp $
+ * $Id: vpf.c,v 1.5 2005/07/24 09:32:46 jon Exp $
  *
  * Function to permute some vectors under two generators,
  * using intermediate file
@@ -252,7 +252,7 @@ u32 permute_file(const char *tmp_dir, const char *in,
     if ( 0 != errno) {
       perror(name);
     }
-    fprintf(stderr, "%s: failed to write %d rows to %s at offset %lld, terminating\n", name, nor, name_tmp, gen->base_ptr);
+    fprintf(stderr, "%s: failed to write %u rows to %s at offset %lld, terminating\n", name, nor, name_tmp, gen->base_ptr);
     cleanup(NULL, f_a, f_b, vectors);
     (void)remove(name_tmp);
     exit(1);
@@ -277,7 +277,7 @@ u32 permute_file(const char *tmp_dir, const char *in,
       if ( 0 != errno) {
         perror(name);
       }
-      fprintf(stderr, "%s: failed to read %d rows from %s at offset %lld, terminating\n", name, rows_to_do, name_tmp, gen->base_ptr);
+      fprintf(stderr, "%s: failed to read %u rows from %s at offset %lld, terminating\n", name, rows_to_do, name_tmp, gen->base_ptr);
       cleanup(NULL, f_a, f_b, vectors);
       (void)remove(name_tmp);
       exit(1);
@@ -309,7 +309,7 @@ u32 permute_file(const char *tmp_dir, const char *in,
     }
     temp_space = max_rows - rows_to_do; /* Amount of temporary space */
     if (verbose) {
-      printf("%s: searching for %d new rows\n", name, rows_to_do);
+      printf("%s: searching for %u new rows\n", name, rows_to_do);
       fflush(stdout);
     }
     for (i = 0; i < rows_to_do; i++) {
@@ -340,7 +340,7 @@ u32 permute_file(const char *tmp_dir, const char *in,
             u32 index = found_row[k]->index;
             fseeko64(vectors, ((s64)index) * ((s64)len) * ((s64)sizeof(**rows)), SEEK_SET);
             if (0 == endian_read_row(vectors, *rows, len)) {
-              fprintf(stderr, "%s: failed to read row %d from %s, terminating\n",
+              fprintf(stderr, "%s: failed to read row %u from %s, terminating\n",
                       name, index, name_tmp);
               cleanup(NULL, f_a, f_b, vectors);
               (void)remove(name_tmp);
@@ -381,14 +381,14 @@ u32 permute_file(const char *tmp_dir, const char *in,
     fseeko64(vectors, end_ptr, SEEK_SET);
     errno = 0;
     if (verbose) {
-      printf("%s: adding %d new rows giving %d rows\n", name, j, nor + j);
+      printf("%s: adding %u new rows giving %u rows\n", name, j, nor + j);
       fflush(stdout);
     }
     if (0 == endian_write_matrix(vectors, rows + temp_space, len, j)) {
       if ( 0 != errno) {
         perror(name);
       }
-      fprintf(stderr, "%s: failed to write %d rows to %s, terminating\n", name, j, name_tmp);
+      fprintf(stderr, "%s: failed to write %u rows to %s, terminating\n", name, j, name_tmp);
       cleanup(NULL, f_a, f_b, vectors);
       (void)remove(name_tmp);
       exit(1);
@@ -406,7 +406,7 @@ u32 permute_file(const char *tmp_dir, const char *in,
   fclose(f_a);
   fclose(f_b);
   if (gen_a.nor < nor || gen_b.nor < nor) {
-    fprintf(stderr, "%s: out of memory at %d rows, terminating\n",
+    fprintf(stderr, "%s: out of memory at %u rows, terminating\n",
             name, nor);
     cleanup(NULL, NULL, NULL, vectors);
     (void)remove(name_tmp);

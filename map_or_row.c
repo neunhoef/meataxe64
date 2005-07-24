@@ -1,5 +1,5 @@
 /*
- * $Id: map_or_row.c,v 1.3 2005/06/22 21:52:53 jon Exp $
+ * $Id: map_or_row.c,v 1.4 2005/07/24 09:32:45 jon Exp $
  *
  * Handle reading from a choice of map or row
  *
@@ -30,7 +30,7 @@ int read_row(int is_perm, FILE *inp, word *row,
       if ( 0 != errno) {
         perror(name);
       }
-      fprintf(stderr, "%s: cannot read row %d from %s, terminating\n", name, i, m);
+      fprintf(stderr, "%s: cannot read row %u from %s, terminating\n", name, i, m);
       return 0;
     }
   }

@@ -1,5 +1,5 @@
 /*
- * $Id: zvp.c,v 1.8 2005/06/22 21:52:55 jon Exp $
+ * $Id: zvp.c,v 1.9 2005/07/24 09:32:46 jon Exp $
  *
  * Permute some vectors under two generators
  *
@@ -31,7 +31,7 @@ int main(int argc, const char * const argv[])
   endian_init();
   memory_init(name, memory);
   degree = permute(argv[1], argv[2], argv[3], argv[4], argv[5], argv[6], 0, name);
-  printf("%d\n", degree);
+  printf("%u\n", degree);
   memory_dispose();
   return 0;
 }

@@ -1,5 +1,5 @@
 /*
- * $Id: znor.c,v 1.5 2005/06/22 21:52:54 jon Exp $
+ * $Id: znor.c,v 1.6 2005/07/24 09:32:46 jon Exp $
  *
  * Print the number of rows of a matrix
  *
@@ -36,7 +36,7 @@ int main(int argc, const char * const argv[])
   }
   nor = header_get_nor(h);
   header_free(h);
-  printf("%d\n", nor);
+  printf("%u\n", nor);
   fclose(inp);
   return 0;
 }

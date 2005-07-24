@@ -1,5 +1,5 @@
 /*
- * $Id: mop.c,v 1.21 2005/06/22 21:52:53 jon Exp $
+ * $Id: mop.c,v 1.22 2005/07/24 09:32:45 jon Exp $
  *
  * Monster operations for meataxe
  *
@@ -737,7 +737,7 @@ unsigned int suzor(suzel a)
   vecsuz(vorvec, a, vec2);
   for (i = 1; i <= 119; i++) {
     if(0 == memcmp(vec2, vorvec, VECLEN)) {
-      if (PRINT == 1) printf("Order is %d\n", i);
+      if (PRINT == 1) printf("Order is %u\n", i);
       return(i);
     }
     memcpy(vec1, vec2, VECLEN);

@@ -1,5 +1,5 @@
 /*
- * $Id: read.c,v 1.23 2005/06/22 21:52:53 jon Exp $
+ * $Id: read.c,v 1.24 2005/07/24 09:32:45 jon Exp $
  *
  * Read a header
  *
@@ -38,7 +38,7 @@ int read_text_header_items(FILE *fp, u32 *nod, u32 *prime,
   assert(NULL != prime);
   assert(NULL != nor);
   assert(NULL != noc);
-  fscanf(fp, "%d%d%d%d", nod, prime, nor, noc);
+  fscanf(fp, "%u%u%u%u", nod, prime, nor, noc);
   i = fgetc(fp);
   while (i >= 0 && '\n' != (char)i) {
     if (my_isspace(i)) {
@@ -71,7 +71,7 @@ int read_text_header(FILE *fp, const header **hp, const char *file, const char *
     *hp = header_create(prime, nob, nod, noc, nor);
     return 1;
   } else {
-    fprintf(stderr, "%s: value %d is neither 1 nor a prime\n", name, prime);
+    fprintf(stderr, "%s: value %u is neither 1 nor a prime\n", name, prime);
     return 0;
   }
 }
@@ -106,7 +106,7 @@ int read_binary_header(FILE *fp, const header **hp, const char *file, const char
   }
   masked_prime = prime & PRIME_MASK;
   if (1 != masked_prime && 0 == is_a_prime_power(masked_prime)) {
-    fprintf(stderr, "%s: prime power or 1 expected, found %d while reading %s\n", name, masked_prime, file);
+    fprintf(stderr, "%s: prime power or 1 expected, found %u while reading %s\n", name, masked_prime, file);
     return 0;
   }
   nod = digits_of(masked_prime);

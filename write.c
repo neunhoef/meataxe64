@@ -1,5 +1,5 @@
 /*
- * $Id: write.c,v 1.14 2005/06/22 21:52:54 jon Exp $
+ * $Id: write.c,v 1.15 2005/07/24 09:32:46 jon Exp $
  *
  * Write a header
  *
@@ -31,7 +31,7 @@ int write_text_header(FILE *fp, const header *h, const char *name)
   } else {
     fprintf(fp, "12");
   }
-  fprintf(fp, " %d %d %d\n", prime, nor, noc);
+  fprintf(fp, " %u %u %u\n", prime, nor, noc);
   return 1;
 }
 

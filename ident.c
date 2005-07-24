@@ -1,5 +1,5 @@
 /*
- * $Id: ident.c,v 1.11 2005/06/22 21:52:53 jon Exp $
+ * $Id: ident.c,v 1.12 2005/07/24 09:32:45 jon Exp $
  *
  * Subroutine to generate identity matrix
  *
@@ -57,11 +57,11 @@ int ident(u32 prime, u32 nor, u32 noc, u32 elt,
     map_free(map);
   } else {
     if (0 == is_a_prime_power(prime)) {
-      fprintf(stderr, "%s: non prime %d\n", name, prime);
+      fprintf(stderr, "%s: non prime %u\n", name, prime);
       return 0;
     }
     if (elt >= prime) {
-      fprintf(stderr, "%s: %d is too large for %d\n", name, elt, prime);
+      fprintf(stderr, "%s: %u is too large for %u\n", name, elt, prime);
       return 0;
     }
     nob = bits_of(prime);

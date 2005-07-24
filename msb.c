@@ -1,5 +1,5 @@
 /*
- * $Id: msb.c,v 1.11 2005/06/22 21:52:53 jon Exp $
+ * $Id: msb.c,v 1.12 2005/07/24 09:32:45 jon Exp $
  *
  * Function to spin some vectors under two generators to obtain a standard base
  *
@@ -138,7 +138,7 @@ u32 msb_spin(const char *in, const char *out,
     exit(2);
   }
   if (max_rows < noc + 1) {
-    fprintf(stderr, "%s: failed to get %d + 1 rows for %s, terminating\n",
+    fprintf(stderr, "%s: failed to get %u + 1 rows for %s, terminating\n",
             name, noc, in);
     cleanup(inp, argc, files);
     exit(2);
@@ -244,7 +244,7 @@ u32 msb_spin(const char *in, const char *out,
       free(new_map);
       assert(j == d);
       if (verbose) {
-        printf("%s: adding %d new rows giving %d rows for gen %s\n",
+        printf("%s: adding %u new rows giving %u rows for gen %s\n",
                name, d, nor + d, gen->m);
         fflush(stdout);
       }
@@ -257,7 +257,7 @@ u32 msb_spin(const char *in, const char *out,
     gen = gen->next;
   }
   if (nor >= max_rows) {
-    fprintf(stderr, "%s: out of memory at %d rows, terminating\n",
+    fprintf(stderr, "%s: out of memory at %u rows, terminating\n",
             name, nor);
     exit(2);
   }
@@ -265,7 +265,7 @@ u32 msb_spin(const char *in, const char *out,
     fclose(files[d]);
   }
   if (nor != noc) {
-    fprintf(stderr, "%s: fails to spin to full space (%d, %d), terminating\n",
+    fprintf(stderr, "%s: fails to spin to full space (%u, %u), terminating\n",
             name, nor, noc);
     exit(1);
   }
@@ -273,7 +273,7 @@ u32 msb_spin(const char *in, const char *out,
     exit(1);
   }
   if (verbose) {
-    printf("%s: Writing %d rows to output\n", name, nor);
+    printf("%s: Writing %u rows to output\n", name, nor);
     fflush(stdout);
   }
   errno = 0;

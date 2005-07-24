@@ -1,5 +1,5 @@
 /*
- * $Id: vp.c,v 1.11 2005/06/22 21:52:54 jon Exp $
+ * $Id: vp.c,v 1.12 2005/07/24 09:32:46 jon Exp $
  *
  * Function to permute some vectors under two generators
  *
@@ -295,7 +295,7 @@ u32 permute(const char *in, const char *out, const char *a,
     gen = gen->next;
   }
   if (nor >= max_rows) {
-    fprintf(stderr, "%s: out of memory at %d rows, terminating\n",
+    fprintf(stderr, "%s: out of memory at %u rows, terminating\n",
             name, nor);
     exit(2);
   }
@@ -336,8 +336,8 @@ u32 permute(const char *in, const char *out, const char *a,
     fclose(outp);
     exit(1);
   }
-  printf("%d search hash failures\n", search_hash_fails);
-  printf("%d sort hash failures\n", sort_hash_fails);
+  printf("%u search hash failures\n", search_hash_fails);
+  printf("%u sort hash failures\n", sort_hash_fails);
   fclose(outp);
   map_free(map_b);
   header_free(h_map);

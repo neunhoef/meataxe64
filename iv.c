@@ -1,5 +1,5 @@
 /*
- * $Id: iv.c,v 1.8 2005/06/22 21:52:53 jon Exp $
+ * $Id: iv.c,v 1.9 2005/07/24 09:32:45 jon Exp $
  *
  * Invert a matrix
  *
@@ -60,7 +60,7 @@ void invert(const char *m1, const char *m2, const char *name)
     len = header_get_len(h);
     r = memory_rows(len, 100);
     if (memory_rows(len, 400) < nor || r < prime) {
-      fprintf(stderr, "%s: cannot allocate %d rows for %s and %s, terminating\n",
+      fprintf(stderr, "%s: cannot allocate %u rows for %s and %s, terminating\n",
               name, 2 * (nor + prime), m1, m2);
       fclose(inp);
       header_free(h);
@@ -93,7 +93,7 @@ void invert(const char *m1, const char *m2, const char *name)
     }
     echelise(&row_operations, mat1, nor, &n, &map1, mat2, 1, grease.level, prime, len, nob, 800, 900, len, 1, name);
     if (nor != n) {
-      fprintf(stderr, "%s: matrix %s is singular with rank %d, terminating\n", name, m1, n);
+      fprintf(stderr, "%s: matrix %s is singular with rank %u, terminating\n", name, m1, n);
       exit(1);
     }
     if (0 == open_and_write_binary_header(&outp, h, m2, name)) {
@@ -123,7 +123,7 @@ void invert(const char *m1, const char *m2, const char *name)
         if ( 0 != errno) {
           perror(name);
         }
-        fprintf(stderr, "%s: cannot write row %d to %s, terminating\n", name, r, m2);
+        fprintf(stderr, "%s: cannot write row %u to %s, terminating\n", name, r, m2);
         fclose(outp);
         exit(1);
       }

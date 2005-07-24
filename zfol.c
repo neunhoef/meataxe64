@@ -1,5 +1,5 @@
 /*
- * $Id: zfol.c,v 1.1 2005/01/06 21:37:51 jon Exp $
+ * $Id: zfol.c,v 1.2 2005/07/24 09:32:46 jon Exp $
  *
  * Find the orbits under multiple generators for a linear representation
  *
@@ -196,7 +196,7 @@ int main(int argc, const char * const argv[])
   }
   header_free(h_out);
   if (0 == primes_init(gen_prime, &ops)) {
-    fprintf(stderr, "%s: failed to initialise for prime power %d, terminating\n", name, gen_prime);
+    fprintf(stderr, "%s: failed to initialise for prime power %u, terminating\n", name, gen_prime);
     cleanup_perms_and_lambdas(perms, lambdas, count);
     orbit_set_free(orbits_in);
     orbit_set_free(orbits_out);

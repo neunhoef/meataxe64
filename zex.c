@@ -1,5 +1,5 @@
 /*
- * $Id: zex.c,v 1.13 2005/06/22 21:52:54 jon Exp $
+ * $Id: zex.c,v 1.14 2005/07/24 09:32:46 jon Exp $
  *
  * explode a matrix
  *
@@ -87,7 +87,7 @@ int main(int argc,  const char *const argv[])
       if ( 0 != errno) {
         perror(name);
       }
-      fprintf(stderr, "%s cannot read row %d from %s, terminating\n", name, i, argv[1]);
+      fprintf(stderr, "%s cannot read row %u from %s, terminating\n", name, i, argv[1]);
       fclose(input);
     }
     /* Write the row */

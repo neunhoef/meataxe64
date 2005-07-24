@@ -1,5 +1,5 @@
 /*
- * $Id: zvpf.c,v 1.1 2005/05/25 18:35:56 jon Exp $
+ * $Id: zvpf.c,v 1.2 2005/07/24 09:32:46 jon Exp $
  *
  * Permute some vectors under two generators,
  * using intermediate file
@@ -31,7 +31,7 @@ int main(int argc, const char * const argv[])
   endian_init();
   memory_init(name, memory);
   degree = permute_file(argv[1], argv[2], argv[3], argv[4], argv[5], argv[6], argv[7], 0, name);
-  printf("%d\n", degree);
+  printf("%u\n", degree);
   memory_dispose();
   return 0;
 }

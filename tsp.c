@@ -1,5 +1,5 @@
 /*
- * $Id: tsp.c,v 1.18 2005/06/22 21:52:54 jon Exp $
+ * $Id: tsp.c,v 1.19 2005/07/24 09:32:45 jon Exp $
  *
  * Function to spin some vectors under two generators in tensor space
  *
@@ -277,7 +277,7 @@ u32 tensor_spin(const char *in, const char *out,
     /* Ensure we don't try to do too many */
     rows_to_do = (rows_to_do + gen->nor > nor) ? (nor - gen->nor) : rows_to_do;
     if (verbose) {
-      printf("%s: multiplying %d rows\n", name, rows_to_do);
+      printf("%s: multiplying %u rows\n", name, rows_to_do);
       fflush(stdout);
     }
     for (i = 0; i < rows_to_do; i++) {
@@ -320,7 +320,7 @@ u32 tensor_spin(const char *in, const char *out,
     free(new_map);
     assert(j == d);
     if (verbose) {
-      printf("%s: adding %d new rows giving %d rows for gen %s\n",
+      printf("%s: adding %u new rows giving %u rows for gen %s\n",
              name, d, nor + d, gen->m1);
       fflush(stdout);
     }
@@ -328,7 +328,7 @@ u32 tensor_spin(const char *in, const char *out,
     gen = gen->next;
   }
   if (nor >= max_rows) {
-    fprintf(stderr, "%s: out of memory at %d rows, terminating\n",
+    fprintf(stderr, "%s: out of memory at %u rows, terminating\n",
             name, nor);
     exit(2);
   }
@@ -338,7 +338,7 @@ u32 tensor_spin(const char *in, const char *out,
   }
   len = header_get_len(h_out);
   if (verbose) {
-    printf("%s: Writing %d rows to output\n", name, nor);
+    printf("%s: Writing %u rows to output\n", name, nor);
     fflush(stdout);
   }
   for (d = 0; d < nor; d++) {
@@ -349,7 +349,7 @@ u32 tensor_spin(const char *in, const char *out,
       if ( 0 != errno) {
         perror(name);
       }
-      fprintf(stderr, "%s: failed to write output row %d to %s, terminating\n",
+      fprintf(stderr, "%s: failed to write output row %u to %s, terminating\n",
               name, d, out);
       fclose(outp);
       exit(1);

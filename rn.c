@@ -1,5 +1,5 @@
 /*
- * $Id: rn.c,v 1.16 2005/06/22 21:52:53 jon Exp $
+ * $Id: rn.c,v 1.17 2005/07/24 09:32:45 jon Exp $
  *
  * Compute the rank of a matrix
  *
@@ -52,7 +52,7 @@ int rank(const char *m, u32 *r, const char *name)
     header_free(h);
     n = memory_rows(len, 100);
     if (memory_rows(len, 900) < nor || n < prime) {
-      fprintf(stderr, "%s: cannot allocate %d rows for %s, terminating\n", name, nor + prime, m);
+      fprintf(stderr, "%s: cannot allocate %u rows for %s, terminating\n", name, nor + prime, m);
       fclose(inp);
       exit(2);
     }

@@ -1,5 +1,5 @@
 /*
- * $Id: signf.c,v 1.4 2005/06/22 21:52:54 jon Exp $
+ * $Id: signf.c,v 1.5 2005/07/24 09:32:45 jon Exp $
  *
  * Function compute the orthogonal group sign
  *
@@ -96,7 +96,7 @@ int sign(const char *qform, const char *bform, const char *dir, const char *name
   n = memory_rows(len, 100);
   m = memory_rows(len, 900);
   if (m < 8 || n < prime) {
-    fprintf(stderr, "%s: cannot allocate %d rows, terminating\n",
+    fprintf(stderr, "%s: cannot allocate %u rows, terminating\n",
             name, prime * 10);
     fclose(qinp);
     fclose(binp);

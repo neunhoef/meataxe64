@@ -1,5 +1,5 @@
 /*
- * $Id: zse.c,v 1.9 2005/06/22 21:52:54 jon Exp $
+ * $Id: zse.c,v 1.10 2005/07/24 09:32:46 jon Exp $
  *
  * Select a row of a matrix
  *
@@ -59,7 +59,7 @@ int main(int argc, const char * const argv[])
   len = header_get_len(h_in);
   h_out = header_create(prime, nob, header_get_nod(h_in), noc, 1);
   if (vector >= nor) {
-    fprintf(stderr, "%s: vector %d requested outside of matrix %s, terminating\n", name, vector, in);
+    fprintf(stderr, "%s: vector %u requested outside of matrix %s, terminating\n", name, vector, in);
     exit(1);
   }
   if (0 == open_and_write_binary_header(&outp, h_out, out, name)) {
@@ -80,7 +80,7 @@ int main(int argc, const char * const argv[])
       if ( 0 != errno) {
         perror(name);
       }
-      fprintf(stderr, "%s: failed to read row %d to %s, terminating\n", name, i, out);
+      fprintf(stderr, "%s: failed to read row %u to %s, terminating\n", name, i, out);
       exit(1);
     }
   }
@@ -89,7 +89,7 @@ int main(int argc, const char * const argv[])
     if ( 0 != errno) {
       perror(name);
     }
-    fprintf(stderr, "%s: failed to write row %d to %s, terminating\n", name, i, out);
+    fprintf(stderr, "%s: failed to write row %u to %s, terminating\n", name, i, out);
     exit(1);
   }
   fclose(inp);

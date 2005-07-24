@@ -1,5 +1,5 @@
 /*
- * $Id: spanmsp.c,v 1.4 2005/06/22 21:52:54 jon Exp $
+ * $Id: spanmsp.c,v 1.5 2005/07/24 09:32:45 jon Exp $
  *
  * Function to spin from a span under multiple generators until a proper subspace is found
  *
@@ -75,7 +75,7 @@ u32 spanmspin(const char *in, const char *out,
     return 0;
   }
   i = 0;
-  while (1) {
+  for (;;) {
     int broke = 0;
     put_element_to_row(nob, i, scalar_row, 1);
     if (0 == mul_from_store(&scalar_row, &seed_row, inp, 0, nor, len, nob, 1, noc, prime,

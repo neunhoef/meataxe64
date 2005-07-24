@@ -42,11 +42,11 @@ int main(int argc, const char * const argv[])
   if (1 != prime) {
     ch = prime_divisor(prime);
     if (0 == ch) {
-      fprintf(stderr, "%s: %s has bad prime power %d\n", name, argv[1], prime);
+      fprintf(stderr, "%s: %s has bad prime power %u\n", name, argv[1], prime);
       exit(1);
     }
   }
-  printf("%d\n", ch);
+  printf("%u\n", ch);
   fclose(inp);
   return 0;
 }

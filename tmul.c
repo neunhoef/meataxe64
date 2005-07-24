@@ -1,5 +1,5 @@
 /*
- * $Id: tmul.c,v 1.7 2005/06/22 21:52:54 jon Exp $
+ * $Id: tmul.c,v 1.8 2005/07/24 09:32:45 jon Exp $
  *
  * Function to multiply a matrix by a tensor product
  *
@@ -167,7 +167,7 @@ int tmul(const char *m1, const char *m2, const char *m3,
       if ( 0 != errno) {
         perror(name);
       }
-      fprintf(stderr, "%s: failed to read row %d from %s, terminating\n",
+      fprintf(stderr, "%s: failed to read row %u from %s, terminating\n",
               name, i, m1);
       cleanup(in1, out, NULL);
       return 0;
@@ -197,7 +197,7 @@ int tmul(const char *m1, const char *m2, const char *m3,
       if ( 0 != errno) {
         perror(name);
       }
-      fprintf(stderr, "%s: failed to write output row %d to %s, terminating\n",
+      fprintf(stderr, "%s: failed to write output row %u to %s, terminating\n",
               name, i, m4);
       cleanup(in1, out, NULL);
       return 0;

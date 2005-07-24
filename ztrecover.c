@@ -1,5 +1,5 @@
 /*
- * $Id: ztrecover.c,v 1.5 2005/06/22 21:52:55 jon Exp $
+ * $Id: ztrecover.c,v 1.6 2005/07/24 09:32:46 jon Exp $
  *
  * Recover a tensor subspace
  *
@@ -68,7 +68,7 @@ int main(int argc, const char * const argv[])
   len2 = header_get_len(h_2);
   header_free(h_2);
   if (len2 * noc1 != len) {
-    fprintf(stderr, "%s: incompatible row lengths %d, %d\n", name, len2 * noc1, len);
+    fprintf(stderr, "%s: incompatible row lengths %u, %u\n", name, len2 * noc1, len);
     fclose(inp);
     header_free(h_in);
     exit(1);

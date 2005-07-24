@@ -1,5 +1,5 @@
 /*
- * $Id: ipp.c,v 1.14 2005/06/22 21:52:53 jon Exp $
+ * $Id: ipp.c,v 1.15 2005/07/24 09:32:45 jon Exp $
  *
  * Read a permutation into a matrix
  *
@@ -49,7 +49,7 @@ int main(int argc, const char * const argv[])
   out = argv[2];
   prime = strtoul(argv[3], NULL, 0);
   if (0 == is_a_prime_power(prime)) {
-    fprintf(stderr, "%s: %d is not a prime power, terminating\n", name, prime);
+    fprintf(stderr, "%s: %u is not a prime power, terminating\n", name, prime);
     exit(1);
   }
   nob = bits_of(prime);
@@ -85,9 +85,9 @@ int main(int argc, const char * const argv[])
   for (i = 0; i < nor; i++) {
     u32 j;
     row_init(row, len);
-    fscanf(inp, "%d", &j);
+    fscanf(inp, "%u", &j);
     if (0 == j || j > nor) {
-      fprintf(stderr, "%s: %d (out of range 1 - %d) found as permutation image, terminating\n", name, j, nor);
+      fprintf(stderr, "%s: %u (out of range 1 - %u) found as permutation image, terminating\n", name, j, nor);
       exit(1);
     }
     put_element_to_row(nob, j - 1, row, 1);
@@ -96,7 +96,7 @@ int main(int argc, const char * const argv[])
       if ( 0 != errno) {
         perror(name);
       }
-      fprintf(stderr, "%s: cannot write output row %d to %s\n", name, i, out);
+      fprintf(stderr, "%s: cannot write output row %u to %s\n", name, i, out);
       fclose(inp);
       fclose(outp);
       exit(1);

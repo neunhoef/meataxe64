@@ -1,5 +1,5 @@
 /*
- * $Id: zspan.c,v 1.14 2005/06/22 21:52:54 jon Exp $
+ * $Id: zspan.c,v 1.15 2005/07/24 09:32:46 jon Exp $
  *
  * Compute the span of a matrix
  *
@@ -65,7 +65,7 @@ int main(int argc, const char * const argv[])
   nob = header_get_nob(h_in);
   len = header_get_len(h_in);
   if (0 == int_pow(prime, vectors, &rows)) {
-    fprintf(stderr, "%s: cannot compute %d ** %d, terminating\n", name, prime, vectors);
+    fprintf(stderr, "%s: cannot compute %u ** %u, terminating\n", name, prime, vectors);
     exit(1);
   }
   rows--;
@@ -85,7 +85,7 @@ int main(int argc, const char * const argv[])
   }
   mat = matrix_malloc(vectors);
   if (memory_rows(len, 1000) < vectors + 1) {
-    fprintf(stderr, "%s: cannot allocate %d rows for %s, terminating\n", name, vectors + 1, in);
+    fprintf(stderr, "%s: cannot allocate %u rows for %s, terminating\n", name, vectors + 1, in);
     exit(1);
   }
   for (i = 0; i < vectors; i++) {
@@ -120,7 +120,7 @@ int main(int argc, const char * const argv[])
       if ( 0 != errno) {
         perror(name);
       }
-      fprintf(stderr, "%s: failed to write row %d to %s, terminating\n", name, i, out);
+      fprintf(stderr, "%s: failed to write row %u to %s, terminating\n", name, i, out);
       exit(1);
     }
   }

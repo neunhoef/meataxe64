@@ -1,7 +1,7 @@
 #
 # unix specific fragment for building
 #
-# $Id: unix.txt,v 1.12 2005/06/22 21:52:54 jon Exp $
+# $Id: unix.txt,v 1.13 2005/07/24 09:32:45 jon Exp $
 #
 EXEEXT=
 LIBEXT=	a
@@ -30,4 +30,3 @@ PROFNA_LIBS=	$(PROF_LIBS)
 COMPILE_CFLAGS=	-include $(ARCH)/mt_types.h -Werror -Wall -Wpointer-arith -Wwrite-strings -Winline -Waggregate-return -Wmissing-prototypes -Wnested-externs -W -Wunused -Wcast-align -Wstrict-prototypes -Wmissing-declarations -ansi $(COMPILE_EXTRA_FLAGS)
 COMPILE=	$(CC) -c -o # terminating space
 DEP_COMPILE_CFLAGS=	-MM -MG $(COMPILE_CFLAGS)
-

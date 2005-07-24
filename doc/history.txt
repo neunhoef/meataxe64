@@ -358,3 +358,4 @@ skew seventh
 20050628 - Fix bug in commutate
 20050710 - Fix bug in sit whereby element orders weren't correctly recorded
 20050713 - Added a cygwin port
+20050724 - Fix some warnings shown up by intel compiler

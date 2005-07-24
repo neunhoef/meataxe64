@@ -1,5 +1,5 @@
 /*
- * $Id: symb.c,v 1.9 2005/06/22 21:52:54 jon Exp $
+ * $Id: symb.c,v 1.10 2005/07/24 09:32:45 jon Exp $
  *
  * Function to compute a symmetry basis
  *
@@ -590,7 +590,7 @@ u32 symb(u32 spaces, u32 space_size,
       }
     } else if (count != d) {
       /*Error */
-      fprintf(stderr, "%s: unexpected %d rows added, when expecting 0 or %d, terminating\n",
+      fprintf(stderr, "%s: unexpected %u rows added, when expecting 0 or %u, terminating\n",
               name, count - d, space_size);
       cleanup(NULL, 0, name1, name2, name_o1, name_o2, NULL, NULL, NULL, &t1, &t2, temp);
       exit(1);
@@ -599,7 +599,7 @@ u32 symb(u32 spaces, u32 space_size,
   /* Check the size of answer */
   if (space_size * spaces != count) {
     /* Error */
-    fprintf(stderr, "%s: unexpected %d spaces found, when expecting %d spaces, terminating\n",
+    fprintf(stderr, "%s: unexpected %u spaces found, when expecting %u spaces, terminating\n",
             name, count, spaces);
     cleanup(NULL, 0, name1, name2, name_o1, name_o2, NULL, NULL, NULL, &t1, &t2, NULL);
   }

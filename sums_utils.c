@@ -1,5 +1,5 @@
 /*
- * $Id: sums_utils.c,v 1.5 2005/06/22 21:52:54 jon Exp $
+ * $Id: sums_utils.c,v 1.6 2005/07/24 09:32:45 jon Exp $
  *
  * Utilities for sums, sumf etc
  *
@@ -56,7 +56,7 @@ char *make_elt_script(u32 prime_power, u32 cur_power,
   if (0 == r) {
     sprintf(name, "%s", initial);
   } else {
-    sprintf(name, "%s+%d%s", initial, r, words[i]);
+    sprintf(name, "%s+%u%s", initial, r, words[i]);
   }
   free(initial);
   return name;
@@ -68,7 +68,7 @@ char *make_elt_name(const char *base, u32 num)
   u32 digits = ((CHAR_BIT) * sizeof(u32) + 2) / 3;
   /* Enought digits to print in decimal */
   char *name = my_malloc(len + 1 + 3 + digits);
-  sprintf(name, "%s.e.%d", base, num);
+  sprintf(name, "%s.e.%u", base, num);
   return name;
 }
 
@@ -122,7 +122,7 @@ int next_gen(u32 cur_gen, u32 max_gen, char *gen, const u32 *orders, const char 
   assert(NULL != gen);
   assert(NULL != orders);
   assert(NULL != word);
-  while (1) {
+  for (;;) {
     char letter;
     u32 len;
     cur_gen++;
@@ -178,7 +178,7 @@ static int find_word(const char *word, const char **words, u32 max_gen)
 int ignore_word(u32 word, u32 max_prod, const char **words, u32 gen, u32 order, u32 prime)
 {
   int found_I = 0, meets_current = 0, new_word = 0, ignore;
-  u32 scalar = 1, i, power = prime, prev_power = 1;
+  u32 i, power = prime, prev_power = 1;
   char letter = 'A' + gen;
   assert(NULL != words);
   /* First look at left multiplication */
@@ -199,7 +199,6 @@ int ignore_word(u32 word, u32 max_prod, const char **words, u32 gen, u32 order, 
       }
       if (reduces) {
         if (len == order + 1) {
-          scalar = coeff;
           found_I = 1;
         }
       } else {
@@ -246,7 +245,6 @@ int ignore_word(u32 word, u32 max_prod, const char **words, u32 gen, u32 order, 
         }
         if (reduces) {
           if (len == order + 1) {
-            scalar = coeff;
             found_I = 1;
           }
         } else {

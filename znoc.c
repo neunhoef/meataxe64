@@ -1,5 +1,5 @@
 /*
- * $Id: znoc.c,v 1.5 2005/06/22 21:52:54 jon Exp $
+ * $Id: znoc.c,v 1.6 2005/07/24 09:32:46 jon Exp $
  *
  * Print the number of columns of a matrix
  *
@@ -36,7 +36,7 @@ int main(int argc, const char * const argv[])
   }
   noc = header_get_noc(h);
   header_free(h);
-  printf("%d\n", noc);
+  printf("%u\n", noc);
   fclose(inp);
   return 0;
 }

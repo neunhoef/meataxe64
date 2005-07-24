@@ -1,5 +1,5 @@
 /*
- * $Id: maps.c,v 1.4 2005/06/22 21:52:53 jon Exp $
+ * $Id: maps.c,v 1.5 2005/07/24 09:32:45 jon Exp $
  *
  * Maps from {0 .. nor-1} -> {0 .. noc-1}
  *
@@ -44,7 +44,7 @@ int read_map_element_as_row(FILE *inp, word *row, u32 nob,
     return 0;
   }
   if (i >= noc) {
-    fprintf(stderr, "%s: element %d from %s out of range (0 - %d), terminating\n", name, (u32)i, in, noc - 1);
+    fprintf(stderr, "%s: element %u from %s out of range (0 - %u), terminating\n", name, (u32)i, in, noc - 1);
     return 0;
   }
   row_init(row, len);
@@ -67,7 +67,7 @@ int read_map(FILE *inp, u32 nor, word *map, const char *name, const char *in)
       if ( 0 != errno) {
         perror(name);
       }
-      fprintf(stderr, "%s: failed to read entry %d from %s, terminating\n", name, i, in);
+      fprintf(stderr, "%s: failed to read entry %u from %s, terminating\n", name, i, in);
       fclose(inp);
       return 0;
     }
@@ -89,7 +89,7 @@ int write_map(FILE *outp, u32 nor, word *map, const char *name, const char *out)
       if ( 0 != errno) {
         perror(name);
       }
-      fprintf(stderr, "%s: failed to write entry %d to %s, or entry out of range, terminating\n", name, i, out);
+      fprintf(stderr, "%s: failed to write entry %u to %s, or entry out of range, terminating\n", name, i, out);
       fclose(outp);
       return 0;
     }
@@ -121,12 +121,12 @@ int mul_map(word *in1, word *in2, word *out,
   for (i = 0; i < nor1; i++) {
     j = in1[i];
     if (j >= noc1) {
-      fprintf(stderr, "%s: map entry %d out of range (0 - %d), terminating\n", name, (u32)j, noc1 - 1);
+      fprintf(stderr, "%s: map entry %u out of range (0 - %u), terminating\n", name, (u32)j, noc1 - 1);
       return 0;
     }
     k = in2[j];
     if (k >= noc2) {
-      fprintf(stderr, "%s: map entry %d out of range (0 - %d), terminating\n", name, (u32)k, noc2 - 1);
+      fprintf(stderr, "%s: map entry %u out of range (0 - %u), terminating\n", name, (u32)k, noc2 - 1);
       return 0;
     }
     out[i] = k;
@@ -158,7 +158,7 @@ int map_rank(FILE *inp, const header *h, const char *m, u32 *r, const char *name
   for (i = 0; i < nor; i++) {
     word j = map1[i];
     if (j >= noc) {
-      fprintf(stderr, "%s: map entry %d out of range (0 - %d), terminating\n", name, (u32)j, noc - 1);
+      fprintf(stderr, "%s: map entry %u out of range (0 - %u), terminating\n", name, (u32)j, noc - 1);
       map_free(map1);
       map_free(map2);
       return 0;
@@ -202,7 +202,7 @@ int map_iv(FILE *inp, const header *h, const char *m1, const char *m2, const cha
   for (i = 0; i < nor; i++) {
     j = map1[i];
     if (j >= nor) {
-      fprintf(stderr, "%s: map entry %d out of range (0 - %d), terminating\n", name, (u32)j, nor - 1);
+      fprintf(stderr, "%s: map entry %u out of range (0 - %u), terminating\n", name, (u32)j, nor - 1);
       map_free(map1);
       map_free(map2);
       return 0;

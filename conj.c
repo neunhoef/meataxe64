@@ -1,5 +1,5 @@
 /*
- * $Id: conj.c,v 1.9 2005/06/22 21:52:53 jon Exp $
+ * $Id: conj.c,v 1.10 2005/07/24 09:32:45 jon Exp $
  *
  * Function to compute algebraic conjugate of a matrix, from file
  *
@@ -87,7 +87,7 @@ int conjugate(const char *m1, const char *m2, u32 power, const char *name)
       if ( 0 != errno) {
         perror(name);
       }
-      fprintf(stderr, "%s: cannot read row %d from %s, terminating\n", name, i, m1);
+      fprintf(stderr, "%s: cannot read row %u from %s, terminating\n", name, i, m1);
       return cleanup(inp, outp);
     }
     if ( 1 != power) {
@@ -103,7 +103,7 @@ int conjugate(const char *m1, const char *m2, u32 power, const char *name)
       if ( 0 != errno) {
         perror(name);
       }
-      fprintf(stderr, "%s: cannot write row %d to %s, terminating\n", name, i, m2);
+      fprintf(stderr, "%s: cannot write row %u to %s, terminating\n", name, i, m2);
       return cleanup(inp, outp);
     }
   }

@@ -1,5 +1,5 @@
 /*
- * $Id: sns.c,v 1.13 2005/06/22 21:52:54 jon Exp $
+ * $Id: sns.c,v 1.14 2005/07/24 09:32:45 jon Exp $
  *
  * Simple compute of the null space of a matrix
  *
@@ -60,7 +60,7 @@ int main(int argc, const char * const argv[])
     exit(1);
   }
   if (memory_rows(len, 500) < nor) {
-    fprintf(stderr, "%s: cannot allocate %d rows for %s, terminating\n", name, nor, argv[1]);
+    fprintf(stderr, "%s: cannot allocate %u rows for %s, terminating\n", name, nor, argv[1]);
     fclose(inp);
     exit(2);
   }
@@ -108,7 +108,7 @@ int main(int argc, const char * const argv[])
   fclose(outp);
   matrix_free(mat1);
   matrix_free(mat2);
-  printf("%d\n", nor - rank);
+  printf("%u\n", nor - rank);
   memory_dispose();
   return 0;
 }

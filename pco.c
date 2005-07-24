@@ -1,5 +1,5 @@
 /*
- * $Id: pco.c,v 1.7 2005/06/22 21:52:53 jon Exp $
+ * $Id: pco.c,v 1.8 2005/07/24 09:32:45 jon Exp $
  *
  * Permuation condense one group element
  *
@@ -121,7 +121,7 @@ int pcondense(const char *in1, const char *in2,
 #if 0
     k = orb->size;
     if (0 == k % characteristic) {
-      fprintf(stderr, "%s: orbit size %d is divisible by field characteristic %d, terminating\n", name, k, characteristic);
+      fprintf(stderr, "%s: orbit size %u is divisible by field characteristic %u, terminating\n", name, k, characteristic);
       fclose(outf);
       exit(1);
     }
@@ -143,7 +143,7 @@ int pcondense(const char *in1, const char *in2,
       if ( 0 != l) {
         k = (orbits->orbits[j]).size;
         if (0 == k % characteristic) {
-          fprintf(stderr, "%s: orbit size %d is divisible by field characteristic %d, terminating\n", name, k, characteristic);
+          fprintf(stderr, "%s: orbit size %u is divisible by field characteristic %u, terminating\n", name, k, characteristic);
           fclose(outf);
           exit(1);
         }
@@ -162,7 +162,7 @@ int pcondense(const char *in1, const char *in2,
       if ( 0 != errno) {
         perror(name);
       }
-      fprintf(stderr, "%s: failed to output row %d to %s, terminating\n", name, i, out);
+      fprintf(stderr, "%s: failed to output row %u to %s, terminating\n", name, i, out);
       fclose(outf);
       exit(1);
     }

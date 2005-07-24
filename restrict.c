@@ -1,5 +1,5 @@
 /*
- * $Id: restrict.c,v 1.8 2005/06/22 21:52:53 jon Exp $
+ * $Id: restrict.c,v 1.9 2005/07/24 09:32:45 jon Exp $
  *
  * Function to restrict a matrix from a big field to a smaller
  *
@@ -68,13 +68,13 @@ int restrict(const char *m1, const char *m2, u32 q, const char *name)
   index_in = prime_index(prime_in, base_prime);
   header_free(h_in);
   if (0 != prime_in % q) {
-    fprintf(stderr, "%s: %d does not divide %d\n", name, q, prime_in);
+    fprintf(stderr, "%s: %u does not divide %u\n", name, q, prime_in);
     header_free(h_in);
     return cleanup(inp, NULL);
   }
   index_out = prime_index(q, base_prime);
   if (0 != index_in % index_out) {
-    fprintf(stderr, "%s: field of order %d does not divide is not a subfield of field of order %d\n",
+    fprintf(stderr, "%s: field of order %u does not divide is not a subfield of field of order %u\n",
             name, q, prime_in);
     header_free(h_in);
     return cleanup(inp, NULL);
@@ -104,14 +104,14 @@ int restrict(const char *m1, const char *m2, u32 q, const char *name)
       if ( 0 != errno) {
         perror(name);
       }
-      fprintf(stderr, "%s: cannot read row %d from %s, terminating\n", name, i, m1);
+      fprintf(stderr, "%s: cannot read row %u from %s, terminating\n", name, i, m1);
       return cleanup(inp, outp);
     }
     row_init(row2, len_out);
     for (j = 0; j < noc; j++) {
       word elt = get_element_from_row_with_params(nob_in, j, in_mask, elts_per_in_word, row1);
       if (elt >= q) {
-        fprintf(stderr, "%s: element %d from row %d, column %d of %s is not in field of order %d, terminating\n", name, (unsigned int)elt, i, j, m1, q);
+        fprintf(stderr, "%s: element %u from row %u, column %u of %s is not in field of order %u, terminating\n", name, (unsigned int)elt, i, j, m1, q);
         (void)cleanup(inp, outp);
         return 255;
       }
@@ -122,7 +122,7 @@ int restrict(const char *m1, const char *m2, u32 q, const char *name)
       if ( 0 != errno) {
         perror(name);
       }
-      fprintf(stderr, "%s: cannot write row %d to %s, terminating\n", name, i, m2);
+      fprintf(stderr, "%s: cannot write row %u to %s, terminating\n", name, i, m2);
       return cleanup(inp, outp);
     }
   }

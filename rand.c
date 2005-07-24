@@ -1,5 +1,5 @@
 /*
- * $Id: rand.c,v 1.4 2005/06/22 21:52:53 jon Exp $
+ * $Id: rand.c,v 1.5 2005/07/24 09:32:45 jon Exp $
  *
  * Subroutine to generate a random matrix
  *
@@ -34,7 +34,7 @@ int random(u32 prime, u32 nor, u32 noc,
     return 0;
   } else {
     if (0 == is_a_prime_power(prime)) {
-      fprintf(stderr, "%s: non prime %d\n", name, prime);
+      fprintf(stderr, "%s: non prime %u\n", name, prime);
       return 0;
     }
     nob = bits_of(prime);

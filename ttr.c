@@ -1,5 +1,5 @@
 /*
- * $Id: ttr.c,v 1.2 2005/06/22 21:52:54 jon Exp $
+ * $Id: ttr.c,v 1.3 2005/07/24 09:32:45 jon Exp $
  *
  * Function to transpose some tensor product vectors
  *
@@ -49,7 +49,7 @@ int ttr(u32 input_noc, const char *m1, const char *m2, const char *name)
     return 0;
   }
   if (0 != noc % input_noc) {
-    fprintf(stderr, "%s: %s has %d columns which is not divisible by %d\n", name, m1, noc, input_noc);
+    fprintf(stderr, "%s: %s has %u columns which is not divisible by %u\n", name, m1, noc, input_noc);
     fclose(input);
     header_free(h1);
     return 0;
@@ -79,7 +79,7 @@ int ttr(u32 input_noc, const char *m1, const char *m2, const char *name)
       if ( 0 != errno) {
         perror(name);
       }
-      fprintf(stderr, "%s cannot read row %d from %s, terminating\n", name, i, m1);
+      fprintf(stderr, "%s cannot read row %u from %s, terminating\n", name, i, m1);
       fclose(input);
       fclose(output);
       return 0;
@@ -104,7 +104,7 @@ int ttr(u32 input_noc, const char *m1, const char *m2, const char *name)
       if ( 0 != errno) {
         perror(name);
       }
-      fprintf(stderr, "%s cannot write row %d to %s, terminating\n", name, i, m2);
+      fprintf(stderr, "%s cannot write row %u to %s, terminating\n", name, i, m2);
       fclose(input);
       fclose(output);
       return 0;

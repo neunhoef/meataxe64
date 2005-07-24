@@ -1,5 +1,5 @@
 /*
- * $Id: nsf.c,v 1.19 2005/06/22 21:52:53 jon Exp $
+ * $Id: nsf.c,v 1.20 2005/07/24 09:32:45 jon Exp $
  *
  * Compute the nullspace of a matrix, using temporary files
  *
@@ -151,7 +151,7 @@ u32 nullspacef(const char *m1, const char *m2, const char *dir, const char *name
     r = r1; /* For a grease level and step rate compatible with both */
   }
   if (r < prime) {
-    fprintf(stderr, "%s: cannot allocate %d rows for %s, terminating\n", name, prime, m1);
+    fprintf(stderr, "%s: cannot allocate %u rows for %s, terminating\n", name, prime, m1);
     fclose(f.f);
     fclose(f.f_id);
     fclose(outp);

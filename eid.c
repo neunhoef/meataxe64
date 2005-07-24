@@ -1,5 +1,5 @@
 /*
- * $Id: eid.c,v 1.8 2005/06/22 21:52:53 jon Exp $
+ * $Id: eid.c,v 1.9 2005/07/24 09:32:45 jon Exp $
  *
  * Generate exploded identity matrix
  *
@@ -46,7 +46,7 @@ int main(int argc, const char * const argv[])
   out = argv[4];
   prime = strtoul(argv[1], NULL, 0);
   if (0 == is_a_prime_power(prime)) {
-    fprintf(stderr, "%s: non prime %d\n", name, prime);
+    fprintf(stderr, "%s: non prime %u\n", name, prime);
     exit(1);
   }
   nor = strtoul(argv[2], NULL, 0);

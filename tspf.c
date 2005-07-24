@@ -1,5 +1,5 @@
 /*
- * $Id: tspf.c,v 1.19 2005/06/22 21:52:54 jon Exp $
+ * $Id: tspf.c,v 1.20 2005/07/24 09:32:45 jon Exp $
  *
  * Function to spin some vectors under two generators in tensor space
  * using intermediate files in a temporary directory.
@@ -333,7 +333,7 @@ u32 tensor_spinf(const char *in, const char *out,
     /* Ensure we don't try to do too many */
     k = 0;
     if (verbose) {
-      printf("%s: multiplying %d rows\n", name, rows_to_do);
+      printf("%s: multiplying %u rows\n", name, rows_to_do);
       fflush(stdout);
     }
     while (k < rows_to_do) {
@@ -348,7 +348,7 @@ u32 tensor_spinf(const char *in, const char *out,
         if ( 0 != errno) {
           perror(name);
         }
-        fprintf(stderr, "%s: failed to read %d rows from %s at offset %lld, terminating\n", name, stride, name_echelised, gen->base_ptr);
+        fprintf(stderr, "%s: failed to read %u rows from %s at offset %lld, terminating\n", name, stride, name_echelised, gen->base_ptr);
         cleanup_tmp(echelised, name_echelised);
         exit(1);
       }
@@ -388,7 +388,7 @@ u32 tensor_spinf(const char *in, const char *out,
       gen->nor += stride;
       d = nor;
       if (verbose) {
-        printf("%s: cleaning %d rows out of %d for gen %s\n",
+        printf("%s: cleaning %u rows out of %u for gen %s\n",
                name, stride, rows_to_do, gen->m1);
         fflush(stdout);
       }
@@ -403,7 +403,7 @@ u32 tensor_spinf(const char *in, const char *out,
         exit(1);
       }
       if (verbose) {
-        printf("%s: adding %d new rows giving %d rows\n", name, d - nor, d);
+        printf("%s: adding %u new rows giving %u rows\n", name, d - nor, d);
         fflush(stdout);
       }
       nor = d;
@@ -431,7 +431,7 @@ u32 tensor_spinf(const char *in, const char *out,
   header_free(h_out);
   fseeko64(echelised, 0, SEEK_SET);
   if (verbose) {
-    printf("%s: Copying %d rows to output\n", name, nor);
+    printf("%s: Copying %u rows to output\n", name, nor);
     fflush(stdout);
   }
   for (d = 0; d < nor; d++) {
@@ -440,7 +440,7 @@ u32 tensor_spinf(const char *in, const char *out,
       if ( 0 != errno) {
         perror(name);
       }
-      fprintf(stderr, "%s: failed to read input row %d from %s, terminating\n",
+      fprintf(stderr, "%s: failed to read input row %u from %s, terminating\n",
                 name, d, name_echelised);
       fclose(outp);
       cleanup_tmp(echelised, name_echelised);
@@ -452,7 +452,7 @@ u32 tensor_spinf(const char *in, const char *out,
       if ( 0 != errno) {
         perror(name);
       }
-      fprintf(stderr, "%s: failed to write output row %d to %s, terminating\n",
+      fprintf(stderr, "%s: failed to write output row %u to %s, terminating\n",
                 name, d, out);
       fclose(outp);
       cleanup_tmp(echelised, name_echelised);

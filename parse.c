@@ -1,11 +1,12 @@
 /*
- * $Id: parse.c,v 1.9 2005/06/22 21:52:53 jon Exp $
+ * $Id: parse.c,v 1.10 2005/07/24 09:32:45 jon Exp $
  *
  * Function to parse command line flags
  *
  */
 
 #include "parse.h"
+#include "utils.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -90,7 +91,7 @@ static void set_env_values(void)
           *(elt->flag) = strtoul(env_val, NULL, 0);
           return;
         default:
-          assert(0);
+          assert(assert_var_zero != 0);
         }
       }
     }
@@ -112,7 +113,7 @@ static u32 parse_tag(const char *tag, const char *val, int argc)
         *(elt->flag) = strtoul(val, NULL, 0);
         return 2;
       default:
-        assert(0);
+        assert(assert_var_zero != 0);
       }
     }
   }

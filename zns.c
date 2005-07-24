@@ -1,5 +1,5 @@
 /*
- * $Id: zns.c,v 1.7 2005/06/22 21:52:54 jon Exp $
+ * $Id: zns.c,v 1.8 2005/07/24 09:32:46 jon Exp $
  *
  * Compute the null space of a matrix
  *
@@ -31,7 +31,7 @@ int main(int argc, const char * const argv[])
   endian_init();
   memory_init(name, memory);
   n = nullspace(argv[1], argv[2], name);
-  printf("%d\n", n);
+  printf("%u\n", n);
   memory_dispose();
   return 0;
 }

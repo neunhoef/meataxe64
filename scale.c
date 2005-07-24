@@ -1,5 +1,5 @@
 /*
- * $Id: scale.c,v 1.4 2005/06/22 21:52:54 jon Exp $
+ * $Id: scale.c,v 1.5 2005/07/24 09:32:45 jon Exp $
  *
  * Function to scale a matrix
  *
@@ -78,7 +78,7 @@ int scale(const char *m1, const char *m2, u32 elt, const char *name)
       if ( 0 != errno) {
         perror(name);
       }
-      fprintf(stderr, "%s cannot read row %d from %s, terminating\n", name, i, m1);
+      fprintf(stderr, "%s cannot read row %u from %s, terminating\n", name, i, m1);
       return cleanup(inp, outp);
     }
     if (1 != elt) {
@@ -93,7 +93,7 @@ int scale(const char *m1, const char *m2, u32 elt, const char *name)
       if ( 0 != errno) {
         perror(name);
       }
-      fprintf(stderr, "%s cannot write row %d to %s, terminating\n", name, i, m2);
+      fprintf(stderr, "%s cannot write row %u to %s, terminating\n", name, i, m2);
       return cleanup(inp, outp);
     }
   }

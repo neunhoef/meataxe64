@@ -1,5 +1,5 @@
 /*
- * $Id: sums.c,v 1.19 2005/06/22 21:52:54 jon Exp $
+ * $Id: sums.c,v 1.20 2005/07/24 09:32:45 jon Exp $
  *
  * Function to compute linear sums of two matices
  *
@@ -51,7 +51,7 @@ int sums(const char *out, u32 n, unsigned int argc, const char *const args[],
   assert(NULL != args);
   assert(1 < argc && 0 == argc % 2);
   if (argc2 > 8) {
-    fprintf(stderr, "%s: too many generators (%d), terminating\n", name, argc2);
+    fprintf(stderr, "%s: too many generators (%u), terminating\n", name, argc2);
     exit(1);
   }
   orders = my_malloc(argc2 * sizeof(u32));
@@ -65,7 +65,7 @@ int sums(const char *out, u32 n, unsigned int argc, const char *const args[],
     exit(1);
   }
   if (0 != sub_order && 0 == is_a_prime_power(sub_order)) {
-    fprintf(stderr, "%s: bad value %d for subfield order, terminating\n", name, sub_order);
+    fprintf(stderr, "%s: bad value %u for subfield order, terminating\n", name, sub_order);
     cleanup(orders);
     exit(1);
   }
@@ -97,13 +97,13 @@ int sums(const char *out, u32 n, unsigned int argc, const char *const args[],
   }
   if (0 != sub_order) {
     if (0 != prime % sub_order) {
-      fprintf(stderr, "%s: %d is not a field order, terminating\n", name, sub_order);
+      fprintf(stderr, "%s: %u is not a field order, terminating\n", name, sub_order);
       cleanup(orders);
       exit(1);
     }
     base_prime = prime_divisor(prime);
     if (0 != prime_index(prime, base_prime) % prime_index(sub_order, base_prime)) {
-      fprintf(stderr, "%s: %d is not a sub field order for %d, terminating\n", name, sub_order, prime);
+      fprintf(stderr, "%s: %u is not a sub field order for %u, terminating\n", name, sub_order, prime);
       cleanup(orders);
       exit(1);
     }
@@ -119,7 +119,7 @@ int sums(const char *out, u32 n, unsigned int argc, const char *const args[],
     n += 1;
   }
   if (0 == int_pow((0 != sub_order) ? sub_order : prime, n, &count)) {
-    fprintf(stderr, "%s: too many elements requested (%d ** %d), terminating\n", name, prime, n);
+    fprintf(stderr, "%s: too many elements requested (%u ** %u), terminating\n", name, prime, n);
     cleanup(orders);
     exit(1);
   }
@@ -149,7 +149,7 @@ int sums(const char *out, u32 n, unsigned int argc, const char *const args[],
     char letter;
     if (i > argc2) {
       buf = my_malloc(2 * k);
-      sprintf(buf, "%s%d", out, i - 1);
+      sprintf(buf, "%s%u", out, i - 1);
       names[i] = buf;
     }
     for (;;) {
@@ -220,12 +220,12 @@ int sums(const char *out, u32 n, unsigned int argc, const char *const args[],
         if (keep || (0 != l && 0 == ignore)) {
           /* We only make the element if either we're keeping it, or we want its rank */
           if (verbose) {
-            printf("%s: making %s, formula %s by %s + %d * %s\n", name, elt_pos, elt_script, elt_l, r, names[i]);
+            printf("%s: making %s, formula %s by %s + %u * %s\n", name, elt_pos, elt_script, elt_l, r, names[i]);
             fflush(stdout);
           }
           /* scale names[i] and add to elt_l */
           if (0 == scaled_add(names[i], elt_l, elt_pos, r, name)) {
-            fprintf(stderr, "%s: scaled add failed on %s + %d * %s, terminating\n",
+            fprintf(stderr, "%s: scaled add failed on %s + %u * %s, terminating\n",
                     name, elt_l, r, names[i]);
             cleanup(orders);
             exit(1);
@@ -239,13 +239,13 @@ int sums(const char *out, u32 n, unsigned int argc, const char *const args[],
               exit(1);
             }
             if (verbose) {
-              printf("%s: checking element %s of rank %d\n", name, elt_script, s);
+              printf("%s: checking element %s of rank %u\n", name, elt_script, s);
               fflush(stdout);
             }
             res = (*acceptor)(s, nor, elt_pos, elt_script);
             if (res & 1) {
               found = 1;
-              printf("%s: found element %s of nullity %d, form %s\n",
+              printf("%s: found element %s of nullity %u, form %s\n",
                      name, elt_pos, nor - s, elt_script);
             }
             if (res & 2) {

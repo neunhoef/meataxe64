@@ -1,5 +1,5 @@
 /*
- * $Id: primes.c,v 1.13 2005/06/22 21:52:53 jon Exp $
+ * $Id: primes.c,v 1.14 2005/07/24 09:32:45 jon Exp $
  *
  * Prime manipulation for meataxe
  *
@@ -326,14 +326,14 @@ u32 prime_index(word q, u32 prime)
 static word negate_unknown(word elt)
 {
   NOT_USED(elt);
-  assert(0);
+  assert(assert_var_zero != 0);
   return 0;
 }
 
 static word invert_unknown(word elt)
 {
   NOT_USED(elt);
-  assert(0);
+  assert(assert_var_zero != 0);
   return 0;
 }
 
@@ -341,7 +341,7 @@ static word power_unknown(word elt, word n)
 {
   NOT_USED(elt);
   NOT_USED(n);
-  assert(0);
+  assert(assert_var_zero != 0);
   return 0;
 }
 
@@ -349,7 +349,7 @@ static word add_unknown(word elt1, word elt2)
 {
   NOT_USED(elt1);
   NOT_USED(elt2);
-  assert(0);
+  assert(assert_var_zero != 0);
   return 0;
 }
 
@@ -357,7 +357,7 @@ static word mul_unknown(word elt1, word elt2)
 {
   NOT_USED(elt1);
   NOT_USED(elt2);
-  assert(0);
+  assert(assert_var_zero != 0);
   return 0;
 }
 
@@ -402,7 +402,7 @@ int primes_init(u32 prime, prime_opsp ops)
     ops->mul = &mul_9;
     break;
   default:
-    assert(0);
+    assert(assert_var_zero != 0);
     return 0;
   }
   return 1;

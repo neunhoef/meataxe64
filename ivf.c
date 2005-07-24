@@ -1,5 +1,5 @@
 /*
- * $Id: ivf.c,v 1.8 2005/06/22 21:52:53 jon Exp $
+ * $Id: ivf.c,v 1.9 2005/07/24 09:32:45 jon Exp $
  *
  * Invert a matrix using intermediate files
  *
@@ -95,7 +95,7 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
     /* And at least two rows to work on, but we know max_rows >= r */
     max_rows = memory_rows(len, 400);
     if (work_rows < prime) {
-      fprintf(stderr, "%s: cannot allocate %d rows for %s and %s, terminating\n",
+      fprintf(stderr, "%s: cannot allocate %u rows for %s and %s, terminating\n",
               name, 2 * (2 + prime), m1, m2);
       fclose(inp);
       header_free(h);
@@ -140,7 +140,7 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
         if ( 0 != errno) {
           perror(name);
         }
-        fprintf(stderr, "%s: cannot write row %d to %s, terminating\n", name, n, name_id);
+        fprintf(stderr, "%s: cannot write row %u to %s, terminating\n", name, n, name_id);
         fclose(inp);
         header_free(h);
         cleanup_all(echelised, name_echelised, id, name_id);
@@ -175,7 +175,7 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
         if ( 0 != errno) {
           perror(name);
         }
-        fprintf(stderr, "%s: cannot read %d rows from matrix for %s, terminating\n", name, stride, name_echelised);
+        fprintf(stderr, "%s: cannot read %u rows from matrix for %s, terminating\n", name, stride, name_echelised);
         header_free(h);
         cleanup_all(echelised, name_echelised, id, name_id);
         exit(1);
@@ -185,7 +185,7 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
         if ( 0 != errno) {
           perror(name);
         }
-        fprintf(stderr, "%s: cannot read %d rows from matrix for %s, terminating\n", name, stride, name_id);
+        fprintf(stderr, "%s: cannot read %u rows from matrix for %s, terminating\n", name, stride, name_id);
         header_free(h);
         cleanup_all(echelised, name_echelised, id, name_id);
         exit(1);
@@ -194,7 +194,7 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
       ptr_id = ftello64(id);
       echelise(&row_operations, rows1, stride, &n, &map, rows2, 1, grease.level, prime, len, nob, 900, 950, len, 1, name);
       if (stride != n) {
-        fprintf(stderr, "%s: matrix %s is singular with rank at most %d, terminating\n", name, m1, nor + n - stride);
+        fprintf(stderr, "%s: matrix %s is singular with rank at most %u, terminating\n", name, m1, nor + n - stride);
         header_free(h);
         cleanup_all(echelised, name_echelised, id, name_id);
         exit(1);
@@ -210,7 +210,7 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
         if ( 0 != errno) {
           perror(name);
         }
-        fprintf(stderr, "%s: failed to write %d rows to one of %s or %s, terminating\n",
+        fprintf(stderr, "%s: failed to write %u rows to one of %s or %s, terminating\n",
                 name, stride, name_echelised, name_id);
         header_free(h);
         cleanup_all(echelised, name_echelised, id, name_id);
@@ -230,7 +230,7 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
           if ( 0 != errno) {
             perror(name);
           }
-          fprintf(stderr, "%s: cannot read %d rows from one of %s or %s, terminating\n",
+          fprintf(stderr, "%s: cannot read %u rows from one of %s or %s, terminating\n",
                   name, stride2, name_echelised, name_id);
           header_free(h);
           cleanup_all(echelised, name_echelised, id, name_id);
@@ -247,7 +247,7 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
           if ( 0 != errno) {
             perror(name);
           }
-          fprintf(stderr, "%s: cannot write %d rows to one of %s or %s, terminating\n",
+          fprintf(stderr, "%s: cannot write %u rows to one of %s or %s, terminating\n",
                   name, stride2, name_echelised, name_id);
           header_free(h);
           cleanup_all(echelised, name_echelised, id, name_id);
@@ -270,7 +270,7 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
           if ( 0 != errno) {
             perror(name);
           }
-          fprintf(stderr, "%s: cannot read %d rows from one of %s or %s, terminating\n",
+          fprintf(stderr, "%s: cannot read %u rows from one of %s or %s, terminating\n",
                   name, stride2, name_echelised, name_id);
           header_free(h);
           cleanup_all(echelised, name_echelised, id, name_id);
@@ -287,7 +287,7 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
           if ( 0 != errno) {
             perror(name);
           }
-          fprintf(stderr, "%s: cannot write %d rows to one of %s or %s, terminating\n",
+          fprintf(stderr, "%s: cannot write %u rows to one of %s or %s, terminating\n",
                   name, stride2, name_echelised, name_id);
           header_free(h);
           cleanup_all(echelised, name_echelised, id, name_id);
@@ -316,7 +316,7 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
           if ( 0 != errno) {
             perror(name);
           }
-          fprintf(stderr, "%s cannot read row %d from %s, terminating\n", name, n, name_id);
+          fprintf(stderr, "%s cannot read row %u from %s, terminating\n", name, n, name_id);
           cleanup_all(echelised, name_echelised, id, name_id);
           fclose(outp);
           exit(1);
@@ -336,7 +336,7 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
           if ( 0 != errno) {
             perror(name);
           }
-          fprintf(stderr, "%s: cannot write row %d to %s, terminating\n", name, r + n, m2);
+          fprintf(stderr, "%s: cannot write row %u to %s, terminating\n", name, r + n, m2);
           cleanup_all(echelised, name_echelised, id, name_id);
           fclose(outp);
           exit(1);

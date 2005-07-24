@@ -1,5 +1,5 @@
 /*
- * $Id: zbase.c,v 1.9 2005/06/22 21:52:54 jon Exp $
+ * $Id: zbase.c,v 1.10 2005/07/24 09:32:46 jon Exp $
  *
  * Compute a basis for a space from a set of vectors
  *
@@ -31,7 +31,7 @@ int main(int argc, const char * const argv[])
   endian_init();
   memory_init(name, memory);
   n = base(argv[1], argv[2], argv[3], name);
-  printf("%d\n", n);
+  printf("%u\n", n);
   memory_dispose();
   return 0;
 }

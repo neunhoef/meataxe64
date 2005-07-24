@@ -1,5 +1,5 @@
 /*
- * $Id: msbf.c,v 1.14 2005/06/22 21:52:53 jon Exp $
+ * $Id: msbf.c,v 1.15 2005/07/24 09:32:45 jon Exp $
  *
  * Function to spin some vectors under multiple generators to obtain a standard base
  *
@@ -172,7 +172,7 @@ u32 msb_spinf(const char *in, const char *out, const char *dir,
   }
   /* Give up if too few rows available */
   if (max_rows < 2 * (prime + 1)) {
-    fprintf(stderr, "%s: failed to get %d rows for %s, terminating\n",
+    fprintf(stderr, "%s: failed to get %u rows for %s, terminating\n",
             name, 2 * (prime + 1), in);
     cleanup(inp, argc, files);
     exit(2);
@@ -272,7 +272,7 @@ u32 msb_spinf(const char *in, const char *out, const char *dir,
         if ( 0 != errno) {
           perror(name);
         }
-        fprintf(stderr, "%s: failed to read %d rows from %s at offset %lld, terminating\n", name, stride, name_basis, gen->base_ptr);
+        fprintf(stderr, "%s: failed to read %u rows from %s at offset %lld, terminating\n", name, stride, name_basis, gen->base_ptr);
         cleanup_all(NULL, argc, files, basis, echelised, name_basis, name_echelised);
         exit(1);
       }
@@ -290,7 +290,7 @@ u32 msb_spinf(const char *in, const char *out, const char *dir,
       gen->nor += stride;
       d = nor;
       if (verbose) {
-        printf("%s: cleaning %d rows out of %d for gen %s\n",
+        printf("%s: cleaning %u rows out of %u for gen %s\n",
                name, stride, rows_to_do, gen->m);
         fflush(stdout);
       }
@@ -301,7 +301,7 @@ u32 msb_spinf(const char *in, const char *out, const char *dir,
         exit(1);
       }
       if (verbose) {
-        printf("%s: adding %d new rows giving %d rows\n", name, d - nor, d);
+        printf("%s: adding %u new rows giving %u rows\n", name, d - nor, d);
         fflush(stdout);
       }
       nor = d;
@@ -339,7 +339,7 @@ u32 msb_spinf(const char *in, const char *out, const char *dir,
     fclose(files[d]);
   }
   if (nor != noc) {
-    fprintf(stderr, "%s: fails to spin to full space (%d, %d), terminating\n",
+    fprintf(stderr, "%s: fails to spin to full space (%u, %u), terminating\n",
             name, nor, noc);
     fclose(basis);
     (void)remove(name_basis);
@@ -353,7 +353,7 @@ u32 msb_spinf(const char *in, const char *out, const char *dir,
   header_free(h_out);
   fseeko64(basis, 0, SEEK_SET);
   if (verbose) {
-    printf("%s: Copying %d rows to output\n", name, nor);
+    printf("%s: Copying %u rows to output\n", name, nor);
     fflush(stdout);
   }
   errno = 0;

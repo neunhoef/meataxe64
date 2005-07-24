@@ -1,5 +1,5 @@
 /*
- * $Id: maketab.c,v 1.2 2005/06/22 21:52:53 jon Exp $
+ * $Id: maketab.c,v 1.3 2005/07/24 09:32:45 jon Exp $
  *
  * Produce the addition and multiplication tables for a Galois field
  *
@@ -33,12 +33,12 @@ int main(int argc, const char * const argv[])
   }
   prime = strtoul(argv[1], NULL, 0);
   if ((!is_a_prime_power(prime)) || 1 == prime) {
-    fprintf(stderr, "%s: bad prime power %d, terminating\n", name, prime);
+    fprintf(stderr, "%s: bad prime power %u, terminating\n", name, prime);
     return 1;
   }
   out = argv[2];
   if (0 == primes_init(prime, &prime_operations)) {
-    fprintf(stderr, "%s: unknown prime power %d, terminating\n", name, prime);
+    fprintf(stderr, "%s: unknown prime power %u, terminating\n", name, prime);
     return 1;
   }
   errno = 0;
@@ -49,7 +49,7 @@ int main(int argc, const char * const argv[])
   }
   switch (prime) {
   case 9:
-    fprintf(outp, "static word prod_table_%d[256] = {\n", prime);
+    fprintf(outp, "static word prod_table_%u[256] = {\n", prime);
     for (i = 0; i < 256; i++) {
       unsigned int prod = 0;
       unsigned int k = (i & 0xf0) >> 4;
@@ -57,7 +57,7 @@ int main(int argc, const char * const argv[])
       if (0 != j && j < 9 && 0 != k && k < 9) {
         prod = (*prime_operations.mul)(j, k);
       }
-      fprintf(outp, "%d", prod);
+      fprintf(outp, "%u", prod);
       if (15 != j) {
         fprintf(outp, ", ");
       } else if (255 != i) {
@@ -67,7 +67,7 @@ int main(int argc, const char * const argv[])
       }
     }
     fprintf(outp, "};\n");
-    fprintf(outp, "static word add_table_%d[65536] = {\n", prime);
+    fprintf(outp, "static word add_table_%u[65536] = {\n", prime);
     for (i = 0; i < 256; i++) {
       for (j = 0; j < 256; j++) {
         unsigned int a = i & 0xf, b = (i & 0xf0) >> 4, c = j & 0xf, d = (j & 0xf0) >> 4, sum = 0;
@@ -77,7 +77,7 @@ int main(int argc, const char * const argv[])
           sum2 = (*prime_operations.add)(b, d);
           sum = (sum2 << 4) | sum1;
         }
-        fprintf(outp, "%d", sum);
+        fprintf(outp, "%u", sum);
         if (15 != (j % 16)) {
           fprintf(outp, ", ");
         } else if (255 != j || 255 != i) {
@@ -88,7 +88,7 @@ int main(int argc, const char * const argv[])
       }
     }
     fprintf(outp, "};\n");
-    fprintf(outp, "static word scale_table_%d[7][256] = {\n", prime);
+    fprintf(outp, "static word scale_table_%u[7][256] = {\n", prime);
     for (i = 2; i < 9; i++) {
       fprintf(outp, "  {\n");
       for (j = 0; j < 256; j++) {
@@ -99,7 +99,7 @@ int main(int argc, const char * const argv[])
         if (k < 9 && l < 9) {
           m = (*prime_operations.mul)(i, k) | (((*prime_operations.mul)(i, l)) << 4);
         }
-        fprintf(outp, "%d", m);
+        fprintf(outp, "%u", m);
         if (15 != (j & 0xf)) {
           fprintf(outp, ", ");
         } else if (255 != j) {
@@ -117,7 +117,7 @@ int main(int argc, const char * const argv[])
     fprintf(outp, "};\n");
     break;
   default:
-    assert(0);
+    assert(assert_var_zero != 0);
     return 1;
   }
   fclose(outp);

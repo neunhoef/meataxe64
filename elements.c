@@ -1,5 +1,5 @@
 /*
- * $Id: elements.c,v 1.23 2005/06/22 21:52:53 jon Exp $
+ * $Id: elements.c,v 1.24 2005/07/24 09:32:45 jon Exp $
  *
  * Element manipulation for meataxe
  *
@@ -33,7 +33,7 @@ int get_element_from_text(FILE *fp, u32 nod,
       e = e * 10 + (i - '0');
       nod--;
     } else {
-      printf("Failed on '%c', where isspace delivered %d\n", i, isspace(i));
+      printf("Failed on '%c', where isspace delivered %u\n", i, isspace(i));
       return 0; /* Failed, non-digit */
     }
   }
@@ -317,7 +317,7 @@ u32 first_non_zero(word *row, u32 nob,
           i++;
         }
       }
-      assert(0);
+      assert(assert_var_zero != 0);
     } else {
       i += elts_per_word;
       row++;

@@ -1,5 +1,5 @@
 /*
- * $Id: zflnf.c,v 1.7 2004/11/18 15:29:44 jon Exp $
+ * $Id: zflnf.c,v 1.8 2005/07/24 09:32:46 jon Exp $
  *
  * Compute sums in the group algebra in two matrices finding one of lowest non-zero nullity
  * Expected to be used during computation of standard bases of irreducible but not absolutely
@@ -125,7 +125,7 @@ int main(int argc, const char * const argv[])
       printf("%s: found element %s of nullity 0, form %s\n",
              name, best_name, best_form);
     } else {
-      printf("%s: found element %s of nullity %d, form %s\n",
+      printf("%s: found element %s of nullity %u, form %s\n",
              name, best_name, gcd, best_form);
     }
     return 0;

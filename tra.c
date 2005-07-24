@@ -1,5 +1,5 @@
 /*
- * $Id: tra.c,v 1.16 2005/06/22 21:52:54 jon Exp $
+ * $Id: tra.c,v 1.17 2005/07/24 09:32:45 jon Exp $
  *
  * Function to transpose a matrix
  *
@@ -130,7 +130,7 @@ int tra(const char *m1, const char *m2, const char *name)
         if ( 0 != errno) {
           perror(name);
         }
-        fprintf(stderr, "%s cannot read row %d from %s, terminating\n", name, i, m1);
+        fprintf(stderr, "%s cannot read row %u from %s, terminating\n", name, i, m1);
         fclose(input);
         fclose(output);
         matrix_free(rows);
@@ -158,7 +158,7 @@ int tra(const char *m1, const char *m2, const char *name)
         if ( 0 != errno) {
           perror(name);
         }
-        fprintf(stderr, "%s cannot write row %d to %s, terminating\n", name, j, m2);
+        fprintf(stderr, "%s cannot write row %u to %s, terminating\n", name, j, m2);
         fclose(input);
         fclose(output);
         matrix_free(rows);

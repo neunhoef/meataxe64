@@ -1,5 +1,5 @@
 /*
- * $Id: clean_vectors.c,v 1.7 2005/06/22 21:52:53 jon Exp $
+ * $Id: clean_vectors.c,v 1.8 2005/07/24 09:32:45 jon Exp $
  *
  * Clean one file of vectors with another
  *
@@ -55,7 +55,7 @@ int clean_vectors(const char *echelised, const char *vectors, const char *output
   nor1 = header_get_nor(h_in1);
   len = header_get_len(h_in1);
   if (0 == is_a_prime_power(prime)) {
-    fprintf(stderr, "%s: prime %d from %s is not a prime power, terminating\n",
+    fprintf(stderr, "%s: prime %u from %s is not a prime power, terminating\n",
             name, prime, echelised);
     fclose(inp1);
     header_free(h_in1);
@@ -97,7 +97,7 @@ int clean_vectors(const char *echelised, const char *vectors, const char *output
   }
   /* Give up if too few rows available */
   if (max_rows < 2 * (prime + 1)) {
-    fprintf(stderr, "%s: failed to get %d rows for %s, terminating\n",
+    fprintf(stderr, "%s: failed to get %u rows for %s, terminating\n",
             name, 2 * (prime + 1), echelised);
     fclose(inp1);
     fclose(inp2);

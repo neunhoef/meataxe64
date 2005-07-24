@@ -1,5 +1,5 @@
 /*
- * $Id: clean_file.c,v 1.6 2005/06/22 21:52:53 jon Exp $
+ * $Id: clean_file.c,v 1.7 2005/07/24 09:32:45 jon Exp $
  *
  * Cleaning and echilisation, when the already clean vectors
  * are in a file which is to be updated
@@ -57,7 +57,7 @@ int clean_file(row_ops *row_operations,
         if ( 0 != errno) {
           perror(name);
         }
-        fprintf(stderr, "%s: failed to read %d rows from temporary file, terminating\n", name, stride);
+        fprintf(stderr, "%s: failed to read %u rows from temporary file, terminating\n", name, stride);
         return 0;
       }
       clean(row_operations, rows2, stride, rows1, nor1, map + i, NULL, NULL, 0,

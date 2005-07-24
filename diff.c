@@ -1,5 +1,5 @@
 /*
- * $Id: diff.c,v 1.7 2005/06/22 21:52:53 jon Exp $
+ * $Id: diff.c,v 1.8 2005/07/24 09:32:45 jon Exp $
  *
  * Function to find the differences between two matrices
  *
@@ -107,7 +107,7 @@ int diff(const char *m1, const char *m2, const char *name)
       if ( 0 != errno) {
         perror(name);
       }
-      fprintf(stderr, "%s cannot read row %d from %s, terminating\n", name, i, m1);
+      fprintf(stderr, "%s cannot read row %u from %s, terminating\n", name, i, m1);
       fclose(inp1);
       fclose(inp2);
       return 0;
@@ -117,7 +117,7 @@ int diff(const char *m1, const char *m2, const char *name)
       if ( 0 != errno) {
         perror(name);
       }
-      fprintf(stderr, "%s cannot read row %d from %s, terminating\n", name, i, m2);
+      fprintf(stderr, "%s cannot read row %u from %s, terminating\n", name, i, m2);
       fclose(inp1);
       fclose(inp2);
       return 0;
@@ -126,7 +126,7 @@ int diff(const char *m1, const char *m2, const char *name)
       u32 j, k = 0;
       for (j = 0; j < len; j++) {
         if (row1[j] != row2[j]) {
-          printf("%s and %s differ in row %d near offset %d, with values 0x%x and 0x%x (diffs 0x%x)\n",
+          printf("%s and %s differ in row %u near offset %u, with values 0x%x and 0x%x (diffs 0x%x)\n",
                  m1, m2, i, j * (bits_in_word / nob), (u32)row1[j], (u32)row2[j], (u32)(row1[j] ^ row2[j]));
           res = 0;
           k++;
