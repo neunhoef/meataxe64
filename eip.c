@@ -1,5 +1,5 @@
 /*
- * $Id: eip.c,v 1.12 2005/07/24 09:32:45 jon Exp $
+ * $Id: eip.c,v 1.13 2005/07/24 11:31:35 jon Exp $
  *
  * Read a permutation into an exploded matrix
  *
@@ -86,7 +86,7 @@ int main(int argc, const char * const argv[])
   split = ((split + elts_per_word - 1) / elts_per_word) * elts_per_word;
   row_pieces = (nor + split - 1) / split;
   outputs = my_malloc(row_pieces * sizeof(FILE *));
-  output_map(name, argv[2], row_pieces, row_pieces, &names);
+  output_map(name, out, row_pieces, row_pieces, &names);
   h = header_create(prime, nob, nod, nor, nor);
   len = header_get_len(h);
   if (memory_rows(len, 1000) < 1) {
@@ -102,7 +102,7 @@ int main(int argc, const char * const argv[])
     fscanf(inp, "%u", &j);
     assert(j >= 1);
     put_element_to_clean_row_with_params(nob, j - 1, elts_per_word, row, 1);
-    if (0 == ex_row_put(i, nor, nor, argv[2], names, split, row, outputs)) {
+    if (0 == ex_row_put(i, nor, nor, out, names, split, row, outputs)) {
       fprintf(stderr, "%s: cannot write output row %u\n", name, i);
       fclose(inp);
       exit(1);

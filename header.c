@@ -1,5 +1,5 @@
 /*
- * $Id: header.c,v 1.14 2005/06/22 21:52:53 jon Exp $
+ * $Id: header.c,v 1.15 2005/07/24 11:31:35 jon Exp $
  *
  * Header manipulation
  *
@@ -170,7 +170,7 @@ static u32 get_eperb(u32 prime, u32 nob)
   } else {
     double log2 = log(2);
     double logq = log(prime);
-    return ((CHAR_BIT) * log2) / logq;
+    return (u32)((CHAR_BIT) * log2) / logq;
   }
 }
 

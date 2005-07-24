@@ -1,5 +1,5 @@
 /*
- * $Id: pr.c,v 1.18 2005/07/24 09:32:45 jon Exp $
+ * $Id: pr.c,v 1.19 2005/07/24 11:31:35 jon Exp $
  *
  * Print a matrix
  *
@@ -78,7 +78,7 @@ int main(int argc, const char * const argv[])
         fclose(inp);
         exit(1);
       }
-      printf("%12lld\n", (unsigned long long)(e + 1));
+      printf("%12llu\n", (unsigned long long)(e + 1));
     }
   } else {
     mask = get_mask_and_elts(nob, &elts_per_word);
@@ -111,16 +111,16 @@ int main(int argc, const char * const argv[])
         m = j; /* To survive the loop */
         e = get_element_from_row_with_params(nob, j, mask, elts_per_word, row);
         if (0 == (*prime_operations.decimal_rep)(&e)) {
-          fprintf(stderr, "%s: cannot convert %lld with prime %u from %s, terminating\n", name, (unsigned long long)e, prime, in);
+          fprintf(stderr, "%s: cannot convert %llu with prime %u from %s, terminating\n", name, (unsigned long long)e, prime, in);
           fclose(inp);
           exit(1);
         }
-        (void)sprintf(buf, "%0d", (u32)e);
+        (void)sprintf(buf, "%0u", (u32)e);
         k = strlen(buf);
         if (k > nod) {
           /* Some precision will be lost */
           /* This shouldn't happen */
-          fprintf(stderr, "%s: cannot print %lld to precision %u without loss of data, terminating\n", name, (unsigned long long)e, nod);
+          fprintf(stderr, "%s: cannot print %llu to precision %u without loss of data, terminating\n", name, (unsigned long long)e, nod);
           fclose(inp);
           exit(1);
         } else if (k < nod) {

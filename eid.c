@@ -1,5 +1,5 @@
 /*
- * $Id: eid.c,v 1.9 2005/07/24 09:32:45 jon Exp $
+ * $Id: eid.c,v 1.10 2005/07/24 11:31:35 jon Exp $
  *
  * Generate exploded identity matrix
  *
@@ -43,7 +43,7 @@ int main(int argc, const char * const argv[])
     id_usage();
     exit(1);
   }
-  out = argv[4];
+  out = argv[5];
   prime = strtoul(argv[1], NULL, 0);
   if (0 == is_a_prime_power(prime)) {
     fprintf(stderr, "%s: non prime %u\n", name, prime);
@@ -59,7 +59,7 @@ int main(int argc, const char * const argv[])
   cols = (noc + split - 1) / split;
   rows = (nor + split - 1) / split;
   outputs = my_malloc(cols * sizeof(FILE *));
-  output_map(name, argv[5], cols, rows, &names);
+  output_map(name, out, cols, rows, &names);
   endian_init();
   memory_init(name, memory);
   len = (noc + elts_in_word - 1) / elts_in_word;
@@ -74,7 +74,7 @@ int main(int argc, const char * const argv[])
       put_element_to_row(nob, i, row, 1);
     }
     /* Write the row */
-    ex_row_put(i, noc, nor, argv[5], names, split, row, outputs);
+    ex_row_put(i, noc, nor, out, names, split, row, outputs);
   }
   memory_dispose();
   return 0;

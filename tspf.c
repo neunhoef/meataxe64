@@ -1,5 +1,5 @@
 /*
- * $Id: tspf.c,v 1.20 2005/07/24 09:32:45 jon Exp $
+ * $Id: tspf.c,v 1.21 2005/07/24 11:31:35 jon Exp $
  *
  * Function to spin some vectors under two generators in tensor space
  * using intermediate files in a temporary directory.
@@ -257,7 +257,7 @@ u32 tensor_spinf(const char *in, const char *out,
       exit(1);
     }
     for (j = 0; j < stride; j++) {
-      create_pointers(rows2[j], mat_rows, nor1, len2, prime);
+      create_pointers(rows2[j], mat_rows, nor1, len2);
       v_to_m(rows1[j], mat_rows, nor1, nor2, prime);
     }
     if (0 == clean_file(&row_operations, echelised, &clean_nor, rows2, stride, rows1, max_rows,
@@ -277,8 +277,8 @@ u32 tensor_spinf(const char *in, const char *out,
   nor = clean_nor;
   /* We reserve memory_pointer_offset(0, 0, len) for workspace */
   work_row = memory_pointer_offset(0, 0, len);
-  create_pointers(work_row, work_rows, nor1, len2, prime);
-  create_pointers(rows1[0], mat_rows, nor1, len2, prime);
+  create_pointers(work_row, work_rows, nor1, len2);
+  create_pointers(rows1[0], mat_rows, nor1, len2);
   /* Set up grease for multiplying */
   if (0 == grease_allocate(prime, len, &grease, 900)){
     fprintf(stderr, "%s: unable to allocate grease, terminating\n", name);
@@ -354,7 +354,7 @@ u32 tensor_spinf(const char *in, const char *out,
       }
       gen->base_ptr = ftello64(echelised); /* Reset the pointer into the existing basis for this generator */
       for (i = 0; i < stride; i++) {
-        create_pointers(rows2[i], mat_rows, nor1, len2, prime);
+        create_pointers(rows2[i], mat_rows, nor1, len2);
         if (all_in_store) {
           if (0 == mul_in_store(mat_rows, gen->rows_2, work_rows,
                                 noc2, len2,
@@ -372,7 +372,7 @@ u32 tensor_spinf(const char *in, const char *out,
             exit(1);
           }
         }
-        create_pointers(rows1[i], mat_rows, nor1, len2, prime);
+        create_pointers(rows1[i], mat_rows, nor1, len2);
         if (0 == mul_in_store(gen->rows_1, work_rows, mat_rows,
                               noc1, len2,
                               nob, nor1, prime,

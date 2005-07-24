@@ -1,5 +1,5 @@
 /*
- * $Id: pcv.c,v 1.7 2005/06/22 21:52:53 jon Exp $
+ * $Id: pcv.c,v 1.8 2005/07/24 11:31:35 jon Exp $
  *
  * Function to lift vectors from a quotient space
  *
@@ -36,7 +36,7 @@ void pco_lift(const char *range, const char *vectors,
 {
   FILE *inp1 = NULL, *inp2 = NULL, *outp = NULL;
   const header *h_in1, *h_in2, *h_out;
-  u32 prime, nob, noc, nor, nor_o, noc_o, len, len_o, i, j, elts_per_word;
+  u32 prime, nob, noc, nor_o, noc_o, len, len_o, i, j, elts_per_word;
   word elt, mask;
   word *row_in, *row_out;
   orbit_set *orbits;
@@ -57,7 +57,6 @@ void pco_lift(const char *range, const char *vectors,
   prime = header_get_prime(h_in2);
   noc_o = header_get_noc(h_in1);
   nob = header_get_nob(h_in2);
-  nor = header_get_nor(h_in2);
   noc = header_get_noc(h_in2);
   len = header_get_len(h_in2);
   /* One entry for each incoming and for each subspace row */

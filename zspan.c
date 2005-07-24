@@ -1,5 +1,5 @@
 /*
- * $Id: zspan.c,v 1.15 2005/07/24 09:32:46 jon Exp $
+ * $Id: zspan.c,v 1.16 2005/07/24 11:31:35 jon Exp $
  *
  * Compute the span of a matrix
  *
@@ -33,7 +33,7 @@ int main(int argc, const char * const argv[])
   const char *out;
   FILE *inp;
   FILE *outp;
-  u32 prime, nob, noc, nor, rows, len;
+  u32 prime, nob, noc, rows, len;
   u32 i, vectors;
   const header *h_in, *h_out;
   word **mat, *row, *scalars;
@@ -60,7 +60,6 @@ int main(int argc, const char * const argv[])
     header_free(h_in);
     exit(1);
   }
-  nor = header_get_nor(h_in);
   noc = header_get_noc(h_in);
   nob = header_get_nob(h_in);
   len = header_get_len(h_in);

@@ -1,5 +1,5 @@
 /*
- * $Id: tcv.c,v 1.10 2005/07/24 09:32:45 jon Exp $
+ * $Id: tcv.c,v 1.11 2005/07/24 11:31:35 jon Exp $
  *
  * Function to lift vectors from a tensor condensation representation
  *
@@ -129,7 +129,7 @@ int tco_lift(u32 s, const char *mults_l, const char *mults_r, const char *in,
   assert(NULL != argv);
   assert(0 != argc);
   if ((int)s != argc) {
-    fprintf(stderr, "%s: incorrect number (%u) of arguments Qi, should be %u, terminating\n", name, argc, s);
+    fprintf(stderr, "%s: incorrect number (%d) of arguments Qi, should be %u, terminating\n", name, argc, s);
     return 0;
   }
   left_multiplicities = my_malloc(s * sizeof(u32));

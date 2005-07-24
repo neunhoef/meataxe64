@@ -1,5 +1,5 @@
 /*
- * $Id: zfol.c,v 1.2 2005/07/24 09:32:46 jon Exp $
+ * $Id: zfol.c,v 1.3 2005/07/24 11:31:35 jon Exp $
  *
  * Find the orbits under multiple generators for a linear representation
  *
@@ -76,7 +76,7 @@ int main(int argc, const char * const argv[])
 {
   const char *in, *out;
   FILE *inp, *outp, **gens;
-  u32 prime, gen_prime, nor, noc, nob, i, max_orb = 0;
+  u32 prime, gen_prime, nor, noc, i, max_orb = 0;
   u32 *stack;
   u32 *indexes;
   /* TODO: check if Schreier and back are irrelevant */
@@ -106,7 +106,6 @@ int main(int argc, const char * const argv[])
   prime = header_get_prime(h_in);
   nor = header_get_nor(h_in);
   noc = header_get_noc(h_in);
-  nob = header_get_nob(h_in);
   if (1 != prime || noc != nor) {
     fprintf(stderr, "%s: %s is not a map, terminating\n", name, in);
     fclose(inp);

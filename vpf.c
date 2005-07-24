@@ -1,5 +1,5 @@
 /*
- * $Id: vpf.c,v 1.5 2005/07/24 09:32:46 jon Exp $
+ * $Id: vpf.c,v 1.6 2005/07/24 11:31:35 jon Exp $
  *
  * Function to permute some vectors under two generators,
  * using intermediate file
@@ -32,8 +32,6 @@ typedef struct vec_struct
   u32 index;
   u32 hash;
 } vec;
-
-static u32 row_len = 0;
 
 static word **rows;
 
@@ -126,7 +124,6 @@ u32 permute_file(const char *tmp_dir, const char *in,
   noc = header_get_noc(h_in);
   nor = header_get_nor(h_in);
   len = header_get_len(h_in);
-  row_len = len;
   if (noc != header_get_noc(h_a) ||
       noc != header_get_nor(h_a) ||
       noc != header_get_noc(h_b) ||

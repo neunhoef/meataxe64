@@ -1,5 +1,5 @@
 /*
- * $Id: slave.c,v 1.13 2005/07/24 09:32:45 jon Exp $
+ * $Id: slave.c,v 1.14 2005/07/24 11:31:35 jon Exp $
  *
  * Slave for extended operations
  * Based on zsl.c     MTX6 slave version 6.0.11 7.11.98 
@@ -111,7 +111,9 @@ int main(int argc, const char *const argv[])
       fputs(line, output);
     }
     if (free) {
+#ifndef NDEBUG
       unsigned long size1, size2;
+#endif
       unsigned int a = strlen(argv[1]);
       unsigned int b = strlen("free");
       int is_kill = 1;
@@ -127,8 +129,10 @@ int main(int argc, const char *const argv[])
       fflush(output);
       fclose(output);
       fclose(input);
+#ifndef NDEBUG
       size1 = file_size(COMMAND_FILE);
       size2 = file_size(COMMAND_COPY);
+#endif
       if (is_kill) {
         assert(size1 == size2 + strlen(line_ptrs[0]));
       } else {
@@ -158,8 +162,10 @@ int main(int argc, const char *const argv[])
       fflush(output);
       fclose(output);
       fclose(input);
+#ifndef NDEBUG
       size1 = file_size(COMMAND_FILE);
       size2 = file_size(COMMAND_COPY);
+#endif
       assert(size1 == size2);
       /* Straight copy, why didn't we use rename? */
       release_lock();
@@ -228,8 +234,10 @@ int main(int argc, const char *const argv[])
       fflush(output);
       fclose(output);
       fclose(input);
+#ifndef NDEBUG
       size1 = file_size(COMMAND_FILE);
       size2 = file_size(COMMAND_COPY);
+#endif
       assert(size1 + b == size2 + a);
       /* Now copy to original command file */
       errno = 0;

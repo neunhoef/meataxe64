@@ -1,5 +1,5 @@
 /*
- * $Id: ztrecover.c,v 1.6 2005/07/24 09:32:46 jon Exp $
+ * $Id: ztrecover.c,v 1.7 2005/07/24 11:31:35 jon Exp $
  *
  * Recover a tensor subspace
  *
@@ -92,7 +92,7 @@ int main(int argc, const char * const argv[])
   header_free(h_in);
   header_free(h_out);
   mat_rows = matrix_malloc(noc1);
-  create_pointers(row_in, mat_rows, noc1, len2, prime);
+  create_pointers(row_in, mat_rows, noc1, len2);
   for (d = 0; d < nor; d++) {
     errno = 0;
     if (0 == endian_read_row(inp, row_in, len)) {

@@ -1,5 +1,5 @@
 /*
- * $Id: zpro.c,v 1.6 2005/06/22 21:52:54 jon Exp $
+ * $Id: zpro.c,v 1.7 2005/07/24 11:31:35 jon Exp $
  *
  * Print an orbit_set
  *
@@ -27,7 +27,7 @@ int main(int argc, const char * const argv[])
 {
   const char *in;
   FILE *inp;
-  unsigned int prime, nor;
+  unsigned int nor;
   const header *h;
   orbit_set *orbits;
   endian_init();
@@ -40,7 +40,6 @@ int main(int argc, const char * const argv[])
   if (0 == open_and_read_binary_header(&inp, &h, in, name)) {
     exit(1);
   }
-  prime = header_get_prime(h);
   nor = header_get_nor(h);
   if (0 == read_orbits(inp, nor, &orbits, in, name)) {
     fprintf(stderr, "%s: cannot read orbits, terminating\n", name);

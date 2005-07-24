@@ -1,5 +1,5 @@
 /*
- * $Id: base.c,v 1.8 2005/07/24 09:32:45 jon Exp $
+ * $Id: base.c,v 1.9 2005/07/24 11:31:35 jon Exp $
  *
  * Form an echelised basis from one file to another
  *
@@ -41,7 +41,6 @@ u32 base(const char *in, const char *dir,
   u32 prime, nob, noc, nor = 0, nor1, len, d, max_rows;
   word **rows1, **rows2;
   int *map;
-  int tmps_created = 0;
   grease_struct grease;
   prime_ops prime_operations;
   row_ops row_operations;
@@ -81,7 +80,6 @@ u32 base(const char *in, const char *dir,
     fclose(inp);
     exit(1);
   }
-  tmps_created = 1;
   /* Set up the map for the echelised basis */
   map = my_malloc(nor1 * sizeof(int));
   /* Initialise arithmetic */

@@ -1,5 +1,5 @@
 /*
- * $Id: parse.c,v 1.10 2005/07/24 09:32:45 jon Exp $
+ * $Id: parse.c,v 1.11 2005/07/24 11:31:35 jon Exp $
  *
  * Function to parse command line flags
  *
@@ -20,14 +20,14 @@ typedef enum parse_element
 
 typedef struct parse_element_struct
 {
-  int *flag;
-  int set_value;
+  unsigned int *flag;
+  unsigned int set_value;
   parse_element_type type;
   const char *tag;
   const char *env_tag;
 } parse_element, *pparse_element;
 
-int verbose = 0;
+u32 verbose = 0;
 
 u32 memory = MEM_SIZE;
 

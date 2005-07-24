@@ -1,5 +1,5 @@
 /*
- * $Id: system.c,v 1.9 2005/07/13 21:05:46 jon Exp $
+ * $Id: system.c,v 1.10 2005/07/24 11:31:35 jon Exp $
  *
  * system dependent stuff for locking etc
  */
@@ -31,7 +31,7 @@ void wait_lock(const char *task_name)
   assert(NULL != task_name);
   assert(0 != h->h_length);
   sprintf(name, "meataxe_lock_%u_%s", (unsigned int)pid, h->h_name);
-  while(1) {
+  for (;;) {
     retries--;
     if (retries <= 0) {
       fprintf(stderr, "lock acquisition failed, exiting\n");
@@ -158,7 +158,7 @@ static char buf[256];
 const char *tmp_name(void)
 {
   pid_t pid = getpid();
-  sprintf(buf, "tmp%d", (unsigned int)pid);
+  sprintf(buf, "tmp%u", (unsigned int)pid);
   return buf;
 }
 

@@ -1,5 +1,5 @@
 /*
- * $Id: endian.c,v 1.12 2005/06/22 21:52:53 jon Exp $
+ * $Id: endian.c,v 1.13 2005/07/24 11:31:35 jon Exp $
  *
  * Endian handling for meataxe
  *
@@ -67,7 +67,6 @@ int endian_read_word(word *a, FILE *fp)
   } else {
     return (1 == fread(a, sizeof(word), 1, fp));
   }
-  return 1;
 }
 
 int endian_write_u32(u32 a, FILE *fp)
@@ -129,7 +128,6 @@ int endian_read_u32(u32 *a, FILE *fp)
   } else {
     return (1 == fread(a, sizeof(u32), 1, fp));
   }
-  return 1;
 }
 
 static u64 endian_get_u64(u32 i, const u64 *row)
@@ -159,7 +157,6 @@ int endian_read_u64(u64 *a, FILE *fp)
   } else {
     return (1 == fread(a, sizeof(u64), 1, fp));
   }
-  return 1;
 }
 
 void endian_skip_row(FILE *fp, u32 len)
@@ -169,16 +166,21 @@ void endian_skip_row(FILE *fp, u32 len)
 
 int endian_read_row(FILE *fp, word *row, u32 len)
 {
+#ifndef NDEBUG
+  unsigned int word_size =
+#ifdef EIGHT_BYTE_WORD
+    8
+#else
+    4
+#endif
+    ;
+#endif
   if (endian_is_big) {
     while (len > 0) {
       u32 j;
       unsigned char buf[sizeof(word)];
       word res = 0;
-#ifdef EIGHT_BYTE_WORD
-      assert(8 == sizeof(word));
-#else
-      assert(4 == sizeof(word));
-#endif
+      assert(word_size == sizeof(word));
       if (sizeof(word) != fread(buf, 1, sizeof(word), fp)) {
         return 0;
       }

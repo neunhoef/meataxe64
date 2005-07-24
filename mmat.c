@@ -1,5 +1,5 @@
 /*
- * $Id: mmat.c,v 1.9 2005/07/24 09:32:45 jon Exp $
+ * $Id: mmat.c,v 1.10 2005/07/24 11:31:35 jon Exp $
  *
  * Monster program
  * Based on Version 1 - 30th November 1998 by R.A.Parker and R.A.Wilson
@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
       vecT(vec1, vec2);
       break;
     default:
-      fprintf(stderr, "Error in monster, unexpected generator type %u\n", type);
+      fprintf(stderr, "Error in monster, unexpected generator type %d\n", type);
       exit(1);
     }
     if(i%1000==0) printf("%uth row done\n", i);

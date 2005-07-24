@@ -1,5 +1,5 @@
 /*
- * $Id: mop.c,v 1.22 2005/07/24 09:32:45 jon Exp $
+ * $Id: mop.c,v 1.23 2005/07/24 11:31:35 jon Exp $
  *
  * Monster operations for meataxe
  *
@@ -20,11 +20,7 @@ int PRINT;
 unsigned char vec1[VECLEN], vec2[VECLEN];
 static char suz1head[8], suz2head[8];
 static unsigned char vorvec[VECLEN];
-static unsigned char s90head[12];
-static unsigned char s729head[12];
-static unsigned char s142head[12];
 static char w[256], ww[256], bar[256];
-static unsigned char vechead[12], mathead[12];
 static int s3[7][7];
 static char v3[4][7];
 static unsigned int suztab[32761];
@@ -93,71 +89,6 @@ void init(void)
   unsigned int i, j, k, l;
   strncpy(suz1head, "MONSUZ01", 8);
   strncpy(suz2head, "MONSUZ02", 8);
-  vechead[0] = 2;
-  vechead[1] = 0;
-  vechead[2] = 0;
-  vechead[3] = 0;
-  vechead[4] = 1;
-  vechead[5] = 0;
-  vechead[6] = 0;
-  vechead[7] = 0;
-  vechead[8] = 18;
-  vechead[9] = 1;
-  vechead[10] = 3;
-  vechead[11] = 0;
-/*  GF2,  1 row,  196882 (=3 1 18 base 256) columns */
-  mathead[0] = 2;
-  mathead[1] = 0;
-  mathead[2] = 0;
-  mathead[3] = 0;
-  mathead[4] = 18;
-  mathead[5] = 1;
-  mathead[6] = 3;
-  mathead[7] = 0;
-  mathead[8] = 18;
-  mathead[9] = 1;
-  mathead[10] = 3;
-  mathead[11] = 0;
-/*  GF2,  196882 rows,  196882 (=3 1 18 base 256) columns */
-
-  s90head[0] = 4;
-  s90head[1] = 0;
-  s90head[2] = 0;
-  s90head[3] = 0;
-  s90head[4] = 90;
-  s90head[5] = 0;
-  s90head[6] = 0;
-  s90head[7] = 0;
-  s90head[8] = 90;
-  s90head[9] = 0;
-  s90head[10] = 0;
-  s90head[11] = 0;
-
-  s729head[0] = 4;
-  s729head[1] = 0;
-  s729head[2] = 0;
-  s729head[3] = 0;
-  s729head[4] = 217;
-  s729head[5] = 2;
-  s729head[6] = 0;
-  s729head[7] = 0;
-  s729head[8] = 217;
-  s729head[9] = 2;
-  s729head[10] = 0;
-  s729head[11] = 0;
-
-  s142head[0] = 2;
-  s142head[1] = 0;
-  s142head[2] = 0;
-  s142head[3] = 0;
-  s142head[4] = 142;
-  s142head[5] = 0;
-  s142head[6] = 0;
-  s142head[7] = 0;
-  s142head[8] = 142;
-  s142head[9] = 0;
-  s142head[10] = 0;
-  s142head[11] = 0;
 
   for(i = 1; i < 7; i++) {
     s3[i][1] = i;

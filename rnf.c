@@ -1,5 +1,5 @@
 /*
- * $Id: rnf.c,v 1.18 2005/07/24 09:32:45 jon Exp $
+ * $Id: rnf.c,v 1.19 2005/07/24 11:31:35 jon Exp $
  *
  * Compute the rank of a matrix, using temporary files
  *
@@ -47,7 +47,7 @@ u32 rankf(const char *m1, const char *dir, const char *name)
 {
   FILE *inp;
   const header *h;
-  u32 prime, nob, nod, noc, nor, len, n, r, i, rows_to_do, max_rows, step1, step2;
+  u32 prime, nob, nor, len, n, r, i, rows_to_do, max_rows, step1, step2;
   word **mat1, **mat2;
   int *map;
   row_ops row_operations;
@@ -91,8 +91,6 @@ u32 rankf(const char *m1, const char *dir, const char *name)
   }
   nob = header_get_nob(h);
   nor = header_get_nor(h);
-  nod = header_get_nod(h);
-  noc = header_get_noc(h);
   len = header_get_len(h);
   header_free(h);
   rows_init(prime, &row_operations);

@@ -1,5 +1,5 @@
 /*
- * $Id: powers.c,v 1.13 2005/06/22 21:52:53 jon Exp $
+ * $Id: powers.c,v 1.14 2005/07/24 11:31:35 jon Exp $
  *
  * Function to compute tensor powers of a matrix, from file
  *
@@ -181,7 +181,6 @@ int sym_square(const char *m1, const char *m2, const char *name)
   FILE *inp = NULL;
   FILE *outp = NULL;
   u32 prime, nob, nod, nor_in, len_in, nor_out, len_out, elts_per_word;
-  word mask;
   const header *h_in = NULL, *h_out = NULL;
   u32 i, j;
   word **rows, *row_out;
@@ -255,7 +254,7 @@ int sym_square(const char *m1, const char *m2, const char *name)
       }
     }
   }
-  mask = get_mask_and_elts(nob, &elts_per_word);
+  (void)get_mask_and_elts(nob, &elts_per_word);
   for (i = 0; i < nor_in; i++) {
     /* Down the rows of m1 */
     make_row(nob, i, i, prime_operations, row_out, rows, len_out, nor_in, nor_out);

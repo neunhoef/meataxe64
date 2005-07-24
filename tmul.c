@@ -1,5 +1,5 @@
 /*
- * $Id: tmul.c,v 1.8 2005/07/24 09:32:45 jon Exp $
+ * $Id: tmul.c,v 1.9 2005/07/24 11:31:35 jon Exp $
  *
  * Function to multiply a matrix by a tensor product
  *
@@ -40,7 +40,7 @@ int tmul(const char *m1, const char *m2, const char *m3,
 {
   FILE *in1 = NULL, *in2 = NULL, *in3 = NULL, *out = NULL;
   const header *h_in, *h1, *h2;
-  u32 prime, nor, noc, nor1, noc1, nor2, noc2, nob, len1, len2, len, max_len, max_nor, max_rows, i, j;
+  u32 prime, nor, noc, nor1, noc1, nor2, noc2, nob, len1, len2, len, max_len, max_nor, max_rows, i;
   word **rows1, **rows2, *row1, *row2, **ptrs_row1, **ptrs_row2;
   int is_map1, is_map2;
   grease_struct grease;
@@ -51,7 +51,6 @@ int tmul(const char *m1, const char *m2, const char *m3,
   assert(NULL != m3);
   assert(NULL != m4);
   assert(NULL != name);
-  NOT_USED(j);
   if (0 == open_and_read_binary_header(&in1, &h_in, m1, name) ||
       0 == open_and_read_binary_header(&in2, &h1, m2, name) ||
       0 == open_and_read_binary_header(&in3, &h2, m3, name)) {
@@ -131,8 +130,8 @@ int tmul(const char *m1, const char *m2, const char *m3,
   /* Initialise the points into these two rows */
   ptrs_row1 = matrix_malloc(nor1);
   ptrs_row2 = matrix_malloc(nor1);
-  create_pointers(row1, ptrs_row1, nor1, len2, prime);
-  create_pointers(row2, ptrs_row2, nor1, len2, prime);
+  create_pointers(row1, ptrs_row1, nor1, len2);
+  create_pointers(row2, ptrs_row2, nor1, len2);
   errno = 0;
   if (0 == endian_read_matrix(in2, rows1, len1, nor1)) {
     if ( 0 != errno) {

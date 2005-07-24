@@ -1,5 +1,5 @@
 /*
- * $Id: ivf.c,v 1.9 2005/07/24 09:32:45 jon Exp $
+ * $Id: ivf.c,v 1.10 2005/07/24 11:31:35 jon Exp $
  *
  * Invert a matrix using intermediate files
  *
@@ -72,7 +72,6 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
     header_free(h);
   } else {
     const char *tmp = tmp_name();
-    int tmps_created = 0;
     char *name_echelised = NULL, *name_id = NULL;
     FILE *echelised = NULL, *id = NULL;
     u32 max_rows, work_rows;
@@ -130,7 +129,6 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
       header_free(h);
       exit(1);
     }
-    tmps_created = 1;
     /* Initialise id */
     for (n = 0; n < nor; n++) {
       row_init(rows2[0], len);

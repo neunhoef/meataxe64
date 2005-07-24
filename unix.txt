@@ -1,16 +1,19 @@
 #
 # unix specific fragment for building
 #
-# $Id: unix.txt,v 1.13 2005/07/24 09:32:45 jon Exp $
+# $Id: unix.txt,v 1.14 2005/07/24 11:31:35 jon Exp $
 #
+COMPILER=gcc
+include $(COMPILER).txt
 EXEEXT=
 LIBEXT=	a
 OBJEXT=	o
 DEPENDOBJEXT=	o
 DEPENDEXT=	d
 ASMOUTEXT=	S
-CC=	gcc
 DEPEND_CC=	gcc
+COMPILE_INCLUDES=	-include $(ARCH)/mt_types.h
+COMPILE_CFLAGS=	$(COMPILE_INCLUDES) $(COMPILE_DEFINES) $(COMPILE_EXTRA_DEFS) $(COMPILE_WARNINGS)
 REL_COMPILE_FLAGS=	-O3 -finline-functions
 DEBUG_COMPILE_FLAGS=	-g
 ASMOUT_FLAGS=	-S
@@ -27,6 +30,5 @@ REL_LIBS=	-lm
 DEBUG_LIBS=	$(REL_LIBS)
 PROF_LIBS=	$(DEBUG_LIBS)
 PROFNA_LIBS=	$(PROF_LIBS)
-COMPILE_CFLAGS=	-include $(ARCH)/mt_types.h -Werror -Wall -Wpointer-arith -Wwrite-strings -Winline -Waggregate-return -Wmissing-prototypes -Wnested-externs -W -Wunused -Wcast-align -Wstrict-prototypes -Wmissing-declarations -ansi $(COMPILE_EXTRA_FLAGS)
 COMPILE=	$(CC) -c -o # terminating space
-DEP_COMPILE_CFLAGS=	-MM -MG $(COMPILE_CFLAGS)
+DEP_COMPILE_CFLAGS=	-MM -MG $(COMPILE_INCLUDES) $(COMPILE_DEFINES) $(COMPILE_EXTRA_DEFS)

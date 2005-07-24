@@ -1,5 +1,5 @@
 /*
- * $Id: ztrace.c,v 1.11 2005/07/24 09:32:46 jon Exp $
+ * $Id: ztrace.c,v 1.12 2005/07/24 11:31:35 jon Exp $
  *
  * Compute the trace of a matrix
  *
@@ -28,7 +28,7 @@ int main(int argc, const char * const argv[])
 {
   const char *in;
   FILE *inp;
-  u32 prime, noc, nor, nob, len;
+  u32 prime, nor, nob, len;
   u32 i, elts_per_word;
   word mask, sum = 0;
   const header *h;
@@ -57,7 +57,6 @@ int main(int argc, const char * const argv[])
   rows_init(prime, &row_operations);
   nob = header_get_nob(h);
   nor = header_get_nor(h);
-  noc = header_get_noc(h);
   len = header_get_len(h);
   if (memory_rows(len, 1000) < 1) {
     fprintf(stderr, "%s: cannot allocate row for %s, terminating\n", name, in);

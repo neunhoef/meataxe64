@@ -1,5 +1,5 @@
 /*
- * $Id: scale.c,v 1.5 2005/07/24 09:32:45 jon Exp $
+ * $Id: scale.c,v 1.6 2005/07/24 11:31:35 jon Exp $
  *
  * Function to scale a matrix
  *
@@ -35,7 +35,7 @@ int scale(const char *m1, const char *m2, u32 elt, const char *name)
 {
   FILE *inp = NULL;
   FILE *outp = NULL;
-  u32 prime, nob, noc, nor, len;
+  u32 prime, nor, len;
   u32 i;
   const header *h;
   word *row;
@@ -51,9 +51,7 @@ int scale(const char *m1, const char *m2, u32 elt, const char *name)
     fclose(inp);
     header_free(h);
   }
-  nob = header_get_nob(h);
   nor = header_get_nor(h);
-  noc = header_get_noc(h);
   len = header_get_len(h);
   elt = elt % prime; /* Bring into range */
   if (0 == rows_init(prime, &row_operations)) {

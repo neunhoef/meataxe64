@@ -1,5 +1,5 @@
 /*
- * $Id: tco.c,v 1.28 2005/07/24 09:32:45 jon Exp $
+ * $Id: tco.c,v 1.29 2005/07/24 11:31:35 jon Exp $
  *
  * Tensor condense one group element
  *
@@ -209,7 +209,6 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
   u32 vector[3] = {0, 0, 0};
   row_ops row_operations;
   grease_struct grease;
-  u32 powers[GREASE_MAX];
   u32 lim;
   assert(0 != s);
   assert(NULL != mults_l);
@@ -223,7 +222,7 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
   assert(NULL != argv);
   assert(0 != argc);
   if (2*(int)s != argc) {
-    fprintf(stderr, "%s: incorrect number (%u) of arguments Pi, Qi, should be %u, terminating\n", name, argc, 2*s);
+    fprintf(stderr, "%s: incorrect number (%d) of arguments Pi, Qi, should be %u, terminating\n", name, argc, 2*s);
     return 0;
   }
   left_multiplicities = my_malloc(s * sizeof(u32));
@@ -608,7 +607,6 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
   j = 1;
   for (i = 0; i < GREASE_MAX; i++) {
     j *= prime;
-    powers[i] = j;
   }
   expanded_lrows = matrix_malloc(max_irr);
   expanded_rrows = matrix_malloc(nor_r);

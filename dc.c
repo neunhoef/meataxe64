@@ -1,5 +1,5 @@
 /*
- * $Id: dc.c,v 1.1 2005/06/22 21:52:53 jon Exp $
+ * $Id: dc.c,v 1.2 2005/07/24 11:31:35 jon Exp $
  *
  * Function to compute direct complement
  * Uses the computed map, rather than clean/echelise
@@ -37,7 +37,6 @@ void direct_complement(const char *range, const char *out, const char *name)
   const header *h_in, *h_out;
   u32 prime, nob, noc, nor, nor_o, noc_o, len, i, j, elts_per_word;
   word *row_in, *row_out;
-  word mask;
   int *map, *map1;
   assert(NULL != range);
   assert(NULL != out);
@@ -86,7 +85,7 @@ void direct_complement(const char *range, const char *out, const char *name)
   }
   /* inp no longer necessary */
   fclose(inp);
-  mask = get_mask_and_elts(nob, &elts_per_word);
+  (void)get_mask_and_elts(nob, &elts_per_word);
   map1 = my_malloc(noc * sizeof(*map1));
   for (i = 0; i < noc; i++) {
     map1[i] = -1;

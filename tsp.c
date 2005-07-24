@@ -1,5 +1,5 @@
 /*
- * $Id: tsp.c,v 1.19 2005/07/24 09:32:45 jon Exp $
+ * $Id: tsp.c,v 1.20 2005/07/24 11:31:35 jon Exp $
  *
  * Function to spin some vectors under two generators in tensor space
  *
@@ -193,7 +193,7 @@ u32 tensor_spin(const char *in, const char *out,
   }
   /* We reserve memory_pointer_offset(0, 0, len) for workspace */
   work_row = memory_pointer_offset(0, 0, len);
-  create_pointers(work_row, work_rows, nor1, len2, prime);
+  create_pointers(work_row, work_rows, nor1, len2);
   errno = 0;
   for (d = 0; d < nor; d++) {
     if (0 == endian_read_row(inp, work_row, len_in)) {
@@ -204,7 +204,7 @@ u32 tensor_spin(const char *in, const char *out,
       cleanup(inp, f_a1, f_b1, f_a2, f_b2);
       exit(1);
     }
-    create_pointers(rows[d], mat_rows, nor1, len2, prime);
+    create_pointers(rows[d], mat_rows, nor1, len2);
     v_to_m(work_row, mat_rows, nor1, nor2, prime);
   }
   fclose(inp);
@@ -281,7 +281,7 @@ u32 tensor_spin(const char *in, const char *out,
       fflush(stdout);
     }
     for (i = 0; i < rows_to_do; i++) {
-      create_pointers(rows[gen->nor + i], mat_rows, nor1, len2, prime);
+      create_pointers(rows[gen->nor + i], mat_rows, nor1, len2);
       if (0 == mul_in_store(mat_rows, gen->rows_2, work_rows,
                             noc2, len2,
                             nob, nor1, prime,
@@ -289,7 +289,7 @@ u32 tensor_spin(const char *in, const char *out,
         fprintf(stderr, "%s: failed to multiply using %s, terminating\n", name, gen->m1);
         exit(1);
       }
-      create_pointers(rows[nor + i], mat_rows, nor1, len2, prime);
+      create_pointers(rows[nor + i], mat_rows, nor1, len2);
       if (0 == mul_in_store(gen->rows_1, work_rows, mat_rows,
                             noc1, len2,
                             nob, nor1, prime,
@@ -342,7 +342,7 @@ u32 tensor_spin(const char *in, const char *out,
     fflush(stdout);
   }
   for (d = 0; d < nor; d++) {
-    create_pointers(rows[d], mat_rows, nor1, len2, prime);
+    create_pointers(rows[d], mat_rows, nor1, len2);
     m_to_v(mat_rows, work_row, nor1, noc2, prime);
     errno = 0;
     if (0 == endian_write_row(outp, work_row, len)) {

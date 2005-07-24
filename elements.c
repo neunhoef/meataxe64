@@ -1,5 +1,5 @@
 /*
- * $Id: elements.c,v 1.24 2005/07/24 09:32:45 jon Exp $
+ * $Id: elements.c,v 1.25 2005/07/24 11:31:35 jon Exp $
  *
  * Element manipulation for meataxe
  *
@@ -33,7 +33,7 @@ int get_element_from_text(FILE *fp, u32 nod,
       e = e * 10 + (i - '0');
       nod--;
     } else {
-      printf("Failed on '%c', where isspace delivered %u\n", i, isspace(i));
+      printf("Failed on '%c', where isspace delivered %d\n", i, isspace(i));
       return 0; /* Failed, non-digit */
     }
   }

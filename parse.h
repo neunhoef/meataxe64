@@ -1,5 +1,5 @@
 /*
- * $Id: parse.h,v 1.6 2005/06/22 21:52:53 jon Exp $
+ * $Id: parse.h,v 1.7 2005/07/24 11:31:35 jon Exp $
  *
  * Function to parse command line flags
  *
@@ -8,7 +8,7 @@
 #ifndef included__parse
 #define included__parse
 
-extern int verbose;
+extern u32 verbose;
 
 extern u32 memory;
 

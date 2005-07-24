@@ -1,5 +1,5 @@
 /*
- * $Id: mv.h,v 1.2 2005/06/22 21:52:53 jon Exp $
+ * $Id: mv.h,v 1.3 2005/07/24 11:31:35 jon Exp $
  *
  * Function to convert rows to matrices and vv
  * Used for multiplication in tensor space
@@ -30,7 +30,6 @@ extern void m_to_v(word **rows_in, word *row_out,
                    u32 prime);
 
 extern void create_pointers(word *row_in, word **rows_out,
-                            u32 nor, u32 len,
-                            u32 prime);
+                            u32 nor, u32 len);
 
 #endif

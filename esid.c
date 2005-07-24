@@ -1,5 +1,5 @@
 /*
- * $Id: esid.c,v 1.7 2005/07/24 09:32:45 jon Exp $
+ * $Id: esid.c,v 1.8 2005/07/24 11:31:35 jon Exp $
  *
  * Generate exploded scaled identity matrix
  *
@@ -64,7 +64,7 @@ int main(int argc, const char * const argv[])
   cols = (noc + split - 1) / split;
   rows = (nor + split - 1) / split;
   outputs = my_malloc(cols * sizeof(FILE *));
-  output_map(name, argv[5], cols, rows, &names);
+  output_map(name, out, cols, rows, &names);
   endian_init();
   memory_init(name, memory);
   len = (noc + elts_in_word - 1) / elts_in_word;
@@ -79,7 +79,7 @@ int main(int argc, const char * const argv[])
       put_element_to_row(nob, i, row, elt);
     }
     /* Write the row */
-    ex_row_put(i, noc, nor, argv[5], names, split, row, outputs);
+    ex_row_put(i, noc, nor, out, names, split, row, outputs);
   }
   memory_dispose();
   return 0;

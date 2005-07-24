@@ -1,5 +1,5 @@
 /*
- * $Id: ip.c,v 1.19 2005/07/24 09:32:45 jon Exp $
+ * $Id: ip.c,v 1.20 2005/07/24 11:31:35 jon Exp $
  *
  * Read a matrix
  *
@@ -33,7 +33,6 @@ int main(int argc, const char * const argv[])
   FILE *outp;
   u32 prime, nob, nod, noc, nor;
   u32 i, j;
-  word base_mask;
   const header *h;
 
   argv = parse_line(argc, argv, &argc);
@@ -95,7 +94,6 @@ int main(int argc, const char * const argv[])
     nob = header_get_nob(h);
     nod = header_get_nod(h);
     header_free(h);
-    base_mask = (1 << nob) - 1;
     for (i = 0; i < nor; i++) {
       word a = 0;
       u32 k = 0;

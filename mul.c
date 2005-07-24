@@ -1,5 +1,5 @@
 /*
- * $Id: mul.c,v 1.48 2005/07/24 09:32:45 jon Exp $
+ * $Id: mul.c,v 1.49 2005/07/24 11:31:35 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
@@ -272,8 +272,6 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
   word **rows1, **rows3;
   int is_perm1, is_perm2;
   row_ops row_operations;
-  row_adder adder;
-  row_incer incer;
   grease_struct grease;
   assert(NULL != m1);
   assert(NULL != m2);
@@ -327,8 +325,6 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
     return cleanup(inp1, inp2, outp);
   }
   grease_init(&row_operations, &grease);
-  adder = row_operations.adder;
-  incer = row_operations.incer;
   if (is_perm1) {
     len1 = compute_len(nob, noc1);
   }

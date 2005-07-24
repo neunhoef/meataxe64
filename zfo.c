@@ -1,5 +1,5 @@
 /*
- * $Id: zfo.c,v 1.6 2005/07/24 09:32:46 jon Exp $
+ * $Id: zfo.c,v 1.7 2005/07/24 11:31:35 jon Exp $
  *
  * Find the orbits under multiple generators
  *
@@ -29,7 +29,7 @@ int main(int argc, const char * const argv[])
 {
   const char *in, *out;
   FILE *inp, *outp;
-  u32 prime, nor, noc, nob, max_orb, cur_point = 0, total_orbits = 0, i, j, im;
+  u32 prime, nor, noc, max_orb, cur_point = 0, total_orbits = 0, i, j, im;
   unsigned int count;
   word *map;
   const header *h;
@@ -55,7 +55,6 @@ int main(int argc, const char * const argv[])
   prime = header_get_prime(h);
   nor = header_get_nor(h);
   noc = header_get_noc(h);
-  nob = header_get_nob(h);
   if (1 != prime || noc != nor) {
     fprintf(stderr, "%s: %s is not a map, terminating\n", name, in);
     fclose(inp);
