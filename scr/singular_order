@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: singular_order,v 1.5 2002/10/13 20:07:20 jon Exp $: f1,v 1.2 2001/12/01 10:46:02 jon Exp $
+# $Id: singular_order,v 1.6 2005/08/19 08:05:26 jon Exp $: f1,v 1.2 2001/12/01 10:46:02 jon Exp $
 #
 # Script to compute number of distinct powers of a matrix, in a naive fashion
 # Terminates at 5
@@ -56,7 +56,7 @@ if [ $r -ne $nor ]; then
     exit 255
   fi
   while [ $ok -eq 0 -a $o -lt 5 ]; do
-    zmu -m 400 $a $t ${tmp}.$o 1>/dev/null
+    zmu -m $memory $a $t ${tmp}.$o 1>/dev/null
     ret=$?
     if [ 0 -ne $ret ]; then
       rm -f ${tmp}*
@@ -93,7 +93,7 @@ else
       rm -f ${tmp}*
       exit 0
     fi
-    zmu -m 400 $a $t ${tmp}.$o 1>/dev/null
+    zmu -m $memory $a $t ${tmp}.$o 1>/dev/null
     ret=$?
     if [ 0 -ne $ret ]; then
       rm -f ${tmp}*

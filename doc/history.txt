@@ -360,3 +360,4 @@ skew seventh
 20050713 - Added a cygwin port
 20050724 - Fix some warnings shown up by intel compiler
 20050724 - Addition of intel compiler support
+20050819 - Update singular_order to use a more sensible memory size
