@@ -1,5 +1,5 @@
 /*
- * $Id: zcv64to32.c,v 1.2 2005/07/24 09:32:46 jon Exp $
+ * $Id: zcv64to32.c,v 1.3 2005/10/12 18:20:31 jon Exp $
  *
  * Convert from the 64 bit word meataxe to the 32 bit word meataxe
  *
@@ -103,7 +103,7 @@ int main(int argc, const char * const argv[])
       memset(row_out, 0, u32len * sizeof(u32));
       for (j = 0; j < noc; j++) {
         u64 elt = get_element_from_u64_row(nob, j, row_in);
-        put_element_to_u32_row(nob, j, row_out, elt);
+        put_element_to_u32_row(nob, j, row_out, (u32)elt);
       }
       if (0 == endian_write_u32_row(outp, row_out, u32len)) {
         fclose(inp);

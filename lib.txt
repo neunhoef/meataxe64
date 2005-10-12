@@ -1,12 +1,12 @@
 #
 # Generic library rules
 #
-# $Id: lib.txt,v 1.1 2004/08/22 11:09:47 jon Exp $
+# $Id: lib.txt,v 1.2 2005/10/12 18:20:31 jon Exp $
 #
 # generate library name plus rule
 #
 $(TARGET_TYPE)_OBJECTS:= $(LIB_MODULES:%=$($(TARGET_TYPE)OBJDIR)/%.$(OBJEXT))
-$(TARGET_TYPE)_LIBTARGET:= $(LIB:%=$($(TARGET_TYPE)BINDIR)/%.$(LIBEXT))
+$(TARGET_TYPE)_LIBTARGET:= $(MTXLIB:%=$($(TARGET_TYPE)BINDIR)/%.$(LIBEXT))
 $(TARGET_TYPE)_TARGETS+= $($(TARGET_TYPE)_LIBTARGET)
 
 # Build archive

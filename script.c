@@ -1,5 +1,5 @@
 /*
- * $Id: script.c,v 1.10 2005/07/24 09:32:45 jon Exp $
+ * $Id: script.c,v 1.11 2005/10/12 18:20:31 jon Exp $
  *
  * Function to compute a script in two generators
  *
@@ -44,7 +44,7 @@ static int close_files(u32 s, FILE **files, const header **headers)
     header_free(headers[i]);
   }
   free(files);
-  free(headers);
+  free((void *)headers);
   return 0;
 }
 

@@ -1,5 +1,5 @@
 /*
- * $Id: mspf.c,v 1.21 2005/07/24 09:32:45 jon Exp $
+ * $Id: mspf.c,v 1.22 2005/10/12 18:20:31 jon Exp $
  *
  * Function to spin some vectors under multiple generators
  * using intermediate files in a temporary directory.
@@ -31,11 +31,11 @@ typedef struct gen_struct *gen;
 
 struct gen_struct
 {
-  FILE *f;		/* File containing the generator */
-  const char *m;	/* Name of the generator */
-  u32 nor;	/* Rows from input already multiplied by this generator */
-  int is_map;		/* This generator is a map */
-  long long base_ptr;	/* Pointer to row nor + 1 in output basis file */
+  FILE *f;       /* File containing the generator */
+  const char *m; /* Name of the generator */
+  u32 nor;       /* Rows from input already multiplied by this generator */
+  int is_map;    /* This generator is a map */
+  s64 base_ptr;  /* Pointer to row nor + 1 in output basis file */
   gen next;
 };
 

@@ -1,5 +1,5 @@
 /*
- * $Id: tco.c,v 1.29 2005/07/24 11:31:35 jon Exp $
+ * $Id: tco.c,v 1.30 2005/10/12 18:20:31 jon Exp $
  *
  * Tensor condense one group element
  *
@@ -167,8 +167,8 @@ static int cleanup(u32 *left_multiplicities, u32 *right_multiplicities,
   }
   free(p);
   free(q);
-  free(h_p);
-  free(h_q);
+  free((void *)h_p);
+  free((void *)h_q);
   if (NULL != h_o) {
     header_free(h_o);
   }
@@ -201,12 +201,12 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
     max_rows, max_irr, max_irr2, max_irr_len, max_end, i, j, k;
   u32 *nor_p = NULL, *nor_q = NULL, *noc_p = NULL, *noc_q = NULL, *len_p = NULL, *len_q = NULL;
   const header *h_l, *h_r, *h_o, **h_p, **h_q;
-  u32 alpha, beta, gamma, delta, extent_l, extent_r, extent_te, extent_end, extent_q, extent_p, o_r, m_r, n_r;
+  u32 alpha, beta, gamma, delta, extent_l, extent_r, extent_te, extent_end, extent_q, extent_p, n_r;
   word **rows, **lrows, **rrows, **te_rows, *te_row, **end_rows, **q_rows, **p_rows, *q_row;
   u32 elts_per_word, elts_per_word_nob;
   word mask;
   word **expanded_lrows, **expanded_rrows;
-  u32 vector[3] = {0, 0, 0};
+  u32 v0 = 0, v1 = 0, v2 = 0;
   row_ops row_operations;
   grease_struct grease;
   u32 lim;
@@ -266,7 +266,7 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
                      NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
                      NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL);
     }
-    vector[0] = init;
+    v0 = init;
     break;
   case 1:
     if (init >= left_multiplicities[s-1]) {
@@ -275,8 +275,8 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
                      NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
                      NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL);
     }
-    vector[0] = s-1;
-    vector[1] = init;
+    v0 = s-1;
+    v1 = init;
     break;
   case 2:
     if (init >= right_multiplicities[s-1]) {
@@ -285,9 +285,9 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
                      NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
                      NULL, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL);
     }
-    vector[0] = s-1;
-    vector[1] = left_multiplicities[s-1] - 1;
-    vector[2] = init;
+    v0 = s-1;
+    v1 = left_multiplicities[s-1] - 1;
+    v2 = init;
     break;
   default:
     fprintf(stderr, "%s: cannot restart further in than loop 2, terminating\n", name);
@@ -499,14 +499,14 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
     u32 nrows = 0;
     word *row = memory_pointer(0);
     /* Compute the number of rows */
-    for (i = 0; i < vector[0]; i++) {
+    for (i = 0; i < v0; i++) {
       nrows += left_multiplicities[i] * right_multiplicities[i] * dim_end[i];
     }
-    i = vector[0];
-    for (j = 0; j < vector[1]; j++) {
+    i = v0;
+    for (j = 0; j < v1; j++) {
       nrows += right_multiplicities[i] * dim_end[i];
     }
-    for (k = 0; k < vector[2]; k++) {
+    for (k = 0; k < v2; k++) {
       nrows += dim_end[i];
     }
     /* Open the input */
@@ -621,17 +621,21 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
       expanded_rrows[i][j] = get_element_from_row_with_params(nob, j, mask, elts_per_word, rrows[i]);
     }
   }
-  o_r = 0;
-  m_r = 0;
   n_r = 0;
   q_row = matrix_malloc(max_irr2); /* Where to record the zero rows */
-  for (i = 0; i < s; i++) {
+  for (i = 0; i < v0; i++) {
+    u32 dim_irr_i = dim_irr[i];
+    n_r += right_multiplicities[i] * dim_irr[i];
+    /* Skip the early rows of the left tensor */
+    for (alpha = 0; alpha < left_multiplicities[i] * dim_irr_i; alpha++) {
+      endian_skip_row(leftp, len_l);
+    }
+  }
+  for (i = v0; i < s; i++) {
     /* Row loop over distinct irreducibles of H */
     u32 dim_irr_i = dim_irr[i];
     u32 dim_endi = dim_end[i];
     u32 noc_qi = noc_q[i];
-    int skipping0 = i < vector[0];
-    int equal0 = i == vector[0];
     /* Read ahead q[i], only needed once */
     if (0 == endian_read_matrix(q[i], q_rows, len_q[i], nor_q[i])) {
       matrix_free(te_rows);
@@ -654,10 +658,11 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
       }
       q_row[j] = acc;
     }
-    for (alpha = 0; alpha < left_multiplicities[i]; alpha++) {
+    for (alpha = 0; alpha < v1 * dim_irr_i; alpha++) {
+      endian_skip_row(leftp, len_l);
+    }
+    for (alpha = v1; alpha < left_multiplicities[i]; alpha++) {
       /* Row loop over multiplicity of Si */
-      int skipping1 = skipping0 || (equal0 && (alpha < vector[1]));
-      int equal1 = (equal0 && (alpha == vector[1]));
       /* First read lrows */
       assert(dim_irr_i <= max_irr);
       if (0 == endian_read_matrix(leftp, lrows, len_l, dim_irr_i)) {
@@ -671,15 +676,9 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
           expanded_lrows[k][j] = get_element_from_row_with_params(nob, j, mask, elts_per_word, lrows[k]);
         }
       }
-      for (beta = 0; beta < right_multiplicities[i]; beta++) {
+      for (beta = v2; beta < right_multiplicities[i]; beta++) {
         /* Row loop over multiplicity of Si* */
-        int skipping2 = skipping1 || (equal1 && (beta < vector[2]));
-        if (skipping2) {
-#if 0
-          printf("Skipping with i = %u, alpha = %u, beta = %u\n",
-                 i, alpha, beta);
-#endif
-        } else {
+        {
           u32 beta_i = n_r + beta * dim_irr_i;
           u32 o_c = 0, m_c = 0, n_c = 0;
           for (j = 0; j < dim_endi; j++) {
@@ -845,10 +844,10 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
                            NULL, NULL, p, q, h_p, h_q, s, h_o, outp, rows, lrows, rrows);
           }
         }
-        o_r += dim_endi; /* Increment output row index */
       }
+      v2 = 0;
     }
-    m_r += left_multiplicities[i] * dim_irr_i;
+    v1 = 0;
     n_r += right_multiplicities[i] * dim_irr_i;
   }
   fclose(leftp);

@@ -1,7 +1,7 @@
 #
 # win32 specific fragment for building
 #
-# $Id: win32.txt,v 1.4 2002/11/13 19:42:49 jon Exp $
+# $Id: win32.txt,v 1.5 2005/10/12 18:20:31 jon Exp $
 #
 EXEEXT= .exe
 LIBEXT= lib
@@ -10,19 +10,22 @@ DEPENDOBJEXT= o
 DEPENDEXT= d
 ASMOUTEXT=	S
 CC= cl
+COMPILER=${CC}
 DEPEND_CC= gcc
 REL_COMPILE_FLAGS=	/O2
 DEBUG_COMPILE_FLAGS=	/Zi
 ASMOUT_FLAGS=	-S
 REL_LINK_FLAGS=
-DEBUG_LINK_FLAGS= /DEBUG /PDBTYPE:SEPT
+DEBUG_LINK_FLAGS= /DEBUG
 PROF_COMPILE_FLAGS= 
 PROF_LINK_FLAGS= /PROFILE $(DEBUG_LINK_FLAGS)
 PROFNA_LINK_FLAGS= $(PROF_LINK_FLAGS)
 NA_COMPILE_FLAGS= "/DNDEBUG=1"
-# Note $$@ below. This is because LINK will be expanded in targets.txt
-LINK= link /nologo /subsystem:console /machine:ix86 /stack:0x2000000 /out:
-COMPILE_CFLAGS= /W3 /WX
+LINK= link /nologo /out:
+ARCHIVE=	link /lib /nologo /out:
+COMPILE_WARNINGS=	/W2 /WX
+COMPILE_INCLUDES=	/FI$(ARCH)/mt_types.h
+COMPILE_DEFINES=	-DWIN32
+COMPILE_CFLAGS= $(COMPILE_INCLUDES) $(COMPILE_DEFINES) $(COMPILE_EXTRA_DEFS) $(COMPILE_WARNINGS)
 COMPILE= $(CC) /c /nologo /Fo
-DEP_COMPILE_CFLAGS= -MM -MG
-
+DEP_COMPILE_CFLAGS= -MM -MG -include $(ARCH)/mt_types.h $(COMPILE_DEFINES) $(COMPILE_EXTRA_DEFS)

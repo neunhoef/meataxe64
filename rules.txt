@@ -1,7 +1,7 @@
 #
 # Generic build rules
 #
-# $Id: rules.txt,v 1.6 2003/07/20 18:13:53 jon Exp $
+# $Id: rules.txt,v 1.7 2005/10/12 18:20:31 jon Exp $
 #
 
 # Cancel builtin rules
@@ -45,7 +45,7 @@ $(ASMOUTDIR)/%.$(ASMOUTEXT): %.c
 	@$(COMPILE)$@ $< $(REL_COMPILE_FLAGS) $(COMPILE_CFLAGS) $(NA_COMPILE_FLAGS) $(ASMOUT_FLAGS) $(INCLUDES) $(DEFINES)
 
 # Auto-generated files
-$(GENDIR)/9.c:	$(DEBUGBINDIR)/maketab
+$(GENDIR)/9.c:	$(DEBUGBINDIR)/maketab$(EXEEXT)
 	@echo Generate $@
 	-@mkdir -p $(GENDIR)
 	$< 9 $@

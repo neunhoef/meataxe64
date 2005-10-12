@@ -1,5 +1,5 @@
 /*
- * $Id: tspf.c,v 1.21 2005/07/24 11:31:35 jon Exp $
+ * $Id: tspf.c,v 1.22 2005/10/12 18:20:31 jon Exp $
  *
  * Function to spin some vectors under two generators in tensor space
  * using intermediate files in a temporary directory.
@@ -39,7 +39,7 @@ struct gen_struct
   int is_map1, is_map2;	/* Rows from input already multiplied by this generator */
   word **rows_1;/* Rows of left tensor */
   word **rows_2;/* Rows of right tensor */
-  long long base_ptr;	/* Pointer to row nor + 1 in output basis file */
+  s64 base_ptr;	/* Pointer to row nor + 1 in output basis file */
   gen next;		/* Next generator to be used */
 };
 

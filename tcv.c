@@ -1,5 +1,5 @@
 /*
- * $Id: tcv.c,v 1.11 2005/07/24 11:31:35 jon Exp $
+ * $Id: tcv.c,v 1.12 2005/10/12 18:20:31 jon Exp $
  *
  * Function to lift vectors from a tensor condensation representation
  *
@@ -64,7 +64,7 @@ static int cleanup(u32 *left_multiplicities, u32 *right_multiplicities,
     close_files_and_headers(q, h_q, i);
   }
   free(q);
-  free(h_q);
+  free((void *)h_q);
   if (NULL != h_i) {
     header_free(h_i);
   }
@@ -98,9 +98,6 @@ static void positions(u32 cf, u32 l, u32 r, u32 dim_r,
   }
   start_l += irr_q[cf] * l;
   start_r += irr_q[cf] * r;
-  /*
-  printf("start_l = %u, start_r = %u\n", start_l, start_r);
-  */
   *ucpos = start_l * dim_r + start_r;
   *cpos = 0;
   for (i = 0; i < cf; i++) {
@@ -271,9 +268,6 @@ int tco_lift(u32 s, const char *mults_l, const char *mults_r, const char *in,
           positions(i, j, k, dim_r, left_multiplicities, right_multiplicities, irr_q, nor_q, &col_i, &col_o);
           assert(col_i < noc_i);
           assert(col_o < noc_o);
-          /*
-          printf("i = %u, j = %u, k = %u, col_i = %u, col_o = %u\n", i, j, k, col_i, col_o);
-          */
           row_init(inter_row_i, len_i);
           for (m = 0; m < nor_q[i]; m++) {
             word elt = get_element_from_row(nob, col_i + m, row_i);

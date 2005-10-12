@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.98 2005/06/22 21:52:53 jon Exp $
+# $Id: makefile,v 1.99 2005/10/12 18:20:31 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -383,7 +383,7 @@ DEBUG_TARGETS:=
 PROF_TARGETS:=
 PROFNA_TARGETS:=
 
-LIB:=	libmtx
+MTXLIB:=	libmtx
 include libs.txt
 
 TARGET:=CONS

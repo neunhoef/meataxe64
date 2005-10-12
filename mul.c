@@ -1,5 +1,5 @@
 /*
- * $Id: mul.c,v 1.49 2005/07/24 11:31:35 jon Exp $
+ * $Id: mul.c,v 1.50 2005/10/12 18:20:31 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
@@ -424,7 +424,7 @@ int skip_mul_from_store(u32 offset, word **rows1, word **rows3,
                         u32 nob, u32 nor, u32 noc_o, u32 prime,
                         grease grease, int verbose, const char *m, const char *name)
 {
-  long long pos;
+  s64 pos;
   u32 i, j, l, elts_per_word;
   assert(NULL != rows1);
   assert(NULL != rows3);

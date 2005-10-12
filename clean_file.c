@@ -1,5 +1,5 @@
 /*
- * $Id: clean_file.c,v 1.7 2005/07/24 09:32:45 jon Exp $
+ * $Id: clean_file.c,v 1.8 2005/10/12 18:20:31 jon Exp $
  *
  * Cleaning and echilisation, when the already clean vectors
  * are in a file which is to be updated
@@ -33,7 +33,7 @@ int clean_file(row_ops *row_operations,
 { 
   u32 i, j = 0, my_nor, d;
   int *internal_new_map;
-  long long ptr;
+  s64 ptr;
   assert(NULL != clean_vectors);
   assert(NULL != rows1);
   assert(NULL != rows2);

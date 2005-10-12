@@ -1,5 +1,5 @@
 /*
- * $Id: project.c,v 1.11 2005/06/22 21:52:53 jon Exp $
+ * $Id: project.c,v 1.12 2005/10/12 18:20:31 jon Exp $
  *
  * Function to project into quotient space representation
  *
@@ -48,7 +48,7 @@ void project(const char *range, const char *in,
   word *map_o;
   row_ops row_operations;
   grease_struct grease;
-  long long pos;
+  s64 pos;
   int in_store;
   assert(NULL != range);
   assert(NULL != in);

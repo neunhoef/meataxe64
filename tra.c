@@ -1,5 +1,5 @@
 /*
- * $Id: tra.c,v 1.17 2005/07/24 09:32:45 jon Exp $
+ * $Id: tra.c,v 1.18 2005/10/12 18:20:31 jon Exp $
  *
  * Function to transpose a matrix
  *
@@ -69,7 +69,7 @@ int tra(const char *m1, const char *m2, const char *name)
   const header *h1, *h2;
   word *row1;
   word **rows;
-  long long pos;
+  s64 pos;
 
   assert(NULL != m1);
   assert(NULL != m2);

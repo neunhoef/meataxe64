@@ -1,5 +1,5 @@
 /*
- * $Id: symb.c,v 1.10 2005/07/24 09:32:45 jon Exp $
+ * $Id: symb.c,v 1.11 2005/10/12 18:20:31 jon Exp $
  *
  * Function to compute a symmetry basis
  *
@@ -277,7 +277,7 @@ u32 symb(u32 spaces, u32 space_size,
     u32 sub_nor = 1;
     u32 d;
     /* Remember file pointer into f.f */
-    long long ptr = ftello64(f.f);
+    s64 ptr = ftello64(f.f);
     /* Read one row into ech_rows */
     if (0 == endian_read_row(f.f, ech_rows[0], len)) {
       if ( 0 != errno) {

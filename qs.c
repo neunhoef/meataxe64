@@ -1,5 +1,5 @@
 /*
- * $Id: qs.c,v 1.17 2005/06/22 21:52:53 jon Exp $
+ * $Id: qs.c,v 1.18 2005/10/12 18:20:31 jon Exp $
  *
  * Function to compute quotient space representation
  *
@@ -47,7 +47,7 @@ void quotient(const char *range, const char *gen,
   word elt, mask;
   row_ops row_operations;
   grease_struct grease;
-  long long pos;
+  s64 pos;
   int in_store;
   assert(NULL != range);
   assert(NULL != gen);

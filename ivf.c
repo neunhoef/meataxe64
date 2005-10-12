@@ -1,5 +1,5 @@
 /*
- * $Id: ivf.c,v 1.10 2005/07/24 11:31:35 jon Exp $
+ * $Id: ivf.c,v 1.11 2005/10/12 18:20:31 jon Exp $
  *
  * Invert a matrix using intermediate files
  *
@@ -78,7 +78,7 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
     /* rows1, rows2 for area being worked on */
     /* rows3, rows4 for forward and backward cleaning */
     word **rows1, **rows2, **rows3, **rows4;
-    long long ptr_echelised = 0, ptr_id = 0;
+    s64 ptr_echelised = 0, ptr_id = 0;
     row_ops row_operations;
     grease_struct grease;
     rows_init(prime, &row_operations);
@@ -166,7 +166,7 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
     for (r = 0; r < nor; r += max_rows) {
       /* Now read the two submatrices */
       u32 stride = (r + max_rows <= nor) ? max_rows : nor - r;
-      long long ptr_e1 = ftello64(echelised), ptr_i1 = ftello64(id);
+      s64 ptr_e1 = ftello64(echelised), ptr_i1 = ftello64(id);
       int *map;
       errno = 0;
       if (0 == endian_read_matrix(echelised, rows1, len, stride)) {

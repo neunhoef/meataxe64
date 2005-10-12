@@ -1,5 +1,5 @@
 /*
- * $Id: clean_vectors.c,v 1.8 2005/07/24 09:32:45 jon Exp $
+ * $Id: clean_vectors.c,v 1.9 2005/10/12 18:20:31 jon Exp $
  *
  * Clean one file of vectors with another
  *
@@ -32,7 +32,7 @@ int clean_vectors(const char *echelised, const char *vectors, const char *output
   header *h_out;
   u32 prime, nob, noc, nor2, nor1, len, d, i, j, max_rows;
   word **rows1, **rows2;
-  long long ptr;
+  s64 ptr;
   int *map;
   grease_struct grease;
   prime_ops prime_operations;

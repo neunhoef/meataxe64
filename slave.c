@@ -1,5 +1,5 @@
 /*
- * $Id: slave.c,v 1.14 2005/07/24 11:31:35 jon Exp $
+ * $Id: slave.c,v 1.15 2005/10/12 18:20:31 jon Exp $
  *
  * Slave for extended operations
  * Based on zsl.c     MTX6 slave version 6.0.11 7.11.98 
@@ -35,7 +35,7 @@ static int capable(const char *cmd, unsigned int length)
           strncmp(cmd, "mu", length) == 0);
 }
 
-static unsigned int parse_cmd_line(const char *(*line_ptrs)[], unsigned int (*lengths)[],
+static unsigned int parse_cmd_line(const char *(*line_ptrs)[MAX_LINE], unsigned int (*lengths)[MAX_LINE],
                                const char *line)
 {
   unsigned int i = 0, j = 0, k;
@@ -113,17 +113,19 @@ int main(int argc, const char *const argv[])
     if (free) {
 #ifndef NDEBUG
       unsigned long size1, size2;
+      int is_kill = 1;
 #endif
       unsigned int a = strlen(argv[1]);
       unsigned int b = strlen("free");
-      int is_kill = 1;
       NOT_USED(a);
       NOT_USED(b);
       assert(strlen("done") == b);
       if (0 != strncmp(line_ptrs[2], "kill", lengths[2])) {
         fprintf(output, "%s %s", argv[1], line_ptrs[1]);
         /* Only copy back if it's not kill */
+#ifndef NDEBUG
         is_kill = 0;
+#endif
       }
       copy_rest(output, input);
       fflush(output);
@@ -132,12 +134,12 @@ int main(int argc, const char *const argv[])
 #ifndef NDEBUG
       size1 = file_size(COMMAND_FILE);
       size2 = file_size(COMMAND_COPY);
-#endif
       if (is_kill) {
         assert(size1 == size2 + strlen(line_ptrs[0]));
       } else {
         assert(size1 + a == size2 + b);
       }
+#endif
       errno = 0;
       input = fopen(COMMAND_COPY, "rb");
       if (NULL == input) {
@@ -165,6 +167,7 @@ int main(int argc, const char *const argv[])
 #ifndef NDEBUG
       size1 = file_size(COMMAND_FILE);
       size2 = file_size(COMMAND_COPY);
+      assert(size1 == size2);
 #endif
       assert(size1 == size2);
       /* Straight copy, why didn't we use rename? */
@@ -237,8 +240,8 @@ int main(int argc, const char *const argv[])
 #ifndef NDEBUG
       size1 = file_size(COMMAND_FILE);
       size2 = file_size(COMMAND_COPY);
-#endif
       assert(size1 + b == size2 + a);
+#endif
       /* Now copy to original command file */
       errno = 0;
       input = fopen(COMMAND_COPY, "rb");

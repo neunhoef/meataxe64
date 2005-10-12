@@ -1,5 +1,5 @@
 /*
- * $Id: msbf.c,v 1.15 2005/07/24 09:32:45 jon Exp $
+ * $Id: msbf.c,v 1.16 2005/10/12 18:20:31 jon Exp $
  *
  * Function to spin some vectors under multiple generators to obtain a standard base
  *
@@ -31,12 +31,12 @@ typedef struct gen_struct *gen;
 
 struct gen_struct
 {
-  FILE *f;		/* File containing the generator */
-  const char *m;	/* Name of the generator */
-  u32 nor;	/* Rows from input already multiplied by this generator */
-  gen next;		/* Next generator to be used */
-  int is_map;		/* This generator is a map */
-  long long base_ptr;	/* Pointer to row nor + 1 in output basis file */
+  FILE *f;       /* File containing the generator */
+  const char *m; /* Name of the generator */
+  u32 nor;       /* Rows from input already multiplied by this generator */
+  gen next;      /* Next generator to be used */
+  int is_map;    /* This generator is a map */
+  s64 base_ptr;  /* Pointer to row nor + 1 in output basis file */
 };
 
 static void cleanup(FILE *f1, u32 count, FILE **files)

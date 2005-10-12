@@ -1,5 +1,5 @@
 /*
- * $Id: mmat.c,v 1.10 2005/07/24 11:31:35 jon Exp $
+ * $Id: mmat.c,v 1.11 2005/10/12 18:20:31 jon Exp $
  *
  * Monster program
  * Based on Version 1 - 30th November 1998 by R.A.Parker and R.A.Wilson
@@ -20,7 +20,7 @@ static void mkvec(u32 pos, unsigned char *vecin)
   u32 i;
   assert(NULL != vecin);
   memset(vectemp, 0, 24611);
-  FTOV(vectemp, pos/2, (pos+1)%2+1);
+  FTOV(vectemp, pos/2, (char)((pos+1)%2+1));
 
   memset(vecin, 0, VECLEN);
   ptr1=0;

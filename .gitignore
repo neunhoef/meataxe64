@@ -30,3 +30,4 @@ poo*
 derived*
 install
 profiles/*
+*.pdb

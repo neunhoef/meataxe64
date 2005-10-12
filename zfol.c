@@ -1,5 +1,5 @@
 /*
- * $Id: zfol.c,v 1.3 2005/07/24 11:31:35 jon Exp $
+ * $Id: zfol.c,v 1.4 2005/10/12 18:20:31 jon Exp $
  *
  * Find the orbits under multiple generators for a linear representation
  *
@@ -42,8 +42,8 @@ static void cleanup_gens(FILE **gens, const header **h_perm, const header **h_la
     header_free(h_lambda[i]);
   }
   free(gens);
-  free(h_perm);
-  free(h_lambda);
+  free((void *)h_perm);
+  free((void *)h_lambda);
 }
 
 static void cleanup_perms_and_lambdas(word **perms, word *lambdas, unsigned int count)

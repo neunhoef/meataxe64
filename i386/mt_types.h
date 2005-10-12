@@ -1,5 +1,5 @@
 /*
- * $Id: mt_types.h,v 1.1 2005/05/01 10:10:30 jon Exp $
+ * $Id: mt_types.h,v 1.2 2005/10/12 18:20:31 jon Exp $
  *
  * Fundamental types for meataxe
  *
@@ -10,8 +10,13 @@
 
 typedef unsigned int u32;
 typedef int s32;
+#if defined(WIN32)
+typedef unsigned long u64;
+typedef long s64;
+#else
 typedef unsigned long long u64;
 typedef long long s64;
+#endif
 
 #define PRIME_MASK 0x3fffffff
 #define PRIME_BITS 0xc0000000

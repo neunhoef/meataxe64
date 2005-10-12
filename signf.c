@@ -1,5 +1,5 @@
 /*
- * $Id: signf.c,v 1.5 2005/07/24 09:32:45 jon Exp $
+ * $Id: signf.c,v 1.6 2005/10/12 18:20:31 jon Exp $
  *
  * Function compute the orthogonal group sign
  *
@@ -34,7 +34,7 @@ int sign(const char *qform, const char *bform, const char *dir, const char *name
   word **mat;
   word *sing_row1, *sing_row2, *products;
   int res;
-  long long *posns;
+  s64 *posns;
   grease_struct grease;
   prime_ops prime_operations;
   row_ops row_operations;
@@ -123,7 +123,7 @@ int sign(const char *qform, const char *bform, const char *dir, const char *name
   }
   sing_row1 = mat[6];
   sing_row2 = mat[7];
-  posns = my_malloc(nor * sizeof(long long));
+  posns = my_malloc(nor * sizeof(s64));
   idp = fopen64(id_name, "w+b");
   if (NULL == idp) {
     fprintf(stderr, "%s: unable to allocate intermediate identity, terminating\n", name);
