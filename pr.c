@@ -1,5 +1,5 @@
 /*
- * $Id: pr.c,v 1.21 2005/10/28 22:58:08 jon Exp $
+ * $Id: pr.c,v 1.22 2005/10/28 23:04:07 jon Exp $
  *
  * Print a matrix
  *
@@ -111,7 +111,7 @@ int main(int argc, const char * const argv[])
         m = j; /* To survive the loop */
         e = get_element_from_row_with_params(nob, j, mask, elts_per_word, row);
         if (0 == (*prime_operations.decimal_rep)(&e)) {
-          fprintf(stderr, "%s: cannot convert %" W_F " with prime %u from %s, terminating\n", name, (u64)e, prime, in);
+          fprintf(stderr, "%s: cannot convert %" U64_F " with prime %u from %s, terminating\n", name, (u64)e, prime, in);
           fclose(inp);
           exit(1);
         }
@@ -120,7 +120,7 @@ int main(int argc, const char * const argv[])
         if (k > nod) {
           /* Some precision will be lost */
           /* This shouldn't happen */
-          fprintf(stderr, "%s: cannot print %" W_F " to precision %u without loss of data, terminating\n", name, (u64)e, nod);
+          fprintf(stderr, "%s: cannot print %" U64_F " to precision %u without loss of data, terminating\n", name, (u64)e, nod);
           fclose(inp);
           exit(1);
         } else if (k < nod) {
