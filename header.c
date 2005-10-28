@@ -1,5 +1,5 @@
 /*
- * $Id: header.c,v 1.16 2005/10/12 18:20:31 jon Exp $
+ * $Id: header.c,v 1.17 2005/10/28 22:58:08 jon Exp $
  *
  * Header manipulation
  *
@@ -236,7 +236,7 @@ header *header_create(u32 prime, u32 nob,
                       u32 nod, u32 noc,
                       u32 nor)
 {
-  header *h;
+  header *h = NULL;
   int i = header_alloc(&h);
   assert(NULL != h);
   assert(i);

@@ -1,5 +1,5 @@
 /*
- * $Id: vpf.c,v 1.6 2005/07/24 11:31:35 jon Exp $
+ * $Id: vpf.c,v 1.7 2005/10/28 22:58:08 jon Exp $
  *
  * Function to permute some vectors under two generators,
  * using intermediate file
@@ -249,7 +249,7 @@ u32 permute_file(const char *tmp_dir, const char *in,
     if ( 0 != errno) {
       perror(name);
     }
-    fprintf(stderr, "%s: failed to write %u rows to %s at offset %lld, terminating\n", name, nor, name_tmp, gen->base_ptr);
+    fprintf(stderr, "%s: failed to write %u rows to %s at offset %" S64_F ", terminating\n", name, nor, name_tmp, gen->base_ptr);
     cleanup(NULL, f_a, f_b, vectors);
     (void)remove(name_tmp);
     exit(1);
@@ -274,13 +274,13 @@ u32 permute_file(const char *tmp_dir, const char *in,
       if ( 0 != errno) {
         perror(name);
       }
-      fprintf(stderr, "%s: failed to read %u rows from %s at offset %lld, terminating\n", name, rows_to_do, name_tmp, gen->base_ptr);
+      fprintf(stderr, "%s: failed to read %u rows from %s at offset %" S64_F ", terminating\n", name, rows_to_do, name_tmp, gen->base_ptr);
       cleanup(NULL, f_a, f_b, vectors);
       (void)remove(name_tmp);
       exit(1);
     }
     gen->base_ptr = ftello64(vectors); /* Reset the pointer into the rows for this generator */
-    assert(gen->base_ptr == sizeof(**rows) * len * (gen->nor + rows_to_do));
+    assert((u64)gen->base_ptr == sizeof(**rows) * len * (gen->nor + rows_to_do));
     /* Multiply placing results at max_rows - rows_to_do */
     if (0 == mul_from_store(rows, rows + max_rows - rows_to_do, gen->f,
                             gen->is_map, noc, len, nob, rows_to_do, noc,
@@ -394,7 +394,7 @@ u32 permute_file(const char *tmp_dir, const char *in,
     /* Note, gen->base_ptr already set */
     gen->nor += rows_to_do;
     nor += j; /* The number of extra rows we made */
-    assert(end_ptr == sizeof(**rows) * len * nor);
+    assert((u64)end_ptr == sizeof(**rows) * len * nor);
     /* Now sort the new rows in according to hash */
     /* There's no need to do more than this, because bsearch only uses hash */
     qsort(record_ptrs, nor, sizeof(vec *), &hash_compar);

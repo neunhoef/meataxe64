@@ -1,5 +1,5 @@
 /*
- * $Id: utils.c,v 1.22 2005/07/24 09:32:45 jon Exp $
+ * $Id: utils.c,v 1.23 2005/10/28 22:58:08 jon Exp $
  *
  * Utils for meataxe
  *
@@ -121,7 +121,7 @@ void *my_malloc(size_t size)
   errno = 0;
   ret = malloc(size);
   if (NULL == ret) {
-    fprintf(stderr, "Failed to allocate %u bytes with error reason '%s', terminating\n",
+    fprintf(stderr, "Failed to allocate %" SIZE_F " bytes with error reason '%s', terminating\n",
             size, (0 != errno) ? strerror(errno) : "unknown");
     exit(1);
   }

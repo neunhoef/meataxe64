@@ -1,5 +1,5 @@
 /*
- * $Id: tspf.c,v 1.22 2005/10/12 18:20:31 jon Exp $
+ * $Id: tspf.c,v 1.23 2005/10/28 22:58:08 jon Exp $
  *
  * Function to spin some vectors under two generators in tensor space
  * using intermediate files in a temporary directory.
@@ -348,7 +348,7 @@ u32 tensor_spinf(const char *in, const char *out,
         if ( 0 != errno) {
           perror(name);
         }
-        fprintf(stderr, "%s: failed to read %u rows from %s at offset %lld, terminating\n", name, stride, name_echelised, gen->base_ptr);
+        fprintf(stderr, "%s: failed to read %u rows from %s at offset %" S64_F ", terminating\n", name, stride, name_echelised, gen->base_ptr);
         cleanup_tmp(echelised, name_echelised);
         exit(1);
       }

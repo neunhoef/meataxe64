@@ -1,5 +1,5 @@
 /*
- * $Id: memory.c,v 1.15 2005/06/22 21:52:53 jon Exp $
+ * $Id: memory.c,v 1.16 2005/10/28 22:58:08 jon Exp $
  *
  * Large memory manipulation for meataxe
  *
@@ -27,7 +27,7 @@ void memory_init(const char *name, size_t size)
   extent /= sizeof(word);
   errno = 0;
   if (UINT_MAX / (1000 * sizeof(word)) < extent) {
-    fprintf(stderr, "%s: memory request %u exceeds system maximum, exiting\n", name, extent * sizeof(word));
+    fprintf(stderr, "%s: memory request %" SIZE_F " exceeds system maximum, exiting\n", name, extent * sizeof(word));
     exit(1);
   }
   memory = malloc(extent * 1000 * sizeof(word));
@@ -35,7 +35,7 @@ void memory_init(const char *name, size_t size)
     if ( 0 != errno) {
       perror(name);
     }
-    fprintf(stderr, "%s: failed to allocate %u bytes, exiting\n", name, extent * 1000 * sizeof(word));
+    fprintf(stderr, "%s: failed to allocate %" SIZE_F " bytes, exiting\n", name, extent * 1000 * sizeof(word));
     exit(1);
   }
 }

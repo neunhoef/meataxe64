@@ -1,5 +1,5 @@
 /*
- * $Id: msbf.c,v 1.16 2005/10/12 18:20:31 jon Exp $
+ * $Id: msbf.c,v 1.17 2005/10/28 22:58:08 jon Exp $
  *
  * Function to spin some vectors under multiple generators to obtain a standard base
  *
@@ -272,7 +272,7 @@ u32 msb_spinf(const char *in, const char *out, const char *dir,
         if ( 0 != errno) {
           perror(name);
         }
-        fprintf(stderr, "%s: failed to read %u rows from %s at offset %lld, terminating\n", name, stride, name_basis, gen->base_ptr);
+        fprintf(stderr, "%s: failed to read %u rows from %s at offset %" S64_F ", terminating\n", name, stride, name_basis, gen->base_ptr);
         cleanup_all(NULL, argc, files, basis, echelised, name_basis, name_echelised);
         exit(1);
       }
