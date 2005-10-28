@@ -1,22 +1,17 @@
 /*
- * $Id: mt_types.h,v 1.3 2005/10/28 20:56:07 jon Exp $
+ * $Id: mt_types.h,v 1.1 2005/10/28 20:58:25 jon Exp $
  *
- * Fundamental types for meataxe for x86
+ * Fundamental types for meataxe for ia64
  *
  */
 
 #ifndef included__mt_types
 #define included__mt_types
 
-typedef unsigned int u32;
-typedef int s32;
-#if defined(WIN32)
-typedef unsigned long u64;
-typedef long s64;
-#else
-typedef unsigned long long u64;
-typedef long long s64;
-#endif
+typedef unsigned short u32; /* Check, might be int */
+typedef short s32; /* Check, might be int */
+typedef unsigned int u64; /* Check, might be long */
+typedef int s64; /* Check, might be long */
 
 #define PRIME_MASK 0x3fffffff
 #define PRIME_BITS 0xc0000000
