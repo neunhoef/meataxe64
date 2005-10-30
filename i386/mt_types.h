@@ -1,5 +1,5 @@
 /*
- * $Id: mt_types.h,v 1.4 2005/10/28 22:58:08 jon Exp $
+ * $Id: mt_types.h,v 1.5 2005/10/30 09:41:16 jon Exp $
  *
  * Fundamental types for meataxe for x86
  *
@@ -12,7 +12,7 @@
 
 #define U32_F "u"
 #define S32_F "d"
-#define SIZE_F "lu"
+#define SIZE_F "u"
 
 typedef unsigned int u32;
 typedef int s32;
