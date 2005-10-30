@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.99 2005/10/12 18:20:31 jon Exp $
+# $Id: makefile,v 1.100 2005/10/30 10:53:46 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -23,6 +23,7 @@ ESID_TARGET=	esid
 ETR_TARGET=	etr
 MAKE_TARGET=	maketab
 MON_TARGET=	monst
+SIZES_TARGET=	sizes
 SNS_TARGET=	sns
 SRN_TARGET=	srn
 STOP_TARGET=	stop
@@ -137,6 +138,7 @@ ESID_MODULES=	esid rows
 ETR_MODULES=	etr rows
 MAKE_MODULES=	maketab primes utils
 MON_MODULES=	mmat mop mtx rows
+SIZES_MODULES=	sizes
 SNS_MODULES=	rows sns
 SRN_MODULES=	rows srn
 STOP_MODULES=	stop
@@ -250,6 +252,7 @@ MODULES=	$(LIB_MODULES) \
 	$(ETR_MODULES) \
 	$(MAKE_MODULES) \
 	$(MON_MODULES) \
+	$(SIZES_MODULES) \
 	$(SNS_MODULES) \
 	$(SRN_MODULES) \
 	$(STOP_MODULES) \
@@ -427,6 +430,9 @@ TARGET_TYPE:=DEBUG
 include nonlibtarget.txt
 
 TARGET:=MON
+include targets.txt
+
+TARGET:=SIZES
 include targets.txt
 
 TARGET:=SNS
