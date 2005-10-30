@@ -1,5 +1,5 @@
 /*
- * $Id: header.c,v 1.17 2005/10/28 22:58:08 jon Exp $
+ * $Id: header.c,v 1.18 2005/10/30 19:52:22 jon Exp $
  *
  * Header manipulation
  *
@@ -162,6 +162,7 @@ void header_set_len(header *h)
 
 static u32 get_eperb(u32 prime, u32 nob)
 {
+  prime &= PRIME_MASK;
   if (1 == prime) {
     return 1;
   }

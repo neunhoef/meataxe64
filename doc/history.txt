@@ -363,4 +363,5 @@ skew seventh
 20050819 - Update singular_order to use a more sensible memory size
 20050727 - Added win32 build
 20051028 - First em64t port
-20051020 - Added sizes program to get the data for 64 bit architectures
+20051030 - Added sizes program to get the data for 64 bit architectures
+20051030 - Fix bug in header computation for odd primes in 64 bit mode
