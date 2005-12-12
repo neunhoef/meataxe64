@@ -1,5 +1,5 @@
 /*
- * $Id: zcv64to32.c,v 1.3 2005/10/12 18:20:31 jon Exp $
+ * $Id: zcv64to32.c,v 1.4 2005/12/12 23:16:03 jon Exp $
  *
  * Convert from the 64 bit word meataxe to the 32 bit word meataxe
  *
@@ -16,7 +16,7 @@
 #include "utils.h"
 #include "write.h"
 
-static const char *name = "zcvu64to32";
+static const char *name = "zcv64to32";
 
 static void cv_usage(void)
 {

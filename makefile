@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.101 2005/12/12 08:55:57 jon Exp $
+# $Id: makefile,v 1.102 2005/12/12 23:16:03 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -49,6 +49,7 @@ ZFLN_TARGET=	zfln
 ZFLNF_TARGET=	zflnf
 ZFO_TARGET=	zfo
 ZFOL_TARGET=	zfol
+ZFORMAT_TARGET=	zformat
 ZID_TARGET=	zid
 ZIMPORT_TARGET=	zimport
 ZIP_TARGET=	zip
@@ -165,6 +166,7 @@ ZFLN_MODULES=	rows zfln
 ZFLNF_MODULES=	rows zflnf
 ZFO_MODULES=	rows zfo
 ZFOL_MODULES=	rows zfol
+ZFORMAT_MODULES=	zformat
 ZID_MODULES=	id rows
 ZIMPORT_MODULES=	rows zimport
 ZIP_MODULES=	ipp rows
@@ -280,6 +282,7 @@ MODULES=	$(LIB_MODULES) \
 	$(ZFLNF_MODULES) \
 	$(ZFO_MODULES) \
 	$(ZFOL_MODULES) \
+	$(ZFORMAT_MODULES) \
 	$(ZID_MODULES) \
 	$(ZIMPORT_MODULES) \
 	$(ZIP_MODULES) \
@@ -511,6 +514,9 @@ TARGET:=ZFO
 include targets.txt
 
 TARGET:=ZFOL
+include targets.txt
+
+TARGET:=ZFORMAT
 include targets.txt
 
 TARGET:=ZID
