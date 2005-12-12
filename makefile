@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.100 2005/10/30 10:53:46 jon Exp $
+# $Id: makefile,v 1.101 2005/12/12 08:55:57 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -93,6 +93,7 @@ ZSID_TARGET=	zsid
 ZSIGN_TARGET=	zsign
 ZSIGNF_TARGET=	zsignf
 ZSING_TARGET=	zsing
+ZSIZE_TARGET=	zsize
 ZSKCU_TARGET=	zskcu
 ZSKFI_TARGET=	zskfi
 ZSKFO_TARGET=	zskfo
@@ -208,6 +209,7 @@ ZSID_MODULES=	rows zsid
 ZSIGN_MODULES=	sign rows zsign
 ZSIGNF_MODULES=	signf rows zsignf
 ZSING_MODULES=	rows zsing
+ZSIZE_MODULES=	zsize
 ZSKCU_MODULES=	rows zskcu
 ZSKFI_MODULES=	rows zskfi
 ZSKFO_MODULES=	rows zskfo
@@ -322,6 +324,7 @@ MODULES=	$(LIB_MODULES) \
 	$(ZSIGN_MODULES) \
 	$(ZSIGNF_MODULES) \
 	$(ZSING_MODULES) \
+	$(ZSIZE_MODULES) \
 	$(ZSKCU_MODULES) \
 	$(ZSKFI_MODULES) \
 	$(ZSKFO_MODULES) \
@@ -634,6 +637,9 @@ TARGET:=ZSID
 include targets.txt
 
 TARGET:=ZSING
+include targets.txt
+
+TARGET:=ZSIZE
 include targets.txt
 
 TARGET:=ZSIGN
