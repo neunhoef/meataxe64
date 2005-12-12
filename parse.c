@@ -1,5 +1,5 @@
 /*
- * $Id: parse.c,v 1.11 2005/07/24 11:31:35 jon Exp $
+ * $Id: parse.c,v 1.12 2005/12/12 08:02:33 jon Exp $
  *
  * Function to parse command line flags
  *
@@ -34,6 +34,10 @@ u32 memory = MEM_SIZE;
 u32 max_grease = 32;
 
 unsigned int maximum_rows = 0;
+
+unsigned int print_stats = 0;
+
+double adds = 0.0, incs = 0.0, scaled_adds = 0.0, scaled_incs = 0.0;
 
 static parse_element parse_table[] =
 {
@@ -71,6 +75,13 @@ static parse_element parse_table[] =
     nullary,
     "-v",
     "mtx_verbose"
+  },
+  {
+    &print_stats,
+    1,
+    nullary,
+    "-s",
+    "mtx_print_stats"
   },
 };
 
