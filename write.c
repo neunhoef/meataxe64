@@ -1,5 +1,5 @@
 /*
- * $Id: write.c,v 1.16 2005/07/24 11:31:35 jon Exp $
+ * $Id: write.c,v 1.17 2005/12/17 14:43:55 jon Exp $
  *
  * Write a header
  *
@@ -70,7 +70,7 @@ int open_and_write_binary_header(FILE **outp, const header *h, const char *m, co
   assert(NULL != h);
   assert(NULL != m);
   errno = 0;
-  out = fopen64(m, "wb");
+  out = fopen64(m, "w+b");
   if (NULL == out) {
     if ( 0 != errno) {
       perror(name);
