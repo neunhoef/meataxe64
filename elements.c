@@ -1,5 +1,5 @@
 /*
- * $Id: elements.c,v 1.25 2005/07/24 11:31:35 jon Exp $
+ * $Id: elements.c,v 1.26 2005/12/18 11:22:07 jon Exp $
  *
  * Element manipulation for meataxe
  *
@@ -101,6 +101,55 @@ word get_element_from_row_with_params(u32 nob, u32 index, word mask,
   assert(NULL != row);
   assert(bit_offset + nob <= bits_in_word);
   return res;
+}
+
+void get_elements_from_row_with_params_into_row(u32 nob, u32 index, word mask,
+                                                u32 elts_per_word, const word *row,
+                                                u32 count, word *out)
+{
+  u32 word_offset = index / elts_per_word;
+  u32 elt_offset = index % elts_per_word;
+  u32 bit_offset = elt_offset * nob;
+  word w;
+  assert(0 != nob);
+  assert(NULL != row);
+  assert(NULL != out);
+  row += word_offset;
+  if (0 != elt_offset) {
+    u32 sub_count = elts_per_word - elt_offset;
+    word *end = out + sub_count;
+    if (sub_count > count) {
+      sub_count = count;
+    }
+    count -= sub_count;
+    w = *row >> bit_offset;
+    while (out < end) {
+      *out = w & mask;
+      w >>= nob;
+      out++;
+    }
+    row++;
+  }
+  while (count >= elts_per_word) {
+    word *end = out + elts_per_word;
+    w = *row;
+    while (out < end) {
+      *out = w & mask;
+      w >>= nob;
+      out++;
+    }
+    row++;
+    count -= elts_per_word;
+  }
+  if (count > 0) {
+    word *end = out + count;
+    w = *row;
+    while (out < end) {
+      *out = w & mask;
+      w >>= nob;
+      out++;
+    }
+  }
 }
 
 void element_access_init(u32 nob, u32 from, u32 size,

@@ -1,5 +1,5 @@
 /*
- * $Id: rows.c,v 1.31 2005/07/24 09:32:45 jon Exp $
+ * $Id: rows.c,v 1.32 2005/12/18 11:22:11 jon Exp $
  *
  * Row manipulation for meataxe
  *
@@ -71,6 +71,16 @@ static void short_row_add_2(const word *row1, const word *row2,
   }
 }
 
+static void word_row_add_2(const word *row1, const word *row2,
+                            word *row3, u32 len)
+{
+  NOT_USED(len);
+  assert(NULL != row1);
+  assert(NULL != row2);
+  assert(NULL != row3);
+  *(row3) = *(row1) ^ *(row2);
+}
+
 static void row_inc_2_sub(const word *row1,
                           word *row2, u32 len)
 {
@@ -131,6 +141,15 @@ static void short_row_inc_2(const word *row1,
   while (row1 < rowa) {
     *(row2++) ^= *(row1++);
   }
+}
+
+static void word_row_inc_2(const word *row1,
+                           word *row2, u32 len)
+{
+  NOT_USED(len);
+  assert(NULL != row1);
+  assert(NULL != row2);
+  *(row2) ^= *(row1);
 }
 
 static unsigned char prod_table_2[0x10000];
@@ -1238,6 +1257,149 @@ int short_rows_init(u32 prime, row_opsp ops)
   case 4:
     ops->adder = &short_row_add_2;
     ops->incer = &short_row_inc_2;
+    ops->scaled_adder = &scaled_row_add_4;
+    ops->scaled_incer = &scaled_row_inc_4;
+    ops->scaler = &row_scale_4;
+    ops->scaler_in_place = &row_scale_in_place_4;
+    ops->product = &row_product_4;
+    for (i = 0; i < 0x10000; i++) {
+      word prod = 0;
+      u32 j = i & 0xff;
+      u32 k = (i & 0xff00) >> 8;
+      while (0 != j && 0 != k) {
+        u32 l = j & 3;
+        u32 m = k & 3;
+        switch (4 * l + m) {
+        case 0x0:
+        case 0x1:
+        case 0x2:
+        case 0x3:
+        case 0x4:
+        case 0x8:
+        case 0xc:
+          break;
+        case 0x5:
+        case 0xb:
+        case 0xe:
+          prod ^= 1;
+          break;
+        case 0x6:
+        case 0x9:
+        case 0xf:
+          prod ^= 2;
+          break;
+        case 0x7:
+        case 0xa:
+        case 0xd:
+          prod ^= 1;
+          break;
+        }
+        j >>= 2;
+        k >>= 2;
+      }
+      prod_table_4[i] = prod;
+    }
+    break;
+  case 5:
+    ops->adder = &row_add_5;
+    ops->incer = &row_inc_5;
+    ops->scaled_adder = &scaled_row_add_5;
+    ops->scaled_incer = &scaled_row_inc_5;
+    ops->scaler = &row_scale_5;
+    ops->scaler_in_place = &row_scale_in_place_5;
+    ops->product = &row_product_5;
+    break;
+  case 9:
+    if (0 == primes_init(9, &prime_operations)) {
+      return 0;
+    }
+    ops->adder = &row_add_9;
+    ops->incer = &row_inc_9;
+    ops->scaled_adder = &scaled_row_add_9;
+    ops->scaled_incer = &scaled_row_inc_9;
+    ops->scaler = &row_scale_9;
+    ops->scaler_in_place = &row_scale_in_place_9;
+    ops->product = &row_product_9;
+    break;
+  default:
+    assert(assert_var_zero != 0);
+    return 0;
+  }
+  return 1;
+}
+
+int word_rows_init(u32 prime, row_opsp ops)
+{
+  u32 i;
+  switch (prime) {
+  case 2:
+    ops->adder = &word_row_add_2;
+    ops->incer = &word_row_inc_2;
+    ops->scaled_adder = NULL; /* Should never be called */
+    ops->scaled_incer = NULL; /* Should never be called */
+    ops->scaler = NULL; /* Should never be called */
+    ops->scaler_in_place = NULL; /* Should never be called */
+    ops->product = &row_product_2;
+    if (0 == prod_table_2_init) {
+      for (i = 0; i < 0x10000; i++) {
+        unsigned char prod = 0;
+        u32 j = i;
+        while (0 != j) {
+          prod ^= 1;
+          j &= (j - 1);
+        }
+        prod_table_2[i] = prod;
+      }
+      prod_table_2_init = 1;
+    }
+    break;
+  case 3:
+    ops->adder = &row_add_3;
+    ops->incer = &row_inc_3;
+    ops->scaled_adder = &scaled_row_add_3;
+    ops->scaled_incer = &scaled_row_inc_3;
+    ops->scaler = &row_scale_3;
+    ops->scaler_in_place = &row_scale_in_place_3;
+    ops->product = row_product_3;
+    for (i = 0; i < 0x10000; i++) {
+      word prod = 0;
+      u32 j = i & 0xff;
+      u32 k = (i & 0xff00) >> 8;
+      while (0 != j && 0 != k) {
+        u32 l = j & 3;
+        u32 m = k & 3;
+        switch (4 * l + m) {
+        case 0x0:
+        case 0x1:
+        case 0x2:
+        case 0x3:
+        case 0x4:
+        case 0x7:
+        case 0x8:
+        case 0xb:
+        case 0xc:
+        case 0xd:
+        case 0xe:
+        case 0xf:
+          break;
+        case 0x6:
+        case 0x9:
+          prod += 2;
+          break;
+        case 0x5:
+        case 0xa:
+          prod += 1;
+          break;
+        }
+        j >>= 2;
+        k >>= 2;
+      }
+      prod_table_3[i] = prod % 3;
+    }
+    break;
+  case 4:
+    ops->adder = &word_row_add_2;
+    ops->incer = &word_row_inc_2;
     ops->scaled_adder = &scaled_row_add_4;
     ops->scaled_incer = &scaled_row_inc_4;
     ops->scaler = &row_scale_4;
