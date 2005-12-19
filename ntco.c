@@ -1,5 +1,5 @@
 /*
- * $Id: ntco.c,v 1.2 2005/12/18 11:22:07 jon Exp $
+ * $Id: ntco.c,v 1.3 2005/12/19 22:23:06 jon Exp $
  *
  * Tensor condense one group element (new algorithm)
  *
@@ -692,14 +692,26 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
 #endif
                   /* Add elt * qnp[k,l] to t_rows */
                   if (0 != elt) {
-                    for (m = 0; m < dim_end_i; m++) {
-                      if (1 == elt) {
+                    if (1 == elt) {
+#if 0
+                      for (m = 0; m < dim_end_i; m++) {
                         word_row_operations.incer(qnp_rows[dim_end_i * (k * dim_irr_j + l) + m], t_rows[m],
-                                             len_pj);
-                      } else {
+                                                  len_pj);
+                      }
+#else
+                      row_operations.incer(qnp_rows[dim_end_i * (k * dim_irr_j + l)], t_rows[0],
+                                           len_pj * dim_end_i);
+#endif
+                    } else {
+#if 0
+                      for (m = 0; m < dim_end_i; m++) {
                         word_row_operations.scaled_incer(qnp_rows[dim_end_i * (k * dim_irr_j + l) + m], t_rows[m],
                                                     len_pj, elt);
                       }
+#else
+                      row_operations.scaled_incer(qnp_rows[dim_end_i * (k * dim_irr_j + l)], t_rows[0],
+                                                  len_pj * dim_end_i, elt);
+#endif
                     }
                   }
                 }
@@ -711,8 +723,6 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
                   /* Extract from t_rows[k] at l */
                   word elt = get_element_from_row_with_params(nob, l, mask, elts_per_word, t_rows[k]);
                   /* Insert into rows[k] at m + l */
-                  if (i == 17) {
-                  }
                   put_element_to_clean_row_with_params(nob, m + l, elts_per_word, rows[k], elt);
                 }
               }

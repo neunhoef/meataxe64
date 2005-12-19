@@ -368,3 +368,4 @@ skew seventh
 20051212 - Added zsize and zformat to say what sort of meataxe
 20051217 - Add new tensor condense algorithm
 20051218 - Add get_elements_from_row_with_params_into_row and use in ntco
+20051219 - Further minor improvements to ntco
