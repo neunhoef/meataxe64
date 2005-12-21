@@ -1,5 +1,5 @@
 /*
- * $Id: parse.h,v 1.8 2005/12/12 08:02:33 jon Exp $
+ * $Id: parse.h,v 1.9 2005/12/21 18:12:22 jon Exp $
  *
  * Function to parse command line flags
  *
@@ -15,6 +15,8 @@ extern u32 memory;
 extern u32 max_grease;
 
 extern unsigned int maximum_rows;
+
+extern unsigned int print_stats;
 
 /* These values will only be computed if the system is compiled for statistics gathering */
 /* They will be printed in stats mode */

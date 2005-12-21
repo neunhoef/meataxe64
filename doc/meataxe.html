@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.68 2005/12/12 23:16:03 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.69 2005/12/21 18:12:22 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -359,6 +359,7 @@ Turn on verbose mode
 <li><a href="#znor">znor</a></li>
 <li><a href="#zns">zns</a></li>
 <li><a href="#znsf">znsf</a></li>
+<li><a href="#zntco">zntco</a></li>
 <li><a href="#zpco">zpco</a></li>
 <li><a href="#zpcv">zpcv</a></li>
 <li><a href="#zpr">zpr</a></li>
@@ -2358,6 +2359,168 @@ new temporary file. The process than restarts with that temporary file
 as input. The record of operations is similarly kept in corresponding
 temporary files. The temporary workspace directory must exist, this
 program will not create it.
+</li>
+<li>
+<h3><a name="zntco">zntco</a></h3>
+Purpose: Tensor condense (new algorithm)
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Number of irreducibles of
+condensation subgroup</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Multiplicities of tensor parameter
+1</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>Multiplicities of tensor parameter
+2</td>
+</tr>
+<tr>
+<td valign=top>4</td><td valign=top>File of irreducible dimensions for
+condensation subgroup</td>
+</tr>
+<tr>
+<td valign=top>5</td><td valign=top>File of endomorphism ring
+dimensions for condensation subgroup</td>
+</tr>
+<tr>
+<td valign=top>6</td><td valign=top>Tensor parameter 1</td>
+</tr>
+<tr>
+<td valign=top>7</td><td valign=top>Tensor parameter 2</td>
+</tr>
+<tr>
+<td valign=top>8</td><td valign=top>Output</td>
+</tr>
+<tr>
+<td valign=top>9</td><td valign=top>Endomorphism ring basis (Q) for
+first irreducible</td>
+</tr>
+<tr>
+<td valign=top>10</td><td valign=top>Projection matrix (P) for first
+irreducible</td>
+</tr>
+<tr>
+<td valign=top>11-</td><td valign=top>Further bases and projections</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>None</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient workspace</td>
+</tr>
+</table>
+Commentary: This is a revised implementation of the direct tensor
+condensation algorithm, as described in Lux and Wiegelmann -
+Condensing Tensor Product Modules, to which the user is referred for a
+fuller description of condensation in general and tensor condensation
+in particular. The algorithm produces the result in a different order
+from that described in the paper, and achieves an average factor 25
+speed up as a result. The result is nevertheless identical to that
+produced by <a href="ztco">ztco</a> given the same input.
+</li>
+<li>
+<h3><a name="ztcocon">ztcocon</a></h3>
+Purpose: Tensor condense continue
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Number of irreducibles of
+condensation subgroup</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Multiplicities of tensor parameter
+1</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>Multiplicities of tensor parameter
+2</td>
+</tr>
+<tr>
+<td valign=top>4</td><td valign=top>File of irreducible dimensions for
+condensation subgroup</td>
+</tr>
+<tr>
+<td valign=top>5</td><td valign=top>File of endomorphism ring
+dimensions for condensation subgroup</td>
+</tr>
+<tr>
+<td valign=top>6</td><td valign=top>Tensor parameter 1</td>
+</tr>
+<tr>
+<td valign=top>7</td><td valign=top>Tensor parameter 2</td>
+</tr>
+<tr>
+<td valign=top>8</td><td valign=top>Output</td>
+</tr>
+<tr>
+<td valign=top>9</td><td valign=top>Input</td>
+</tr>
+<tr>
+<td valign=top>10</td><td valign=top>Loop number</td>
+</tr>
+<tr>
+<td valign=top>11</td><td valign=top>Loop start point</td>
+</tr>
+<tr>
+<td valign=top>12</td><td valign=top>Endomorphism ring basis (Q) for
+first irreducible</td>
+</tr>
+<tr>
+<td valign=top>13</td><td valign=top>Projection matrix (P) for first
+irreducible</td>
+</tr>
+<tr>
+<td valign=top>14-</td><td valign=top>Further bases and projections</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>None</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient workspace</td>
+</tr>
+</table>
+Commentary: This program is to carry on where a preceding tenosr
+condense has failed due to machine crash. It takes three extra
+parameters not used by <a href=#ztco>ztco</a>, to specify the
+condensed tensor so far, and at what point in the algorithm to
+continue. The algorithm has an outer loop (parameter 0) controlling
+which irreducible of the condensation subgroup is being dealt with, a
+first inner loop (parameter 1) over the multiplicity of this
+irreducible in the left tensor, and a second inner loop (parameter 2)
+over the multiplicity of the given irreducible in the right tensor. A
+continuation point can be specified for one of these three parameters.
+The loop number takes values 0, 1 or 2 according to which parameter is
+to be given. The loop start point then indicates the starting value of
+the parameter in question. If an inner loop initial value is
+specified, then all containing loops start at their maximum value.
+See Lux and Wiegelmann - Condensing Tensor Product Modules for a
+fuller description of condensation in general and tensor condensation
+in particular.
 </li>
 <li>
 <h3><a name="zpco">zpco</a></h3>

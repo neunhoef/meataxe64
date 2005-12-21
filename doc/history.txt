@@ -369,3 +369,4 @@ skew seventh
 20051217 - Add new tensor condense algorithm
 20051218 - Add get_elements_from_row_with_params_into_row and use in ntco
 20051219 - Further minor improvements to ntco
+20051221 - Convert t_rows to t_row in ntco

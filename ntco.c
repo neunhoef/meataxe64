@@ -1,5 +1,5 @@
 /*
- * $Id: ntco.c,v 1.3 2005/12/19 22:23:06 jon Exp $
+ * $Id: ntco.c,v 1.4 2005/12/21 18:12:22 jon Exp $
  *
  * Tensor condense one group element (new algorithm)
  *
@@ -145,18 +145,17 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
   u32 *left_multiplicities = NULL, *right_multiplicities = NULL, *dim_irr = NULL, *dim_end = NULL;
   FILE *inp = NULL, *leftp = NULL, *rightp = NULL, *outp = NULL, **p, **q;
   u32 nor, nob, nod, len, prime, nor_l, noc_l, len_l, nor_r, noc_r, len_r,
-    max_rows, max_irr, max_irr2, max_irr_len, max_irr2_len, max_end, max_end_len, max_left, i, j, k, l, m;
+    max_rows, max_irr, max_irr2, max_irr_len, max_irr2_len, max_end, max_end_len, max_end2_len, max_left, i, j, k, l, m, n;
   u32 *nor_p = NULL, *nor_q = NULL, *noc_p = NULL, *noc_q = NULL, *len_p = NULL, *len_q = NULL;
   const header *h_l, *h_r, *h_o, **h_p, **h_q;
   u32 alpha, beta, gamma, delta, extent_l, extent_r, extent_q, extent_p, extent_sub_q, extent_n, extent_qn, extent_qnp, extent_t, n_r, n_o, m_r, m_l;
-  word **rows, **lrows, **rrows, **q_rows, **p_rows, **q_split_rows, **n_rows, **qn_rows, **qnp_rows, **t_rows;
-  u32 elts_per_word, elts_per_word_nob;
+  word **rows, **lrows, **rrows, **q_rows, **p_rows, **q_split_rows, **n_rows, **qn_rows, **qnp_rows, *t_row;
+  u32 elts_per_word;
   word mask;
   word **expanded_rrows, **expanded_lrows;
   row_ops row_operations;
   row_ops word_row_operations;
   grease_struct grease;
-  u32 lim;
   s64 optr;
   s64 lptr;
   NOT_USED(loop);
@@ -292,9 +291,7 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
                    h_l, NULL, NULL, NULL, NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL);
   }
   nob = header_get_nob(h_l);
-  lim = bits_in_word - nob;
   mask = get_mask_and_elts(nob, &elts_per_word);
-  elts_per_word_nob = elts_per_word * nob;
   nod = header_get_nod(h_l);
   prime = header_get_prime(h_l);
   nor_l = header_get_nor(h_l);
@@ -306,6 +303,7 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
   max_irr2_len = compute_len(nob, max_irr2);
   max_irr_len = compute_len(nob, max_irr);
   max_end_len = compute_len(nob, max_end);
+  max_end2_len = compute_len(nob, max_end * max_end);
   if (1 == prime || header_get_prime(h_r) != prime || 0 == is_a_prime_power(prime) ||
       nor_l != noc_l || nor_r != noc_r) {
     fprintf(stderr, "%s: header compatibility failure between '%s' and '%s', terminating\n", name, left, right);
@@ -379,8 +377,8 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
   extent_sub_q = find_extent(max_irr * max_end, max_irr_len); /* Space for the split up Qi */
   extent_n = find_extent(max_irr, max_irr_len); /* Space for the individual N element */
   extent_qn = find_extent(max_end, max_irr_len); /* Space for Qi * N element */
-  extent_qnp = find_extent(max_irr2 * max_end, max_end_len); /* Space for Qi * N * P element */
-  extent_t = find_extent(max_end * max_end, max_end_len); /* Space for T element */
+  extent_qnp = find_extent(max_irr2 * max_end, max_end2_len); /* Space for Qi * N * P element */
+  extent_t = find_extent(1, max_end2_len); /* Space for T element */
   if (extent_l + extent_r + extent_p + extent_q + extent_sub_q + extent_n + extent_qn + extent_qnp + extent_t >= 900) {
     fprintf(stderr, "%s: insufficient memory, terminating\n", name);
     (void)cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
@@ -451,7 +449,7 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
     }
   }
   short_rows_init(prime, &row_operations);
-  if (max_end_len <= 1) {
+  if (max_end2_len <= 1) {
     word_rows_init(prime, &word_row_operations);
   } else {
     short_rows_init(prime, &word_row_operations);
@@ -517,13 +515,10 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
   qnp_rows = matrix_malloc(max_irr2 * max_end);
   for (i = 0; i < max_irr2 * max_end; i++) {
     /* Now set up the pointers */
-    qnp_rows[i] = memory_pointer_offset(extent_l + extent_r + extent_p + extent_q + extent_sub_q + extent_n + extent_qn, i, max_end_len);
+    qnp_rows[i] = memory_pointer_offset(extent_l + extent_r + extent_p + extent_q + extent_sub_q + extent_n + extent_qn, i, max_end2_len);
   }
-  t_rows = matrix_malloc(max_end * max_end);
-  for (i = 0; i < max_end * max_end; i++) {
-    /* Now set up the pointers */
-    t_rows[i] = memory_pointer_offset(extent_l + extent_r + extent_p + extent_q + extent_sub_q + extent_n + extent_qn + extent_qnp, i, max_end_len);
-  }
+  /* Now set up the pointers */
+  t_row = memory_pointer_offset(extent_l + extent_r + extent_p + extent_q + extent_sub_q + extent_n + extent_qn + extent_qnp, 0, max_end2_len);
   n_r = 0;
   n_o = 0;
   lptr = ftello64(leftp);
@@ -540,7 +535,6 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
       matrix_free(n_rows);
       matrix_free(qn_rows);
       matrix_free(qnp_rows);
-      matrix_free(t_rows);
       grease_free(&grease);
       free_expanded(expanded_rrows, nor_r);
       free_expanded(expanded_lrows, max_irr);
@@ -602,7 +596,6 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
                 matrix_free(n_rows);
                 matrix_free(qn_rows);
                 matrix_free(qnp_rows);
-                matrix_free(t_rows);
                 grease_free(&grease);
                 free_expanded(expanded_rrows, nor_r);
                 free_expanded(expanded_lrows, max_irr);
@@ -621,13 +614,20 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
                 matrix_free(n_rows);
                 matrix_free(qn_rows);
                 matrix_free(qnp_rows);
-                matrix_free(t_rows);
                 grease_free(&grease);
                 free_expanded(expanded_rrows, nor_r);
                 free_expanded(expanded_lrows, max_irr);
                 return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
                                nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, NULL,
                                NULL, NULL, p, q, h_p, h_q, s, h_o, outp, rows, lrows, rrows);
+              }
+              /* Now convert this to linearised form */
+              for (m = 1; m < dim_end_i; m++) {
+                /* Over the rows */
+                for (n = 0; n < dim_end_j; n++) {
+                  word elt = get_element_from_row_with_params(nob, n, mask, elts_per_word, qnp_rows[dim_end_i * (k * dim_irr_j + l) + m]);
+                  put_element_to_row_with_params(nob, n + m * dim_end_j, mask, elts_per_word, qnp_rows[dim_end_i * (k * dim_irr_j + l)], elt);
+                }
               }
             }
           }
@@ -644,7 +644,6 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
               matrix_free(n_rows);
               matrix_free(qn_rows);
               matrix_free(qnp_rows);
-              matrix_free(t_rows);
               grease_free(&grease);
               free_expanded(expanded_rrows, nor_r);
               free_expanded(expanded_lrows, max_irr);
@@ -660,7 +659,6 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
               matrix_free(n_rows);
               matrix_free(qn_rows);
               matrix_free(qnp_rows);
-              matrix_free(t_rows);
               grease_free(&grease);
               free_expanded(expanded_rrows, nor_r);
               free_expanded(expanded_lrows, max_irr);
@@ -677,41 +675,21 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
             }
             for (gamma = 0; gamma < left_multiplicities[j]; gamma++) {
               /* Initialise the result */
-              for (k = 0; k < dim_end_i; k++) {
-                row_init(t_rows[k], len_pj);
-              }
+              u32 len_pjl = compute_len(nob, dim_end_i * dim_end_j);
+              row_init(t_row, len_pjl);
               /* Form T = Sigma(k,l) Lambdakl*Rkl */
               for (k = 0; k < dim_irr_i; k++) {
                 for (l = 0; l < dim_irr_j; l++) {
                   /* Get Lambda = Mi,alpha,j,gamma[k,l] */
-#if 0
-                  word elt = get_element_from_row_with_params(nob, m_l + gamma * dim_irr_j + l, mask, elts_per_word, lrows[k]);
-                  assert(elt == expanded_lrows[k][gamma * dim_irr_j + l]);
-#else
                   word elt = expanded_lrows[k][gamma * dim_irr_j + l];
-#endif
-                  /* Add elt * qnp[k,l] to t_rows */
+                  /* Add elt * qnp[k,l] to t_row */
                   if (0 != elt) {
                     if (1 == elt) {
-#if 0
-                      for (m = 0; m < dim_end_i; m++) {
-                        word_row_operations.incer(qnp_rows[dim_end_i * (k * dim_irr_j + l) + m], t_rows[m],
-                                                  len_pj);
-                      }
-#else
-                      row_operations.incer(qnp_rows[dim_end_i * (k * dim_irr_j + l)], t_rows[0],
-                                           len_pj * dim_end_i);
-#endif
+                      word_row_operations.incer(qnp_rows[dim_end_i * (k * dim_irr_j + l)], t_row,
+                                                len_pjl);
                     } else {
-#if 0
-                      for (m = 0; m < dim_end_i; m++) {
-                        word_row_operations.scaled_incer(qnp_rows[dim_end_i * (k * dim_irr_j + l) + m], t_rows[m],
-                                                    len_pj, elt);
-                      }
-#else
-                      row_operations.scaled_incer(qnp_rows[dim_end_i * (k * dim_irr_j + l)], t_rows[0],
-                                                  len_pj * dim_end_i, elt);
-#endif
+                      word_row_operations.scaled_incer(qnp_rows[dim_end_i * (k * dim_irr_j + l)], t_row,
+                                                       len_pjl, elt);
                     }
                   }
                 }
@@ -720,8 +698,8 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
               m = m_o + dim_end_j * (gamma * right_multiplicities[j] + delta);
               for (k = 0; k < dim_end_i; k++) {
                 for (l = 0; l < dim_end_j; l++) {
-                  /* Extract from t_rows[k] at l */
-                  word elt = get_element_from_row_with_params(nob, l, mask, elts_per_word, t_rows[k]);
+                  /* Extract from t_row at k * dim_end_j + l */
+                  word elt = get_element_from_row_with_params(nob, k * dim_end_j + l, mask, elts_per_word, t_row);
                   /* Insert into rows[k] at m + l */
                   put_element_to_clean_row_with_params(nob, m + l, elts_per_word, rows[k], elt);
                 }
@@ -737,7 +715,6 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
               matrix_free(n_rows);
               matrix_free(qn_rows);
               matrix_free(qnp_rows);
-              matrix_free(t_rows);
               grease_free(&grease);
               free_expanded(expanded_rrows, nor_r);
               free_expanded(expanded_lrows, max_irr);
@@ -765,7 +742,6 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
   matrix_free(n_rows);
   matrix_free(qn_rows);
   matrix_free(qnp_rows);
-  matrix_free(t_rows);
   grease_free(&grease);
   free_expanded(expanded_rrows, nor_r);
   free_expanded(expanded_lrows, max_irr);
