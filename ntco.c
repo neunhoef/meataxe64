@@ -1,5 +1,5 @@
 /*
- * $Id: ntco.c,v 1.4 2005/12/21 18:12:22 jon Exp $
+ * $Id: ntco.c,v 1.5 2005/12/31 13:11:47 jon Exp $
  *
  * Tensor condense one group element (new algorithm)
  *
@@ -436,7 +436,7 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
   }
   /* Rows for the P matrices */
   for (i = 0; i < max_irr2 * s; i++) {
-    p_rows[i] = memory_pointer_offset(extent_l + extent_r + extent_q, i, max_irr2_len);
+    p_rows[i] = memory_pointer_offset(extent_l + extent_r + extent_q, i, max_end_len);
   }
   /* Now read the P matrices */
   for (i = 0; i < s; i++) {

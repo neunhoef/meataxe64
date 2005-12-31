@@ -1,5 +1,5 @@
 /*
- * $Id: te.c,v 1.10 2005/06/22 21:52:54 jon Exp $
+ * $Id: te.c,v 1.11 2005/12/31 13:11:48 jon Exp $
  *
  * Function to tensor two matrices to give a third
  *
@@ -61,15 +61,8 @@ int tensor(const char *m1, const char *m2, const char *m3, const char *name)
   noc1 = header_get_noc(h1);
   noc2 = header_get_noc(h2);
   nor2 = header_get_nor(h2);
-  if (nor1 != noc1 ||
-      nor2 != noc2) {
-    fprintf(stderr, "%s: header mismatch between %s and %s, terminating\n", name, m1, m2);
-    header_free(h1);
-    header_free(h2);
-    return cleanup(inp1, inp2, NULL);
-  }
   nor3 = nor1 * nor2;
-  noc3 = nor3;
+  noc3 = noc1 * noc2;
   is_perm1 = (1 == prime);
   is_perm2 = (1 == header_get_prime(h2));
   if (is_perm1 && is_perm2) {
