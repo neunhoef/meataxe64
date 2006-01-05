@@ -1,5 +1,5 @@
 /*
- * $Id: rows.c,v 1.32 2005/12/18 11:22:11 jon Exp $
+ * $Id: rows.c,v 1.33 2006/01/05 08:31:38 jon Exp $
  *
  * Row manipulation for meataxe
  *
@@ -290,6 +290,20 @@ static void row_inc_3(const word *row1,
   }
 }
 
+static void word_row_inc_3(const word *row1,
+                           word *row2, u32 len)
+{
+  word a, b, c, d, e, f, g, h;
+  NOT_USED(len);
+  assert(NULL != row1);
+  assert(NULL != row2);
+  a = *(row1);
+  b = *(row2);
+  mod_3_add(a,b,c,d,e,f,g,h);
+  *(row2) = c;
+  assert(check_for_3(c));
+}
+
 #define scale_mod_3(b) (((b) & (ONE_BITS_3)) << 1) | (((b) & (TWO_BITS_3)) >> 1)
 
 static void scaled_row_add_3(const word *row1, const word *row2,
@@ -366,6 +380,23 @@ static void scaled_row_inc_3(const word *row1, word *row2,
   } else {
     scaled_row_inc_3_sub(row1, row2, len, elt);
   }
+}
+
+static void word_scaled_row_inc_3(const word *row1, word *row2,
+                                  u32 len, word elt)
+{
+  word a, b, c, d, e, f, g, h;
+  NOT_USED(len);
+  assert(2 == elt);
+  assert(NULL != row1);
+  assert(NULL != row2);
+  NOT_USED(elt);
+  a = *(row1);
+  b = *(row2);
+  a = scale_mod_3(a); /* Negate a */
+  mod_3_add(a,b,c,d,e,f,g,h);
+  *(row2) = c;
+  assert(check_for_3(c));
 }
 
 static void row_scale_3(const word *row1, word *row2,
@@ -533,6 +564,24 @@ static void scaled_row_inc_4(const word *row1, word *row2,
   } else {
     scaled_row_inc_4_sub(row1, row2, len, elt);
   }
+}
+
+static void word_scaled_row_inc_4(const word *row1, word *row2,
+                                  u32 len, word elt)
+{
+  word a, b, c, d;
+  NOT_USED(len);
+  assert(NULL != row1);
+  assert(NULL != row2);
+  assert(2 <= elt && elt <= 3);
+  a = *(row1);
+  b = *(row2);
+  if (2 == elt) {
+    scale_mod_4_X(a,c, d);
+  } else {
+    scale_mod_4_X_plus_1(a,c, d);
+  }
+  *(row2) = a ^ b;
 }
 
 static void row_scale_4(const word *row1, word *row2,
@@ -1212,9 +1261,9 @@ int short_rows_init(u32 prime, row_opsp ops)
     break;
   case 3:
     ops->adder = &row_add_3;
-    ops->incer = &row_inc_3;
+    ops->incer = &row_inc_3_sub;
     ops->scaled_adder = &scaled_row_add_3;
-    ops->scaled_incer = &scaled_row_inc_3;
+    ops->scaled_incer = &scaled_row_inc_3_sub;
     ops->scaler = &row_scale_3;
     ops->scaler_in_place = &row_scale_in_place_3;
     ops->product = row_product_3;
@@ -1258,7 +1307,7 @@ int short_rows_init(u32 prime, row_opsp ops)
     ops->adder = &short_row_add_2;
     ops->incer = &short_row_inc_2;
     ops->scaled_adder = &scaled_row_add_4;
-    ops->scaled_incer = &scaled_row_inc_4;
+    ops->scaled_incer = &scaled_row_inc_4_sub;
     ops->scaler = &row_scale_4;
     ops->scaler_in_place = &row_scale_in_place_4;
     ops->product = &row_product_4;
@@ -1355,9 +1404,9 @@ int word_rows_init(u32 prime, row_opsp ops)
     break;
   case 3:
     ops->adder = &row_add_3;
-    ops->incer = &row_inc_3;
+    ops->incer = &word_row_inc_3;
     ops->scaled_adder = &scaled_row_add_3;
-    ops->scaled_incer = &scaled_row_inc_3;
+    ops->scaled_incer = &word_scaled_row_inc_3;
     ops->scaler = &row_scale_3;
     ops->scaler_in_place = &row_scale_in_place_3;
     ops->product = row_product_3;
@@ -1401,7 +1450,7 @@ int word_rows_init(u32 prime, row_opsp ops)
     ops->adder = &word_row_add_2;
     ops->incer = &word_row_inc_2;
     ops->scaled_adder = &scaled_row_add_4;
-    ops->scaled_incer = &scaled_row_inc_4;
+    ops->scaled_incer = &word_scaled_row_inc_4;
     ops->scaler = &row_scale_4;
     ops->scaler_in_place = &row_scale_in_place_4;
     ops->product = &row_product_4;

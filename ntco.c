@@ -1,5 +1,5 @@
 /*
- * $Id: ntco.c,v 1.5 2005/12/31 13:11:47 jon Exp $
+ * $Id: ntco.c,v 1.6 2006/01/05 08:31:38 jon Exp $
  *
  * Tensor condense one group element (new algorithm)
  *
@@ -449,11 +449,6 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
     }
   }
   short_rows_init(prime, &row_operations);
-  if (max_end2_len <= 1) {
-    word_rows_init(prime, &word_row_operations);
-  } else {
-    short_rows_init(prime, &word_row_operations);
-  }
   grease_init(&row_operations, &grease);
   if (0 == grease_level(prime, &grease, memory_rows(max_irr2_len, 100))) { /*** Think about using max_irr_len */
     fprintf(stderr, "%s: failed to determine grease level, terminating\n", name);
@@ -566,6 +561,12 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
       u32 dim_end_j = dim_end[j];
       u32 len_qj = compute_len(nob, dim_irr_j);
       u32 len_pj = len_p[j];
+      u32 len_pjl = compute_len(nob, dim_end_i * dim_end_j);
+      if (len_pjl <= 1) {
+        word_rows_init(prime, &word_row_operations);
+      } else {
+        short_rows_init(prime, &word_row_operations);
+      }
       /* Component l is at pj_rows + l * dim_irr_j */
       for (beta = 0; beta < right_multiplicities[i]; beta++) {
         for (delta = 0; delta < right_multiplicities[j]; delta++) {
@@ -675,7 +676,6 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
             }
             for (gamma = 0; gamma < left_multiplicities[j]; gamma++) {
               /* Initialise the result */
-              u32 len_pjl = compute_len(nob, dim_end_i * dim_end_j);
               row_init(t_row, len_pjl);
               /* Form T = Sigma(k,l) Lambdakl*Rkl */
               for (k = 0; k < dim_irr_i; k++) {

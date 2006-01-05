@@ -372,3 +372,5 @@ skew seventh
 20051221 - Convert t_rows to t_row in ntco
 20051231 - Allow tensor to handle non-square
 20051231 - Fix memory corruption bug in zntco
+20060101 - Better short and word operations for GF(3) and GF(4)
+20060104 - Choose row operation length in ntco dynamically
