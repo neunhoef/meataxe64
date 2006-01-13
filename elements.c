@@ -1,5 +1,5 @@
 /*
- * $Id: elements.c,v 1.26 2005/12/18 11:22:07 jon Exp $
+ * $Id: elements.c,v 1.27 2006/01/13 08:18:32 jon Exp $
  *
  * Element manipulation for meataxe
  *
@@ -117,10 +117,11 @@ void get_elements_from_row_with_params_into_row(u32 nob, u32 index, word mask,
   row += word_offset;
   if (0 != elt_offset) {
     u32 sub_count = elts_per_word - elt_offset;
-    word *end = out + sub_count;
+    word *end;
     if (sub_count > count) {
       sub_count = count;
     }
+    end = out + sub_count;
     count -= sub_count;
     w = *row >> bit_offset;
     while (out < end) {

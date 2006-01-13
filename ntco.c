@@ -1,5 +1,5 @@
 /*
- * $Id: ntco.c,v 1.6 2006/01/05 08:31:38 jon Exp $
+ * $Id: ntco.c,v 1.7 2006/01/13 08:18:32 jon Exp $
  *
  * Tensor condense one group element (new algorithm)
  *
@@ -482,9 +482,10 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
     expanded_rrows[i] = my_malloc(noc_r * sizeof(word));
   }
   for (i = 0; i < nor_r; i++) {
-    for (j = 0; j < noc_r; j++) {
-      expanded_rrows[i][j] = get_element_from_row_with_params(nob, j, mask, elts_per_word, rrows[i]);
-    }
+    get_elements_from_row_with_params_into_row(nob, 0, mask,
+                                               elts_per_word,
+                                               rrows[i],
+                                               noc_r, expanded_rrows[i])
   }
   expanded_lrows = matrix_malloc(max_irr);
   for (i = 0; i < max_irr; i++) {
