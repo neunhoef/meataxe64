@@ -374,4 +374,5 @@ skew seventh
 20051231 - Fix memory corruption bug in zntco
 20060101 - Better short and word operations for GF(3) and GF(4)
 20060104 - Choose row operation length in ntco dynamically
-20060113 - Minor bug fix in elements.c amd weak in ntco.c
+20060113 - Minor bug fix in elements.c and weak in ntco.c
+20060126 - Fix minor syntax error in ntco.c
