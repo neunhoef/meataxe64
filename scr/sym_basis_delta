@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: sym_basis_delta,v 1.7 2005/03/21 21:43:56 jon Exp $
+# $Id: sym_basis_delta,v 1.8 2006/01/28 17:29:53 jon Exp $
 #
 # Script to compute a symmetry basis wrt an ordered set of irreducibles,
 # using delta words
@@ -40,27 +40,14 @@ irred_num=1
 for x in `cat $irreds`; do
   w=$x
   i=1
-  for x in $deltas; do
+  for y in $deltas; do
     if [ $i -eq $irred_num ]; then
-      script=$x
+      script=$y
       break
     fi
     let i=$i+1
   done
   wdim=`znor ${w}_1`
-  y=`ls ${w}_1_I*`
-  ret=$?
-  if [ 0 -ne $ret ]; then
-    echo "$name: failed to find irreducible script for ${w}, terminating"
-    exit 1
-  fi
-  script_x=`echo $y | sed -e "s?${w}_1_??g"`
-  ret=$?
-  if [ 0 -ne $ret ]; then
-    echo "$name: failed to produce irreducible script for ${w}, terminating"
-    rm -f ${tmp}.*
-    exit 1
-  fi
   count=0
 # Compute the delta word in the generators for irreducible X
   zscript -m $memory ${tmp}.0 ${tmp}.zscript $script $*
