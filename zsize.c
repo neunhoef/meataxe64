@@ -1,5 +1,5 @@
 /*
- * $Id: zsize.c,v 1.1 2005/12/12 08:55:58 jon Exp $
+ * $Id: zsize.c,v 1.2 2006/01/31 23:18:23 jon Exp $
  *
  * Print the number of bits in a meataxe word
  *
@@ -24,6 +24,6 @@ int main(int argc, const char * const argv[])
     size_usage();
     exit(1);
   }
-  printf("%u bit meataxe\n", sizeof(word) * CHAR_BIT);
+  printf("%" SIZE_F " bit meataxe\n", sizeof(word) * CHAR_BIT);
   return 0;
 }

@@ -377,3 +377,4 @@ skew seventh
 20060113 - Minor bug fix in elements.c and weak in ntco.c
 20060126 - Fix minor syntax error in ntco.c
 20060128 - Simplify sym_basis_delta
+20060128 - Fix bug in zsize.c on 64 bit compiler
