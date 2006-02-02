@@ -1,5 +1,5 @@
 /*
- * $Id: sums_utils.c,v 1.6 2005/07/24 09:32:45 jon Exp $
+ * $Id: sums_utils.c,v 1.7 2006/02/02 20:53:10 jon Exp $
  *
  * Utilities for sums, sumf etc
  *
@@ -240,7 +240,7 @@ int ignore_word(u32 word, u32 max_prod, const char **words, u32 gen, u32 order, 
         strcpy(w, words[i]);
         w[len - 2] = letter;
         w[len - 1] = '\0';
-        for (j = len; j + order > len && j > 0 && reduces; j--) {
+        for (j = len; j + order > len && j > 1 && reduces; j--) {
           reduces = w[j - 2] == letter;
         }
         if (reduces) {

@@ -378,3 +378,4 @@ skew seventh
 20060126 - Fix minor syntax error in ntco.c
 20060128 - Simplify sym_basis_delta
 20060128 - Fix bug in zsize.c on 64 bit compiler
+20060202 - Fix bug in sums_utils.c shown up by 64 bit system
