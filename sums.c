@@ -1,5 +1,5 @@
 /*
- * $Id: sums.c,v 1.20 2005/07/24 09:32:45 jon Exp $
+ * $Id: sums.c,v 1.21 2006/02/09 22:02:05 jon Exp $
  *
  * Function to compute linear sums of two matices
  *
@@ -158,7 +158,7 @@ int sums(const char *out, u32 n, unsigned int argc, const char *const args[],
       if (m >= 0) {
         break;
       } else {
-        m = -1;
+        m = -1; /* Will be incremented by next_gen */
         /* Try a new word, with the first letter */
         cur_word++;
         assert(cur_word < i);

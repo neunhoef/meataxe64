@@ -1,5 +1,5 @@
 /*
- * $Id: sums_utils.c,v 1.7 2006/02/02 20:53:10 jon Exp $
+ * $Id: sums_utils.c,v 1.8 2006/02/09 22:02:05 jon Exp $
  *
  * Utilities for sums, sumf etc
  *
@@ -150,7 +150,8 @@ int next_gen(u32 cur_gen, u32 max_gen, char *gen, const u32 *orders, const char 
           break;
         }
       }
-      if (len + 1 >= orders[cur_gen] + pos) {
+      /* If pos is still equal to len we're ok */
+      if (pos < len && len + 1 >= orders[cur_gen] + pos) {
         /* we've reached the order of this element */
         continue;
       }
