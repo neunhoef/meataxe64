@@ -1,5 +1,5 @@
 /*
- * $Id: dets.c,v 1.6 2005/06/22 21:52:53 jon Exp $
+ * $Id: dets.c,v 1.7 2006/02/09 22:07:40 jon Exp $
  *
  * Functions to compute determinants
  *
@@ -69,7 +69,6 @@ static word det(word **rows, prime_ops prime_operations,
         j = perm[i];
         if (i != j) {
           /* Post multiply by the cycle (i j) */
-          u32 k;
           assert(j > i);
           sign = 1 - sign;
           for (k = i + 1; k < nor; k++) {

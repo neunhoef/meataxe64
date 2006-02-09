@@ -1,0 +1,7 @@
+#
+# gcc specific fragment for building
+#
+# $Id: gcc-3.3.txt,v 1.1 2006/02/09 22:07:41 jon Exp $
+#
+CC=	gcc-3.3
+COMPILE_WARNINGS=	-Werror -Wall -Wpointer-arith -Wwrite-strings -Winline -Waggregate-return -Wmissing-prototypes -Wnested-externs -W -Wunused -Wcast-align -Wstrict-prototypes -Wmissing-declarations -ansi

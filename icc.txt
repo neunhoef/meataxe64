@@ -1,7 +1,7 @@
 #
 # icc specific fragment for building
 #
-# $Id: icc.txt,v 1.1 2005/07/24 11:31:35 jon Exp $
+# $Id: icc.txt,v 1.2 2006/02/09 22:07:41 jon Exp $
 #
 CC=	icc
-COMPILE_WARNINGS=	-Werror -Wall -wd981 -wd810 -ansi
+COMPILE_WARNINGS=	-Werror -Wall -wd981 -wd810 -wd1682 -ansi

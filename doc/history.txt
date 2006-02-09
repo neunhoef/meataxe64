@@ -380,3 +380,4 @@ skew seventh
 20060128 - Fix bug in zsize.c on 64 bit compiler
 20060202 - Fix bug in sums_utils.c shown up by 64 bit system
 20060209 - Fix bug in sums_utils for special case of order 1 elements
+20060209 - Extra compiler options needed by 64 bit icc
