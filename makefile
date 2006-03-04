@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.103 2005/12/17 14:43:55 jon Exp $
+# $Id: makefile,v 1.104 2006/03/04 09:02:06 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -108,6 +108,7 @@ ZSPANMSP_TARGET=	zspanmsp
 ZSS_TARGET=	zss
 ZSUMS_TARGET=	zsums
 ZSUMSF_TARGET=	zsumsf
+ZSV_TARGET=	zsv
 ZSYMB_TARGET=	zsymb
 ZSYMSQ_TARGET=	zsymsq
 ZTCO_TARGET=	ztco
@@ -125,7 +126,7 @@ ZVP_TARGET=	zvp
 ZVPF_TARGET=	zvpf
 ZWORDS_TARGET=	zwords
 
-LIB_MODULES=	add clean clean_file clean_vectors command conj count dc dets diff diffd elements endian exrows extend extend_matrix files grease header ident join map map_or_row maps matrix memory msb msbf msp mspf mul mv ns nsf ntco orbit parse pco pcol powers primes project ps qs rand read restrict rn rnf scale script singular span spanmsp ss ss_map sums sumsf sums_utils symb system tco te tmul tra tsp tspf ttr utils vp vpf write
+LIB_MODULES=	add clean clean_file clean_vectors command conj count dc dets diff diffd elements endian exrows extend extend_matrix files grease header ident join map map_or_row maps matrix memory msb msbf msp mspf mul mv ns nsf ntco orbit parse pco pcol powers primes project ps qs rand read restrict rn rnf scale script singular span spanmsp ss ss_map sums sumsf sums_utils sv symb system tco te tmul tra tsp tspf ttr utils vp vpf write
 
 CONS_MODULES=	constrain
 DTOU_MODULES=	dtou
@@ -226,6 +227,7 @@ ZSPANMSP_MODULES=	rows zspanmsp
 ZSS_MODULES=	rows zss
 ZSUMS_MODULES=	rows zsums
 ZSUMSF_MODULES=	rows zsumsf
+ZSV_MODULES=	rows zsv
 ZSYMB_MODULES=	rows zsymb
 ZSYMSQ_MODULES=	rows zsymsq
 ZTCO_MODULES=	rows ztco
@@ -343,6 +345,7 @@ MODULES=	$(LIB_MODULES) \
 	$(ZSS_MODULES) \
 	$(ZSUMS_MODULES) \
 	$(ZSUMSF_MODULES) \
+	$(ZSV_MODULES) \
 	$(ZSYMB_MODULES) \
 	$(ZSYMSQ_MODULES) \
 	$(ZTCO_MODULES) \
@@ -694,6 +697,9 @@ TARGET:=ZSUMS
 include targets.txt
 
 TARGET:=ZSUMSF
+include targets.txt
+
+TARGET:=ZSV
 include targets.txt
 
 TARGET:=ZSYMB

@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.69 2005/12/21 18:12:22 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.70 2006/03/04 09:02:06 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -397,6 +397,7 @@ Turn on verbose mode
 <li><a href="#zss">zss</a></li>
 <li><a href="#zsums">zsums</a></li>
 <li><a href="#zsumsf">zsumsf</a></li>
+<li><a href="#zsv">zsv</a></li>
 <li><a href="#zsymb">zsymb</a></li>
 <li><a href="#zsymsq">zsymsq</a></li>
 <li><a href="#ztco">ztco</a></li>
@@ -4020,6 +4021,47 @@ computing ranks. The other operations (add, multiply) are not space
 constrained, and so do not need the use of intermediate files. The
 temporary workspace directory must exist, this program will not create
 it.
+</li>
+<li>
+<h3><a name="zsv">zsv</a></h3>
+Purpose: Compute Schreier and back vectors from a set of permutations
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Orbit start pint (1 based)</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Output Schreier vector</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>Output back vector</td>
+</tr>
+<tr>
+<td valign=top>4</td><td valign=top>Generator 1</td>
+</tr>
+<tr>
+<td valign=top>5-</td><td valign=top>Other generators</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>None</td>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient memory</td>
+</tr>
+</table>
+Commentary: The Schreier and back vector are produced in map form,
+using a standard algorithm, and can be printed using zpr. The chosen
+point will appear as maximum word in such a print.
 </li>
 <li>
 <h3><a name="zsymb">zsymb</a></h3>

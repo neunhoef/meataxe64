@@ -1,5 +1,5 @@
 /*
- * $Id: msp.c,v 1.16 2005/07/24 09:32:45 jon Exp $
+ * $Id: msp.c,v 1.17 2006/03/04 09:02:06 jon Exp $
  *
  * Function to spin some vectors under multiple generators
  *
@@ -9,6 +9,7 @@
 #include "clean.h"
 #include "elements.h"
 #include "endian.h"
+#include "gen.h"
 #include "grease.h"
 #include "header.h"
 #include "matrix.h"
@@ -24,17 +25,6 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
-
-typedef struct gen_struct *gen;
-
-struct gen_struct
-{
-  FILE *f;
-  const char *m;
-  u32 nor;
-  int is_map;
-  gen next;
-};
 
 static void cleanup(FILE *f1, u32 count, FILE **files)
 {
@@ -64,7 +54,7 @@ static int unfinished(struct gen_struct *gens,
 }
 
 u32 spin(const char *in, const char *out,
-         unsigned int argc, const char * const args[], const char *name)
+         unsigned int argc, const char *const args[], const char *name)
 {
   FILE *inp = NULL, *outp = NULL, **files = NULL;
   const header *h_in;
