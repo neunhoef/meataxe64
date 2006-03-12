@@ -1,5 +1,5 @@
 /*
- * $Id: pofp.c,v 1.1 2006/03/12 10:23:19 jon Exp $
+ * $Id: pofp.c,v 1.2 2006/03/12 10:26:33 jon Exp $
  *
  * Function to compute fixed points of permutation in orbit
  *
@@ -69,7 +69,7 @@ u32 fixed_points_orbit(const char *in_orbit, unsigned int orbit_num, const char 
   header_free(h);
   fclose(inp);
   if (orbit_num >= orbits->size) {
-    fprintf(stderr, "%s: orbit number %d is out of range, terminating\n", name, orbit_num);
+    fprintf(stderr, "%s: orbit number %u is out of range, terminating\n", name, orbit_num);
     exit(1);
   }
   for (d = 0; d < argc; d++) {
