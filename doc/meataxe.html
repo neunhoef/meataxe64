@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.70 2006/03/04 09:02:06 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.71 2006/03/12 10:23:20 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -362,6 +362,7 @@ Turn on verbose mode
 <li><a href="#zntco">zntco</a></li>
 <li><a href="#zpco">zpco</a></li>
 <li><a href="#zpcv">zpcv</a></li>
+<li><a href="#zpofp">zpofp</a></li>
 <li><a href="#zpr">zpr</a></li>
 <li><a href="#zprime">zprime</a></li>
 <li><a href="#zpro">zpro</a></li>
@@ -2606,6 +2607,48 @@ space which lie in the fixed space of the condensation subgroup. It
 does this by expanding each non-zero entry in an input vector to a set
 of values equal to this entry, one at each orbit point in the orbit
 represented by this basis element in condensed space.
+</li>
+<li>
+<h3><a name="zpofp">zpofp</a></h3>
+Purpose: Find fixed points in an orbit
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>The permutation orbit set</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>The orbit number (zero based)</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>The output file</td>
+</tr>
+<tr>
+<td valign=top>4</td><td valign=top>First permutation input</td>
+</tr>
+<tr>
+<td valign=top>5-</td><td valign=top>Further permutations</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>The number
+of fixed points</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient memory for workspace</td>
+</tr>
+</table>
+Commentary: Generate a list, as a map file, of the fixed points in a
+given orbit under the set of permutations.
 </li>
 <li>
 <h3><a name="zpr">zpr</a></h3>
