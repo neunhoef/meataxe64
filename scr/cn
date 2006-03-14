@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: cn,v 1.1 2005/06/23 21:48:47 jon Exp $
+# $Id: cn,v 1.2 2006/03/14 19:34:38 jon Exp $
 #
 # Compute cn(x)
 #
@@ -20,24 +20,8 @@ if [ 3 -ne $# ]; then
   exit 1;
 fi
 
-tmp=tmp${PPID}
 a=$1
 n=$2
 o=$3
-let x=$n/3
-let x3=$x*3
-let y=$n-$x3
-if [ 1 -ne $y ]; then
-  echo $n not congruent to 1 mod 3
-  exit 1
-fi
-i=1
-while [ $i -le $x3 ]; do
-  let y=$i*$i*$i
-  let z=$y/$n
-  let j=$y-$z*$n # Cube and reduce modulo n
-  powers[$i]=$j
-  let i=$i+1
-done
 repeat=3
-. xn
+. yn

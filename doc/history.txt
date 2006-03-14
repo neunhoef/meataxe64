@@ -383,3 +383,4 @@ skew seventh
 20060209 - Extra compiler options needed by 64 bit icc
 20060304 - Add zsv, to compute Schreier vectors
 20060312 - Add zpofp for finding fixed points in orbits
+20060314 - Improved versions of bn, cb, xn

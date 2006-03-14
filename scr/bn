@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: bn,v 1.3 2005/06/23 21:48:47 jon Exp $
+# $Id: bn,v 1.4 2006/03/14 19:34:38 jon Exp $
 #
 # Compute bn(x)
 #
@@ -14,30 +14,15 @@
 # 0: success
 #
 #set -x
+#set -e
 usage="$0: usage: $0 <mat> <n> <out>"
 if [ 3 -ne $# ]; then
   echo $usage
   exit 1;
 fi
 
-tmp=tmp${PPID}
 a=$1
 n=$2
 o=$3
-let x=$n/2
-let x2=$x*2
-let y=$n-$x2
-if [ 1 -ne $y ]; then
-  echo $n not congruent to 1 mod 2
-  exit 1
-fi
-i=1
-while [ $i -le $x2 ]; do
-  let y=$i*$i
-  let z=$y/$n
-  let j=$y-$z*$n # Square and reduce modulo n
-  powers[$i]=$j
-  let i=$i+1
-done
 repeat=2
-. xn
+. yn

@@ -1,14 +1,13 @@
 #!/bin/sh
 #
-# $Id: xn,v 1.2 2005/06/23 21:48:47 jon Exp $
+# $Id: xn,v 1.3 2006/03/14 19:34:38 jon Exp $
 #
-# Compute xn(x), continuing on from bn, cn etc
+# Compute xn(n), continuing on from bn, cn etc
 #
 # Inputs: None
 # Values in scope
 # powers: an array of the powers to be made
 # n: the original n value
-# x: the number of powers to be made
 # a: the original matrix
 # o: where to output to
 # repeat: the number of times each value is expected to repeat
@@ -18,81 +17,110 @@
 # 0: success
 #
 #set -x
-tmp=tmp${PPID}
-# First sort powers
-let n1=$n-1
-sorted=0
-while [ 0 -eq $sorted ]; do
-  sorted=1
-  i=1
-  while [ $i -lt $n1 ]; do
-    let j=$i+1
-    if [ ${powers[$i]} -gt ${powers[$j]} ]; then
-      sorted=0
-      t=${powers[$i]}
-      powers[$i]=${powers[$j]}
-      powers[$j]=$t
-    fi
-    i=$j
-  done
-done
-# Now weed out repeats
+#set -e
+# Check n and repeat values
+if [ $n -lt 3 ]; then
+  echo "n value $n too small"
+  exit 1
+fi
+if [ $repeat -lt 2 ]; then
+  echo "repeat value $repeat too small"
+  exit 1
+fi
+# Check n ~ 1 mod repeat
+let x=$n/$repeat
+let y=$n-$x*$repeat
+if [ 1 -ne $y ]; then
+  echo "$n not congurent to 1 modulo $repeat"
+  exit 1
+fi
+# Now create powers t**n for 1 <= t < n
 i=1
-while [ $i -le $x ]; do
-  let j=$i*$repeat
-  powers[$i]=${powers[$j]}
+while  [ $i -lt $n ]; do
+  powers[$i]=0
   let i=$i+1
 done
 i=1
-while [ $i -le $x ]; do
+while [ $i -lt $n ]; do
+  x=$repeat
+  prod=$i
+  # Compute i**repeat
+  while [ $x -gt 1 ]; do
+    let prod=$prod*$i
+    let x=$x-1
+    # reduce modulo n
+    let y=$prod/$n
+    let prod=$prod-$y*$n
+  done
+  let powers[$prod]=${powers[$prod]}+1
+  let i=$i+1
+done
+# Divide by repeat
+i=1
+while [ $i -lt $n ]; do
+  let powers[$i]=${powers[$i]}/$repeat
+  let i=$i+1
+done
+# Get rid of those which are a multiple of the characteristic
+char=`zchar $a`
+i=1
+while [ $i -lt $n ]; do
+  let x=${powers[$i]}/$char
+  let powers[$i]=${powers[$i]}-$x*$char
+  let i=$i+1
+done
+# Now we have the powers matrix indicating how many of each power we need
+i=1
+while [ $i -lt $n ]; do
   echo powers[$i] = ${powers[$i]}
   let i=$i+1
 done
-i=1
-while [ $i -lt $x ]; do
-  let j=$i+1
-  let d=${powers[$j]}-${powers[$i]}
-  diffs[$i]=$d
-  let i=$j
-done
-# Find max diff, and make all intermediate powers
+# Find the maximum difference
 max_diff=1
 i=1
-let x1=$x-1
-while [ $i -le $x1 ]; do
-  if [ ${diffs[$i]} -gt $max_diff ]; then
-    max_diff=${diffs[$i]}
+j=0
+while [ $i -lt $n ]; do
+  let j=$j+1
+  if [ 0 -ne ${powers[$i]} ]; then
+    if [ $j -gt $max_diff ]; then
+      max_diff=$j
+    fi
+    j=0
   fi
   let i=$i+1
 done
+echo max_diff = $max_diff
 # Make intermediate powers
+tmp=tmp${PPID}
 mat=${tmp}.mat
 cp $a ${mat}.1
 i=1
-while [ $i -le $max_diff ]; do
+while [ $i -lt $max_diff ]; do
   let j=$i+1
   zmu -m 100000 $a ${mat}.$i ${mat}.$j
-  let i=$i+1
+  let i=$j
 done
 sum=${tmp}.sum
 cur=${tmp}.cur
-cp $a ${sum}
-cp $a ${cur}
-i=2
+# Initialise sum to 0
+zsid `zprime $a` `znor $a` `znoc $a` 0 ${sum}
+zrn ${sum}
+zid `zprime $a` `znor $a` `znoc $a` ${cur}
+order ${cur}
+set -x
+i=1
 k=1
-while [ $i -le $x ]; do
-  let j=${powers[$i]}-$k
-  if [ 0 -eq $j ]; then
-    echo Power of $i = power of $i - 1?
-    cp ${cur} ${cur}.1
-  else
-    zmu -m 100000 ${cur} ${mat}.$j ${cur}.1
+while [ $i -lt $n ]; do
+  let j=${powers[$i]}
+  if [ 0 -ne $j ]; then
+    zmu -m 100000 ${cur} ${mat}.$k ${cur}.1
+    zsad -m 10000 ${cur}.1 ${sum} ${tmp}.1 $j
+    mv ${cur}.1 ${cur}
+    mv ${tmp}.1 ${sum}
+    k=0
   fi
-  zad -m 10000 ${sum} ${cur}.1 ${tmp}.1
-  mv ${tmp}.1 ${sum}
-  mv ${cur}.1 ${cur}
-  let k=${k}+${j}
   let i=$i+1
+  let k=$k+1
 done
 cp ${sum} $o
 rm ${tmp}.*
