@@ -384,3 +384,4 @@ skew seventh
 20060304 - Add zsv, to compute Schreier vectors
 20060312 - Add zpofp for finding fixed points in orbits
 20060314 - Improved versions of bn, cb, xn
+20060319 - More common code moved into gen.{c,h}

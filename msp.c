@@ -1,5 +1,5 @@
 /*
- * $Id: msp.c,v 1.17 2006/03/04 09:02:06 jon Exp $
+ * $Id: msp.c,v 1.18 2006/05/01 09:08:45 jon Exp $
  *
  * Function to spin some vectors under multiple generators
  *
@@ -28,29 +28,10 @@
 
 static void cleanup(FILE *f1, u32 count, FILE **files)
 {
-  if (NULL != f1)
+  if (NULL != f1) {
     fclose(f1);
-  if (NULL != files) {
-    while (count > 0) {
-      if (NULL != *files) {
-        fclose(*files);
-      }
-      files++;
-      count--;
-    }
   }
-}
-
-static int unfinished(struct gen_struct *gens,
-                      unsigned int argc, u32 nor)
-{
-  while(argc > 0) {
-    if (nor > gens[argc - 1].nor) {
-      return 1;
-    }
-    argc--;
-  }
-  return 0;
+  cleanup_files(files, count);
 }
 
 u32 spin(const char *in, const char *out,

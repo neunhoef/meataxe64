@@ -1,5 +1,5 @@
 /*
- * $Id: tsp.c,v 1.20 2005/07/24 11:31:35 jon Exp $
+ * $Id: tsp.c,v 1.21 2006/05/01 09:08:45 jon Exp $
  *
  * Function to spin some vectors under two generators in tensor space
  *
@@ -9,6 +9,7 @@
 #include "clean.h"
 #include "elements.h"
 #include "endian.h"
+#include "gen.h"
 #include "grease.h"
 #include "header.h"
 #include "matrix.h"
@@ -27,19 +28,6 @@
 #include <assert.h>
 #include <errno.h>
 #include <math.h>
-
-typedef struct gen_struct *gen;
-
-struct gen_struct
-{
-  FILE *f1, *f2;
-  const char *m1, *m2;
-  u32 nor;
-  int is_map1, is_map2;
-  word **rows_1;
-  word **rows_2;
-  gen next;
-};
 
 static void cleanup(FILE *f1, FILE *f2, FILE *f3, FILE *f4, FILE *f5)
 {
@@ -69,7 +57,7 @@ u32 tensor_spin(const char *in, const char *out,
   grease_struct grease;
   prime_ops prime_operations;
   row_ops row_operations;
-  struct gen_struct gen_a, gen_b, *gen = &gen_a;
+  struct gen2_struct gen_a, gen_b, *gen = &gen_a;
   gen_a.next = &gen_b;
   gen_b.next = &gen_a;
   assert(NULL != in);

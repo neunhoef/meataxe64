@@ -1,5 +1,5 @@
 /*
- * $Id: mspf.c,v 1.23 2005/10/28 22:58:08 jon Exp $
+ * $Id: mspf.c,v 1.24 2006/05/01 09:08:45 jon Exp $
  *
  * Function to spin some vectors under multiple generators
  * using intermediate files in a temporary directory.
@@ -10,6 +10,7 @@
 #include "clean_file.h"
 #include "elements.h"
 #include "endian.h"
+#include "gen.h"
 #include "grease.h"
 #include "header.h"
 #include "matrix.h"
@@ -27,31 +28,12 @@
 #include <assert.h>
 #include <errno.h>
 
-typedef struct gen_struct *gen;
-
-struct gen_struct
-{
-  FILE *f;       /* File containing the generator */
-  const char *m; /* Name of the generator */
-  u32 nor;       /* Rows from input already multiplied by this generator */
-  int is_map;    /* This generator is a map */
-  s64 base_ptr;  /* Pointer to row nor + 1 in output basis file */
-  gen next;
-};
-
 static void cleanup(FILE *f1, u32 count, FILE **files)
 {
-  if (NULL != f1)
+  if (NULL != f1) {
     fclose(f1);
-  if (NULL != files) {
-    while (count > 0) {
-      if (NULL != *files) {
-        fclose(*files);
-      }
-      files++;
-      count--;
-    }
   }
+  cleanup_files(files, count);
 }
 
 static void cleanup_all(FILE *f1, u32 count, FILE **files,
@@ -62,18 +44,6 @@ static void cleanup_all(FILE *f1, u32 count, FILE **files,
   fclose(echelised);
   (void)remove(name_echelised);
   cleanup(f1, count, files);
-}
-
-static int unfinished(struct gen_struct *gens,
-                      unsigned int argc, u32 nor)
-{
-  while(argc > 0) {
-    if (nor > gens[argc - 1].nor) {
-      return 1;
-    }
-    argc--;
-  }
-  return 0;
 }
 
 u32 spinf(const char *in, const char *out, const char *dir,
@@ -91,7 +61,7 @@ u32 spinf(const char *in, const char *out, const char *dir,
   grease_struct grease;
   prime_ops prime_operations;
   row_ops row_operations;
-  struct gen_struct *gens, *gen;
+  genf gens, gen;
   assert(NULL != in);
   assert(NULL != out);
   assert(NULL != args);
@@ -222,7 +192,7 @@ u32 spinf(const char *in, const char *out, const char *dir,
     exit(1);
   }
   (void)get_mask_and_elts(nob, &elts_per_word);
-  while (nor < noc && unfinished(gens, argc, nor)) {
+  while (nor < noc && unfinishedf(gens, argc, nor)) {
     u32 rows_to_do = nor - gen->nor;
     u32 k, old_nor = nor;
     /* Ensure we don't try to do too many */

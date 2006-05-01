@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.105 2006/03/12 10:23:19 jon Exp $
+# $Id: makefile,v 1.106 2006/05/01 09:08:45 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -126,7 +126,7 @@ ZVP_TARGET=	zvp
 ZVPF_TARGET=	zvpf
 ZWORDS_TARGET=	zwords
 
-LIB_MODULES=	add clean clean_file clean_vectors command conj count dc dets diff diffd elements endian exrows extend extend_matrix files grease header ident join map map_or_row maps matrix memory msb msbf msp mspf mul mv ns nsf ntco orbit parse pco pcol pofp powers primes project ps qs rand read restrict rn rnf scale script singular span spanmsp ss ss_map sums sumsf sums_utils sv symb system tco te tmul tra tsp tspf ttr utils vp vpf write
+LIB_MODULES=	add clean clean_file clean_vectors command conj count dc dets diff diffd elements endian exrows extend extend_matrix files gen grease header ident join map map_or_row maps matrix memory msb msbf msp mspf mul mv ns nsf ntco orbit parse pco pcol pofp powers primes project ps qs rand read restrict rn rnf scale script singular span spanmsp ss ss_map sums sumsf sums_utils sv symb system tco te tmul tra tsp tspf ttr utils vp vpf write
 
 CONS_MODULES=	constrain
 DTOU_MODULES=	dtou

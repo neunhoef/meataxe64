@@ -1,5 +1,5 @@
 /*
- * $Id: symb.c,v 1.11 2005/10/12 18:20:31 jon Exp $
+ * $Id: symb.c,v 1.12 2006/05/01 09:08:45 jon Exp $
  *
  * Function to compute a symmetry basis
  *
@@ -9,6 +9,7 @@
 #include "clean.h"
 #include "clean_file.h"
 #include "endian.h"
+#include "gen.h"
 #include "grease.h"
 #include "header.h"
 #include "matrix.h"
@@ -27,17 +28,6 @@
 #include <assert.h>
 #include <errno.h>
 
-typedef struct gen_struct *gen;
-
-struct gen_struct
-{
-  FILE *f;
-  const char *m;
-  u32 nor;
-  int is_map;
-  gen next;
-};
-
 typedef struct file_struct file_struct, *file;
 
 struct file_struct
@@ -48,7 +38,7 @@ struct file_struct
   file next;
 };
 
-static void cleanup_files(file_struct *t1, file_struct *t2)
+static void cleanup_2files(file_struct *t1, file_struct *t2)
 {
   if (t1->created) {
     if (NULL != t1->f) {
@@ -104,23 +94,11 @@ static void cleanup(struct gen_struct *gens, unsigned int argc,
     fclose(temp);
     (void)remove(name4);
   }
-  cleanup_files(t1, t2);
+  cleanup_2files(t1, t2);
   cleanup_names(name1, name2, name3, name4);
   if (NULL != grease) {
     grease_free(grease);
   }
-}
-
-static int unfinished(struct gen_struct *gens,
-                      unsigned int argc, u32 nor)
-{
-  while(argc > 0) {
-    if (nor > gens[argc - 1].nor) {
-      return 1;
-    }
-    argc--;
-  }
-  return 0;
 }
 
 u32 symb(u32 spaces, u32 space_size,

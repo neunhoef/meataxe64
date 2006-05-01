@@ -1,5 +1,5 @@
 /*
- * $Id: tspf.c,v 1.23 2005/10/28 22:58:08 jon Exp $
+ * $Id: tspf.c,v 1.24 2006/05/01 09:08:45 jon Exp $
  *
  * Function to spin some vectors under two generators in tensor space
  * using intermediate files in a temporary directory.
@@ -10,6 +10,7 @@
 #include "clean_file.h"
 #include "elements.h"
 #include "endian.h"
+#include "gen.h"
 #include "grease.h"
 #include "header.h"
 #include "matrix.h"
@@ -28,20 +29,6 @@
 #include <string.h>
 #include <assert.h>
 #include <errno.h>
-
-typedef struct gen_struct *gen;
-
-struct gen_struct
-{
-  FILE *f1, *f2;
-  const char *m1, *m2;	/* File containing the generator */                       
-  u32 nor;	/* Name of the generator */                               
-  int is_map1, is_map2;	/* Rows from input already multiplied by this generator */
-  word **rows_1;/* Rows of left tensor */
-  word **rows_2;/* Rows of right tensor */
-  s64 base_ptr;	/* Pointer to row nor + 1 in output basis file */
-  gen next;		/* Next generator to be used */
-};
 
 static void cleanup(FILE *f1, FILE *f2, FILE *f3, FILE *f4, FILE *f5)
 {
@@ -83,7 +70,7 @@ u32 tensor_spinf(const char *in, const char *out,
   grease_struct grease;
   prime_ops prime_operations;
   row_ops row_operations;
-  struct gen_struct gen_a, gen_b, *gen = &gen_a;
+  struct gen2f_struct gen_a, gen_b, *gen = &gen_a;
   gen_a.next = &gen_b;
   gen_b.next = &gen_a;
   assert(NULL != in);
