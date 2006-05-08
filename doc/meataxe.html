@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.71 2006/03/12 10:23:20 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.72 2006/05/08 19:10:56 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -4990,6 +4990,7 @@ dimension increases.
 <li><a href="#split_with_subspace">split_with_subspace</a></li>
 <li><a href="#sym_basis">sym_basis</a></li>
 <li><a href="#sym_basis_delta">sym_basis_delta</a></li>
+<li><a href="#sym_basis_deltaf">sym_basis_deltaf</a></li>
 <li><a href="#tensor_split_with_subspace">tensor_split_with_subspace</a></li>
 <li><a href="#three">three</a></li>
 <li><a href="#tspin_vectors">tspin_vectors</a></li>
@@ -8780,6 +8781,60 @@ href="#ztco">ztco</a>. The delta words scripts give delta words for the
 individual representations, in the same order as the names of the
 irreducibles in parameter 1. Such delta words can be found using the
 <a href="find_element">find_element</a> script.
+</li>
+<li>
+<h3><a name="sym_basis_deltaf">sym_basis_deltaf</a></h3>
+Purpose: Produce a symmetry basis with respect to a p'-subgroup, using
+intermediate files for nullspaces and spins
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>A file containing the names of the
+irreducibles, in the required order</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Memory</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>Output basis</td>
+</tr>
+<tr>
+<td valign=top>4</td><td valign=top>Output multiplicities</td>
+</tr>
+<tr>
+<td valign=top>5</td><td valign=top>File of delta word scripts for the
+irreducibles in use</td>
+</tr>
+<tr>
+<td valign=top>6</td><td valign=top>Directory in whic to create
+temporary files</td>
+</tr>
+<tr>
+<td valign=top>7</td><td valign=top>First generator of condensation subgroup</td>
+</tr>
+<tr>
+<td valign=top>7-</td><td valign=top>Other generators</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>Error messages</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient memory for workspace</td>
+</tr>
+</table>
+Commentary: As <a href="sym_basis_delta">sym_basis_delta</a>, but
+using intermediate files.
 </li>
 <li>
 <h3><a name="tensor_split_with_subspace">tensor_split_with_subspace</a></h3>

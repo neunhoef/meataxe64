@@ -385,3 +385,4 @@ skew seventh
 20060312 - Add zpofp for finding fixed points in orbits
 20060314 - Improved versions of bn, cb, xn
 20060319 - More common code moved into gen.{c,h}
+20060508 - Add sym_basis_deltaf
