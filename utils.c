@@ -1,5 +1,5 @@
 /*
- * $Id: utils.c,v 1.24 2006/05/09 22:04:10 jon Exp $
+ * $Id: utils.c,v 1.25 2006/05/09 22:09:28 jon Exp $
  *
  * Utils for meataxe
  *
@@ -255,89 +255,4 @@ int read_numbers(FILE *inp, u32 s, u32 *out)
     }
   }
   return 1;
-}
-
-/* skip whitespace from file */
-/* return 1 if ok, 0 if end of file */
-static int file_skip_whitespace(FILE *inp, char *out)
-{
-  assert(NULL != out);
-  for (;;) {
-    char x = fgetc(inp);
-    if (feof(inp)) {
-      return 0;
-    }
-    if (!my_isspace(x)) {
-      *out = x;
-      return 1;
-    }
-  }
-}
-
-/* Read more characters from stream */
-static int read_more_numeric_string(int allocate, FILE *inp, unsigned int max_len, char **out, unsigned int len)
-{
-  for (;;) {
-    const char ch = fgetc(inp);
-    if (feof(inp) || !my_isdigit(ch)) {
-      /* Allocate now, store the character and return ok */
-      if (allocate) {
-        *out = my_malloc(len + 1);
-      }
-      (*out)[len] = '\0';
-      return 1;
-    } else {
-      int ret;
-      if (0 == max_len) {
-        return 0; /* String too long */
-      }
-      ret = read_more_numeric_string(allocate, inp, max_len - 1, out, len + 1);
-      if (0 == ret) {
-        return 0;
-      }
-      (*out)[len] = ch; /* Save this character */
-      return 1;
-    }
-  }
-}
-
-int read_numeric_string(int allocate, FILE *inp, int unsigned max_len, char **out)
-{
-  char ch;
-  assert(NULL != out);
-  assert(0 == allocate || NULL == *out);
-  if (0 == max_len) {
-    return 0;
-  }
-  /* First ignore whitespace */
-  if (0 == file_skip_whitespace(inp, &ch)) {
-    return 0;
-  }
-  while ('0' == ch) {
-    ch = fgetc(inp);
-    if (feof(inp)) {
-      /* Just return the string '0' */
-      if (allocate) {
-        *out = my_malloc(2);
-      }
-      strcpy(*out, "0");
-      return 1;
-    }
-  }
-  /* Now received a character which isn't 0 and hasn't caused eof */
-  if (my_isdigit(ch)) {
-    int ret = read_more_numeric_string(allocate, inp, max_len - 1, out, 1);
-    if (0 == ret) {
-      return 0;
-    }
-    **out = ch;
-    return 1;
-  } else {
-    /* Character wasn't a digit, so return '0' */
-    if (allocate) {
-      *out = my_malloc(2);
-    }
-    strcpy(*out, "0");
-    return 1;
-  }
 }
