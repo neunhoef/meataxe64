@@ -1,5 +1,5 @@
 /*
- * $Id: utils.h,v 1.20 2005/07/24 09:32:46 jon Exp $
+ * $Id: utils.h,v 1.21 2006/05/09 22:04:10 jon Exp $
  *
  * Utilities for meataxe
  *
@@ -65,5 +65,11 @@ extern int read_numbers(FILE *inp, u32 s, u32 *out);
 /* A value to avoid assertions on constant expressions */
 
 extern int assert_var_zero;
+
+/* Read a string containing a long number */
+/* max_len is maximum number of digits, excluding leading zeroes */
+/* If allocation is requested then *out must be NULL */
+/* return 1 for success, 0 for failure (eg end of file) */
+extern int read_numeric_string(int allocate, FILE *inp, unsigned int max_len, char **out);
 
 #endif

@@ -386,3 +386,4 @@ skew seventh
 20060314 - Improved versions of bn, cb, xn
 20060319 - More common code moved into gen.{c,h}
 20060508 - Add sym_basis_deltaf
+20060509 - Add filter_element and supporting programs
