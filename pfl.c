@@ -1,5 +1,5 @@
 /*
- * $Id: pfl.c,v 1.1 2006/05/09 22:09:28 jon Exp $
+ * $Id: pfl.c,v 1.2 2006/05/09 22:13:56 jon Exp $
  *
  * Print a filter list
  *
@@ -21,7 +21,7 @@ void print_filter(const char *in_list,
                   unsigned int argc, const char * const args[],
                   const char *name)
 {
-  u32 nor, noc, nob, len, prime, i;
+  u32 nor, noc, nob, len, i;
   FILE *inp;
   const header *h;
   word *row;
@@ -34,7 +34,6 @@ void print_filter(const char *in_list,
   nor = header_get_nor(h);
   noc = header_get_noc(h);
   nob = header_get_nob(h);
-  prime = header_get_prime(h);
   len = header_get_len(h);
   header_free(h);
   if (noc != argc) {

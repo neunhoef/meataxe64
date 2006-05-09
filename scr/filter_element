@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: filter_element,v 1.1 2006/05/09 22:04:11 jon Exp $
+# $Id: filter_element,v 1.2 2006/05/09 22:13:56 jon Exp $
 #
 # Script to find an element of given nullity on one representation
 # and nullity zero on a sequence of others
@@ -56,7 +56,6 @@ while [ $z -le $n ]; do
   let z=$z+1
 done
 for y in $*; do zscript $y ${tmp}zscript $y $gens; done
-echo zfn ${tmp}.0 ${tmp}.1 $nullity $*
 zfn ${tmp}.0 ${tmp}.1 $nullity $*
 i=1
 for x in `cat $reps`; do
@@ -70,7 +69,6 @@ for x in `cat $reps`; do
       let z=$z+1
     done
     for y in $*; do zscript $y ${tmp}zscript $y $gens; done
-    echo zfn ${tmp}.$i ${tmp}.$j 0 $*
     zfn ${tmp}.$i ${tmp}.$j 0 $*
     i=$j
   fi
