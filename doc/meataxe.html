@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.72 2006/05/08 19:10:56 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.73 2006/05/13 15:43:01 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -4974,6 +4974,7 @@ dimension increases.
 <li><a href="#qp">qp</a></li>
 <li><a href="#quick_order">quick_order</a></li>
 <li><a href="#real_indicate">real_indicate</a></li>
+<li><a href="#rebase.sh">rebase.sh</a></li>
 <li><a href="#restrict_with_orders">restrict_with_orders</a></li>
 <li><a href="#restrictf_with_orders">restrictf_with_orders</a></li>
 <li><a href="#rip_rank">rip_rank</a></li>
@@ -7938,6 +7939,46 @@ href="#indicate_with_element">indicate_with_element</a>, <a
 href="#indicatef_with_element">indicatef_with_element</a>. It performs
 the loop over the field elements part of the calculation, looking for
 a diagonal value for a potential quadratic form.
+</li>
+<li>
+<h3><a name="rebase.sh">rebase.sh</a></h3>
+Purpose: Create standard bases for a set of irreducibles with a given
+set of group algebra words used to generate the null vector seeds
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>The list of words to be used for
+creating group algebra elements</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>The set of existing irreducibles</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>The number of generators</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>As from <a
+href=#new_irred_with_script>new_irred_with_script</a></td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient memory for workspace</td>
+</tr>
+</table>
+Commentary: This script is normally used as part of tensor
+condensation, to ensure that the delta words used to compute the
+symmetry basis are the same as those used to seed the irreducible
+representations from which the P and Q matrices are created.
 </li>
 <li>
 <h3><a name="restrict_with_orders">restrict_with_orders</a></h3>
