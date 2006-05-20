@@ -389,3 +389,4 @@ skew seventh
 20060509 - Add filter_element and supporting programs
 20060508 - Add rebase.sh for creating irreducibles suitable for e_script
 20060513 - Add documentation for rebase.sh and fix a bug
+20060520 - Add documentation on filter_element and associated programs

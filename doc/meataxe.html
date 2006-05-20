@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.73 2006/05/13 15:43:01 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.74 2006/05/20 15:28:27 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -325,6 +325,7 @@ Turn on verbose mode
 <li><a href="#zad">zad</a></li>
 <li><a href="#zah">zah</a></li>
 <li><a href="#zbase">zbase</a></li>
+<li><a href="#zcfl">zcfl</a></li>
 <li><a href="#zchar">zchar</a></li>
 <li><a href="#zcheck">zcheck</a></li>
 <li><a href="#zconj">zconj</a></li>
@@ -339,6 +340,7 @@ Turn on verbose mode
 <li><a href="#zfe">zfe</a></li>
 <li><a href="#zfln">zfln</a></li>
 <li><a href="#zflnf">zflnf</a></li>
+<li><a href="#zfn">zfn</a></li>
 <li><a href="#zfo">zfo</a></li>
 <li><a href="#zformat">zformat</a></li>
 <li><a href="#zid">zid</a></li>
@@ -360,6 +362,7 @@ Turn on verbose mode
 <li><a href="#zns">zns</a></li>
 <li><a href="#znsf">znsf</a></li>
 <li><a href="#zntco">zntco</a></li>
+<li><a href="#zpfl">zpfl</a></li>
 <li><a href="#zpco">zpco</a></li>
 <li><a href="#zpcv">zpcv</a></li>
 <li><a href="#zpofp">zpofp</a></li>
@@ -1064,6 +1067,44 @@ set, eg V + W, where the sum is not direct, as might be produced by
 <a href="#zjoin">zjoin</a>.
 </li>
 <li>
+<h3><a name="zcfl">zcfl</a></h3>
+Purpose: Create a filter list
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Field size</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Number of generators</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>Output</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>None</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+</table>
+Commentary: This is part of a suite of three programs used when
+searching for delta words for tensor condensation. See <a
+href=#zfn>zfn</a> for a full description of the purpose of the suite.
+This program creates the initial filter list, and a matrix over the
+feld size given in parameter 1, with number of columns given by
+parameter 2. The output consists of every non-zero vector of the given
+length. Each vector gives the coefficients for forming a linear sum
+of generator matrices.
+</li>
+<li>
 <h3><a name="zchar">zchar</a></h3>
 Purpose: Print the (field) characteristic of a matrix. In the case of a permutation, print 1.
 <table>
@@ -1577,6 +1618,55 @@ nullity found</td>
 Commentary: This program is solely for use where zfln would be used if
 memory constraints permitted. It is wrapped by <a
 href="#find_best_nullityf_with_orders">find_best_nullityf_with_orders</a>
+</li>
+<li>
+<h3><a name="zfn">zfn</a></h3>
+Purpose: Filter on nullity
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Input file to be filtered</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Filtered result</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>The nullity to be selected</td>
+</tr>
+<tr>
+<td valign=top>4</td><td valign=top>First generator</td>
+</tr>
+<tr>
+<td valign=top>5-</td><td valign=top>Further generators</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>None</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported
+textually by the program</td>
+</tr>
+</table>
+Commentary: This is part of a suite of three programs used when
+searching for delta words for tensor condensation. This involves
+finding a word with a required non-zero nullity on one representation
+and nullity zero on all others. The program takes a list of group
+algebra words (as linear sums of the generators, with the identity
+also added in) and for each element in the list computes the nullity
+of that element in the given representation. If the nullity matches,
+the word is output, otherwise it is discarded. Further programs <a
+href=#zcfl>zcfl</a> and <a href=#zpfl>zpfl</a> exist to respectively
+create the list and print the final results. The programs can be run
+in combination via a script <a
+href=#filter_element>filter_element</a>.
 </li>
 <li>
 <h3><a name="zfo">zfo</a></h3>
@@ -2525,6 +2615,40 @@ fuller description of condensation in general and tensor condensation
 in particular.
 </li>
 <li>
+<h3><a name="zpfl">zpfl</a></h3>
+Purpose: Print filter list
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Filter list file</td>
+</tr>
+<tr>
+<td valign=top>2-</td><td valign=top>Generators</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>Algebra
+elements given by the filter list</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported
+textually by the program</td>
+</tr>
+</table>
+Commentary: This is part of a suite of three programs used when
+searching for delta words for tensor condensation. The input is the
+list of all elements satisfying the nullity conditions. The output is
+a list of group algebra words, one per row of the input, where the
+coefficients are the entries in the individual input rows.
+</li>
+<li>
 <h3><a name="zpco">zpco</a></h3>
 Purpose: Permutation condense relative to an orbit file
 <table>
@@ -2566,7 +2690,7 @@ Commentary: Condense a permutation relative to a set of orbits, as
 described in Cooperman, Hiss, Lux and Mueller "The Brauer Tree of the
 Principal 19-Block of the Sporadic Simple Thompson Group". It is worth
 noting that the matrices produced by condensation are fairly row
-spare, since the number of non-zero entries in any row can be at most
+spares, since the number of non-zero entries in any row can be at most
 the orbit size of the orbit indexing this row.
 </li>
 <li>
@@ -4940,6 +5064,7 @@ dimension increases.
 <li><a href="#f7">f7</a></li>
 <li><a href="#f8">f8</a></li>
 <li><a href="#f9">f9</a></li>
+<li><a href="#filter_element">filter_element</a></li>
 <li><a href="#find_best_nullity_with_orders">find_best_nullity_with_orders</a></li>
 <li><a href="#find_best_nullityf_with_orders">find_best_nullityf_with_orders</a></li>
 <li><a href="#find_element">find_element</a></li>
@@ -6235,6 +6360,51 @@ A+B+CC
 </tr>
 </table>
 Commentary: 
+</li>
+<li>
+<h3><a name="filter_element">filter_element</a></h3>
+Purpose: A script for automating the search for delta words for use in
+tensor condensation.
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Number of generators of the algebra</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>The nullity required on the first
+representation (all other nullities will be zero)</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>A file containing the names of the
+representations to be considered, with the representation to be
+considered for non-zero nullity first. The generators for a particular
+representation will be created by appending _1, _2 etc to the line
+from this file giving that representation</td>
+</tr>
+<tr>
+<td valign=top>4-</td><td valign=top>A number of formulae in the
+generators, whose linear sums are to be tested as potential delta
+words.</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>A number
+of delta words (if found) for the first represnetation given</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+</table>
+Commentary: The script glues together the use of <a
+href=#zcfl>zcfl</a>, <a href=#zfn>zfn</a> and <a href=#zfl>zpfl</a> to
+find delta words for one representation.
 </li>
 <li>
 <h3><a name="f10">f10</a></h3>
