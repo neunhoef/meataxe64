@@ -1,5 +1,5 @@
 /*
- * $Id: symb.c,v 1.12 2006/05/01 09:08:45 jon Exp $
+ * $Id: symb.c,v 1.13 2006/06/15 08:00:12 jon Exp $
  *
  * Function to compute a symmetry basis
  *
@@ -198,7 +198,7 @@ u32 symb(u32 spaces, u32 space_size,
     ech_rows[i] = memory_pointer_offset(0, total_rows + i, len);
   }
   files = my_malloc(argc * sizeof(FILE *));
-  gens = my_malloc(argc * sizeof(struct gen_struct));
+  gens = my_malloc(argc * sizeof(*gens));
   for (i = 1; i < argc; i++) {
     gens[i - 1].next = gens + i;
     files[i] = NULL;

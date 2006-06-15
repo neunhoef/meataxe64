@@ -1,5 +1,5 @@
 /*
- * $Id: msp.c,v 1.18 2006/05/01 09:08:45 jon Exp $
+ * $Id: msp.c,v 1.19 2006/06/15 08:00:12 jon Exp $
  *
  * Function to spin some vectors under multiple generators
  *
@@ -58,7 +58,7 @@ u32 spin(const char *in, const char *out,
     exit(1);
   }
   files = my_malloc(argc * sizeof(FILE *));
-  gens = my_malloc(argc * sizeof(struct gen_struct));
+  gens = my_malloc(argc * sizeof(*gens));
   for (d = 1; d < argc; d++) {
     gens[d - 1].next = gens + d;
     files[d] = NULL;

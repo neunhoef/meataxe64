@@ -1,5 +1,5 @@
 /*
- * $Id: sv.c,v 1.1 2006/03/04 09:02:06 jon Exp $
+ * $Id: sv.c,v 1.2 2006/06/15 08:00:12 jon Exp $
  *
  * Function to compute Schreier vector
  *
@@ -51,7 +51,7 @@ int sv(word point, const char *sv_out, const char *bv_out,
   assert(0 < argc);
   assert(NULL != name);
   files = my_malloc(argc * sizeof(FILE *));
-  gens = my_malloc(argc * sizeof(struct gen_struct));
+  gens = my_malloc(argc * sizeof(*gens));
   for (d = 1; d < argc; d++) {
     gens[d - 1].next = gens + d;
     files[d] = NULL;

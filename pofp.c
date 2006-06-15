@@ -1,5 +1,5 @@
 /*
- * $Id: pofp.c,v 1.2 2006/03/12 10:26:33 jon Exp $
+ * $Id: pofp.c,v 1.3 2006/06/15 08:00:12 jon Exp $
  *
  * Function to compute fixed points of permutation in orbit
  *
@@ -48,7 +48,7 @@ u32 fixed_points_orbit(const char *in_orbit, unsigned int orbit_num, const char 
   assert(0 != argc);
   assert(NULL != args);
   files = my_malloc(argc * sizeof(FILE *));
-  gens = my_malloc(argc * sizeof(struct gen_struct));
+  gens = my_malloc(argc * sizeof(*gens));
   for (d = 1; d < argc; d++) {
     gens[d - 1].next = gens + d;
     files[d] = NULL;
