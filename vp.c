@@ -1,5 +1,5 @@
 /*
- * $Id: vp.c,v 1.12 2005/07/24 09:32:46 jon Exp $
+ * $Id: vp.c,v 1.13 2006/07/19 21:26:24 jon Exp $
  *
  * Function to permute some vectors under two generators
  *
@@ -336,8 +336,6 @@ u32 permute(const char *in, const char *out, const char *a,
     fclose(outp);
     exit(1);
   }
-  printf("%u search hash failures\n", search_hash_fails);
-  printf("%u sort hash failures\n", sort_hash_fails);
   fclose(outp);
   map_free(map_b);
   header_free(h_map);
