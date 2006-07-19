@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.74 2006/05/20 15:28:27 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.75 2006/07/19 21:26:00 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -356,6 +356,7 @@ Turn on verbose mode
 <li><a href="#zmsbf">zmsbf</a></li>
 <li><a href="#zmsp">zmsp</a></li>
 <li><a href="#zmspf">zmspf</a></li>
+<li><a href="#zmvp">zmvp</a></li>
 <li><a href="#zmu">zmu</a></li>
 <li><a href="#znoc">znoc</a></li>
 <li><a href="#znor">znor</a></li>
@@ -2272,6 +2273,44 @@ when the meataxe is being used on groups which are not two generator,
 or when it is being used on condensations (which frequently require
 more than two generators), and subspaces larger than the available
 memory are to be produced.
+</li>
+<li>
+<h3><a name="zmvp">zmvp</a></h3>
+Purpose: Vector permute with mu;tiple generators
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Input vector</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Output set of vectors</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>Generator 1</td>
+</tr>
+<tr>
+<td valign=top>4- *</td><td valign=top>Remaining generators</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>The number of points in the orbit</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient memory for vectors plus workspace</td>
+</tr>
+</table>
+Commentary: This is very similar to <a href="#zvp">zvp</a>
+but taking multiple generators.
 </li>
 <li>
 <h3><a name="zmu">zmu</a></h3>
@@ -4770,7 +4809,7 @@ memory is exhausted, the number of rows produced at that stage</td>
 <td valign=top>2</td><td valign=top>Insufficient memory for subspace plus workspace</td>
 </tr>
 </table>
-Commentary: This is a special case of <a href="#zsp">zsp</a> where the
+Commentary: This is a special case of <a href="#zmsp">zmsp</a> where the
 generators are a tensor product. Replacing row multiplication by a
 generator in tensor space, with two multiplications (with the left
 hand generator transposed) gives an algorithm with a much better
@@ -4879,8 +4918,8 @@ Purpose: Vector permute
 <td valign=top>2</td><td valign=top>Insufficient memory for vectors plus workspace</td>
 </tr>
 </table>
-Commentary: This does for permutations what <a href="#zsp">zsp</a>
-does for modules. It algorithms are in no way optimised, and anybody
+Commentary: This does for permutations what <a href="#zmsp">zmsp</a>
+does for modules. Its algorithms are in no way optimised, and anybody
 wanting to produce seriously large permutation representations is
 advised to use other published methods. It also produces the
 permutations, since this information is calculated for free during the

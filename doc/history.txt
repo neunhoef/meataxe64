@@ -391,3 +391,4 @@ skew seventh
 20060513 - Add documentation for rebase.sh and fix a bug
 20060520 - Add documentation on filter_element and associated programs
 20060614 - Fix bug in allocation of gens
+20060717 - Add zmvp, vector permute with multiple generators
