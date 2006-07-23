@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.107 2006/05/09 22:04:10 jon Exp $
+# $Id: makefile,v 1.108 2006/07/23 15:26:04 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -66,6 +66,7 @@ ZMSBF_TARGET=	zmsbf
 ZMSP_TARGET=	zmsp
 ZMSPF_TARGET=	zmspf
 ZMU_TARGET=	zmu
+ZMVP_TARGET=	zmvp
 ZNOC_TARGET=	znoc
 ZNOR_TARGET=	znor
 ZNS_TARGET=	zns
@@ -129,7 +130,7 @@ ZVP_TARGET=	zvp
 ZVPF_TARGET=	zvpf
 ZWORDS_TARGET=	zwords
 
-LIB_MODULES=	add clean clean_file clean_vectors command conj count dc dets diff diffd elements endian exrows extend extend_matrix files gen grease header ident join map map_or_row maps matrix memory msb msbf msp mspf mul mv ns nsf ntco orbit parse pco pcol pfl pofp powers primes project ps qs rand read restrict rn rnf scale script singular span spanmsp ss ss_map sums sumsf sums_utils sv symb system tco te tmul tra tsp tspf ttr utils vp vpf write
+LIB_MODULES=	add clean clean_file clean_vectors command conj count dc dets diff diffd elements endian exrows extend extend_matrix files gen grease header ident join map map_or_row maps matrix memory msb msbf msp mspf mul mv mvp ns nsf ntco orbit parse pco pcol pfl pofp powers primes project ps qs rand read restrict rn rnf scale script singular span spanmsp ss ss_map sums sumsf sums_utils sv symb system tco te tmul tra tsp tspf ttr utils vp vpf write
 
 CONS_MODULES=	constrain
 DTOU_MODULES=	dtou
@@ -188,6 +189,7 @@ ZMSBF_MODULES=	rows zmsbf
 ZMSP_MODULES=	rows zmsp
 ZMSPF_MODULES=	rows zmspf
 ZMU_MODULES=	mu rows
+ZMVP_MODULES=	rows zmvp
 ZNOC_MODULES=	znoc
 ZNOR_MODULES=	znor
 ZNS_MODULES=	rows zns
@@ -310,6 +312,7 @@ MODULES=	$(LIB_MODULES) \
 	$(ZMSP_MODULES) \
 	$(ZMSPF_MODULES) \
 	$(ZMU_MODULES) \
+	$(ZMVP_MODULES) \
 	$(ZNOC_MODULES) \
 	$(ZNOR_MODULES) \
 	$(ZNS_MODULES) \
@@ -582,6 +585,9 @@ TARGET:=ZMSPF
 include targets.txt
 
 TARGET:=ZMU
+include targets.txt
+
+TARGET:=ZMVP
 include targets.txt
 
 TARGET:=ZNOC
