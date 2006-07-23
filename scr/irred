@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: irred,v 1.9 2002/10/13 19:09:42 jon Exp $
+# $Id: irred,v 1.10 2006/07/23 16:02:13 jon Exp $
 #
 # Script to discover if a representation is irreducible
 #
@@ -56,6 +56,7 @@ else
   exit 1
 fi
 tmp=tmp${PPID}
+vectors=${tmp}.vectors
 #echo Using tmp stem $tmp
 ok=0
 nullity=0
@@ -82,7 +83,7 @@ for y in $*; do
 done
 #echo irred calls split_with_element
 ok=0
-split_with_element ${tmp}.0 ${o}_tra 1 0 $s ${tmp}.1 ${names}
+split_with_element ${tmp}.0 ${o}_tra 1 0 $s ${vectors} ${tmp}.1 ${names}
 ret=$?
 rm ${tmp}*
 exit $ret

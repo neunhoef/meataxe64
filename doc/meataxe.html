@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.75 2006/07/19 21:26:00 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.76 2006/07/23 16:02:13 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -5153,6 +5153,7 @@ dimension increases.
 <li><a href="#split_all_sub">split_all_sub</a></li>
 <li><a href="#split_with_element">split_with_element</a></li>
 <li><a href="#split_with_subspace">split_with_subspace</a></li>
+<li><a href="#split_with_vectors">split_with_vectors</a></li>
 <li><a href="#sym_basis">sym_basis</a></li>
 <li><a href="#sym_basis_delta">sym_basis_delta</a></li>
 <li><a href="#sym_basis_deltaf">sym_basis_deltaf</a></li>
@@ -8475,6 +8476,9 @@ dimensions of the subspace and quotient</td>
 <tr>
 <td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
 </tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient memory supplied</td>
+</tr>
 </table>
 Commentary: This script provides a means of acquiring the intersection
 of a space with a set of vectors, and a direct complement for that
@@ -8523,9 +8527,7 @@ href="#zmsp">zmsp</a></td>
 </tr>
 </table>
 Commentary: This script is intended for searching a set of vectors for
-one generating a small subspace. In some cases, this information could
-be available from condensation, however, this meataxe does not support
-condensation (yet). The typical use situation is where one knows
+one generating a small subspace. The typical use situation is where one knows
 theoretically that one of the vectors will produce a small subspace,
 and one knows a bound for the dimension of that subspace, and one
 wishes to avoid other potentially much larger subspaces. A particular
@@ -8547,10 +8549,16 @@ Purpose: Perform a single split of a representation
 <td valign=top>2</td><td valign=top>Ignore pathology</td>
 </tr>
 <tr>
-<td valign=top>3</td><td valign=top>Generator 1</td>
+<td valign=top>3</td><td valign=top>Vectors used to seed the split (output)</td>
 </tr>
 <tr>
-<td valign=top>4-</td><td valign=top>Other generators</td>
+<td valign=top>4</td><td valign=top>The subspace found (output)</td>
+</tr>
+<tr>
+<td valign=top>5</td><td valign=top>Generator 1</td>
+</tr>
+<tr>
+<td valign=top>6-</td><td valign=top>Other generators</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>Information describing the split
@@ -8590,7 +8598,12 @@ However, when splitting a representation which is completely reducible
 (eg for a condensation subgroup), these elements may be the only ones
 that can provide suitable vectors. Under these circumstances, the
 parameter ignore pathology should be set to 0, as is done by the
-driving script <a href="split_all_decomp">split_all_decomp</a>.
+driving script <a href="split_all_decomp">split_all_decomp</a>. The
+script returns the vectors used to seed the split, and the subspace
+found. These can then be used to assist with splitting the subspace
+and quotient (using <a href="space_split">space_split</a> to get the
+projections and subspace vectos), thus avoiding potentially costly
+searches for splitting elements.
 </li>
 <li>
 <h3><a name="split_all">split_all</a></h3>
@@ -8751,10 +8764,13 @@ pathologically large nullities, 0 to use them. Other values reserved
 for future expansion</td>
 </tr>
 <tr>
-<td valign=top>4</td><td valign=top>Generator 1</td>
+<td valign=top>4</td><td valign=top>The vectors to try first when splitting</td>
 </tr>
 <tr>
-<td valign=top>5 onwards</td><td valign=top>Other generators</td>
+<td valign=top>5</td><td valign=top>Generator 1</td>
+</tr>
+<tr>
+<td valign=top>6 onwards</td><td valign=top>Other generators</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td
@@ -8782,7 +8798,11 @@ Commentary: Because this script does a lot of searching for suitable
 elements, it should be used carefully, either on very small cases, or
 on cases which are known to split easily. This applies even more than
 for split, since this script will continue until all pieces found are
-irreducible.
+irreducible. In order to ease the problem of searching through
+elements which are known to be no use (because the calling split found
+them to have nullity zero), this script can be provided via parameter
+4 with some vectors to try first, which will typically have come from a
+nullspace operation yielding non-zero nullity.
 </li>
 <li>
 <h3><a name="split_with_element">split_with_element</a></h3>
@@ -8807,10 +8827,13 @@ Purpose: Split a representation using the nullspace of a given element
 <td valign=top>5</td><td valign=top>The subspace produced</td>
 </tr>
 <tr>
-<td valign=top>6</td><td valign=top>Generator 1</td>
+<td valign=top>6</td><td valign=top>The null vectors used to seed the subspace</td>
 </tr>
 <tr>
-<td valign=top>7 onwards</td><td valign=top>Other generators</td>
+<td valign=top>7</td><td valign=top>Generator 1</td>
+</tr>
+<tr>
+<td valign=top>8 onwards</td><td valign=top>Other generators</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td
@@ -8838,7 +8861,7 @@ valign=top>Information describing the split (or lack of split)</td>
 <td valign=top>255</td><td valign=top>Irreducible</td>
 </tr>
 </table>
-Commentary: Ths script actually performs a single split with a given
+Commentary: This script actually performs a single split with a given
 element, transposing and recursing if necessary via the script irred.
 In order to prevent an infinite loop, a count of calls is passed in
 via parameter 3. If this count is not zero, then the assumption is
@@ -8846,7 +8869,7 @@ that we have been called recursively, and that therefore if a single
 vector spins to the whole space then the representation is
 irreducible, as per the Norton irreducibility test. So, if this script
 is called from the command line, parameter 3 should be set to 0. A
-further parameter to allow or disalow pathologically low nullities is
+further parameter to allow or disallow pathologically low nullities is
 passed in in parameter 4. This script regards any nullity whose square
 exceeds the dimension of the representation as bad, and will, if
 parameter 4 is set non-zero, refuse to use it to split. However, in
@@ -8868,7 +8891,108 @@ representation may have been queued awaiting processing, and name
 clashes can easily occur. In the case where the Norton irreducibility
 test is invoked, a dual dual subspace is produced in the original
 using <a href="#dual_subspace">dual_subspace</a>. The subspace is
-returned via parameter 4.
+returned via parameter 5, and the null vectors used to seed it via
+parameter 6.
+</li>
+<li>
+<h3><a name="split_with_subspace">split_with_subspace</a></h3>
+Purpose: Given a subspace, produce the sub and quotient
+representations of an element of the group algebra
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Any element acting on the whole space</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>The subspace</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>The name to be given to the subspace representation for
+parameter 1</td>
+</tr>
+<tr>
+<td valign=top>4</td><td valign=top>The name to be given to the quotient space
+representation for parameter 1</td>
+</tr>
+<tr>
+<td valign=top>5</td><td valign=top>Optional memory size (default 200k)</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>None</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient memory for workspace</td>
+</tr>
+<tr>
+<td valign=top>254</td><td valign=top>Subspace is whole space</td>
+</tr>
+</table>
+Commentary: This is really just a script to wrap up the relevant use
+of <a href="#zmu">zmu</a>, <a href="#zss">zss</a> and <a
+href="#zqs">zqs</a> for the same parameters.
+</li>
+<li>
+<h3><a name="split_with_vectors">split_with_vectors</a></h3>
+Purpose: Split a representation using a collection of vectors
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Vectors with which to split</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Stem for output file names</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>A boolean to allow or disallow pathological elements</td>
+</tr>
+<tr>
+<td valign=top>4</td><td valign=top>The subspace produced</td>
+</tr>
+<tr>
+<td valign=top>5</td><td valign=top>Generator 1</td>
+</tr>
+<tr>
+<td valign=top>6 onwards</td><td valign=top>Other generators</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td
+valign=top>Information describing the split (or lack of split)</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient memory for workspace</td>
+</tr>
+<tr>
+<td valign=top>254</td><td valign=top>Did not split (probably too many null vectors)</td>
+</tr>
+</table>
+Commentary: This script tries to split using each possible element
+from the sapn of the vectors, or some restricted subset thereof if the
+span is too large. It returns the subspace found, as well as
+performing the subspace and quoteient space operations. The naming
+conventions are as for <a href="split_with_element">
+split_with_element<a/>. Norton irreducibility is not applied.
 </li>
 <li>
 <h3><a name="split_with_subspace">split_with_subspace</a></h3>
@@ -9219,9 +9343,7 @@ href="#zmsp">zmsp</a></td>
 </tr>
 </table>
 Commentary: This script is intended for searching a set of vectors for
-one generating a small subspace. In some cases, this information could
-be available from condensation, however, this meataxe does not support
-condensation (yet). The typical use situation is where one knows
+one generating a small subspace. The typical use situation is where one knows
 theoretically that one of the vectors will produce a small subspace,
 and one knows a bound for the dimension of that subspace, and one
 wishes to avoid other potentially much larger subspaces. A particular

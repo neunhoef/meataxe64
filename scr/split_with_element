@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: split_with_element,v 1.22 2003/12/17 23:29:06 jon Exp $
+# $Id: split_with_element,v 1.23 2006/07/23 16:02:13 jon Exp $
 #
 # Script to split a representation given a particular element to work from
 #
@@ -10,8 +10,9 @@
 # $3: call count to prevent looping
 # $4: ignore pathology (very high nullity)
 # $5: name for subspace
-# $6: generator a
-# $7-: other generators
+# $6: name for null vectors
+# $7: generator a
+# $8-: other generators
 #
 # outputs will be of the form <$2>_<nor>_<subnor>_<x>
 # where nor is number of rows, and subnor is
@@ -26,7 +27,7 @@
 # 255: irreducible
 #
 . functions
-usage="$0: usage: $0 <e> <output_stem> <count> <ignore pathology> <subspace> <a> [<other generators>]"
+usage="$0: usage: $0 <e> <output_stem> <count> <ignore pathology> <subspace> <null vectors> <a> [<other generators>]"
 if [ $# -lt 6 ]; then
   echo "$usage"
   exit 1;
@@ -36,8 +37,9 @@ o=$2
 c=$3
 path=$4
 s=$5
-a=$6
-shift 6
+null=$6
+a=$7
+shift 7
 if [ -e $a -a -e $e ]; then
   q=`zprime $e`
   nor=`znor $a`
@@ -68,7 +70,7 @@ memory=200
 ok=0
 nullity=0
 while [ 0 -eq $ok ]; do
-  nullity=`zns -m $memory $e ${tmp}.2 2>&1`
+  nullity=`zns -m $memory $e ${null} 2>&1`
   ret=$?
   if [ $ret -eq 0 ]; then
     ok=1
@@ -115,15 +117,17 @@ if [ $count -gt 5 ]; then
 fi
 #echo Considering $vectors vectors
 if [ 0 -eq $c ]; then
-  zspan ${tmp}.2 ${tmp}.3 $count
+  zspan ${null} ${tmp}.3 $count
   if [ $? -ne 0 ]; then
     rm -f ${tmp}*
+    echo zspan ${null} ${tmp}.3 $count failed
+    znor ${null}
     exit 1
   fi
   vectors=`znor ${tmp}.3`
 else
 # Only consider one vector when called from irred
-  cp ${tmp}.2 ${tmp}.3
+  cp ${null} ${tmp}.3
   vectors=1
 fi
 vector=0;
@@ -177,6 +181,7 @@ else
 #   echo split_with_element calls irred
     irred $e $o $memory $s $a $*
     ret=$?
+    rm ${null}
 #   echo irred returns result $ret
     if [ $ret -eq 255 ]; then
       echo irreducible $a $* of dimension $nor found

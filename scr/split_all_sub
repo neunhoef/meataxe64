@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: split_all_sub,v 1.6 2003/08/24 12:05:12 jon Exp $
+# $Id: split_all_sub,v 1.7 2006/07/23 16:02:13 jon Exp $
 #
 # Script to split a representation completely
 # and possibly classify the irreducibles
@@ -9,44 +9,75 @@
 # $1: output filename base
 # $2: classify
 # $3: ignore patholgy
-# $4: generator a
-# $5-: other generators
+# $4: set of splitting vectors (out)
+# $5: generator a
+# $6-: other generators
 #
 # Return codes
 # 1: error in parameters
 # 0: success
 # 252: ran out of possible splitters
 #
-usage="$0: usage: $0 <output_stem> <classify> <ignore pathology> <a> [<other generators>]"
-if [ $# -lt 5 ]; then
+. functions
+usage="$0: usage: $0 <output_stem> <classify> <ignore pathology> <splitting vectors> <a> [<other generators>]"
+if [ $# -lt 6 ]; then
   echo "$usage"
   exit 1;
 fi
-a=$4
+a=$5
 o=$1
 c=$2
 classify=1
 path=$3
+vectors=$4
 if [ 0 -eq $c ]; then
   classify=0
 fi
+memory=400
 nor=`znor $a`
 #
 # TODO: find a way of using a process specific temporary for stdout
 #
-shift 4
-split $o $path $a $* 2>/dev/null 1>poo
-ret=$?
+shift 5
+tmp=tmp${PPID}
+subspace=${tmp}.subspace
+#
+# First see if we can use incoming vectors
+#
+ret=254
+if [ -s $vectors ]; then
+#  echo Trying to use vectors in $vectors
+  split_with_vectors $vectors $o $path ${subspace} $a $* 2>/dev/null 1>poo
+  ret=$?
+  if [ 1 -eq $ret ]; then
+    echo "parameter problem with module $a"
+    rm -f $vectors $subspace
+    cat poo
+    exit 1
+  fi
+fi
+if [ 254 -eq $ret ]; then
+# Create our own vectors file
+  if [ "/dev/null" != "$vectors" ]; then
+    rm -f $vectors $subspace
+  fi
+  vectors=${tmp}.vectors
+  split $o $path ${vectors} ${subspace} $a $* 2>/dev/null 1>poo
+  ret=$?
+fi
+#ls -l ${vectors} ${subspace}
 res=`grep dimension poo 2>/dev/null`
 #cat poo
 #echo res = $res, ret = $ret
 if [ 1 -eq $ret ]; then
   echo "parameter problem with module $a"
+  rm -f $vectors $subspace
   cat poo
   exit 1
 elif [ 255 -eq $ret ]; then
   rm -f poo
   echo "irreducible module $a found"
+  rm -f $vectors $subspace
   if [ 0 -ne $classify ]; then
     new_irred_and_indicate 400 $a $*
   else
@@ -54,10 +85,12 @@ elif [ 255 -eq $ret ]; then
   fi
   exit 0
 elif [ 254 -eq $ret ]; then
+  rm -f $vectors $subspace
   cat poo
   echo "unable to split module $a (unexpected)"
   exit 0
 elif [ 252 -eq $ret ]; then
+  rm -f $vectors $subspace
   cat poo
   echo "ran out of splitters for $a"
   exit 252
@@ -72,18 +105,102 @@ else
   quot_name=`echo $res | sed -e "s/^.* quotient //g;s/ .*$//g" | sed -e "s/_tra//g"`
 # echo dim=$dim, codim=$codim, sub_name=$sub_name, quot_name=$quot_name
 # Recurse, using same classify criterion
+# First check if we have vectors we can pass in
+  qv=/dev/null
+  sv=/dev/null
+  if [ -s $vectors -a -s $subspace ]; then
+# Project to see if any quotient vectors. We may need to work on the memory allocation
+#    echo subspace and vectors found
+    while true; do
+      zproj -m $memory $subspace $vectors ${tmp}.quot 1>>poo 2>&1
+      ret=$?
+      if [ 2 -eq $ret ]; then
+        let memory=`more_memory $memory`
+      else
+        break
+      fi
+    done
+    if [ 0 -eq $ret ]; then
+      while true; do
+        n=`zrn -m $memory ${tmp}.quot 2>&1`
+        ret=$?
+        if [ 2 -eq $ret ]; then
+          let memory=`more_memory $memory`
+        else
+          break
+        fi
+      done
+      if [ 0 -eq $ret ]; then
+#        echo Rank $n for ${tmp}.quot
+        # Now space_split
+        while true; do
+          space_split $subspace $vectors ${tmp}.stem $memory 1>>poo 2>&1
+          ret=$?
+          if [ 2 -eq $ret ]; then
+            let memory=`more_memory $memory`
+          else
+            break
+          fi
+        done
+        if [ 0 -eq $ret ]; then
+          # Space now split, deal with quotient and subspace
+          if [ 0 -eq $n ]; then
+            # No quotient vectors
+            rm -f ${tmp}.stem.proj
+          else
+            qv=${tmp}.stem.proj
+          fi
+          while true; do
+            m=`zrn -m $memory ${tmp}.stem.ss 2>&1`
+            ret=$?
+            if [ 2 -eq $ret ]; then
+              let memory=`more_memory $memory`
+            else
+              break
+            fi
+          done
+          if [ 0 -eq $ret ]; then
+            if [ 1 -ge $m ]; then
+#              echo Not enough vectors for subspace
+              rm -f ${tmp}.stem.ss
+            else
+              sv=${tmp}.stem.ss
+            fi
+          else
+#            echo zrn -m $memory ${tmp}.stem.ss failed
+            rm -f ${tmp}.*
+          fi
+        else
+#          echo space_split $subspace $vectors ${tmp}.stem $memory failed
+          rm -f ${tmp}.*
+        fi
+      else
+#        echo Failed to get rank for ${tmp}.quot
+        rm -f ${tmp}.*
+      fi
+    else
+#      echo zproj $subspace $vectors ${tmp}.quot failed
+      rm -f ${tmp}.*
+    fi
+#  else
+#    echo Subspace or vectors not found
+  fi
+  rm -f $vectors $subspace
   names="${sub_name}_1"
   y=1
   for x in $*; do
     let y=$y+1
     names="$names ${sub_name}_$y"
   done
-  split_all_sub ${o} $c $path $names
+#  ls -l $sv
+  split_all_sub ${o} $c $path $sv $names
   names="${quot_name}_1"
   y=1
   for x in $*; do
     let y=$y+1
     names="$names ${quot_name}_$y"
   done
-  split_all_sub ${o} $c $path $names
+#  ls -l $qv
+  split_all_sub ${o} $c $path $qv $names
+  rm -f ${tmp}.*
 fi

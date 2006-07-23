@@ -1,14 +1,16 @@
 #!/bin/sh
 #
-# $Id: split,v 1.20 2005/07/10 10:05:31 jon Exp $
+# $Id: split,v 1.21 2006/07/23 16:02:13 jon Exp $
 #
 # Script to split a representation
 #
 # Inputs
 # $1: output filename base
 # $2: ignore pathology
-# $3: generator a
-# $4-: other generators
+# $3: vectors (may not exist)
+# $4: subspace (may not exist)
+# $5: generator a
+# $6-: other generators
 #
 # outputs will be of the form <$4>_<q>_<nor>_$x
 # where nor is number of rows, and q is the prime power
@@ -23,15 +25,17 @@
 #
 #set -v
 . functions
-usage="$0: usage: $0 <output_stem> <ignore pathology> <a> [<other generators>]"
-if [ $# -lt 4 ]; then
+usage="$0: usage: $0 <output_stem> <ignore pathology> <vectors> <subspace> <a> [<other generators>]"
+if [ $# -lt 5 ]; then
   echo "$usage"
   exit 1;
 fi
-a=$3
+a=$5
 o=$1
 path=$2
-shift 3
+vectors=$3
+subspace=$4
+shift 5
 if [ -e $a ]; then
   q=`zprime $a`
   nor=`znor $a`
@@ -67,7 +71,7 @@ for i in 1 2 3 4 5 6 7 8 9 10; do
     rm -f ${tmp}*
     exit 1
   fi
-  split_with_element ${tmp}.1 $o 0 $path ${tmp}.2 $a $*
+  split_with_element ${tmp}.1 $o 0 $path ${subspace} ${vectors} $a $*
   ret=$?
 # Only loop on nullity 0 or didn't split
   if [ $ret -ne 253 -a $ret -ne 254 ]; then
@@ -78,7 +82,7 @@ done
 # If any generators are singular, try them
 for x in $a $*; do
   echo "using $x to split"
-  split_with_element $x $o 0 $path ${tmp}.2 $a $*
+  split_with_element $x $o 0 $path ${subspace} ${vectors} $a $*
   ret=$?
 # Only loop on nullity 0 or didn't split
   if [ $ret -ne 253 -a $ret -ne 254 ]; then
@@ -144,7 +148,7 @@ while [ $ok -eq 0 ]; do
     elif [ 0 -eq $ret ]; then
       ok=1
       name=`echo $out | sed -e "s/^.*element //g;s/ of nullity.*$//g"`
-      split_with_element ${name} $o 0 0 ${tmp}.2 $a $*
+      split_with_element ${name} $o 0 0 ${subspace} ${vectors} $a $*
       ret=$?
       if [ $ret -eq 255 -o $ret -eq 0 ]; then
         rm -f ${tmp}*
@@ -175,7 +179,7 @@ while [ $ok -eq 0 ]; do
   elif [ 0 -eq $ret ]; then
     ok=1
     name=`echo $out | sed -e "s/^.*element //g;s/ of nullity.*$//g"`
-    split_with_element ${name} $o 0 0 ${tmp}.2 $a $*
+    split_with_element ${name} $o 0 0 ${subspace} ${vectors} $a $*
     ret=$?
     if [ $ret -eq 255 -o $ret -eq 0 ]; then
       rm -f ${tmp}*
@@ -198,7 +202,7 @@ while [ $ok -eq 0 ]; do
     let memory=`more_memory $memory`
   elif [ 0 -eq $ret ]; then
     ok=1
-    split_with_element ${tmp}_zero $o 0 0 ${tmp}.2 $a $*
+    split_with_element ${tmp}_zero $o 0 0 ${subspace} ${vectors} $a $*
     ret=$?
     if [ $ret -eq 255 -o $ret -eq 0 ]; then
       rm -f ${tmp}*

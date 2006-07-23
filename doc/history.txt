@@ -393,3 +393,4 @@ skew seventh
 20060614 - Fix bug in allocation of gens
 20060717 - Add zmvp, vector permute with multiple generators
 20060723 - Fix bug in sums_utils whereby two many words were thought to reduce
+20060723 - Add ability to reuse null vectors during recursive split
