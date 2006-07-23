@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: space_split,v 1.2 2004/09/19 09:16:11 jon Exp $
+# $Id: space_split,v 1.3 2006/07/23 15:29:14 jon Exp $
 #
 # Script to split a space across a subspace
 # giving te intersection with the subspace
@@ -39,49 +39,46 @@ zproj -m $memory $s $v ${tmp}.1
 ret=$?
 if [ 0 -ne $ret ]; then
   rm -f ${tmp}.*
-  exit 1
+  exit $ret
 fi
 ns=`zns -m $memory ${tmp}.1 ${tmp}.2`
 ret=$?
 if [ 0 -ne $ret ]; then
   rm -f ${tmp}.*
   echo $ns
-  exit 1
+  exit $ret
 fi
 if [ 0 -ne $ns ]; then
   zmu -m $memory ${tmp}.2 $v ${tmp}.3
   ret=$?
   if [ 0 -ne $ret ]; then
     rm -f ${tmp}.*
-    echo $ns
-    exit 1
+    exit $ret
   fi
   zss -m $memory $s ${tmp}.3 ${tmp}.4
   ret=$?
   if [ 0 -ne $ret ]; then
     rm -f ${tmp}.*
-    exit 1
+    exit $ret
   fi
   zbase -m $memory ${tmp}.4 . $stem.ss
   ret=$?
   if [ 0 -ne $ret ]; then
     rm -f ${tmp}.*
-    echo $ns
-    exit 1
+    exit $ret
   fi
   zbase -m $memory ${tmp}.1 . $stem.proj
   ret=$?
   if [ 0 -ne $ret ]; then
     rm -f ${tmp}.*
-    echo $ns
-    exit 1
+    exit $ret
   fi
 else
   zss -m $memory $s $v $stem.ss
   ret=$?
   if [ 0 -ne $ret ]; then
     rm -f ${tmp}.*
-    exit 1
+    exit $ret
   fi
   echo "$v: entirely within $s"
 fi
