@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: find_best_nullity_with_orders,v 1.9 2005/05/01 10:11:32 jon Exp $
+# $Id: find_best_nullity_with_orders,v 1.10 2006/07/23 15:29:45 jon Exp $
 #
 # Script to find an element of best nullity in two generators
 #
@@ -61,6 +61,7 @@ while [ $ok -eq 0 ]; do
       shift 2
     else
       rm -f ${tmp}*
+      echo $out
       exit 254
     fi
   else
