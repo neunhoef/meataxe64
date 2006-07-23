@@ -392,3 +392,4 @@ skew seventh
 20060520 - Add documentation on filter_element and associated programs
 20060614 - Fix bug in allocation of gens
 20060717 - Add zmvp, vector permute with multiple generators
+20060723 - Fix bug in sums_utils whereby two many words were thought to reduce

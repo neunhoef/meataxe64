@@ -1,5 +1,5 @@
 /*
- * $Id: sums_utils.c,v 1.8 2006/02/09 22:02:05 jon Exp $
+ * $Id: sums_utils.c,v 1.9 2006/07/23 15:27:29 jon Exp $
  *
  * Utilities for sums, sumf etc
  *
@@ -198,7 +198,7 @@ int ignore_word(u32 word, u32 max_prod, const char **words, u32 gen, u32 order, 
       for (j = 0; j < order && j < len && reduces; j++) {
         reduces = w[j] == letter;
       }
-      if (reduces) {
+      if (reduces && j == order) {
         if (len == order + 1) {
           found_I = 1;
         }
@@ -244,7 +244,7 @@ int ignore_word(u32 word, u32 max_prod, const char **words, u32 gen, u32 order, 
         for (j = len; j + order > len && j > 1 && reduces; j--) {
           reduces = w[j - 2] == letter;
         }
-        if (reduces) {
+        if (reduces && j + order == len) {
           if (len == order + 1) {
             found_I = 1;
           }
