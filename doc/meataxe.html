@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.76 2006/07/23 16:02:13 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.77 2006/07/29 10:56:52 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -5122,6 +5122,7 @@ dimension increases.
 <li><a href="#inner_product">inner_product</a></li>
 <li><a href="#intersect">intersect</a></li>
 <li><a href="#irred">irred</a></li>
+<li><a href="#irr_base_change">irr_base_change</a></li>
 <li><a href="#lift_vectors">lift_vectors</a></li>
 <li><a href="#new_irred">new_irred</a></li>
 <li><a href="#new_irred_and_indicate">new_irred_and_indicate</a></li>
@@ -7411,6 +7412,44 @@ element by this process, then the subspace so obtained is irreducible.
 The program returns the subspace found within the dual, from which a
 dual dual subspace can be found in the original using <a
 href="#dual_subspace">dual_subspace</a>.
+</li>
+<li>
+<h3><a name="irr_base_change">irr_base_change</a></h3>
+Purpose: Rebase a set of irreducibles according to scripts
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Memory</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>File of scripts</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>File of irreducible name stems</td>
+</tr>
+<tr>
+<td valign=top>4</td><td valign=top>Number of generators</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>As for <a href="#new_irred_with_script">new_irred_with_script</a></td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient memory for workspace</td>
+</tr>
+</table>
+Commentary: This script is used to change the seed for irreducibles as
+a preliminary to computing a symmetry basis for tensor condensation.
 </li>
 <li>
 <h3><a name="lift_vectors">lift_vectors</a></h3>

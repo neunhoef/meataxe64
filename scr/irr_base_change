@@ -1,0 +1,62 @@
+#!/bin/sh
+#
+# $Id: irr_base_change,v 1.1 2006/07/29 10:56:52 jon Exp $
+#
+# Script to change the base of a set of irreducibles
+# This is used in tensor condensation to use the null vectors of
+# the delta words as the seeds used to spin the irreducibles 
+#
+# Inputs
+# $1: initial memory
+# $2 file of delta words
+# $3 file off irreducible name stems
+# $4 The number of generators
+# $2-: generators
+#
+# Return codes
+# 1: error in parameters
+# 0: ok
+# 2: Run out of memory
+#
+name=$0
+usage="$name: usage: $name <memory> <deltas> <irreds> <number of generators>"
+if [ $# -ne 4 ]; then
+  echo "$usage"
+  exit 1;
+fi
+. functions
+memory=$1
+deltas=$2
+irr=$3
+n=$4
+if [ ! -e $deltas -o ! -e $irr ]; then
+  echo $name: $deltas or $irr not found, terminating
+  exit 1
+fi
+i=0
+for x in `cat $deltas`; do
+  scripts[$i]=$x
+  let i=$i+1
+done
+total=$i
+i=0
+for x in `cat $irr`; do
+  irreds[$i]=$x
+  let i=$i+1
+done
+if [ $i -ne $total ]; then
+  echo "$name: different number of scripts and irreducibles, terminating"
+  exit 1
+fi
+i=0
+while [ $i -lt $total ]; do
+  base=${irreds[$i]}
+  j=1
+  args=
+  while [ $j -le $n ]; do
+    args="$args ${base}_$j"
+    let j=$j+1
+  done
+  new_irred_with_script $memory ${scripts[$i]} $args
+  let i=$i+1
+done
