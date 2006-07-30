@@ -396,3 +396,4 @@ skew seventh
 20060723 - Add ability to reuse null vectors during recursive split
 20060726 - Use head at end of filter_element to prevent very large output
 20060729 - Added irr_base_change
+20060730 - Added group_order

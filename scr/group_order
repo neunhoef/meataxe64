@@ -1,0 +1,40 @@
+#!/bin/sh
+#
+# $Id: group_order,v 1.1 2006/07/30 11:04:25 jon Exp $
+#
+# Script to compute group order given a set of representations
+# Main purpose is to see if representations are missing, or if we have the right group
+#
+# Inputs: None
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+#
+usage="$0: usage: $0"
+if [ $# -ne 0 ]; then
+  echo "$usage"
+  exit 1;
+fi
+tmp=tmp${PPID}
+order=0
+# Count the number of generators
+count=`ls irreds/1_0_? | wc -l`
+for x in irreds/*_1; do
+  script=`ls ${x}_I* | sed -e "s?${x}_??g"`
+  base=`echo $x | sed -e 's/_1$//'`
+  y=1
+  names=
+  while [ $y -le $count ]; do
+    names="$names ${base}_$y"
+    let y=$y+1
+  done
+  zscript -m 100000 ${tmp}.${script} ${tmp} ${script} $names
+  r=`zrnf -m 100000 ${tmp}.${script} .`
+  n=`znor $x`
+  let nullity=$n-$r
+  let degree=$n*$n/$nullity
+  let order=$order+$degree
+done
+echo $order
+rm ${tmp}*

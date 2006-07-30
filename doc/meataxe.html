@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.77 2006/07/29 10:56:52 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.78 2006/07/30 11:04:25 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -5113,6 +5113,7 @@ dimension increases.
 <li><a href="#find_restricted_nullity_one_with_orders">find_restricted_nullity_one_with_orders</a></li>
 <li><a href="#find_restricted_nullity_onef_with_orders">find_restricted_nullity_onef_with_orders</a></li>
 <li><a href="#functions">functions</a></li>
+<li><a href="#group_order">group_order</a></li>
 <li><a href="#indicate">indicate</a></li>
 <li><a href="#indicate_with_element">indicate_with_element</a></li>
 <li><a href="#indicate_with_orders">indicate_with_orders</a></li>
@@ -6960,6 +6961,34 @@ Purpose: A set of functions used as subroutines by other scripts
 </tr>
 </table>
 Commentary: Contains no user servicable parts
+</li>
+<li>
+<h3><a name="group_order">group_order</a></h3>
+Purpose: Compute the order of a group given a complete set of
+irreducibles (not necessarily absolutely irreducible) in
+characteristic not dividing the group order.
+<table>
+<thead>
+<td valign=top>Parameters: None</td>
+</thead>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>The group order</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+</table>
+Commentary: This script computes the group order by summing the
+squares of the representations degrees, each of which is divided by
+the nullity of the seed word. The script can be used either to
+confirm that all required representations have been found, or to
+confirm that the group is the required group.
 </li>
 <li>
 <h3><a name="indicate">indicate</a></h3>
