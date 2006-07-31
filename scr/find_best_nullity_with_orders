@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: find_best_nullity_with_orders,v 1.10 2006/07/23 15:29:45 jon Exp $
+# $Id: find_best_nullity_with_orders,v 1.11 2006/07/31 19:50:01 jon Exp $
 #
 # Script to find an element of best nullity in two generators
 #
@@ -43,6 +43,7 @@ for x in $a $b $*; do
   fi
 done
 depth=`max_depth $q 1023`
+script_shift=0
 while [ $ok -eq 0 ]; do
   out=`zfln -m $memory ${tmp}.zsums $depth $nor $* 2>/dev/null`
   ret=$?
@@ -52,13 +53,19 @@ while [ $ok -eq 0 ]; do
     ok=1
     name=`echo $out | sed -e "s/^.*element //g;s/ of nullity.*$//g"`
     cp ${name} $e
-    echo $out | sed -e "s/^.*form //g;s/ .*$//g"
+    scr=`echo $out | sed -e "s/^.*form //g;s/ .*$//g"`
+    while [ 0 -lt $script_shift ]; do
+      let script_shift=$script_shift-1
+      scr=`echo $scr | sed -e "s/G/H/g;s/F/G/g;s/E/F/g;s/D/E/g;s/C/D/g;s/B/C/g;s/A/B/g"`
+    done
+    echo $scr
   elif [ 255 -eq $ret ]; then
 #
 # Try reducing the number of args to handle small cyclic groups
 #
     if [ 2 -lt $# ]; then
       shift 2
+      let script_shift=$script_shift+1
     else
       rm -f ${tmp}*
       echo $out

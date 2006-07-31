@@ -397,3 +397,4 @@ skew seventh
 20060726 - Use head at end of filter_element to prevent very large output
 20060729 - Added irr_base_change
 20060730 - Added group_order
+20060731 - Fix bug where find_best_nullity gave the wrong script
