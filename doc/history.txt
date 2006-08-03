@@ -398,3 +398,4 @@ skew seventh
 20060729 - Added irr_base_change
 20060730 - Added group_order
 20060731 - Fix bug where find_best_nullity gave the wrong script
+20060804 - Add zfr for field retraction

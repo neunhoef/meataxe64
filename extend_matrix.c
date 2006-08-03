@@ -1,5 +1,5 @@
 /*
- * $Id: extend_matrix.c,v 1.5 2005/06/22 21:52:53 jon Exp $
+ * $Id: extend_matrix.c,v 1.6 2006/08/03 21:45:12 jon Exp $
  *
  * Function to field extend a matrix
  *
@@ -56,8 +56,10 @@ int extend_matrix(const char *in, const char *out, u32 out_prime, const char *na
   out_len = header_get_len(h_out);
   if (0 == open_and_write_binary_header(&outp, h_out, out, name)) {
     fclose(inp);
+    header_free(h_out);
     return 0;
   }
+  header_free(h_out);
   if (memory_rows(in_len, 500) < 1 || memory_rows(out_len, 500) < 1) {
     fprintf(stderr, "%s: cannot allocate memory for input, terminating\n", name);
     return 0;
