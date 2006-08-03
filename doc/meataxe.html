@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.78 2006/07/30 11:04:25 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.79 2006/08/03 21:56:22 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -343,6 +343,7 @@ Turn on verbose mode
 <li><a href="#zfn">zfn</a></li>
 <li><a href="#zfo">zfo</a></li>
 <li><a href="#zformat">zformat</a></li>
+<li><a href="#zfr">zfr</a></li>
 <li><a href="#zid">zid</a></li>
 <li><a href="#zimport">zimport</a></li>
 <li><a href="#zip">zip</a></li>
@@ -1735,6 +1736,39 @@ textually by the program</td>
 </tr>
 </table>
 Commentary: Identifies the meataxe type for this file
+</li>
+<li>
+<h3><a name="zfr">zfr</a></h3>
+Purpose: Retract field
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Input matrix</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Output matrix</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>Order of retraction field</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>None</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+</table>
+Commentary: The matrix is treated as being of larger dimension over a
+subfield. If the input field is a degree n extension of the output
+field, then the number of rows and columns are each multiplied by n.
 </li>
 <li>
 <h3><a name="zid">zid</a></h3>
