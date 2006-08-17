@@ -399,3 +399,4 @@ skew seventh
 20060730 - Added group_order
 20060731 - Fix bug where find_best_nullity gave the wrong script
 20060804 - Add zfr for field retraction
+20060816 - Remove use of expanded_rrows from ntco, as it's not needed and wastes memory

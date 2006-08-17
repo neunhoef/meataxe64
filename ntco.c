@@ -1,5 +1,5 @@
 /*
- * $Id: ntco.c,v 1.8 2006/01/26 20:18:01 jon Exp $
+ * $Id: ntco.c,v 1.9 2006/08/17 19:27:05 jon Exp $
  *
  * Tensor condense one group element (new algorithm)
  *
@@ -152,7 +152,7 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
   word **rows, **lrows, **rrows, **q_rows, **p_rows, **q_split_rows, **n_rows, **qn_rows, **qnp_rows, *t_row;
   u32 elts_per_word;
   word mask;
-  word **expanded_rrows, **expanded_lrows;
+  word **expanded_lrows;
   row_ops row_operations;
   row_ops word_row_operations;
   grease_struct grease;
@@ -477,16 +477,6 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
   for (i = 0; i < GREASE_MAX; i++) {
     j *= prime;
   }
-  expanded_rrows = matrix_malloc(nor_r);
-  for (i = 0; i < nor_r; i++) {
-    expanded_rrows[i] = my_malloc(noc_r * sizeof(word));
-  }
-  for (i = 0; i < nor_r; i++) {
-    get_elements_from_row_with_params_into_row(nob, 0, mask,
-                                               elts_per_word,
-                                               rrows[i],
-                                               noc_r, expanded_rrows[i]);
-  }
   expanded_lrows = matrix_malloc(max_irr);
   for (i = 0; i < max_irr; i++) {
     expanded_lrows[i] = my_malloc(max_left * max_irr * sizeof(word));
@@ -532,7 +522,6 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
       matrix_free(qn_rows);
       matrix_free(qnp_rows);
       grease_free(&grease);
-      free_expanded(expanded_rrows, nor_r);
       free_expanded(expanded_lrows, max_irr);
       return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
                      nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, NULL,
@@ -575,7 +564,8 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
           for (k = 0; k < dim_irr_i; k++) {
             row_init(n_rows[k], max_irr_len);
             for(l = 0; l < dim_irr_j; l++) {
-              put_element_to_clean_row_with_params(nob, l, elts_per_word, n_rows[k], expanded_rrows[n_r + beta * dim_irr_i + k][m_r + delta * dim_irr_j + l]);
+              word elt = get_element_from_row_with_params(nob, m_r + delta * dim_irr_j + l, mask, elts_per_word, rrows[n_r + beta * dim_irr_i + k]);
+              put_element_to_clean_row_with_params(nob, l, elts_per_word, n_rows[k], elt);
             }
           }
           /* Space for results is max_irr2 * max_end of length len(max_end) */
@@ -599,7 +589,6 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
                 matrix_free(qn_rows);
                 matrix_free(qnp_rows);
                 grease_free(&grease);
-                free_expanded(expanded_rrows, nor_r);
                 free_expanded(expanded_lrows, max_irr);
                 return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
                                nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, NULL,
@@ -617,7 +606,6 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
                 matrix_free(qn_rows);
                 matrix_free(qnp_rows);
                 grease_free(&grease);
-                free_expanded(expanded_rrows, nor_r);
                 free_expanded(expanded_lrows, max_irr);
                 return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
                                nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, NULL,
@@ -647,7 +635,6 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
               matrix_free(qn_rows);
               matrix_free(qnp_rows);
               grease_free(&grease);
-              free_expanded(expanded_rrows, nor_r);
               free_expanded(expanded_lrows, max_irr);
               return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
                              nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, NULL,
@@ -662,7 +649,6 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
               matrix_free(qn_rows);
               matrix_free(qnp_rows);
               grease_free(&grease);
-              free_expanded(expanded_rrows, nor_r);
               free_expanded(expanded_lrows, max_irr);
               return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
                              nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, NULL,
@@ -717,7 +703,6 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
               matrix_free(qn_rows);
               matrix_free(qnp_rows);
               grease_free(&grease);
-              free_expanded(expanded_rrows, nor_r);
               free_expanded(expanded_lrows, max_irr);
               return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
                              nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, NULL,
@@ -744,7 +729,6 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
   matrix_free(qn_rows);
   matrix_free(qnp_rows);
   grease_free(&grease);
-  free_expanded(expanded_rrows, nor_r);
   free_expanded(expanded_lrows, max_irr);
   (void)cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
                 nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, NULL, NULL,
