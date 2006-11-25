@@ -1,5 +1,5 @@
 /*
- * $Id: ntco.c,v 1.9 2006/08/17 19:27:05 jon Exp $
+ * $Id: ntco.c,v 1.10 2006/11/25 23:49:54 jon Exp $
  *
  * Tensor condense one group element (new algorithm)
  *
@@ -513,6 +513,10 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
     u32 dim_irr_i = dim_irr[i];
     u32 dim_end_i = dim_end[i];
     u32 m_o = 0;
+    if (verbose) {
+      printf("%s: handling irreducible %u\n", name, i);
+      fflush(stdout);
+    }
     /* Read ahead q[i], only needed once */
     if (0 == endian_read_matrix(q[i], q_rows, len_q[i], nor_q[i])) {
       matrix_free(q_rows);
