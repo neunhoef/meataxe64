@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: real_indicate,v 1.14 2005/02/20 09:51:04 jon Exp $
+# $Id: real_indicate,v 1.15 2006/11/25 23:51:18 jon Exp $
 #
 # Script to find the indicator of an irreducible representation
 # assuming it is real, and we have the standard basis conjugating
@@ -13,16 +13,17 @@
 # Inputs
 # $1: the standard basis for the dual
 # $2: initial memory
-# $3: generator a
-# $4: generator b
-# $5-: other generators
+# $3: temporary directory
+# $4: generator a
+# $5: generator b
+# $6-: other generators
 #
 # Return codes
 # 1: error in parameters
 # 0: ok
 #
-usage="$0: usage: $0 <sb> <memory> <a> <b> [<other generators>]"
-if [ $# -lt 4 ]; then
+usage="$0: usage: $0 <sb> <memory> <tmp dir> <a> <b> [<other generators>]"
+if [ $# -lt 5 ]; then
   echo "$usage"
   exit 1;
 fi
@@ -30,9 +31,10 @@ fi
 S=$1
 memory=$2
 init_memory=$2
-a=$3
-b=$4
-shift 2
+tmp_dir=$3
+a=$4
+b=$5
+shift 3
 if [ -e $a -a -e $b -a -e $S ]; then
   nor=`znor $a`
   if [ $nor -ne `znoc $a` ]; then
@@ -112,7 +114,7 @@ if [ 2 -eq $p ]; then
         ok=0
         memory=$init_memory
         while [ 0 -eq $ok ]; do
-          out=`zsignf -m $memory ${tmp}.8 $S . 2>&1`
+          out=`zsignf -m $memory ${tmp}.8 $S ${tmp_dir} 2>&1`
           ret=$?
           if [ 2 -eq $ret ]; then
             let memory=`more_memory $memory 2>/dev/null`
@@ -208,7 +210,7 @@ else
           ok=0
           memory=$init_memory
           while [ 0 -eq $ok ]; do
-            out=`zsignf -m $memory $S $S . 2>&1`
+            out=`zsignf -m $memory $S $S  ${tmp_dir} 2>&1`
             ret=$?
             if [ 2 -eq $ret ]; then
               let memory=`more_memory $memory 2>/dev/null`
