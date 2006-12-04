@@ -1,5 +1,5 @@
 /*
- * $Id: zcv64to32.c,v 1.4 2005/12/12 23:16:03 jon Exp $
+ * $Id: zcv64to32.c,v 1.5 2006/12/04 22:33:24 jon Exp $
  *
  * Convert from the 64 bit word meataxe to the 32 bit word meataxe
  *
@@ -45,12 +45,13 @@ int main(int argc, const char * const argv[])
     fprintf(stderr, "%s: cannot open %s for input\n", name, in);
     exit(1);
   }
+  endian_init();
   if (0 == read_binary_header(inp, &h, in, name)) {
     fclose(inp);
     fprintf(stderr, "%s: cannot read header from %s\n", name, in);
     exit(1);
   }
-  if (PRIME_BIT != (header_get_raw_prime(h) & PRIME_BITS)) {
+  if (U64PRIME_BIT != (header_get_raw_prime(h) & PRIME_BITS)) {
     fclose(inp);
     header_free(h);
     fprintf(stderr, "%s: %s is not a 64 bit meataxe file\n", name, in);

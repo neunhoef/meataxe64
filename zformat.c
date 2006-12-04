@@ -1,5 +1,5 @@
 /*
- * $Id: zformat.c,v 1.1 2005/12/12 23:16:03 jon Exp $
+ * $Id: zformat.c,v 1.2 2006/12/04 22:33:25 jon Exp $
  *
  * Indicate the meataxe format of a file
  *
@@ -41,6 +41,7 @@ int main(int argc, const char * const argv[])
     fprintf(stderr, "%s: cannot open %s for input\n", name, in);
     exit(1);
   }
+  endian_init();
   if (0 == read_binary_header(inp, &h, in, name)) {
     fclose(inp);
     fprintf(stderr, "%s: cannot read header from %s\n", name, in);

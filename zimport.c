@@ -1,5 +1,5 @@
 /*
- * $Id: zimport.c,v 1.13 2005/07/24 09:32:46 jon Exp $
+ * $Id: zimport.c,v 1.14 2006/12/04 22:33:25 jon Exp $
  *
  * Import matrix from old system
  *
@@ -44,6 +44,7 @@ int main(int argc, const char * const argv[])
   }
   in = argv[1];
   out = argv[2];
+  endian_init();
   if (0 == open_and_read_binary_header(&f_in, &h_in, in, name)) {
     exit(1);
   }
@@ -60,7 +61,6 @@ int main(int argc, const char * const argv[])
   len = header_get_len(h_in);
   eperb = header_get_eperb(h_in);
   memory_init(name, memory);
-  endian_init();
   blen = header_get_blen(h_in);
   if (memory_rows(len, 500) < 1 || memory_rows((blen + sizeof(word) - 1) / sizeof(word), 500) < 1) {
     fprintf(stderr, "%s: cannot fit row of %s for input and row of %s for output, terminating\n", name, in, out);

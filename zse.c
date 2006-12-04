@@ -1,5 +1,5 @@
 /*
- * $Id: zse.c,v 1.10 2005/07/24 09:32:46 jon Exp $
+ * $Id: zse.c,v 1.11 2006/12/04 22:33:25 jon Exp $
  *
  * Select a row of a matrix
  *
@@ -42,6 +42,7 @@ int main(int argc, const char * const argv[])
   }
   in = argv[1];
   out = argv[2];
+  endian_init();
   vector = strtoul(argv[3], NULL, 0);
   if (0 == open_and_read_binary_header(&inp, &h_in, in, name)) {
     exit(1);
@@ -65,7 +66,6 @@ int main(int argc, const char * const argv[])
   if (0 == open_and_write_binary_header(&outp, h_out, out, name)) {
     exit(1);
   }
-  endian_init();
   memory_init(name, memory);
   header_free(h_in);
   header_free(h_out);

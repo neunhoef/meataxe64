@@ -403,3 +403,4 @@ skew seventh
 20061009 - Add support for gcc 3.4
 20061126 - Add some verbose output to ntco
 20061126 - Make zsignf use given temp directory when there is one
+20061204 - Fix missing or late endian_init calls shown up by sparc version
