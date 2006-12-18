@@ -1,5 +1,5 @@
 /*
- * $Id: read.c,v 1.24 2005/07/24 09:32:45 jon Exp $
+ * $Id: read.c,v 1.25 2006/12/18 09:20:37 jon Exp $
  *
  * Read a header
  *
@@ -142,7 +142,7 @@ int open_and_read_binary_header(FILE **inp, const header **h, const char *m, con
     return 0;
   }
   res = read_binary_header(in, h, m, name);
-  if (0 == header_check(*h)) {
+  if (0 != res && 0 == header_check(*h)) {
     fprintf(stderr, "%s: expected and found data size mismatch, terminating\n", name);
     res = 0;
   }

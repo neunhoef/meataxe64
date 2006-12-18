@@ -404,3 +404,4 @@ skew seventh
 20061126 - Add some verbose output to ntco
 20061126 - Make zsignf use given temp directory when there is one
 20061204 - Fix missing or late endian_init calls shown up by sparc version
+20061218 - Fix bug in open_and_read_binary_header where unset header was dereferenced
