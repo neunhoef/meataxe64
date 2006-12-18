@@ -1,5 +1,5 @@
 /*
- * $Id: tra.c,v 1.18 2005/10/12 18:20:31 jon Exp $
+ * $Id: tra.c,v 1.19 2006/12/18 19:26:14 jon Exp $
  *
  * Function to transpose a matrix
  *
@@ -109,6 +109,9 @@ int tra(const char *m1, const char *m2, const char *name)
     return 0;
   }
   t1 = total - 1;
+  if (t1 > nor + noc) {
+    t1 = nor + noc;
+  }
   rows = matrix_malloc(t1);
   row1 = memory_pointer_offset(0, 0, max);
   for (i = 0; i < t1; i++) {
