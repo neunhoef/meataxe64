@@ -1,0 +1,134 @@
+#!/bin/sh
+#
+# $Id: fixed_point_form_signf,v 1.1 2006/12/23 13:06:06 jon Exp $
+#
+# Script to compute the form sign on the fixed point space,
+# using intermediate files
+#
+# Inputs
+# $1: form
+# $2: group element
+# $3 tmp directory
+# $4: memory (optional)
+#
+# Return codes
+# 1: error in parameters
+# 0: sign plus
+# 255: sign minus
+#
+usage="$0: usage: $0 <form> <element> <dir> [<memory>]"
+if [ $# -ne 3 -a $# -ne 4 ]; then
+  echo "$usage"
+  exit 1;
+fi
+form=$1
+elt=$2
+dir=$3
+if [ 4 -eq $# ]; then
+  memory=$4
+else
+  memory=400
+fi
+if [ -e $form -a -e $elt ]; then
+  q=`zprime $form`
+  r=`zprime $elt`
+  nor=`znor $form`
+  noc=`znoc $form`
+  if [ $nor -ne $noc ]; then
+    echo "$0: $form is not square"
+    exit 1
+  fi
+  if [ $nor -ne `znor $elt` -o $nor -ne `znoc $elt` ]; then
+    echo "$0: $form and $elt are not compatible"
+    exit 1
+  fi
+  if [ 1 -eq $q -a 1 -eq $r ]; then
+    echo "$0: form and element cannot be maps"
+    exit 1
+  fi
+  if [ 1 -ne $q -a 1 -ne $r -a $q -ne $r ]; then
+    echo "$0: $form and $elt are not compatible"
+    exit 1
+  fi
+else
+  echo "$0: missing files $form or $elt"
+  exit 1
+fi
+prime=`zchar $form`
+let minus1=$prime-1
+tmp=tmp${PPID}
+zsid $q $nor $nor $minus1 ${tmp}.1
+ret=$?
+if [ 0 -ne $ret ]; then
+  rm -f ${tmp}.*
+  exit 1
+fi
+zad -m $memory ${tmp}.1 $elt ${tmp}.2
+ret=$?
+if [ 0 -ne $ret ]; then
+  rm -f ${tmp}.*
+  exit 1
+fi
+rm -f ${tmp}.1
+n=`znsf -m $memory ${tmp}.2 ${tmp}.2.ns $dir`
+ret=$?
+if [ 0 -ne $ret ]; then
+  echo $n
+  rm -f ${tmp}.*
+  exit 1
+fi
+rm -f ${tmp}.2
+zmu -m $memory ${tmp}.2.ns $form ${tmp}.3
+ret=$?
+if [ 0 -ne $ret ]; then
+  rm -f ${tmp}.*
+  exit 1
+fi
+ztr -m $memory ${tmp}.2.ns ${tmp}.4
+ret=$?
+if [ 0 -ne $ret ]; then
+  rm -f ${tmp}.*
+  exit 1
+fi
+rm -f ${tmp}.2.ns
+zmu -m $memory ${tmp}.3 ${tmp}.4 ${tmp}.form
+ret=$?
+if [ 0 -ne $ret ]; then
+  rm -f ${tmp}.*
+  exit 1
+fi
+rm -f ${tmp}.3 ${tmp}.4
+new_nor=`znor ${tmp}.form`
+ret=$?
+if [ 0 -ne $ret ]; then
+  echo $new_nor
+  rm -f ${tmp}.*
+  exit 1
+fi
+ztr -m $memory ${tmp}.form ${tmp}.form.tra
+ret=$?
+if [ 0 -ne $ret ]; then
+  rm -f ${tmp}.*
+  exit 1
+fi
+zad -m $memory ${tmp}.form ${tmp}.form.tra ${tmp}.form.sym
+ret=$?
+if [ 0 -ne $ret ]; then
+  rm -f ${tmp}.*
+  exit 1
+fi
+zsign -m $memory ${tmp}.form ${tmp}.form.sym
+ret=$?
+if [ 0 -ne $ret -a 255 -ne $ret ]; then
+  rm -f ${tmp}.*
+  exit 1
+fi
+if [ 0 -eq $ret ]; then
+  echo sign +
+else
+  echo sign -
+fi
+let diff=$nor-$new_nor
+echo Remaining dimension $diff
+rm -f ${tmp}.*
+exit $ret
