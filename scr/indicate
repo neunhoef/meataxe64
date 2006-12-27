@@ -1,29 +1,31 @@
 #!/bin/sh
 #
-# $Id: indicate,v 1.6 2002/09/12 11:47:28 jon Exp $
+# $Id: indicate,v 1.7 2006/12/27 19:09:52 jon Exp $
 #
 # Script to find the indicator of an irreducible representation
 # Assumes a and b in standard base form
 #
 # Inputs
 # $1: initial memory
-# $2: generator a
-# $3-: others generators
+# $2: a name for the form
+# $3: generator a
+# $4-: others generators
 #
 # Return codes
 # 1: error in parameters
 # 0: ok
 #
-usage="$0: usage: $0 <memory> <a> <b> [<other generators>]"
-if [ $# -lt 3 ]; then
+usage="$0: usage: $0 <memory> <form> <a> <b> [<other generators>]"
+if [ $# -lt 4 ]; then
   echo "$usage"
   exit 1;
 fi
 . functions
 memory=$1
-a=$2
-b=$3
-shift
+form=$2
+a=$3
+b=$4
+shift 2
 if [ -e $a -a -e $b ]; then
   q=`zprime $a`
   nor=`znor $a`
@@ -51,4 +53,4 @@ for x in $*; do
   fi
   line="$line $x $o"
 done
-exec indicate_with_orders $memory $line
+exec indicate_with_orders $memory $form $line

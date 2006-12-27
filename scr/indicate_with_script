@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: indicate_with_script,v 1.9 2002/10/14 17:32:07 jon Exp $
+# $Id: indicate_with_script,v 1.10 2006/12/27 19:09:52 jon Exp $
 #
 # Script to find the indicator of an irreducible representation,
 # given a script describing the null generator
@@ -9,29 +9,31 @@
 # Inputs
 # $1: script for finding standard base generator
 # $2: initial memory
-# $3: generator a
-# $4: order a
-# $5: generator b
-# $6: order b
-# $7-: other generators and orders
+# $3: a name for the form
+# $4: generator a
+# $5: order a
+# $6: generator b
+# $7: order b
+# $8-: other generators and orders
 #
 # Return codes
 # 1: error in parameters
 # 0: ok
 #
-usage="$0: usage: $0 <script> <memory> <a> <order a> <b> <order b> [<other generators and orders>]"
-if [ $# -lt 6 ]; then
+usage="$0: usage: $0 <script> <memory> <form> <a> <order a> <b> <order b> [<other generators and orders>]"
+if [ $# -lt 7 ]; then
   echo "$usage"
   exit 1;
 fi
 . functions
 script=$1
 memory=$2
-a=$3
-b=$5
-o_a=$4
-o_b=$6
-shift 2
+form=$3
+a=$4
+b=$6
+o_a=$5
+o_b=$7
+shift 3
 if [ -e $a -a -e $b ]; then
   q=`zprime $a`
   nor=`znor $a`
@@ -80,7 +82,7 @@ while [ $ok -eq 0 ]; do
   fi
 done
 rm ${tmp}zscript*
-indicate_with_element $e $script $memory $line
+indicate_with_element $e $script $memory $form $line
 ret=$?
 rm -f ${tmp}.*
 exit $ret

@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: real_indicate,v 1.15 2006/11/25 23:51:18 jon Exp $
+# $Id: real_indicate,v 1.16 2006/12/27 19:10:23 jon Exp $
 #
 # Script to find the indicator of an irreducible representation
 # assuming it is real, and we have the standard basis conjugating
@@ -14,16 +14,17 @@
 # $1: the standard basis for the dual
 # $2: initial memory
 # $3: temporary directory
-# $4: generator a
-# $5: generator b
-# $6-: other generators
+# $4: a name for the quadratic form
+# $5: generator a
+# $6: generator b
+# $7-: other generators
 #
 # Return codes
 # 1: error in parameters
 # 0: ok
 #
-usage="$0: usage: $0 <sb> <memory> <tmp dir> <a> <b> [<other generators>]"
-if [ $# -lt 5 ]; then
+usage="$0: usage: $0 <sb> <memory> <tmp dir> <form> <a> <b> [<other generators>]"
+if [ $# -lt 6 ]; then
   echo "$usage"
   exit 1;
 fi
@@ -32,9 +33,10 @@ S=$1
 memory=$2
 init_memory=$2
 tmp_dir=$3
-a=$4
-b=$5
-shift 3
+form=$4
+a=$5
+b=$6
+shift 4
 if [ -e $a -a -e $b -a -e $S ]; then
   nor=`znor $a`
   if [ $nor -ne `znoc $a` ]; then
@@ -67,10 +69,10 @@ if [ 2 -eq $p ]; then
   q=`zprime $a`
   while [ $i -lt $q ]; do
     zsid $q $nor $nor $i ${tmp}.7
-    zad $Q ${tmp}.7 ${tmp}.8
+    zad $Q ${tmp}.7 ${form}
     ind=1
     for x in $*; do
-      preserves ${tmp}.8 $S $x $i $memory
+      preserves ${form} $S $x $i $memory
       ret=$?
       if [ 254 -eq $ret ]; then
         echo indicator o
@@ -101,7 +103,7 @@ if [ 2 -eq $p ]; then
       ok=0
       mem_failed=0
       while [ 0 -eq $ok ]; do
-        out=`zsign -m $memory ${tmp}.8 $S 2>&1`
+        out=`zsign -m $memory ${form} $S 2>&1`
         ret=$?
         if [ 2 -eq $ret ]; then
           let memory=`more_memory $memory 2>/dev/null`
@@ -114,7 +116,7 @@ if [ 2 -eq $p ]; then
         ok=0
         memory=$init_memory
         while [ 0 -eq $ok ]; do
-          out=`zsignf -m $memory ${tmp}.8 $S ${tmp_dir} 2>&1`
+          out=`zsignf -m $memory ${form} $S ${tmp_dir} 2>&1`
           ret=$?
           if [ 2 -eq $ret ]; then
             let memory=`more_memory $memory 2>/dev/null`
