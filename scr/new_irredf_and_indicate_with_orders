@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: new_irredf_and_indicate_with_orders,v 1.5 2006/12/27 19:09:52 jon Exp $
+# $Id: new_irredf_and_indicate_with_orders,v 1.6 2006/12/28 19:16:06 jon Exp $
 #
 # Script to classify an irreducible representation
 #
@@ -52,13 +52,13 @@ else
   echo "$0: missing files $a or $b"
   exit 1
 fi
-out=`new_irredf_with_orders $*`
+shift 3
+out=`new_irredf_with_orders $memory $tmp_dir $*`
 ret=$?
 echo $out
 script=`echo $out | sed -e "s/^.*using script //g"`
 new_name=`echo $out | sed -e "s/^Found a new irreducible //g;s/ of dimension .*$//g"`
 if [ 0 -eq $ret ]; then
-  shift 3
   i=1
   line=
   while [ 0 -lt $# ]; do
