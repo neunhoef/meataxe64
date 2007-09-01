@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: split_with_vectors,v 1.1 2006/07/23 16:02:13 jon Exp $
+# $Id: split_with_vectors,v 1.2 2007/09/01 16:51:04 jon Exp $
 #
 # Script to split a representation given a particular set of vector seeds
 #
@@ -60,7 +60,7 @@ tmp=tmp${PPID}
 # rm -f ${tmp}*
 # Check above first
 #
-memory=200
+memory=`memory_from_stat $a`
 count=`znor $e`
 nullity=$count
 if [ $count -gt 5 ]; then
