@@ -409,3 +409,4 @@ skew seventh
 20061223 - Add fixed_point_form_sign and fixed_point_form_signf
 20061227 - Modified indicator scripts to return the form if quadratic
 20070901 - Modified split_with_vectors to start at a more sensible memory setting
+20070903 - Further tweak to memory_from_stat

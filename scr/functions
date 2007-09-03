@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: functions,v 1.8 2007/09/01 16:51:04 jon Exp $
+# $Id: functions,v 1.9 2007/09/03 21:17:18 jon Exp $
 #
 # Functions to support the meataxe scripts
 #
@@ -19,7 +19,7 @@ function memory_from_stat()
 {
   local x
   x=`stat -c "%s" $1`
-  let x=$x/1000
+  let x=$x/500
   if [ $x -lt 200 ]; then
     x=200
   fi
