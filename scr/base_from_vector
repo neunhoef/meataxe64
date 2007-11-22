@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: base_from_vector,v 1.4 2002/11/26 20:46:23 jon Exp $
+# $Id: base_from_vector,v 1.5 2007/11/22 21:49:03 jon Exp $
 #
 # Script to find a representation in standard base, given a vector
 #
@@ -23,7 +23,7 @@
 #
 #set -v
 . functions
-usage="$0: usage: $0 <e> <output_stem> <s> <a>  [<other generators>*]"
+usage="$0: usage: $0 <e> <output_stem> <memory> <s> <a>  [<other generators>*]"
 if [ $# -lt 6 ]; then
   echo "$usage"
   exit 1;
