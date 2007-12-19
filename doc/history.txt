@@ -412,3 +412,4 @@ skew seventh
 20070903 - Further tweak to memory_from_stat
 20071122 - Correct fault in usage for base_from_vector
 20071214 - Use rm_all in base_from_vector
+20071219 - Copy form even for odd characteristic in real_indicate
