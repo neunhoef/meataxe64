@@ -1,5 +1,5 @@
 /*
- * $Id: utils.c,v 1.25 2006/05/09 22:09:28 jon Exp $
+ * $Id: utils.c,v 1.26 2011/01/19 22:47:17 jon Exp $
  *
  * Utils for meataxe
  *
@@ -249,7 +249,8 @@ int read_numbers(FILE *inp, u32 s, u32 *out)
   assert(0 != s);
   assert(NULL != out);
   for (i = 0; i < s; i++) {
-    fscanf(inp, "%u", out + i);
+    int j = fscanf(inp, "%u", out + i);
+    NOT_USED(j);
     if (ferror(inp) || feof(inp)) {
       return 0;
     }

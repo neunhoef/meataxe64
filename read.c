@@ -1,5 +1,5 @@
 /*
- * $Id: read.c,v 1.25 2006/12/18 09:20:37 jon Exp $
+ * $Id: read.c,v 1.26 2011/01/19 22:47:17 jon Exp $
  *
  * Read a header
  *
@@ -38,7 +38,8 @@ int read_text_header_items(FILE *fp, u32 *nod, u32 *prime,
   assert(NULL != prime);
   assert(NULL != nor);
   assert(NULL != noc);
-  fscanf(fp, "%u%u%u%u", nod, prime, nor, noc);
+  i = fscanf(fp, "%u%u%u%u", nod, prime, nor, noc);
+  NOT_USED(i);
   i = fgetc(fp);
   while (i >= 0 && '\n' != (char)i) {
     if (my_isspace(i)) {

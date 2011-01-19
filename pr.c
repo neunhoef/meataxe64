@@ -1,5 +1,5 @@
 /*
- * $Id: pr.c,v 1.22 2005/10/28 23:04:07 jon Exp $
+ * $Id: pr.c,v 1.23 2011/01/19 22:47:17 jon Exp $
  *
  * Print a matrix
  *
@@ -132,7 +132,10 @@ int main(int argc, const char * const argv[])
           assert(k == nod);
           /* Nothing else to be done */
         }
-        printf(buf);
+        /* Reprint the same thing, even though it's in buf
+         * gcc 4.3 has got a bit anal and we have to humour it
+         */
+        printf("%0u", (u32)e);
         if (BITS_PER_ROW - 1 == j % BITS_PER_ROW) {
           printf("\n");
         }

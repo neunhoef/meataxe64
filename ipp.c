@@ -1,5 +1,5 @@
 /*
- * $Id: ipp.c,v 1.15 2005/07/24 09:32:45 jon Exp $
+ * $Id: ipp.c,v 1.16 2011/01/19 22:47:17 jon Exp $
  *
  * Read a permutation into a matrix
  *
@@ -84,8 +84,10 @@ int main(int argc, const char * const argv[])
   header_free(h);
   for (i = 0; i < nor; i++) {
     u32 j;
+    int k;
     row_init(row, len);
-    fscanf(inp, "%u", &j);
+    k = fscanf(inp, "%u", &j);
+    NOT_USED(k);
     if (0 == j || j > nor) {
       fprintf(stderr, "%s: %u (out of range 1 - %u) found as permutation image, terminating\n", name, j, nor);
       exit(1);

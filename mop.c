@@ -1,5 +1,5 @@
 /*
- * $Id: mop.c,v 1.23 2005/07/24 11:31:35 jon Exp $
+ * $Id: mop.c,v 1.24 2011/01/19 22:47:17 jon Exp $
  *
  * Monster operations for meataxe
  *
@@ -8,6 +8,7 @@
  */
 
 #include "mop.h"
+#include "utils.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -157,6 +158,7 @@ static void rdvec(const char *filnam, unsigned char *vecin)
 {
   FILE *f;
   unsigned int i;
+  int j;
   assert(NULL != filnam);
   assert(NULL != vecin);
   f = fopen(filnam, "rb");
@@ -164,8 +166,10 @@ static void rdvec(const char *filnam, unsigned char *vecin)
     printf("File %s does not exist!\n", filnam);
     exit(-1);
   }
-  fread(vectemp, 1, 12, f);
-  fread(vectemp, 1, 24611, f);
+  j = fread(vectemp, 1, 12, f);
+  NOT_USED(j);
+  j = fread(vectemp, 1, 24611, f);
+  NOT_USED(j);
   memset(vecin, 0, VECLEN);
   ptr1 = 0;
   ptr2 = 0;
@@ -213,7 +217,8 @@ void rdsuz1(suzel m, const char *fn)
     printf("File %s does not exist!\n", fn);
     exit(-1);
   }
-  fread(vectemp, 1, 8, f);
+  j = fread(vectemp, 1, 8, f);
+  NOT_USED(j);
   if (0 == memcmp(vectemp, suz1head, 8)) m->inout = 1;
   if (0 == memcmp(vectemp, suz2head, 8)) m->inout = 2;
   if (m->inout == 0) {
@@ -222,24 +227,28 @@ void rdsuz1(suzel m, const char *fn)
   }
   ptr = (char *)m->m729;
   for (i = 0; i < 729; i++) {
-    fread(ptr, 1, 183, f);
+    j = fread(ptr, 1, 183, f);
+    NOT_USED(j);
     ptr += wl729 * sizeof(word);
   }
   ptr = (char *)m->m90;
   for (i = 0; i < 90; i++) {
-    fread(ptr, 1, 23, f);
+    j = fread(ptr, 1, 23, f);
+    NOT_USED(j);
     ptr += wl90 * sizeof(word);
   }
   ptr = (char *)m->m142;
   for (i = 0; i < 142; i++) {
-    fread(ptr, 1, 18, f);
+    j = fread(ptr, 1, 18, f);
+    NOT_USED(j);
     ptr += wl142 * sizeof(word);
   }
 
   ptrc = (m->b32760)+1;
   ptrl = (m->p32760)+1;
   for (i = 1; i <= 32760; i++) {
-    fread(c, 1, 3, f);
+    j = fread(c, 1, 3, f);
+    NOT_USED(j);
     *(ptrc++) = c[2];
     j = 256*c[1]+c[0];
     *(ptrl++) = j;
@@ -253,30 +262,36 @@ static void rdT(const char *fn)
   unsigned char c[4];
   FILE *f;
   char *ptr;
+  int j;
   assert(NULL != fn);
   f = fopen(fn, "rb");
   if (f == NULL) {
     printf("File %s does not exist\n", fn);
     exit(-1);
   }
-  fread(vectemp, 1, 8, f);
+  j = fread(vectemp, 1, 8, f);
+  NOT_USED(j);
   ptr = (char *)T324a;
   for (i = 0; i < 324; i++) {
-    fread(ptr, 1, 41, f);
+    j = fread(ptr, 1, 41, f);
+    NOT_USED(j);
     ptr += wl324 * sizeof(word);
   }
   ptr = (char *)T324b;
   for (i = 0; i < 324; i++) {
-    fread(ptr, 1, 41, f);
+    j = fread(ptr, 1, 41, f);
+    NOT_USED(j);
     ptr += wl324 * sizeof(word);
   }
   ptr = (char *)T538;
   for (i = 0; i < 538; i++) {
-    fread(ptr, 1, 68, f);
+    j = fread(ptr, 1, 68, f);
+    NOT_USED(j);
     ptr += wl538 * sizeof(word);
   }
   for (i = 0; i < 87750; i++) {
-    fread(c, 1, 4, f);
+    j = fread(c, 1, 4, f);
+    NOT_USED(j);
     Tperm[i] = c[0]+256*c[1]+256*256*c[2];
     Tbact[i] = c[3];
     if (c[3] == 0) Tperm[i] = -1;

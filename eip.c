@@ -1,5 +1,5 @@
 /*
- * $Id: eip.c,v 1.13 2005/07/24 11:31:35 jon Exp $
+ * $Id: eip.c,v 1.14 2011/01/19 22:47:16 jon Exp $
  *
  * Read a permutation into an exploded matrix
  *
@@ -98,8 +98,10 @@ int main(int argc, const char * const argv[])
   assert(NULL != row);
   for (i = 0; i < nor; i++) {
     u32 j;
+    int k;
     row_init(row, len);
-    fscanf(inp, "%u", &j);
+    k = fscanf(inp, "%u", &j);
+    NOT_USED(k);
     assert(j >= 1);
     put_element_to_clean_row_with_params(nob, j - 1, elts_per_word, row, 1);
     if (0 == ex_row_put(i, nor, nor, out, names, split, row, outputs)) {
