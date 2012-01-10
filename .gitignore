@@ -31,3 +31,4 @@ derived*
 install
 profiles/*
 *.pdb
+mtx.txt
