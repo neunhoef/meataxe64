@@ -1,0 +1,20 @@
+#
+# Generic definitions
+#
+
+# Set up default word size
+ifeq "${ARCH}" "em64t"
+DEFAULT_SIZE=64
+else
+DEFAULT_SIZE=32
+endif
+
+ifeq "" "${WORD_SIZE}"
+REAL_SIZE=${DEFAULT_SIZE}
+else
+REAL_SIZE=${WORD_SIZE}
+endif
+
+ifeq "${REAL_SIZE}" "64"
+COMPILE_DEFINES+=     -DEIGHT_BYTE_WORD
+endif
