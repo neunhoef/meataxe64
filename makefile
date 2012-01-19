@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.110 2012/01/19 23:46:54 jon Exp $
+# $Id: makefile,v 1.111 2012/01/19 23:52:37 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -382,8 +382,6 @@ MODULES=	$(LIB_MODULES) \
 
 include dirs.txt
 include defines.txt
-$(warning REAL_SIZE = ${REAL_SIZE})
-$(warning COMPILE_DEFINES = ${COMPILE_DEFINES})
 
 .PRECIOUS: $(GENFILES)
 
