@@ -1,5 +1,5 @@
 /*
- * $Id: mt_types.h,v 1.3 2011/12/20 19:36:15 jon Exp $
+ * $Id: mt_types.h,v 1.4 2012/01/19 23:26:47 jon Exp $
  *
  * Fundamental types for meataxe for em64t
  *
@@ -14,7 +14,7 @@
 #define S32_F "d"
 #define U64_F "lu"
 #define S64_F "ld"
-#define SIZE_F "u"
+#define SIZE_F "lu"
 
 typedef unsigned int u32;
 typedef int s32;
