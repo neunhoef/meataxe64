@@ -1,13 +1,13 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.111 2012/01/19 23:52:37 jon Exp $
+# $Id: makefile,v 1.112 2012/01/24 22:15:43 jon Exp $
 #
 all: debug rel profile profilena
 
 GENERATED=9.c
 
-.PHONY: debug rel profile profilena clean full_clean
+.PHONY: debug rel profile profilena clean full_clean relpp relasm
 
 CONS_TARGET=	cons
 DTOU_TARGET=	dtou
@@ -415,6 +415,8 @@ REL_TARGETS:=
 DEBUG_TARGETS:=
 PROF_TARGETS:=
 PROFNA_TARGETS:=
+RELPP_TARGETS:=
+RELASM_TARGETS:=
 
 MTXLIB:=	libmtx
 include libs.txt
@@ -789,6 +791,8 @@ include targets.txt
 debug: $(DEBUG_TARGETS)
 
 rel: $(REL_TARGETS)
+relpp: $(RELPP_TARGETS)
+relasm: $(RELASM_TARGETS)
 
 profile: $(PROF_TARGETS)
 
