@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.112 2012/01/24 22:15:43 jon Exp $
+# $Id: makefile,v 1.113 2012/02/07 22:00:45 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -122,6 +122,7 @@ ZTCV_TARGET=	ztcv
 ZTE_TARGET=	zte
 ZTMU_TARGET=	ztmu
 ZTR_TARGET=	ztr
+ZTR2_TARGET=	ztr2
 ZTRACE_TARGET=	ztrace
 ZTRECOV_TARGET=	ztrecover
 ZTSP_TARGET=	ztsp
@@ -131,7 +132,7 @@ ZVP_TARGET=	zvp
 ZVPF_TARGET=	zvpf
 ZWORDS_TARGET=	zwords
 
-LIB_MODULES=	add clean clean_file clean_vectors command conj count dc dets diff diffd elements endian exrows extend extend_matrix files gen grease header ident join map map_or_row maps matrix memory msb msbf msp mspf mul mv mvp ns nsf ntco orbit parse pco pcol pfl pofp powers primes project ps qs rand read restrict retract retract_matrix rn rnf scale script singular span spanmsp ss ss_map sums sumsf sums_utils sv symb system tco te tmul tra tsp tspf ttr utils vp vpf write
+LIB_MODULES=	add clean clean_file clean_vectors command conj count dc dets diff diffd elements endian exrows extend extend_matrix files gen grease header ident join map map_or_row maps matrix memory msb msbf msp mspf mul mv mvp ns nsf ntco orbit parse pco pcol pfl pofp powers primes project ps qs rand read restrict retract retract_matrix rn rnf scale script singular span spanmsp ss ss_map sums sumsf sums_utils sv symb system tco te tmul tra tra2 tsp tspf ttr utils vp vpf write
 
 CONS_MODULES=	constrain
 DTOU_MODULES=	dtou
@@ -247,6 +248,7 @@ ZTCV_MODULES=	tcv rows ztcv
 ZTE_MODULES=	rows zte
 ZTMU_MODULES=	rows ztmu
 ZTR_MODULES=	rows tr
+ZTR2_MODULES=	rows ztr2
 ZTRACE_MODULES=	rows ztrace
 ZTRECOV_MODULES=	rows ztrecover
 ZTSP_MODULES=	rows ztsp
@@ -371,6 +373,7 @@ MODULES=	$(LIB_MODULES) \
 	$(ZTE_MODULES) \
 	$(ZTMU_MODULES) \
 	$(ZTR_MODULES) \
+	$(ZTR2_MODULES) \
 	$(ZTRECOV_MODULES) \
 	$(ZTRACE_MODULES) \
 	$(ZTSP_MODULES) \
@@ -762,6 +765,9 @@ TARGET:=ZTMU
 include targets.txt
 
 TARGET:=ZTR
+include targets.txt
+
+TARGET:=ZTR2
 include targets.txt
 
 TARGET:=ZTTR
