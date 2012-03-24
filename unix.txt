@@ -1,7 +1,7 @@
 #
 # unix specific fragment for building
 #
-# $Id: unix.txt,v 1.15 2012/01/24 22:15:43 jon Exp $
+# $Id: unix.txt,v 1.16 2012/03/24 13:32:46 jon Exp $
 #
 COMPILER=gcc
 include $(COMPILER).txt
@@ -15,7 +15,7 @@ PPEXT=	e
 DEPEND_CC=	gcc
 COMPILE_INCLUDES=	-include $(ARCH)/mt_types.h
 COMPILE_CFLAGS=	$(COMPILE_INCLUDES) $(COMPILE_DEFINES) $(COMPILE_EXTRA_DEFS) $(COMPILE_WARNINGS)
-REL_COMPILE_FLAGS=	-O3 -finline-functions
+REL_COMPILE_FLAGS=	-g -O3 -finline-functions
 DEBUG_COMPILE_FLAGS=	-g
 ASMOUT_FLAGS=	-S
 PP_FLAGS=	-E
