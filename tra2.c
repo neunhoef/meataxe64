@@ -1,5 +1,5 @@
 /*
- * $Id: tra2.c,v 1.2 2012/03/24 13:31:32 jon Exp $
+ * $Id: tra2.c,v 1.3 2012/03/25 11:53:29 jon Exp $
  *
  * Function to transpose a matrix
  *
@@ -173,18 +173,18 @@ int tra2(const char *m1, const char *m2, const char *name)
     /* There is no horizontal divide, from our choice of t1 */
     /* Read the bits of row */
     pos = ftello64(input);
-    printf("pos = %lld\n", pos);
+    printf("pos = %" S64_F "\n", pos);
     /*
      * TBD, we need to handle the case where nor isn't a multiple of 32
      * by creating some blank rows
      */
     for (k = 0; k < nor; k++) {
-      printf("Reading row %d from %lld\n", k, ftello64(input));
+      printf("Reading row %" U32_F " from %" S64_F "\n", k, ftello64(input));
       /* Skip start of row */
       if (0 != row_start_skip) {
         endian_skip_row(input, row_start_skip);
       }
-      printf("Reading data for row %d from %lld\n", k, ftello64(input));
+      printf("Reading data for row %" U32_F " from %" S64_F "\n", k, ftello64(input));
       if (0 == endian_read_row(input, rows_in[k], row_length)) {
         if ( 0 != errno) {
           perror(name);
@@ -231,21 +231,21 @@ int tra2(const char *m1, const char *m2, const char *name)
           u32 e = first_non_zero(rows_in[in_row + i], nob, row_length, &nz);
           printf("First non zero %d for row %d found at %d\n", e, in_row + i, nz);
           if (e != 0) {
-            printf("Element found was 0x%x\n", rows_in[in_row + i][0]);
+            printf("Element found was %" W_F "\n", rows_in[in_row + i][0]);
           }
         }
         for (i = 0; i < 32; i++) {
           elts[i] = rows_in[in_row + i][k];
-          printf("row %d, column %d elt 0x%x\n", in_row + i, k * 32, elts[i]);
+          printf("row %" U32_F ", column %" U32_F " elt %" W_F "\n", in_row + i, k * 32, elts[i]);
         }
         /* We'll transpose in situ, then copy back at the end */
         /* Phase 1: transpose a 32 x 32 matrix in 16 x 16 blocks */
         for (i = 0; i < shift; i++) {
           word new1 = (elts[i] & mask1) | ((elts[i + shift] & mask1) << shift);
           word new2 = (elts[i + shift] & mask2) | ((elts[i] & mask2) >> shift);
-          printf("Setting elts[%d] to 0x%x from 0x%x\n", i, elts[i], new1);
+          printf("Setting elts[%" U32_F "] to %" W_F " from %" W_F "\n", i, elts[i], new1);
           elts[i] = new1;
-          printf("Setting elts[%d] to 0x%x from 0x%x\n", i + shift, elts[i + shift], new2);
+          printf("Setting elts[%" U32_F "] to %" W_F " from %" W_F "\n", i + shift, elts[i + shift], new2);
           elts[i + shift] = new2;
         }
         phase++;
@@ -258,9 +258,9 @@ int tra2(const char *m1, const char *m2, const char *name)
             u32 l = 2 * shift * j + i; /* The row we work with */
             word new1 = (elts[l] & mask1) | ((elts[l + shift] & mask1) << shift);
             word new2 = (elts[l + shift] & mask2) | ((elts[l] & mask2) >> shift);
-            printf("Setting elts[%d] to 0x%x from 0x%x\n", l, elts[l], new1);
+            printf("Setting elts[%" U32_F "] to %" W_F " from %" W_F "\n", l, elts[l], new1);
             elts[l] = new1;
-            printf("Setting elts[%d] to 0x%x from 0x%x\n", l + shift, elts[l + shift], new2);
+            printf("Setting elts[%" U32_F "] to %" W_F " from %" W_F "\n", l + shift, elts[l + shift], new2);
             elts[l + shift] = new2;
           }
         }
@@ -269,7 +269,7 @@ int tra2(const char *m1, const char *m2, const char *name)
         /* Phase 5: transpose a 32 x 32 matrix in 256 1 x 1 blocks */
         /* Now copy back from elts to (in_col+32k, in_row) */
         for (i = 0; i < 32; i++) {
-          printf("Setting out row %d column %d to 0x%x\n", in_col + i + 32 * k, out_word_pos * 32, elts[i]);
+          printf("Setting out row %" U32_F " column %" U32_F " to %" W_F "\n", in_col + i + 32 * k, out_word_pos * 32, elts[i]);
           rows_out[i + 32 * k][out_word_pos] = elts[i];
         }
       }
