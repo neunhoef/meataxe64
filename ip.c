@@ -1,5 +1,5 @@
 /*
- * $Id: ip.c,v 1.21 2011/01/19 22:47:17 jon Exp $
+ * $Id: ip.c,v 1.22 2012/06/05 13:02:28 jon Exp $
  *
  * Read a matrix
  *
@@ -43,7 +43,7 @@ int main(int argc, const char * const argv[])
   in = argv[1];
   out = argv[2];
   errno = 0;
-  inp = fopen(in, "r");
+  inp = fopen64(in, "r");
   if (NULL == inp) {
     if ( 0 != errno) {
       perror(name);
