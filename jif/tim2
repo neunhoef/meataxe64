@@ -1,0 +1,2 @@
+time zmu ../reg/d ../reg/d r1
+diff r1 ../reg/dsqr
