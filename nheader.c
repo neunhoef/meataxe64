@@ -1,5 +1,5 @@
 /*
- * $Id: nheader.c,v 1.2 2012/03/25 11:53:29 jon Exp $
+ * $Id: nheader.c,v 1.3 2012/06/17 10:41:29 jon Exp $
  *
  * Header manipulation for meataxe 64
  *
@@ -39,6 +39,12 @@ void nheader_set_prime(nheader *h, u64 p)
   assert(NULL != h);
   assert(1 == p || is_a_prime_power(p));
   h->prime = p;
+}
+
+u64 nheader_get_nob(const nheader *h)
+{
+  assert(NULL != h);
+  return h->nob;
 }
 
 void nheader_set_nob(nheader *h, u64 n)

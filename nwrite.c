@@ -1,5 +1,5 @@
 /*
- * $Id: nwrite.c,v 1.1 2012/03/24 13:32:21 jon Exp $
+ * $Id: nwrite.c,v 1.2 2012/06/17 10:41:29 jon Exp $
  *
  * Write a meataxe 64 header
  *
@@ -14,7 +14,7 @@
 #include "utils.h"
 #include "endian.h"
 
-int write_text_nheader(FILE *fp, const nheader *h, const char *name)
+int nwrite_text_nheader(FILE *fp, const nheader *h, const char *name)
 {
   u64 prime, nod, noc, nor;
 
@@ -35,7 +35,7 @@ int write_text_nheader(FILE *fp, const nheader *h, const char *name)
   return 1;
 }
 
-int write_binary_nheader(FILE *fp, const nheader *h, const char *file, const char *name)
+int nwrite_binary_nheader(FILE *fp, const nheader *h, const char *file, const char *name)
 {
   u64 prime;
   u64 nor;
@@ -79,7 +79,7 @@ int open_and_write_binary_nheader(FILE **outp, const nheader *h, const char *m, 
     return 0;
   }
   *outp = out;
-  res = write_binary_nheader(out, h, m, name);
+  res = nwrite_binary_nheader(out, h, m, name);
   if (0 == res) {
     fclose(out);
     *outp = NULL;

@@ -1,5 +1,5 @@
 /*
- * $Id: znexp.c,v 1.1 2012/03/24 13:32:21 jon Exp $
+ * $Id: znexp.c,v 1.2 2012/06/17 10:41:29 jon Exp $
  *
  * Export matrix to meataxe 64 system
  *
@@ -73,7 +73,7 @@ int main(int argc, const char * const argv[])
   }
   in_row = memory_pointer(0);
   out_row = memory_pointer(500);
-  /* TBD: Create new header */
+  /* Create new header */
   h_out = nheader_create(prime, nob, header_get_nod(h_in), noc, nor);
   /* Open the output, and write the new header */
   if (0 == open_and_write_binary_nheader(&f_out, h_out, out, name)) {
@@ -86,7 +86,7 @@ int main(int argc, const char * const argv[])
       if ( 0 != errno) {
         perror(name);
       }
-      fprintf(stderr, "%s: failed to read row %u from %s, terminating\n", name, i, in);
+      fprintf(stderr, "%s: failed to read row %" U32_F " from %s, terminating\n", name, i, in);
       exit(1);
     }
     /* Copy the main content */
@@ -96,7 +96,7 @@ int main(int argc, const char * const argv[])
       memset(out_row + len, 0, sizeof(word));
     }
     if (out_len != fwrite(out_row, sizeof(word), out_len, f_out)) {
-      fprintf(stderr, "%s: failed to write row %u to %s, terminating\n", name, i, out);
+      fprintf(stderr, "%s: failed to write row %" U32_F " to %s, terminating\n", name, i, out);
       exit(1);
     }
   }

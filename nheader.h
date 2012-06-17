@@ -1,5 +1,5 @@
 /*
- * $Id: nheader.h,v 1.1 2012/03/24 13:32:21 jon Exp $
+ * $Id: nheader.h,v 1.2 2012/06/17 10:41:29 jon Exp $
  *
  * Internal header for meataxe 64
  *
@@ -32,6 +32,5 @@ extern void nheader_free(const nheader *);
 extern nheader *nheader_create(u64 prime, u64 nob,
                                u64 nod, u64 noc,
                                u64 nor);
-extern int nheader_check(const nheader *h); /* Check for correct size setting */
 
 #endif
