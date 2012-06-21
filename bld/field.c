@@ -1,6 +1,6 @@
 /*
-         field2.c   -   Meataxe-64 Mod 2 only Field Routines
-         ========       R. A. Parker    14.02.2012
+  field2.c   -   Meataxe-64 Mod 2 only Field Routines
+  ========       R. A. Parker    14.02.2012
 */
 
 #include <stdio.h>
@@ -14,191 +14,190 @@ size_t LenField(uint64 fdef)
   return 32;     /* just the compulsory public members */
 }
 
-int  FieldSet(uint64 fdef, FIELD * f)
+int  FieldSet(uint64 fdef, FIELD *f)
 {
-    if(fdef!=2) return -2;
-    f[FDEF]=2;
-    f[CHARC]=2;
-    f[POW]=1;
-    f[CONP]=1;
-    return 1;
+  if(fdef!=2) return -2;
+  f[FDEF]=2;
+  f[CHARC]=2;
+  f[POW]=1;
+  f[CONP]=1;
+  return 1;
 }
 
-FELT FieldAdd(FIELD * f, FELT a, FELT b)
-{
-  (void)f;
-    return a^b;
-}
-
-FELT FieldNeg(FIELD * f, FELT a)
+FELT FieldAdd(FIELD *f, FELT a, FELT b)
 {
   (void)f;
-    return a;
+  return a^b;
 }
 
-FELT FieldSub(FIELD * f, FELT a, FELT b)
+FELT FieldNeg(FIELD *f, FELT a)
 {
   (void)f;
-    return a^b;
+  return a;
 }
 
-FELT FieldMul(FIELD * f, FELT a, FELT b)
+FELT FieldSub(FIELD *f, FELT a, FELT b)
 {
   (void)f;
-    return a&b;
+  return a^b;
 }
 
-FELT FieldInv(FIELD * f, FELT a)
+FELT FieldMul(FIELD *f, FELT a, FELT b)
 {
   (void)f;
-    return a;
+  return a&b;
 }
 
-FELT FieldDiv(FIELD * f, FELT a, FELT b)
+FELT FieldInv(FIELD *f, FELT a)
+{
+  (void)f;
+  return a;
+}
+
+FELT FieldDiv(FIELD *f, FELT a, FELT b)
 {
   (void)f;
   (void)b;
-    return a;
+  return a;
 }
 
-void DSSet(FIELD * f, uint64 noc, DSPACE * ds)
+void DSSet(FIELD *f, uint64 noc, DSPACE *ds)
 {
-    ds->field=f;
-    ds->noc=noc;
-    ds->nob=((noc+63)/64)*8;
-    ds->paktyp=1;
+  ds->field=f;
+  ds->noc=noc;
+  ds->nob=((noc+63)/64)*8;
+  ds->paktyp=1;
 }
 
 static uint64 getint64(FILE *f)
 {
-    unsigned char byt;
-    uint64 u,x;
-    int i,r;
-    u=0;
-    for(i=0;i<8;i++)
+  unsigned char byt;
+  uint64 u,x;
+  int i,r;
+  u=0;
+  for(i=0;i<8;i++)
     {
-	r=fread(&byt,1,1,f);
-        if(r==99) printf("99\n");
-        x=byt;
-        x<<=8*i;
-	u |= x;
+      r=fread(&byt,1,1,f);
+      if(r==99) printf("99\n");
+      x=byt;
+      x<<=8*i;
+      u |= x;
     }
-    return u;
+  return u;
 }
 
 static void putint64(FILE *f,  uint64 u)
 {
-    unsigned char byt;
-    int i;
-    for(i=0;i<8;i++)
+  unsigned char byt;
+  int i;
+  for(i=0;i<8;i++)
     {
-	byt = u & 255;
-	fwrite(&byt,1,1,f);
-	u = (u >> 8);
+      byt = u & 255;
+      fwrite(&byt,1,1,f);
+      u = (u >> 8);
     }
 }
 
-FILE * RdHdr(char * fname, uint64 * fdef, uint64 * nor, uint64 * noc)
+FILE *RdHdr(const char *fname, uint64 *fdef, uint64 *nor, uint64 *noc)
 {
-    FILE *f;
-    f = fopen(fname,"rb");
-    if(f == NULL)
+  FILE *f;
+  f = fopen(fname,"rb");
+  if(f == NULL) {
+      fprintf(stderr, "Cannot open input file %s\n",fname);
+      exit(10);
+  }
+  *fdef = getint64(f);
+  *nor  = getint64(f);
+  *noc  = getint64(f);
+  return f;
+}
+
+FILE *WrHdr(const char *fname, uint64 fdef, uint64 nor, uint64 noc)
+{
+  FILE *f;
+  f = fopen(fname,"wb");
+  if(f == NULL)
     {
-        printf("Cannot open input file %s\n",fname);
-        exit(10);
+      printf("Cannot open output file %s\n",fname);
+      exit(11);
     }
-    *fdef = getint64(f);
-    *nor  = getint64(f);
-    *noc  = getint64(f);
-    return f;
+  putint64(f,fdef);
+  putint64(f,nor);
+  putint64(f,noc);
+  return f;
 }
 
-FILE * WrHdr(char * fname, uint64 fdef, uint64 nor, uint64 noc)
+void RdMatrix(FILE *f, DSPACE *ds, uint64 nor, Dfmt d)
 {
-    FILE *f;
-    f = fopen(fname,"wb");
-    if(f == NULL)
-    {
-        printf("Cannot open output file %s\n",fname);
-        exit(11);
-    }
-    putint64(f,fdef);
-    putint64(f,nor);
-    putint64(f,noc);
-    return f;
+  int r;
+  r=fread(d,ds->nob,nor,f);
+  if(r==99) printf("99\n");
 }
 
-void RdMatrix(FILE * f, DSPACE * ds, uint64 nor, Dfmt d)
+void WrMatrix(FILE *f, DSPACE *ds, uint64 nor, Dfmt d)
 {
-    int r;
-    r=fread(d,ds->nob,nor,f);
-    if(r==99) printf("99\n");
+  int r;
+  r=fwrite(d,ds->nob,nor,f);
+  if(r==99) printf("99\n");
 }
 
-void WrMatrix(FILE * f, DSPACE * ds, uint64 nor, Dfmt d)
+void Close(FILE *f)
 {
-    int r;
-    r=fwrite(d,ds->nob,nor,f);
-    if(r==99) printf("99\n");
+  fclose(f);
 }
 
-void Close(FILE * f)
+
+FELT DUnpak(DSPACE *ds, uint64 col, Dfmt d)
 {
-    fclose(f);
+  uint8 *dp, x;
+  FELT f;
+  int i;
+  (void)ds;
+  dp=(uint8 *) d;
+  dp+=(col>>3);
+  x=*dp;
+  i=col&7;
+  x=(x>>i)&1;
+  f=x;
+  return f;
 }
 
-
-FELT DUnpak(DSPACE * ds, uint64 col, Dfmt d)
+void DPak(DSPACE *ds, uint64 col, Dfmt d, FELT f)
 {
-    uint8 * dp, x;
-    FELT f;
-    int i;
-    (void)ds;
-    dp=(uint8 *) d;
-    dp+=(col>>3);
-    x=*dp;
-    i=col&7;
-    x=(x>>i)&1;
-    f=x;
-    return f;
+  uint8 *dp, x,y,z;
+  int i;
+  (void)ds;
+  dp=(uint8 *) d;
+  dp+=(col>>3);
+  x=*dp;
+  i=col&7;
+  y=f<<i;
+  z=1<<i;
+  x=x&(z^255);
+  x|=y;
+  *dp=x;
 }
 
-void DPak(DSPACE * ds, uint64 col, Dfmt d, FELT f)
+void DAdd(DSPACE *ds, Dfmt d1, Dfmt d2)
 {
-    uint8 * dp, x,y,z;
-    int i;
-    (void)ds;
-    dp=(uint8 *) d;
-    dp+=(col>>3);
-    x=*dp;
-    i=col&7;
-    y=f<<i;
-    z=1<<i;
-    x=x&(z^255);
-    x|=y;
-    *dp=x;
+  uint64 *dp1, *dp2, imax, i;
+  dp1=(uint64 *) d1;
+  dp2=(uint64 *) d2;
+  imax=ds->nob/8;
+  for(i=0;i<imax;i++)  *(dp2++) ^= *(dp1++);
 }
 
-void DAdd(DSPACE * ds, Dfmt d1, Dfmt d2)
+void DSMul(DSPACE *ds, FELT f, Dfmt d)
 {
-    uint64 *dp1, *dp2, imax, i;
-    dp1=(uint64 *) d1;
-    dp2=(uint64 *) d2;
-    imax=ds->nob/8;
-    for(i=0;i<imax;i++)  *(dp2++) ^= *(dp1++);
+  if(f==0) memset(d,0,ds->nob);
 }
 
-void DSMul(DSPACE * ds, FELT f, Dfmt d)
+void DMove(DSPACE *ds, Dfmt d1, Dfmt d2)
 {
-    if(f==0) memset(d,0,ds->nob);
+  memcpy(d2,d1,ds->nob);
 }
 
-void DMove(DSPACE * ds, Dfmt d1, Dfmt d2)
-{
-    memcpy(d2,d1,ds->nob);
-}
-
-void DCut(DSPACE * ds1, uint64 nor, uint64 col, Dfmt d1, DSPACE * ds2, Dfmt d2)
+void DCut(DSPACE *ds1, uint64 nor, uint64 col, Dfmt d1, DSPACE *ds2, Dfmt d2)
 {
   (void)ds1;
   (void)nor;
@@ -208,8 +207,8 @@ void DCut(DSPACE * ds1, uint64 nor, uint64 col, Dfmt d1, DSPACE * ds2, Dfmt d2)
   (void)d2;
 }
 
-void DPaste(DSPACE * ds1, Dfmt d1, uint64 nor, uint64 col,
-                 DSPACE * ds2, Dfmt d2)
+void DPaste(DSPACE *ds1, Dfmt d1, uint64 nor, uint64 col,
+            DSPACE *ds2, Dfmt d2)
 {
   uint64 fullw;           /* full words of input to process */
   uint64 bitslast;        /* number of bits to take from last word */
@@ -220,36 +219,36 @@ void DPaste(DSPACE * ds1, Dfmt d1, uint64 nor, uint64 col,
   uint64 pt2add;          /* Fullwords to skip after paste */
   uint64 pt1add;          /* fullwords input to skip after fullw */
 
-    fullw=ds1->noc>>6;
-    bitslast=ds1->noc&63;
-    maske2=0;
-    if(bitslast!=0)
+  fullw=ds1->noc>>6;
+  bitslast=ds1->noc&63;
+  maske2=0;
+  if(bitslast!=0)
     {
-        maske1=(1ull<<bitslast)-1;
-        maske2=maske1^0xffffffffffffffffull;
+      maske1=(1ull<<bitslast)-1;
+      maske2=maske1^0xffffffffffffffffull;
     }
-    pt1=(uint64 *) d1;
-    pt2=(uint64 *) d2;
-    pt2+=(col>>6);
-    pt2add=((63+ds2->noc)>>6)-fullw;
-    pt1add=((63+ds1->noc)>>6)-fullw;
+  pt1=(uint64 *) d1;
+  pt2=(uint64 *) d2;
+  pt2+=(col>>6);
+  pt2add=((63+ds2->noc)>>6)-fullw;
+  pt1add=((63+ds1->noc)>>6)-fullw;
 
-    if( (col&63)==0 )       /* multiply case */
+  if( (col&63)==0 )       /* multiply case */
     {
-        for(i=0;i<nor;i++)
+      for(i=0;i<nor;i++)
         {
-            for(j=0;j<fullw;j++)
-                *(pt2++)=*(pt1++);
-            if(bitslast!=0)     /* deal with the tatty-bit. */
-                *pt2 = ((*pt2)&maske2) | (*pt1);
-            pt2+=pt2add;
-            pt1+=pt1add;
+          for(j=0;j<fullw;j++)
+            *(pt2++)=*(pt1++);
+          if(bitslast!=0)     /* deal with the tatty-bit. */
+            *pt2 = ((*pt2)&maske2) | (*pt1);
+          pt2+=pt2add;
+          pt1+=pt1add;
         }
     }
-    else
+  else
     {
-        printf("haven't written this bit yet\n");
-        exit(113);
+      printf("haven't written this bit yet\n");
+      exit(113);
     }
 }
 
