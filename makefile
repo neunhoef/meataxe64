@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.115 2012/06/17 10:41:29 jon Exp $
+# $Id: makefile,v 1.116 2013/10/13 16:53:13 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -398,7 +398,7 @@ SRCDIR=.
 # Compiler search path for headers
 INCLUDES=-I. -I$(GENDIR) -I$(SRCDIR) -I $(SRCDIR)/$(OS)
 # Preprocessor defined values
-DEFINES=-DMEM_SIZE=200 -DCACHE_SIZE=1000
+DEFINES=-DMEM_SIZE=200000 -DCACHE_SIZE=1000
 
 # Make search paths for source
 vpath %.c $(SRCDIR) $(SRCDIR)/$(OS) $(GENDIR)
