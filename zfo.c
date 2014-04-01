@@ -1,5 +1,5 @@
 /*
- * $Id: zfo.c,v 1.7 2005/07/24 11:31:35 jon Exp $
+ * $Id: zfo.c,v 1.8 2014/04/01 22:02:14 jon Exp $
  *
  * Find the orbits under multiple generators
  *
@@ -82,7 +82,7 @@ int main(int argc, const char * const argv[])
     /* Find the next untried point and compute its orbit in orb */
     if (NULL == orb_ptr[cur_point]) {
       /* Found an untried point */
-      im = map[cur_point], i;
+      im = map[cur_point];
       orb.size = 1;
       orb.values[0] = cur_point;
       while (im != cur_point) {
