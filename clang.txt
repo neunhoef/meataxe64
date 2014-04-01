@@ -1,0 +1,7 @@
+#
+# clang specific fragment for building
+#
+# $Id: clang.txt,v 1.1 2014/04/01 20:20:10 jon Exp $
+#
+CC=	clang
+COMPILE_WARNINGS=	-Werror -Wall -Wpointer-arith -Wwrite-strings -Winline -Waggregate-return -Wmissing-prototypes -Wnested-externs -W -Wunused -Wcast-align -Wstrict-prototypes -Wmissing-declarations -ansi
