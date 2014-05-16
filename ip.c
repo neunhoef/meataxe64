@@ -1,5 +1,5 @@
 /*
- * $Id: ip.c,v 1.22 2012/06/05 13:02:28 jon Exp $
+ * $Id: ip.c,v 1.23 2014/05/16 21:37:55 jon Exp $
  *
  * Read a matrix
  *
@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <assert.h>
 #include <limits.h>
 #include <errno.h>
@@ -22,8 +23,10 @@ static const char *name = "zcv";
 
 static void ip_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s %s <in_file> <out_file>\n", name, name, parse_usage());
+  fprintf(stderr, "%s: usage: %s %s <in_file (- for stdin)> <out_file>\n", name, name, parse_usage());
 }
+
+static int use_stdin = 0;
 
 int main(int argc, const char * const argv[])
 {
@@ -43,17 +46,24 @@ int main(int argc, const char * const argv[])
   in = argv[1];
   out = argv[2];
   errno = 0;
-  inp = fopen64(in, "r");
-  if (NULL == inp) {
-    if ( 0 != errno) {
-      perror(name);
+  if (0 == strcmp("-", in)) {
+    inp = stdin;
+    use_stdin = 1;
+  } else {
+    inp = fopen64(in, "r");
+    if (NULL == inp) {
+      if ( 0 != errno) {
+        perror(name);
+      }
+      fprintf(stderr, "%s: cannot open %s, terminating\n", name, in);
+      exit(1);
     }
-    fprintf(stderr, "%s: cannot open %s, terminating\n", name, in);
-    exit(1);
   }
   endian_init();
   if (0 == read_text_header(inp, &h, in, name)) {
-    fclose(inp);
+    if (0 == use_stdin) {
+      fclose(inp);
+    }
     exit(1);
   }
   prime = header_get_prime(h);
@@ -63,7 +73,9 @@ int main(int argc, const char * const argv[])
   }
   header_set_prime((header *)h, prime);
   if (0 == open_and_write_binary_header(&outp, h, out, name)) {
-    fclose(inp);
+    if (0 == use_stdin) {
+      fclose(inp);
+    }
     header_free(h);
     exit(1);
   }
@@ -85,7 +97,9 @@ int main(int argc, const char * const argv[])
           perror(name);
         }
         fprintf(stderr, "%s: cannot write output value %u in row %u to %s\n", name, j - 1, i, out);
-        fclose(inp);
+        if (0 == use_stdin) {
+          fclose(inp);
+        }
         fclose(outp);
         exit(1);
       }
@@ -111,7 +125,9 @@ int main(int argc, const char * const argv[])
               }
               fprintf(stderr, "Failed to write element to %s at (%u, %u)\n",
                       out, i, j);
-              fclose(inp);
+              if (0 == use_stdin) {
+                fclose(inp);
+              }
               fclose(outp);
               exit(1);
             }
@@ -121,7 +137,9 @@ int main(int argc, const char * const argv[])
         } else {
           fprintf(stderr, "Failed to read element from %s at (%u, %u)\n",
                   in, i, j);
-          fclose(inp);
+          if (0 == use_stdin) {
+            fclose(inp);
+          }
           fclose(outp);
           exit(1);
         }
@@ -133,13 +151,17 @@ int main(int argc, const char * const argv[])
         }
         fprintf(stderr, "Failed to write element to %s at (%u, %u)\n",
                 out, i, j);
-        fclose(inp);
+        if (0 == use_stdin) {
+          fclose(inp);
+        }
         fclose(outp);
         exit(1);
       }
     }
   }
-  fclose(inp);
+  if (0 == use_stdin) {
+    fclose(inp);
+  }
   fclose(outp);
   return 0;
 }
