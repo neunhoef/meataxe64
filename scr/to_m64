@@ -2,7 +2,6 @@
 # Script to convert from meataxe 2000 to meataxe 64
 # Expect to use back to back zpr znd zcv
 # Ie roughly 2000/zpr $1 | zcv $2
-# But there are issue piping 2000 zpr output into 64 zcv
 # meataxe 64 is expected to be on path
 # meataxe 2000 in ~/install
 #
@@ -15,10 +14,8 @@ if [ $# -ne 2 ]; then
   exit 1;
 fi
 if [ -e $1 ]; then
-  tmp=tmp${PPID}
   echo "zpr $1 | zcv $2"
-  ~/install/zpr $1 | sed -e "1d" > ${tmp}
-  #zcv $2 < ${tmp}
+  ~/install/zpr $1 | zcv $2
 else
   echo "$0: missing file $1"
   exit 1
