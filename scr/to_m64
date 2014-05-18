@@ -14,7 +14,6 @@ if [ $# -ne 2 ]; then
   exit 1;
 fi
 if [ -e $1 ]; then
-  echo "zpr $1 | zcv $2"
   ~/install/zpr $1 | zcv $2
 else
   echo "$0: missing file $1"
