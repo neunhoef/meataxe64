@@ -1,5 +1,5 @@
 /*
- * $Id: mt_types.h,v 1.4 2012/01/19 23:26:47 jon Exp $
+ * $Id: mt_types.h,v 1.5 2014/06/11 07:56:19 jon Exp $
  *
  * Fundamental types for meataxe for em64t
  *
@@ -36,5 +36,8 @@ typedef u32 word;
 
 #define U32PRIME_BIT 0
 #define U64PRIME_BIT 0x40000000
+
+/* The maximum we could try to allocate */
+#define SIZE_T_MAX ULONG_MAX
 
 #endif

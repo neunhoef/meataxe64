@@ -1,5 +1,5 @@
 /*
- * $Id: memory.c,v 1.16 2005/10/28 22:58:08 jon Exp $
+ * $Id: memory.c,v 1.17 2014/06/11 07:56:19 jon Exp $
  *
  * Large memory manipulation for meataxe
  *
@@ -26,7 +26,7 @@ void memory_init(const char *name, size_t size)
   extent = ((0 != size) ? size : (MEM_SIZE));
   extent /= sizeof(word);
   errno = 0;
-  if (UINT_MAX / (1000 * sizeof(word)) < extent) {
+  if (SIZE_T_MAX / (1000 * sizeof(word)) < extent) {
     fprintf(stderr, "%s: memory request %" SIZE_F " exceeds system maximum, exiting\n", name, extent * sizeof(word));
     exit(1);
   }
