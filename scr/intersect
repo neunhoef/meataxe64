@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: intersect,v 1.9 2004/09/12 21:25:17 jon Exp $
+# $Id: intersect,v 1.10 2014/06/20 20:42:14 jon Exp $
 #
 # Script to intersect two spaces
 #
@@ -43,7 +43,7 @@ if [ $ret -ne 0 ]; then
   exit $ret
 fi
 ok=0
-memory=200
+memory=200000
 while [ 0 -eq $ok ]; do
   nullity=`zns -m $memory ${tmp}.0 ${tmp}.1 2>&1`
   ret=$?

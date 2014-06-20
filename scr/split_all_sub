@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: split_all_sub,v 1.8 2006/12/27 19:10:23 jon Exp $
+# $Id: split_all_sub,v 1.9 2014/06/20 20:42:14 jon Exp $
 #
 # Script to split a representation completely
 # and possibly classify the irreducibles
@@ -33,7 +33,7 @@ vectors=$4
 if [ 0 -eq $c ]; then
   classify=0
 fi
-memory=400
+memory=400000
 nor=`znor $a`
 #
 # TODO: find a way of using a process specific temporary for stdout

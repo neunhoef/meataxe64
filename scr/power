@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: power,v 1.13 2004/05/12 22:20:05 jon Exp $
+# $Id: power,v 1.14 2014/06/20 20:42:14 jon Exp $
 #
 # Script to compute a power of a matrix
 #
@@ -25,7 +25,7 @@ a=$1
 o=$3
 n=$2
 if [ $# -eq 3 ]; then
-  memory=400
+  memory=400000
 else
   memory=$4
 fi

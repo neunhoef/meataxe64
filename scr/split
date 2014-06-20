@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: split,v 1.21 2006/07/23 16:02:13 jon Exp $
+# $Id: split,v 1.22 2014/06/20 20:42:14 jon Exp $
 #
 # Script to split a representation
 #
@@ -120,7 +120,7 @@ if [ 2 -ne $i ]; then
   exit 254
 fi
 ok=0
-memory=200
+memory=200000
 q=1
 for x in $a $b $*; do
   r=`zprime $x`

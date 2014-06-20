@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: quick_order,v 1.5 2002/10/13 20:07:20 jon Exp $: f1,v 1.2 2001/12/01 10:46:02 jon Exp $
+# $Id: quick_order,v 1.6 2014/06/20 20:42:14 jon Exp $: f1,v 1.2 2001/12/01 10:46:02 jon Exp $
 #
 # Script to compute order of a matrix, in a naive fashion
 # returning 10 if it's greater than 10
@@ -31,7 +31,7 @@ else
   echo "$0: missing file $a"
   exit 1
 fi
-memory=200
+memory=200000
 ok=0
 while [ $ok -eq 0 ]; do
   r=`zrn -m $memory $a 2>/dev/null`
