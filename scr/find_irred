@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: find_irred,v 1.1 2003/08/24 12:05:12 jon Exp $
+# $Id: find_irred,v 1.2 2014/07/15 17:46:38 jon Exp $
 #
 # Script to find the irreducible corresponding to a representation
 #
@@ -52,7 +52,7 @@ for x in `ls irreds/*_1 2>/dev/null`; do
   if [ $nor -eq `znor $x` ]; then
     script=`echo $y | sed -e "s?${x}_??g"`
 #   echo "Trying script $script"
-    zscript -m $memory ${tmp}.0 ${tmp}.zscript $script $*
+    zscript -m $memory ${tmp}.0 ${tmp}.zscript $script $* 2>/dev/null
     ret=$?
     rm ${tmp}.zscript*
     if [ 0 -ne $ret ]; then

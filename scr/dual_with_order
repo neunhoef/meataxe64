@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: dual_with_order,v 1.7 2002/10/13 19:09:42 jon Exp $
+# $Id: dual_with_order,v 1.8 2014/07/15 17:46:37 jon Exp $
 #
 # Script to dual of a matrix, given its order
 #
@@ -39,7 +39,7 @@ else
   exit 1
 fi
 if [ $# -eq 3 ]; then
-  memory=200
+  memory=400
 else
   memory=$4
 fi
