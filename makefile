@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.116 2013/10/13 16:53:13 jon Exp $
+# $Id: makefile,v 1.117 2014/08/03 11:55:15 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -133,6 +133,7 @@ ZTTR_TARGET=	zttr
 ZVP_TARGET=	zvp
 ZVPF_TARGET=	zvpf
 ZWORDS_TARGET=	zwords
+ZWORD_SIZE_TARGET=	zword_size
 
 LIB_MODULES=	add clean clean_file clean_vectors command conj count dc dets diff diffd elements endian exrows extend extend_matrix files gen grease header ident join map map_or_row maps matrix memory msb msbf msp mspf mul mv mvp nheader nread ns nsf ntco nwrite orbit parse pco pcol pfl pofp powers primes project ps qs rand read restrict retract retract_matrix rn rnf scale script singular span spanmsp ss ss_map sums sumsf sums_utils sv symb system tco te tmul tra tra2 tsp tspf ttr utils vp vpf write
 
@@ -261,6 +262,7 @@ ZTTR_MODULES=	rows zttr
 ZVP_MODULES=	rows zvp
 ZVPF_MODULES=	rows zvpf
 ZWORDS_MODULES=	rows zwords
+ZWORD_SIZE_MODULES=	zword_size
 
 MODULES=	$(LIB_MODULES) \
 	$(CONS_MODULES) \
@@ -387,7 +389,8 @@ MODULES=	$(LIB_MODULES) \
 	$(ZTTR_MODULES) \
 	$(ZVP_MODULES) \
 	$(ZVPF_MODULES) \
-	$(ZWORDS_MODULES)
+	$(ZWORDS_MODULES) \
+	$(ZWORD_SIZE_MODULES)
 
 include dirs.txt
 include defines.txt
@@ -804,6 +807,9 @@ TARGET:=ZVPF
 include targets.txt
 
 TARGET:=ZWORDS
+include targets.txt
+
+TARGET:=ZWORD_SIZE
 include targets.txt
 
 debug: $(DEBUG_TARGETS)
