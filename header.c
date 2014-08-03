@@ -1,5 +1,5 @@
 /*
- * $Id: header.c,v 1.18 2005/10/30 19:52:22 jon Exp $
+ * $Id: header.c,v 1.19 2014/08/03 11:56:42 jon Exp $
  *
  * Header manipulation
  *
@@ -264,4 +264,3 @@ int header_check(const header *h)
     return 0;
   }
 }
-
