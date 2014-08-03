@@ -25,6 +25,6 @@ int main(int argc, const char *const argv[])
     exit(1);
   }
   NOT_USED(argv);
-  printf("%u\n", (CHAR_BIT) * sizeof(word));
+  printf("%" SIZE_F "\n", (CHAR_BIT) * sizeof(word));
   return 0;
 }
