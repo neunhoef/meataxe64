@@ -1,0 +1,74 @@
+#!/bin/bash
+#
+# Script to check a set o irreducibles for nullity 0 on some given elements
+#
+# Inputs
+# $1: number of generators
+# $2: scripts file (output from zranks)
+# $3: irreducible bases
+#
+# Output: the first script found having nullity 0 on all representations
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+# 255: no elements of required nullity found
+#
+#set -v
+#set -x
+. functions
+usage="$0: usage: $0 <number of generators> <scripts file> <other irreds>"
+if [ $# -lt 3 ]; then
+  echo "$usage"
+  exit 1;
+fi
+n=$1
+file=$2
+shift 2
+name=$0
+i=0
+tot=0
+tmp=tmp${PPID}
+while [ 1 -le $# ]; do
+  a[$i]=$1
+  shift
+  let i=$i+1
+  let tot=$tot+1
+done
+for x in `cat $file | sed -e "s/^.*form //"`; do
+  i=0
+  ok=1
+  while [ $i -lt $tot -a $ok -eq 1 ]; do
+    line=
+    j=1
+    while [ $j -le $n ]; do
+      line="${line} ${a[$i]}_$j"
+      let j=$j+1
+    done
+    zscript -m 100000 ${tmp}.1 ${tmp}1 $x $line
+    ret=$?
+    if [ 0 -ne $ret ]; then
+      echo "zscript failed"
+      exit 1
+    fi
+    nullity=`zns -m 100000 ${tmp}.{1,2}`
+    ret=$?
+    if [ 0 -ne $ret ]; then
+      echo "zns failed with $nullity"
+      exit 1
+    fi
+    if [ 0 -ne $nullity ]; then
+      echo "$x failed on ${a[$i]}"
+      ok=0
+      break
+    fi
+    let i=$i+1
+  done
+  if [ 1 -eq $ok ]; then
+    echo "Passed with script $x"
+    rm_all ${tmp}
+    exit 0
+  fi
+done
+rm_all ${tmp}
+exit 255
