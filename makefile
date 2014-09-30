@@ -1,7 +1,7 @@
 #
 # meataxe makefile for building on multiple targets
 #
-# $Id: makefile,v 1.117 2014/08/03 11:55:15 jon Exp $
+# $Id: makefile,v 1.118 2014/09/30 21:33:50 jon Exp $
 #
 all: debug rel profile profilena
 
@@ -77,6 +77,7 @@ ZNSF_TARGET=	znsf
 ZNTCO_TARGET=	zntco
 ZPCO_TARGET=	zpco
 ZPCOL_TARGET=	zpcol
+ZPCV_TARGET=	zpcv
 ZPFL_TARGET=	zpfl
 ZPOFP_TARGET=	zpofp
 ZPR_TARGET=	zpr
