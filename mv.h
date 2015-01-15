@@ -1,5 +1,5 @@
 /*
- * $Id: mv.h,v 1.3 2005/07/24 11:31:35 jon Exp $
+ * $Id: mv.h,v 1.4 2015/01/15 09:06:45 jon Exp $
  *
  * Function to convert rows to matrices and vv
  * Used for multiplication in tensor space
@@ -20,7 +20,7 @@ extern void v_to_m(word *row_in, word **rows_out,
                    u32 prime);
 
 /* Convert vector to matrix
- * nor1 is number of rows, nor2 number of columns
+ * nor is number of rows, noc number of columns
  * expected use is efficient multiplication of vector by tensor
  * Hence the use of nor1 and nor2, rather than nor and noc
  * This routine cannot run in place

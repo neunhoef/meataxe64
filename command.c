@@ -1,5 +1,5 @@
 /*
- * $Id: command.c,v 1.12 2005/07/24 09:32:45 jon Exp $
+ * $Id: command.c,v 1.13 2015/01/15 09:06:45 jon Exp $
  *
  * Interface to task manager (definition)
  *
@@ -40,7 +40,7 @@ job get_job(void)
   return (++job_base);
 }
 
-extern t_uid get_tmp_id(void)
+t_uid get_tmp_id(void)
 {
   static unsigned int tmp_base=0;
   return (++tmp_base);

@@ -1,5 +1,5 @@
 /*
- * $Id: mv.c,v 1.5 2005/07/24 11:31:35 jon Exp $
+ * $Id: mv.c,v 1.6 2015/01/15 09:06:45 jon Exp $
  *
  * Function to convert rows to matrices and vv
  * Used for multiplication in tensor space
@@ -44,7 +44,7 @@ void v_to_m(word *row_in, word **rows_out,
   header_free(h);
 }
 
-extern void m_to_v(word **rows_in, word *row_out,
+void m_to_v(word **rows_in, word *row_out,
                    u32 nor, u32 noc,
                    u32 prime)
 {

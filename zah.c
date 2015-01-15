@@ -1,7 +1,7 @@
 /*
- * $Id: zah.c,v 1.10 2005/10/12 18:20:31 jon Exp $
+ * $Id: zah.c,v 1.11 2015/01/15 09:06:45 jon Exp $
  *
- * Add a header to en intermediate file matrix
+ * Add a header to an intermediate file matrix
  * Essentially a disaster recovery program
  *
  */
