@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: fixed_point_form_signf,v 1.1 2006/12/23 13:06:06 jon Exp $
+# $Id: fixed_point_form_signf,v 1.2 2015/02/04 23:31:06 jon Exp $
 #
 # Script to compute the form sign on the fixed point space,
 # using intermediate files
@@ -16,6 +16,8 @@
 # 0: sign plus
 # 255: sign minus
 #
+set -x
+. functions
 usage="$0: usage: $0 <form> <element> <dir> [<memory>]"
 if [ $# -ne 3 -a $# -ne 4 ]; then
   echo "$usage"
@@ -29,6 +31,7 @@ if [ 4 -eq $# ]; then
 else
   memory=400
 fi
+init_memory=${memory}
 if [ -e $form -a -e $elt ]; then
   q=`zprime $form`
   r=`zprime $elt`
@@ -117,16 +120,41 @@ if [ 0 -ne $ret ]; then
   rm -f ${tmp}.*
   exit 1
 fi
-zsign -m $memory ${tmp}.form ${tmp}.form.sym
-ret=$?
-if [ 0 -ne $ret -a 255 -ne $ret ]; then
-  rm -f ${tmp}.*
-  exit 1
+ok=0
+mem_failed=0
+while [ 0 -eq $ok ]; do
+  out=`zsign -m $memory ${tmp}.form ${tmp}.form.sym 2>&1`
+  ret=$?
+  if [ 2 -eq $ret ]; then
+    let memory=`more_memory $memory 2>/dev/null`
+    mem_failed=1
+  else
+    ok=1
+  fi
+done
+if [ 1 -eq $mem_failed -a 1 -eq $ret ]; then
+  ok=0
+  memory=$init_memory
+  while [ 0 -eq $ok ]; do
+    out=`zsignf -m $memory ${tmp}.form ${tmp}.form.sym ${dir} 2>&1`
+    ret=$?
+    if [ 2 -eq $ret ]; then
+      let memory=`more_memory $memory 2>/dev/null`
+    else
+      ok=1
+    fi
+  done
 fi
 if [ 0 -eq $ret ]; then
   echo sign +
-else
+elif [ 255 -eq $ret ]; then
   echo sign -
+elif [ 2 -eq $ret ]; then
+  echo insufficient memory to compute sign
+else
+  rm -f ${tmp}.*
+  echo $out
+  exit 1
 fi
 let diff=$nor-$new_nor
 echo Remaining dimension $diff
