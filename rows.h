@@ -1,5 +1,5 @@
 /*
- * $Id: rows.h,v 1.16 2005/12/18 11:22:11 jon Exp $
+ * $Id: rows.h,v 1.17 2015/02/09 23:33:13 jon Exp $
  *
  * Row manipulation for meataxe
  *
@@ -10,7 +10,7 @@
 
 extern void row_init(word *, u32 len);
 
-extern int row_is_zero(word *, u32 len);
+extern int row_is_zero(const word *, u32 len);
 
 typedef void (*row_adder)(const word *, const word *,
                           word *, u32);

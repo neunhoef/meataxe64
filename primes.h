@@ -1,5 +1,5 @@
 /*
- * $Id: primes.h,v 1.8 2005/06/22 21:52:53 jon Exp $
+ * $Id: primes.h,v 1.9 2015/02/09 23:33:13 jon Exp $
  *
  * Prime power manipulation for meataxe
  *
@@ -8,7 +8,7 @@
 #ifndef included__primes
 #define included__primes
 
-typedef int (*rep_fn)(word *);
+typedef int (*rep_fn)(const word *);
 
 typedef word (*unary_fn)(word);
 

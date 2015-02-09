@@ -1,5 +1,5 @@
 /*
- * $Id: primes.c,v 1.14 2005/07/24 09:32:45 jon Exp $
+ * $Id: primes.c,v 1.15 2015/02/09 23:33:13 jon Exp $
  *
  * Prime manipulation for meataxe
  *
@@ -61,14 +61,14 @@ static word from_prim_9[] =
   5  /* X = 2 */
 };
 
-static int prime_rep_2(word *e)
+static int prime_rep_2(const word *e)
 {
   NOT_USED(e);
   /* Prime and decimal rep for p = 2 are the same */
   return 1;
 }
 
-static int decimal_rep_2(word *e)
+static int decimal_rep_2(const word *e)
 {
   NOT_USED(e);
   /* Prime and decimal rep for p = 2 are the same */

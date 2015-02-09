@@ -1,5 +1,5 @@
 /*
- * $Id: rows.c,v 1.33 2006/01/05 08:31:38 jon Exp $
+ * $Id: rows.c,v 1.34 2015/02/09 23:33:13 jon Exp $
  *
  * Row manipulation for meataxe
  *
@@ -15,7 +15,7 @@
 
 static prime_ops prime_operations;
 
-int row_is_zero(word *row, u32 len)
+int row_is_zero(const word *row, u32 len)
 {
   while (len > 0) {
     if (0 != *row) {
