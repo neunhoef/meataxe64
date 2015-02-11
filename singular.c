@@ -1,5 +1,5 @@
 /*
- * $Id: singular.c,v 1.9 2005/07/24 09:32:45 jon Exp $
+ * $Id: singular.c,v 1.10 2015/02/11 08:41:03 jon Exp $
  *
  * Function to find a singular vector, given a quadratic form
  *
@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include "elements.h"
 #include "endian.h"
 #include "grease.h"
 #include "header.h"
@@ -31,8 +32,8 @@ int singular_vector(row_ops *row_operations,
                     u32 index, const char *form, const char *name)
 {
   u32 products[3][3];
-  word vector[3];
-  u32 i, j, power = 1;
+  word vector[3]; /* This will hold the coefficients */
+  u32 i, j, power = 1, elts_in_word, offset;
   prime_ops prime_operations;
   assert(NULL != rows);
   assert(NULL != work);
@@ -51,25 +52,45 @@ int singular_vector(row_ops *row_operations,
   if (nor >= 3) {
     nor = 3;
   }
+  /* Compute where to start seeing non zero entries */
+  (void)get_mask_and_elts(nob, &elts_in_word);
+  offset = index / elts_in_word;
+  /*
+   * Multiply our rows by the form and place the answer in work
+   * If U is the search space, Q the form, then we have acquired UQ
+   */
   if (0 == skip_mul_from_store(index, rows, work, formp, 0, noc, len, nob, nor, noc, prime,
                                grease, 0, form, name)) {
     return 1;
   }
+  /*
+   * Now compute the partial products UQ(U(transpose))
+   * Note that we aren't using the bilinear form here
+   * If we wanted viSvj that would be viQvj + vjQvi
+   */
   for (i = 0; i < nor; i++) {
     for (j = 0; j < nor; j++) {
-      products[i][j] = (*row_operations->product)(rows[i], work[j], len);
+      products[i][j] = (*row_operations->product)(rows[i] + offset, work[j] + offset, len - offset);
       /*
       printf("products[%u][%u] = %u\n", i, j, products[i][j]);
       */
     }
   }
+  /* Start with the all zero vector */
   memset(vector, 0, 3 * sizeof(word));
   for (i = 0; i < nor; i++) {
     u32 l, m;
     j = 0;
     while (j < power) {
       u32 sub_prod[3], prod = 0, tmp;
+      /* Get the next projective vector in the little space */
       span(nor, vector, prime, out_num);
+      /*
+       * Compute Q(vector*rows), ie the length of a particular vector
+       * in the big space spanned by rows
+       * TBD, suspect sub_prod doesn't need to be an arrya
+       * We're computing Sigma(l)v(l)Sigma(m)v(m)products(m,l)
+       */
       for (l = 0; l < nor; l++) {
         sub_prod[l] = 0;
         for (m = 0; m < nor; m++) {
@@ -79,6 +100,7 @@ int singular_vector(row_ops *row_operations,
         tmp = (*prime_operations.mul)(sub_prod[l], vector[l]);
         prod = (*prime_operations.add)(prod, tmp);
       }
+      /* Finally, if we find a vector of length 0, copy it out */
       if (0 == prod) {
         row_init(out, len);
         for (l = 0; l < nor; l++) {

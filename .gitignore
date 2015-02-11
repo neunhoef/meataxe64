@@ -32,3 +32,4 @@ install
 profiles/*
 *.pdb
 mtx.txt
+gprof*
