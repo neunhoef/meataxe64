@@ -1,5 +1,5 @@
 /*
- * $Id: elements.c,v 1.27 2006/01/13 08:18:32 jon Exp $
+ * $Id: elements.c,v 1.28 2015/02/13 23:19:32 jon Exp $
  *
  * Element manipulation for meataxe
  *
@@ -352,9 +352,10 @@ u32 first_non_zero(word *row, u32 nob,
   u32 i = 0;
   u32 elts_per_word = bits_in_word / nob;
   word mask = (1 << nob) - 1;
+  word *row_end = row + len;
   assert(NULL != row);
   assert(NULL != pos);
-  while (0 != len) {
+  while (row < row_end) {
     word elts = *row;
     if (0 != elts) {
       while (0 != elts) {
@@ -371,7 +372,6 @@ u32 first_non_zero(word *row, u32 nob,
     } else {
       i += elts_per_word;
       row++;
-      len--;
     }
   }
   return 0; /* No first non zero found */
