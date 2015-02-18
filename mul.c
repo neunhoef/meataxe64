@@ -1,5 +1,5 @@
 /*
- * $Id: mul.c,v 1.50 2005/10/12 18:20:31 jon Exp $
+ * $Id: mul.c,v 1.51 2015/02/18 08:47:46 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
@@ -467,9 +467,9 @@ int skip_mul_from_store(u32 offset, word **rows1, word **rows3,
       u32 width = size * nob;
       u32 word_offset, bit_offset;
       word mask;
-      u32 elt_index = noc, index = 0;
       int in_word;
       u32 shift = 0;
+      u32 index = len, my_index = len;
       /* Read size rows from matrix 2 into rows 2 */
       /* This sets the initial rows */
       l = 1;
@@ -482,18 +482,25 @@ int skip_mul_from_store(u32 offset, word **rows1, word **rows3,
           fprintf(stderr, "%s: unable to read %s, terminating\n", name, m);
           return 0;
         }
-        if (nor > grease->level) {
-          /* Only do this if the row will be reused */
-          unsigned int pos;
-          word elt = first_non_zero(grease->rows[l - 1], nob, len, &pos);
-          if (0 != elt && pos < elt_index) {
-            elt_index = pos;
+        /*
+         * Compute how much of matrix B we can skip
+         * Only worth doing if we'll reuse the rows a bit
+         */
+        if (nor > 2 * grease->level) {
+          /* Only do this if the row will be reused and there's some potential gain */
+          word *row = grease->rows[l - 1];
+          word *end_row = row + index;
+          while (0 == *row && row < end_row) {
+            row++;
           }
+          my_index = row - grease->rows[l - 1];
+          if (my_index < index) {
+            index = my_index; /* Reduce if a row demands it */
+          }
+        } else {
+          index = 0;
         }
         l *= prime;
-      }
-      if (nor > grease->level) {
-        index = elt_index / elts_per_word;
       }
       element_access_init(nob, i, size, &word_offset, &bit_offset, &mask);
       in_word = bit_offset + width <= bits_in_word;
