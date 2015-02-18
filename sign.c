@@ -1,5 +1,5 @@
 /*
- * $Id: sign.c,v 1.12 2015/02/18 21:32:45 jon Exp $
+ * $Id: sign.c,v 1.13 2015/02/18 21:34:26 jon Exp $
  *
  * Function compute the orthogonal group sign
  *
@@ -271,7 +271,6 @@ int sign(const char *qform, const char *bform, const char *name)
           res = n;
           prod_start = (noc - 1 - n) / elts_per_word;
           prod_len = len - prod_start;
-          assert(j != len);
         } else {
           /*
            * Subsequent instance, clean the row with the remembered row
