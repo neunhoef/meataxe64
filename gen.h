@@ -1,5 +1,5 @@
 /*
- * $Id: gen.h,v 1.2 2006/05/01 09:08:45 jon Exp $
+ * $Id: gen.h,v 1.3 2015/02/18 22:40:32 jon Exp $
  *
  * Types and functions to handle generator sets
  *
@@ -18,6 +18,7 @@ struct gen_struct
   const char *m; /* Name of the generator */
   u32 nor;       /* Rows from input already multiplied by this generator */
   int is_map;    /* 1 if a map, 0 otherwise */
+  u32 *indexes;  /* word index of first non-zero element in each row */
   gen next;      /* The next generator in the set */
 };
 
@@ -30,6 +31,7 @@ struct genf_struct
   u32 nor;       /* Rows from input already multiplied by this generator */
   int is_map;    /* 1 if a map, 0 otherwise */
   s64 base_ptr;  /* Pointer to row nor + 1 in output basis file */
+  u32 *indexes;  /* word index of first non-zero element in each row */
   genf next;     /* The next generator in the set */
 };
 

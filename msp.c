@@ -1,5 +1,5 @@
 /*
- * $Id: msp.c,v 1.20 2015/02/18 21:32:45 jon Exp $
+ * $Id: msp.c,v 1.21 2015/02/18 22:40:32 jon Exp $
  *
  * Function to spin some vectors under multiple generators
  *
@@ -66,7 +66,6 @@ u32 spin(const char *in, const char *out,
   gens[argc - 1].next = gens;
   files[0] = NULL;
   /* Start at first generator */
-  gen = gens;
   prime = header_get_prime(h_in);
   nob = header_get_nob(h_in);
   noc = header_get_noc(h_in);
@@ -95,6 +94,7 @@ u32 spin(const char *in, const char *out,
     }
     assert(gens[d].is_map || header_get_len(h) == len);
     header_free(h);
+    gens[d].indexes = my_malloc(sizeof(u32) * noc);
   }
   h_out = header_create(prime, nob, header_get_nod(h_in), noc, nor);
   header_free(h_in);
@@ -117,6 +117,38 @@ u32 spin(const char *in, const char *out,
   for (d = 0; d < max_rows; d++) {
     rows[d] = memory_pointer_offset(0, d, len);
   }
+  /* Now populate gen->indexes for each generator */
+  for (d = 0; d < argc; d++) {
+    u32 i;
+    s64 pos;
+    gen = gens + d;
+    pos = ftello64(gen->f); /* Remember where we start */
+    for (i = 0; i < noc; i++) {
+      word *my_row = rows[0], *end_row = rows[0] + len;
+      errno = 0;
+      if (0 == endian_read_row(gen->f, my_row, len)) {
+        if ( 0 != errno) {
+          perror(name);
+        }
+        fprintf(stderr, "%s: unable to read %s, terminating\n", name, gen->m);
+        cleanup(inp, argc, files);
+        exit(1);
+      }
+      while (my_row < end_row) {
+        if (0 != *my_row) {
+          break;
+        }
+        my_row++;
+      }
+      gen->indexes[i] = /*my_row - rows[0]*/0;
+    }
+    /* Now rewind gen->f */
+    if (0 != fseeko64(gen->f, pos, SEEK_SET)) {
+      fprintf(stderr, "%s: unable to rewind %s, terminating\n", name, gen->m);
+      return 0;
+    }
+  }
+  gen = gens;
   errno = 0;
   if (0 == endian_read_matrix(inp, rows, len, nor)) {
     if ( 0 != errno) {
@@ -169,7 +201,7 @@ u32 spin(const char *in, const char *out,
     }
     index = elt_index / elts_per_word;
     if (0 == skip_mul_from_store(index, rows + gen->nor, rows + nor, gen->f, gen->is_map, noc, len, nob,
-                                 rows_to_do, noc, prime, &grease, verbose, NULL, gen->m, name)) {
+                                 rows_to_do, noc, prime, &grease, verbose, gen->indexes, gen->m, name)) {
       fprintf(stderr, "%s: failed to multiply using %s, terminating\n", name, gen->m);
       cleanup(NULL, argc, files);
       exit(1);

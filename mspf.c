@@ -1,5 +1,5 @@
 /*
- * $Id: mspf.c,v 1.26 2015/02/18 21:32:45 jon Exp $
+ * $Id: mspf.c,v 1.27 2015/02/18 22:40:32 jon Exp $
  *
  * Function to spin some vectors under multiple generators
  * using intermediate files in a temporary directory.
@@ -99,6 +99,7 @@ u32 spinf(const char *in, const char *out, const char *dir,
     gens[d].m = gen_name;
     gens[d].f = files[d];
     gens[d].nor = 0;
+    gens[d].indexes = NULL;
     /* Check compatibility */
     if (noc != header_get_noc(h) ||
         noc != header_get_nor(h) ||
@@ -225,7 +226,7 @@ u32 spinf(const char *in, const char *out, const char *dir,
       }
       index = elt_index / elts_per_word;
       if (0 == skip_mul_from_store(index, rows2, rows1, gen->f, gen->is_map, noc, len, nob,
-                                   stride, noc, prime, &grease, verbose, NULL, gen->m, name)) {
+                                   stride, noc, prime, &grease, verbose, gen->indexes, gen->m, name)) {
         fprintf(stderr, "%s: failed to multiply using %s, terminating\n", name, gen->m);
         cleanup_all(NULL, argc, files, echelised, name_echelised);
         exit(1);
