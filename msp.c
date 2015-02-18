@@ -1,5 +1,5 @@
 /*
- * $Id: msp.c,v 1.19 2006/06/15 08:00:12 jon Exp $
+ * $Id: msp.c,v 1.20 2015/02/18 21:32:45 jon Exp $
  *
  * Function to spin some vectors under multiple generators
  *
@@ -169,7 +169,7 @@ u32 spin(const char *in, const char *out,
     }
     index = elt_index / elts_per_word;
     if (0 == skip_mul_from_store(index, rows + gen->nor, rows + nor, gen->f, gen->is_map, noc, len, nob,
-                                 rows_to_do, noc, prime, &grease, verbose, gen->m, name)) {
+                                 rows_to_do, noc, prime, &grease, verbose, NULL, gen->m, name)) {
       fprintf(stderr, "%s: failed to multiply using %s, terminating\n", name, gen->m);
       cleanup(NULL, argc, files);
       exit(1);

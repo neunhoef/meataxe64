@@ -1,5 +1,5 @@
 /*
- * $Id: sign.c,v 1.11 2005/07/24 09:32:45 jon Exp $
+ * $Id: sign.c,v 1.12 2015/02/18 21:32:45 jon Exp $
  *
  * Function compute the orthogonal group sign
  *
@@ -27,7 +27,6 @@
 
 #define shuffle_rows
 
-#ifdef shuffle_rows
 static void shuffle(u32 from, u32 to, word **mat)
 {
   u32 i;
@@ -38,19 +37,17 @@ static void shuffle(u32 from, u32 to, word **mat)
   }
   mat[from] = row;
 }
-#endif
 
 int sign(const char *qform, const char *bform, const char *name)
 {
   FILE *qinp = NULL, *binp = NULL;
   const header *h_inq, *h_inb;
   u32 prime, nob, nor, noc, len, n;
-  word **mat;
+  word **mat; /* Our space. We lose vectors off the top of this */
   word *sing_row1, *sing_row2;
-  u32 *products, out_num, start = 0, elts_per_word;
-#ifndef shuffle_rows
-  word *row;
-#endif
+  u32 *products, out_num;
+  u32 start = 0; /* Pointer into mat */
+  u32 elts_per_word;
   int res;
   grease_struct grease;
   prime_ops prime_operations;
@@ -132,17 +129,38 @@ int sign(const char *qform, const char *bform, const char *name)
   }
   sing_row1 = memory_pointer_offset(0, nor + 3, len);
   sing_row2 = memory_pointer_offset(0, nor + 4, len);
-  /* Now set up the identity (in reverse order, part of a cunning plan) */
+  /*
+   * Now set up the identity (in reverse order, part of a cunning plan)
+   * This is so we know early on how much of the intial part of each
+   * row is zero, and can feed this to singular_vector,
+   * skip_mul_from_store, and the row product function
+   */
   for (n = 0; n < nor; n++) {
     row_init(mat[n], len);
     put_element_to_row(nob, nor - 1 - n, mat[n], 1);
   }
   products = my_malloc(nor * sizeof(u32));
+  /* Whilst there are 3 or more rows there is always a singular vector */
+  /*
+   * The loop below has the invariant that
+   * the vector at position n has its first n columns zero
+   * This is how we start. Choosing a singular vector can only
+   * make some rows have a greater leading zero section, if we shuffle
+   * we always choose the first not orthogonal vector, and add it
+   * in to later vectors, so this cannot change the leading of leading 0
+   */
   while (nor > 2) {
     int start_pos = -1;
+    u32 prod_start, prod_len;
     assert(nor >= 3);
 #ifndef NDEBUG
-    /* Validate that nor - 3 will be ok */
+    /*
+     * Validate that nor - 3 will be ok for passing to singular_vector
+     * ie that no row it receives has a non zero entry earlier than nor - 3
+     * I think this may be insufficient if when cleaning to obtain
+     * the new perpendicular subspace we clean with a vector with an
+     * earlier first non-zero position
+     */
     {
       u32 pos;
       word elt = first_non_zero(mat[start], nob, len, &pos);
@@ -168,16 +186,15 @@ int sign(const char *qform, const char *bform, const char *name)
       return 1;
     }
     assert(nor > 3);
-#ifndef shuffle_rows
-    row = mat[out_num];
-    mat[out_num] = mat[nor - 1];
-    mat[nor - 1] = row;
-#else
+    /* Move the row chosen by singular_vector to the top */
     shuffle(start, start + out_num, mat);
+    /* Move on one row, ie ignore the singular vector we just found */
     start++;
     assert(start < noc);
-#endif
-    /* Use skip_mul_from_store here, from offset nor - 3 */
+    /*
+     * Use skip_mul_from_store here, from offset nor - 3
+     * ie first non-zero occurs at a column >= nor-3
+     */
 #ifndef NDEBUG
     /* Validate that nor - 3 is ok */
     {
@@ -188,22 +205,34 @@ int sign(const char *qform, const char *bform, const char *name)
       assert(pos + 3 >= nor);
     }
 #endif
+    /*
+     * Compute singular vector v * bilinear form S
+     * This is what we take products with to find w such that vSw != 0
+     */
     if (0 == skip_mul_from_store(nor - 3, &sing_row1, &sing_row2, binp, 0, noc, len, nob, 1, noc, prime,
-                                 &grease, 0, bform, name)) {
+                                 &grease, 0, NULL, bform, name)) {
       fclose(binp);
       fclose(qinp);
       matrix_free(mat);
       free(products);
       return 1;
     }
+    /*
+     * Compute start_pos in words
+     * We can use this to cut down the size of product
+     */
     for (n = 0; n < len; n++) {
       if (0 != sing_row2[n]) {
         start_pos = n;
-        break;
+        break; /* At first non-zero element */
       }
     }
     assert(start_pos >= 0);
-    /* Compute the product of the chosen norm zero vector with the remaining vectors */
+    /*
+     * Compute the product of the chosen norm zero vector
+     * with the remaining vectors. Note we use noc here
+     * as nor is our decrementing space dimension
+     */
     for (n = start; n < noc; n++) {
       u32 i = (noc - 1 - n) / elts_per_word;
 #ifndef NDEBUG
@@ -212,48 +241,60 @@ int sign(const char *qform, const char *bform, const char *name)
         assert(0 == mat[n][j]);
       }
 #endif
-      if (i <= (u32)start_pos) {
+      /* Start later in the row if we can */
+      if (i < (u32)start_pos) {
         i = start_pos;
       }
+      /*
+       * Compute vS(mat[n]), so we can find a non-orthogonal vector
+       * And also so we know what to add
+       * This is where all the time is consumed (just over 50%
+       */
       products[n] = (*row_operations.product)(mat[n] + i, sing_row2 + i, len - i);
     }
     n = start;
     res = -1;
+    /* TBD: combine this with the previous loop and eliminate products */
     while (n < noc) {
       if (0 != products[n]) {
         word elt = products[n];
         if (res < 0) {
-          /* First instance, clean the row and remember it */
+          /*
+           * First instance, clean the row and remember it
+           * So vS(mat[res]) = 1
+           * TBD: can we avoid early parts of the row that are zero?
+           */
           if (1 != elt) {
             elt = (*prime_operations.invert)(elt);
             (*row_operations.scaler_in_place)(mat[n], len, elt);
           }
           res = n;
+          prod_start = (noc - 1 - n) / elts_per_word;
+          prod_len = len - prod_start;
+          assert(j != len);
         } else {
-          /* Subsequent instance, clean the row with the remembered row */
+          /*
+           * Subsequent instance, clean the row with the remembered row
+           * TBD: it would make sense here to know where the first
+           * non zero is in mat[res]. 24% of total time goes here
+           */
           elt = (*prime_operations.negate)(elt);
           if (1 == elt) {
-            (*row_operations.incer)(mat[res], mat[n], len);
+            (*row_operations.incer)(mat[res] + prod_start, mat[n] + prod_start, prod_len);
           } else {
-            (*row_operations.scaled_incer)(mat[res], mat[n], len, elt);
+            (*row_operations.scaled_incer)(mat[res] + prod_start, mat[n] + prod_start, prod_len, elt);
           }
         }
-      }
+      } /* No action if the row is orthogonal */
       n++;
     }
     /* Now remove mat[res] as this isn't a null vector */
     assert(nor > 3);
     nor -= 2;
-#ifndef shuffle_rows
-    row = mat[res];
-    mat[res] = mat[nor];
-    mat[nor] = row;
-#else
     shuffle(start, res, mat);
     start++;
     assert(start < noc);
     assert (start + nor == noc);
-#endif
   }
   assert(nor == 2 && noc == nor + start);
   res = singular_vector(&row_operations, mat + start, mat + noc, sing_row1, &out_num, qinp,

@@ -1,5 +1,5 @@
 /*
- * $Id: singular.c,v 1.10 2015/02/11 08:41:03 jon Exp $
+ * $Id: singular.c,v 1.11 2015/02/18 21:32:45 jon Exp $
  *
  * Function to find a singular vector, given a quadratic form
  *
@@ -60,7 +60,7 @@ int singular_vector(row_ops *row_operations,
    * If U is the search space, Q the form, then we have acquired UQ
    */
   if (0 == skip_mul_from_store(index, rows, work, formp, 0, noc, len, nob, nor, noc, prime,
-                               grease, 0, form, name)) {
+                               grease, 0, NULL, form, name)) {
     return 1;
   }
   /*

@@ -1,5 +1,5 @@
 /*
- * $Id: mul.c,v 1.51 2015/02/18 08:47:46 jon Exp $
+ * $Id: mul.c,v 1.52 2015/02/18 21:32:45 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
@@ -422,7 +422,8 @@ int mul(const char *m1, const char *m2, const char *m3, const char *name)
 int skip_mul_from_store(u32 offset, word **rows1, word **rows3,
                         FILE *inp, int is_map, u32 noc, u32 len,
                         u32 nob, u32 nor, u32 noc_o, u32 prime,
-                        grease grease, int verbose, const char *m, const char *name)
+                        grease grease, int verbose, u32 *indexes,
+                        const char *m, const char *name)
 {
   s64 pos;
   u32 i, j, l, elts_per_word;
@@ -488,12 +489,17 @@ int skip_mul_from_store(u32 offset, word **rows1, word **rows3,
          */
         if (nor > 2 * grease->level) {
           /* Only do this if the row will be reused and there's some potential gain */
-          word *row = grease->rows[l - 1];
-          word *end_row = row + index;
-          while (0 == *row && row < end_row) {
-            row++;
+          if (NULL != indexes) {
+            /* We already know where the rows start */
+            my_index = indexes[i + j];
+          } else {
+            word *row = grease->rows[l - 1];
+            word *end_row = row + index;
+            while (0 == *row && row < end_row) {
+              row++;
+            }
+            my_index = row - grease->rows[l - 1];
           }
-          my_index = row - grease->rows[l - 1];
           if (my_index < index) {
             index = my_index; /* Reduce if a row demands it */
           }
@@ -535,7 +541,7 @@ int mul_from_store(word **rows1, word **rows3,
                    grease grease, int verbose, const char *m, const char *name)
 {
   return skip_mul_from_store(0, rows1, rows3, inp, is_map, noc, len,
-                             nob, nor, noc_o, prime, grease, verbose, m, name);
+                             nob, nor, noc_o, prime, grease, verbose, NULL, m, name);
 }
 
 /* Does not handle maps */

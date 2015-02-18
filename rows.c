@@ -1,5 +1,5 @@
 /*
- * $Id: rows.c,v 1.34 2015/02/09 23:33:13 jon Exp $
+ * $Id: rows.c,v 1.35 2015/02/18 21:32:45 jon Exp $
  *
  * Row manipulation for meataxe
  *
@@ -159,22 +159,20 @@ static word row_product_2(const word *row1, const word *row2, u32 len)
 {
   unsigned char res = 0;
   const word *row = row1 + len;
+  word prod = 0;
   assert(NULL != row1);
   assert(NULL != row2);
   while (row1 < row) {
     word a = *row1;
     if (0 != a) {
-      word b = *row2;
-      if (0 != b) {
-        word prod = a & b;
-        while (0 != prod) {
-          res ^= prod_table_2[prod & 0xffff];
-          prod >>= 16;
-        }
-      }
+      prod ^= (a & *row2);
     }
     row1++;
     row2++;
+  }
+  while (0 != prod) {
+    res ^= prod_table_2[prod & 0xffff];
+    prod >>= 16;
   }
   return res;
 }
