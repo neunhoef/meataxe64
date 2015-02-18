@@ -1,5 +1,5 @@
 /*
- * $Id: sign.c,v 1.13 2015/02/18 21:34:26 jon Exp $
+ * $Id: sign.c,v 1.14 2015/02/18 21:36:49 jon Exp $
  *
  * Function compute the orthogonal group sign
  *
@@ -151,7 +151,7 @@ int sign(const char *qform, const char *bform, const char *name)
    */
   while (nor > 2) {
     int start_pos = -1;
-    u32 prod_start, prod_len;
+    u32 prod_start = 0, prod_len;
     assert(nor >= 3);
 #ifndef NDEBUG
     /*
