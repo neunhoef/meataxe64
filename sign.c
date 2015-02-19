@@ -1,6 +1,4 @@
 /*
- * $Id: sign.c,v 1.16 2015/02/19 09:06:09 jon Exp $
- *
  * Function compute the orthogonal group sign
  *
  */
@@ -44,7 +42,7 @@ int sign(const char *qform, const char *bform, const char *name)
   const header *h_inq, *h_inb;
   u32 prime, nob, nor, noc, len, n;
   word **mat; /* Our space. We lose vectors off the top of this */
-  u32 *q_indexes = NULL, *b_indexes;
+  u32 *q_indexes = NULL, *b_indexes = NULL;
   word *sing_row1, *sing_row2;
   u32 *products, out_num;
   u32 start = 0; /* Pointer into mat */
@@ -211,7 +209,7 @@ int sign(const char *qform, const char *bform, const char *name)
      * This is what we take products with to find w such that vSw != 0
      */
     if (0 == skip_mul_from_store(nor - 3, &sing_row1, &sing_row2, binp, 0, noc, len, nob, 1, noc, prime,
-                                 &grease, 0, NULL, bform, name)) {
+                                 &grease, 0, b_indexes, bform, name)) {
       fclose(binp);
       fclose(qinp);
       matrix_free(mat);
@@ -303,6 +301,5 @@ int sign(const char *qform, const char *bform, const char *name)
   free(products);
   fclose(binp);
   fclose(qinp);
-  NOT_USED(b_indexes);
   return res;
 }

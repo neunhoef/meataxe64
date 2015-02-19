@@ -135,7 +135,7 @@ ZVPF_TARGET=	zvpf
 ZWORDS_TARGET=	zwords
 ZWORD_SIZE_TARGET=	zword_size
 
-LIB_MODULES=	add clean clean_file clean_vectors command conj count dc dets diff diffd elements endian exrows extend extend_matrix files gen grease header ident join map map_or_row maps matrix memory msb msbf msp mspf mul mv mvp nheader nread ns nsf ntco nwrite orbit parse pco pcol pfl pofp powers primes project ps qs rand read restrict retract retract_matrix rn rnf scale script singular span spanmsp ss ss_map sums sumsf sums_utils sv symb system tco te tmul tra tra2 tsp tspf ttr utils vp vpf write
+LIB_MODULES=	add clean clean_file clean_vectors command conj count dc dets diff diffd elements endian exrows extend extend_matrix files gen grease header ident indexes join map map_or_row maps matrix memory msb msbf msp mspf mul mv mvp nheader nread ns nsf ntco nwrite orbit parse pco pcol pfl pofp powers primes project ps qs rand read restrict retract retract_matrix rn rnf scale script singular span spanmsp ss ss_map sums sumsf sums_utils sv symb system tco te tmul tra tra2 tsp tspf ttr utils vp vpf write
 
 CONS_MODULES=	constrain
 DTOU_MODULES=	dtou

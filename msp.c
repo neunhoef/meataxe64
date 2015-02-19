@@ -1,6 +1,4 @@
 /*
- * $Id: msp.c,v 1.21 2015/02/18 22:40:32 jon Exp $
- *
  * Function to spin some vectors under multiple generators
  *
  */
@@ -12,6 +10,7 @@
 #include "gen.h"
 #include "grease.h"
 #include "header.h"
+#include "indexes.h"
 #include "matrix.h"
 #include "memory.h"
 #include "mul.h"
