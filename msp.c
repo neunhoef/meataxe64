@@ -118,33 +118,10 @@ u32 spin(const char *in, const char *out,
   }
   /* Now populate gen->indexes for each generator */
   for (d = 0; d < argc; d++) {
-    u32 i;
-    s64 pos;
     gen = gens + d;
-    pos = ftello64(gen->f); /* Remember where we start */
-    for (i = 0; i < noc; i++) {
-      word *my_row = rows[0], *end_row = rows[0] + len;
-      errno = 0;
-      if (0 == endian_read_row(gen->f, my_row, len)) {
-        if ( 0 != errno) {
-          perror(name);
-        }
-        fprintf(stderr, "%s: unable to read %s, terminating\n", name, gen->m);
-        cleanup(inp, argc, files);
-        exit(1);
-      }
-      while (my_row < end_row) {
-        if (0 != *my_row) {
-          break;
-        }
-        my_row++;
-      }
-      gen->indexes[i] = /*my_row - rows[0]*/0;
-    }
-    /* Now rewind gen->f */
-    if (0 != fseeko64(gen->f, pos, SEEK_SET)) {
-      fprintf(stderr, "%s: unable to rewind %s, terminating\n", name, gen->m);
-      return 0;
+    if (0 == make_indexes(gen->f, rows[0], gen->indexes, noc, len, name, gen->m)) {
+      cleanup(inp, argc, files);
+      exit(1);
     }
   }
   gen = gens;
