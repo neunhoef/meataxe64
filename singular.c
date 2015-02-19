@@ -1,5 +1,5 @@
 /*
- * $Id: singular.c,v 1.11 2015/02/18 21:32:45 jon Exp $
+ * $Id: singular.c,v 1.12 2015/02/19 09:06:09 jon Exp $
  *
  * Function to find a singular vector, given a quadratic form
  *
@@ -29,7 +29,7 @@ int singular_vector(row_ops *row_operations,
                     word *out, u32 *out_num, FILE *formp,
                     u32 noc, u32 nor, u32 nob,
                     u32 len, u32 prime, grease grease,
-                    u32 index, const char *form, const char *name)
+                    u32 index, u32 *indexes, const char *form, const char *name)
 {
   u32 products[3][3];
   word vector[3]; /* This will hold the coefficients */
@@ -60,7 +60,7 @@ int singular_vector(row_ops *row_operations,
    * If U is the search space, Q the form, then we have acquired UQ
    */
   if (0 == skip_mul_from_store(index, rows, work, formp, 0, noc, len, nob, nor, noc, prime,
-                               grease, 0, NULL, form, name)) {
+                               grease, 0, indexes, form, name)) {
     return 1;
   }
   /*
@@ -215,7 +215,7 @@ int singular(const char *space, const char *form, const char *out, const char *n
   }
   fclose(inp1);
   res = singular_vector(&row_operations, mat, mat + 3, out_row, &out_num, inp2,
-                        nor, nor, nob, len, prime, &grease, 0, form, name);
+                        nor, nor, nob, len, prime, &grease, 0, NULL, form, name);
   matrix_free(mat);
   fclose(inp2);
   if (0 == res || 255 == res) {

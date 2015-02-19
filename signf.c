@@ -1,5 +1,5 @@
 /*
- * $Id: signf.c,v 1.6 2005/10/12 18:20:31 jon Exp $
+ * $Id: signf.c,v 1.7 2015/02/19 09:06:09 jon Exp $
  *
  * Function compute the orthogonal group sign
  *
@@ -177,7 +177,7 @@ int sign(const char *qform, const char *bform, const char *dir, const char *name
     }
     assert(nor >= 3);
     res = singular_vector(&row_operations, mat, mat + 3, sing_row1, &out_num, qinp,
-                          noc, 3, nob, len, prime, &grease, 0, qform, name);
+                          noc, 3, nob, len, prime, &grease, 0, NULL, qform, name);
     /* TODO: to use nor - 3 above */
     if (0 != res) {
       fprintf(stderr, "%s: cannot find a singular vector, terminating\n", name);
@@ -394,7 +394,7 @@ int sign(const char *qform, const char *bform, const char *dir, const char *name
   }
   /* TODO: Use the right vectors */
   res = singular_vector(&row_operations, mat, mat + 2, sing_row1, &out_num, qinp,
-                        noc, nor, nob, len, prime, &grease, 0, qform, name);
+                        noc, nor, nob, len, prime, &grease, 0, NULL, qform, name);
   fclose(idp);
   (void)remove(id_name);
   matrix_free(mat);

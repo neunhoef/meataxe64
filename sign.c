@@ -1,5 +1,5 @@
 /*
- * $Id: sign.c,v 1.15 2015/02/18 21:37:48 jon Exp $
+ * $Id: sign.c,v 1.16 2015/02/19 09:06:09 jon Exp $
  *
  * Function compute the orthogonal group sign
  *
@@ -44,6 +44,7 @@ int sign(const char *qform, const char *bform, const char *name)
   const header *h_inq, *h_inb;
   u32 prime, nob, nor, noc, len, n;
   word **mat; /* Our space. We lose vectors off the top of this */
+  u32 *q_indexes = NULL, *b_indexes;
   word *sing_row1, *sing_row2;
   u32 *products, out_num;
   u32 start = 0; /* Pointer into mat */
@@ -176,7 +177,7 @@ int sign(const char *qform, const char *bform, const char *name)
     }
 #endif
     res = singular_vector(&row_operations, mat + start, mat + noc, sing_row1, &out_num, qinp,
-                          noc, 3, nob, len, prime, &grease, nor - 3, qform, name);
+                          noc, 3, nob, len, prime, &grease, nor - 3, q_indexes, qform, name);
     if (0 != res) {
       fclose(binp);
       fclose(qinp);
@@ -297,10 +298,11 @@ int sign(const char *qform, const char *bform, const char *name)
   }
   assert(nor == 2 && noc == nor + start);
   res = singular_vector(&row_operations, mat + start, mat + noc, sing_row1, &out_num, qinp,
-                        noc, nor, nob, len, prime, &grease, 0, qform, name);
+                        noc, nor, nob, len, prime, &grease, 0, q_indexes, qform, name);
   matrix_free(mat);
   free(products);
   fclose(binp);
   fclose(qinp);
+  NOT_USED(b_indexes);
   return res;
 }
