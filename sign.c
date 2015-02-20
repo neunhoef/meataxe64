@@ -13,6 +13,7 @@
 #include "endian.h"
 #include "grease.h"
 #include "header.h"
+#include "indexes.h"
 #include "matrix.h"
 #include "memory.h"
 #include "mul.h"
@@ -42,7 +43,7 @@ int sign(const char *qform, const char *bform, const char *name)
   const header *h_inq, *h_inb;
   u32 prime, nob, nor, noc, len, n;
   word **mat; /* Our space. We lose vectors off the top of this */
-  u32 *q_indexes = NULL, *b_indexes = NULL;
+  u32 *q_indexes, *b_indexes = NULL;
   word *sing_row1, *sing_row2;
   u32 *products, out_num;
   u32 start = 0; /* Pointer into mat */
@@ -128,6 +129,15 @@ int sign(const char *qform, const char *bform, const char *name)
   }
   sing_row1 = memory_pointer_offset(0, nor + 3, len);
   sing_row2 = memory_pointer_offset(0, nor + 4, len);
+  /*
+   * Now get the indexes for q and b
+   */
+  q_indexes = my_malloc(sizeof(u32) * noc);
+  if (0 == make_indexes(qinp, mat[0], q_indexes, noc, len, name, qform)) {
+    fclose(qinp);
+    fclose(binp);
+    return 1;
+  }
   /*
    * Now set up the identity (in reverse order, part of a cunning plan)
    * This is so we know early on how much of the intial part of each
