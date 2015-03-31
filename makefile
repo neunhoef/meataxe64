@@ -129,9 +129,11 @@ ZTRACE_TARGET=	ztrace
 ZTRECOV_TARGET=	ztrecover
 ZTSP_TARGET=	ztsp
 ZTSPF_TARGET=	ztspf
+ZTTOV_TARGET=	zttov
 ZTTR_TARGET=	zttr
 ZVP_TARGET=	zvp
 ZVPF_TARGET=	zvpf
+ZVTOT_TARGET=	zvtot
 ZWORDS_TARGET=	zwords
 ZWORD_SIZE_TARGET=	zword_size
 
@@ -259,10 +261,12 @@ ZTRACE_MODULES=	rows ztrace
 ZTRECOV_MODULES=	rows ztrecover
 ZTSP_MODULES=	rows ztsp
 ZTSPF_MODULES=	rows ztspf
+ZTTOV_MODULES=	rows zttov
 ZTTR_MODULES=	rows zttr
 ZVP_MODULES=	rows zvp
 ZVPF_MODULES=	rows zvpf
-ZWORDS_MODULES=	rows zwords
+ZVTOT_MODULES=	rows zvtot
+WORDS_MODULES=	rows zwords
 ZWORD_SIZE_MODULES=	zword_size
 
 MODULES=	$(LIB_MODULES) \
@@ -388,9 +392,11 @@ MODULES=	$(LIB_MODULES) \
 	$(ZTRACE_MODULES) \
 	$(ZTSP_MODULES) \
 	$(ZTSPF_MODULES) \
+	$(ZTTOV_MODULES) \
 	$(ZTTR_MODULES) \
 	$(ZVP_MODULES) \
 	$(ZVPF_MODULES) \
+	$(ZVTOT_MODULES) \
 	$(ZWORDS_MODULES) \
 	$(ZWORD_SIZE_MODULES)
 
@@ -805,10 +811,16 @@ include targets.txt
 TARGET:=ZTSPF
 include targets.txt
 
+TARGET:=ZTTOV
+include targets.txt
+
 TARGET:=ZVP
 include targets.txt
 
 TARGET:=ZVPF
+include targets.txt
+
+TARGET:=ZVTOT
 include targets.txt
 
 TARGET:=ZWORDS

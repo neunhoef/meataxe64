@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.82 2015/02/09 23:33:13 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.83 2015/03/31 18:46:16 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -416,8 +416,10 @@ Turn on verbose mode
 <li><a href="#ztrecover">ztrecover</a></li>
 <li><a href="#ztsp">ztsp</a></li>
 <li><a href="#ztspf">ztspf</a></li>
+<li><a href="#zttov">zttov</a></li>
 <li><a href="#zvp">zvp</a></li>
 <li><a href="#zvpf">zvpf</a></li>
+<li><a href="#zvtot">zvtot</a></li>
 <li><a href="#zwords">zwords</a></li>
 </ol>
 <ul>
@@ -4970,6 +4972,42 @@ temporary workspace directory must exist, this program will not create
 it.
 </li>
 <li>
+<h3><a name="zttov">zttov</a></h3>
+Purpose: Convert a tensor to a flattened form, suitable for use by <a href="#ztmu">ztmu</a>
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Input</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Output</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>None</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient memory for workspace</td>
+</tr>
+</table>
+Commentary: Essentially this takes each row of the input and places it
+on the end of the preceding row, thus producing a single row with as
+many columns as entries in the input tensor. Its inverse
+is <a href="#zvtot">zvtot</a>. These, together
+with <a href="#ztr">ztr</a> can be used to transpose the order of a
+tensor product.
+</li>
+<li>
 <h3><a name="zvp">zvp</a></h3>
 Purpose: Vector permute
 <table>
@@ -5063,6 +5101,42 @@ Purpose: Vector permute using intermediate files
 </table>
 Commentary: This is similar to <a href="#zlp">zlp</a>, but without
 constraining the number of vectors to the total available memory.
+</li>
+<li>
+<h3><a name="zvtot">zvtot</a></h3>
+Purpose: Convert a vector to a tensor suitable for use by <a href="#ztr">ztr</a>
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Input</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Number of columns in output</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>Output</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>None</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient memory for workspace</td>
+</tr>
+</table>
+Commentary: This is the inverse of <a href="#zttov">zttov</a>. The
+number of columns requested must be a divisor of the length of the
+vector.
 </li>
 <li>
 <h3><a name="zwords">zwords</a></h3>
