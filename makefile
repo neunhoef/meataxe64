@@ -266,7 +266,7 @@ ZTTR_MODULES=	rows zttr
 ZVP_MODULES=	rows zvp
 ZVPF_MODULES=	rows zvpf
 ZVTOT_MODULES=	rows zvtot
-WORDS_MODULES=	rows zwords
+ZWORDS_MODULES=	rows zwords
 ZWORD_SIZE_MODULES=	zword_size
 
 MODULES=	$(LIB_MODULES) \
