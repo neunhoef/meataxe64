@@ -22,7 +22,7 @@ int main(int argc, const char * const argv[])
   int n;
 
   argv = parse_line(argc, argv, &argc);
-  if (3 != argc) {
+  if (2 != argc) {
     psign_usage();
     exit(1);
   }
