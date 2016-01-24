@@ -1,5 +1,5 @@
 /*
- * $Id: clean.h,v 1.9 2005/06/22 21:52:53 jon Exp $
+ * $Id: clean.h,v 1.10 2016/01/24 21:31:49 jon Exp $
  *
  * Cleaning and echilisation for meataxe
  *
@@ -30,6 +30,17 @@ extern void echelise(row_ops *row_operations,
                      u32 start, u32 start_e,
                      u32 len_e,
                      int full, const char *name);
+
+extern void echelise_with_det(row_ops *row_operations,
+                              word **m, u32 d,
+                              u32 *d_out, int **map,
+                              word *det,
+                              word **m_e, int record,
+                              u32 grease_level, u32 prime,
+                              u32 len, u32 nob,
+                              u32 start, u32 start_e,
+                              u32 len_e,
+                              int full, const char *name);
 
 extern u32 simple_echelise(word **m, u32 d,
                            u32 prime,

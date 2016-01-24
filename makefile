@@ -39,6 +39,7 @@ ZCV_TARGET=	zcv
 ZCV32_TARGET=	zcv32to64
 ZCV64_TARGET=	zcv64to32
 ZDC_TARGET=	zdc
+ZDET_TARGET=	zdet
 ZDIAG_TARGET=	zdiag
 ZDIFF_TARGET=	zdiff
 ZDIFFD_TARGET=	zdiffd
@@ -172,6 +173,7 @@ ZCV_MODULES=	ip
 ZCV32_MODULES=	zcv32to64
 ZCV64_MODULES=	zcv64to32
 ZDC_MODULES=	rows zdc
+ZDET_MODULES=	rows det psign zdet
 ZDIAG_MODULES=	rows zdiag
 ZDIFF_MODULES=	rows zdiff
 ZDIFFD_MODULES=	rows zdiffd
@@ -304,6 +306,7 @@ MODULES=	$(LIB_MODULES) \
 	$(ZCV32_MODULES) \
 	$(ZCV64_MODULES) \
 	$(ZDC_MODULES) \
+	$(ZDET_MODULES) \
 	$(ZDIAG_MODULES) \
 	$(ZDIFF_MODULES) \
 	$(ZDIFFD_MODULES) \
@@ -542,6 +545,9 @@ TARGET:=ZDIAG
 include targets.txt
 
 TARGET:=ZDC
+include targets.txt
+
+TARGET:=ZDET
 include targets.txt
 
 TARGET:=ZDIFF

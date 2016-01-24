@@ -1,5 +1,5 @@
 /*
- * $Id: clean.c,v 1.22 2005/07/24 09:32:45 jon Exp $
+ * $Id: clean.c,v 1.23 2016/01/24 21:31:49 jon Exp $
  *
  * Cleaning and echilisation for meataxe
  *
@@ -135,15 +135,16 @@ void clean(row_ops *row_operations,
   }
 }
 
-void echelise(row_ops *row_operations,
-              word **m, u32 d,
-              u32 *d_out, int **map,
-              word **m_e, int record,
-              u32 grease_level, u32 prime,
-              u32 len, u32 nob,
-              u32 start, u32 start_e,
-              u32 len_e,
-              int full, const char *name)
+static void echelise_sub(row_ops *row_operations,
+                         word **m, u32 d,
+                         u32 *d_out, int **map,
+                         word *det, int record_det,
+                         word **m_e, int record,
+                         u32 grease_level, u32 prime,
+                         u32 len, u32 nob,
+                         u32 start, u32 start_e,
+                         u32 len_e,
+                         int full, const char *name)
 {
   u32 dout = 0;
   u32 i = 0, j = 0, inc = grease_level, elts_per_word;
@@ -157,6 +158,9 @@ void echelise(row_ops *row_operations,
   assert(0 != nob);
   assert(0 != len);
   assert(0 != grease_level);
+  if (record_det) {
+    assert(NULL != det);
+  }
   mask = get_mask_and_elts(nob, &elts_per_word);
   primes_init(prime, &prime_operations);
   bits = my_malloc(d * sizeof(int));
@@ -192,6 +196,10 @@ void echelise(row_ops *row_operations,
         word elt = first_non_zero(m[i + l], nob, len, &pos);
         assert(0 != elt);
         if (1 != elt) {
+          /* Only multiply by non identity field elements */
+          if (record_det) {
+            *det = (*prime_operations.mul)(*det, elt);
+          }
           elt = (*prime_operations.invert)(elt);
           (*row_operations->scaler_in_place)(m[i + l], len, elt);
           if (0 != record) {
@@ -252,6 +260,39 @@ void echelise(row_ops *row_operations,
   } /* while */
   *d_out = dout;
   *map = bits;
+  NOT_USED(det);
+  NOT_USED(record_det);
+}
+
+void echelise(row_ops *row_operations,
+              word **m, u32 d,
+              u32 *d_out, int **map,
+              word **m_e, int record,
+              u32 grease_level, u32 prime,
+              u32 len, u32 nob,
+              u32 start, u32 start_e,
+              u32 len_e,
+              int full, const char *name)
+{
+  echelise_sub(row_operations, m, d, d_out, map, NULL, 0,
+               m_e, record, grease_level, prime, len, nob,
+               start, start_e, len_e, full, name);
+}
+
+void echelise_with_det(row_ops *row_operations,
+                       word **m, u32 d,
+                       u32 *d_out, int **map,
+                       word *det,
+                       word **m_e, int record,
+                       u32 grease_level, u32 prime,
+                       u32 len, u32 nob,
+                       u32 start, u32 start_e,
+                       u32 len_e,
+                       int full, const char *name)
+{
+  echelise_sub(row_operations, m, d, d_out, map, det, 1,
+               m_e, record, grease_level, prime, len, nob,
+               start, start_e, len_e, full, name);
 }
 
 u32 simple_echelise(word **m, u32 d,
