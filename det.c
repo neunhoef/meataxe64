@@ -60,7 +60,7 @@ int det(const char *m, word *d, const char *name)
     grease_struct grease;
     word sign;
     u32 r;
-    int *int_map = my_malloc(nor * sizeof(*int_map));
+    int *int_map;
     word *map = my_malloc(nor * sizeof(*map));
     primes_init(prime, &prime_operations);
     rows_init(prime, &row_operations);
