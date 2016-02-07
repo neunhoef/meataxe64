@@ -44,6 +44,7 @@ ZDETF_TARGET=	zdetf
 ZDIAG_TARGET=	zdiag
 ZDIFF_TARGET=	zdiff
 ZDIFFD_TARGET=	zdiffd
+ZDMS_TARGET=	zdms
 ZEX_TARGET=	zex
 ZEXPORT_TARGET=	zexport
 ZFE_TARGET=	zfe
@@ -179,6 +180,7 @@ ZDETF_MODULES=	rows detf psign zdetf
 ZDIAG_MODULES=	rows zdiag
 ZDIFF_MODULES=	rows zdiff
 ZDIFFD_MODULES=	rows zdiffd
+ZDMS_MODULES=	rows zdms dms det psign
 ZEX_MODULES=	rows zex
 ZEXPORT_MODULES=	rows zexport
 ZFE_MODULES=	rows zfe
@@ -313,6 +315,7 @@ MODULES=	$(LIB_MODULES) \
 	$(ZDIAG_MODULES) \
 	$(ZDIFF_MODULES) \
 	$(ZDIFFD_MODULES) \
+	$(ZDMS_MODULES) \
 	$(ZEX_MODULES) \
 	$(ZEXPORT_MODULES) \
 	$(ZFE_MODULES) \
@@ -560,6 +563,9 @@ TARGET:=ZDIFF
 include targets.txt
 
 TARGET:=ZDIFFD
+include targets.txt
+
+TARGET:=ZDMS
 include targets.txt
 
 TARGET:=ZEX
