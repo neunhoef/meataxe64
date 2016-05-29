@@ -1,5 +1,5 @@
 /*
- * $Id: mul.c,v 1.52 2015/02/18 21:32:45 jon Exp $
+ * $Id: mul.c,v 1.53 2016/05/29 15:17:30 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
@@ -558,6 +558,7 @@ int mul_in_store(word **rows1, word **rows2, word **rows3,
   u32 bits_per_word = elts_per_word * nob;
   u32 width, size, spare, end;
   word mask;
+  word bit = 1;
   assert(NULL != rows1);
   assert(NULL != rows2);
   assert(NULL != rows3);
@@ -569,7 +570,7 @@ int mul_in_store(word **rows1, word **rows2, word **rows3,
   level = grease->level;
   size = level;
   width = level * nob;
-  mask = (1 << width) - 1;
+  mask = (bit << width) - 1;
   spare = noc % level;
   end = noc - spare;
   if (preserve_rows) {
@@ -594,7 +595,7 @@ int mul_in_store(word **rows1, word **rows2, word **rows3,
     if (level + i > noc) {
       size = noc - i;
       width = size * nob;
-      mask = (1 << width) - 1;
+      mask = (bit << width) - 1;
     }
     l = 1;
     /* Replace the initial allocated grease rows with the rows of rows2 */
@@ -631,7 +632,7 @@ int mul_in_store(word **rows1, word **rows2, word **rows3,
     word **rows = grease->rows - 1;
     size = spare;
     width = size * nob;
-    mask = (1 << width) - 1;
+    mask = (bit << width) - 1;
     l = 1;
     /* Replace the initial allocated grease rows with the rows of rows2 */
     for (j = 0; j < size; j++) {

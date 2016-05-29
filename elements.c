@@ -1,5 +1,5 @@
 /*
- * $Id: elements.c,v 1.28 2015/02/13 23:19:32 jon Exp $
+ * $Id: elements.c,v 1.29 2016/05/29 15:17:30 jon Exp $
  *
  * Element manipulation for meataxe
  *
@@ -55,7 +55,8 @@ word get_element_from_row(u32 nob, u32 index,
   u32 word_offset = index / elts_per_word;
   u32 bit_offset = (index % elts_per_word) * nob;
   word elt = row[word_offset];
-  word mask = (1 << nob) - 1;
+  word bit = 1; /* Make sure C doesn't truncate the shift */
+  word mask = (bit << nob) - 1;
   word res = (elt >> bit_offset) & mask;
   assert(0 != nob);
   assert(NULL != row);
@@ -85,9 +86,10 @@ word get_element_from_char_row(u32 eperb, u32 prime,
 
 word get_mask_and_elts(u32 nob, u32 *elts_per_word)
 {
+  word bit = 1;
   assert(NULL != elts_per_word);
   *elts_per_word = bits_in_word / nob;
-  return (1 << nob) - 1;
+  return (bit << nob) - 1;
 }
 
 word get_element_from_row_with_params(u32 nob, u32 index, word mask,
@@ -159,13 +161,20 @@ void element_access_init(u32 nob, u32 from, u32 size,
 {
   u32 elts_per_word;
   u32 bits = nob * size;
+  word bit = 1; /* We use this for the shift below */
   assert(0 != nob);
   assert(0 != size);
-  assert(bits <= bits_in_word);
+  assert(bits < bits_in_word);
   elts_per_word = bits_in_word / nob;
   *word_offset = from / elts_per_word;
   *bit_offset = (from % elts_per_word) * nob;
-  *mask = (1 << bits) - 1;
+  /*
+   * Avoid getting a shorter shift by using bit instead of 1
+   * Eg 1 might be 32 bits, whereas word is 64.
+   * Then 1 << 32 gives 0 rather than 0x100000000
+   * Isn't C wonderful?
+   */
+  *mask = (bit << bits) - 1;
 }
 
 word get_elements_in_word_from_row(const word *row,
@@ -213,7 +222,8 @@ void put_element_to_row(u32 nob, u32 index,
   u32 word_offset = index / elts_per_word;
   u32 bit_offset = (index % elts_per_word) * nob;
   word elt1 = row[word_offset];
-  word base_mask = (1 << nob) - 1;
+  word bit = 1;
+  word base_mask = (bit << nob) - 1;
   word mask = base_mask << bit_offset;
   assert(0 != nob);
   assert(NULL != row);
@@ -286,7 +296,8 @@ word elements_contract(word elts, u32 prime, u32 nob)
   if (0 == prime % 2) {
     return elts; /* Exact representation for powers of 2 */
   } else {
-    word out = 0, power = 1, mask = (1 << nob) - 1;
+    word bit = 1;
+    word out = 0, power = 1, mask = (bit << nob) - 1;
     assert(0 != nob);
     assert(0 != prime);
     assert(prime <= mask);
@@ -303,7 +314,8 @@ word elements_contract(word elts, u32 prime, u32 nob)
 /* Count the non-zero elements in a word */
 word count_word(word elt, u32 nob)
 {
-  word mask = (1 << nob) - 1;
+  word bit = 1;
+  word mask = (bit << nob) - 1;
   word res = 0;
   while (0 != elt) {
     if (0 != (elt & mask)) {
@@ -316,7 +328,8 @@ word count_word(word elt, u32 nob)
 
 word negate_elements(word elts, u32 nob, u32 prime)
 {
-  word new = 0, i = 0, mask = (1 << nob) - 1;
+  word bit = 1;
+  word new = 0, i = 0, mask = (bit << nob) - 1;
   if (0 == inited && 0 == primes_init(prime, &prime_operations)) {
     return 0;
   }
@@ -332,7 +345,8 @@ word negate_elements(word elts, u32 nob, u32 prime)
 
 word invert_elements(word elts, u32 nob, u32 prime)
 {
-  word new = 0, i = 0, mask = (1 << nob) - 1;
+  word bit = 1;
+  word new = 0, i = 0, mask = (bit << nob) - 1;
   if (0 == inited && 0 == primes_init(prime, &prime_operations)) {
     return 0;
   }
@@ -351,7 +365,8 @@ u32 first_non_zero(word *row, u32 nob,
 {
   u32 i = 0;
   u32 elts_per_word = bits_in_word / nob;
-  word mask = (1 << nob) - 1;
+  word bit = 1;
+  word mask = (bit << nob) - 1;
   word *row_end = row + len;
   assert(NULL != row);
   assert(NULL != pos);
@@ -399,7 +414,8 @@ u64 get_element_from_u64_row(u32 nob, u32 index,
   u32 word_offset = index / elts_per_word;
   u32 bit_offset = (index % elts_per_word) * nob;
   u64 elt = row[word_offset];
-  u64 mask = (1 << nob) - 1;
+  u64 bit = 1;
+  u64 mask = (bit << nob) - 1;
   u64 res = (elt >> bit_offset) & mask;
   assert(0 != nob);
   assert(NULL != row);
@@ -431,7 +447,8 @@ void put_element_to_u64_row(u32 nob, u32 index,
   u32 word_offset = index / elts_per_word;
   u32 bit_offset = (index % elts_per_word) * nob;
   u64 elt1 = row[word_offset];
-  u64 base_mask = (1 << nob) - 1;
+  u64 bit = 1;
+  u64 base_mask = (bit << nob) - 1;
   u64 mask = base_mask << bit_offset;
   assert(0 != nob);
   assert(NULL != row);
