@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: new_irred_with_script,v 1.6 2014/07/15 17:46:38 jon Exp $
+# $Id: new_irred_with_script,v 1.7 2016/07/17 16:39:38 jon Exp $
 #
 # Script to classify an irreducible representation, given its script
 #
@@ -99,6 +99,7 @@ if [ 0 -eq $ret ]; then
     exit 1
   fi
 else
+  zscript -m $memory $e zscript.${tmp} $script $args
   rm -f ${tmp}.*
   exit $ret
 fi
