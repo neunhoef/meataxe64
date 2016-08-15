@@ -257,7 +257,7 @@ int sign(const char *qform, const char *bform, const char *name)
       /*
        * Compute vS(mat[n]), so we can find a non-orthogonal vector
        * And also so we know what to add
-       * This is where all the time is consumed (just over 50%
+       * This is where all the time is consumed (just over 50%)
        */
       products[n] = (*row_operations.product)(mat[n] + i, sing_row2 + i, len - i);
     }
@@ -299,6 +299,7 @@ int sign(const char *qform, const char *bform, const char *name)
     /* Now remove mat[res] as this isn't a null vector */
     assert(nor > 3);
     nor -= 2;
+    assert(res >= 0);
     shuffle(start, res, mat);
     start++;
     assert(start < noc);

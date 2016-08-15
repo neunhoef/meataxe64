@@ -1,5 +1,5 @@
 /*
- * $Id: rows.c,v 1.35 2015/02/18 21:32:45 jon Exp $
+ * $Id: rows.c,v 1.36 2016/08/15 00:16:50 jon Exp $
  *
  * Row manipulation for meataxe
  *
@@ -1195,7 +1195,7 @@ int rows_init(u32 prime, row_opsp ops)
         case 0x7:
         case 0xa:
         case 0xd:
-          prod ^= 1;
+          prod ^= 3;
           break;
         }
         j >>= 2;
