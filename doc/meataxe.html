@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.83 2015/03/31 18:46:16 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.84 2016/09/23 20:59:40 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -9391,7 +9391,11 @@ the symmetry basis, plus the file of multiplicities required by <a
 href="#ztco">ztco</a>. The delta words scripts give delta words for the
 individual representations, in the same order as the names of the
 irreducibles in parameter 1. Such delta words can be found using the
-<a href="find_element">find_element</a> script.
+<a href="find_element">find_element</a> script. Note that having found
+these delta words, the irreducibles for the condensation subgroup must
+be classified using them, rather than those found in the normal zsums
+search order. From these will be produced the E, Q and P matrices,
+which have a correspondence with the symmetry basis produced here.
 </li>
 <li>
 <h3><a name="sym_basis_deltaf">sym_basis_deltaf</a></h3>
