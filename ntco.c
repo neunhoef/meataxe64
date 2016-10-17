@@ -1,5 +1,5 @@
 /*
- * $Id: ntco.c,v 1.10 2006/11/25 23:49:54 jon Exp $
+ * $Id: ntco.c,v 1.11 2016/10/17 18:52:43 jon Exp $
  *
  * Tensor condense one group element (new algorithm)
  *
@@ -514,7 +514,7 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
     u32 dim_end_i = dim_end[i];
     u32 m_o = 0;
     if (verbose) {
-      printf("%s: handling irreducible %u\n", name, i);
+      printf("%s: handling left irreducible %u\n", name, i);
       fflush(stdout);
     }
     /* Read ahead q[i], only needed once */
@@ -556,6 +556,10 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
       u32 len_qj = compute_len(nob, dim_irr_j);
       u32 len_pj = len_p[j];
       u32 len_pjl = compute_len(nob, dim_end_i * dim_end_j);
+      if (verbose) {
+        printf("%s: handling right irreducible %u\n", name, j);
+        fflush(stdout);
+      }
       if (len_pjl <= 1) {
         word_rows_init(prime, &word_row_operations);
       } else {
