@@ -1,0 +1,21 @@
+#!/bin/sh
+#
+# Script to do ztr in meataxe 64
+# Although we have a binary, it is command line incompatible
+# with the meataxe 2000 scripts
+#
+# Parameters as for ztr in meataxe 2000
+# ie [-m <memory] <infile> <outfile>
+#
+dir=`dirname $0`
+if [ "$1" = "-m" ]; then
+    shift 2 # Ignore -m <memory
+fi
+if [ $# -ne 2 ]; then
+   echo "ztr: bad parameters"
+   echo "usage: ztr [-m <memory] <infile> <outfile>"
+   exit 1
+fi
+infile=$1
+outfile=$2
+${dir}/../bin/ztr ${infile} ${outfile}

@@ -1,0 +1,38 @@
+#!/bin/sh
+#
+# Script to do zscript in meataxe 64 until a binary is available
+#
+# Parameters as for zscript in meataxe 2000
+# ie [-m <memory] <outfile> <tmp> <script> <generators>
+#
+mem=
+if [ "-m" = "$1" ]; then
+    mem="-m $2"
+    shift 2
+fi
+mg=
+if [ "-mg" = "$1" ]; then
+    mg="-mg $2"
+    shift 2
+fi
+out=$1
+stem=$2
+script=$3
+shift 3
+tmp=tmp$$
+# Now need to convert all the generators, yuk
+i=0
+gens=
+for x in $*; do
+    to_m2000 $x ${tmp}_g$i
+    gens="${gens} ${tmp}_g$i"
+    let i=$i+1
+done
+~/install/zscript ${mem} ${mg} ${tmp} ${stem} ${script} ${gens}
+ret=$?
+if [ 0 -eq $ret ]; then
+  # Need to convert ${out} back
+  to_m64 ${tmp} ${out}
+fi
+rm -f ${tmp}*
+exit ${ret}

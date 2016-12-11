@@ -1,0 +1,23 @@
+#!/bin/sh
+#
+# Script to do zdiffd in meataxe 64 until a binary is available
+#
+# Parameters as for zdiffd in meataxe 2000
+# ie [-m <memory] <infile> <outfile>
+#
+if [ $# -ne 2 -a $# -ne 4 ]; then
+   echo "zdiffd: bad parameters"
+   echo "usage: zdiffd [-m <memory] <in file> <elt>"
+   exit 1
+fi
+mem=
+if [ 4 -eq $# ]; then
+    mem="-m $2"
+    shift 2
+fi
+in=$1
+elt=$2
+tmp=tmp$$
+to_m2000 ${in} ${tmp}.1
+~/install/zdiffd ${mem} ${tmp}.1 ${elt}
+rm ${tmp}.1

@@ -1,0 +1,37 @@
+#!/bin/sh
+#
+# Script to do zmsp in meataxe 64 until a binary is available
+#
+# Parameters as for zmsp in meataxe 2000
+# ie [-m <memory] <infile> <outfile> <generators>
+#
+mem=
+if [ "-m" = "$1" ]; then
+    mem="-m $2"
+    shift 2
+fi
+if [ $# -le 3 ]; then
+   echo "zmsp: bad parameters"
+   echo "usage: zmsp [-m <memory] <infile> <outfile> <generators>"
+   exit 1
+fi
+infile=$1
+outfile=$2
+shift 2
+tmp=tmp$$
+to_m2000 ${infile} ${tmp}.1
+# Now need to convert all the generators, yuk
+i=0
+gens=
+for x in $*; do
+    to_m2000 $x ${tmp}_g$i
+    gens="${gens} ${tmp}_g$i"
+    let i=$i+1
+done
+~/install/zmsp ${mem} ${tmp}.1 ${tmp}.2 ${gens}
+ret=$?
+if [ 0 -eq ${ret} ]; then
+    to_m64 ${tmp}.2 ${outfile}
+fi
+rm -f ${tmp}.{1,2} ${gens}
+exit ${ret}

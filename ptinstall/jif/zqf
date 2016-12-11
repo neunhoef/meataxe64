@@ -1,0 +1,24 @@
+#!/bin/sh
+#
+# Script to do zqf in meataxe 64 until a binary is available
+#
+# Parameters as for zqf in meataxe 2000
+# ie [-m <memory] <infile> <outfile>
+#
+if [ $# -ne 2 -a $# -ne 4 ]; then
+   echo "zqf: bad parameters"
+   echo "usage: zqf [-m <memory] <infile> <outfile>"
+   exit 1
+fi
+mem=
+if [ 4 -eq $# ]; then
+    mem="-m $2"
+    shift 2
+fi
+infile=$1
+outfile=$2
+tmp=tmp$$
+to_m2000 ${infile} ${tmp}.1
+~/install/zqf ${mem} ${tmp}.1 ${tmp}.2
+to_m64 ${tmp}.2 ${outfile}
+rm ${tmp}.{1,2}

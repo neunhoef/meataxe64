@@ -1,0 +1,29 @@
+#!/bin/sh
+#
+# Script to do zsel in meataxe 64 until a binary is available
+#
+# Parameters as for zsel in meataxe 2000
+# ie [-m <memory] <infile1> <outfile> <index>
+#
+dir=`dirname $0`
+if [ "$1" = "-m" ]; then
+    shift 2 # Ignore -m <memory
+fi
+if [ $# -ne 3 ]; then
+   echo "zsel: bad parameters"
+   echo "usage: zsel [-m <memory] <infile1> <infile2> <outfile>"
+   exit 1
+fi
+infile=$1
+outfile=$2
+index=$3
+tmp=tmp$$
+to_m2000 ${infile} ${tmp}.1
+out=`~/install/zsel ${tmp}.1 ${tmp}.2 ${index}`
+ret=$?
+if [ 0 == ${ret} ]; then
+    to_m64 ${tmp}.2 ${outfile}
+    rm ${tmp}.2
+fi
+rm ${tmp}.1
+exit ${ret}

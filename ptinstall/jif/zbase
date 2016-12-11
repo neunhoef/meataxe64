@@ -1,0 +1,25 @@
+#!/bin/sh
+#
+# Script to do zbase in meataxe 64 until a binary is available
+#
+# Parameters as for zbase in meataxe 2000
+# ie [-m <memory] <infile> <dir> <outfile>
+#
+if [ $# -ne 3 -a $# -ne 5 ]; then
+   echo "zbase: bad parameters"
+   echo "usage: zbase [-m <memory] <infile> <dir> <outfile>"
+   exit 1
+fi
+mem=
+if [ 5 -eq $# ]; then
+    mem="-m $2"
+    shift 2
+fi
+infile=$1
+outfile=$3
+dir=$2
+tmp=tmp$$
+to_m2000 ${infile} ${tmp}.1
+~/install/zbase ${mem} ${tmp}.1 ${dir} ${tmp}.2
+to_m64 ${tmp}.2 ${outfile}
+rm ${tmp}.{1,2}

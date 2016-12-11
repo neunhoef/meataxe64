@@ -1,0 +1,31 @@
+#!/bin/sh
+#
+# Script to do znsf in meataxe 64 until a binary is available
+#
+# Parameters as for znsf in meataxe 2000
+# ie [-m <memory] <infile> <outfile> <dir>
+#
+if [ $# -ne 3 -a $# -ne 5 ]; then
+   echo "znsf: bad parameters"
+   echo "usage: znsf [-m <memory] <infile> <outfile> <dir>"
+   exit 1
+fi
+mem=
+if [ 5 -eq $# ]; then
+    mem="-m $2"
+    shift 2
+fi
+infile=$1
+outfile=$2
+dir=$3
+tmp=tmp$$
+to_m2000 ${infile} ${tmp}.1
+out=`~/install/znsf ${mem} ${tmp}.1 ${tmp}.2 ${dir}`
+ret=$?
+if [ 0 == ${ret} -a "0" != "${out}" ]; then
+    to_m64 ${tmp}.2 ${outfile}
+    rm ${tmp}.2
+fi
+echo ${out}
+rm ${tmp}.1
+exit ${ret}

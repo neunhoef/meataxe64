@@ -1,0 +1,44 @@
+#!/bin/sh
+#
+# Script to do zsums in meataxe 64 until a binary is available
+#
+# Parameters as for zsums in meataxe 2000
+# ie [-m <memory] <outfile> <depth> <nullity> <generators and orders>
+#
+mem=
+if [ "-m" = "$1" ]; then
+    mem="-m $2"
+    shift 2
+fi
+mg=
+if [ "-mg" = "$1" ]; then
+    mg="-mg $2"
+    shift 2
+fi
+out=$1
+depth=$2
+nullity=$3
+shift 3
+# Now get elements and orders and construct
+comline=
+tmp=tmp$$
+i=0
+while [ $# -gt 0 ]; do
+  # Get the element and convert
+  name=${tmp}.$i
+  to_m2000 $1 ${name}
+  comline="${comline} ${name} $2"
+  let i=$i+1
+  shift 2
+done
+out=`~/install/zsums ${mem} ${mg} ${out} ${depth} ${nullity} ${comline}`
+ret=$?
+if [ 0 -eq $ret ]; then
+  # Need to convert outfile back
+  out_name=`echo $out | sed -e "s/^.*element //g;s/ of nullity.*$//g"`
+  mv ${out_name} ${tmp}.out
+  to_m64 ${tmp}.out ${out_name}
+fi
+rm -f ${tmp}.*
+echo ${out}
+exit ${ret}

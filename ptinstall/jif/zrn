@@ -1,0 +1,23 @@
+#!/bin/sh
+#
+# Script to do zrn in meataxe 64
+# Although we have a binary, it is command line incompatible
+# with the meataxe 2000 scripts
+#
+# Parameters as for zrn in meataxe 2000
+# ie [-m <memory] <infile>
+#
+dir=`dirname $0`
+if [ "$1" = "-m" ]; then
+    shift 2 # Ignore -m <memory
+fi
+if [ $# -ne 1 ]; then
+   echo "zrn: bad parameters"
+   echo "usage: zrn [-m <memory] <infile>"
+   exit 1
+fi
+infile=$1
+out=`${dir}/../bin/zrn ${infile}`
+ret=$?
+echo ${out} | sed -e "s?^Rank of ${infile} is ??"
+exit $ret
