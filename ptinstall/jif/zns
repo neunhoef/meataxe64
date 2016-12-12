@@ -5,6 +5,7 @@
 # Parameters as for zns in meataxe 2000
 # ie [-m <memory] <infile> <outfile>
 #
+dir=`dirname $0`
 if [ $# -ne 2 -a $# -ne 4 ]; then
    echo "zns: bad parameters"
    echo "usage: zns [-m <memory] <infile> <outfile>"
@@ -18,13 +19,10 @@ fi
 infile=$1
 outfile=$2
 tmp=tmp$$
-to_m2000 ${infile} ${tmp}.1
-out=`~/install/zns ${mem} ${tmp}.1 ${tmp}.2`
+out=`${dir}/../bin/znu.sh ${infile} ${outfile}`
 ret=$?
-if [ 0 == ${ret} -a "0" != "${out}" ]; then
-    to_m64 ${tmp}.2 ${outfile}
-    rm ${tmp}.2
+if [ 0 -eq $ret ]; then
+    echo ${out} | sed -e "s/Nullity //"
+    exit 0
 fi
-echo ${out}
-rm ${tmp}.1
-exit ${ret}
+exit 1
