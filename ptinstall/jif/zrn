@@ -17,7 +17,17 @@ if [ $# -ne 1 ]; then
    exit 1
 fi
 infile=$1
-out=`${dir}/../bin/zrn ${infile}`
+if [ ! -e ${infile} ]; then
+    echo "zrn: No such file or directory" 1>&2
+    echo "zrn: cannot open poo, terminating" 1>&2
+    exit 1
+fi
+tmp=tmp$$
+out=`${dir}/../bin/zpe ${infile} ${tmp}.{bs,rem}`
 ret=$?
+if [ 0 -ne $ret ]; then
+    exit 1
+fi
 echo ${out} | sed -e "s?^Rank of ${infile} is ??"
+rm -f ${tmp}.{bs,rem}
 exit $ret
