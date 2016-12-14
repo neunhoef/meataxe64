@@ -17,7 +17,7 @@ fi
 infile=$1
 outfile=$2
 shift 2
-tmp=tmp$PPID
+tmp=tmp$$
 out=`${dir}/../bin/zsp.sh ${infile} ${tmp}.ss 2 0 $*`
 ret=$?
 if [ 1 -eq $ret ]; then
