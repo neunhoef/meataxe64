@@ -5,21 +5,39 @@
 # Parameters as for zbase in meataxe 2000
 # ie [-m <memory] <infile> <dir> <outfile>
 #
+dir=`dirname $0`
 if [ $# -ne 3 -a $# -ne 5 ]; then
    echo "zbase: bad parameters"
    echo "usage: zbase [-m <memory] <infile> <dir> <outfile>"
    exit 1
 fi
-mem=
 if [ 5 -eq $# ]; then
-    mem="-m $2"
     shift 2
 fi
 infile=$1
 outfile=$3
-dir=$2
+if [ ! -e ${infile} ]; then
+    echo "zbase: No such file or directory" 1>&2
+    echo "zbase: cannot open poo, terminating" 1>&2
+    exit 1
+fi
 tmp=tmp$$
-to_m2000 ${infile} ${tmp}.1
-~/install/zbase ${mem} ${tmp}.1 ${dir} ${tmp}.2
-to_m64 ${tmp}.2 ${outfile}
-rm ${tmp}.{1,2}
+out=`${dir}/../bin/zpe ${infile} ${tmp}.{bs,rem}`
+ret=$?
+if [ 1 -eq $ret ]; then
+    if [ -e ${tmp}.bs -a ${tmp}.rem ]; then
+        ret=0
+    fi
+fi
+if [ 0 -eq $ret ]; then
+    # Success
+    ${dir}/../bin/zex ${tmp}.{bs,rem} ${tmp}.out
+    ${dir}/../bin/zng ${tmp}.out ${outfile}
+    rm ${tmp}.{bs,rem} ${tmp}.out
+    ${dir}/../bin/znor ${outfile}
+    exit 0
+else
+    # Failure
+    rm -f ${tmp}*
+    exit 1
+fi
