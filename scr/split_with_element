@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: split_with_element,v 1.24 2014/06/20 20:42:14 jon Exp $
+# $Id: split_with_element,v 1.25 2016/12/15 20:13:31 jon Exp $
 #
 # Script to split a representation given a particular element to work from
 #
@@ -137,7 +137,7 @@ while [ $vector -lt $vectors ]; do
 # Pick vector $vector from ${tmp}.3 and attempt to spin
 #
 #  echo Trying vector $vector
-  zsel ${tmp}.3 ${tmp}.4 $vector
+  zsel ${tmp}.3 ${tmp}.4 $vector 2>&1
   mem_ok=0
   while [ 0 -eq $mem_ok ]; do
     dim=`zmsp -m $memory ${tmp}.4 $s $a $* 2>/dev/null`
@@ -233,11 +233,11 @@ if [ $dim -eq $codim ]; then
   qs_name=${qs_name}_b
 fi
 echo Obtained a subspace ${ss_name} of dimension $dim, quotient ${qs_name} codimension $codim
-split_with_subspace $a $s ${ss_name}_1 ${qs_name}_1 $memory
+split_with_subspace $s ${ss_name}_1 ${qs_name}_1 $memory $a
 x=1
 while [ 0 -ne $# ]; do
   let x=$x+1
-  split_with_subspace $1 $s ${ss_name}_$x ${qs_name}_$x $memory
+  split_with_subspace $s ${ss_name}_$x ${qs_name}_$x $memory $1
   shift
 done
 rm -f ${tmp}*

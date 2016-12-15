@@ -1,15 +1,15 @@
 #!/bin/sh
 #
-# $Id: split_with_subspace,v 1.7 2002/10/13 22:41:39 jon Exp $
+# $Id: split_with_subspace,v 1.8 2016/12/15 20:13:31 jon Exp $
 #
 # Script to split a representation given a particular subspace to work from
 #
 # Inputs
-# $1: generator a
-# $2: subspace with which to split
-# $3: output subspace representation filename
-# $4: output quotient representation filename
-# $5: initial memory (optional)
+# $1: subspace with which to split
+# $2: output subspace representation filename
+# $3: output quotient representation filename
+# $4: initial memory
+# $5: generator a
 #
 # outputs will be of the form <$3>_<q>_<nor>
 # where nor is number of rows, and q is the prime power
@@ -21,20 +21,16 @@
 # 254: did not split
 #
 . functions
-usage="$0: usage: $0 <a> <s> <o_s> <o_q> [<memory>]"
-if [ $# -ne 4 -a $# -ne 5 ]; then
+usage="$0: usage: $0 <s> <o_s> <o_q> <memory> <a>"
+if [ $# -ne 5 ]; then
   echo "$usage"
   exit 1;
 fi
-a=$1
-s=$2
-o_s=$3
-o_q=$4
-if [ $# -eq 5 ]; then
-  memory=$5
-else
-  memory=200
-fi
+s=$1
+o_s=$2
+o_q=$3
+memory=$4
+a=$5
 if [ -e $a -a -e $s ]; then
   q=`zprime $a`
   nor=`znor $a`
