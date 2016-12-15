@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: split_with_vectors,v 1.3 2016/12/15 20:13:31 jon Exp $
+# $Id: split_with_vectors,v 1.4 2016/12/15 20:28:46 jon Exp $
 #
 # Script to split a representation given a particular set of vector seeds
 #
@@ -136,12 +136,6 @@ if [ $dim -eq $codim ]; then
   qs_name=${qs_name}_b
 fi
 echo Obtained a subspace ${ss_name} of dimension $dim, quotient ${qs_name} codimension $codim
-split_with_subspace $s ${ss_name}_1 ${qs_name}_1 $memory $a
-x=1
-while [ 0 -ne $# ]; do
-  let x=$x+1
-  split_with_subspace $s ${ss_name}_$x ${qs_name}_$x $memory $1
-  shift
-done
+split_with_subspace $s ${ss_name} ${qs_name} $memory $a $*
 rm -f ${tmp}*
 exit 0
