@@ -1,5 +1,5 @@
 /*
- * $Id: memory.c,v 1.17 2014/06/11 07:56:19 jon Exp $
+ * $Id: memory.c,v 1.18 2017/01/10 08:08:47 jon Exp $
  *
  * Large memory manipulation for meataxe
  *
@@ -84,7 +84,9 @@ u32 find_extent(u32 nor, u32 len)
   if (avail < nor) {
     return 1001;
   } else {
-    required = 1000 * nor / avail + 1;
+    /* Avoid integer overflow below */
+    u64 total = 1000 * (u64)nor;
+    required = total / avail + 1;
   }
   if (required > 1000) {
     required = 1000;

@@ -82,6 +82,7 @@ ZPCOL_TARGET=	zpcol
 ZPCV_TARGET=	zpcv
 ZPFL_TARGET=	zpfl
 ZPOFP_TARGET=	zpofp
+ZPPCO_TARGET=	zppco
 ZPR_TARGET=	zpr
 ZPRIME_TARGET=	zprime
 ZPRO_TARGET=	zpro
@@ -141,7 +142,7 @@ ZVTOT_TARGET=	zvtot
 ZWORDS_TARGET=	zwords
 ZWORD_SIZE_TARGET=	zword_size
 
-LIB_MODULES=	add clean clean_file clean_vectors command conj count dc dets diff diffd elements endian exrows extend extend_matrix files gen grease header ident indexes join map map_or_row maps matrix memory msb msbf msp mspf mul mv mvp nheader nread ns nsf ntco nwrite orbit parse pco pcol pfl pofp powers primes project ps qs rand read restrict retract retract_matrix rn rnf scale script singular span spanmsp ss ss_map sums sumsf sums_utils sv symb system tco te tmul tra tra2 tsp tspf ttr utils vp vpf write
+LIB_MODULES=	add clean clean_file clean_vectors command conj count dc dets diff diffd elements endian exrows extend extend_matrix files gen grease header ident indexes join map map_or_row maps matrix memory msb msbf msp mspf mul mv mvp nheader nread ns nsf ntco nwrite orbit parse pco pcol pfl pofp powers ppco primes project ps qs rand read restrict retract retract_matrix rn rnf scale script singular span spanmsp ss ss_map sums sumsf sums_utils sv symb system tco te tmul tra tra2 tsp tspf ttr utils vp vpf write
 
 CONS_MODULES=	constrain
 DTOU_MODULES=	dtou
@@ -218,6 +219,7 @@ ZPCOL_MODULES=	rows zpcol
 ZPCV_MODULES=	pcv rows zpcv
 ZPFL_MODULES=	zpfl
 ZPOFP_MODULES=	zpofp rows
+ZPPCO_MODULES=	rows zppco
 ZPR_MODULES=	pr rows
 ZPRIME_MODULES=	zprime
 ZPRO_MODULES=	zpro
@@ -353,6 +355,7 @@ MODULES=	$(LIB_MODULES) \
 	$(ZPCV_MODULES) \
 	$(ZPFL_MODULES) \
 	$(ZPOFP_MODULES) \
+	$(ZPPCO_MODULES) \
 	$(ZPR_MODULES) \
 	$(ZPRIME_MODULES) \
 	$(ZPRO_MODULES) \
@@ -677,6 +680,9 @@ TARGET:=ZPFL
 include targets.txt
 
 TARGET:=ZPOFP
+include targets.txt
+
+TARGET:=ZPPCO
 include targets.txt
 
 TARGET:=ZPR
