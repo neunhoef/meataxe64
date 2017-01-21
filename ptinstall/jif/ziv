@@ -3,7 +3,7 @@
 # Script to do ziv in meataxe 64 until a binary is available
 #
 # Parameters as for ziv in meataxe 2000
-# ie [-m <memory] <infile> <outfile> <generators>
+# ie [-m <memory] <infile> <outfile>
 #
 mem=
 if [ "-m" = "$1" ]; then
