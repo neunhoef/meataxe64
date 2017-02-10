@@ -1,5 +1,5 @@
 /*
- * $Id: rows.c,v 1.36 2016/08/15 00:16:50 jon Exp $
+ * $Id: rows.c,v 1.37 2017/02/10 20:47:48 jon Exp $
  *
  * Row manipulation for meataxe
  *
@@ -1079,6 +1079,223 @@ static word row_product_9(const word *row1, const word *row2, u32 len)
   return res;
 }
 
+#ifdef EIGHT_BYTE_WORD
+#define LOW_BITS_8 0333333333333333333333
+#define ONE_BITS_8 0111111111111111111111
+#define FOUR_BITS_8 0444444444444444444444
+#else
+#define LOW_BITS_8 03333333333
+#define ONE_BITS_8 01111111111
+#define FOUR_BITS_8 04444444444
+#endif
+
+#define mod_8_add(a, b, c, d, e) \
+  do { \
+  c = a & LOW_BITS_8; \
+  d = b & LOW_BITS_8; \
+  e = (a ^ b) & FOUR_BITS_8; \
+  } while (0);
+  
+static void row_add_8(const word *row1, const word *row2,
+                      word *row3, u32 len)
+{
+  const word *rowa;
+  assert(0 != len);
+  assert(NULL != row1);
+  assert(NULL != row2);
+  assert(NULL != row3);
+  rowa = row1 + len;
+  while (row1 < rowa) {
+    word a, b, c, d, e;
+    a = *(row1++);
+    b = *(row2++);
+    mod_8_add(a, b, c, d, e);
+    *(row3++) = (c + d) ^ e;
+  }
+}
+
+static void row_inc_8_sub(const word *row1, word *row2, u32 len)
+{
+  const word *rowa;
+  assert(0 != len);
+  assert(NULL != row1);
+  assert(NULL != row2);
+  rowa = row1 + len;
+  while (row1 < rowa) {
+    word a, b, c, d, e;
+    a = *(row1++);
+    b = *(row2);
+    mod_8_add(a, b, c, d, e);
+    *(row2++) = (c + d) ^ e;
+  }
+}
+
+static void row_inc_8(const word *row1,
+                      word *row2, u32 len)
+{
+  if (len > 10) {
+    /* Search for first non-zero */
+    const word *rowa = row1 + len, *rowb = row1;
+    while (row1 < rowa) {
+      if (0 != *row1) {
+        u32 len1 = row1 - rowb;
+        len -= len1;
+        row2 += len1;
+        row_inc_8_sub(row1, row2, len);
+        return;
+      }
+      row1++;
+    }
+  } else {
+    row_inc_8_sub(row1, row2, len);
+  }
+}
+
+static word scale_mod_8(word a, word e)
+{
+  if (0 == e) {
+    return 0;
+  } else {
+    if (e & 1) {
+      word b, c, d, f;
+      b = scale_mod_8(a, e ^ 1); /* Get rest of scale */
+      mod_8_add(a, b, c, d, f);
+      return (c + d) ^ f;
+    } else {
+      if (e & 2) {
+        word b, c, d, f, g;
+        b = (a & LOW_BITS_8) << 1;
+        c = scale_mod_8(a, e ^ 2);
+        mod_8_add(b, c, d, f, g);
+        return (d + f) ^ g;
+      } else {
+        word b, c, d, f, g;
+        assert(e & 4);
+        b = (a & ONE_BITS_8);
+        c = scale_mod_8(a, e ^ 4);
+        mod_8_add(b, c, d, f, g);
+        return (d + f) ^ g;
+      }
+    }
+  }
+}
+
+static void scaled_row_add_8(const word *row1, const word *row2,
+                             word *row3, u32 len, word elt)
+{
+  const word *rowa;
+  assert(0 != len);
+  assert(NULL != row1);
+  assert(NULL != row2);
+  assert(NULL != row3);
+  assert(2 <= elt && elt <= 4);
+  rowa = row1 + len;
+  while (row1 < rowa) {
+    word a, b, c, d, e;
+    a = *(row1++);
+    b = *(row2++);
+    b = scale_mod_8(b, elt);
+    mod_8_add(a, b, c, d, e);
+    *(row3++) = (c + d) ^ e;
+  }
+}
+
+static void scaled_row_inc_8_sub(const word *row1, word *row2,
+                                 u32 len, word elt)
+{
+  const word *rowa;
+  assert(0 != len);
+  assert(NULL != row1);
+  assert(NULL != row2);
+  assert(2 <= elt && elt <= 4);
+  rowa = row1 + len;
+  while (row1 < rowa) {
+    word a, b, c, d, e;
+    a = *(row1++);
+    b = *(row2);
+    b = scale_mod_8(b, elt);
+    mod_8_add(a, b, c, d, e);
+    *(row2++) = (c + d) ^ e;
+  }
+}
+
+static void scaled_row_inc_8(const word *row1, word *row2,
+                             u32 len, word elt)
+{
+  if (len > 10) {
+    /* Search for first non-zero */
+    const word *rowa = row1 + len, *rowb = row1;
+    while (row1 < rowa) {
+      if (0 != *row1) {
+        u32 len1 = row1 - rowb;
+        len -= len1;
+        row2 += len1;
+        scaled_row_inc_8_sub(row1, row2, len, elt);
+        return;
+      }
+      row1++;
+    }
+  } else {
+    scaled_row_inc_8_sub(row1, row2, len, elt);
+  }
+}
+
+static void row_scale_8(const word *row1, word *row2,
+                       u32 len, word elt)
+{
+  const word *rowa;
+  assert(0 != len);
+  assert(NULL != row1);
+  assert(NULL != row2);
+  assert(2 <= elt && elt <= 4);
+  rowa = row1 + len;
+  while (row1 < rowa) {
+    word b;
+    b = *(row1++);
+    *(row2++) = scale_mod_8(b, elt);
+  }
+}
+
+static void row_scale_in_place_8(word *row,
+                                 u32 len, word elt)
+{
+  const word *rowa;
+  assert(0 != len);
+  assert(NULL != row);
+  assert(2 <= elt && elt <= 4);
+  rowa = row + len;
+  while (row < rowa) {
+    word b;
+    b = *(row);
+    b = scale_mod_8(b, elt);
+    *(row++) = b;
+  }
+}
+
+static word row_product_8(const word *row1, const word *row2, u32 len)
+{
+  word res = 0;
+  const word *row = row1 + len;
+  assert(NULL != row1);
+  assert(NULL != row2);
+  while (row1 < row) {
+    word a = *row1;
+    if (0 != a) {
+      word b = *row2;
+      while (0 != b && 0 != a) {
+        word prod = (a & 0x7) * (b & 0x7);
+        res += prod;
+        b >>= 3;
+        a >>= 3;
+      }
+    }
+    res %= 5;
+    row1++;
+    row2++;
+  }
+  return res;
+}
+
 void row_init(word *row, u32 len)
 {
   word *row1 = row + len;
@@ -1212,6 +1429,15 @@ int rows_init(u32 prime, row_opsp ops)
     ops->scaler = &row_scale_5;
     ops->scaler_in_place = &row_scale_in_place_5;
     ops->product = &row_product_5;
+    break;
+  case 8: /* Only for quadratic forms over GF(2) */
+    ops->adder = &row_add_8;
+    ops->incer = &row_inc_8;
+    ops->scaled_adder = &scaled_row_add_8;
+    ops->scaled_incer = &scaled_row_inc_8;
+    ops->scaler = &row_scale_8;
+    ops->scaler_in_place = &row_scale_in_place_8;
+    ops->product = &row_product_8;
     break;
   case 9:
     if (0 == primes_init(9, &prime_operations)) {

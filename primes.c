@@ -1,5 +1,5 @@
 /*
- * $Id: primes.c,v 1.15 2015/02/09 23:33:13 jon Exp $
+ * $Id: primes.c,v 1.16 2017/02/10 20:47:48 jon Exp $
  *
  * Prime manipulation for meataxe
  *
@@ -250,6 +250,38 @@ static word mul_9(word elt1, word elt2)
   }
 }
 
+/* The 8 subroutines implement integers mod 8 */
+static word negate_8(word elt)
+{
+  assert(8 > elt);
+  return (0 == elt) ? elt : 8 - elt;
+}
+
+static word invert_8(word elt)
+{
+  assert(5 > elt && 0 != (elt % 2));
+  return elt; /* All odd elements have order 2 mod 8 */
+}
+
+static word power_8(word elt, word n)
+{
+  assert(8 > elt);
+  NOT_USED(n);
+  return elt;
+}
+
+static word add_8(word elt1, word elt2)
+{
+  assert(8 > elt1 && 8 > elt2);
+  return (elt1 + elt2) % 8;
+}
+
+static word mul_8(word elt1, word elt2)
+{
+  assert(8 > elt1 && 8 > elt2);
+  return (elt1 * elt2) % 8;
+}
+
 int is_a_prime(word p)
 {
   word i = 2;
@@ -393,6 +425,13 @@ int primes_init(u32 prime, prime_opsp ops)
     ops->power = power_5;
     ops->add = &add_5;
     ops->mul = &mul_5;
+    break;
+  case 8:
+    ops->negate = &negate_8;
+    ops->invert = &invert_8;
+    ops->power = power_8;
+    ops->add = &add_8;
+    ops->mul = &mul_8;
     break;
   case 9:
     ops->negate = &negate_9;
