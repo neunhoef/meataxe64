@@ -8,12 +8,12 @@
 #include <stdlib.h>
 #include "endian.h"
 #include "memory.h"
-#include "dms.h"
+#include "dms2.h"
 #include "parse.h"
 
 static const char *name = "zdms2";
 
-static void dms_usage(void)
+static void dms2_usage(void)
 {
   fprintf(stderr, "%s: usage: %s %s <matrix>\n", name, name, parse_usage());
 }
@@ -24,12 +24,12 @@ int main(int argc, const char * const argv[])
 
   argv = parse_line(argc, argv, &argc);
   if (2 != argc) {
-    dms_usage();
+    dms2_usage();
     exit(1);
   }
   endian_init();
   memory_init(name, memory);
-  /*n = dms(argv[1], name);*/
+  n = dms2(argv[1], name);
   memory_dispose();
   if (0 == n) {
     return 0;
