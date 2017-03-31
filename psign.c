@@ -20,6 +20,7 @@ int psign_value(word *perm, u32 nor)
   int sign = 1;
   int *done = malloc(sizeof(*done) * nor);
   /* Mark no values examined yet */
+  start = 0;
   memset(done, 0, sizeof(*done) * nor);
   while (start < nor) {
     u32 cycle;

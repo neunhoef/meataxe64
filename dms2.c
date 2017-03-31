@@ -36,18 +36,17 @@ int dms2(const char *m, const char *name)
     fprintf(stderr, "Det mod squares is meaningless for odd degree matrices, terminating");
     return 1;
   }
-  if (0 == det(m, &d, name)) {
+  if (0 == det2(m, &d, name)) {
     return 1;
   }
   mult = header_get_nor(h) / 2;
   header_free(h);
-  mult = (0 == mult % 2) ? 1 : prime_divisor(prime) - 1;
   /*
    * For 0 mod 4 1 is +, 5 is -
    * For 2 mod 2 7 is +, 3 is -
    * All other values are illegal
    */
-  if (0 == mult) {
+  if (0 == (mult % 2)) {
     /* 0 mod 4 */
     if (1 != d && 5 != d) {
       fprintf(stderr, "%s: unexpected result %" W_F " for determinant, terminating\n", name, d);

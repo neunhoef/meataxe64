@@ -1,5 +1,5 @@
 /*
- * $Id: rows.c,v 1.37 2017/02/10 20:47:48 jon Exp $
+ * $Id: rows.c,v 1.38 2017/03/31 19:52:23 jon Exp $
  *
  * Row manipulation for meataxe
  *
@@ -1153,6 +1153,7 @@ static void row_inc_8(const word *row1,
 
 static word scale_mod_8(word a, word e)
 {
+  assert(e < 8);
   if (0 == e) {
     return 0;
   } else {
@@ -1169,12 +1170,8 @@ static word scale_mod_8(word a, word e)
         mod_8_add(b, c, d, f, g);
         return (d + f) ^ g;
       } else {
-        word b, c, d, f, g;
-        assert(e & 4);
-        b = (a & ONE_BITS_8);
-        c = scale_mod_8(a, e ^ 4);
-        mod_8_add(b, c, d, f, g);
-        return (d + f) ^ g;
+        assert(e == 4);
+        return (a & ONE_BITS_8) << 2;
       }
     }
   }
@@ -1188,7 +1185,7 @@ static void scaled_row_add_8(const word *row1, const word *row2,
   assert(NULL != row1);
   assert(NULL != row2);
   assert(NULL != row3);
-  assert(2 <= elt && elt <= 4);
+  assert(2 <= elt && elt <= 7);
   rowa = row1 + len;
   while (row1 < rowa) {
     word a, b, c, d, e;
@@ -1207,7 +1204,7 @@ static void scaled_row_inc_8_sub(const word *row1, word *row2,
   assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
-  assert(2 <= elt && elt <= 4);
+  assert(2 <= elt && elt <= 7);
   rowa = row1 + len;
   while (row1 < rowa) {
     word a, b, c, d, e;
@@ -1247,7 +1244,7 @@ static void row_scale_8(const word *row1, word *row2,
   assert(0 != len);
   assert(NULL != row1);
   assert(NULL != row2);
-  assert(2 <= elt && elt <= 4);
+  assert(2 <= elt && elt <= 7);
   rowa = row1 + len;
   while (row1 < rowa) {
     word b;
@@ -1262,7 +1259,7 @@ static void row_scale_in_place_8(word *row,
   const word *rowa;
   assert(0 != len);
   assert(NULL != row);
-  assert(2 <= elt && elt <= 4);
+  assert(2 <= elt && elt <= 7);
   rowa = row + len;
   while (row < rowa) {
     word b;

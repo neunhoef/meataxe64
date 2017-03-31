@@ -1,5 +1,5 @@
 /*
- * $Id: primes.c,v 1.16 2017/02/10 20:47:48 jon Exp $
+ * $Id: primes.c,v 1.17 2017/03/31 19:52:22 jon Exp $
  *
  * Prime manipulation for meataxe
  *
@@ -259,7 +259,7 @@ static word negate_8(word elt)
 
 static word invert_8(word elt)
 {
-  assert(5 > elt && 0 != (elt % 2));
+  assert(8 > elt && 0 != (elt % 2));
   return elt; /* All odd elements have order 2 mod 8 */
 }
 
@@ -393,6 +393,16 @@ static word mul_unknown(word elt1, word elt2)
   return 0;
 }
 
+static int is_invertible(word a)
+{
+  return 0 != a;
+}
+
+static int is_invertible_8(word a)
+{
+  return a & 1; /* All odd residues are invertible */
+}
+
 int primes_init(u32 prime, prime_opsp ops)
 {
   ops->prime = prime;
@@ -403,6 +413,7 @@ int primes_init(u32 prime, prime_opsp ops)
   ops->power = power_unknown;
   ops->add = &add_unknown;
   ops->mul = &mul_unknown;
+  ops->is_invertible = &is_invertible;
   switch(prime) {
   case 2:
   case 4:
@@ -432,6 +443,7 @@ int primes_init(u32 prime, prime_opsp ops)
     ops->power = power_8;
     ops->add = &add_8;
     ops->mul = &mul_8;
+    ops->is_invertible = &is_invertible_8;
     break;
   case 9:
     ops->negate = &negate_9;

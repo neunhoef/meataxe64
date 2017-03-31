@@ -1,5 +1,5 @@
 /*
- * $Id: elements.c,v 1.29 2016/05/29 15:17:30 jon Exp $
+ * $Id: elements.c,v 1.30 2017/03/31 19:52:22 jon Exp $
  *
  * Element manipulation for meataxe
  *
@@ -12,7 +12,7 @@
 #include "utils.h"
 #include "primes.h"
 
-static prime_ops prime_operations = {0, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+static prime_ops prime_operations = {0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
 static int inited = 0;
 
 int get_element_from_text(FILE *fp, u32 nod,
@@ -388,6 +388,40 @@ u32 first_non_zero(word *row, u32 nob,
       i += elts_per_word;
       row++;
     }
+  }
+  return 0; /* No first non zero found */
+}
+u32 first_invertible(u32 prime, word *row, u32 nob,
+                     u32 len, u32 *pos)
+{
+  u32 i = 0;
+  u32 elts_per_word = bits_in_word / nob;
+  word bit = 1;
+  word mask = (bit << nob) - 1;
+  word *row_end = row + len;
+  assert(NULL != row);
+  assert(NULL != pos);
+  if (0 == inited && 0 == primes_init(prime, &prime_operations)) {
+    return 0;
+  }
+  inited = 1;
+  while (row < row_end) {
+    word elts = *row;
+    if (0 != elts) {
+      u32 j = i;
+      while (0 != elts) {
+        word elt = elts & mask;
+        if ((*prime_operations.is_invertible)(elt)) {
+          *pos = j;
+          return elt;
+        } else {
+          elts >>= nob;
+          j++;
+        }
+      }
+    }
+    i += elts_per_word;
+    row++;
   }
   return 0; /* No first non zero found */
 }

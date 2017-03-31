@@ -8,4 +8,6 @@
 
 extern int det(const char *m, word *d, const char *name);
 
+extern int det2(const char *m, word *d, const char *name);
+
 #endif

@@ -1,5 +1,5 @@
 /*
- * $Id: clean.h,v 1.10 2016/01/24 21:31:49 jon Exp $
+ * $Id: clean.h,v 1.11 2017/03/31 19:52:21 jon Exp $
  *
  * Cleaning and echilisation for meataxe
  *
@@ -30,7 +30,10 @@ extern void echelise(row_ops *row_operations,
                      u32 start, u32 start_e,
                      u32 len_e,
                      int full, const char *name);
-
+/*
+ * Echelise, returning product of the pivots and a map of the pivot columns
+ * This is so a determinant can be computed
+ */
 extern void echelise_with_det(row_ops *row_operations,
                               word **m, u32 d,
                               u32 *d_out, int **map,
@@ -41,6 +44,21 @@ extern void echelise_with_det(row_ops *row_operations,
                               u32 start, u32 start_e,
                               u32 len_e,
                               int full, const char *name);
+
+/*
+ * Echelise over Z/8, returning product of the pivots and a map of the pivot columns
+ * This is so a determinant in GF(2) can be computed
+ */
+extern void echelise_with_det2(row_ops *row_operations,
+                               word **m, u32 d,
+                               u32 *d_out, int **map,
+                               word *det,
+                               word **m_e, int record,
+                               u32 grease_level, u32 prime,
+                               u32 len, u32 nob,
+                               u32 start, u32 start_e,
+                               u32 len_e,
+                               int full, const char *name);
 
 extern u32 simple_echelise(word **m, u32 d,
                            u32 prime,

@@ -1,5 +1,5 @@
 /*
- * $Id: elements.h,v 1.21 2005/12/18 11:22:07 jon Exp $
+ * $Id: elements.h,v 1.22 2017/03/31 19:52:22 jon Exp $
  *
  * Element manipulation for meataxe
  *
@@ -81,6 +81,9 @@ extern word invert_elements(word elts, u32 nob, u32 prime);
 
 extern u32 first_non_zero(word *row, u32 nob,
                           u32 len, u32 *pos);
+
+extern u32 first_invertible(u32 prime, word *row, u32 nob,
+                            u32 len, u32 *pos);
 
 /* Extra functions for conversion between 32 and 64 bit systems */
 

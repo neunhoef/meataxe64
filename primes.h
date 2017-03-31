@@ -1,5 +1,5 @@
 /*
- * $Id: primes.h,v 1.9 2015/02/09 23:33:13 jon Exp $
+ * $Id: primes.h,v 1.10 2017/03/31 19:52:22 jon Exp $
  *
  * Prime power manipulation for meataxe
  *
@@ -23,6 +23,7 @@ typedef struct {
   binary_fn power;
   binary_fn add;
   binary_fn mul;
+  int (*is_invertible)(word);
 } prime_ops, *prime_opsp;
 
 extern int primes_init(u32 prime, prime_opsp ops);

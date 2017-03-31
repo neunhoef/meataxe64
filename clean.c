@@ -1,5 +1,5 @@
 /*
- * $Id: clean.c,v 1.23 2016/01/24 21:31:49 jon Exp $
+ * $Id: clean.c,v 1.24 2017/03/31 19:52:21 jon Exp $
  *
  * Cleaning and echilisation for meataxe
  *
@@ -17,18 +17,19 @@
 #include "rows.h"
 #include "utils.h"
 
-static prime_ops prime_operations = {0, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
+static prime_ops prime_operations = {0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
 
 #define LAZY_GREASE 1
 
-void clean(row_ops *row_operations,
-           word **m1, u32 d1,
-           word **m2, u32 d2, int *map,
-           word **m1_e, word **m2_e, int record,
-           u32 grease_level, u32 prime,
-           u32 len, u32 nob,
-           u32 start, u32 start_e,
-           u32 len_e, int verbose, const char *name)
+static void clean_sub(row_ops *row_operations,
+                      word **m1, u32 d1,
+                      word **m2, u32 d2, int *map,
+                      word **m1_e, word **m2_e, int record,
+                      u32 grease_level, u32 prime,
+                      u32 len, u32 nob,
+                      u32 start, u32 start_e,
+                      u32 len_e, int verbose,
+                      int use_invertible, const char *name)
 {
   u32 i = 0, inc = grease_level, elts_per_word;
   word mask;
@@ -89,7 +90,7 @@ void clean(row_ops *row_operations,
       }
       j++;
     }
-    index = elt_index / elts_per_word;
+    index = (use_invertible) ? 0 : elt_index / elts_per_word;
 #if LAZY_GREASE
 #else
     /* Now compute grease */
@@ -135,6 +136,20 @@ void clean(row_ops *row_operations,
   }
 }
 
+void clean(row_ops *row_operations,
+           word **m1, u32 d1,
+           word **m2, u32 d2, int *map,
+           word **m1_e, word **m2_e, int record,
+           u32 grease_level, u32 prime,
+           u32 len, u32 nob,
+           u32 start, u32 start_e,
+           u32 len_e, int verbose, const char *name)
+{
+  clean_sub(row_operations, m1, d1, m2, d2, map,
+            m1_e, m2_e, record, grease_level, prime,
+            len, nob, start, start_e, len_e, verbose, 0, name);
+}
+
 static void echelise_sub(row_ops *row_operations,
                          word **m, u32 d,
                          u32 *d_out, int **map,
@@ -144,7 +159,8 @@ static void echelise_sub(row_ops *row_operations,
                          u32 len, u32 nob,
                          u32 start, u32 start_e,
                          u32 len_e,
-                         int full, const char *name)
+                         int full, int use_invertible,
+                         const char *name)
 {
   u32 dout = 0;
   u32 i = 0, j = 0, inc = grease_level, elts_per_word;
@@ -193,7 +209,9 @@ static void echelise_sub(row_ops *row_operations,
       if (0 == row_is_zero(m[i + l], len)) {
         /* New linearly independent row */
         u32 pos;
-        word elt = first_non_zero(m[i + l], nob, len, &pos);
+        word elt = (use_invertible) ?
+          first_invertible(prime, m[i + l], nob, len, &pos) :
+          first_non_zero(m[i + l], nob, len, &pos);
         assert(0 != elt);
         if (1 != elt) {
           /* Only multiply by non identity field elements */
@@ -242,16 +260,16 @@ static void echelise_sub(row_ops *row_operations,
         /* Only back clean for full echelise */
         /* Now clean m[0, i] with m[i, i + l] */
         if (0 != i) {
-          clean(row_operations, m + i, l, m, i, bits + i,
-                m_e + i, m_e, record, k, prime, len,
-                nob, start, start_e, len_e, 0, name);
+          clean_sub(row_operations, m + i, l, m, i, bits + i,
+                    m_e + i, m_e, record, k, prime, len,
+                    nob, start, start_e, len_e, 0, use_invertible, name);
         }
       }
       /* Now clean m[i + l, d] with m[i, i + l] */
       if (d > i + l) {
-        clean(row_operations, m + i, l, m + i + l, d - i - l, bits + i,
-              m_e + i, m_e + i + l, record, k, prime, len,
-              nob, start, start_e, len_e, 0, name);
+        clean_sub(row_operations, m + i, l, m + i + l, d - i - l, bits + i,
+                  m_e + i, m_e + i + l, record, k, prime, len,
+                  nob, start, start_e, len_e, 0, use_invertible, name);
       }
     }
     i += l;
@@ -276,7 +294,7 @@ void echelise(row_ops *row_operations,
 {
   echelise_sub(row_operations, m, d, d_out, map, NULL, 0,
                m_e, record, grease_level, prime, len, nob,
-               start, start_e, len_e, full, name);
+               start, start_e, len_e, full, 0, name);
 }
 
 void echelise_with_det(row_ops *row_operations,
@@ -292,7 +310,23 @@ void echelise_with_det(row_ops *row_operations,
 {
   echelise_sub(row_operations, m, d, d_out, map, det, 1,
                m_e, record, grease_level, prime, len, nob,
-               start, start_e, len_e, full, name);
+               start, start_e, len_e, full, 0, name);
+}
+
+void echelise_with_det2(row_ops *row_operations,
+                        word **m, u32 d,
+                        u32 *d_out, int **map,
+                        word *det,
+                        word **m_e, int record,
+                        u32 grease_level, u32 prime,
+                        u32 len, u32 nob,
+                        u32 start, u32 start_e,
+                        u32 len_e,
+                        int full, const char *name)
+{
+  echelise_sub(row_operations, m, d, d_out, map, det, 1,
+               m_e, record, grease_level, prime, len, nob,
+               start, start_e, len_e, full, 1, name);
 }
 
 u32 simple_echelise(word **m, u32 d,
