@@ -12,7 +12,7 @@
 #include "ppco.h"
 #include "utils.h"
 
-static const char *name = "zpco";
+static const char *name = "zppco";
 
 static void ppco_usage(void)
 {
