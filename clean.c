@@ -1,5 +1,5 @@
 /*
- * $Id: clean.c,v 1.24 2017/03/31 19:52:21 jon Exp $
+ * $Id: clean.c,v 1.25 2017/04/15 17:15:04 jon Exp $
  *
  * Cleaning and echilisation for meataxe
  *
@@ -150,6 +150,20 @@ void clean(row_ops *row_operations,
             len, nob, start, start_e, len_e, verbose, 0, name);
 }
 
+void clean2(row_ops *row_operations,
+            word **m1, u32 d1,
+            word **m2, u32 d2, int *map,
+            word **m1_e, word **m2_e, int record,
+            u32 grease_level, u32 prime,
+            u32 len, u32 nob,
+            u32 start, u32 start_e,
+            u32 len_e, int verbose, const char *name)
+{
+  clean_sub(row_operations, m1, d1, m2, d2, map,
+            m1_e, m2_e, record, grease_level, prime,
+            len, nob, start, start_e, len_e, verbose, 1, name);
+}
+
 static void echelise_sub(row_ops *row_operations,
                          word **m, u32 d,
                          u32 *d_out, int **map,
@@ -213,6 +227,8 @@ static void echelise_sub(row_ops *row_operations,
           first_invertible(prime, m[i + l], nob, len, &pos) :
           first_non_zero(m[i + l], nob, len, &pos);
         assert(0 != elt);
+        /*        printf("First invertible 0x%lx found at %u in %lo\n", elt, pos, *m[i + l]);
+                  fflush(stdout);*/
         if (1 != elt) {
           /* Only multiply by non identity field elements */
           if (record_det) {
