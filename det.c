@@ -143,7 +143,6 @@ int det2(const char *m, word *d, const char *name)
       fclose(inp);
       exit(2);
     }
-    max_grease = 1;
     (void)grease_level(prime, &grease, n);
     /* Now read the matrix */
     mat = matrix_malloc(nor);
@@ -164,12 +163,19 @@ int det2(const char *m, word *d, const char *name)
     if (nor != r) {
       /* Singular */
       *d = 0;
+      return 0;
     } else {
       u32 i;
+      int psign;
       for (i = 0; i < nor; i++) {
         map[i] = int_map[i];
       }
-      sign = sign_to_elt(psign_value(map, nor), prime);
+      psign = psign_value(map, nor);
+      sign = sign_to_elt(psign, prime);
+      if (0 == psign) {
+        *d = 0;
+        return 0;
+      }
       *d = prime_operations.mul(*d, sign);
     }
     matrix_free(mat);

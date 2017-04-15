@@ -1,5 +1,5 @@
 /*
- * $Id: rows.c,v 1.38 2017/03/31 19:52:23 jon Exp $
+ * $Id: rows.c,v 1.39 2017/04/15 17:16:40 jon Exp $
  *
  * Row manipulation for meataxe
  *
@@ -1210,7 +1210,7 @@ static void scaled_row_inc_8_sub(const word *row1, word *row2,
     word a, b, c, d, e;
     a = *(row1++);
     b = *(row2);
-    b = scale_mod_8(b, elt);
+    a = scale_mod_8(a, elt);
     mod_8_add(a, b, c, d, e);
     *(row2++) = (c + d) ^ e;
   }

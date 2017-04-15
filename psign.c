@@ -33,6 +33,10 @@ int psign_value(word *perm, u32 nor)
       done[start] = -1;
       cycle = perm[start];
       while (cycle != start) {
+        if (0 != done[cycle]) {
+          fprintf(stderr, "psign looping, aborting\n");
+          return 0;
+        }
         /* Follow the cycle */
         sign *= -1; /* Invert the sign */
         done[cycle] = -1; /* Mark this one visited */
