@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.87 2017/01/10 08:08:49 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.88 2017/04/15 17:12:43 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -332,6 +332,9 @@ Turn on verbose mode
 <li><a href="#zclean">zclean</a></li>
 <li><a href="#zct">zct</a></li>
 <li><a href="#zcv">zcv</a></li>
+<li><a href="#zdet">zdet</a></li>
+<li><a href="#zdetf">zdetf</a></li>
+<li><a href="#zdet2">zdet2</a></li>
 <li><a href="#zdiag">zdiag</a></li>
 <li><a href="#zdiff">zdiff</a></li>
 <li><a href="#zdiffd">zdiffd</a></li>
@@ -1305,6 +1308,96 @@ permutations. Permutations are not converted to matrices, but remain
 in an internal binary map form. If matrices are required, then either
 <a href="#zip">zip</a> can be used, or multiplication by a suitable
 identity can be performed.
+</li>
+<li>
+<h3><a name="zdet">zdet</a></h3>
+Purpose: Compute a determinant
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Input matrix</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>The determinant</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+</table>
+Commentary: This computes a determinant of a square matrix over any field
+</li>
+<li>
+<h3><a name="zdetf">zdetf</a></h3>
+Purpose: Compute a determinant, using intermediate files
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Input matrix</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Directory in which to create
+intermediate files</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>The determinant</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+</table>
+Commentary: This computes a determinant of a square matrix over any
+field, using intermediate files to hold partial gaussian elimination
+results
+</li>
+<li>
+<h3><a name="zdet2">zdet2</a></h3>
+Purpose: Compute a determinant over a matrix over Z/8Z
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Input matrix</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>The determinant</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+</table>
+Commentary: This computes a determinant of a square matrix over Z/8Z.
+It's really only here because we need this functionality to assist
+with computing orthogonal group signs over GF(2). When proving that a
+representation is orthogonal over GF(2) we end up with a matrix whose
+sum with its transpose gives the symplectic form, and all of whose
+diagonal elements are the same (by constructing with a basis all of
+whose vectors are in an orbit under the group). But the symplectic
+form loses the diagonal information. So, we lift. Over Z/4Z there
+aren't enough invertibles to distinguish + vs - in both dimensions 0
+mod 4 and 2 mod 4. So we lift to Z/8Z.
 </li>
 <li>
 <h3><a name="zdiag">zdiag</a></h3>
