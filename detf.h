@@ -8,4 +8,6 @@
 
 extern word detf(const char *m1, const char *dir, const char *name);
 
+extern word det2f(const char *m1, const char *dir, const char *name);
+
 #endif
