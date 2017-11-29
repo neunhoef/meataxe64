@@ -1,7 +1,5 @@
-/*
-      ztr.c     meataxe-64 Version 2.0 Transpose program
-      =====     R. A. Parker 01.06.17
-*/
+// Copyright (C) Richard Parker   2017
+//      ztr.c   meataxe-64 Nikolaus version Transpose program
 
 #include <stdlib.h>
 #include <stdint.h>

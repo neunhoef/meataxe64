@@ -1,7 +1,5 @@
-/*
-      zfr.c     meataxe-64 Frobenius automorphism program
-      =====     R. A. Parker 27.9.17
-*/
+// Copyright (C) Richard Parker   2017
+// zfr.c     meataxe-64 Nikolaus version Frobenius automorphism program
 
 #include <stdlib.h>
 #include <stdint.h>
@@ -9,7 +7,6 @@
 #include "io.h"
 #include "field.h"
 #include "funs.h"
-
 
 int main(int argc,  char **argv)
 {

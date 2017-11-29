@@ -1,7 +1,6 @@
-/*
-      ziv.c     meataxe-64 Invert
-      =====     R. A. Parker 9.7.17
-*/
+// Copyright (C) Richard Parker   2017
+// ziv.c     meataxe-64 Nikolaus version Invert
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
