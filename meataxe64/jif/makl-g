@@ -1,0 +1,37 @@
+cd $SRC
+mkdir -p $BIN
+gcc -c $2 -pthread -Wall -g field.c -o $BIN/field-g.o
+gcc -c $2 -pthread -Wall -g conex.c -o $BIN/conex-g.o
+gcc -c $2 -pthread -Wall -g pcrit$1c.c -o $BIN/pcritc-g.o
+gcc -c $2 -pthread -Wall     pcrit$1s.s -o $BIN/pcrits-g.o
+gcc -c $2 -pthread -Wall     tfarm0.s -o $BIN/tfarm0-g.o
+gcc -c $2 -pthread -Wall -g tfarm1.c -o $BIN/tfarm1-g.o
+gcc -c $2 -pthread -Wall -g tfarm2.c -o $BIN/tfarm2-g.o
+gcc -c $2 -pthread -Wall -g io.c -o $BIN/io-g.o
+gcc -c $2 -pthread -Wall -g proggies.c -o $BIN/proggies-g.o
+gcc -c $2 -pthread -Wall -g bitstring.c -o $BIN/bitstring-g.o
+gcc -c $2 -pthread -Wall -g slab.c -o $BIN/slab-g.o
+gcc -c $2 -pthread -Wall -g pmul.c -o $BIN/pmul-g.o
+gcc -c $2 -pthread -Wall -g tabmake.c -o $BIN/tabmake-g.o
+gcc -c $2 -pthread -Wall -g hpmi.c -o $BIN/hpmi-g.o
+gcc -c $2 -pthread -Wall -g mtra.c -o $BIN/mtra-g.o
+gcc -c $2 -pthread -Wall -g mmul.c -o $BIN/mmul-g.o
+gcc -c $2 -pthread -Wall -g mpef.c -o $BIN/mpef-g.o
+gcc -c $2 -pthread -Wall -g mech.c -o $BIN/mech-g.o
+gcc -c $2 -pthread -Wall -g linf.c -o $BIN/linf-g.o
+gcc -c $2 -pthread -Wall -g util.c -o $BIN/util-g.o
+gcc -c $2 -pthread -Wall -g fasp.c -o $BIN/fasp-g.o
+gcc -c $2 -pthread -Wall -g fchp.c -o $BIN/fchp-g.o
+gcc -c $2 -pthread -Wall -g fech.c -o $BIN/fech-g.o
+gcc -c $2 -pthread -Wall -g fmul.c -o $BIN/fmul-g.o
+gcc -c $2 -pthread -Wall -g fsmu.c -o $BIN/fsmu-g.o
+gcc -c $2 -pthread -Wall -g ftra.c -o $BIN/ftra-g.o
+gcc -c $2 -pthread -Wall -g fpef.c -o $BIN/fpef-g.o
+gcc -c $2 -pthread -Wall -g funs1.c -o $BIN/funs1-g.o
+gcc -c $2 -pthread -Wall -g funs2.c -o $BIN/funs2-g.o
+gcc -c $2 -pthread -Wall -g funs3.c -o $BIN/funs3-g.o
+gcc -c $2 -pthread -Wall -g funs4.c -o $BIN/funs4-g.o
+gcc -c $2 -pthread -Wall -g funs5.c -o $BIN/funs5-g.o
+gcc -c $2 -pthread -Wall -g mfuns.c -o $BIN/mfuns-g.o
+rm -f $BIN/libmtx-g.a
+ar rc $BIN/libmtx-g.a $BIN/tfarm0-g.o $BIN/tfarm1-g.o $BIN/tfarm2-g.o $BIN/field-g.o $BIN/io-g.o $BIN/pmul-g.o $BIN/slab-g.o $BIN/proggies-g.o $BIN/pcritc-g.o $BIN/pcrits-g.o $BIN/bitstring-g.o $BIN/hpmi-g.o $BIN/tabmake-g.o $BIN/linf-g.o $BIN/conex-g.o $BIN/fasp-g.o $BIN/fchp-g.o $BIN/fech-g.o $BIN/fmul-g.o $BIN/funs1-g.o $BIN/funs2-g.o $BIN/funs3-g.o $BIN/funs4-g.o $BIN/funs5-g.o $BIN/mmul-g.o $BIN/mpef-g.o $BIN/ftra-g.o $BIN/mtra-g.o $BIN/mech-g.o $BIN/util-g.o $BIN/fpef-g.o $BIN/fsmu-g.o $BIN/mfuns-g.o

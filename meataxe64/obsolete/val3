@@ -1,0 +1,72 @@
+zcv r1 < $REG/m24p1
+zcv r2 < $REG/m24p2
+ff 1
+sp
+lo q
+ff 1
+sp
+lo s
+st k11a
+dl k11a
+st k11b
+e2 k11b
+ff 1
+sp
+lo q
+st k44a
+dl k44a
+st k44b
+te k11b k44b
+ff 1
+sp
+lo s
+st k252
+lo q
+ff 1
+sp
+lo q
+ff 1
+sp
+lo q
+st k220a
+dl k220a
+st k220b
+te k11a k11b
+ff 6
+sp
+lo s
+st k120
+te k44a k44b
+ff 7
+sp
+lo q
+ff 1
+sp
+lo s
+ff 2
+sp
+lo s
+ff 1
+sp
+lo s
+st k1242
+te k11a k220a
+ff 7
+sp
+lo q
+ff 7
+sp
+lo s
+st xx
+lo q
+ff 1
+sp
+lo q
+st k1792
+lo xx
+ff 4
+sp
+lo s
+st k320a
+dl k320a
+st k320b

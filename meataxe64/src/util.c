@@ -73,6 +73,26 @@ const char *tmp_name(void)
   sprintf(buf, "tmp%u", (unsigned int)pid);
   return buf;
 }
+
+#define TMP_FORMAT "%s_%d"
+#define PRINTED_INT_LEN (3 * sizeof(unsigned int))
+static unsigned int idx = 0;
+/*
+ * Function to make a new temporary name
+ * We allocate space for the temporary root,
+ * an undescore, a printed integer and a terminator
+ */
+char *mk_tmp(const char *name, const char *tmp_root, size_t tmp_len)
+{
+  char *tmp = malloc(tmp_len + PRINTED_INT_LEN + 2);
+  if (NULL == tmp) {
+    fprintf(stderr, "%s: failed to allocate memory for temporary file name \n", name);
+    exit(1000);
+  }
+  sprintf(tmp, TMP_FORMAT, tmp_root, idx++);
+  return tmp;
+}
+
 #ifdef NEVER
 /* Very temporary chop size algorithm*/
 #define CHOP_SIZE 0x10
