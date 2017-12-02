@@ -13,7 +13,7 @@
 int main(int argc,  char **argv)
 {
   EFIL *e;
-  uint64 hdr[5];
+  uint64_t hdr[5];
   LogCmd(argc,argv);
   if (argc != 2) {
     LogString(80,"usage znoc <file>");

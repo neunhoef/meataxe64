@@ -12,8 +12,8 @@
 int main(int argc,  char **argv)
 {
     EFIL *e;
-    uint64 header[5];
-    uint64 fdef;
+    uint64_t header[5];
+    uint64_t fdef;
     FIELD *f = malloc(FIELDLEN);
     LogCmd(argc,argv);
 

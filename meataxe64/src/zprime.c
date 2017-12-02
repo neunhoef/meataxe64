@@ -11,8 +11,8 @@
 int main(int argc,  char **argv)
 {
     EFIL *e;
-    uint64 prime;
-    uint64 header[5];
+    uint64_t prime;
+    uint64_t header[5];
     LogCmd(argc,argv);
 
     if ( (argc < 2) || (argc>3) )

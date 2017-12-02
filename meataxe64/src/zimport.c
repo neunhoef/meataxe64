@@ -30,8 +30,8 @@ int main(int argc, char **argv)
   FIELD *f;
   DSPACE ds;
   FILE *inp = NULL;
-  uint64 hdr[5];
-  uint32 nor, noc, len, nob, fdef, i;
+  uint64_t hdr[5];
+  uint32_t nor, noc, len, nob, fdef, i;
   const header *h;
   Dfmt *v;
   word *row;

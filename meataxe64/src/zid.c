@@ -12,13 +12,13 @@
  
 int main(int argc,  char **argv)
 {
-  uint64 fdef, nor, noc;
-  uint64 hdr[5];
+  uint64_t fdef, nor, noc;
+  uint64_t hdr[5];
   EFIL *e;
   FIELD *f;
   DSPACE ds;
   Dfmt *v1;
-  uint64 i;
+  uint64_t i;
   LogCmd(argc, argv);
   if (argc != 5) {
     LogString(80,"usage zid m1 fdef nor noc");
