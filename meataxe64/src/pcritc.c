@@ -1,7 +1,7 @@
-/*    Meataxe-64    pcritPILc.c     */
+/*    Meataxe-64    pcritNEHc.c     */
 /*    ==========    =========     */
 
-/*    R. A. Parker      29 July 2015 */
+/*    R. A. Parker      8 July 2015 */
 
 #include <stdio.h>
 #include <stdint.h>
@@ -10,10 +10,14 @@
 
 /* these routines here because they depend on technology */
 
+
 void hpmiset(FIELD * f)
 {
     uint64_t bias;
     f->cauldron=0;
+    f->recbox=1024;
+    if(f->mact[1]=='1') f->recbox=2048;
+    if(f->mact[1]=='2') f->recbox=5000;
     if(f->charc==2)
     {
         f->AfmtMagic=1;
@@ -28,7 +32,6 @@ void hpmiset(FIELD * f)
         f->GreaseMagic=2;
         f->SeedMagic=2;
         f->alcove=32;
-        f->recbox=6000;
         f->czer=0;
         f->bzer=0;
         f->bbrickbytes=4097;
@@ -48,9 +51,8 @@ void hpmiset(FIELD * f)
         f->dfmtcauld=102;
         f->alcove=12;
         f->alcovebytes=4;
-        f->recbox=1024;
-        f->czer=0xffffffffffffffff;
         f->bzer=0xffffffffffffffff;
+        f->czer=0xffffffffffffffff;
         f->bbrickbytes=1537;
         f->bwasize=15744;
         hpmitab3(f);
@@ -58,39 +60,44 @@ void hpmiset(FIELD * f)
     if( (f->charc>=5)&&(f->charc<=181) )
     {
         f->AfmtMagic=2;
-        f->BfmtMagic=1;
+
+// CfmtMagic (2,16-bit) (4,10 bit) (5,8 bit 128) (6 8 bit 126)
         f->CfmtMagic=2;
         if( (f->charc>=17) && (f->charc<=61) ) f->CfmtMagic=4;
         if( (f->charc>=7) && (f->charc<=13) ) f->CfmtMagic=5;
         if(f->charc==5) f->CfmtMagic=6;
+        if( (f->mact[0]<'d') && (f->CfmtMagic==4) ) f->CfmtMagic=2;  // no SSE4.1
+
+        f->BfmtMagic=1;
+
         f->BwaMagic=1;
+        if(f->CfmtMagic==4) f->BwaMagic=4;
         f->GreaseMagic=1;
         f->SeedMagic=1;
-        if( (f->charc>=17) && (f->charc<=61) ) f->SeedMagic=4;
-        if( (f->charc>=7) && (f->charc<=13) ) f->SeedMagic=5;
-        if(f->charc==5) f->SeedMagic=6;
+        if(f->CfmtMagic==4) f->SeedMagic=4;
+        if(f->CfmtMagic==5) f->SeedMagic=5;
+        if(f->CfmtMagic==6) f->SeedMagic=6;
         f->cauldron=64;
-        if(f->charc<=61) f->cauldron=96;
-        if(f->charc<=13) f->cauldron=128;
-        if(f->charc==5)  f->cauldron=126;
+        if(f->CfmtMagic==4) f->cauldron=96;
+        if(f->CfmtMagic==5) f->cauldron=128;
+        if(f->CfmtMagic==6) f->cauldron=126;
         f->bfmtcauld=f->cauldron;
-        if(f->charc<=13) f->bfmtcauld=f->cauldron/2;
-        if(f->charc<=5) f->bfmtcauld=f->cauldron/3;
+        if(f->charc<=13) f->bfmtcauld=f->cauldron/2;  //entbyte=2
+        if(f->charc<=5) f->bfmtcauld=f->cauldron/3;   //entbyte=3
         f->cfmtcauld=128;
         f->dfmtcauld=f->bfmtcauld;
         f->alcove=7;
         if( (f->charc>=7) && (f->charc<=13) ) f->alcove=14;
         if (f->charc==5) f->alcove=21;
         f->alcovebytes=8;
-        f->recbox=1024;
         bias=7*f->charc;
         if(f->charc<=7) bias=6*f->charc;
-        if(f->charc>=67)
+        if(f->CfmtMagic==2)
             f->czer=bias+(bias<<16)+(bias<<32)+(bias<<48);
-        if( (f->charc>=17)&&(f->charc<=61) )
+        if(f->CfmtMagic==4)
             f->czer=bias+(bias<<10)+(bias<<20)
                    +(bias<<32)+(bias<<42)+(bias<<52);
-        if( (f->charc>=5)&&(f->charc<=13) )
+        if(f->CfmtMagic>=5)
             f->czer=bias+(bias<<8)+(bias<<16)+(bias<<24)
                    +(bias<<32)+(bias<<40)+(bias<<48)+(bias<<56);
         f->bzer=0;
@@ -102,6 +109,7 @@ void hpmiset(FIELD * f)
 }
 
 /* choose suitable nor from nob  */
+/* probably should use mact also!  */
 uint64_t pcstride(uint64_t s)
 {
     uint64_t i,j,k,d;
@@ -121,5 +129,4 @@ uint64_t pcstride(uint64_t s)
     return k;
 }
 
-
-/* end of pcrit1c.c  */
+/* end of pcritNEHc.c  */

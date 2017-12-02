@@ -1,7 +1,5 @@
-/*
-      zmu.c     meataxe-64 Version 2.0 Multiply program
-      =====     R. A. Parker 01.06.17
-*/
+// Copyright (C) Richard Parker   2017
+// zmu.c     meataxe-64 Nikolaus version Multiply program
 
 #include <stdlib.h>
 #include <stdint.h>
