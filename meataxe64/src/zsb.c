@@ -120,6 +120,7 @@ int main(int argc, const char *argv[])
   char *ech_tmp_bsr = mk_tmp(prog_name, tmp_root, tmp_len);
   char *clean_tmp1 = mk_tmp(prog_name, tmp_root, tmp_len);
   char *clean_tmp2 = mk_tmp(prog_name, tmp_root, tmp_len);
+  const char *row_sel = mk_tmp(prog_name, tmp_root, tmp_len);
   int ngens = argc - 3;
   uint64_t res;
   uint64_t nor = 0;
@@ -142,10 +143,10 @@ int main(int argc, const char *argv[])
   strcat(fun_tmp, FUN_TMP);
   /* Echelise initial vecs. Also sets up zero_bs */
   /* TBD: we need the row select here, using fech */
-  res = fProduceNREF(fun_tmp, in_vecs, 1, zero_bs, 0, in_vecs_rem, 0);
-  /* res = fech(in_vecs, 0, row_sel, 0,
-                zero_bs, 0, "NULL", 0,
-                "NULL", 0, in_vecs_rem, 0); */
+  /* res = fProduceNREF(fun_tmp, in_vecs, 1, zero_bs, 0, in_vecs_rem, 0);*/
+  res = fech(in_vecs, 0, row_sel, 0,
+             zero_bs, 0, "NULL", 0,
+             "NULL", 0, in_vecs_rem, 0);
   /* fail if rank 0 */
   if (0 == res) {
     /* Given zero space to spin, give up */
@@ -156,7 +157,10 @@ int main(int argc, const char *argv[])
   }
   rank = res;
   /* Reread to get a second copy of zero_bs: Fudge */
-  fProduceNREF(fun_tmp, in_vecs, 1, in_vecs_bs, 0, in_vecs_rem, 0);
+  /* fProduceNREF(fun_tmp, in_vecs, 1, in_vecs_bs, 0, in_vecs_rem, 0); */
+  res = fech(in_vecs, 0, "NULL", 0,
+             in_vecs_bs, 0, "NULL", 0,
+             "NULL", 0, in_vecs_rem, 0);
   /* Allocate the temporaries for the clean operation */
   clean_vars = malloc(3 * sizeof(*clean_vars));
   for (i = 0; i < 3; i++) {
@@ -236,7 +240,10 @@ int main(int argc, const char *argv[])
         /* Now clean with previous results of this round of multiply */
         if (first) {
           /* Just echelise this */
-          res = fProduceNREF(fun_tmp, clean_tmp1, 1, ech_tmp_bs, 0, ech_tmp_rem, 0);
+          /* res = fProduceNREF(fun_tmp, clean_tmp1, 1, ech_tmp_bs, 0, ech_tmp_rem, 0); */
+          res = fech(clean_tmp1, 0, "NULL", 0,
+                     ech_tmp_bs, 0, "NULL", 0,
+                     "NULL", 0, ech_tmp_rem, 0);
           if (0 != res) {
             first = 0;
           } else {
@@ -248,7 +255,10 @@ int main(int argc, const char *argv[])
           /* Clean with previous echelised */
           clean(ech_tmp_bs, ech_tmp_rem, clean_tmp1, clean_tmp2);
           /* Then echelise */
-          res = fProduceNREF(fun_tmp, clean_tmp2, 1, ech_tmp_bs1, 0, ech_tmp_rem1, 0);
+          /* res = fProduceNREF(fun_tmp, clean_tmp2, 1, ech_tmp_bs1, 0, ech_tmp_rem1, 0); */
+          res = fech(clean_tmp2, 0, "NULL", 0,
+                     ech_tmp_bs1, 0, "NULL", 0,
+                     "NULL", 0, ech_tmp_rem1, 0);
           if (0 != res) {
             /* Then back clean ech_tmp_rem with ech_tmp_{bs,rem}1*/
             clean(ech_tmp_bs1, ech_tmp_rem1, ech_tmp_rem, clean_tmp1);
