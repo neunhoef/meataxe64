@@ -554,7 +554,7 @@ void   TFInit(int threads)
     jobstruct * tfjob;
     rdlstruct * tfrdl;
     MOJ mj;
-    jobx=SCALE*8;
+    jobx=SCALE*12;
     nmojes=jobx*2;
     closejobs=0;
     TFM=malloc(TFMSIZE*sizeof(uint64_t));

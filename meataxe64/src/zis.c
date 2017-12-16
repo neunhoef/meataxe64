@@ -1,19 +1,4 @@
 /*
-To clean one file A with another NREF B, you go
-column extract of A with B.bs giving Asel and Anon
-multiply Asel by B.rem and add into Anon giving C (say)
-This gives shorter rows - the same length as B.rem
-You will normally want to fProduceNREF on C next, giving C.bs and C.rem
-You probably want to back-clean B.rem (col extract, multiply-and-add as above)
-If you want to put the two parts together, you go
-Pivot combine (the two bit strings)
-Row Riffle with the result of the multiply-and-add and C.rem
-The result will be a combined bit-string and a combined remnant as if
-you had echelized all the rows in one go.
-Hope that helps. If you can't fight your way through that, let me know
-and I'll try to write a document.
-*/
-/*
       zis.c     meataxe-64 invariant subspace
       =====     J. G. Thackray   04.10.2017
 */
@@ -84,25 +69,7 @@ static void clean(const char *bs, const char *rem, const char *rows, const char 
   /* Also produce tmp3 = nonsel(bs, rows) */
   fColumnExtract(bs, 0, rows, 0, clean_vars[0], 0, clean_vars[2], 0);
   /* Produce tmp2 = tmp1 * rem */
-#if 0
-  /* Workaround multiplying by 0 bug */
-  {
-    header hdr;
-    EPeek(rem, hdr.hdr);
-    if (0 != hdr.named.noc) {
-      fMultiply(fun_tmp, clean_vars[0], 0, rem, 0, clean_vars[1], 0);
-    } else {
-      /* copy rem to clean_vars[1] */
-      EFIL *rem_fil, *out_fil;
-      rem_fil = ERHdr(rem, hdr.hdr);
-      out_fil = EWHdr(clean_vars[1], hdr.hdr);
-      ERClose1(rem_fil, 0);
-      EWClose1(out_fil, 0);
-    }
-  }
-#else
   fMultiply(fun_tmp, clean_vars[0], 0, rem, 0, clean_vars[1], 0);
-#endif
   /* Produce out = tmp3 + tmp2 */
   fAdd(clean_vars[2], 0, clean_vars[1], 0, out, 0);
   /* And delete the temporaries */
@@ -121,129 +88,6 @@ static void clean(const char *bs, const char *rem, const char *rows, const char 
  *
  * Uses the temporaries used by clean
  */
-
-#if 0
-static void make_plain(const char *zero_bs, const char *nref_bs, const char *in, const char *out, uint64_t fdef)
-{
-  /* A very naive implementation */
-  EFIL *ezbs, *embs, *ei, *eo; /* zero bitstring, minus -1 bitstring, in, out */
-  FELT min1;
-  header hdrzbs, hdrmbs, hdrio;
-  /*uint64_t hdrzbs[5], hdrmbs[5], hdrio[5];*/
-  uint64_t nor, noci1, noci2, noci3, noco, sizz, sizm, i, j, k, l;
-  FIELD *f;
-  FELT felt;
-  DSPACE dsi, dso; /* Matrix in */
-  Dfmt *mo, *mi; /* Matrix out */
-  uint64_t *bstz = NULL, *bstm;
-  int use_ei;
-
-#if 0
-  /* Print the various parts */
-  if (NULL != zero_bs) {
-    printf("make_plain: parameter zero_bs %s\n", zero_bs);
-    zut_fn(zero_bs);
-  }
-  printf("make_plain: parameter nref_bs %s\n", nref_bs);
-  zut_fn(nref_bs);
-#endif
-  ezbs = (NULL != zero_bs) ? ERHdr(zero_bs, hdrzbs.hdr) : NULL;
-  embs = ERHdr(nref_bs, hdrmbs.hdr);
-  noci3 = hdrmbs.named.nor; /* Total bits in nref bitstring */
-  noci1 = hdrmbs.named.noc; /* Set bits in nref bitstring */
-  use_ei = noci1 != noci3;
-  if (use_ei) {
-    ei = ERHdr(in, hdrio.hdr);    // remnant   = 1 fdef nor noc 0
-    nor = hdrio.named.nor; /* Rows of input */
-  } else {
-    ei = NULL;
-    nor = noci1;
-  }
-  if (NULL != ezbs) {
-    /* Some leading zeros */
-    noci2 = hdrzbs.named.noc; /* Set bits in zero bitstring */
-    noco = hdrzbs.named.nor; /* Total bits in zero bitstring, ie amount to output */
-  } else {
-    /* No leading zeros */
-    noci2 = 0;
-    noco = hdrmbs.named.nor;
-  }
-  /* Compatibility check */
-  if (noci1 != nor /* Number of pivots == number of rows */ || 
-      hdrio.named.noc + noci1 + noci2 != noco /* Total columns check */) {
-    LogString(80,"Inputs incompatible");
-    exit(22);
-  }
-  f = malloc(FIELDLEN);
-  FieldASet(fdef, f);
-  min1 = FieldNeg(f, 1);
-  hdrio.named.noc = noco;
-  /* Create the output header */
-  eo = EWHdr(out, hdrio.hdr);  
-  DSSet(f, noci3 - nor, &dsi); /* input space */
-  DSSet(f, noco, &dso); /* output space */
-  /* Allocate space for a row of input, and a row of output */
-  mi = malloc(dsi.nob);
-  mo = malloc(dso.nob);
-  /* Read the bitstring(s) */
-  if (NULL != ezbs) {
-    sizz = 8 * (2 + (noco + 63) / 64);
-    bstz = malloc(sizz);
-    ERData(ezbs, sizz, (uint8_t *)bstz);
-  }
-  sizm = 8 * (2 + (hdrmbs.named.nor + 63) / 64);
-  bstm = malloc(sizm);
-  ERData(embs, sizm, (uint8_t *)bstm);
-  /* Now read through in row by row, inserting minus -1s and zeros */
-  for (i = 0; i < nor; i++) {
-    ERData(ei, dsi.nob, mi);
-    /* Clear output row */
-    memset(mo, 0, dso.nob);
-    /* TBD: put in -1s and contents of in. DCut and DPaste */
-    k = 0; /* Bit position in riffle of -1s and input */
-    l = 0; /* Bit position in -1s */
-    for (j = 0; j < noco; j++) {
-      if (NULL != ezbs && BSBitRead(bstz, j)) {
-        /* No action, we're putting in a zero */
-      } else {
-        /* Putting in a -1 or something from the input */
-        if (BSBitRead(bstm, k)) {
-          /* Put in a -1 if we're at the correct row */
-          if (l == i) {
-            /* Correct row */
-            DPak(&dso, j, mo, min1);
-          }
-          /* Else leave as zero */
-          l++; /* Next column for -1s */
-        } else {
-          /* Pick the value out of input */
-          felt = DUnpak(&dsi, k - l, mi);
-          DPak(&dso, j, mo, felt);
-        }
-        k++; /* Next column in overall input */
-      }
-    }
-    EWData(eo, dso.nob, mo);
-  }
-  /* Close files */
-  if (use_ei) {
-    ERClose1(ei, 0);
-  }
-  EWClose1(eo, 0);
-  ERClose1(embs, 0);
-  if (NULL != ezbs) {
-    ERClose1(ezbs, 0);
-  }
-  /* Deallocate crap */
-  free(mi);
-  free(mo);
-  free(f);
-  free(bstm);
-  if (NULL != ezbs) {
-    free(bstz);
-  }
-}
-#endif
 
 #define FUN_TMP "_funs"
 

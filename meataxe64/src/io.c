@@ -26,8 +26,7 @@ void XUnlock(void)
     pthread_mutex_unlock(&xlock);
 }
 
-
-void CLogCmd(int argc, const char *argv[])
+extern void LogCmd(int argc, char ** argv)
 {
     int i;
     FILE * logfile;
@@ -40,7 +39,8 @@ void CLogCmd(int argc, const char *argv[])
     XUnlock();
 }
 
-extern void LogCmd(int argc, char ** argv)
+
+void CLogCmd(int argc, const char *argv[])
 {
     int i;
     FILE * logfile;
