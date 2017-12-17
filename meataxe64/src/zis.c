@@ -78,17 +78,6 @@ static void clean(const char *bs, const char *rem, const char *rows, const char 
   }
 }
 
-/*
- * A function to create the plain full width vectors for multiplication
- * Parameters:
- * 1: A bitstring specifying the zeros. May be NULL
- * 2: A bitstring specifying the minus ones
- * 3: A matrix. If the total set bits = total bits in (2) this is unused
- * 4: the output
- *
- * Uses the temporaries used by clean
- */
-
 #define FUN_TMP "_funs"
 
 int main(int argc, const char *argv[])

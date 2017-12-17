@@ -78,16 +78,126 @@ static void clean(const char *bs, const char *rem, const char *rows, const char 
   }
 }
 
+/* Get the selected rows from a generator */
+static void fRowExtract(const char *bs, const char *in, const char *sel)
+{
+  /*
+   * Open the file, open the bs
+   * check file has rows = total bits in bitstring
+   * Loop read a row, if bit set output else ignore
+   * Pool
+   */
+  EFIL *ebs, *ei, *eo; /* bitstring, in, out */
+  header hdrbs, hdrio;
+  FIELD *f;
+  DSPACE ds; /* Matrix in */
+  Dfmt *mi; /* Matrix out */
+  uint64_t nor, noc, j, fdef, size;
+  uint64_t *bst;
+  ebs = ERHdr(bs, hdrbs.hdr);
+  ei = ERHdr(in, hdrio.hdr);
+  nor = hdrbs.named.nor; /* Total bits */
+  noc = hdrio.named.noc; /* Elements per row */
+  fdef = hdrio.named.fdef;
+  if (nor != hdrio.named.nor) {
+    /* Should be same as for generator */
+    fprintf(stderr, "%s: %s, %s different number of rows or columns, exiting\n", prog_name, bs, in);
+    exit(1);
+  }
+  f = malloc(FIELDLEN);
+  FieldASet(fdef, f);
+  hdrio.named.nor = hdrbs.named.noc; /* Only selected rows */
+  /* Create the output header */
+  eo = EWHdr(sel, hdrio.hdr);
+  DSSet(f, noc, &ds); /* input/output space */
+  mi = malloc(ds.nob);
+  /* Read the bitstring */
+  size = 8 * (2 + (nor + 63) / 64);
+  bst = malloc(size);
+  ERData(ebs, size, (uint8_t *)bst);
+  for (j = 0; j < nor; j++) {
+    ERData(ei, ds.nob, mi);
+    if (BSBitRead(bst, j)) {
+      EWData(eo, ds.nob, mi);
+    }
+  }
+  EWClose1(eo, 0);
+  ERClose1(ei, 0);
+  ERClose1(ebs, 0);
+  free(mi);
+  free(bst);
+  free(f);
+}
+
+static void copy_matrix(const char *from, const char *to)
+{
+  int i;
+  uint64_t fdef, noc, nor;
+  header hdr;
+  DSPACE ds;
+  EFIL *e1, *e2;
+  FIELD *f;
+  Dfmt *m;
+
+  e1 = ERHdr(from, hdr.hdr);
+  fdef = hdr.named.fdef;
+  noc = hdr.named.noc;
+  nor = hdr.named.nor;
+  e2 = EWHdr(to, hdr.hdr);
+  f = malloc(FIELDLEN);
+  if (f==NULL) {
+    LogString(81,"Can't malloc field structure");
+    exit(22);
+  }
+  FieldASet(fdef, f);
+  DSSet(f, noc, &ds);
+  m = malloc(ds.nob);
+  for (i = 0; i < nor; i++) {
+    ERData(e1, ds.nob, m);
+    EWData(e2, ds.nob, m);
+  }
+  ERClose(e1);
+  EWClose(e2);
+  free(m);
+  free(f);
+}
+
 /*
- * A function to create the plain full width vectors for multiplication
- * Parameters:
- * 1: A bitstring specifying the zeros. May be NULL
- * 2: A bitstring specifying the minus ones
- * 3: A matrix. If the total set bits = total bits in (2) this is unused
- * 4: the output
- *
- * Uses the temporaries used by clean
+ * A function to concatenate two matrices
+ * We actually let row riffle do this by creating a suitable bitstring
  */
+static void cat_matrices(const char *from1, const char *from2, const char *to, const char *tmp_bs)
+{
+  uint64_t nor1, nor_out, j, size;
+  header hdr, hdrbs;
+  uint64_t *bst;
+  EFIL *ebs;
+
+  EPeek(from1, hdr.hdr);
+  nor1 = hdr.named.nor;
+  EPeek(from2, hdr.hdr);
+  nor_out = nor1 + hdr.named.nor;
+  /* Now create a bitstring with nor1 bits set, and nor_out - nor1 bits clear afterwards */
+  hdrbs.named.nor = nor_out;
+  hdrbs.named.noc = nor1;
+  ebs = EWHdr(tmp_bs, hdrbs.hdr);
+  /* What do we put in the other fields? */
+  size = 8 * (2 + (nor_out + 63) / 64);
+  bst = malloc(size);
+  memset(bst, 0, size);
+  bst[0] = nor_out;
+  bst[1] = nor1;
+  /* Set all the bytes that are all 1 */
+  memset(bst + 2, 0xff, nor1 / 8);
+  /* Now the final bits */
+  for (j = (nor1 / 8) * 8; j < nor1; j++) {
+    BSBitSet(bst, j);
+  }
+  EWData(ebs, size, (uint8_t *)bst);
+  EWClose(ebs);
+  /* Then call fRowRiffle */
+  fRowRiffle(tmp_bs, 0, from1, 0, from2, 0, to, 0);
+}
 
 #define FUN_TMP "_funs"
 
@@ -103,6 +213,7 @@ int main(int argc, const char *argv[])
   char *out_bs;
   char *out_rem;
   size_t out_stem_len;
+  char *out_sb; /* The standard base */
   /* Echelised needing no more multiplies */
   char *mult_result_bs = mk_tmp(prog_name, tmp_root, tmp_len);
   char *mult_result_rem = mk_tmp(prog_name, tmp_root, tmp_len);
@@ -120,7 +231,9 @@ int main(int argc, const char *argv[])
   char *ech_tmp_bsr = mk_tmp(prog_name, tmp_root, tmp_len);
   char *clean_tmp1 = mk_tmp(prog_name, tmp_root, tmp_len);
   char *clean_tmp2 = mk_tmp(prog_name, tmp_root, tmp_len);
-  const char *row_sel = mk_tmp(prog_name, tmp_root, tmp_len);
+  char *row_sel = mk_tmp(prog_name, tmp_root, tmp_len);
+  char *mul_acc = mk_tmp(prog_name, tmp_root, tmp_len);
+  char *mul_acc1 = mk_tmp(prog_name, tmp_root, tmp_len);
   int ngens = argc - 3;
   uint64_t res;
   uint64_t nor = 0;
@@ -137,13 +250,14 @@ int main(int argc, const char *argv[])
   in_vecs = argv[1];
   out_stem = argv[2];
   out_stem_len = strlen(out_stem);
+  out_sb = malloc(out_stem_len + 4);
+  strcpy(out_sb, out_stem);
+  strcat(out_sb, ".sb");
   /* Temporary root for functions */
   fun_tmp = malloc(tmp_len + sizeof(FUN_TMP) + 1);
   strcpy(fun_tmp, tmp_root);
   strcat(fun_tmp, FUN_TMP);
-  /* Echelise initial vecs. Also sets up zero_bs */
-  /* TBD: we need the row select here, using fech */
-  /* res = fProduceNREF(fun_tmp, in_vecs, 1, zero_bs, 0, in_vecs_rem, 0);*/
+  /* Echelise initial vecs. Also sets up zero_bs and row_sel */
   res = fech(in_vecs, 0, row_sel, 0,
              zero_bs, 0, "NULL", 0,
              "NULL", 0, in_vecs_rem, 0);
@@ -153,11 +267,11 @@ int main(int argc, const char *argv[])
     fprintf(stderr, "%s: %s has rank zero, not spinning\n", prog_name, in_vecs);
     remove(zero_bs);
     remove(in_vecs_rem);
+    remove(row_sel);
     exit(10);
   }
   rank = res;
   /* Reread to get a second copy of zero_bs: Fudge */
-  /* fProduceNREF(fun_tmp, in_vecs, 1, in_vecs_bs, 0, in_vecs_rem, 0); */
   res = fech(in_vecs, 0, "NULL", 0,
              in_vecs_bs, 0, "NULL", 0,
              "NULL", 0, in_vecs_rem, 0);
@@ -195,15 +309,13 @@ int main(int argc, const char *argv[])
     gens[i].next = gens + ((i + 1) % ngens); /* A circular list */
   }
   /*
-   * Put the echelised result into the last gen.
+   * Put the row selection from the echelised result into the last gen.
    * Once multiplied by that it can form the first part
    * of the "multiplied by everything" result
+   * Also, this is the first part of the output standard base
    */
-  make_plain(NULL, in_vecs_bs, in_vecs_rem, gens[ngens - 1].next_tbd.plain, fdef);
-  /* TBD: Now row select to give the plain form rather than making it as above */
-  /* I need to make my own fRowExtract, prototype
-     void fRowExtract(const char *bs, const char *in, const char *sel)
-  */
+  fRowExtract(row_sel, in_vecs, gens[ngens - 1].next_tbd.plain);
+  copy_matrix(gens[ngens - 1].next_tbd.plain, out_sb);
   rename(in_vecs_rem, gens[ngens - 1].next_tbd.rem);
   rename(in_vecs_bs, gens[ngens - 1].next_tbd.bs);
   gens[ngens - 1].next_tbd.size = rank;
@@ -224,7 +336,8 @@ int main(int argc, const char *argv[])
           /* Clean this result with the overall multiplied stuff */
           clean(mult_result_bs, mult_result_rem, mul_tmp, clean_tmp1);
         } else {
-          rename(mul_tmp, clean_tmp1);
+          /* Need to keep a copy of this for the row select */
+          copy_matrix(mul_tmp, clean_tmp1);
         }
         /* Now clean with all the results awaiting multiply, starting with gen */
         for (j = 0; j < ngens; j++) {
@@ -240,13 +353,10 @@ int main(int argc, const char *argv[])
         /* Now clean with previous results of this round of multiply */
         if (first) {
           /* Just echelise this */
-          /* res = fProduceNREF(fun_tmp, clean_tmp1, 1, ech_tmp_bs, 0, ech_tmp_rem, 0); */
-          res = fech(clean_tmp1, 0, "NULL", 0,
+          res = fech(clean_tmp1, 0, row_sel, 0,
                      ech_tmp_bs, 0, "NULL", 0,
                      "NULL", 0, ech_tmp_rem, 0);
-          if (0 != res) {
-            first = 0;
-          } else {
+          if (0 == res) {
             remove(ech_tmp_bs);
             remove(ech_tmp_rem);
           }
@@ -255,8 +365,7 @@ int main(int argc, const char *argv[])
           /* Clean with previous echelised */
           clean(ech_tmp_bs, ech_tmp_rem, clean_tmp1, clean_tmp2);
           /* Then echelise */
-          /* res = fProduceNREF(fun_tmp, clean_tmp2, 1, ech_tmp_bs1, 0, ech_tmp_rem1, 0); */
-          res = fech(clean_tmp2, 0, "NULL", 0,
+          res = fech(clean_tmp2, 0, row_sel, 0,
                      ech_tmp_bs1, 0, "NULL", 0,
                      "NULL", 0, ech_tmp_rem1, 0);
           if (0 != res) {
@@ -276,13 +385,29 @@ int main(int argc, const char *argv[])
             rename(ech_tmp_bsc, ech_tmp_bs);
             /* The row riffle is no longer needed */
             remove(ech_tmp_bsr);
-            /* These two were only ever temporary */
-            remove(ech_tmp_rem1);
-            remove(ech_tmp_bs1);
           }
+          /* These two were only ever temporary */
           remove(ech_tmp_bs1);
           remove(ech_tmp_rem1);
           extra_rank += res;
+        }
+        /*
+         * TBD: use row_sel above if this multiply added anything
+         * to produce original vectors from the multiply
+         * if (0 != res) {
+         *   Do something!
+         *   We can clear first here
+         * }
+         */
+        if (0 != res) {
+          fRowExtract(row_sel, mul_tmp, mul_acc1);
+          if (first) {
+            first = 0;
+            rename(mul_acc1, mul_acc);
+          } else {
+            cat_matrices(mul_acc, mul_acc1, mul_tmp, clean_tmp1);
+            rename(mul_tmp, mul_acc);
+          }
         }
         remove(clean_tmp1);
         remove(clean_tmp2);
@@ -292,7 +417,6 @@ int main(int argc, const char *argv[])
     }
     /* Add in rank */
     rank += extra_rank;
-    /* TBD: is this all in the right order? */
     /*
      * Stuff to be manipulated
      * mult_result_bs: the pivot columns of the multiplied result
@@ -304,13 +428,13 @@ int main(int argc, const char *argv[])
      * The old zero_bs is placed with the new rows just produced
      */
     if (0 != extra_rank) {
-      /* We can make the plain form for the next multiply */
-      make_plain(zero_bs, ech_tmp_bs, ech_tmp_rem, this_gen->next_tbd.plain, fdef);
-      /* TBD: Now row select to give the plain form rather than making it as above */
-      /* I need to make my own fRowExtract, prototype
-         void fRowExtract(const char *bs, const char *in, const char *sel)
-      */
-      /* The add to row already produced by this generator */
+      /*
+       * Now use the multiply accumulator to extend out_sb
+       * and also to give the plain form for the next multiply
+       */
+      cat_matrices(out_sb, mul_acc, mul_acc1, clean_tmp1);
+      rename(mul_acc1, out_sb);
+      rename(mul_acc, this_gen->next_tbd.plain);
     }
     if (0 != this_gen->next_tbd.size) {
       /* Update the vectors multiplied if this generator has any */
@@ -347,7 +471,7 @@ int main(int argc, const char *argv[])
     /* Move on to next generator */
     this_gen = this_gen->next;
   }
-  /* TBD: Finally put the results where requested */
+  /* Finally put the results where requested */
   out_bs = malloc(out_stem_len + 4);
   out_rem = malloc(out_stem_len + 5);
   strcpy(out_bs, out_stem);
@@ -367,6 +491,9 @@ int main(int argc, const char *argv[])
   remove(ech_tmp_bsr);
   remove(clean_tmp1);
   remove(clean_tmp2);
+  remove(row_sel);
+  remove(mul_acc);
+  remove(mul_acc1);
   /* And the things in the gen structures */
   for (i = 0; i < ngens; i++) {
     remove(gens[i].next_tbd.bs);
@@ -394,7 +521,11 @@ int main(int argc, const char *argv[])
   free(clean_tmp2);
   free(out_bs);
   free(out_rem);
+  free(out_sb);
   free(fun_tmp);
+  free(row_sel);
+  free(mul_acc);
+  free(mul_acc1);
   /* Return the rank */
   printf("%lu\n", rank);
   return 0;
