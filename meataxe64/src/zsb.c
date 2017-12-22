@@ -320,7 +320,7 @@ int main(int argc, const char *argv[])
   rename(in_vecs_bs, gens[ngens - 1].next_tbd.bs);
   gens[ngens - 1].next_tbd.size = rank;
   this_gen = gens; /* The first one */
-  while (mrank < rank) {
+  while (mrank < rank && rank < nor) {
     /* Still some stuff to multiply */
     gen *mul_gen = this_gen;
     int first = 1; /* No results for this gen yet */
@@ -471,15 +471,21 @@ int main(int argc, const char *argv[])
     /* Move on to next generator */
     this_gen = this_gen->next;
   }
-  /* Finally put the results where requested */
-  out_bs = malloc(out_stem_len + 4);
-  out_rem = malloc(out_stem_len + 5);
-  strcpy(out_bs, out_stem);
-  strcat(out_bs, ".bs");
-  strcpy(out_rem, out_stem);
-  strcat(out_rem, ".rem");
-  rename(mult_result_bs, out_bs);
-  rename(mult_result_rem, out_rem);
+  if (rank < nor) {
+    /*
+     * Proper subspace, put the results where requested
+     */
+    out_bs = malloc(out_stem_len + 4);
+    out_rem = malloc(out_stem_len + 5);
+    strcpy(out_bs, out_stem);
+    strcat(out_bs, ".bs");
+    strcpy(out_rem, out_stem);
+    strcat(out_rem, ".rem");
+    rename(mult_result_bs, out_bs);
+    rename(mult_result_rem, out_rem);
+    free(out_bs);
+    free(out_rem);
+  }
   /* Delete temps */
   remove(zero_bs);
   remove(mul_tmp);
@@ -519,8 +525,6 @@ int main(int argc, const char *argv[])
   free(ech_tmp_bsr);
   free(clean_tmp1);
   free(clean_tmp2);
-  free(out_bs);
-  free(out_rem);
   free(out_sb);
   free(fun_tmp);
   free(row_sel);
