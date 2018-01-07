@@ -1,13 +1,12 @@
 #!/bin/sh
 #
-# Script to do ziv in meataxe 64 until a binary is available
+# Script to do ziv in meataxe 64
 #
 # Parameters as for ziv in meataxe 2000
 # ie [-m <memory] <infile> <outfile>
 #
-mem=
+dir=`dirname $0`
 if [ "-m" = "$1" ]; then
-    mem="-m $2"
     shift 2
 fi
 if [ $# -ne 2 ]; then
@@ -17,13 +16,6 @@ if [ $# -ne 2 ]; then
 fi
 infile=$1
 outfile=$2
-tmp=tmp$$
-to_m2000 ${infile} ${tmp}.1
-~/install/ziv ${mem} ${tmp}.1 ${tmp}.2
+${dir}/../bin/ziv ${infile} ${outfile}
 ret=$?
-# Now convert back the result
-if [ 0 -eq ${ret} ]; then
-    to_m64 ${tmp}.2 ${outfile}
-fi
-rm -f ${tmp}.{1,2} ${gens}
 exit ${ret}

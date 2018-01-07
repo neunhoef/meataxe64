@@ -1,13 +1,12 @@
 #!/bin/sh
 #
-# Script to do zmsb in meataxe 64 until a binary is available
+# Script to do zmsb in meataxe 64
 #
 # Parameters as for zmsb in meataxe 2000
 # ie [-m <memory] <infile> <outfile> <generators>
 #
-mem=
+dir=`dirname $0`
 if [ "-m" = "$1" ]; then
-    mem="-m $2"
     shift 2
 fi
 if [ $# -le 3 ]; then
@@ -18,21 +17,10 @@ fi
 infile=$1
 outfile=$2
 shift 2
-tmp=tmp$$
-to_m2000 ${infile} ${tmp}.1
-# Now need to convert all the generators, yuk
-i=0
-gens=
-for x in $*; do
-    to_m2000 $x ${tmp}_g$i
-    gens="${gens} ${tmp}_g$i"
-    let i=$i+1
-done
-~/install/zmsb ${mem} ${tmp}.1 ${tmp}.2 ${gens}
+tmp=tmp${PPID}
+out=`${dir}/../bin/zsb1 ${infile} ${tmp}.ss $*`
 ret=$?
-# Now convert back the result
-if [ 0 -eq ${ret} ]; then
-    to_m64 ${tmp}.2 ${outfile}
-fi
-rm -f ${tmp}.{1,2} ${gens}
+rm -f ${tmp}.ss.{bs,rem}
+mv ${tmp}.ss.sb ${outfile}
+echo $out
 exit ${ret}

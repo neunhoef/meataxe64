@@ -1,10 +1,11 @@
 #!/bin/sh
 #
-# Script to do zmsp in meataxe 64 until a binary is available
+# Script to do zmsp in meataxe 64
 #
 # Parameters as for zmsp in meataxe 2000
 # ie [-m <memory] <infile> <outfile> <generators>
 #
+set -x
 dir=`dirname $0`
 if [ "-m" = "$1" ]; then
     shift 2
@@ -17,23 +18,13 @@ fi
 infile=$1
 outfile=$2
 shift 2
-tmp=tmp$$
-out=`${dir}/../bin/zsp.sh ${infile} ${tmp}.ss 2 0 $*`
+out=`${dir}/../bin/zis ${infile} ${outfile} $*`
 ret=$?
-if [ 1 -eq $ret ]; then
-    if [ -e ${tmp}.ss.bs -a ${tmp}.ss.rem ]; then
-        ret=0
-    fi
-fi
 if [ 0 -eq $ret ]; then
-    # Success
-    ${dir}/../bin/zex ${tmp}.ss.{bs,rem} ${tmp}.out
-    ${dir}/../bin/zng ${tmp}.out ${outfile}
-    rm ${tmp}.ss.{bs,rem} ${tmp}.out
-    ${dir}/../bin/znor ${outfile}
+    # Success, but it might be the whole space
+    echo $out
     exit 0
 else
     # Failure
-    rm -f ${tmp}.ss*
     exit 1
 fi

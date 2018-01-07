@@ -21,4 +21,6 @@ tmp=tmp$$
 to_m2000 ${qf} ${tmp}.1
 to_m2000 ${bf} ${tmp}.2
 ~/install/zsign ${mem} ${tmp}.1 ${tmp}.2
+ret=$?
 rm ${tmp}.{1,2}
+exit $ret

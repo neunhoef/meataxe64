@@ -20,4 +20,6 @@ elt=$2
 tmp=tmp$$
 to_m2000 ${in} ${tmp}.1
 ~/install/zdiffd ${mem} ${tmp}.1 ${elt}
+ret=$?
 rm ${tmp}.1
+exit $ret

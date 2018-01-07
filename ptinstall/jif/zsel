@@ -17,6 +17,10 @@ fi
 infile=$1
 outfile=$2
 index=$3
-${dir}/../bin/zsv ${infile} ${index} ${outfile}
+tmp=tmp$$
+to_m2000 ${infile} ${tmp}.1
+~/install/zsel ${tmp}.1 ${tmp}.2 ${index}
 ret=$?
+to_m64 ${tmp}.2 ${outfile}
+rm ${tmp}.{1,2}
 exit ${ret}
