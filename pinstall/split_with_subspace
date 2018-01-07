@@ -1,19 +1,18 @@
 #!/bin/sh
 #
-# $Id: split_with_subspace,v 1.1 2016/12/15 20:41:20 jon Exp $
-#
 # Script to split a representation given a particular subspace to work from
+# Meataxe64 version
 #
 # Inputs
-# $1: subspace with which to split
+# $1: subspace stem with which to split
 # $2: output subspace representation filename
 # $3: output quotient representation filename
-# $4: initial memory
-# $5-: generators
+# $4-: generators
+#
+# The subspace parameter is the stem, and the files are <stem>.{bs,rem}
 #
 # outputs will be of the form <$3>_<q>_<nor>
 # where nor is number of rows, and q is the prime power
-#
 #
 # Return codes
 # 1: error in parameters
@@ -21,17 +20,16 @@
 # 254: did not split
 #
 . functions
-usage="$0: usage: $0 <s> <o_s> <o_q> <memory> <a> [<other generators>]"
-if [ $# -lt 5 ]; then
+usage="$0: usage: $0 <s> <o_s> <o_q> <a> [<other generators>]"
+if [ $# -lt 4 ]; then
   echo "$usage"
   exit 1;
 fi
 s=$1
 o_s=$2
 o_q=$3
-memory=$4
-a=$5
-if [ -e $a -a -e $s ]; then
+a=$4
+if [ -e $a -a -e $s.bs -a -e $s.rem ]; then
   q=`zprime $a`
   nor=`znor $a`
   noc=`znoc $a`
@@ -39,7 +37,8 @@ if [ -e $a -a -e $s ]; then
     echo "$0: $a is not square"
     exit 1
   fi
-  if [ $noc -ne `znoc $s` -o \( $q -ne `zprime $s` -a 1 -ne $q \) ]; then
+  cols=`~/ptinstall/bin/zut 2 $s.bs | head -1 | sed -e "s/^ *//;s/ .*$//"`
+  if [ $noc -ne $cols -o \( $q -ne `zprime $s.rem` -a 1 -ne $q \) ]; then
     echo "$0: $a and $s are not compatible"
     exit 1
   fi
@@ -47,15 +46,18 @@ else
   echo "$0: missing files $a or $s"
   exit 1
 fi
-tmp=tmp${PPID}
-mem_ok=0
-dim=`znor $s`
-if [ $dim -eq $nor ]; then
-  echo failed to split
-  exit 254
-fi
-shift 4
-tmp=tmp${PPID}
-zpe $s ${tmp}.bs ${tmp}.rem > ${tmp}.junk
-zsplit.sh ${o_s} ${o_q} ${tmp}.bs ${tmp}.rem $*
-rm ${tmp}.{bs,rem,junk}
+dim=`znor $s.rem`
+let codim=$nor-$dim
+shift 3
+x=1
+while [ 0 -ne $# ]; do
+  if [ $dim -lt $nor ]; then
+    ~/ptinstall/bin/zsa $s $1 ${o_s}_$x
+    ~/ptinstall/bin/zqa $s $1 ${o_q}_$x
+  else
+    echo failed to split
+    exit 254
+  fi
+  let x=$x+1
+  shift
+done

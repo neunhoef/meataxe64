@@ -1,0 +1,66 @@
+#!/bin/sh
+#
+# Script to provide a subspace from the dual subspace
+# Meataxe64 version
+#
+# Inputs
+# $1: dual subspace
+# $2: output filename
+# $3: memory
+#
+# The subspace names parameters are the stems, and the files will be <stem>.{bs,rem}
+# Return codes
+# 1: error in parameters
+# 0: ok
+#
+#set -v
+. functions
+usage="$0: usage: $0 <dual subspace> <output> <memory>"
+if [ $# -ne 3 ]; then
+  echo "$usage"
+  exit 1;
+fi
+i=$1
+o=$2
+memory=$3
+if [ -e $i.bs -a -e $i.rem ]; then
+  q=`zprime $i.rem`
+  nor=`znor $i.rem`
+  noc=`~/ptinstall/bin/zut 2 $i.bs | head -1 | sed -e "s/^ *//;s/ .*$//"`
+  if [ 1 -eq $q ]; then
+    echo "$0: $i cannot be a map"
+    exit 1
+  fi
+else
+  echo "$0: missing file $i.bs or $i.rem"
+  exit 1
+fi
+tmp=tmp${PPID}
+# Convert the bitstring/remnant form back to something we can transpose
+# Negate the remnant
+~/ptinstall/bin/zng ${i}.rem ${tmp}.rem_neg
+# Then riffle in identity.
+~/ptinstall/bin/zex ${i}.bs ${tmp}.rem_neg ${tmp}.ex_form
+rm -f ${tmp}.rem_neg
+ztr -m $memory ${tmp}.ex_form ${tmp}.1
+if [ $? -ne 0 ]; then
+  rm ${tmp}*
+  exit 1
+fi
+nullity=`zns -m $memory ${tmp}.1 ${tmp}.2 2>&1`
+ret=$?
+if [ $ret -eq 0 ]; then
+  out=`~/ptinstall/bin/zpe ${tmp}.2 $o.{bs,rem}`
+  ret=$?
+  rm -f ${tmp}*
+  if [ 0 -ne $ret ]; then
+    echo zpe failed, terminating
+    exit 1
+  fi
+  echo $out | sed -e "s/Rank of ${tmp}.2 is //"
+  exit 0
+else
+  echo $nullity
+  rm -f ${tmp}*
+  exit 1
+fi
