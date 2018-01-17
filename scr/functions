@@ -1,14 +1,14 @@
 #!/bin/sh
 #
-# $Id: functions,v 1.9 2007/09/03 21:17:18 jon Exp $
+# $Id: functions,v 1.10 2018/01/17 08:20:22 jon Exp $
 #
 # Functions to support the meataxe scripts
 #
 function more_memory()
 {
   local x
-  if [ $1 -ge 102400 ]; then
-    let x=$1+51200
+  if [ $1 -ge 16000000 ]; then
+    let x=$1+1000000
   else
     let x=$1*2
   fi
