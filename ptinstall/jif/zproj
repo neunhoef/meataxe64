@@ -1,0 +1,31 @@
+#!/bin/sh
+#
+# Script to do zproj in meataxe 64 until a binary is available
+#
+# Parameters as for zproj in meataxe 2000
+# ie [-m <memory] <range> <input> <output>
+#
+mem=
+if [ "-m" = "$1" ]; then
+    mem="-m $2"
+    shift 2
+fi
+if [ $# -n3 3 ]; then
+   echo "zproj: bad parameters"
+   echo "usage: zproj [-m <memory] <range> <input> <output>"
+   exit 1
+fi
+range=$1
+infile=$2
+outfile=$3
+tmp=tmp$$
+to_m2000 ${range} ${tmp}.1
+to_m2000 ${infile} ${tmp}.2
+~/install/zproj ${mem} ${tmp}.1 ${tmp}.2 ${tmp}.3
+ret=$?
+# Now convert back the result
+if [ 0 -eq ${ret} ]; then
+    to_m64 ${tmp}.3 ${outfile}
+fi
+rm -f ${tmp}.{1,2,3}
+exit ${ret}
