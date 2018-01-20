@@ -36,31 +36,40 @@ else
   exit 1
 fi
 tmp=tmp${PPID}
-# Convert the bitstring/remnant form back to something we can transpose
+# M64 algorithm. We have a subspace in the form bs, rem
+# Tranposing this gives a block column of the form -I / R(T)
+# So, the vectors which are null for that are block row (R(T) | I)
+# But our bitstrings represent -I, so we use (-R(T), -I)
+# Where the I in this case if the complement of the I in the original subspace
+# zbc gives complement, zng the negative
 # Negate the remnant
 ~/ptinstall/bin/zng ${i}.rem ${tmp}.rem_neg
-# Then riffle in identity.
-~/ptinstall/bin/zex ${i}.bs ${tmp}.rem_neg ${tmp}.ex_form
-rm -f ${tmp}.rem_neg
-ztr -m $memory ${tmp}.ex_form ${tmp}.1
-if [ $? -ne 0 ]; then
-  rm ${tmp}*
-  exit 1
-fi
-nullity=`zns -m $memory ${tmp}.1 ${tmp}.2 2>&1`
-ret=$?
-if [ $ret -eq 0 ]; then
-  out=`~/ptinstall/bin/zpe ${tmp}.2 $o.{bs,rem}`
-  ret=$?
-  rm -f ${tmp}*
-  if [ 0 -ne $ret ]; then
-    echo zpe failed, terminating
+if [ 0 -ne $? ]; then
+    ~/ptinstall/bin/zng ${i}.rem ${tmp}.rem_neg
+    rm -f ${tmp}*
     exit 1
-  fi
-  echo $out | sed -e "s/Rank of ${tmp}.2 is //"
-  exit 0
-else
-  echo $nullity
-  rm -f ${tmp}*
-  exit 1
 fi
+# Then transpose it
+~/ptinstall/bin/ztr ${tmp}.rem_neg ${o}.rem
+if [ 0 -ne $? ]; then
+    ~/ptinstall/bin/ztr ${tmp}.rem_neg ${o}.rem
+    rm -f ${tmp}*
+    exit 1
+fi
+# Now complement the bitstring
+~/ptinstall/bin/zbc ${i}.bs ${o}.bs
+if [ 0 -ne $? ]; then
+    ~/ptinstall/bin/zbc ${i}.bs ${o}.bs
+    rm -f ${tmp}*
+    exit 1
+fi
+# Now we just need the nullity, which is the number of rows
+# of the new remnant, ie the number of columns of the original remnant
+nullity=`~/ptinstall/bin/znoc ${i}.rem`
+if [ 0 -ne $? ]; then
+    ~/ptinstall/bin/znor ${i}.rem
+    rm -f ${tmp}*
+    exit 1
+fi
+echo $nullity
+exit 0
