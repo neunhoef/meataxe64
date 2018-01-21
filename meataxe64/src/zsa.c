@@ -141,10 +141,10 @@ int main(int argc, const char *argv[])
   /* junk */
   char *junk = mk_tmp(prog_name, tmp_root, tmp_len);
   /* The root of the subspace */
-  const char *sub_root = argv[1];
-  unsigned int sub_root_len = strlen(sub_root);
-  char *sub_bs = malloc(sub_root_len + 4);
-  char *sub_rem = malloc(sub_root_len + 5);
+  const char *sub_root;
+  unsigned int sub_root_len;
+  char *sub_bs;
+  char *sub_rem;
 #if jgt
   header hdr;
 #endif
@@ -156,6 +156,10 @@ int main(int argc, const char *argv[])
     LogString(80,"usage zis <subspace stem> <generator> <output>");
     exit(21);
   }
+  sub_root = argv[1];
+  sub_root_len = strlen(sub_root);
+  sub_bs = malloc(sub_root_len + 4);
+  sub_rem = malloc(sub_root_len + 5);
   strcpy(sub_bs, sub_root);
   strcat(sub_bs, ".bs");
   strcpy(sub_rem, sub_root);

@@ -1937,16 +1937,7 @@ void DPak(const DSPACE * ds, uint64_t col, Dfmt * d, FELT a)
     uint8_t g;
     int paktyp,s;
     uint64_t fdef;
-    if(ds->ground==0)
-    {
-        paktyp=(ds->f)->paktyp;
-        fdef=(ds->f)->fdef;
-    }
-         else     
-    {
-        paktyp=(ds->f)->ppaktyp;
-        fdef=(ds->f)->charc;
-    }
+    paktyp = (ds->ground==0) ? (ds->f)->paktyp : (ds->f)->ppaktyp;
     switch(paktyp)
     {
       case 0:
@@ -1962,6 +1953,7 @@ void DPak(const DSPACE * ds, uint64_t col, Dfmt * d, FELT a)
         *((uint8_t *)d+col)=a;
         break;
       case 4:
+        fdef = (ds->ground==0) ? (ds->f)->fdef : (ds->f)->charc;
         pv=(uint8_t *)d+(col/2);
         g=*pv;
         switch(col%2)
@@ -2044,16 +2036,7 @@ FELT DUnpak(const DSPACE * ds, uint64_t col, const Dfmt * d)
     uint8_t e;
     int paktyp;
     uint64_t fdef;
-    if(ds->ground==0)
-    {
-        paktyp=(ds->f)->paktyp;
-        fdef=(ds->f)->fdef;
-    }
-         else     
-    {
-        paktyp=(ds->f)->ppaktyp;
-        fdef=(ds->f)->charc;
-    }
+    paktyp = (ds->ground==0) ? (ds->f)->paktyp : (ds->f)->ppaktyp;
 
     switch(paktyp)
     {
@@ -2070,6 +2053,7 @@ FELT DUnpak(const DSPACE * ds, uint64_t col, const Dfmt * d)
         x=*((uint8_t *)d+col);
         break;
       case 4:
+        fdef = (ds->ground==0) ? (ds->f)->fdef : (ds->f)->charc;
         e=*((uint8_t *)d+(col/2));
         switch(col%2)
         {

@@ -11,7 +11,7 @@
 // MEGABYTES should be the amount of data memory you 
 // would like a program to restrict itself to.
 
-#define MEGABYTES 2800
+#define MEGABYTES 16000
 
 // MAXCHOP is the maximum number of chops that can be made when
 // doing multi-core work.

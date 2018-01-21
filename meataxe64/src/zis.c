@@ -330,6 +330,8 @@ int main(int argc, const char *argv[])
     free(out_rem);
   }
   /* Delete temps */
+  remove(mult_result_bs);
+  remove(mult_result_rem);
   remove(zero_bs);
   remove(mul_tmp);
   remove(ech_tmp_bs);

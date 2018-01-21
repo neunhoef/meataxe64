@@ -11,6 +11,7 @@
 #include "mfuns.h"
 #include "io.h"
 #include "bitstring.h"
+#include "slab.h"
 
 void make_plain(const char *zero_bs, const char *nref_bs, const char *in, const char *out, uint64_t fdef)
 {
@@ -47,6 +48,7 @@ void make_plain(const char *zero_bs, const char *nref_bs, const char *in, const 
   } else {
     ei = NULL;
     nor = noci1;
+    hdrio.named.noc = 0;
   }
   if (NULL != ezbs) {
     /* Some leading zeros */
@@ -61,7 +63,7 @@ void make_plain(const char *zero_bs, const char *nref_bs, const char *in, const 
   if (noci1 != nor /* Number of pivots == number of rows */ || 
       hdrio.named.noc + noci1 + noci2 != noco /* Total columns check */) {
     LogString(80,"Inputs incompatible");
-    exit(22);
+    exit(23);
   }
   f = malloc(FIELDLEN);
   FieldASet(fdef, f);
@@ -131,4 +133,44 @@ void make_plain(const char *zero_bs, const char *nref_bs, const char *in, const 
   if (NULL != ezbs) {
     free(bstz);
   }
+}
+
+int ident(uint64_t fdef, uint64_t nor, uint64_t noc, uint64_t elt,
+          const char *out)
+{
+  uint64_t hdr[5];
+  EFIL *e;
+  FIELD *f;
+  DSPACE ds;
+  Dfmt *v1;
+  uint64_t i;
+
+  hdr[0] = 1;
+  hdr[1] = fdef;
+  hdr[2] = nor;
+  hdr[3] = noc;
+  hdr[4] = 0;
+  e = EWHdr(out, hdr);
+  f = malloc(FIELDLEN);
+  if (f == NULL) {
+    LogString(81, "Can't malloc field structure");
+    exit(8);
+  }
+  FieldSet(fdef, f);
+  DSSet(f, noc, &ds);
+  v1 = malloc(ds.nob);
+  if (v1 == NULL) {
+    LogString(81,"Can't malloc a single vector");
+    exit(9);
+  }
+  /******  for each row of the matrix  */
+  for (i = 0; i < nor; i++) {
+    memset(v1, 0, ds.nob);
+    DPak(&ds, i, v1, elt);
+    EWData(e, ds.nob, v1);
+  }
+  EWClose(e);
+  free(v1);
+  free(f);
+  return 1;
 }

@@ -31,10 +31,10 @@ int main(int argc, char **argv)
   DSPACE ds;
   FILE *inp = NULL;
   uint64_t hdr[5];
-  uint32_t nor, noc, len, nob, fdef, i;
+  uint32_t nor, noc, len, nob, fdef, i, elts_per_word, k;
   const header *h;
   Dfmt *v;
-  word *row;
+  word mask, *row, val = 0;
 
   LogCmd(argc,argv);
   /******  First check the number of input arguments  */
@@ -70,13 +70,15 @@ int main(int argc, char **argv)
   }
   FieldSet(fdef, f);
   DSSet(f, noc, &ds);
-  v = malloc(ds.nob);
+  /* Allow room for a full word of output at the end */
+  v = malloc(ds.nob + 7);
   /* open m64 output */
   out = EWHdr(argv[2], hdr);
   /* loop over rows of m2000 producing rows of m64 */
+  mask = get_mask_and_elts(nob, &elts_per_word);
   for (i = 0; i < nor; i++) {
     int e;
-    u32 j;
+    u32 j, word_offset = 0;
     errno = 0;
     e = endian_read_row(inp, row, len);
     if (0 == e) {
@@ -86,13 +88,31 @@ int main(int argc, char **argv)
       fprintf(stderr, "%s: cannot read row %u from %s, terminating\n", name, i, argv[1]);
     }
     /* Clear output row */
-    memset(v ,0, ds.nob);
-    for (j = 0; j < noc; j++) {
-      /* Get a field element from m2000 and put in m64 */
-      word elt = get_element_from_row(nob, j, row);
-      DPak(&ds, j, v, elt);
+    switch (fdef) {
+    case 2:
+    case 4:
+      /* Characteristic 2 case, just copy */
+      EWData(out, ds.nob, (Dfmt *)row);
+      break;
+    default:
+      memset(v ,0, ds.nob + 7);
+      k = 0;
+      for (j = 0; j < noc; j++) {
+        /* Get a field element from m2000 and put in m64 */
+        word elt;
+        if (0 == k) {
+          val = get_elements_in_word_from_row(row + word_offset, 0, -1);
+          k = elts_per_word;
+          word_offset++;
+        }
+        elt = val & mask;
+        DPak(&ds, j, v, elt);
+        val >>= nob; /* Next value */
+        k--;
+      }
+      EWData(out, ds.nob, v);
+      break;
     }
-    EWData(out, ds.nob, v);
   }
   /* close m2000 and m64 matrices */
   fclose(inp);

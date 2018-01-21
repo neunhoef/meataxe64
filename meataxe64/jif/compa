@@ -1,3 +1,4 @@
+mkdir -p $BIN
 cd $SRC
 gcc $1 -O3 -Wall -pthread -include malloc.h fieldreg.c -L$BIN -lmtx -o $BIN/fieldreg
 gcc $1 -O3 -Wall -pthread -include malloc.h conreg.c -L$BIN -lmtx -o $BIN/conreg
@@ -57,6 +58,7 @@ gcc $1 -O3 -Wall -pthread -include malloc.h ztr1.c -L$BIN -lmtx -o $BIN/ztr1
 gcc $1 -O3 -Wall -pthread -include malloc.h zad1.c -L$BIN -lmtx -o $BIN/zad1
 gcc $1 -O3 -Wall -pthread -include malloc.h zmu1.c -L$BIN -lmtx -o $BIN/zmu1
 gcc $1 -O3 -Wall -pthread -include malloc.h znu1.c -L$BIN -lmtx -o $BIN/znu1
+gcc $1 -O3 -Wall -pthread -include malloc.h zex.c -L$BIN -lmtx -o $BIN/zex
 
 cp $BIN/zrn1 $BIN/zrn
 gcc $1 -O3 -Wall -pthread -include malloc.h zis.c -L$BIN -lmtx -o $BIN/zis
@@ -66,10 +68,11 @@ gcc -O3 -Wall -pthread -include malloc.h znor.c -L$BIN -lmtx -o $BIN/znor
 gcc -O3 -Wall -pthread -include malloc.h znoc.c -L$BIN -lmtx -o $BIN/znoc
 gcc -O3 -Wall -pthread -include malloc.h zprime.c -L$BIN -lmtx -o $BIN/zprime
 gcc -O3 -Wall -pthread -include malloc.h zchar.c -L$BIN -lmtx -o $BIN/zchar
-gcc -O3 -Wall -pthread -include malloc.h zid.c -L$BIN -lmtx -o $BIN/zid
+gcc -O3 -Wall -pthread -include malloc.h zid.c mfuns.c -L$BIN -lmtx -o $BIN/zid
 gcc_comp_options="-Wall -Wpointer-arith -Wwrite-strings -Winline -Waggregate-return -Wmissing-prototypes -Wnested-externs -W -Wunused -Wcast-align -Wstrict-prototypes -Wmissing-declarations -O3 -pthread -include malloc.h"
 gcc_link_options="${gcc_comp_options} -L${BIN} -lmtx"
 gcc -include mt_types.h zimport.c elements.c endian.c header.c primes.c utils.c read.c ${gcc_link_options} -lm -o $BIN/zimport
 gcc -DEIGHT_BYTE_WORD -include mt_types.h zimport.c elements.c endian.c header.c primes.c utils.c read.c ${gcc_link_options} -lm -o $BIN/zimport64
 gcc -include mt_types.h zexport.c elements.c endian.c header.c primes.c utils.c write.c ${gcc_link_options} -lm -o $BIN/zexport
 gcc -DEIGHT_BYTE_WORD -include mt_types.h zexport.c elements.c endian.c header.c primes.c utils.c write.c ${gcc_link_options} -lm -o $BIN/zexport64
+gcc -DEIGHT_BYTE_WORD -include mt_types.h zscript.c utils.c mfuns.c ${gcc_link_options} -lm -o $BIN/zscript

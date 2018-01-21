@@ -66,10 +66,11 @@ gcc -g -Wall -pthread -include malloc.h znor.c -L$BIN -lmtx-g -o $BIN/znor
 gcc -g -Wall -pthread -include malloc.h znoc.c -L$BIN -lmtx-g -o $BIN/znoc
 gcc -g -Wall -pthread -include malloc.h zprime.c -L$BIN -lmtx-g -o $BIN/zprime
 gcc -g -Wall -pthread -include malloc.h zchar.c -L$BIN -lmtx-g -o $BIN/zchar
-gcc -g -Wall -pthread -include malloc.h zid.c -L$BIN -lmtx-g -o $BIN/zid
+gcc -g -Wall -pthread -include malloc.h zid.c mfuns.c -L$BIN -lmtx-g -o $BIN/zid
 gcc_comp_options="-Wall -Wpointer-arith -Wwrite-strings -Winline -Waggregate-return -Wmissing-prototypes -Wnested-externs -W -Wunused -Wcast-align -Wstrict-prototypes -Wmissing-declarations -g -pthread -include malloc.h"
-gcc_link_options="${gcc_comp_options} -L${BIN} -lmtx-g"
+gcc_link_options="${gcc_comp_options} -g -L${BIN} -lmtx-g"
 gcc -include mt_types.h zimport.c elements.c endian.c header.c primes.c utils.c read.c ${gcc_link_options} -lm -o $BIN/zimport
 gcc -DEIGHT_BYTE_WORD -include mt_types.h zimport.c elements.c endian.c header.c primes.c utils.c read.c ${gcc_link_options} -lm -o $BIN/zimport64
 gcc -include mt_types.h zexport.c elements.c endian.c header.c primes.c utils.c write.c ${gcc_link_options} -lm -o $BIN/zexport
 gcc -DEIGHT_BYTE_WORD -include mt_types.h zexport.c elements.c endian.c header.c primes.c utils.c write.c ${gcc_link_options} -lm -o $BIN/zexport64
+gcc -DEIGHT_BYTE_WORD -include mt_types.h zscript.c utils.c mfuns.c ${gcc_link_options} -lm -o $BIN/zscript
