@@ -58,7 +58,6 @@ gcc $1 -O3 -Wall -pthread -include malloc.h ztr1.c -L$BIN -lmtx -o $BIN/ztr1
 gcc $1 -O3 -Wall -pthread -include malloc.h zad1.c -L$BIN -lmtx -o $BIN/zad1
 gcc $1 -O3 -Wall -pthread -include malloc.h zmu1.c -L$BIN -lmtx -o $BIN/zmu1
 gcc $1 -O3 -Wall -pthread -include malloc.h znu1.c -L$BIN -lmtx -o $BIN/znu1
-gcc $1 -O3 -Wall -pthread -include malloc.h zex.c -L$BIN -lmtx -o $BIN/zex
 
 cp $BIN/zrn1 $BIN/zrn
 gcc $1 -O3 -Wall -pthread -include malloc.h zis.c -L$BIN -lmtx -o $BIN/zis
