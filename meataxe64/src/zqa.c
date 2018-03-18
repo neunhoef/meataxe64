@@ -1,5 +1,5 @@
 /*
-      zqs.c     meataxe-64 quotient action
+      zqa.c     meataxe-64 quotient action
       =====     J. G. Thackray   10.11.2017
 */
 
@@ -15,7 +15,7 @@
 #include "bitstring.h"
 #include "util.h"
 
-static const char prog_name[] = "zis";
+static const char prog_name[] = "zqa";
 
 static char *fun_tmp;
 
@@ -94,7 +94,7 @@ int main(int argc, const char *argv[])
   /* Check command line <vecs> <output stem> [<gen>*] */
   /* Must be exactly 3 args */
   if (argc != 4) {
-    LogString(80,"usage zis <subspace stem> <generator> <output>");
+    LogString(80,"usage zqa <subspace stem> <generator> <output>");
     exit(21);
   }
   sub_root = argv[1];

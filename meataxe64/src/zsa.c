@@ -153,7 +153,7 @@ int main(int argc, const char *argv[])
   /* Check command line <vecs> <output stem> [<gen>*] */
   /* Must be exactly 3 args */
   if (argc != 4) {
-    LogString(80,"usage zis <subspace stem> <generator> <output>");
+    LogString(80,"usage zsa <subspace stem> <generator> <output>");
     exit(21);
   }
   sub_root = argv[1];

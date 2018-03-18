@@ -118,12 +118,12 @@ void make_plain(const char *zero_bs, const char *nref_bs, const char *in, const 
   }
   /* Close files */
   if (use_ei) {
-    ERClose1(ei, 0);
+    ERClose1(ei, 1);
   }
-  EWClose1(eo, 0);
-  ERClose1(embs, 0);
+  EWClose1(eo, 1);
+  ERClose1(embs, 1);
   if (NULL != ezbs) {
-    ERClose1(ezbs, 0);
+    ERClose1(ezbs, 1);
   }
   /* Deallocate crap */
   free(mi);

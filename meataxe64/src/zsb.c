@@ -49,7 +49,7 @@ struct gen {
 
 typedef struct gen gen;
 
-static const char prog_name[] = "zis";
+static const char prog_name[] = "zsb";
 
 static char *fun_tmp;
 
@@ -67,11 +67,11 @@ static void clean(const char *bs, const char *rem, const char *rows, const char 
   unsigned int i;
   /* Extract pivots from rows using bs giving tmp1 */
   /* Also produce tmp3 = nonsel(bs, rows) */
-  fColumnExtract(bs, 0, rows, 0, clean_vars[0], 0, clean_vars[2], 0);
+  fColumnExtract(bs, 1, rows, 1, clean_vars[0], 1, clean_vars[2], 1);
   /* Produce tmp2 = tmp1 * rem */
-  fMultiply(fun_tmp, clean_vars[0], 0, rem, 0, clean_vars[1], 0);
+  fMultiply(fun_tmp, clean_vars[0], 1, rem, 1, clean_vars[1], 1);
   /* Produce out = tmp3 + tmp2 */
-  fAdd(clean_vars[2], 0, clean_vars[1], 0, out, 0);
+  fAdd(clean_vars[2], 1, clean_vars[1], 1, out, 1);
   /* And delete the temporaries */
   for (i = 0; i < 3; i++) {
     remove(clean_vars[i]);
@@ -121,9 +121,9 @@ static void fRowExtract(const char *bs, const char *in, const char *sel)
       EWData(eo, ds.nob, mi);
     }
   }
-  EWClose1(eo, 0);
-  ERClose1(ei, 0);
-  ERClose1(ebs, 0);
+  EWClose1(eo, 1);
+  ERClose1(ei, 1);
+  ERClose1(ebs, 1);
   free(mi);
   free(bst);
   free(f);
@@ -196,7 +196,7 @@ static void cat_matrices(const char *from1, const char *from2, const char *to, c
   EWData(ebs, size, (uint8_t *)bst);
   EWClose(ebs);
   /* Then call fRowRiffle */
-  fRowRiffle(tmp_bs, 0, from1, 0, from2, 0, to, 0);
+  fRowRiffle(tmp_bs, 1, from1, 1, from2, 1, to, 1);
 }
 
 #define FUN_TMP "_funs"
@@ -244,7 +244,7 @@ int main(int argc, const char *argv[])
   /* Check command line <vecs> <output stem> [<gen>*] */
   /* Must be at least 3 args */
   if (argc < 4) {
-    LogString(80,"usage zis <seeds> <output stem> [<generator>*]");
+    LogString(80,"usage zsb <seeds> <output stem> [<generator>*]");
     exit(21);
   }
   in_vecs = argv[1];
@@ -258,9 +258,9 @@ int main(int argc, const char *argv[])
   strcpy(fun_tmp, tmp_root);
   strcat(fun_tmp, FUN_TMP);
   /* Echelise initial vecs. Also sets up zero_bs and row_sel */
-  res = fech(in_vecs, 0, row_sel, 0,
-             zero_bs, 0, "NULL", 0,
-             "NULL", 0, in_vecs_rem, 0);
+  res = fech(in_vecs, 0, row_sel, 1,
+             zero_bs, 1, "NULL", 1,
+             "NULL", 1, in_vecs_rem, 1);
   /* fail if rank 0 */
   if (0 == res) {
     /* Given zero space to spin, give up */
@@ -272,9 +272,9 @@ int main(int argc, const char *argv[])
   }
   rank = res;
   /* Reread to get a second copy of zero_bs: Fudge */
-  res = fech(in_vecs, 0, "NULL", 0,
-             in_vecs_bs, 0, "NULL", 0,
-             "NULL", 0, in_vecs_rem, 0);
+  res = fech(in_vecs, 1, "NULL", 1,
+             in_vecs_bs, 1, "NULL", 1,
+             "NULL", 1, in_vecs_rem, 1);
   /* Allocate the temporaries for the clean operation */
   clean_vars = malloc(3 * sizeof(*clean_vars));
   for (i = 0; i < 3; i++) {
@@ -330,8 +330,8 @@ int main(int argc, const char *argv[])
       gen *clean_gen = this_gen;
       if (0 != mul_gen->next_tbd.size) {
         /* Something to do for the last result from this generator */
-        fMultiply(fun_tmp, mul_gen->next_tbd.plain, 0, 
-                  this_gen->file, 0, mul_tmp, 0);
+        fMultiply(fun_tmp, mul_gen->next_tbd.plain, 1, 
+                  this_gen->file, 1, mul_tmp, 1);
         if (0 != mrank) {
           /* Clean this result with the overall multiplied stuff */
           clean(mult_result_bs, mult_result_rem, mul_tmp, clean_tmp1);
@@ -353,9 +353,9 @@ int main(int argc, const char *argv[])
         /* Now clean with previous results of this round of multiply */
         if (first) {
           /* Just echelise this */
-          res = fech(clean_tmp1, 0, row_sel, 0,
-                     ech_tmp_bs, 0, "NULL", 0,
-                     "NULL", 0, ech_tmp_rem, 0);
+          res = fech(clean_tmp1, 1, row_sel, 1,
+                     ech_tmp_bs, 1, "NULL", 1,
+                     "NULL", 1, ech_tmp_rem, 1);
           if (0 == res) {
             remove(ech_tmp_bs);
             remove(ech_tmp_rem);
@@ -365,21 +365,21 @@ int main(int argc, const char *argv[])
           /* Clean with previous echelised */
           clean(ech_tmp_bs, ech_tmp_rem, clean_tmp1, clean_tmp2);
           /* Then echelise */
-          res = fech(clean_tmp2, 0, row_sel, 0,
-                     ech_tmp_bs1, 0, "NULL", 0,
-                     "NULL", 0, ech_tmp_rem1, 0);
+          res = fech(clean_tmp2, 1, row_sel, 1,
+                     ech_tmp_bs1, 1, "NULL", 1,
+                     "NULL", 1, ech_tmp_rem1, 1);
           if (0 != res) {
             /* Then back clean ech_tmp_rem with ech_tmp_{bs,rem}1*/
             clean(ech_tmp_bs1, ech_tmp_rem1, ech_tmp_rem, clean_tmp1);
             /* Then join as if echelised all together */
             /* First combine pivots and get a riffle */
-            fPivotCombine(ech_tmp_bs, 0, ech_tmp_bs1, 0, ech_tmp_bsc, 0, ech_tmp_bsr, 0);
+            fPivotCombine(ech_tmp_bs, 1, ech_tmp_bs1, 1, ech_tmp_bsc, 1, ech_tmp_bsr, 1);
             /*
              * Now do a riffle controlled by ech_tmp_bsr
              * Selected rows is those resulting from the back clean
              * Non selected rows is those we back cleaned with
              */
-            fRowRiffle(ech_tmp_bsr, 0, clean_tmp1, 0, ech_tmp_rem1, 0, ech_tmp_rem, 0);
+            fRowRiffle(ech_tmp_bsr, 1, clean_tmp1, 1, ech_tmp_rem1, 1, ech_tmp_rem, 1);
             /* Now delete/rename */
             /* The combined pivots are the new ech result */
             rename(ech_tmp_bsc, ech_tmp_bs);
@@ -442,9 +442,9 @@ int main(int argc, const char *argv[])
         /* Back clean */
         clean(this_gen->next_tbd.bs, this_gen->next_tbd.rem, mult_result_rem, clean_tmp1);
         /* Combine pivots, getting new pivots and row riffle */
-        fPivotCombine(mult_result_bs, 0, this_gen->next_tbd.bs, 0, ech_tmp_bsc, 0, ech_tmp_bsr, 0);
+        fPivotCombine(mult_result_bs, 1, this_gen->next_tbd.bs, 1, ech_tmp_bsc, 1, ech_tmp_bsr, 1);
         /* Riffle rows */
-        fRowRiffle(ech_tmp_bsr, 0, clean_tmp1, 0, this_gen->next_tbd.rem, 0, mult_result_rem, 0);
+        fRowRiffle(ech_tmp_bsr, 1, clean_tmp1, 1, this_gen->next_tbd.rem, 1, mult_result_rem, 1);
         /* Renames and deletes */
         rename(ech_tmp_bsc, mult_result_bs);
       } else {
@@ -455,7 +455,7 @@ int main(int argc, const char *argv[])
     }
     if (0 != extra_rank) {
       /* Update this gen for results of multiply, and zero_bs */
-      fPivotCombine(zero_bs, 0, ech_tmp_bs, 0, ech_tmp_bsc, 0, ech_tmp_bsr, 0);
+      fPivotCombine(zero_bs, 1, ech_tmp_bs, 1, ech_tmp_bsc, 1, ech_tmp_bsr, 1);
       /* ech_tmp_bsc is the new zero_bs */
       rename(ech_tmp_bsc, zero_bs);
       /* Don't need the row riffle this time */
