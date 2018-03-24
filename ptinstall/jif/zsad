@@ -1,0 +1,29 @@
+#!/bin/sh
+#
+# Script to do zsad in meataxe 64 until a binary is available
+#
+# Parameters as for zsad in meataxe 2000
+# ie [-m <memory] <infile> <infile> <out_file> <scalar>
+#
+if [ $# -ne 4 -a $# -ne 6 ]; then
+   echo "zsad: bad parameters"
+   echo "usage: zsad [-m <memory] <infile> <infile> <out_file> <scalar>"
+   exit 1
+fi
+mem=
+if [ 6 -eq $# ]; then
+    mem="-m $2"
+    shift 2
+fi
+in1=$1
+in2=$2
+outfile=$3
+scalar=$4
+tmp=tmp$$
+to_m2000 ${in1} ${tmp}.1
+to_m2000 ${in2} ${tmp}.2
+~/install/zsad ${mem} ${tmp}.1 ${tmp}.2 ${tmp}.3 ${scalar}
+ret=$?
+to_m64 ${tmp}.3 ${outfile}
+rm ${tmp}.{1,2,3}
+exit $ret
