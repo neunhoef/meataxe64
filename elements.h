@@ -1,5 +1,5 @@
 /*
- * $Id: elements.h,v 1.22 2017/03/31 19:52:22 jon Exp $
+ * $Id: elements.h,v 1.23 2018/04/18 19:29:03 jon Exp $
  *
  * Element manipulation for meataxe
  *
@@ -38,7 +38,7 @@ extern word get_element_from_row_with_params(u32 nob, u32 index, word mask,
                                              u32 elts_per_word, const word *row);
 
 /* Extract some elements from a row at given position, into an array of words */
-extern void get_elements_from_row_with_params_into_row(u32 nob, u32 index, word mask,
+extern void get_elements_from_row_with_params_into_row(u32 nob, u32 w_o, u32 e_o, u32 b_o, word mask,
                                                        u32 elts_per_word, const word *row,
                                                        u32 count, word *out);
 
