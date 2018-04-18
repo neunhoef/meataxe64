@@ -1,5 +1,5 @@
 /*
- * $Id: rows.c,v 1.39 2017/04/15 17:16:40 jon Exp $
+ * $Id: rows.c,v 1.40 2018/04/18 19:26:35 jon Exp $
  *
  * Row manipulation for meataxe
  *
@@ -1295,12 +1295,8 @@ static word row_product_8(const word *row1, const word *row2, u32 len)
 
 void row_init(word *row, u32 len)
 {
-  word *row1 = row + len;
   assert(NULL != row);
-  while (row < row1) {
-    *row = 0;
-    row++;
-  }
+  memset(row, 0, len * sizeof(*row));
 }
 
 int rows_init(u32 prime, row_opsp ops)
