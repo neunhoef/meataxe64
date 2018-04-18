@@ -294,7 +294,6 @@ word det2f(const char *m1, const char *dir, const char *name)
     fclose(inp);
     exit(2);
   }
-  max_grease = 1;
   (void)grease_level(prime, &grease, r);
   /* Now read the matrix */
   rows_to_do = nor;
