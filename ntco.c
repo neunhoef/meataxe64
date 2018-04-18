@@ -1,5 +1,5 @@
 /*
- * $Id: ntco.c,v 1.11 2016/10/17 18:52:43 jon Exp $
+ * $Id: ntco.c,v 1.12 2018/04/18 19:40:03 jon Exp $
  *
  * Tensor condense one group element (new algorithm)
  *
@@ -52,6 +52,15 @@ static void free_expanded(word **expanded, u32 nor)
     free(expanded[i]);
   }
   matrix_free(expanded);
+}
+
+static void free_mexp(word ***expanded, u32 nor, u32 slices)
+{
+  u32 j;
+  for (j = 0; j < slices; j++) {
+    free_expanded(expanded[j], nor);
+  }
+  free(expanded);
 }
 
 static int cleanup(u32 *left_multiplicities, u32 *right_multiplicities,
@@ -153,11 +162,11 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
   u32 elts_per_word;
   word mask;
   word **expanded_lrows;
+  word ***mexpanded_lrows; /* To hold all expanded left matrices */
   row_ops row_operations;
   row_ops word_row_operations;
   grease_struct grease;
   s64 optr;
-  s64 lptr;
   NOT_USED(loop);
   NOT_USED(init);
   NOT_USED(in);
@@ -473,14 +482,28 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
                    nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, NULL,
                    NULL, NULL, p, q, h_p, h_q, s, h_o, outp, rows, lrows, rrows);
   }
-  j = 1;
-  for (i = 0; i < GREASE_MAX; i++) {
-    j *= prime;
+  /*
+   * mexpanded_lrows will hold Mi in one word per field element
+   * Mi covers the whole of M as i runs from 0 to s-1
+   * at full width, ie noc_l columns
+   * By doing this we only read through M once, but more importantly
+   * we only convert M to expanded form once
+   * (this being an expensive operation).
+   * We also need a single original expanded_lrows
+   * which will give pointers part way into these rows, at row index alpha
+   * and column index j, gamma
+   */
+  mexpanded_lrows = my_malloc(max_left * sizeof(*mexpanded_lrows));
+  for (j = 0; j < max_left; j++) {
+    expanded_lrows = matrix_malloc(max_irr);
+    for (i = 0; i < max_irr; i++) {
+      expanded_lrows[i] = my_malloc(noc_l * sizeof(word));
+    }
+    mexpanded_lrows[j] = expanded_lrows;
   }
+  /* For providing pointer partway into rows of mexpanded_lrows[alpha] */
   expanded_lrows = matrix_malloc(max_irr);
-  for (i = 0; i < max_irr; i++) {
-    expanded_lrows[i] = my_malloc(max_left * max_irr * sizeof(word));
-  }
+  
   /* Matrix for splitting Qi */
   q_split_rows = matrix_malloc(max_end * max_irr);
   for (i = 0; i < max_irr * max_end; i++) {
@@ -507,7 +530,6 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
   t_row = memory_pointer_offset(extent_l + extent_r + extent_p + extent_q + extent_sub_q + extent_n + extent_qn + extent_qnp, 0, max_end2_len);
   n_r = 0;
   n_o = 0;
-  lptr = ftello64(leftp);
   for (i = 0; i < s; i++) {
     /* Row loop over distinct irreducibles of H */
     u32 dim_irr_i = dim_irr[i];
@@ -526,7 +548,8 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
       matrix_free(qn_rows);
       matrix_free(qnp_rows);
       grease_free(&grease);
-      free_expanded(expanded_lrows, max_irr);
+      matrix_free(expanded_lrows);
+      free_mexp(mexpanded_lrows, max_irr, max_left);
       return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
                      nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, NULL,
                      NULL, NULL, p, q, h_p, h_q, s, h_o, outp, rows, lrows, rrows);
@@ -549,6 +572,36 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
     }
     m_r = 0;
     m_l = 0;
+
+    /*** New approach, read all of Mi, ie Mi,alpha for all alpha ***/
+    /* Get Mi */
+    for (alpha = 0; alpha < left_multiplicities[i]; alpha++) {
+      /* Get Mi,alpha */
+      if (0 == endian_read_matrix(leftp, lrows, len_l, dim_irr_i)) {
+        matrix_free(q_rows);
+        matrix_free(p_rows);
+        matrix_free(q_split_rows);
+        matrix_free(n_rows);
+        matrix_free(qn_rows);
+        matrix_free(qnp_rows);
+        grease_free(&grease);
+        matrix_free(expanded_lrows);
+        free_mexp(mexpanded_lrows, max_irr, max_left);
+        return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
+                       nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, NULL,
+                       NULL, NULL, p, q, h_p, h_q, s, h_o, outp, rows, lrows, rrows);
+      } else {
+        /*
+         * Expand Mi,alpha into mexpanded_lrows[alpha]
+         * Note that this expands the entire row
+         */
+        for (k = 0; k < dim_irr_i; k++) {
+          get_elements_from_row_with_params_into_row(nob, 0, 0, 0, mask,
+                                                     elts_per_word, lrows[k],
+                                                     noc_l, mexpanded_lrows[alpha][k]);
+        }
+      }
+    }
     for (j = 0; j < s; j++) {
       word **pj_rows = p_rows + j * max_irr2; /* Pointer to this Pj matrix */
       u32 dim_irr_j = dim_irr[j];
@@ -597,7 +650,8 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
                 matrix_free(qn_rows);
                 matrix_free(qnp_rows);
                 grease_free(&grease);
-                free_expanded(expanded_lrows, max_irr);
+                matrix_free(expanded_lrows);
+                free_mexp(mexpanded_lrows, max_irr, max_left);
                 return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
                                nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, NULL,
                                NULL, NULL, p, q, h_p, h_q, s, h_o, outp, rows, lrows, rrows);
@@ -614,7 +668,8 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
                 matrix_free(qn_rows);
                 matrix_free(qnp_rows);
                 grease_free(&grease);
-                free_expanded(expanded_lrows, max_irr);
+                matrix_free(expanded_lrows);
+                free_mexp(mexpanded_lrows, max_irr, max_left);
                 return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
                                nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, NULL,
                                NULL, NULL, p, q, h_p, h_q, s, h_o, outp, rows, lrows, rrows);
@@ -629,7 +684,6 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
               }
             }
           }
-          fseeko64(leftp, lptr, SEEK_SET); /* Back to start of rows for i */
           for (alpha = 0; alpha < left_multiplicities[i]; alpha++) {
             /* Seek to correct place in output (accounting for alpha and beta) */
             fseeko64(outp, optr + (s64)((s64)beta + (s64)alpha * (s64)right_multiplicities[i]) *
@@ -643,51 +697,44 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
               matrix_free(qn_rows);
               matrix_free(qnp_rows);
               grease_free(&grease);
-              free_expanded(expanded_lrows, max_irr);
+              matrix_free(expanded_lrows);
+              free_mexp(mexpanded_lrows, max_irr, max_left);
               return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
                              nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, NULL,
                              NULL, NULL, p, q, h_p, h_q, s, h_o, outp, rows, lrows, rrows);
             }
-            /* Get Mi,alpha */
-            if (0 == endian_read_matrix(leftp, lrows, len_l, dim_irr_i)) {
-              matrix_free(q_rows);
-              matrix_free(p_rows);
-              matrix_free(q_split_rows);
-              matrix_free(n_rows);
-              matrix_free(qn_rows);
-              matrix_free(qnp_rows);
-              grease_free(&grease);
-              free_expanded(expanded_lrows, max_irr);
-              return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
-                             nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, NULL,
-                             NULL, NULL, p, q, h_p, h_q, s, h_o, outp, rows, lrows, rrows);
-            }
-            /* Now expand the bits we want into expanded_lrows */
+            /*
+             * Set up pointers in expanded_lrows to the correct place
+             * in mexpanded_lrows. This is m_l
+             */
             for (k = 0; k < dim_irr_i; k++) {
-              get_elements_from_row_with_params_into_row(nob, m_l, mask,
-                                                         elts_per_word, lrows[k],
-                                                         left_multiplicities[j] * dim_irr_j, expanded_lrows[k]);
-
+              expanded_lrows[k] = mexpanded_lrows[alpha][k] + m_l;
             }
             for (gamma = 0; gamma < left_multiplicities[j]; gamma++) {
+              u32 m = gamma * dim_irr_j;
+              word **qnp = qnp_rows;
+              word **exp_lrows = expanded_lrows;
               /* Initialise the result */
               row_init(t_row, len_pjl);
               /* Form T = Sigma(k,l) Lambdakl*Rkl */
               for (k = 0; k < dim_irr_i; k++) {
-                for (l = 0; l < dim_irr_j; l++) {
+                word *elrows = *exp_lrows + m;
+                word *end = elrows + dim_irr_j;
+                while (elrows < end) {
                   /* Get Lambda = Mi,alpha,j,gamma[k,l] */
-                  word elt = expanded_lrows[k][gamma * dim_irr_j + l];
+                  word elt = *elrows++;
+                  assert(elt <= 1);
                   /* Add elt * qnp[k,l] to t_row */
                   if (0 != elt) {
                     if (1 == elt) {
-                      word_row_operations.incer(qnp_rows[dim_end_i * (k * dim_irr_j + l)], t_row,
-                                                len_pjl);
+                      word_row_operations.incer(*qnp, t_row, len_pjl);
                     } else {
-                      word_row_operations.scaled_incer(qnp_rows[dim_end_i * (k * dim_irr_j + l)], t_row,
-                                                       len_pjl, elt);
+                      word_row_operations.scaled_incer(*qnp, t_row, len_pjl, elt);
                     }
                   }
+                  qnp += dim_end_i;
                 }
+                exp_lrows++;
               }
               /* Write T into the correct place in outp */
               m = m_o + dim_end_j * (gamma * right_multiplicities[j] + delta);
@@ -711,7 +758,8 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
               matrix_free(qn_rows);
               matrix_free(qnp_rows);
               grease_free(&grease);
-              free_expanded(expanded_lrows, max_irr);
+              matrix_free(expanded_lrows);
+              free_mexp(mexpanded_lrows, max_irr, max_left);
               return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
                              nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, NULL,
                              NULL, NULL, p, q, h_p, h_q, s, h_o, NULL, NULL, lrows, rrows);
@@ -725,7 +773,6 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
     } /* j */
     n_r += dim_irr_i * right_multiplicities[i];
     n_o += dim_end_i * right_multiplicities[i] * left_multiplicities[i];
-    lptr = lptr + (s64)dim_irr_i * (s64)left_multiplicities[i] * (s64)len_l * (s64)sizeof(word);
     optr = optr + (s64)dim_end_i * (s64)left_multiplicities[i] * (s64)right_multiplicities[i] *
       (s64)len * (s64)sizeof(word);
   } /* i */
@@ -737,7 +784,8 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
   matrix_free(qn_rows);
   matrix_free(qnp_rows);
   grease_free(&grease);
-  free_expanded(expanded_lrows, max_irr);
+  matrix_free(expanded_lrows);
+  free_mexp(mexpanded_lrows, max_irr, max_left);
   (void)cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
                 nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, NULL, NULL,
                 NULL, NULL, p, q, h_p, h_q, s, h_o, outp, rows, lrows, rrows);
