@@ -1,5 +1,5 @@
 /*
- * $Id: grease.c,v 1.26 2005/06/22 21:52:53 jon Exp $
+ * $Id: grease.c,v 1.27 2018/04/18 19:27:06 jon Exp $
  *
  * Functions to grease matrix rows
  *
@@ -128,10 +128,7 @@ void grease_init_rows(grease grease, u32 prime)
   u32 i, j, k, *l;
   assert(NULL != grease);
   assert(0 != grease->level);
-  j = grease->size;
-  for (i = 0; i < j; i++) {
-    grease->status[i] = 0;
-  }
+  memset(grease->status, 0, grease->size * sizeof(u32));
   j = 1;
   k = grease->level;
   l = grease->status - 1;
