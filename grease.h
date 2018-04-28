@@ -1,5 +1,5 @@
 /*
- * $Id: grease.h,v 1.13 2005/06/22 21:52:53 jon Exp $
+ * $Id: grease.h,v 1.14 2018/04/28 16:22:42 jon Exp $
  *
  * Functions to grease matrix rows
  *
@@ -30,6 +30,9 @@ extern int grease_limit(u32 prime, u32 level, u32 grease_rows, u32 total_rows);
 
 /* Set up row operations */
 extern void grease_init(row_opsp ops, grease grease);
+
+/* Allocate and populate the divisions table */
+extern int grease_allocate_table(u32 prime, grease grease);
 
 /* Allocate the row table and row type table */
 extern int grease_allocate(u32 prime, u32 len,

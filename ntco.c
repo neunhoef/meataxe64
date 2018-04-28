@@ -1,5 +1,5 @@
 /*
- * $Id: ntco.c,v 1.12 2018/04/18 19:40:03 jon Exp $
+ * $Id: ntco.c,v 1.13 2018/04/28 16:22:42 jon Exp $
  *
  * Tensor condense one group element (new algorithm)
  *
@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <string.h>
 #include "elements.h"
 #include "endian.h"
 #include "grease.h"
@@ -143,7 +144,10 @@ static int cleanup(u32 *left_multiplicities, u32 *right_multiplicities,
   return 0;
 }
 
+/* Maximum grease in general multiplications */
 #define GREASE_MAX 6
+/* How many grease rows we'll produce per set from QNP */
+#define MAX_QNP_GREASE 16
 
 int tcondense(u32 s, const char *mults_l, const char *mults_r,
               const char *irr, const char *end,
@@ -159,6 +163,16 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
   const header *h_l, *h_r, *h_o, **h_p, **h_q;
   u32 alpha, beta, gamma, delta, extent_l, extent_r, extent_q, extent_p, extent_sub_q, extent_n, extent_qn, extent_qnp, extent_t, n_r, n_o, m_r, m_l;
   word **rows, **lrows, **rrows, **q_rows, **p_rows, **q_split_rows, **n_rows, **qn_rows, **qnp_rows, *t_row;
+  /*
+   * Grease for qnp_rows.
+   * We have an entry per row (max_irr of them)
+   * Each entry has max_irr/grease level tables
+   * Each table has prime^grease level entries
+   * Hence the final item is word ****
+   */
+  word ****qnp_grease;
+  u32 qnp_grease_factor, qnp_greases, grease_table_size;
+  grease_struct qnp_grease_table;
   u32 elts_per_word;
   word mask;
   word **expanded_lrows;
@@ -474,7 +488,7 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
     printf("%s: using grease level %u\n", name, grease.level);
     fflush(stdout);
   }
-  if (0 == grease_allocate(prime, max_irr2_len, &grease, 900)){ /*** Think about using max_irr_len */
+  if (0 == grease_allocate(prime, max_irr2_len, &grease, 900)) { /*** Think about using max_irr_len */
     fprintf(stderr, "%s: failed to allocate grease, terminating\n", name);
     matrix_free(q_rows);
     matrix_free(p_rows);
@@ -530,6 +544,38 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
   t_row = memory_pointer_offset(extent_l + extent_r + extent_p + extent_q + extent_sub_q + extent_n + extent_qn + extent_qnp, 0, max_end2_len);
   n_r = 0;
   n_o = 0;
+  /* Now set up space to grease qnp */
+  qnp_grease = my_malloc(max_irr * sizeof *qnp_grease);
+  l = prime;
+  qnp_grease_factor = 0;
+  while (l <= MAX_QNP_GREASE) {
+    qnp_grease_factor++;
+    l *= prime;
+  }
+  grease_table_size = l / prime;
+  qnp_grease_table.level = qnp_grease_factor;
+  if (0 == grease_allocate_table(prime, &qnp_grease_table)) {
+    fprintf(stderr, "%s: failed to allocate qnp grease, terminating\n", name);
+    matrix_free(q_rows);
+    matrix_free(p_rows);
+    return cleanup(left_multiplicities, right_multiplicities, dim_irr, dim_end,
+                   nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, NULL,
+                   NULL, NULL, p, q, h_p, h_q, s, h_o, outp, rows, lrows, rrows);
+  }
+  /* How many sets we'll split one row into */
+  qnp_greases = (max_irr + qnp_grease_factor - 1) / qnp_grease_factor;
+  for (k = 0; k < max_irr; k++) {
+    /* Allocate a table for this row */
+    qnp_grease[k] = my_malloc(qnp_greases * sizeof(*(qnp_grease[k])));
+    for (l = 0; l < qnp_greases; l++) {
+      /* Allocate a set of rows for this grease table */
+      qnp_grease[k][l] = my_malloc(grease_table_size * sizeof(*(qnp_grease[k][l])));
+      for (j = 0; j < grease_table_size; j++) {
+        /* Allocate this row, max_end2_len for a flattened matrix */
+        qnp_grease[k][l][j] = my_malloc(max_end2_len * sizeof(*(qnp_grease[k][l][j])));
+      }
+    }
+  }
   for (i = 0; i < s; i++) {
     /* Row loop over distinct irreducibles of H */
     u32 dim_irr_i = dim_irr[i];
@@ -624,7 +670,7 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
           /* Acquire Ni,beta,j,delta */
           for (k = 0; k < dim_irr_i; k++) {
             row_init(n_rows[k], max_irr_len);
-            for(l = 0; l < dim_irr_j; l++) {
+            for (l = 0; l < dim_irr_j; l++) {
               word elt = get_element_from_row_with_params(nob, m_r + delta * dim_irr_j + l, mask, elts_per_word, rrows[n_r + beta * dim_irr_i + k]);
               put_element_to_clean_row_with_params(nob, l, elts_per_word, n_rows[k], elt);
             }
@@ -632,6 +678,8 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
           /* Space for results is max_irr2 * max_end of length len(max_end) */
           /* Compute Rkl = Qik * Ni,beta,j,delta * Pjl */
           for (k = 0; k < dim_irr_i; k++) {
+            /* Get the row tables ready for population */
+            word ***qnp_row_grease = qnp_grease[k];
             /* Now multiply on left by Qk */
             if (1 == dim_irr_i && 1 == **q_split_rows) {
               /* 1 x 1 identity matrix */
@@ -640,7 +688,7 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
                 qn_rows[0][l] = n_rows[0][l];
               }
             } else {
-              /* Do the multiply */
+              /* Do the multiply of Qk by N*/
               if (0 == mul_in_store(q_split_rows + k * dim_end_i, n_rows, qn_rows,
                                     dim_irr_i, len_qj, nob, dim_end_i, prime, 0, &grease)) {
                 matrix_free(q_rows);
@@ -658,7 +706,7 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
               }
             }
             for (l = 0; l < dim_irr_j; l++) {
-              /* Now multiply on right by Pl */
+              /* Now multiply QkN on right by Pl */
               if (0 == mul_in_store(qn_rows, pj_rows + l * dim_irr_j, qnp_rows + dim_end_i * (k * dim_irr_j + l),
                                     dim_irr_j, len_pj, nob, dim_end_i, prime, 0, &grease)) {
                 matrix_free(q_rows);
@@ -674,14 +722,81 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
                                nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, NULL,
                                NULL, NULL, p, q, h_p, h_q, s, h_o, outp, rows, lrows, rrows);
               }
-              /* Now convert this to linearised form */
+              /* Now convert QkNPl for all k, l to linearised form */
               for (m = 1; m < dim_end_i; m++) {
                 /* Over the rows */
                 for (n = 0; n < dim_end_j; n++) {
+                  /* Over the columns */
                   word elt = get_element_from_row_with_params(nob, n, mask, elts_per_word, qnp_rows[dim_end_i * (k * dim_irr_j + l) + m]);
                   put_element_to_row_with_params(nob, n + m * dim_end_j, mask, elts_per_word, qnp_rows[dim_end_i * (k * dim_irr_j + l)], elt);
                 }
               }
+            }
+            /*
+             * Now get the tables per set of columns
+             * We have QkNPl for all l at this point
+             * QkNPl lives in qnp_rows[dim_end_i * (k * dim_irr_j + l)]
+             * with row m at offset m * dim_end_j onwards
+             * So the total row length here is dim_end_i * dim_end_j,
+             * requiring max_end2_len words of space.
+             * We have a set of grease tables for this row QkNP
+             * at qnp_row_grease
+             */
+            l = 0; /* Column index */
+            m = 0; /* Table index */
+            while (l < dim_irr_j) {
+              word **qnp_row_table = qnp_row_grease[m];
+              u32 r;
+              u32 idx = 1;
+              /*
+               * Now populate qnp_row_table from up to qnp_grease_factor elements
+               * We have qnp_greases to do in all, the last of which may be short
+               */
+              n = l;
+              /* Set up a zero row */
+              row_init(*qnp_row_table, len_pjl);
+              while (n < l + qnp_grease_factor && n < dim_irr_j) {
+                /*
+                 * Pre populate the table with the known rows
+                 * at 1, prime, prime ^2 etc
+                 */
+                memcpy(qnp_row_table[idx], qnp_rows[dim_end_i * (k * dim_irr_j + n)], len_pjl * sizeof(word));
+                idx *= prime;
+                n++;
+              }
+              /* Clear out any rows beyond the end of the column for safety */
+              while (n < l + qnp_grease_factor) {
+                row_init(qnp_row_table[idx], len_pjl);
+                idx *= prime;
+                n++;
+              }
+              /*
+               * Now grease the rest
+               * Note that this will grease some rows
+               * that don't really exist at the end of the column.
+               * This doesn't matter as they won't be used
+               */
+              for (r = 2; r < grease_table_size; r++) {
+                /* Note grease tables ignore 0 */
+                u32 s = r - 1;
+                u32 quot = qnp_grease_table.quot[s];
+                u32 rem = qnp_grease_table.rem[s];
+                u32 index = qnp_grease_table.index[s];
+                if (0 == rem) {
+                  /* Scaled value, or maybe already there */
+                  if (1 != quot) {
+                    /* Scale row[index] by quot into row[r] */
+                    word_row_operations.scaler(qnp_row_table[index], qnp_row_table[r], len_pjl, quot);
+                  }
+                } else {
+                  /* Add row[rem] to row[r-rem] giving row[r] */
+                  word_row_operations.adder(qnp_row_table[rem], qnp_row_table[r - rem], qnp_row_table[r], len_pjl);
+                }
+              }
+              /* On to next set */
+              l = n;
+              /* On to next table */
+              m++;
             }
           }
           for (alpha = 0; alpha < left_multiplicities[i]; alpha++) {
@@ -712,7 +827,6 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
             }
             for (gamma = 0; gamma < left_multiplicities[j]; gamma++) {
               u32 m = gamma * dim_irr_j;
-              word **qnp = qnp_rows;
               word **exp_lrows = expanded_lrows;
               /* Initialise the result */
               row_init(t_row, len_pjl);
@@ -720,19 +834,22 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
               for (k = 0; k < dim_irr_i; k++) {
                 word *elrows = *exp_lrows + m;
                 word *end = elrows + dim_irr_j;
-                while (elrows < end) {
-                  /* Get Lambda = Mi,alpha,j,gamma[k,l] */
-                  word elt = *elrows++;
-                  assert(elt <= 1);
-                  /* Add elt * qnp[k,l] to t_row */
-                  if (0 != elt) {
-                    if (1 == elt) {
-                      word_row_operations.incer(*qnp, t_row, len_pjl);
-                    } else {
-                      word_row_operations.scaled_incer(*qnp, t_row, len_pjl, elt);
-                    }
+                /* Get the greases for this row */
+                word ***qnp_row_grease = qnp_grease[k];
+                /* Do greased addition */
+                for (l = 0; l < qnp_greases; l++) {
+                  /* Acquire the M values for row k, l * qnp_grease_factor to (l+1) * qnp_grease_factor-1 */
+                  u32 r = 0, idx = 1;
+                  word elt = 0;
+                  while (r < qnp_grease_factor && elrows < end) {
+                    /* Add in current element in the right place */
+                    elt += idx * *elrows++;
+                    /* Shift the multiplier up */
+                    idx *= prime;
+                    r++;
                   }
-                  qnp += dim_end_i;
+                  /* Now add in greased value at elt */
+                  word_row_operations.incer(qnp_row_grease[l][elt], t_row, len_pjl);
                 }
                 exp_lrows++;
               }

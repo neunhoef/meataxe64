@@ -1,5 +1,5 @@
 /*
- * $Id: grease.c,v 1.27 2018/04/18 19:27:06 jon Exp $
+ * $Id: grease.c,v 1.28 2018/04/28 16:22:42 jon Exp $
  *
  * Functions to grease matrix rows
  *
@@ -96,6 +96,25 @@ static void split(u32 prime, u32 n,
   }
 }
 
+int grease_allocate_table(u32 prime, grease grease)
+{
+  u32 q_n;
+  u32 i;
+  assert(NULL != grease);
+  assert(0 != grease->level);
+  if (0 == int_pow(prime, grease->level, &q_n)) {
+    return 0;
+  }
+  grease->size = q_n - 1;
+  grease->quot = matrix_malloc(grease->size);
+  grease->rem = matrix_malloc(grease->size);
+  grease->index = matrix_malloc(grease->size);
+  for (i = 0; i < grease->size; i++) {
+    split(prime, i + 1, grease->quot + i, grease->rem + i, grease->index + i);
+  }
+  return 1;
+}
+
 int grease_allocate(u32 prime, u32 len,
                     grease grease, u32 start)
 {
@@ -155,11 +174,11 @@ void grease_free(grease grease)
 /* Compute, if necessary, grease row i */
 /* i is uncorrected for the table, so should not be zero */
 /* len is the revised length taking offset into account */
-static void grease_make_row(grease grease, u32 i, u32 len, u32 offset)
+static void grease_make_row(grease grease, u32 elt, u32 len, u32 offset)
 {
-  u32 j = i - 1;
+  u32 j = elt - 1;
   u32 quot, rem, index;
-  assert(0 < i);
+  assert(0 < elt);
   assert(0 == grease->status[j]);
   quot = grease->quot[j];
   rem = grease->rem[j];

@@ -184,6 +184,7 @@ int sign(const char *qform, const char *bform, const char *name)
       assert(pos + 3 >= nor);
     }
 #endif
+    /*printf("Handling nor = %u\n", nor);*/
     res = singular_vector(&row_operations, mat + start, mat + noc, sing_row1, &out_num, qinp,
                           noc, 3, nob, len, prime, &grease, nor - 3, q_indexes, qform, name);
     if (0 != res) {
@@ -272,19 +273,18 @@ int sign(const char *qform, const char *bform, const char *name)
            * First instance, clean the row and remember it
            * So vS(mat[res]) = 1
            * TBD: can we avoid early parts of the row that are zero?
+           * We only do this for one row each time through
            */
-          if (1 != elt) {
-            elt = (*prime_operations.invert)(elt);
-            (*row_operations.scaler_in_place)(mat[n], len, elt);
-          }
-          res = n;
           prod_start = (noc - 1 - n) / elts_per_word;
           prod_len = len - prod_start;
+          if (1 != elt) {
+            elt = (*prime_operations.invert)(elt);
+            (*row_operations.scaler_in_place)(mat[n] + prod_start, prod_len, elt);
+          }
+          res = n;
         } else {
           /*
            * Subsequent instance, clean the row with the remembered row
-           * TBD: it would make sense here to know where the first
-           * non zero is in mat[res]. 24% of total time goes here
            */
           elt = (*prime_operations.negate)(elt);
           if (1 == elt) {
