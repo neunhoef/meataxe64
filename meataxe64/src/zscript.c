@@ -42,7 +42,7 @@ static int scale(const char *m1, const char *m2, u32 scalar, u32 prime, u32 nor,
     fprintf(stderr, "zscript: unable to create scaled identity, terminating\n");
     return 0;
   }
-  fMultiply(fun_tmp, sid, 0, m1, 0, m2, 0);
+  fMultiply(fun_tmp, sid, 1, m1, 1, m2, 1);
   return 1;
 }
 
@@ -50,14 +50,14 @@ static int scale(const char *m1, const char *m2, u32 scalar, u32 prime, u32 nor,
 static int scaled_add(const char *m1, const char *m2, const char *m3, u32 scalar, u32 prime, u32 nor, const char *tmp)
 {
   if (1 == scalar) {
-    fAdd(m1, 0, m2, 0, m3, 0);
+    fAdd(m1, 1, m2, 1, m3, 1);
   } else {
     const char *scaled = new_id(tmp);
     if (0 == scale(m1, scaled, scalar, prime, nor, tmp)) {
       fprintf(stderr, "zscript: unable to scale, terminating\n");
       return 0;
     }
-    fAdd(scaled, 0, m2, 0, m3, 0);
+    fAdd(scaled, 1, m2, 1, m3, 1);
   }
   return 1;
 }
@@ -200,7 +200,7 @@ static int script_mul(const char *id, const char **out, const char *tmp, const c
         return 0;
       }
       new = new_id(tmp);
-      fMultiply(fun_tmp, current, 0, multiplier, 0, new, 0);
+      fMultiply(fun_tmp, current, 1, multiplier, 1, new, 1);
       current = new;
     }
     *out = current;
