@@ -163,6 +163,7 @@ int main(int argc, const char *argv[])
   names[0] = "I";
   for (j = 0; j < argc2; j++) {
     names[j + 1] = argv[2 * j];
+    words[j + 1] = NULL;
   }
   if (0 != sub_order) {
     prime = sub_order; /* Restrict to subfield if requested */
