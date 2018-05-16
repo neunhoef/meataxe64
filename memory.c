@@ -1,5 +1,5 @@
 /*
- * $Id: memory.c,v 1.18 2017/01/10 08:08:47 jon Exp $
+ * $Id: memory.c,v 1.19 2018/05/16 07:51:26 jon Exp $
  *
  * Large memory manipulation for meataxe
  *
@@ -61,7 +61,7 @@ word *memory_pointer(u32 n)
 
 word *memory_pointer_offset(u32 n, u32 i, u32 len)
 {
-  u32 offset = i * len + n * extent;
+  size_t offset = i * (size_t)len + n * extent;
   assert(n < 1000);
   assert(0 != len);
   assert(offset + len <= 1000 * extent);
