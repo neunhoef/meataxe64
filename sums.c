@@ -1,5 +1,5 @@
 /*
- * $Id: sums.c,v 1.21 2006/02/09 22:02:05 jon Exp $
+ * $Id: sums.c,v 1.22 2018/05/16 07:50:56 jon Exp $
  *
  * Function to compute linear sums of two matices
  *
@@ -136,6 +136,7 @@ int sums(const char *out, u32 n, unsigned int argc, const char *const args[],
   names[0] = "I";
   for (j = 0; j < argc2; j++) {
     names[j + 1] = args[2 * j];
+    words[j + 1] = NULL;
   }
   if (0 != sub_order) {
     prime = sub_order; /* Restrict to subfield if requested */
