@@ -19,7 +19,7 @@
 #include "funs.h"
 
 /* Scalar multiply m1 by scalar to give m2 */
-static int scale(const char *m1, const char *m2, u32 scalar, u32 prime, u32 nor, const char *tmp, u32 tmp_len)
+int scale(const char *m1, const char *m2, u32 scalar, u32 prime, u32 nor, const char *tmp, u32 tmp_len)
 {
   const char *sid = mk_tmp("sums", tmp, tmp_len);
   if (0 == ident(prime, nor, nor, scalar, sid)) {

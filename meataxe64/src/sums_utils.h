@@ -34,8 +34,11 @@ extern int ignore_word(u32 word, u32 max_prod, const char **words, u32 gen, u32 
 
 typedef int (*accept)(u32 rank, u32 nor, const char *file, const char *form);
 
-/* Do a scaled addition */
+/* Do a scaled addition m3 = s * m1 + m2 */
 extern int scaled_add(const char *m1, const char *m2, const char *m3, u32 scalar, u32 prime, u32 nor, const char *tmp);
+
+/* Do a scale m2 = s * m1 */
+extern int scale(const char *m1, const char *m2, u32 scalar, u32 prime, u32 nor, const char *tmp, u32 tmp_len);
 
 /* Compute a rank */
 extern u64 rank(const char *m, const char *tmp);

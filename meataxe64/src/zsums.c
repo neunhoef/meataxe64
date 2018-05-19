@@ -53,7 +53,7 @@ int main(int argc, const char *argv[])
   char *buf;
   u32 *orders;
   unsigned int argc2 = argc / 2;
-  u32 n, sub_order = 0, keep = 0, invertible = 1, verbose = 1;
+  u32 n, sub_order = 0, keep = 0, invertible = 1, verbose = 0;
   u32 i, j, k, l, r, s, cur_word = 0, cur_power = 1, base_prime;
   u32 prime = 1, nod = 0, nor = 0, noc = 0, count;
   u32 order_sum = 0;

@@ -73,5 +73,5 @@ gcc -include mt_types.h zimport.c elements.c endian.c header.c primes.c utils.c 
 gcc -DEIGHT_BYTE_WORD -include mt_types.h zimport.c elements.c endian.c header.c primes.c utils.c read.c ${gcc_link_options} -lm -o $BIN/zimport64
 gcc -include mt_types.h zexport.c elements.c endian.c header.c primes.c utils.c write.c ${gcc_link_options} -lm -o $BIN/zexport
 gcc -DEIGHT_BYTE_WORD -include mt_types.h zexport.c elements.c endian.c header.c primes.c utils.c write.c ${gcc_link_options} -lm -o $BIN/zexport64
-gcc -DEIGHT_BYTE_WORD -include mt_types.h zscript.c utils.c mfuns.c ${gcc_link_options} -lm -o $BIN/zscript
+gcc -DEIGHT_BYTE_WORD -include mt_types.h zscript.c utils.c mfuns.c sums_utils.c ${gcc_link_options} -lm -o $BIN/zscript
 gcc -DEIGHT_BYTE_WORD -include mt_types.h zsums.c utils.c mfuns.c sums_utils.c primes.c ${gcc_link_options} -lm -o $BIN/zsums

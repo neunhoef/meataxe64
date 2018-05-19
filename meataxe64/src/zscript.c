@@ -16,51 +16,9 @@
 #include "io.h"
 #include "util.h"
 #include "mfuns.h"
+#include "sums_utils.h"
 
-static char *fun_tmp;
-#define FUN_TMP "_funs"
-
-static u32 id = 0;
-
-static const char *new_id(const char *base)
-{
-  u32 len;
-  char *res;
-  assert(NULL != base);
-  len = 11 + strlen(base);
-  res = malloc(len + 1);
-  sprintf(res, "%s.%u", base, id);
-  id++;
-  return res;
-}
-
-/* Scalar multiply m1 by scalar to give m2 */
-static int scale(const char *m1, const char *m2, u32 scalar, u32 prime, u32 nor, const char *tmp)
-{
-  const char *sid = new_id(tmp);
-  if (0 == ident(prime, nor, nor, scalar, sid)) {
-    fprintf(stderr, "zscript: unable to create scaled identity, terminating\n");
-    return 0;
-  }
-  fMultiply(fun_tmp, sid, 1, m1, 1, m2, 1);
-  return 1;
-}
-
-/* m3 = s * m1 + m2 */
-static int scaled_add(const char *m1, const char *m2, const char *m3, u32 scalar, u32 prime, u32 nor, const char *tmp)
-{
-  if (1 == scalar) {
-    fAdd(m1, 1, m2, 1, m3, 1);
-  } else {
-    const char *scaled = new_id(tmp);
-    if (0 == scale(m1, scaled, scalar, prime, nor, tmp)) {
-      fprintf(stderr, "zscript: unable to scale, terminating\n");
-      return 0;
-    }
-    fAdd(scaled, 1, m2, 1, m3, 1);
-  }
-  return 1;
-}
+char *fun_tmp;
 
 /* Parse the incoming script up to the first plus */
 /* The result is returned, and the rest of the script is indicated in rest */
@@ -154,7 +112,7 @@ static const char *get_multiplier(unsigned int argc, const char gen, const char 
   return multiplier;
 }
 
-static int script_mul(const char *id, const char **out, const char *tmp, const char *script,
+static int script_mul(const char *id, const char **out, const char *tmp, size_t tmp_len, const char *script,
                       unsigned int argc, const char *const args[], const char *name)
 {
   char gen;
@@ -199,7 +157,7 @@ static int script_mul(const char *id, const char **out, const char *tmp, const c
       if (NULL == multiplier) {
         return 0;
       }
-      new = new_id(tmp);
+      new = mk_tmp("zscript", tmp, tmp_len);
       fMultiply(fun_tmp, current, 1, multiplier, 1, new, 1);
       current = new;
     }
@@ -208,7 +166,7 @@ static int script_mul(const char *id, const char **out, const char *tmp, const c
   return 1;
 }
 
-static int exec_script(const char *out, const char *tmp, const char *script,
+static int exec_script(const char *out, const char *tmp, size_t tmp_len, const char *script,
                        unsigned int argc, const char *const args[], const char *name)
 {
   u32 i, prime = 1, nor, scalar;
@@ -236,7 +194,7 @@ static int exec_script(const char *out, const char *tmp, const char *script,
       exit(21);
     }
   }
-  id = new_id(tmp);
+  id = mk_tmp("zscript", tmp, tmp_len);
   summand = parse_plus(script, &rest, &scalar, prime, name);
   if (NULL == summand) {
     return 0;
@@ -246,26 +204,26 @@ static int exec_script(const char *out, const char *tmp, const char *script,
     return 0;
     /* Note, id not needed if no additions */
   }
-  if (0 == script_mul(id, &current, tmp, summand, argc, args, name)) {
+  if (0 == script_mul(id, &current, tmp, tmp_len, summand, argc, args, name)) {
     fprintf(stderr, "%s: unable to create summand %s, terminating\n", name, summand);
     return 0;
   }
   if (1 != scalar) {
-    new = new_id(tmp);
-    if (0 == scale(current, new, scalar, prime, nor, tmp)) {
+    new = mk_tmp("zscript", tmp, tmp_len);
+    if (0 == scale(current, new, scalar, prime, nor, tmp, tmp_len)) {
       fprintf(stderr, "%s: script scale of %s by %u failed, terminating\n", name, current, scalar);
       return 0;
     }
     current = new;
   }
   while (NULL != rest) {
-    const char *sum = new_id(tmp);
+    const char *sum = mk_tmp("zscript", tmp, tmp_len);
     script = rest;
     summand = parse_plus(script, &rest, &scalar, prime, name);
     if (NULL == summand) {
       return 0;
     }
-    if (0 == script_mul(id, &new, tmp, summand, argc, args, name)) {
+    if (0 == script_mul(id, &new, tmp, tmp_len, summand, argc, args, name)) {
       fprintf(stderr, "%s: unable to create summand '%s', terminating\n", name, summand);
       return 0;
     }
@@ -277,7 +235,7 @@ static int exec_script(const char *out, const char *tmp, const char *script,
   }
   for (i = 0; i < argc; i++) {
     if (0 == strcmp(args[i], current)) {
-      return scale(current, out, 1, prime, nor, tmp);
+      return scale(current, out, 1, prime, nor, tmp, tmp_len);
     }
   }
   rename(current, out); /* Turn current summand into output */
@@ -312,7 +270,7 @@ int main(int argc, const char *argv[])
   out = argv[1];
   tmp = argv[2];
   script = argv[3];
-  if (0 == exec_script(out, tmp, script, argc - 4, argv + 4, name)) {
+  if (0 == exec_script(out, tmp, tmp_len, script, argc - 4, argv + 4, name)) {
     exit(1);
   }
   return 0;
