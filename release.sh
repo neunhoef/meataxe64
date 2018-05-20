@@ -11,7 +11,7 @@ cvs co mtx64
 rm -rf `find . -name CVS`
 rm -rf `find . -name .cvsignore`
 cd mtx64/
-rm -rf bld/ jif/ reg/ test/
+rm -rf bld/ jif/ reg/ test/ release.sh
 cd ..
 git clone http://schur/jon/meataxe64.git git
 cd git/
