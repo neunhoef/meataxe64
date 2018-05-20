@@ -12,6 +12,7 @@ rm -rf `find . -name CVS`
 rm -rf `find . -name .cvsignore`
 cd mtx64/
 rm -rf bld/ jif/ reg/ test/ release.sh
+mv ptinstall/readme.txt install.sh ..
 cd ..
 git clone http://schur/jon/meataxe64.git git
 cd git/

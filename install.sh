@@ -4,7 +4,7 @@
 #
 # Parameter 1: where to install the binaries
 #
-usage="$0 <dir in which to install (will be deleted)>
+usage="$0 <dir in which to install (will be deleted)>"
 if [ 1 -ne $# ]; then
     echo $usage
     exit 1
@@ -18,17 +18,16 @@ fi
 if [ -d $install ]; then
     rm -rf $install
 fi
-cd $dir/.. # Get into the root of the installed source
-cd src
+cd $dir/src
 make OS=unix ARCH=em64t rel
 mkdir -p $install/m2000
 cp -p scr/* derived/unix/em64t/gcc/bin/* $install/m2000
 cd ../mtx64
-tar cf - . | (cd $install | tar xf -)
+tar cf - . | (cd $install; tar xf -)
 cd ../git/meataxe64/test
 source go
 makl
 compa
 cd ..
-tar cf - bin | (cd $instal/ptinstall; tar xf -)
-echo "set up PATH by PATH="$install/pinstall/:$install/ptinstall/jif:$install/m2000:$PATH"
+tar cf - bin | (cd $install/ptinstall; tar xf -)
+echo add $install/pinstall/:$install/ptinstall/jif:$install/m2000 to the start of your PATH
