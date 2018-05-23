@@ -5,7 +5,6 @@
 # Parameters as for zmsp in meataxe 2000
 # ie [-m <memory] <infile> <outfile> <generators>
 #
-set -x
 dir=`dirname $0`
 if [ "-m" = "$1" ]; then
     shift 2
