@@ -53,7 +53,15 @@ x=1
 while [ 0 -ne $# ]; do
   if [ $dim -lt $nor ]; then
     ~/ptinstall/bin/zsa $s $1 ${o_s}_$x
+    if [ 0 -ne $? ]; then
+        echo "$0: zsa failed"
+        exit 1
+    fi
     ~/ptinstall/bin/zqa $s $1 ${o_q}_$x
+    if [ 0 -ne $? ]; then
+        echo "$0: zqa failed"
+        exit 1
+    fi
   else
     echo failed to split
     exit 254
