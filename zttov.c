@@ -1,5 +1,5 @@
 /*
- * Tensor to vectoror. Allow a tensoror to be flattened to a vector
+ * Tensor to vector. Allow a tensor to be flattened to a vector
  * Essentialy internally what ztmu does before output
  */
 
