@@ -1,0 +1,38 @@
+#!/bin/bash
+#
+# Script to do zsymb in meataxe 64
+#
+# Parameters as for zsymb in meataxe 2000
+# ie [-m <memory] <number of spaces> <expected space size> <infile> <outfile> <tmp_dir> <generators>
+#
+dir=`dirname $0`
+if [ "-m" = "$1" ]; then
+    shift 2
+fi
+if [ $# -le 6 ]; then
+   echo "zsymb: bad parameters"
+   echo "usage: zsymb [-m <memory] <number of spaces> <expected space size> <infile> <outfile> <tmp_dir> <generators>"
+   exit 1
+fi
+n=$1
+e=$2
+infile=$3
+outfile=$4
+tmpdir=$5
+shift 5
+tmp=tmp${PPID}
+to_m2000 ${infile} ${tmp}.1
+# Need to convert generators
+gens=
+i=3
+for x in $*; do
+    to_m2000 $x ${tmp}.$i
+    gens="${gens} ${tmp}.$i"
+    let i=$i+1
+done
+out=`~/install/zsymb $n $e ${tmp}.1 ${tmp}.2 ${tmpdir} ${gens}`
+ret=$?
+to_m64 ${tmp}.2 ${outfile}
+rm -f ${tmp}.*
+echo ${out}
+exit ${ret}

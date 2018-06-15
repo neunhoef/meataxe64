@@ -1,0 +1,29 @@
+#!/bin/sh
+#
+# Script to do zmspf in meataxe 64
+#
+# Parameters as for zmspf in meataxe 2000
+# ie [-m <memory] <infile> <outfile> <tmp_dir> <generators>
+# Due to the fact that zis produces bitstring and remnant,
+# we do this using zmsb instead
+# Note, this doesn't produce an echelised basis
+#
+dir=`dirname $0`
+if [ "-m" = "$1" ]; then
+    shift 2
+fi
+if [ $# -le 4 ]; then
+   echo "zmspf: bad parameters"
+   echo "usage: zmspf [-m <memory] <infile> <outfile> <tmp_dir> <generators>"
+   exit 1
+fi
+infile=$1
+outfile=$2
+shift 3 # Ignore tmp_dir
+tmp=tmp${PPID}
+out=`${dir}/../bin/zsb1 ${infile} ${tmp}.ss $*`
+ret=$?
+rm -f ${tmp}.ss.{bs,rem}
+mv ${tmp}.ss.sb ${outfile}
+echo $out
+exit ${ret}

@@ -3,7 +3,7 @@
 # Script to do zsid in meataxe 64 until a binary is available
 #
 # Parameters as for zsid in meataxe 2000
-# ie [-m <memory] <infile> <outfile>
+# ie [-m <memory] <field order> <nor> <noc> <elt> <out_file>
 #
 if [ $# -ne 5 -a $# -ne 7 ]; then
    echo "zsid: bad parameters"
@@ -22,5 +22,7 @@ elt=$4
 outfile=$5
 tmp=tmp$$
 ~/install/zsid ${mem} ${prime} ${nor} ${noc} ${elt} ${tmp}.1
+ret=$?
 to_m64 ${tmp}.1 ${outfile}
 rm ${tmp}.1
+exit $ret
