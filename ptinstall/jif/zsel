@@ -11,7 +11,7 @@ if [ "$1" = "-m" ]; then
 fi
 if [ $# -ne 3 ]; then
    echo "zsel: bad parameters"
-   echo "usage: zsel [-m <memory] <infile> <index> <outfile>"
+   echo "usage: zsel [-m <memory] <infile> <outfile> <index>"
    exit 1
 fi
 infile=$1
