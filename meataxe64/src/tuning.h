@@ -11,11 +11,11 @@
 // MEGABYTES should be the amount of data memory you 
 // would like a program to restrict itself to.
 
-#define MEGABYTES 2800
+#define MEGABYTES 12000
 
 // MAXCHOP is the maximum number of chops that can be made when
 // doing multi-core work.
 
-#define MAXCHOP 5
+#define MAXCHOP 10
 
 /* end of tuning.h */

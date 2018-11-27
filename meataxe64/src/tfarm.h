@@ -5,14 +5,14 @@
 
 /* tfarm0 assembler thread-safe routines */
 
-int TfAdd(int * x, int y);
-long TfGetUni(long * uni);
-void TfPutUni(long * uni, long val);
-uint64_t * TfLinkOut(uint64_t * chain);
-uint64_t * TfLinkClose(uint64_t * chain);
-int TfLinkIn(uint64_t * chain, uint64_t * ours);
-void TfAppend(uint64_t * list, uint64_t new);
-void TfPause(long wait);
+int __attribute__((sysv_abi)) TfAdd(int * x, int y);
+long __attribute__((sysv_abi)) TfGetUni(long * uni);
+void __attribute__((sysv_abi)) TfPutUni(long * uni, long val);
+uint64_t * __attribute__((sysv_abi)) TfLinkOut(uint64_t * chain);
+uint64_t * __attribute__((sysv_abi)) TfLinkClose(uint64_t * chain);
+int __attribute__((sysv_abi)) TfLinkIn(uint64_t * chain, uint64_t * ours);
+void __attribute__((sysv_abi)) TfAppend(uint64_t * list, uint64_t new);
+void __attribute__((sysv_abi)) TfPause(long wait);
 
 #define MAXPARAMS 10
 
