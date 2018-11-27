@@ -161,7 +161,7 @@ int endian_read_u64(u64 *a, FILE *fp)
 
 void endian_skip_row(FILE *fp, u32 len)
 {
-  fseeko64(fp, len * sizeof(word), SEEK_CUR);
+  fseeko(fp, len * sizeof(word), SEEK_CUR);
 }
 
 int endian_read_row(FILE *fp, word *row, u32 len)
