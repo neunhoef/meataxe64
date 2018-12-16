@@ -31,10 +31,10 @@ int main(int argc, char **argv)
   DSPACE ds;
   FILE *outp = NULL;
   uint64_t hdr[5];
-  uint32_t nor, noc, len, nob, fdef, i;
+  uint32_t nor, noc, len, nob, fdef, i, elts_per_word;
   header *h;
   Dfmt *v;
-  word *row;
+  word *row, mask, val;
 
   LogCmd(argc,argv);
   /******  First check the number of input arguments  */
@@ -55,14 +55,13 @@ int main(int argc, char **argv)
   }
   FieldSet(fdef, f);
   DSSet(f, noc, &ds);
-  v = malloc(ds.nob);
+  v = malloc(ds.nob + 7);
   /* set up header structure for m2000 matrix */
   endian_init();
   h = header_create(fdef, nob, 1, noc, nor);
   len = header_get_len(h);
   row = my_malloc(len * sizeof(*row));
   DSSet(f, noc, &ds);
-  v = malloc(ds.nob);
   /* open m2000 output */
   if (0 == open_and_write_binary_header(&outp, h, argv[2], name)) {
     if (NULL != outp) {
@@ -71,22 +70,44 @@ int main(int argc, char **argv)
     }
     return 0;
   }
-  /* loop over rows of m2000 producing rows of m64 */
+  /* loop over rows of m64 producing rows of m2000 */
+  mask = get_mask_and_elts(nob, &elts_per_word);
+  NOT_USED(mask);
   for (i = 0; i < nor; i++) {
     int e;
-    u32 j;
+    u32 j, k = 0, word_offset = 0;
 
     /* Read a row from m64 */
     ERData(in, ds.nob, v);
-    /* Clear output row */
-    memset(row ,0, len * sizeof(*row));
-    errno = 0;
-    for (j = 0; j < noc; j++) {
-      /* Get a field element from m64 and put in m2000 */
-      FELT elt = DUnpak(&ds, j, v);
-      put_element_to_row(nob, j,row, elt);
+    switch (fdef) {
+    case 2:
+    case 4:
+      /* Characteristic 2 case, just copy */
+      e = endian_write_row(outp, (word *)v, len);
+      break;
+    default:
+      /* Clear output row */
+      memset(row ,0, len * sizeof(*row));
+      errno = 0;
+      val = 0;
+      for (j = 0; j < noc; j++) {
+        /* Get a field element from m64 and put in m2000 */
+        FELT elt = DUnpak(&ds, j, v);
+        val |= elt << (nob * k);
+        k++;
+        if (k >= elts_per_word) {
+          row[word_offset] = val;
+          val = 0;
+          k = 0;
+          word_offset++;
+        }
+      }
+      if (k > 0) {
+        row[word_offset] = val;
+      }
+      e = endian_write_row(outp, row, len);
+      break;
     }
-    e = endian_write_row(outp, row, len);
     if (0 == e) {
       if ( 0 != errno) {
         perror(name);

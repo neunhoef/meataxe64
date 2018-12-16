@@ -1,19 +1,4 @@
 /*
-To clean one file A with another NREF B, you go
-column extract of A with B.bs giving Asel and Anon
-multiply Asel by B.rem and add into Anon giving C (say)
-This gives shorter rows - the same length as B.rem
-You will normally want to fProduceNREF on C next, giving C.bs and C.rem
-You probably want to back-clean B.rem (col extract, multiply-and-add as above)
-If you want to put the two parts together, you go
-Pivot combine (the two bit strings)
-Row Riffle with the result of the multiply-and-add and C.rem
-The result will be a combined bit-string and a combined remnant as if
-you had echelized all the rows in one go.
-Hope that helps. If you can't fight your way through that, let me know
-and I'll try to write a document.
-*/
-/*
       zis.c     meataxe-64 invariant subspace
       =====     J. G. Thackray   04.10.2017
 */
@@ -82,168 +67,16 @@ static void clean(const char *bs, const char *rem, const char *rows, const char 
   unsigned int i;
   /* Extract pivots from rows using bs giving tmp1 */
   /* Also produce tmp3 = nonsel(bs, rows) */
-  fColumnExtract(bs, 0, rows, 0, clean_vars[0], 0, clean_vars[2], 0);
+  fColumnExtract(bs, 1, rows, 1, clean_vars[0], 1, clean_vars[2], 1);
   /* Produce tmp2 = tmp1 * rem */
-#if 0
-  /* Workaround multiplying by 0 bug */
-  {
-    header hdr;
-    EPeek(rem, hdr.hdr);
-    if (0 != hdr.named.noc) {
-      fMultiply(fun_tmp, clean_vars[0], 0, rem, 0, clean_vars[1], 0);
-    } else {
-      /* copy rem to clean_vars[1] */
-      EFIL *rem_fil, *out_fil;
-      rem_fil = ERHdr(rem, hdr.hdr);
-      out_fil = EWHdr(clean_vars[1], hdr.hdr);
-      ERClose1(rem_fil, 0);
-      EWClose1(out_fil, 0);
-    }
-  }
-#else
-  fMultiply(fun_tmp, clean_vars[0], 0, rem, 0, clean_vars[1], 0);
-#endif
+  fMultiply(fun_tmp, clean_vars[0], 1, rem, 1, clean_vars[1], 1);
   /* Produce out = tmp3 + tmp2 */
-  fAdd(clean_vars[2], 0, clean_vars[1], 0, out, 0);
+  fAdd(clean_vars[2], 1, clean_vars[1], 1, out, 1);
   /* And delete the temporaries */
   for (i = 0; i < 3; i++) {
     remove(clean_vars[i]);
   }
 }
-
-/*
- * A function to create the plain full width vectors for multiplication
- * Parameters:
- * 1: A bitstring specifying the zeros. May be NULL
- * 2: A bitstring specifying the minus ones
- * 3: A matrix. If the total set bits = total bits in (2) this is unused
- * 4: the output
- *
- * Uses the temporaries used by clean
- */
-
-#if 0
-static void make_plain(const char *zero_bs, const char *nref_bs, const char *in, const char *out, uint64_t fdef)
-{
-  /* A very naive implementation */
-  EFIL *ezbs, *embs, *ei, *eo; /* zero bitstring, minus -1 bitstring, in, out */
-  FELT min1;
-  header hdrzbs, hdrmbs, hdrio;
-  /*uint64_t hdrzbs[5], hdrmbs[5], hdrio[5];*/
-  uint64_t nor, noci1, noci2, noci3, noco, sizz, sizm, i, j, k, l;
-  FIELD *f;
-  FELT felt;
-  DSPACE dsi, dso; /* Matrix in */
-  Dfmt *mo, *mi; /* Matrix out */
-  uint64_t *bstz = NULL, *bstm;
-  int use_ei;
-
-#if 0
-  /* Print the various parts */
-  if (NULL != zero_bs) {
-    printf("make_plain: parameter zero_bs %s\n", zero_bs);
-    zut_fn(zero_bs);
-  }
-  printf("make_plain: parameter nref_bs %s\n", nref_bs);
-  zut_fn(nref_bs);
-#endif
-  ezbs = (NULL != zero_bs) ? ERHdr(zero_bs, hdrzbs.hdr) : NULL;
-  embs = ERHdr(nref_bs, hdrmbs.hdr);
-  noci3 = hdrmbs.named.nor; /* Total bits in nref bitstring */
-  noci1 = hdrmbs.named.noc; /* Set bits in nref bitstring */
-  use_ei = noci1 != noci3;
-  if (use_ei) {
-    ei = ERHdr(in, hdrio.hdr);    // remnant   = 1 fdef nor noc 0
-    nor = hdrio.named.nor; /* Rows of input */
-  } else {
-    ei = NULL;
-    nor = noci1;
-  }
-  if (NULL != ezbs) {
-    /* Some leading zeros */
-    noci2 = hdrzbs.named.noc; /* Set bits in zero bitstring */
-    noco = hdrzbs.named.nor; /* Total bits in zero bitstring, ie amount to output */
-  } else {
-    /* No leading zeros */
-    noci2 = 0;
-    noco = hdrmbs.named.nor;
-  }
-  /* Compatibility check */
-  if (noci1 != nor /* Number of pivots == number of rows */ || 
-      hdrio.named.noc + noci1 + noci2 != noco /* Total columns check */) {
-    LogString(80,"Inputs incompatible");
-    exit(22);
-  }
-  f = malloc(FIELDLEN);
-  FieldASet(fdef, f);
-  min1 = FieldNeg(f, 1);
-  hdrio.named.noc = noco;
-  /* Create the output header */
-  eo = EWHdr(out, hdrio.hdr);  
-  DSSet(f, noci3 - nor, &dsi); /* input space */
-  DSSet(f, noco, &dso); /* output space */
-  /* Allocate space for a row of input, and a row of output */
-  mi = malloc(dsi.nob);
-  mo = malloc(dso.nob);
-  /* Read the bitstring(s) */
-  if (NULL != ezbs) {
-    sizz = 8 * (2 + (noco + 63) / 64);
-    bstz = malloc(sizz);
-    ERData(ezbs, sizz, (uint8_t *)bstz);
-  }
-  sizm = 8 * (2 + (hdrmbs.named.nor + 63) / 64);
-  bstm = malloc(sizm);
-  ERData(embs, sizm, (uint8_t *)bstm);
-  /* Now read through in row by row, inserting minus -1s and zeros */
-  for (i = 0; i < nor; i++) {
-    ERData(ei, dsi.nob, mi);
-    /* Clear output row */
-    memset(mo, 0, dso.nob);
-    /* TBD: put in -1s and contents of in. DCut and DPaste */
-    k = 0; /* Bit position in riffle of -1s and input */
-    l = 0; /* Bit position in -1s */
-    for (j = 0; j < noco; j++) {
-      if (NULL != ezbs && BSBitRead(bstz, j)) {
-        /* No action, we're putting in a zero */
-      } else {
-        /* Putting in a -1 or something from the input */
-        if (BSBitRead(bstm, k)) {
-          /* Put in a -1 if we're at the correct row */
-          if (l == i) {
-            /* Correct row */
-            DPak(&dso, j, mo, min1);
-          }
-          /* Else leave as zero */
-          l++; /* Next column for -1s */
-        } else {
-          /* Pick the value out of input */
-          felt = DUnpak(&dsi, k - l, mi);
-          DPak(&dso, j, mo, felt);
-        }
-        k++; /* Next column in overall input */
-      }
-    }
-    EWData(eo, dso.nob, mo);
-  }
-  /* Close files */
-  if (use_ei) {
-    ERClose1(ei, 0);
-  }
-  EWClose1(eo, 0);
-  ERClose1(embs, 0);
-  if (NULL != ezbs) {
-    ERClose1(ezbs, 0);
-  }
-  /* Deallocate crap */
-  free(mi);
-  free(mo);
-  free(f);
-  free(bstm);
-  if (NULL != ezbs) {
-    free(bstz);
-  }
-}
-#endif
 
 #define FUN_TMP "_funs"
 
@@ -297,7 +130,7 @@ int main(int argc, const char *argv[])
   strcpy(fun_tmp, tmp_root);
   strcat(fun_tmp, FUN_TMP);
   /* Echelise initial vecs. Also sets up zero_bs */
-  res = fProduceNREF(fun_tmp, in_vecs, 1, zero_bs, 0, in_vecs_rem, 0);
+  res = fProduceNREF(fun_tmp, in_vecs, 0, zero_bs, 1, in_vecs_rem, 1);
   /* fail if rank 0 */
   if (0 == res) {
     /* Given zero space to spin, give up */
@@ -308,7 +141,7 @@ int main(int argc, const char *argv[])
   }
   rank = res;
   /* Reread to get a second copy of zero_bs: Fudge */
-  fProduceNREF(fun_tmp, in_vecs, 1, in_vecs_bs, 0, in_vecs_rem, 0);
+  fProduceNREF(fun_tmp, in_vecs, 1, in_vecs_bs, 1, in_vecs_rem, 1);
   /* Allocate the temporaries for the clean operation */
   clean_vars = malloc(3 * sizeof(*clean_vars));
   for (i = 0; i < 3; i++) {
@@ -352,7 +185,7 @@ int main(int argc, const char *argv[])
   rename(in_vecs_bs, gens[ngens - 1].next_tbd.bs);
   gens[ngens - 1].next_tbd.size = rank;
   this_gen = gens; /* The first one */
-  while (mrank < rank) {
+  while (mrank < rank && rank < nor) {
     /* Still some stuff to multiply */
     gen *mul_gen = this_gen;
     int first = 1; /* No results for this gen yet */
@@ -362,8 +195,8 @@ int main(int argc, const char *argv[])
       gen *clean_gen = this_gen;
       if (0 != mul_gen->next_tbd.size) {
         /* Something to do for the last result from this generator */
-        fMultiply(fun_tmp, mul_gen->next_tbd.plain, 0, 
-                  this_gen->file, 0, mul_tmp, 0);
+        fMultiply(fun_tmp, mul_gen->next_tbd.plain, 1, 
+                  this_gen->file, 1, mul_tmp, 1);
         if (0 != mrank) {
           /* Clean this result with the overall multiplied stuff */
           clean(mult_result_bs, mult_result_rem, mul_tmp, clean_tmp1);
@@ -384,7 +217,7 @@ int main(int argc, const char *argv[])
         /* Now clean with previous results of this round of multiply */
         if (first) {
           /* Just echelise this */
-          res = fProduceNREF(fun_tmp, clean_tmp1, 1, ech_tmp_bs, 0, ech_tmp_rem, 0);
+          res = fProduceNREF(fun_tmp, clean_tmp1, 1, ech_tmp_bs, 1, ech_tmp_rem, 1);
           if (0 != res) {
             first = 0;
           } else {
@@ -396,19 +229,19 @@ int main(int argc, const char *argv[])
           /* Clean with previous echelised */
           clean(ech_tmp_bs, ech_tmp_rem, clean_tmp1, clean_tmp2);
           /* Then echelise */
-          res = fProduceNREF(fun_tmp, clean_tmp2, 1, ech_tmp_bs1, 0, ech_tmp_rem1, 0);
+          res = fProduceNREF(fun_tmp, clean_tmp2, 1, ech_tmp_bs1, 1, ech_tmp_rem1, 1);
           if (0 != res) {
             /* Then back clean ech_tmp_rem with ech_tmp_{bs,rem}1*/
             clean(ech_tmp_bs1, ech_tmp_rem1, ech_tmp_rem, clean_tmp1);
             /* Then join as if echelised all together */
             /* First combine pivots and get a riffle */
-            fPivotCombine(ech_tmp_bs, 0, ech_tmp_bs1, 0, ech_tmp_bsc, 0, ech_tmp_bsr, 0);
+            fPivotCombine(ech_tmp_bs, 1, ech_tmp_bs1, 1, ech_tmp_bsc, 1, ech_tmp_bsr, 1);
             /*
              * Now do a riffle controlled by ech_tmp_bsr
              * Selected rows is those resulting from the back clean
              * Non selected rows is those we back cleaned with
              */
-            fRowRiffle(ech_tmp_bsr, 0, clean_tmp1, 0, ech_tmp_rem1, 0, ech_tmp_rem, 0);
+            fRowRiffle(ech_tmp_bsr, 1, clean_tmp1, 1, ech_tmp_rem1, 1, ech_tmp_rem, 1);
             /* Now delete/rename */
             /* The combined pivots are the new ech result */
             rename(ech_tmp_bsc, ech_tmp_bs);
@@ -451,9 +284,9 @@ int main(int argc, const char *argv[])
         /* Back clean */
         clean(this_gen->next_tbd.bs, this_gen->next_tbd.rem, mult_result_rem, clean_tmp1);
         /* Combine pivots, getting new pivots and row riffle */
-        fPivotCombine(mult_result_bs, 0, this_gen->next_tbd.bs, 0, ech_tmp_bsc, 0, ech_tmp_bsr, 0);
+        fPivotCombine(mult_result_bs, 1, this_gen->next_tbd.bs, 1, ech_tmp_bsc, 1, ech_tmp_bsr, 1);
         /* Riffle rows */
-        fRowRiffle(ech_tmp_bsr, 0, clean_tmp1, 0, this_gen->next_tbd.rem, 0, mult_result_rem, 0);
+        fRowRiffle(ech_tmp_bsr, 1, clean_tmp1, 1, this_gen->next_tbd.rem, 1, mult_result_rem, 1);
         /* Renames and deletes */
         rename(ech_tmp_bsc, mult_result_bs);
       } else {
@@ -464,7 +297,7 @@ int main(int argc, const char *argv[])
     }
     if (0 != extra_rank) {
       /* Update this gen for results of multiply, and zero_bs */
-      fPivotCombine(zero_bs, 0, ech_tmp_bs, 0, ech_tmp_bsc, 0, ech_tmp_bsr, 0);
+      fPivotCombine(zero_bs, 1, ech_tmp_bs, 1, ech_tmp_bsc, 1, ech_tmp_bsr, 1);
       /* ech_tmp_bsc is the new zero_bs */
       rename(ech_tmp_bsc, zero_bs);
       /* Don't need the row riffle this time */
@@ -480,16 +313,25 @@ int main(int argc, const char *argv[])
     /* Move on to next generator */
     this_gen = this_gen->next;
   }
-  /* TBD: Finally put the results where requested */
-  out_bs = malloc(out_stem_len + 4);
-  out_rem = malloc(out_stem_len + 5);
-  strcpy(out_bs, out_stem);
-  strcat(out_bs, ".bs");
-  strcpy(out_rem, out_stem);
-  strcat(out_rem, ".rem");
-  rename(mult_result_bs, out_bs);
-  rename(mult_result_rem, out_rem);
+  if (rank < nor) {
+    /*
+     * Finally put the results where requested
+     * assuming we have a proper subspace
+     */
+    out_bs = malloc(out_stem_len + 4);
+    out_rem = malloc(out_stem_len + 5);
+    strcpy(out_bs, out_stem);
+    strcat(out_bs, ".bs");
+    strcpy(out_rem, out_stem);
+    strcat(out_rem, ".rem");
+    rename(mult_result_bs, out_bs);
+    rename(mult_result_rem, out_rem);
+    free(out_bs);
+    free(out_rem);
+  }
   /* Delete temps */
+  remove(mult_result_bs);
+  remove(mult_result_rem);
   remove(zero_bs);
   remove(mul_tmp);
   remove(ech_tmp_bs);
@@ -525,8 +367,6 @@ int main(int argc, const char *argv[])
   free(ech_tmp_bsr);
   free(clean_tmp1);
   free(clean_tmp2);
-  free(out_bs);
-  free(out_rem);
   free(fun_tmp);
   /* Return the rank */
   printf("%lu\n", rank);

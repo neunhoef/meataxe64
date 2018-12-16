@@ -64,7 +64,14 @@ typedef struct
 {
     FIELD * f;
 } TLS;
-
+/*
+ * m1: argument to be echelised
+ * b2: row select
+ * b3: column select
+ * m4: multiplier
+ * m5: cleaner (nor - rank * rank)
+ * m6: remnant (rank * noc - rank)
+ */
 extern uint64_t fech(const char *m1, int s1, const char *b2, int s2,
                 const char *b3, int s3, const char *m4, int s4,
                 const char *m5, int s5, const char *m6, int s6);

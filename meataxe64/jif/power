@@ -1,0 +1,88 @@
+#!/bin/sh
+#
+# $Id: power,v 1.1 2018/01/07 12:05:52 jon Exp $
+#
+# Script to compute a power of a matrix
+#
+# Inputs
+# $1: matrix
+# $2: index
+# $3: out
+# $4: memory (optional)
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+#
+#set -v
+usage="$0: usage: $0 <in> <power> <out> [<memory>/"
+if [ $# -ne 3 -a $# -ne 4 ]; then
+  echo "$usage"
+  exit 1;
+fi
+a=$1
+o=$3
+n=$2
+if [ $n -lt 0 ]; then
+  echo "$0: bad parameters"
+  exit 1
+fi
+if [ -e $a ]; then
+  q=`zprime $a`
+  nor=`znor $a`
+  noc=`znoc $a`
+  if [ $nor -ne $noc ]; then
+    echo "$0: $a is not square"
+    exit 1
+  fi
+else
+  echo "$0: missing file $a"
+  exit 1
+fi
+if [ $n -eq 1 ]; then
+  cp $a $o
+  exit 0
+fi
+id=id_${q}_$nor
+if [ ! -e $id -a $n -eq 0 ]; then
+  zid $q $nor $nor $o
+  exit 0
+fi
+tmp=tmp${PPID}
+ok=0
+t=$a
+m=2
+k=1
+l=0
+ln -s $a ${tmp}.0
+while [ $m -le $n ]; do
+  zmu ${tmp}.$l ${tmp}.$l ${tmp}.$k 2>/dev/null
+  ret=$?
+  if [ 0 -ne $ret ]; then
+    rm -f ${tmp}.*
+    exit $ret
+  fi
+  let m=$m*2
+  let k=$k+1
+  let l=$l+1
+done
+let m=$m/2
+let n=$n-$m
+res=${tmp}.$l
+while [ $n -gt 0 ]; do
+  let l=$l-1
+  let m=$m/2
+  if [ $n -ne 0 -a $n -ge $m ]; then
+    zmu $res ${tmp}.$l ${tmp}.$k
+    ret=$?
+    if [ 0 -ne $ret ]; then
+      rm -f ${tmp}.*
+      exit $ret
+    fi
+    res=${tmp}.$k
+    let k=$k+1
+    let n=$n-$m
+  fi
+done
+cp $res $o
+rm -f ${tmp}.*
