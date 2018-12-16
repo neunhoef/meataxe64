@@ -42,6 +42,7 @@ gcc $1 -pg -Wall -pthread -include malloc.h zrx.c -L$BIN -lmtx-pg -o $BIN/zrx
 gcc $1 -pg -Wall -pthread -include malloc.h zs21.c -L$BIN -lmtx-pg -o $BIN/zs21
 gcc $1 -pg -Wall -pthread -include malloc.h zs2.c -L$BIN -lmtx-pg -o $BIN/zs2
 gcc $1 -pg -Wall -pthread -include malloc.h zsb1.c -L$BIN -lmtx-pg -o $BIN/zsb
+gcc $1 -pg -Wall -pthread -include malloc.h zsb.c -L$BIN -lmtx-pg -o $BIN/zsb1
 gcc $1 -pg -Wall -pthread -include malloc.h zsp1.c -L$BIN -lmtx-pg -o $BIN/zsp
 gcc $1 -pg -Wall -pthread -include malloc.h zss.c -L$BIN -lmtx-pg -o $BIN/zss
 gcc $1 -pg -Wall -pthread -include malloc.h zsv.c -L$BIN -lmtx-pg -o $BIN/zsv
@@ -65,10 +66,12 @@ gcc -pg -Wall -pthread -include malloc.h znor.c -L$BIN -lmtx-pg -o $BIN/znor
 gcc -pg -Wall -pthread -include malloc.h znoc.c -L$BIN -lmtx-pg -o $BIN/znoc
 gcc -pg -Wall -pthread -include malloc.h zprime.c -L$BIN -lmtx-pg -o $BIN/zprime
 gcc -pg -Wall -pthread -include malloc.h zchar.c -L$BIN -lmtx-pg -o $BIN/zchar
-gcc -pg -Wall -pthread -include malloc.h zid.c -L$BIN -lmtx-pg -o $BIN/zid
+gcc -pg -Wall -pthread -include malloc.h zid.c mfuns.c -L$BIN -lmtx-pg -o $BIN/zid
 gcc_comp_options="-Wall -Wpointer-arith -Wwrite-strings -Winline -Waggregate-return -Wmissing-prototypes -Wnested-externs -W -Wunused -Wcast-align -Wstrict-prototypes -Wmissing-declarations -pg -pthread -include malloc.h"
-gcc_link_options="${gcc_comp_options} -L${BIN} -lmtx-pg"
+gcc_link_options="${gcc_comp_options} -pg -L${BIN} -lmtx-pg"
 gcc -include mt_types.h zimport.c elements.c endian.c header.c primes.c utils.c read.c ${gcc_link_options} -lm -o $BIN/zimport
 gcc -DEIGHT_BYTE_WORD -include mt_types.h zimport.c elements.c endian.c header.c primes.c utils.c read.c ${gcc_link_options} -lm -o $BIN/zimport64
 gcc -include mt_types.h zexport.c elements.c endian.c header.c primes.c utils.c write.c ${gcc_link_options} -lm -o $BIN/zexport
 gcc -DEIGHT_BYTE_WORD -include mt_types.h zexport.c elements.c endian.c header.c primes.c utils.c write.c ${gcc_link_options} -lm -o $BIN/zexport64
+gcc -DEIGHT_BYTE_WORD -include mt_types.h zscript.c utils.c mfuns.c sums_utils.c ${gcc_link_options} -lm -o $BIN/zscript
+gcc -DEIGHT_BYTE_WORD -include mt_types.h zsums.c utils.c mfuns.c sums_utils.c primes.c ${gcc_link_options} -lm -o $BIN/zsums

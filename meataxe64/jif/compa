@@ -1,3 +1,4 @@
+mkdir -p $BIN
 cd $SRC
 gcc $1 -O3 -Wall -pthread -include malloc.h fieldreg.c -L$BIN -lmtx -o $BIN/fieldreg
 gcc $1 -O3 -Wall -pthread -include malloc.h conreg.c -L$BIN -lmtx -o $BIN/conreg
@@ -42,6 +43,7 @@ gcc $1 -O3 -Wall -pthread -include malloc.h zrx.c -L$BIN -lmtx -o $BIN/zrx
 gcc $1 -O3 -Wall -pthread -include malloc.h zs21.c -L$BIN -lmtx -o $BIN/zs21
 gcc $1 -O3 -Wall -pthread -include malloc.h zs2.c -L$BIN -lmtx -o $BIN/zs2
 gcc $1 -O3 -Wall -pthread -include malloc.h zsb1.c -L$BIN -lmtx -o $BIN/zsb
+gcc $1 -O3 -Wall -pthread -include malloc.h zsb.c -L$BIN -lmtx -o $BIN/zsb1
 gcc $1 -O3 -Wall -pthread -include malloc.h zsp1.c -L$BIN -lmtx -o $BIN/zsp
 gcc $1 -O3 -Wall -pthread -include malloc.h zss.c -L$BIN -lmtx -o $BIN/zss
 gcc $1 -O3 -Wall -pthread -include malloc.h zsv.c -L$BIN -lmtx -o $BIN/zsv
@@ -72,3 +74,5 @@ gcc -include mt_types.h zimport.c elements.c endian.c header.c primes.c utils.c 
 gcc -DEIGHT_BYTE_WORD -include mt_types.h zimport.c elements.c endian.c header.c primes.c utils.c read.c ${gcc_link_options} -lm -o $BIN/zimport64
 gcc -include mt_types.h zexport.c elements.c endian.c header.c primes.c utils.c write.c ${gcc_link_options} -lm -o $BIN/zexport
 gcc -DEIGHT_BYTE_WORD -include mt_types.h zexport.c elements.c endian.c header.c primes.c utils.c write.c ${gcc_link_options} -lm -o $BIN/zexport64
+gcc -DEIGHT_BYTE_WORD -include mt_types.h zscript.c utils.c mfuns.c sums_utils.c ${gcc_link_options} -lm -o $BIN/zscript
+gcc -DEIGHT_BYTE_WORD -include mt_types.h zsums.c utils.c mfuns.c sums_utils.c primes.c ${gcc_link_options} -lm -o $BIN/zsums

@@ -1,4 +1,6 @@
 bin
+poo*
+foo*
 a1*
 a2*
 a3
@@ -13,3 +15,4 @@ logfile
 x
 y
 z6
+[0-9]*
