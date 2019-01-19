@@ -313,21 +313,55 @@ int main(int argc, const char *argv[])
     /* Move on to next generator */
     this_gen = this_gen->next;
   }
+  /* Even if we get whole space, we'll still produce a bs and rem */
+  out_bs = malloc(out_stem_len + 4);
+  out_rem = malloc(out_stem_len + 5);
+  strcpy(out_bs, out_stem);
+  strcat(out_bs, ".bs");
+  strcpy(out_rem, out_stem);
+  strcat(out_rem, ".rem");
   if (rank < nor) {
     /*
      * Finally put the results where requested
      * assuming we have a proper subspace
      */
-    out_bs = malloc(out_stem_len + 4);
-    out_rem = malloc(out_stem_len + 5);
-    strcpy(out_bs, out_stem);
-    strcat(out_bs, ".bs");
-    strcpy(out_rem, out_stem);
-    strcat(out_rem, ".rem");
     rename(mult_result_bs, out_bs);
     rename(mult_result_rem, out_rem);
     free(out_bs);
     free(out_rem);
+  } else {
+    /*
+     * Whole space case.
+     * We produce a 0x0 rem, and a bs of the right width all 1
+     */
+    header my_hdr;
+    EFIL *out;
+    size_t rslen;
+    uint64_t * bsrs;
+    /* Write the remnant */
+    my_hdr.named.rnd1 = 1;
+    my_hdr.named.fdef = fdef;
+    my_hdr.named.nor = 0;
+    my_hdr.named.noc = 0;
+    my_hdr.named.rnd2 = 0;
+    out = EWHdr(out_rem, my_hdr.hdr);
+    EWClose1(out, 1);
+    /* Write the bitstring */
+    my_hdr.named.rnd1 = 2;
+    my_hdr.named.fdef = 1;
+    my_hdr.named.nor = nor;
+    my_hdr.named.noc = nor;
+    my_hdr.named.rnd2 = 0;
+    out = EWHdr(out_bs, my_hdr.hdr);
+    /* Populate the bitstring */
+    rslen = 16 + ((nor + 63) / 64) * 8;
+    bsrs = malloc(rslen);
+    bsrs[0] = nor;
+    bsrs[1] = nor;
+    memset(bsrs + 2, 0xff, rslen - 16);
+    /* Write the bitstring */
+    EWData(out, rslen, (uint8_t *)bsrs);
+    EWClose1(out, 1);
   }
   /* Delete temps */
   remove(mult_result_bs);
