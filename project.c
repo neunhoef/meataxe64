@@ -1,5 +1,5 @@
 /*
- * $Id: project.c,v 1.13 2014/06/19 22:01:34 jon Exp $
+ * $Id: project.c,v 1.14 2019/01/21 08:32:34 jon Exp $
  *
  * Function to project into quotient space representation
  *
@@ -117,7 +117,7 @@ void project(const char *range, const char *in,
   memset(map_r, 0, nor_r * sizeof(int));
   memset(map_o, 0, noc_r * sizeof(u32));
   /* Now set up the map */
-  pos = ftello64(inp_r); /* Where we are in the range */
+  pos = ftello(inp_r); /* Where we are in the range */
   for (i = 0; i < nor_r; i += step) {
     u32 j, stride_i = (i + step <= nor_r) ? step : nor_r - i;
     errno = 0;
@@ -173,7 +173,7 @@ void project(const char *range, const char *in,
       }
     }
     /* Now loop over inp_r cleaning rows2 */
-    if (0 == in_store && 0 != fseeko64(inp_r, pos, SEEK_SET)) {
+    if (0 == in_store && 0 != fseeko(inp_r, pos, SEEK_SET)) {
       fprintf(stderr, "%s: failed to seek in %s, terminating\n",
                 name, range);
       cleanup(inp_r, inp_g, outp);

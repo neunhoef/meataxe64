@@ -1,5 +1,5 @@
 /*
- * $Id: tra.c,v 1.19 2006/12/18 19:26:14 jon Exp $
+ * $Id: tra.c,v 1.20 2019/01/21 08:32:35 jon Exp $
  *
  * Function to transpose a matrix
  *
@@ -121,7 +121,7 @@ int tra(const char *m1, const char *m2, const char *name)
   for (i = 0; i < noc; i += t1) {
     /* Number of output rows at once */
     k = (i + t1 > noc) ? noc - i : t1;
-    pos = ftello64(input);
+    pos = ftello(input);
     /* Initialise all output rows */
     for (j = 0; j < k; j++) {
       row_init(rows[j], len2);
@@ -148,7 +148,7 @@ int tra(const char *m1, const char *m2, const char *name)
         }
       }
     }
-    if (0 != fseeko64(input, pos, SEEK_SET)) {
+    if (0 != fseeko(input, pos, SEEK_SET)) {
       fprintf(stderr, "%s: unable to rewind %s, terminating\n", name, m1);
       fclose(input);
       fclose(output);

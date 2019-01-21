@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.88 2017/04/15 17:12:43 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.89 2019/01/21 08:32:35 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -2299,10 +2299,10 @@ Purpose: Compute a standard basis of vectors from a single seed
 </table>
 Commentary: This program implements the same algorithm as <a
 href="#zmsb">zmsb</a>, but uses intermediate files to cope with lack of
-main memory. fseek and ftell are used to position within the file used
+main memory. fseeko and ftell are used to position within the file used
 to record an echelised basis (need in order to determine whether a new
 vector is linearly independent). In the case of files exceeding 2Gb,
-fseeko64 and ftello64 are used. Unfortunately, these require long long
+fseeko and ftello are used. Unfortunately, these require long long
 on 32 bits systems, which is not ANSI. However, the alternative is to
 be unable to perform <a href="#zmsb">zmsb</a> at all. If long files are
 required, then they have to be supported in the kernel and C library,
@@ -5253,6 +5253,9 @@ Purpose: Produce a sequence of words in the generators
 </tr>
 <tr>
 <td valign=top>5</td><td valign=top>Order of generator 2</td>
+</tr>
+<tr>
+<td valign=top>6</td><td valign=top>Depth</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>The filenames corresponding to

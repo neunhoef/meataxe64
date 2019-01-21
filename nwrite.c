@@ -1,5 +1,5 @@
 /*
- * $Id: nwrite.c,v 1.2 2012/06/17 10:41:29 jon Exp $
+ * $Id: nwrite.c,v 1.3 2019/01/21 08:32:34 jon Exp $
  *
  * Write a meataxe 64 header
  *
@@ -70,7 +70,7 @@ int open_and_write_binary_nheader(FILE **outp, const nheader *h, const char *m, 
   assert(NULL != h);
   assert(NULL != m);
   errno = 0;
-  out = fopen64(m, "w+b");
+  out = fopen(m, "w+b");
   if (NULL == out) {
     if ( 0 != errno) {
       perror(name);

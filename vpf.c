@@ -1,5 +1,5 @@
 /*
- * $Id: vpf.c,v 1.7 2005/10/28 22:58:08 jon Exp $
+ * $Id: vpf.c,v 1.8 2019/01/21 08:32:35 jon Exp $
  *
  * Function to permute some vectors under two generators,
  * using intermediate file
@@ -234,7 +234,7 @@ u32 permute_file(const char *tmp_dir, const char *in,
   sprintf(name_tmp, "%s/%s.1", tmp_dir, tmp);
   /* Create the temporary file */
   errno = 0;
-  vectors = fopen64(name_tmp, "w+b");
+  vectors = fopen(name_tmp, "w+b");
   if (NULL == vectors) {
     if ( 0 != errno) {
       perror(name);
@@ -254,7 +254,7 @@ u32 permute_file(const char *tmp_dir, const char *in,
     (void)remove(name_tmp);
     exit(1);
   }
-  end_ptr = ftello64(vectors);
+  end_ptr = ftello(vectors);
   assert(end_ptr == ((s64)sizeof(**rows)) * ((s64)len) * ((s64)nor));
   /* Sort initial rows if necessary */
   if (nor > 1) {
@@ -268,7 +268,7 @@ u32 permute_file(const char *tmp_dir, const char *in,
     /* Ensure we don't try to do too many */
     rows_to_do = (rows_to_do + gen->nor > nor) ? (nor - gen->nor) : rows_to_do;
     rows_to_do = (rows_to_do > max_rows2) ? max_rows2 : rows_to_do;
-    fseeko64(vectors, gen->base_ptr, SEEK_SET);
+    fseeko(vectors, gen->base_ptr, SEEK_SET);
     errno = 0;
     if (0 == endian_read_matrix(vectors, rows, len, rows_to_do)) {
       if ( 0 != errno) {
@@ -279,7 +279,7 @@ u32 permute_file(const char *tmp_dir, const char *in,
       (void)remove(name_tmp);
       exit(1);
     }
-    gen->base_ptr = ftello64(vectors); /* Reset the pointer into the rows for this generator */
+    gen->base_ptr = ftello(vectors); /* Reset the pointer into the rows for this generator */
     assert((u64)gen->base_ptr == sizeof(**rows) * len * (gen->nor + rows_to_do));
     /* Multiply placing results at max_rows - rows_to_do */
     if (0 == mul_from_store(rows, rows + max_rows - rows_to_do, gen->f,
@@ -335,7 +335,7 @@ u32 permute_file(const char *tmp_dir, const char *in,
           if (found_row[k]->hash == hash) {
             /* Read this row into rows[0] */
             u32 index = found_row[k]->index;
-            fseeko64(vectors, ((s64)index) * ((s64)len) * ((s64)sizeof(**rows)), SEEK_SET);
+            fseeko(vectors, ((s64)index) * ((s64)len) * ((s64)sizeof(**rows)), SEEK_SET);
             if (0 == endian_read_row(vectors, *rows, len)) {
               fprintf(stderr, "%s: failed to read row %u from %s, terminating\n",
                       name, index, name_tmp);
@@ -375,7 +375,7 @@ u32 permute_file(const char *tmp_dir, const char *in,
         j++;
       }
     }
-    fseeko64(vectors, end_ptr, SEEK_SET);
+    fseeko(vectors, end_ptr, SEEK_SET);
     errno = 0;
     if (verbose) {
       printf("%s: adding %u new rows giving %u rows\n", name, j, nor + j);
@@ -390,7 +390,7 @@ u32 permute_file(const char *tmp_dir, const char *in,
       (void)remove(name_tmp);
       exit(1);
     }
-    end_ptr = ftello64(vectors);
+    end_ptr = ftello(vectors);
     /* Note, gen->base_ptr already set */
     gen->nor += rows_to_do;
     nor += j; /* The number of extra rows we made */
@@ -415,7 +415,7 @@ u32 permute_file(const char *tmp_dir, const char *in,
   }
   header_free(h_out);
   /* Copy temp file into output */
-  fseeko64(vectors, 0, SEEK_SET);
+  fseeko(vectors, 0, SEEK_SET);
   errno = 0;
   if (0 == endian_copy_matrix(vectors, outp, *rows, len, nor)) {
     if ( 0 != errno) {

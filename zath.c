@@ -66,7 +66,7 @@ int main(int argc, const char * const argv[])
   noc = noc1 * noc2;
 
   errno = 0;
-  inp = fopen64(in, "r");
+  inp = fopen(in, "r");
   if (NULL == inp) {
     if ( 0 != errno) {
       perror(name);
@@ -122,9 +122,9 @@ int main(int argc, const char * const argv[])
       exit(1);
     }
   }
-  ptr = ftello64(inp);
-  fseeko64(inp, 0, SEEK_END);
-  if (ftello64(inp) != ptr) {
+  ptr = ftello(inp);
+  fseeko(inp, 0, SEEK_END);
+  if (ftello(inp) != ptr) {
     fprintf(stderr, "%s: not all of input %s read, terminating\n", name, in);
     fclose(inp);
     fclose(outp);

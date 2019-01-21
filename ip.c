@@ -1,5 +1,5 @@
 /*
- * $Id: ip.c,v 1.23 2014/05/16 21:37:55 jon Exp $
+ * $Id: ip.c,v 1.24 2019/01/21 08:32:34 jon Exp $
  *
  * Read a matrix
  *
@@ -50,7 +50,7 @@ int main(int argc, const char * const argv[])
     inp = stdin;
     use_stdin = 1;
   } else {
-    inp = fopen64(in, "r");
+    inp = fopen(in, "r");
     if (NULL == inp) {
       if ( 0 != errno) {
         perror(name);

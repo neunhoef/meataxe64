@@ -1,5 +1,5 @@
 /*
- * $Id: ntco.c,v 1.15 2018/05/08 20:28:58 jon Exp $
+ * $Id: ntco.c,v 1.16 2019/01/21 08:32:34 jon Exp $
  *
  * Tensor condense one group element (new algorithm)
  *
@@ -438,7 +438,7 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
                    nor_p, noc_p, len_p, nor_q, noc_q, len_q, NULL, leftp, rightp,
                    NULL, NULL, p, q, h_p, h_q, s, h_o, NULL, NULL, lrows, rrows);
   }
-  optr = ftello64(outp);
+  optr = ftello(outp);
   rows = matrix_malloc(max_end);
   for (i = 0; i < max_end; i++) {
     rows[i] = memory_pointer_offset(extent_l + extent_r + extent_p + extent_q + extent_sub_q + extent_n + extent_qn + extent_qnp + extent_t, i, len);
@@ -844,7 +844,7 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
           }
           for (alpha = 0; alpha < left_multiplicities[i]; alpha++) {
             /* Seek to correct place in output (accounting for alpha and beta) */
-            fseeko64(outp, optr + (s64)((s64)beta + (s64)alpha * (s64)right_multiplicities[i]) *
+            fseeko(outp, optr + (s64)((s64)beta + (s64)alpha * (s64)right_multiplicities[i]) *
                      (s64)dim_end_i * (s64)len * (s64)sizeof(word), SEEK_SET);
             /* Get relevant rows of output for update */
             if (0 == endian_read_matrix(outp, rows, len, dim_end_i)) {
@@ -897,7 +897,7 @@ int tcondense(u32 s, const char *mults_l, const char *mults_r,
               }
             } /* gamma */
             /* Write out updated rows */
-            fseeko64(outp, optr + (s64)((s64)beta + (s64)alpha * (s64)right_multiplicities[i]) *
+            fseeko(outp, optr + (s64)((s64)beta + (s64)alpha * (s64)right_multiplicities[i]) *
                      (s64)dim_end_i * (s64)len * (s64)sizeof(word), SEEK_SET);
             if (0 == endian_write_matrix(outp, rows, len, dim_end_i)) {
               matrix_free(q_rows);

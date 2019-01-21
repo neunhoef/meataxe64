@@ -1,5 +1,5 @@
 /*
- * $Id: read.c,v 1.26 2011/01/19 22:47:17 jon Exp $
+ * $Id: read.c,v 1.27 2019/01/21 08:32:34 jon Exp $
  *
  * Read a header
  *
@@ -133,7 +133,7 @@ int open_and_read_binary_header(FILE **inp, const header **h, const char *m, con
   assert(NULL != m);
   assert(NULL != name);
   errno = 0;
-  in = fopen64(m, "rb");
+  in = fopen(m, "rb");
   if (NULL == in) {
     if ( 0 != errno) {
       perror(name);

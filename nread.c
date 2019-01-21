@@ -1,5 +1,5 @@
 /*
- * $Id: nread.c,v 1.1 2012/06/17 10:41:29 jon Exp $
+ * $Id: nread.c,v 1.2 2019/01/21 08:32:34 jon Exp $
  *
  * Read a meataxe 64 header
  *
@@ -62,7 +62,7 @@ int open_and_read_binary_nheader(FILE **inp, const nheader **h, const char *m, c
   assert(NULL != m);
   assert(NULL != name);
   errno = 0;
-  in = fopen64(m, "rb");
+  in = fopen(m, "rb");
   if (NULL == in) {
     if ( 0 != errno) {
       perror(name);

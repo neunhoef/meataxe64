@@ -1,5 +1,5 @@
 /*
- * $Id: utils.h,v 1.22 2006/05/09 22:09:28 jon Exp $
+ * $Id: utils.h,v 1.23 2019/01/21 08:32:35 jon Exp $
  *
  * Utilities for meataxe
  *
@@ -14,13 +14,6 @@
 #define NOT_USED(_x) (void)(_x)
 
 #define MAX_LINE 100000
-
-/* Large files */
-extern FILE *fopen64(const char *, const char *);
-
-extern int fseeko64(FILE *, s64, int);
-
-extern s64 ftello64(FILE *);
 
 extern u32 read_decimal(const char *str, u32 len);
 

@@ -1,5 +1,5 @@
 /*
- * $Id: mspf.c,v 1.27 2015/02/18 22:40:32 jon Exp $
+ * $Id: mspf.c,v 1.28 2019/01/21 08:32:34 jon Exp $
  *
  * Function to spin some vectors under multiple generators
  * using intermediate files in a temporary directory.
@@ -149,7 +149,7 @@ u32 spinf(const char *in, const char *out, const char *dir,
   }
   /* Create the temporary file */
   errno = 0;
-  echelised = fopen64(name_echelised, "w+b");
+  echelised = fopen(name_echelised, "w+b");
   if (NULL == echelised) {
     if ( 0 != errno) {
       perror(name);
@@ -205,7 +205,7 @@ u32 spinf(const char *in, const char *out, const char *dir,
       /* We place the rows to multiply into rows2 */
       /* and produce the product in rows1 */
       /* Seek to correct place in echelised basis */
-      fseeko64(echelised, gen->base_ptr, SEEK_SET);
+      fseeko(echelised, gen->base_ptr, SEEK_SET);
       errno = 0;
       if (0 == endian_read_matrix(echelised, rows2, len, stride)) {
         if ( 0 != errno) {
@@ -215,7 +215,7 @@ u32 spinf(const char *in, const char *out, const char *dir,
         cleanup_all(NULL, argc, files, echelised, name_echelised);
         exit(1);
       }
-      gen->base_ptr = ftello64(echelised); /* Reset the pointer into the existing basis for this generator */
+      gen->base_ptr = ftello(echelised); /* Reset the pointer into the existing basis for this generator */
       /* TODO: convert to use skip_mul */
       for (i = 0; i < stride; i++) {
         int m = map[i + gen->nor];
@@ -269,7 +269,7 @@ u32 spinf(const char *in, const char *out, const char *dir,
     exit(1);
   }
   header_free(h_out);
-  fseeko64(echelised, 0, SEEK_SET);
+  fseeko(echelised, 0, SEEK_SET);
   if (verbose) {
     printf("%s: Copying %u rows to output\n", name, nor);
     fflush(stdout);

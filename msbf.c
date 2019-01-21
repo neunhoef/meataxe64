@@ -1,5 +1,5 @@
 /*
- * $Id: msbf.c,v 1.19 2006/06/15 08:00:12 jon Exp $
+ * $Id: msbf.c,v 1.20 2019/01/21 08:32:34 jon Exp $
  *
  * Function to spin some vectors under multiple generators to obtain a standard base
  *
@@ -159,8 +159,8 @@ u32 msb_spinf(const char *in, const char *out, const char *dir,
   }
   /* Create the two temporary files */
   errno = 0;
-  basis = fopen64(name_basis, "w+b");
-  echelised = fopen64(name_echelised, "w+b");
+  basis = fopen(name_basis, "w+b");
+  echelised = fopen(name_echelised, "w+b");
   if (NULL == basis || NULL == echelised) {
     if ( 0 != errno) {
       perror(name);
@@ -236,7 +236,7 @@ u32 msb_spinf(const char *in, const char *out, const char *dir,
       /* We place the rows to multiply into rows2 */
       /* and produce the product in rows1 */
       /* Seek to correct place in basis */
-      fseeko64(basis, gen->base_ptr, SEEK_SET);
+      fseeko(basis, gen->base_ptr, SEEK_SET);
       errno = 0;
       if (0 == endian_read_matrix(basis, rows2, len, stride)) {
         if ( 0 != errno) {
@@ -246,7 +246,7 @@ u32 msb_spinf(const char *in, const char *out, const char *dir,
         cleanup_all(NULL, argc, files, basis, echelised, name_basis, name_echelised);
         exit(1);
       }
-      gen->base_ptr = ftello64(basis); /* Reset the pointer into the existing basis for this generator */
+      gen->base_ptr = ftello(basis); /* Reset the pointer into the existing basis for this generator */
       if (0 == mul_from_store(rows2, rows1, gen->f, gen->is_map, noc, len, nob,
                               stride, noc, prime, &grease, verbose, gen->m, name)) {
         fprintf(stderr, "%s: failed to multiply using %s, terminating\n", name, gen->m);
@@ -276,7 +276,7 @@ u32 msb_spinf(const char *in, const char *out, const char *dir,
       }
       nor = d;
       /* Extra code to deal with adding the standard basis vectors */
-      fseeko64(basis, 0, SEEK_END);
+      fseeko(basis, 0, SEEK_END);
       for (i = 0; i < stride; i++) {
         if (new_map[i] >= 0) {
           /* Got a useful row */
@@ -321,7 +321,7 @@ u32 msb_spinf(const char *in, const char *out, const char *dir,
     exit(1);
   }
   header_free(h_out);
-  fseeko64(basis, 0, SEEK_SET);
+  fseeko(basis, 0, SEEK_SET);
   if (verbose) {
     printf("%s: Copying %u rows to output\n", name, nor);
     fflush(stdout);

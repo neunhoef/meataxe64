@@ -1,5 +1,5 @@
 /*
- * $Id: endian.c,v 1.13 2005/07/24 11:31:35 jon Exp $
+ * $Id: endian.c,v 1.14 2019/01/21 08:32:34 jon Exp $
  *
  * Endian handling for meataxe
  *
@@ -161,7 +161,7 @@ int endian_read_u64(u64 *a, FILE *fp)
 
 void endian_skip_row(FILE *fp, u32 len)
 {
-  fseeko64(fp, len * sizeof(word), SEEK_CUR);
+  fseeko(fp, len * sizeof(word), SEEK_CUR);
 }
 
 int endian_read_row(FILE *fp, word *row, u32 len)

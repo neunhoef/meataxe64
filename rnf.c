@@ -1,5 +1,5 @@
 /*
- * $Id: rnf.c,v 1.19 2005/07/24 11:31:35 jon Exp $
+ * $Id: rnf.c,v 1.20 2019/01/21 08:32:34 jon Exp $
  *
  * Compute the rank of a matrix, using temporary files
  *
@@ -136,7 +136,7 @@ u32 rankf(const char *m1, const char *dir, const char *name)
       if (rows_remaining > 0) {
         u32 rows_written = 0;
         errno = 0;
-        out->f = fopen64(out->name, "wb");
+        out->f = fopen(out->name, "wb");
         out->created = 1;
         if (NULL == out->f) {
           if ( 0 != errno) {
@@ -185,7 +185,7 @@ u32 rankf(const char *m1, const char *dir, const char *name)
         out = out->next;
         if (rows_written > 0) {
           errno = 0;
-          in->f = fopen64(in->name, "rb");
+          in->f = fopen(in->name, "rb");
           if (NULL == in->f) {
             if ( 0 != errno) {
               perror(name);

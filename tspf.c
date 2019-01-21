@@ -1,5 +1,5 @@
 /*
- * $Id: tspf.c,v 1.24 2006/05/01 09:08:45 jon Exp $
+ * $Id: tspf.c,v 1.25 2019/01/21 08:32:35 jon Exp $
  *
  * Function to spin some vectors under two generators in tensor space
  * using intermediate files in a temporary directory.
@@ -218,7 +218,7 @@ u32 tensor_spinf(const char *in, const char *out,
   }
   /* Create the temporary file */
   errno = 0;
-  echelised = fopen64(name_echelised, "w+b");
+  echelised = fopen(name_echelised, "w+b");
   if (NULL == echelised) {
     if ( 0 != errno) {
       perror(name);
@@ -329,7 +329,7 @@ u32 tensor_spinf(const char *in, const char *out,
       /* We place the rows to multiply into rows2 */
       /* and produce the product in rows1 */
       /* Seek to correct place in echelised basis */
-      fseeko64(echelised, gen->base_ptr, SEEK_SET);
+      fseeko(echelised, gen->base_ptr, SEEK_SET);
       errno = 0;
       if (0 == endian_read_matrix(echelised, rows2, len, stride)) {
         if ( 0 != errno) {
@@ -339,7 +339,7 @@ u32 tensor_spinf(const char *in, const char *out,
         cleanup_tmp(echelised, name_echelised);
         exit(1);
       }
-      gen->base_ptr = ftello64(echelised); /* Reset the pointer into the existing basis for this generator */
+      gen->base_ptr = ftello(echelised); /* Reset the pointer into the existing basis for this generator */
       for (i = 0; i < stride; i++) {
         create_pointers(rows2[i], mat_rows, nor1, len2);
         if (all_in_store) {
@@ -416,7 +416,7 @@ u32 tensor_spinf(const char *in, const char *out,
   header_free(h_a2);
   header_free(h_b2);
   header_free(h_out);
-  fseeko64(echelised, 0, SEEK_SET);
+  fseeko(echelised, 0, SEEK_SET);
   if (verbose) {
     printf("%s: Copying %u rows to output\n", name, nor);
     fflush(stdout);

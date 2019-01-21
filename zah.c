@@ -1,5 +1,5 @@
 /*
- * $Id: zah.c,v 1.11 2015/01/15 09:06:45 jon Exp $
+ * $Id: zah.c,v 1.12 2019/01/21 08:32:35 jon Exp $
  *
  * Add a header to an intermediate file matrix
  * Essentially a disaster recovery program
@@ -59,7 +59,7 @@ int main(int argc, const char * const argv[])
     exit(1);
   }
   errno = 0;
-  inp = fopen64(in, "r");
+  inp = fopen(in, "r");
   if (NULL == inp) {
     if ( 0 != errno) {
       perror(name);
@@ -109,9 +109,9 @@ int main(int argc, const char * const argv[])
       exit(1);
     }
   }
-  ptr = ftello64(inp);
-  fseeko64(inp, 0, SEEK_END);
-  if (ftello64(inp) != ptr) {
+  ptr = ftello(inp);
+  fseeko(inp, 0, SEEK_END);
+  if (ftello(inp) != ptr) {
     fprintf(stderr, "%s: not all of input %s read, terminating\n", name, in);
     fclose(inp);
     fclose(outp);

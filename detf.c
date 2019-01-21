@@ -159,7 +159,7 @@ word detf(const char *m1, const char *dir, const char *name)
       if (rows_remaining > 0) {
         u32 rows_written = 0;
         errno = 0;
-        out->f = fopen64(out->name, "wb");
+        out->f = fopen(out->name, "wb");
         out->created = 1;
         if (NULL == out->f) {
           if ( 0 != errno) {
@@ -208,7 +208,7 @@ word detf(const char *m1, const char *dir, const char *name)
         out = out->next;
         if (rows_written > 0) {
           errno = 0;
-          in->f = fopen64(in->name, "rb");
+          in->f = fopen(in->name, "rb");
           if (NULL == in->f) {
             if ( 0 != errno) {
               perror(name);
@@ -341,7 +341,7 @@ word det2f(const char *m1, const char *dir, const char *name)
       if (rows_remaining > 0) {
         u32 rows_written = 0;
         errno = 0;
-        out->f = fopen64(out->name, "wb");
+        out->f = fopen(out->name, "wb");
         out->created = 1;
         if (NULL == out->f) {
           if ( 0 != errno) {
@@ -390,7 +390,7 @@ word det2f(const char *m1, const char *dir, const char *name)
         out = out->next;
         if (rows_written > 0) {
           errno = 0;
-          in->f = fopen64(in->name, "rb");
+          in->f = fopen(in->name, "rb");
           if (NULL == in->f) {
             if ( 0 != errno) {
               perror(name);

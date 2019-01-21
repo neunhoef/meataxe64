@@ -1,5 +1,5 @@
 /*
- * $Id: tra2.c,v 1.4 2014/04/01 20:19:11 jon Exp $
+ * $Id: tra2.c,v 1.5 2019/01/21 08:32:35 jon Exp $
  *
  * Function to transpose a matrix
  *
@@ -173,19 +173,19 @@ int tra2(const char *m1, const char *m2, const char *name)
     printf("row_length = %d, row_start_skip = %d, row_end_skip = %d\n", row_length, row_start_skip, row_end_skip);
     /* There is no horizontal divide, from our choice of t1 */
     /* Read the bits of row */
-    pos = ftello64(input);
+    pos = ftello(input);
     printf("pos = %" S64_F "\n", pos);
     /*
      * TBD, we need to handle the case where nor isn't a multiple of 32
      * by creating some blank rows
      */
     for (k = 0; k < nor; k++) {
-      printf("Reading row %" U32_F " from %" S64_F "\n", k, ftello64(input));
+      printf("Reading row %" U32_F " from %" S64_F "\n", k, ftello(input));
       /* Skip start of row */
       if (0 != row_start_skip) {
         endian_skip_row(input, row_start_skip);
       }
-      printf("Reading data for row %" U32_F " from %" S64_F "\n", k, ftello64(input));
+      printf("Reading data for row %" U32_F " from %" S64_F "\n", k, ftello(input));
       if (0 == endian_read_row(input, rows_in[k], row_length)) {
         if ( 0 != errno) {
           perror(name);
@@ -277,7 +277,7 @@ int tra2(const char *m1, const char *m2, const char *name)
       NOT_USED(last_row);
     }
     /* All read, return to start */
-    if (0 != fseeko64(input, pos, SEEK_SET)) {
+    if (0 != fseeko(input, pos, SEEK_SET)) {
       fprintf(stderr, "%s: unable to rewind %s, terminating\n", name, m1);
       fclose(input);
       fclose(output);

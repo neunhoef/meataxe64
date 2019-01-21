@@ -1,5 +1,5 @@
 /*
- * $Id: clean_vectors.c,v 1.9 2005/10/12 18:20:31 jon Exp $
+ * $Id: clean_vectors.c,v 1.10 2019/01/21 08:32:34 jon Exp $
  *
  * Clean one file of vectors with another
  *
@@ -132,8 +132,8 @@ int clean_vectors(const char *echelised, const char *vectors, const char *output
     free(map);
     return 1;
   }
-  ptr = ftello64(inp1);
-  fseeko64(inp1, 0, SEEK_SET);
+  ptr = ftello(inp1);
+  fseeko(inp1, 0, SEEK_SET);
   for (i = 0; i < nor2; i += max_rows) {
     u32 stride2 = (i + max_rows < nor2) ? max_rows : nor2 - i;
     /* TODO: loop reading stuff from inp1 and cleaning with it */
@@ -146,7 +146,7 @@ int clean_vectors(const char *echelised, const char *vectors, const char *output
       free(map);
       return 0;
     }
-    fseeko64(inp1, ptr, SEEK_SET);
+    fseeko(inp1, ptr, SEEK_SET);
     for (j = 0; j < nor1; j += max_rows) {
       u32 stride1 = (j + max_rows < nor1) ? max_rows : nor1 - j;
       if (0 == endian_read_matrix(inp1, rows1, len, stride1)) {

@@ -1,5 +1,5 @@
 /*
- * $Id: base.c,v 1.9 2005/07/24 11:31:35 jon Exp $
+ * $Id: base.c,v 1.10 2019/01/21 08:32:34 jon Exp $
  *
  * Form an echelised basis from one file to another
  *
@@ -71,7 +71,7 @@ u32 base(const char *in, const char *dir,
   sprintf(name_echelised, "%s/%s.1", dir, tmp);
   /* Create the temporary file */
   errno = 0;
-  echelised = fopen64(name_echelised, "w+b");
+  echelised = fopen(name_echelised, "w+b");
   if (NULL == echelised) {
     if ( 0 != errno) {
       perror(name);
@@ -138,7 +138,7 @@ u32 base(const char *in, const char *dir,
     exit(1);
   }
   header_free(h_out);
-  fseeko64(echelised, 0, SEEK_SET);
+  fseeko(echelised, 0, SEEK_SET);
   errno = 0;
   if (0 == endian_copy_matrix(echelised, outp, *rows1, len, nor)) {
     if ( 0 != errno) {

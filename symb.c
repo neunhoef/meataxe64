@@ -1,5 +1,5 @@
 /*
- * $Id: symb.c,v 1.13 2006/06/15 08:00:12 jon Exp $
+ * $Id: symb.c,v 1.14 2019/01/21 08:32:34 jon Exp $
  *
  * Function to compute a symmetry basis
  *
@@ -239,7 +239,7 @@ u32 symb(u32 spaces, u32 space_size,
   t2.f = NULL;
   map = my_malloc((ech_size + space_size * nor) * sizeof(int));
   errno = 0;
-  o = fopen64(name_o1, "wb");
+  o = fopen(name_o1, "wb");
   if (NULL == o) {
     if ( 0 != errno) {
       perror(name);
@@ -255,7 +255,7 @@ u32 symb(u32 spaces, u32 space_size,
     u32 sub_nor = 1;
     u32 d;
     /* Remember file pointer into f.f */
-    s64 ptr = ftello64(f.f);
+    s64 ptr = ftello(f.f);
     /* Read one row into ech_rows */
     if (0 == endian_read_row(f.f, ech_rows[0], len)) {
       if ( 0 != errno) {
@@ -279,7 +279,7 @@ u32 symb(u32 spaces, u32 space_size,
     map[0] = new_map[0];
     free(new_map);
     /* Reset to file pointer and continue */
-    fseeko64(f.f, ptr, SEEK_SET);
+    fseeko(f.f, ptr, SEEK_SET);
     gen = gens; /* The first generator */
     t_in = &f; /* Point to correct input and output */
     t_out = &t1;
@@ -291,7 +291,7 @@ u32 symb(u32 spaces, u32 space_size,
       u32 rows_to_do = sub_nor - gen->nor, new_nor = sub_nor;
       if (0 != rows_to_do) {
         /* Remember file pointer into t_in */
-        ptr = ftello64(t_in->f);
+        ptr = ftello(t_in->f);
         /* Ignore rows of space 1 we don't want */
         if (0 == endian_read_matrix(t_in->f, mat, len, gen->nor)) {
           if ( 0 != errno) {
@@ -330,7 +330,7 @@ u32 symb(u32 spaces, u32 space_size,
                 grease.level, prime, len, nob, 900, 0, 0, 0, name);
         }
         /* Reset to file pointer in t_in */
-        fseeko64(t_in->f, ptr, SEEK_SET);
+        fseeko(t_in->f, ptr, SEEK_SET);
         /* If any new vectors */
         if (0 != d) {
           /* We produce some new rows. Note that this can all be done in memory */
@@ -395,7 +395,7 @@ u32 symb(u32 spaces, u32 space_size,
             l = m; /* Don't need l as a count any more */
           }
           errno = 0;
-          t_out->f = fopen64(t_out->name, "wb");
+          t_out->f = fopen(t_out->name, "wb");
           t_out->created = 1;
           if (NULL == t_out->f) {
             if ( 0 != errno) {
@@ -406,7 +406,7 @@ u32 symb(u32 spaces, u32 space_size,
             exit(1);
           }
           /* Back to start of input rows for this time round loop */
-          fseeko64(t_in->f, ptr, SEEK_SET);
+          fseeko(t_in->f, ptr, SEEK_SET);
           /* Copy old space to new, adding new rows */
           for (j = 0; j < spaces_per_loop; j++) {
             /* Read sub_nor rows from t_in */
@@ -451,7 +451,7 @@ u32 symb(u32 spaces, u32 space_size,
           t_in = t_in->next;
           t_out = t_out->next;
           errno = 0;
-          t_in->f = fopen64(t_in->name, "rb");
+          t_in->f = fopen(t_in->name, "rb");
           if (NULL == t_in->f) {
             if ( 0 != errno) {
               perror(name);
@@ -514,7 +514,7 @@ u32 symb(u32 spaces, u32 space_size,
   }
   header_free(h_out);
   errno = 0;
-  f.f = fopen64(name_o1, "rb");
+  f.f = fopen(name_o1, "rb");
   if (NULL == f.f) {
     if ( 0 != errno) {
       perror(name);
@@ -524,7 +524,7 @@ u32 symb(u32 spaces, u32 space_size,
     exit(1);
   }
   errno = 0;
-  temp = fopen64(name_o2, "w+b");
+  temp = fopen(name_o2, "w+b");
   if (NULL == temp) {
     if ( 0 != errno) {
       perror(name);

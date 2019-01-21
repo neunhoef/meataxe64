@@ -1,7 +1,7 @@
 #
 # gcc specific fragment for building
 #
-# $Id: gcc.txt,v 1.1 2005/07/24 11:31:35 jon Exp $
+# $Id: gcc.txt,v 1.2 2019/01/21 08:32:34 jon Exp $
 #
 CC=	gcc
-COMPILE_WARNINGS=	-Werror -Wall -Wpointer-arith -Wwrite-strings -Winline -Waggregate-return -Wmissing-prototypes -Wnested-externs -W -Wunused -Wcast-align -Wstrict-prototypes -Wmissing-declarations -ansi
+COMPILE_WARNINGS=	-Werror -Wall -Wpointer-arith -Wwrite-strings -Winline -Waggregate-return -Wmissing-prototypes -Wnested-externs -W -Wunused -Wcast-align -Wstrict-prototypes -Wmissing-declarations

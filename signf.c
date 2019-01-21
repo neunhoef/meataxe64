@@ -1,5 +1,5 @@
 /*
- * $Id: signf.c,v 1.7 2015/02/19 09:06:09 jon Exp $
+ * $Id: signf.c,v 1.8 2019/01/21 08:32:34 jon Exp $
  *
  * Function compute the orthogonal group sign
  *
@@ -124,7 +124,7 @@ int sign(const char *qform, const char *bform, const char *dir, const char *name
   sing_row1 = mat[6];
   sing_row2 = mat[7];
   posns = my_malloc(nor * sizeof(s64));
-  idp = fopen64(id_name, "w+b");
+  idp = fopen(id_name, "w+b");
   if (NULL == idp) {
     fprintf(stderr, "%s: unable to allocate intermediate identity, terminating\n", name);
     fclose(qinp);
@@ -138,7 +138,7 @@ int sign(const char *qform, const char *bform, const char *dir, const char *name
   /* TODO: Reflect the identity */
   for (n = 0; n < nor; n++) {
     put_element_to_row(nob, n, mat[0], 1);
-    posns[n] = ftello64(idp);
+    posns[n] = ftello(idp);
     errno = 0;
     if (0 == endian_write_row(idp, mat[0], len)) {
       if ( 0 != errno) {
@@ -159,7 +159,7 @@ int sign(const char *qform, const char *bform, const char *dir, const char *name
   products = my_malloc(nor * sizeof(word));
   while (nor > 2) {
     int start_pos = -1;
-    fseeko64(idp, posns[0], SEEK_SET);
+    fseeko(idp, posns[0], SEEK_SET);
     errno = 0;
     if (0 == endian_read_matrix(idp, mat, len, 3)) {
       if ( 0 != errno) {
@@ -191,7 +191,7 @@ int sign(const char *qform, const char *bform, const char *dir, const char *name
     }
     assert(nor > 3);
     /* TODO: Use shuffle */
-    fseeko64(idp, posns[nor - 1], SEEK_SET);
+    fseeko(idp, posns[nor - 1], SEEK_SET);
     errno = 0;
     if (0 == endian_read_row(idp, mat[0], len)) {
       if ( 0 != errno) {
@@ -206,7 +206,7 @@ int sign(const char *qform, const char *bform, const char *dir, const char *name
       free(posns);
       return 1;
     }
-    fseeko64(idp, posns[out_num], SEEK_SET);
+    fseeko(idp, posns[out_num], SEEK_SET);
     errno = 0;
     if (0 == endian_write_row(idp, mat[0], len)) {
       if ( 0 != errno) {
@@ -239,7 +239,7 @@ int sign(const char *qform, const char *bform, const char *dir, const char *name
       }
     }
     assert(start_pos >= 0);
-    fseeko64(idp, posns[0], SEEK_SET);
+    fseeko(idp, posns[0], SEEK_SET);
     for (n = 0; n + 1 < nor; n++) {
       errno = 0;
       if (0 == endian_read_row(idp, mat[0], len)) {
@@ -262,7 +262,7 @@ int sign(const char *qform, const char *bform, const char *dir, const char *name
       word elt = products[n];
       if (0 != elt) {
         /* Read this row and possibly convert to a weight one vector */
-        fseeko64(idp, posns[n], SEEK_SET);
+        fseeko(idp, posns[n], SEEK_SET);
         errno = 0;
         if (0 == endian_read_row(idp, mat[0], len)) {
           if ( 0 != errno) {
@@ -303,7 +303,7 @@ int sign(const char *qform, const char *bform, const char *dir, const char *name
       if (0 != elt) {
         elt = (*prime_operations.negate)(elt);
         /* Read the row and add in a multiple of the discard vector to keep this row in the perp space */
-        fseeko64(idp, posns[n], SEEK_SET);
+        fseeko(idp, posns[n], SEEK_SET);
         errno = 0;
         if (0 == endian_read_row(idp, mat[1], len)) {
           if ( 0 != errno) {
@@ -323,7 +323,7 @@ int sign(const char *qform, const char *bform, const char *dir, const char *name
         } else {
           (*row_operations.scaled_incer)(mat[0], mat[1], len, elt);
         }
-        fseeko64(idp, posns[n], SEEK_SET);
+        fseeko(idp, posns[n], SEEK_SET);
         errno = 0;
         if (0 == endian_write_row(idp, mat[1], len)) {
           if ( 0 != errno) {
@@ -344,7 +344,7 @@ int sign(const char *qform, const char *bform, const char *dir, const char *name
     /* TODO: Use shuffle */
     /* Now remove mat[res] as this isn't a null vector */
     assert(nor > 3);
-    fseeko64(idp, posns[nor - 2], SEEK_SET);
+    fseeko(idp, posns[nor - 2], SEEK_SET);
     errno = 0;
     if (0 == endian_read_row(idp, mat[0], len)) {
       if ( 0 != errno) {
@@ -359,7 +359,7 @@ int sign(const char *qform, const char *bform, const char *dir, const char *name
       free(posns);
       return 1;
     }
-    fseeko64(idp, posns[res], SEEK_SET);
+    fseeko(idp, posns[res], SEEK_SET);
     errno = 0;
     if (0 == endian_write_row(idp, mat[0], len)) {
       if ( 0 != errno) {
@@ -378,7 +378,7 @@ int sign(const char *qform, const char *bform, const char *dir, const char *name
   }
   free(products);
   fclose(binp);
-  fseeko64(idp, posns[0], SEEK_SET);
+  fseeko(idp, posns[0], SEEK_SET);
   errno = 0;
   if (0 == endian_read_matrix(idp, mat, len, 2)) {
     if ( 0 != errno) {

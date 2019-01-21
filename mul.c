@@ -1,5 +1,5 @@
 /*
- * $Id: mul.c,v 1.53 2016/05/29 15:17:30 jon Exp $
+ * $Id: mul.c,v 1.54 2019/01/21 08:32:34 jon Exp $
  *
  * Function to multiply two matrices to give a third
  *
@@ -440,7 +440,7 @@ int skip_mul_from_store(u32 offset, word **rows1, word **rows3,
     fflush(stdout);
   }
   /* Remember where we are in row 2 */
-  pos = ftello64(inp);
+  pos = ftello(inp);
   if (is_map) {
     /* Multiply some rows by a map */
     prime_ops operations;
@@ -528,7 +528,7 @@ int skip_mul_from_store(u32 offset, word **rows1, word **rows3,
     }
   }
   /* Move back in matrix 2 */
-  if (0 != fseeko64(inp, pos, SEEK_SET)) {
+  if (0 != fseeko(inp, pos, SEEK_SET)) {
     fprintf(stderr, "%s: unable to rewind %s, terminating\n", name, m);
     return 0;
   }

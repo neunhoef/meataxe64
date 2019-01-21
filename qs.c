@@ -1,5 +1,5 @@
 /*
- * $Id: qs.c,v 1.18 2005/10/12 18:20:31 jon Exp $
+ * $Id: qs.c,v 1.19 2019/01/21 08:32:34 jon Exp $
  *
  * Function to compute quotient space representation
  *
@@ -122,7 +122,7 @@ void quotient(const char *range, const char *gen,
   memset(map_r, 0, nor_r * sizeof(int));
   memset(map_g, 0, nor_g * sizeof(int));
   /* Now set up the map */
-  pos = ftello64(inp_r); /* Where we are in the range */
+  pos = ftello(inp_r); /* Where we are in the range */
   for (i = 0; i < nor_r; i += step_r) {
     u32 j, stride_i = (i + step_r <= nor_r) ? step_r : nor_r - i;
     errno = 0;
@@ -201,7 +201,7 @@ void quotient(const char *range, const char *gen,
       }
     }
     /* Now loop over inp_r cleaning rows2 */
-    if (0 == in_store && 0 != fseeko64(inp_r, pos, SEEK_SET)) {
+    if (0 == in_store && 0 != fseeko(inp_r, pos, SEEK_SET)) {
       fprintf(stderr, "%s: failed to seek in %s, terminating\n",
                 name, range);
       cleanup(inp_r, inp_g, outp);

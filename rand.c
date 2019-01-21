@@ -1,5 +1,5 @@
 /*
- * $Id: rand.c,v 1.5 2005/07/24 09:32:45 jon Exp $
+ * $Id: rand.c,v 1.6 2019/01/21 08:32:34 jon Exp $
  *
  * Subroutine to generate a random matrix
  *
@@ -19,8 +19,8 @@
 #include "utils.h"
 #include "write.h"
 
-int random(u32 prime, u32 nor, u32 noc,
-           const char *out, const char *name)
+int mtx_random(u32 prime, u32 nor, u32 noc,
+              const char *out, const char *name)
 {
   u32 nob, nod, len, i, elts_per_word;
   word *row;

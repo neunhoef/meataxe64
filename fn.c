@@ -1,5 +1,5 @@
 /*
- * $Id: fn.c,v 1.1 2006/05/09 22:04:10 jon Exp $
+ * $Id: fn.c,v 1.2 2019/01/21 08:32:34 jon Exp $
  *
  * Filter a list based on nullity
  *
@@ -240,7 +240,7 @@ int filter_nullity(const char *in_list, const char *out_list, u32 nullity,
   free(elements);
   fclose(in_listp);
   header_set_nor((header *)h, nor_out);
-  fseeko64(out_listp, 0, SEEK_SET);
+  fseeko(out_listp, 0, SEEK_SET);
   if (0 == write_binary_header(out_listp, h, out_list, name)) {
     fclose(out_listp);
     header_free(h);

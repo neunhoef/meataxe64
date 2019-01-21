@@ -1,5 +1,5 @@
 /*
- * $Id: ivf.c,v 1.11 2005/10/12 18:20:31 jon Exp $
+ * $Id: ivf.c,v 1.12 2019/01/21 08:32:34 jon Exp $
  *
  * Invert a matrix using intermediate files
  *
@@ -117,8 +117,8 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
     (void)grease_level(prime, &grease, work_rows);
     r = grease.level;
     errno = 0;
-    echelised = fopen64(name_echelised, "w+b");
-    id = fopen64(name_id, "w+b");
+    echelised = fopen(name_echelised, "w+b");
+    id = fopen(name_id, "w+b");
     if (NULL == echelised || NULL == id) {
       if ( 0 != errno) {
         perror(name);
@@ -161,12 +161,12 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
     fclose(inp);
     map1 = my_malloc(nor * sizeof(int));
     /* Back to start of echelised and id */
-    fseeko64(echelised, 0, SEEK_SET);
-    fseeko64(id, 0, SEEK_SET);
+    fseeko(echelised, 0, SEEK_SET);
+    fseeko(id, 0, SEEK_SET);
     for (r = 0; r < nor; r += max_rows) {
       /* Now read the two submatrices */
       u32 stride = (r + max_rows <= nor) ? max_rows : nor - r;
-      s64 ptr_e1 = ftello64(echelised), ptr_i1 = ftello64(id);
+      s64 ptr_e1 = ftello(echelised), ptr_i1 = ftello(id);
       int *map;
       errno = 0;
       if (0 == endian_read_matrix(echelised, rows1, len, stride)) {
@@ -188,8 +188,8 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
         cleanup_all(echelised, name_echelised, id, name_id);
         exit(1);
       }
-      ptr_echelised = ftello64(echelised);
-      ptr_id = ftello64(id);
+      ptr_echelised = ftello(echelised);
+      ptr_id = ftello(id);
       echelise(&row_operations, rows1, stride, &n, &map, rows2, 1, grease.level, prime, len, nob, 900, 950, len, 1, name);
       if (stride != n) {
         fprintf(stderr, "%s: matrix %s is singular with rank at most %u, terminating\n", name, m1, nor + n - stride);
@@ -200,8 +200,8 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
       /* Copy the new map into the right place in the existing one */
       memcpy(map1 + r, map, n * sizeof(int));
       /* Now write back the cleaning result */
-      fseeko64(echelised, ptr_e1, SEEK_SET);
-      fseeko64(id, ptr_i1, SEEK_SET);
+      fseeko(echelised, ptr_e1, SEEK_SET);
+      fseeko(id, ptr_i1, SEEK_SET);
       errno = 0;
       if (0 == endian_write_matrix(echelised, rows1, len, stride) ||
           0 == endian_write_matrix(id, rows2, len, stride)) {
@@ -220,8 +220,8 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
       for (n = 0; n < r; n += work_rows) {
         u32 stride2 = (work_rows + n > r) ? r - n : work_rows;
         /* Read stride2 rows from echelised and id at offsets ptr_e1, ptr_i1 */
-        fseeko64(echelised, ptr_e1, SEEK_SET);
-        fseeko64(id, ptr_i1, SEEK_SET);
+        fseeko(echelised, ptr_e1, SEEK_SET);
+        fseeko(id, ptr_i1, SEEK_SET);
         errno = 0;
         if (0 == endian_read_matrix(echelised, rows3, len, stride2) ||
             0 == endian_read_matrix(id, rows4, len, stride2)) {
@@ -237,8 +237,8 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
         clean(&row_operations, rows1, stride, rows3, stride2, map1 + r, rows2, rows4, 1,
               grease.level, prime, len, nob, 900, 950, len, 0, name);
         /* Write back the cleaned version to echelised and id */
-        fseeko64(echelised, ptr_e1, SEEK_SET);
-        fseeko64(id, ptr_i1, SEEK_SET);
+        fseeko(echelised, ptr_e1, SEEK_SET);
+        fseeko(id, ptr_i1, SEEK_SET);
         errno = 0;
         if (0 == endian_write_matrix(echelised, rows3, len, stride2) ||
             0 == endian_write_matrix(id, rows4, len, stride2)) {
@@ -251,8 +251,8 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
           cleanup_all(echelised, name_echelised, id, name_id);
           exit(1);
         }
-        ptr_e1 = ftello64(echelised);
-        ptr_i1 = ftello64(id);
+        ptr_e1 = ftello(echelised);
+        ptr_i1 = ftello(id);
       }
       /* Now forward clean the later stuff */
       ptr_e1 = ptr_echelised; /* where we are in echelised */
@@ -260,8 +260,8 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
       for (n = r + stride; n < nor; n += work_rows) {
         u32 stride2 = (work_rows + n > nor) ? nor - n : work_rows;
         /* Read stride2 rows from echelised and id at offsets ptr_e1, ptr_i1 */
-        fseeko64(echelised, ptr_e1, SEEK_SET);
-        fseeko64(id, ptr_i1, SEEK_SET);
+        fseeko(echelised, ptr_e1, SEEK_SET);
+        fseeko(id, ptr_i1, SEEK_SET);
         errno = 0;
         if (0 == endian_read_matrix(echelised, rows3, len, stride2) ||
             0 == endian_read_matrix(id, rows4, len, stride2)) {
@@ -277,8 +277,8 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
         clean(&row_operations, rows1, stride, rows3, stride2, map1 + r, rows2, rows4, 1,
               grease.level, prime, len, nob, 900, 950, len, 0, name);
         /* Write back the cleaned version to echelised and id */
-        fseeko64(echelised, ptr_e1, SEEK_SET);
-        fseeko64(id, ptr_i1, SEEK_SET);
+        fseeko(echelised, ptr_e1, SEEK_SET);
+        fseeko(id, ptr_i1, SEEK_SET);
         errno = 0;
         if (0 == endian_write_matrix(echelised, rows3, len, stride2) ||
             0 == endian_write_matrix(id, rows4, len, stride2)) {
@@ -291,12 +291,12 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
           cleanup_all(echelised, name_echelised, id, name_id);
           exit(1);
         }
-        ptr_e1 = ftello64(echelised);
-        ptr_i1 = ftello64(id);
+        ptr_e1 = ftello(echelised);
+        ptr_i1 = ftello(id);
       }
       /* Reset pointers to next chunk */
-      fseeko64(echelised, ptr_echelised, SEEK_SET);
-      fseeko64(id, ptr_id, SEEK_SET);
+      fseeko(echelised, ptr_echelised, SEEK_SET);
+      fseeko(id, ptr_id, SEEK_SET);
     }
     if (0 == open_and_write_binary_header(&outp, h, m2, name)) {
       exit(1);
@@ -307,7 +307,7 @@ void invert(const char *m1, const char *m2, const char *dir, const char *name)
       /* Interested in stride rows */
       u32 stride = (r + max_rows <= nor) ? max_rows : nor - r;
       /* Back to start in id file */
-      fseeko64(id, 0, SEEK_SET);
+      fseeko(id, 0, SEEK_SET);
       for (n = 0; n < nor; n++) {
         errno = 0;
         if (0 == endian_read_row(id, rows2[0], len)) {

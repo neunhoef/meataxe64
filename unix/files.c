@@ -1,18 +1,18 @@
 /*
- * $Id: files.c,v 1.5 2002/06/28 08:39:16 jon Exp $
+ * $Id: files.c,v 1.6 2019/01/21 08:32:35 jon Exp $
  *
  * file system stuff for unix
  *
  */
 
-#include "files.h"
+#include "../files.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 #include <unistd.h>
 #include <sys/stat.h>
-#include "utils.h"
+#include "../utils.h"
 
 int remove(const char *file)
 {

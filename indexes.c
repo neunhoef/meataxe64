@@ -18,7 +18,7 @@
 int make_indexes(FILE *f, word *row, u32 *indexes, u32 nor, u32 len, const char *name, const char *m)
 {
   u32 i;
-  s64 pos = ftello64(f); /* Remember where we start */
+  s64 pos = ftello(f); /* Remember where we start */
   for (i = 0; i < nor; i++) {
     word *my_row = row, *end_row = row + len;
     errno = 0;
@@ -38,7 +38,7 @@ int make_indexes(FILE *f, word *row, u32 *indexes, u32 nor, u32 len, const char 
     indexes[i] = /*my_row - rows[0]*/0;
   }
   /* Now rewind f */
-  if (0 != fseeko64(f, pos, SEEK_SET)) {
+  if (0 != fseeko(f, pos, SEEK_SET)) {
     fprintf(stderr, "%s: unable to rewind %s, terminating\n", name, m);
     return 0;
   }

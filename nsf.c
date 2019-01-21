@@ -1,5 +1,5 @@
 /*
- * $Id: nsf.c,v 1.20 2005/07/24 09:32:45 jon Exp $
+ * $Id: nsf.c,v 1.21 2019/01/21 08:32:34 jon Exp $
  *
  * Compute the nullspace of a matrix, using temporary files
  *
@@ -77,7 +77,7 @@ u32 nullspacef(const char *m1, const char *m2, const char *dir, const char *name
   sprintf(name4, "%s/%s.3", dir, tmp); /* Two for identity */
   sprintf(name5, "%s/%s.4", dir, tmp); /* One for null vectors */
   errno = 0;
-  outp = fopen64(name5, "wb");
+  outp = fopen(name5, "wb");
   if (NULL == outp) {
     if ( 0 != errno) {
       perror(name);
@@ -232,7 +232,7 @@ u32 nullspacef(const char *m1, const char *m2, const char *dir, const char *name
       if (rows_remaining > 0) {
         u32 rows_written = 0;
         errno = 0;
-        out->f = fopen64(out->name, "wb");
+        out->f = fopen(out->name, "wb");
         if (NULL == out->f) {
           if ( 0 != errno) {
             perror(name);
@@ -245,7 +245,7 @@ u32 nullspacef(const char *m1, const char *m2, const char *dir, const char *name
           exit(1);
         }
         errno = 0;
-        out->f_id = fopen64(out->name_id, "wb");
+        out->f_id = fopen(out->name_id, "wb");
         out->created = 1;
         if (NULL == out->f_id) {
           if ( 0 != errno) {
@@ -331,7 +331,7 @@ u32 nullspacef(const char *m1, const char *m2, const char *dir, const char *name
         out = out->next;
         if (rows_written > 0) {
           errno = 0;
-          in->f = fopen64(in->name, "rb");
+          in->f = fopen(in->name, "rb");
           if (NULL == in->f) {
             if ( 0 != errno) {
               perror(name);
@@ -341,7 +341,7 @@ u32 nullspacef(const char *m1, const char *m2, const char *dir, const char *name
             exit(1);
           }
           errno = 0;
-          in->f_id = fopen64(in->name_id, "rb");
+          in->f_id = fopen(in->name_id, "rb");
           if (NULL == in->f_id) {
             if ( 0 != errno) {
               perror(name);
@@ -384,7 +384,7 @@ u32 nullspacef(const char *m1, const char *m2, const char *dir, const char *name
       exit(1);
     }
     errno = 0;
-    inp = fopen64(name5, "rb");
+    inp = fopen(name5, "rb");
     if (NULL == inp) {
       if ( 0 != errno) {
         perror(name);

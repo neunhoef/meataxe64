@@ -1,5 +1,5 @@
 /*
- * $Id: files.c,v 1.1 2005/07/13 21:05:46 jon Exp $
+ * $Id: files.c,v 1.2 2019/01/21 08:32:35 jon Exp $
  *
  * file system stuff for unix
  *
@@ -79,19 +79,4 @@ unsigned long file_size(const char *filename)
   } else {
     return buf.st_size;
   }
-}
-
-FILE *fopen64(const char *filename, const char *mode)
-{
-  return fopen(filename, mode);
-}
-
-int fseeko64(FILE *stream, long long off, int whence)
-{
-  return fseek(stream, off, whence);
-}
-
-long long ftello64(FILE *stream)
-{
-  return ftell(stream);
 }

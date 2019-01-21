@@ -1,5 +1,5 @@
 /*
- * $Id: files.c,v 1.1 2005/10/12 18:20:31 jon Exp $
+ * $Id: files.c,v 1.2 2019/01/21 08:32:35 jon Exp $
  *
  * file system stuff for win32
  *
@@ -53,19 +53,4 @@ unsigned long file_size(const char *filename)
     (void)CloseHandle(hFile);
     return size;
   }
-}
-
-FILE *fopen64(const char *filename, const char *mode)
-{
-  return fopen(filename, mode);
-}
-
-int fseeko64(FILE *stream, s64 off, int whence)
-{
-  return fseek(stream, (long)off, whence);
-}
-
-s64 ftello64(FILE *stream)
-{
-  return ftell(stream);
 }

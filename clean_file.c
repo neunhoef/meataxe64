@@ -1,5 +1,5 @@
 /*
- * $Id: clean_file.c,v 1.8 2005/10/12 18:20:31 jon Exp $
+ * $Id: clean_file.c,v 1.9 2019/01/21 08:32:34 jon Exp $
  *
  * Cleaning and echilisation, when the already clean vectors
  * are in a file which is to be updated
@@ -49,7 +49,7 @@ int clean_file(row_ops *row_operations,
   }
   my_nor = *nor;
   if (0 != my_nor) {
-    fseeko64(clean_vectors, 0, SEEK_SET);
+    fseeko(clean_vectors, 0, SEEK_SET);
     for (i = 0; i < my_nor; i += nor2) {
       u32 stride = (i + nor2 > my_nor) ? my_nor - i : nor2;
       errno = 0;
@@ -72,7 +72,7 @@ int clean_file(row_ops *row_operations,
       for (i = 0; i < my_nor; i += nor2) {
         u32 stride2 = (nor2 + i > my_nor) ? my_nor - i : nor2;
         /* Read stride2 rows from echelised at offset ptr */
-        fseeko64(clean_vectors, ptr, SEEK_SET);
+        fseeko(clean_vectors, ptr, SEEK_SET);
         errno = 0;
         if (0 == endian_read_matrix(clean_vectors, rows2, len, stride2)) {
           if ( 0 != errno) {
@@ -85,7 +85,7 @@ int clean_file(row_ops *row_operations,
         clean(row_operations, rows1, nor1, rows2, stride2, internal_new_map, NULL, NULL, 0,
               grease_level, prime, len, nob, start, 0, 0, 0, name);
         /* Write back the cleaned version to echelised */
-        fseeko64(clean_vectors, ptr, SEEK_SET);
+        fseeko(clean_vectors, ptr, SEEK_SET);
         errno = 0;
         if (0 == endian_write_matrix(clean_vectors, rows2, len, stride2)) {
           if ( 0 != errno) {
@@ -94,11 +94,11 @@ int clean_file(row_ops *row_operations,
           fprintf(stderr, "%s: cannot write temporary matrix, terminating\n", name);
           return 0;
         }
-        ptr = ftello64(clean_vectors);
+        ptr = ftello(clean_vectors);
       }
     }
     /* We put the new rows onto the end */
-    fseeko64(clean_vectors, 0, SEEK_END);
+    fseeko(clean_vectors, 0, SEEK_END);
     for (i = 0; i < nor1; i++) {
       if (internal_new_map[i] >= 0) {
         /* Got a useful row */
