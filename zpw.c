@@ -29,7 +29,7 @@ int main(int argc, const char *const argv[])
   int peak;
 
   argv = parse_line(argc, argv, &argc);
-  if (5 > argc || argc % 2 != 1) {
+  if (5 > argc) {
     pw_usage();
     exit(1);
   }
