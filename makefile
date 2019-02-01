@@ -93,6 +93,7 @@ ZPRO_TARGET=	zpro
 ZPROJ_TARGET=	zproj
 ZPS_TARGET=	zps
 ZPSIGN_TARGET=	zpsign
+ZPW_TARGET=	zpw
 ZQF_TARGET=	zqf
 ZQS_TARGET=	zqs
 ZRAND_TARGET=	zrand
@@ -234,6 +235,7 @@ ZPRO_MODULES=	zpro
 ZPROJ_MODULES=	rows zproj
 ZPS_MODULES=	zps
 ZPSIGN_MODULES=	psign rows zpsign
+ZPW_MODULES=	pw zpw rows
 ZQF_MODULES=	rows zqf
 ZQS_MODULES=	rows zqs
 ZRAND_MODULES=	rows zrand
@@ -374,6 +376,7 @@ MODULES=	$(LIB_MODULES) \
 	$(ZPROJ_MODULES) \
 	$(ZPS_MODULES) \
 	$(ZPSIGN_MODULES) \
+	$(ZPW_MODULES) \
 	$(ZQF_MODULES) \
 	$(ZQS_MODULES) \
 	$(ZRAND_MODULES) \
@@ -725,6 +728,9 @@ TARGET:=ZPS
 include targets.txt
 
 TARGET:=ZPSIGN
+include targets.txt
+
+TARGET:=ZPW
 include targets.txt
 
 TARGET:=ZQF
