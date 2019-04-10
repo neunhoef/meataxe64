@@ -381,6 +381,11 @@ int pw(u32 n_irreds, u32 n_gens, int peak, u32 depth, u32 *orders, char **irred_
       printf("irred %" U32_F ", %s\n", ones[k] - 1, words[ones[k] - 1]);
     }
   }
+  for (j = n_gens; j < depth; j++) {
+    remove(group_names[j]);
+    free(group_names[j]);
+  }
+  free(group_names);
   NOT_USED(peak);
   return 0;
 }

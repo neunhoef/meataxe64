@@ -18,7 +18,7 @@ int psign_value(word *perm, u32 nor)
 {
   u32 start = 0;
   int sign = 1;
-  int *done = malloc(sizeof(*done) * nor);
+  int *done = my_malloc(sizeof(*done) * nor);
   /* Mark no values examined yet */
   start = 0;
   memset(done, 0, sizeof(*done) * nor);
