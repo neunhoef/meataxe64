@@ -16,7 +16,7 @@ static const char *name = "zpw";
 
 static void pw_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s %s <number of irreducibles> <number of generators> <peak(1)/delta(0) words> <depth> [<element order>] [<irreducible name><nullity>]\n", name, name, parse_usage());
+  fprintf(stderr, "%s: usage: %s %s <number of irreducibles> <number of generators> <peak(1)/delta(0) words> <depth> [<element order>] [<irreducible name> <nullity>]\n", name, name, parse_usage());
 }
 
 int main(int argc, const char *const argv[])

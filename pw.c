@@ -242,6 +242,8 @@ int pw(u32 n_irreds, u32 n_gens, int peak, u32 depth, u32 *orders, char **irred_
           fprintf(stderr, "%s: incompatible parameter %s, terminating\n", name, irred);
           return 1;
         }
+      } else {
+        return 1;
       }
     }
     nors[i] = nor;
