@@ -113,7 +113,7 @@ static const char *print_ga_element(u64 code, u64 prime, u32 depth)
     u64 rem = code % prime;
     code /= prime;
     if (0 != rem) {
-      char digit[3];
+      char digit[24];
       sprintf(digit, "+%" U64_F, rem);
       strcat(out, digit);
       strcat(out, group_words[index]);

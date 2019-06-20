@@ -1,5 +1,5 @@
 /*
- * $Id: system.c,v 1.11 2019/01/21 08:32:35 jon Exp $
+ * $Id: system.c,v 1.12 2019/06/20 22:50:28 jon Exp $
  *
  * system dependent stuff for locking etc
  */
@@ -110,6 +110,7 @@ void release_lock(void)
     case ENOMEM:
     case EROFS:
       printf("Lock file fault %d (%s)\n", errno, strerror(errno));
+    /* FALLTHRU */
     default:
       printf("Unexpected error %d (%s) deleting lock file\n", errno, strerror(errno));
     }

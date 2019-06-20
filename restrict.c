@@ -1,5 +1,5 @@
 /*
- * $Id: restrict.c,v 1.9 2005/07/24 09:32:45 jon Exp $
+ * $Id: restrict.c,v 1.10 2019/06/20 22:50:28 jon Exp $
  *
  * Function to restrict a matrix from a big field to a smaller
  *
@@ -31,7 +31,7 @@ static int cleanup(FILE *inp, FILE *outp)
   return 0;
 }
 
-int restrict(const char *m1, const char *m2, u32 q, const char *name)
+int res_restrict(const char *m1, const char *m2, u32 q, const char *name)
 {
   FILE *inp = NULL;
   FILE *outp = NULL;
