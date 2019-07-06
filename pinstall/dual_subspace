@@ -46,21 +46,21 @@ tmp=tmp${PPID}
 ~/ptinstall/bin/zng ${i}.rem ${tmp}.rem_neg
 if [ 0 -ne $? ]; then
     ~/ptinstall/bin/zng ${i}.rem ${tmp}.rem_neg
-    rm -f ${tmp}*
+    rm -f ${tmp}.*
     exit 1
 fi
 # Then transpose it
 ~/ptinstall/bin/ztr ${tmp}.rem_neg ${o}.rem
 if [ 0 -ne $? ]; then
     ~/ptinstall/bin/ztr ${tmp}.rem_neg ${o}.rem
-    rm -f ${tmp}*
+    rm -f ${tmp}.*
     exit 1
 fi
 # Now complement the bitstring
 ~/ptinstall/bin/zbc ${i}.bs ${o}.bs
 if [ 0 -ne $? ]; then
     ~/ptinstall/bin/zbc ${i}.bs ${o}.bs
-    rm -f ${tmp}*
+    rm -f ${tmp}.*
     exit 1
 fi
 # Now we just need the nullity, which is the number of rows
@@ -68,8 +68,9 @@ fi
 nullity=`~/ptinstall/bin/znoc ${i}.rem`
 if [ 0 -ne $? ]; then
     ~/ptinstall/bin/znor ${i}.rem
-    rm -f ${tmp}*
+    rm -f ${tmp}.*
     exit 1
 fi
+rm -f ${tmp}.*
 echo $nullity
 exit 0
