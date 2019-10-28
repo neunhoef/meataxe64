@@ -1,5 +1,5 @@
 /*
- * $Id: script.c,v 1.11 2005/10/12 18:20:31 jon Exp $
+ * $Id: script.c,v 1.12 2019/10/28 22:15:21 jon Exp $
  *
  * Function to compute a script in two generators
  *
@@ -98,41 +98,49 @@ static const char *get_multiplier(unsigned int argc, const char gen, const char 
     if (argc >= 1) {
       break;
     }
+    /* Fallthrough */
   case 'B':
     multiplier = args[1];
     if (argc >= 2) {
       break;
     }
+    /* Fallthrough */
   case 'C':
     multiplier = args[2];
     if (argc >= 3) {
       break;
     }
+    /* Fallthrough */
   case 'D':
     multiplier = args[3];
     if (argc >= 4) {
       break;
     }
+    /* Fallthrough */
   case 'E':
     multiplier = args[4];
     if (argc >= 5) {
       break;
     }
+    /* Fallthrough */
   case 'F':
     multiplier = args[5];
     if (argc >= 6) {
       break;
     }
+    /* Fallthrough */
   case 'G':
     multiplier = args[6];
     if (argc >= 7) {
       break;
     }
+    /* Fallthrough */
   case 'H':
     multiplier = args[7];
     if (argc >= 8) {
       break;
     }
+    /* Fallthrough */
   default:
     fprintf(stderr, "%s: script element '%c' is not a generator, terminating\n", name, gen);
     multiplier =  NULL;
