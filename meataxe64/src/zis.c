@@ -112,8 +112,10 @@ int main(int argc, const char *argv[])
   int ngens = argc - 3;
   uint64_t res;
   uint64_t nor = 0;
+  uint64_t noc = 0;
   uint64_t fdef = 0;
   uint64_t rank, mrank = 0;
+  uint64_t hdr[5];
   gen *gens, *this_gen;
   CLogCmd(argc, argv);
   /* Check command line <vecs> <output stem> [<gen>*] */
@@ -129,6 +131,11 @@ int main(int argc, const char *argv[])
   fun_tmp = malloc(tmp_len + sizeof(FUN_TMP) + 1);
   strcpy(fun_tmp, tmp_root);
   strcat(fun_tmp, FUN_TMP);
+  /* Get the parameters of the seeds */
+  EPeek(in_vecs, hdr);
+  fdef = hdr[1]; /* The field in which we're working */
+  noc = hdr[3]; /* Columns: this doesn't change */
+  /* We don't care about the nor for the seeds, this will change as we spin */
   /* Echelise initial vecs. Also sets up zero_bs */
   res = fProduceNREF(fun_tmp, in_vecs, 0, zero_bs, 1, in_vecs_rem, 1);
   /* fail if rank 0 */
@@ -147,23 +154,23 @@ int main(int argc, const char *argv[])
   for (i = 0; i < 3; i++) {
     clean_vars[i] = mk_tmp(prog_name, tmp_root, tmp_len);
   }
-  /* Now check all the generators, all square, same size */
+  /*
+   * Now check all the generators, all square, same size
+   * Any of them may be a map. If they aren't, they must have
+   * the same fdef as the seeds
+   */
   for (i = 0; i < ngens; i++) {
-    uint64_t hdr[5];
     EPeek(argv[i + 3], hdr);
-    if (0 == i) {
-      fdef = hdr[1];
-      nor = hdr[2];
-      if (hdr[3] != nor) {
-        fprintf(stderr, "%s: cannot spin with non square matrix %s\n", prog_name, argv[i + 3]);
-        exit(20);
-      }
-    } else {
-      if (fdef != hdr[1] || nor != hdr[2] || nor != hdr[3]) {
-        fprintf(stderr, "%s: cannot spin with incompatible matrix %s\n", prog_name, argv[i + 3]);
-        exit(20);
-      }
+    /*
+     * Check against seeds. We must have consistent noc
+     * But, we may have maps (fdef == 1)
+     * If not, it must be the same
+     */
+    if ((fdef != hdr[1] && 1 != hdr[1]) || (noc != hdr[2] || noc != hdr[3])) {
+      fprintf(stderr, "%s: cannot spin with incompatible matrix %s\n", prog_name, argv[i + 3]);
+      exit(20);
     }
+    nor = noc;
   }
   /* Set up gen structures */
   gens = malloc(ngens * sizeof(*gens));
