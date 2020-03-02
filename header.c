@@ -1,5 +1,5 @@
 /*
- * $Id: header.c,v 1.20 2017/01/10 08:08:46 jon Exp $
+ * $Id: header.c,v 1.21 2020/03/02 22:23:58 jon Exp $
  *
  * Header manipulation
  *
@@ -192,7 +192,7 @@ void header_set_eperb(header *h)
 static u32 get_blen(const header *h)
 {
   assert(NULL != h);
-  if (1 == h->prime) {
+  if (1 == header_get_prime(h)) {
     return 0;
   } else {
     assert(get_eperb(h->prime, h->nob) == h->eperb);
