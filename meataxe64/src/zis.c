@@ -68,12 +68,17 @@ static void clean(const char *bs, const char *rem, const char *rows, const char 
   /* Extract pivots from rows using bs giving tmp1 */
   /* Also produce tmp3 = nonsel(bs, rows) */
   fColumnExtract(bs, 1, rows, 1, clean_vars[0], 1, clean_vars[2], 1);
-  /* Produce tmp2 = tmp1 * rem */
-  fMultiply(fun_tmp, clean_vars[0], 1, rem, 1, clean_vars[1], 1);
-  /* Produce out = tmp3 + tmp2 */
+  /* Transpose rem and clean_vars[0] */
+  fTranspose(fun_tmp, rem, 1, clean_vars[3], 1);
+  fTranspose(fun_tmp, clean_vars[0], 1, clean_vars[4], 1);
+  /* Produce tmp2 = rem(T) * tmp1(T) */
+  fMultiply(fun_tmp, clean_vars[3], 1, clean_vars[4], 1, clean_vars[5], 1);
+  /* Produce tmp4 = tmp2(T) */
+  fTranspose(fun_tmp, clean_vars[5], 1, clean_vars[1], 1);
+  /* Produce out = tmp3 + tmp4 */
   fAdd(clean_vars[2], 1, clean_vars[1], 1, out, 1);
   /* And delete the temporaries */
-  for (i = 0; i < 3; i++) {
+  for (i = 0; i < 6; i++) {
     remove(clean_vars[i]);
   }
 }
@@ -150,8 +155,9 @@ int main(int argc, const char *argv[])
   /* Reread to get a second copy of zero_bs: Fudge */
   fProduceNREF(fun_tmp, in_vecs, 1, in_vecs_bs, 1, in_vecs_rem, 1);
   /* Allocate the temporaries for the clean operation */
-  clean_vars = malloc(3 * sizeof(*clean_vars));
-  for (i = 0; i < 3; i++) {
+  /* Three extra are used for transpose operations */
+  clean_vars = malloc(6 * sizeof(*clean_vars));
+  for (i = 0; i < 6; i++) {
     clean_vars[i] = mk_tmp(prog_name, tmp_root, tmp_len);
   }
   /*
