@@ -34,7 +34,6 @@ if (argc != 3) {
   strcat(sub_bs, ".bs");
   strcpy(sub_rem, sub_root);
   strcat(sub_rem, ".rem");
-  sub_bs = malloc(sub_root_len + 4);
   EPeek(sub_rem, hdr.hdr);
   make_plain(NULL, sub_bs, sub_rem, argv[2], hdr.named.fdef);
   free(sub_bs);
