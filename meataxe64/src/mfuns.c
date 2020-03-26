@@ -66,7 +66,6 @@ void make_plain(const char *zero_bs, const char *nref_bs, const char *in, const 
     noco = hdrmbs.named.nor;
     zeroes = 0;
   }
-  fflush(stdout);
   /* Compatibility check */
   if (noci1 != nor /* Number of pivots == number of rows */ || 
       hdrio.named.noc + noci1 + noci2 != noco /* Total columns check */) {
@@ -131,7 +130,6 @@ void make_plain(const char *zero_bs, const char *nref_bs, const char *in, const 
         k++; /* Next column in overall input */
       }
     }
-    fflush(stdout);
     EWData(eo, dso.nob, mo);
   }
   /* Close files */
