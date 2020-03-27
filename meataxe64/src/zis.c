@@ -44,6 +44,7 @@ typedef struct mult_result mult_result;
 struct gen {
   const char *file;
   mult_result next_tbd;
+  int is_perm; /* 1 if this is a permutation, 0 otherwise */
   struct gen *next;
 };
 
@@ -165,6 +166,8 @@ int main(int argc, const char *argv[])
    * Any of them may be a map. If they aren't, they must have
    * the same fdef as the seeds
    */
+  /* Set up gen structures */
+  gens = malloc(ngens * sizeof(*gens));
   for (i = 0; i < ngens; i++) {
     EPeek(argv[i + 3], hdr);
     /*
@@ -172,14 +175,13 @@ int main(int argc, const char *argv[])
      * But, we may have maps (fdef == 1)
      * If not, it must be the same
      */
+    gens[i].is_perm = (1 == hdr[1]);
     if ((fdef != hdr[1] && 1 != hdr[1]) || (noc != hdr[2] || noc != hdr[3])) {
       fprintf(stderr, "%s: cannot spin with incompatible matrix %s\n", prog_name, argv[i + 3]);
       exit(20);
     }
     nor = noc;
   }
-  /* Set up gen structures */
-  gens = malloc(ngens * sizeof(*gens));
   for (i = 0; i < ngens; i++) {
     gens[i].file = argv[i + 3];
     gens[i].next_tbd.bs = mk_tmp(prog_name, tmp_root, tmp_len);
@@ -208,8 +210,22 @@ int main(int argc, const char *argv[])
       gen *clean_gen = this_gen;
       if (0 != mul_gen->next_tbd.size) {
         /* Something to do for the last result from this generator */
-        fMultiply(fun_tmp, mul_gen->next_tbd.plain, 1, 
-                  this_gen->file, 1, mul_tmp, 1);
+        if (this_gen->is_perm) {
+          /*
+           * We transpose and act on the left, ie a row shuffle
+           * Because the transpose and inverse of a permutation
+           * are the same thing, we don't need to tranpose the permutation
+           */
+          fTranspose(fun_tmp, mul_gen->next_tbd.plain, 1, clean_vars[0], 1);
+          fMultiply(fun_tmp, this_gen->file, 1,
+                    clean_vars[0], 1, clean_vars[1], 1);
+          fTranspose(fun_tmp, clean_vars[1], 1, mul_tmp, 1);
+          remove(clean_vars[0]);
+          remove(clean_vars[1]);
+        } else {
+          fMultiply(fun_tmp, mul_gen->next_tbd.plain, 1, 
+                    this_gen->file, 1, mul_tmp, 1);
+        }
         if (0 != mrank) {
           /* Clean this result with the overall multiplied stuff */
           clean(mult_result_bs, mult_result_rem, mul_tmp, clean_tmp1);
