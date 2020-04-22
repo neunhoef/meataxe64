@@ -17,14 +17,6 @@ if [ $# -ne 3 ]; then
 fi
 infile=$1
 outfile=$2
-tmp_dir=$3
-tmp=tmp$$
-to_m2000 ${infile} ${tmp}.1
-~/install/zivf ${mem} ${tmp}.1 ${tmp}.2 ${tmp_dir}
+${dir}/../bin/ziv ${infile} ${outfile}
 ret=$?
-# Now convert back the result
-if [ 0 -eq ${ret} ]; then
-    to_m64 ${tmp}.2 ${outfile}
-fi
-rm -f ${tmp}.{1,2} ${gens}
 exit ${ret}
