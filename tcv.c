@@ -1,5 +1,5 @@
 /*
- * $Id: tcv.c,v 1.12 2005/10/12 18:20:31 jon Exp $
+ * $Id: tcv.c,v 1.13 2020/10/25 11:01:07 jon Exp $
  *
  * Function to lift vectors from a tensor condensation representation
  *
@@ -147,7 +147,7 @@ int tco_lift(u32 s, const char *mults_l, const char *mults_r, const char *in,
   fclose(inp);
   inp = fopen(mults_r, "r");
   if (NULL == inp) {
-    fprintf(stderr, "%s: failed to open right multiplicities file '%s', terminating\n", name, mults_l);
+    fprintf(stderr, "%s: failed to open right multiplicities file '%s', terminating\n", name, mults_r);
     return cleanup(left_multiplicities, right_multiplicities,
                    NULL, NULL, NULL, NULL, NULL,
                    NULL, NULL, 0, NULL, NULL, NULL);
