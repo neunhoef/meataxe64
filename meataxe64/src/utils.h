@@ -17,12 +17,6 @@
 #define MAX_LINE 100000
 
 /* Large files */
-extern FILE *fopen64(const char *, const char *);
-
-extern int fseeko64(FILE *, s64, int);
-
-extern s64 ftello64(FILE *);
-
 extern u32 read_decimal(const char *str, u32 len);
 
 extern u32 bits_in_word;

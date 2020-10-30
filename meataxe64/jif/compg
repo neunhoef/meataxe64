@@ -62,6 +62,7 @@ cp $BIN/zrn1 $BIN/zrn
 gcc $1 -g -Wall -pthread -include malloc.h zis.c -L$BIN -lmtx-g -o $BIN/zis
 gcc $1 -g -Wall -pthread -include malloc.h zqa.c -L$BIN -lmtx-g -o $BIN/zqa
 gcc $1 -g -Wall -pthread -include malloc.h zsa.c -L$BIN -lmtx-g -o $BIN/zsa
+gcc $1 -g -Wall -pthread -include malloc.h zplain.c -L$BIN -lmtx-g -o $BIN/zplain
 gcc -g -Wall -pthread -include malloc.h znor.c -L$BIN -lmtx-g -o $BIN/znor
 gcc -g -Wall -pthread -include malloc.h znoc.c -L$BIN -lmtx-g -o $BIN/znoc
 gcc -g -Wall -pthread -include malloc.h zprime.c -L$BIN -lmtx-g -o $BIN/zprime

@@ -61,7 +61,7 @@ u32 header_get_nob(const header *h)
 void header_set_nob(header *h, u32 n)
 {
   assert(NULL != h);
-  assert(n >= 1 || 1 == h->prime);
+  assert(n >= 1 || 1 == header_get_prime(h));
   h->nob = n;
 }
 
@@ -74,7 +74,7 @@ u32 header_get_nod(const header *h)
 void header_set_nod(header *h, u32 n)
 {
   assert(NULL != h);
-  assert(n >= 1 || 1 == h->prime);
+  assert(n >= 1 || 1 == header_get_prime(h));
   h->nod = n;
 }
 
@@ -156,7 +156,7 @@ u32 header_get_u64_len(const header *h)
 void header_set_len(header *h)
 {
   assert(NULL != h);
-  assert(0 != h->nob || 1 == h->prime);
+  assert(0 != h->nob || 1 == header_get_prime(h));
   h->len = compute_len(h->nob, h->noc);
 }
 
@@ -185,14 +185,14 @@ u32 header_get_eperb(const header *h)
 void header_set_eperb(header *h)
 {
   assert(NULL != h);
-  assert(0 != h->nob || 1 == h->prime);
+  assert(0 != h->nob || 1 == header_get_prime(h));
   h->eperb = get_eperb(h->prime, h->nob);
 }
 
 static u32 get_blen(const header *h)
 {
   assert(NULL != h);
-  if (1 == h->prime) {
+  if (1 == header_get_prime(h)) {
     return 0;
   } else {
     assert(get_eperb(h->prime, h->nob) == h->eperb);
@@ -210,7 +210,7 @@ u32 header_get_blen(const header *h)
 void header_set_blen(header *h)
 {
   assert(NULL != h);
-  assert(0 != h->nob || 1 == h->prime);
+  assert(0 != h->nob || 1 == header_get_prime(h));
   h->blen = get_blen(h);
 }
 
