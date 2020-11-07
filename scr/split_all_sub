@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: split_all_sub,v 1.10 2020/11/07 14:34:58 jon Exp $
+# $Id: split_all_sub,v 1.11 2020/11/07 20:10:26 jon Exp $
 #
 # Script to split a representation completely
 # and possibly classify the irreducibles
@@ -108,7 +108,7 @@ else
 # First check if we have vectors we can pass in
   qv=/dev/null
   sv=/dev/null
-  if [ -s $vectors -a -s $subspace ]; then
+  if [ -s $vectors -a \( -s $subspace -o \( -s $subspace.bs -a -s $subspace.rem \) \) ]; then
 # Project to see if any quotient vectors. We may need to work on the memory allocation
 #    echo subspace and vectors found
     while true; do
