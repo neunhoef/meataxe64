@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: split_all_sub,v 1.9 2014/06/20 20:42:14 jon Exp $
+# $Id: split_all_sub,v 1.10 2020/11/07 14:34:58 jon Exp $
 #
 # Script to split a representation completely
 # and possibly classify the irreducibles
@@ -51,7 +51,7 @@ if [ -s $vectors ]; then
   ret=$?
   if [ 1 -eq $ret ]; then
     echo "parameter problem with module $a"
-    rm -f $vectors $subspace
+    rm -f $vectors $subspace*
     cat poo
     exit 1
   fi
@@ -59,7 +59,7 @@ fi
 if [ 254 -eq $ret ]; then
 # Create our own vectors file
   if [ "/dev/null" != "$vectors" ]; then
-    rm -f $vectors $subspace
+    rm -f $vectors $subspace*
   fi
   vectors=${tmp}.vectors
   split $o $path ${vectors} ${subspace} $a $* 2>/dev/null 1>poo
@@ -71,13 +71,13 @@ res=`grep dimension poo 2>/dev/null`
 #echo res = $res, ret = $ret
 if [ 1 -eq $ret ]; then
   echo "parameter problem with module $a"
-  rm -f $vectors $subspace
+  rm -f $vectors $subspace*
   cat poo
   exit 1
 elif [ 255 -eq $ret ]; then
   rm -f poo
   echo "irreducible module $a found"
-  rm -f $vectors $subspace
+  rm -f $vectors $subspace*
   if [ 0 -ne $classify ]; then
     new_irred_and_indicate 400 ${tmp}.form $a $*
   else
@@ -85,12 +85,12 @@ elif [ 255 -eq $ret ]; then
   fi
   exit 0
 elif [ 254 -eq $ret ]; then
-  rm -f $vectors $subspace
+  rm -f $vectors $subspace*
   cat poo
   echo "unable to split module $a (unexpected)"
   exit 0
 elif [ 252 -eq $ret ]; then
-  rm -f $vectors $subspace
+  rm -f $vectors $subspace*
   cat poo
   echo "ran out of splitters for $a"
   exit 252
@@ -185,7 +185,7 @@ else
 #  else
 #    echo Subspace or vectors not found
   fi
-  rm -f $vectors $subspace
+  rm -f $vectors $subspace*
   names="${sub_name}_1"
   y=1
   for x in $*; do
