@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: split,v 1.23 2019/02/12 22:02:51 jon Exp $
+# $Id: split,v 1.24 2021/01/02 10:35:16 jon Exp $
 #
 # Script to split a representation
 #
@@ -30,7 +30,6 @@ if [ $# -lt 5 ]; then
   echo "$usage"
   exit 1;
 fi
-echo "$0 $*"
 a=$5
 o=$1
 path=$2
