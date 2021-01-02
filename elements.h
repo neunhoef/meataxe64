@@ -1,5 +1,5 @@
 /*
- * $Id: elements.h,v 1.23 2018/04/18 19:29:03 jon Exp $
+ * $Id: elements.h,v 1.24 2021/01/02 11:05:15 jon Exp $
  *
  * Element manipulation for meataxe
  *
@@ -66,6 +66,18 @@ extern void put_element_to_row_with_params(u32 nob, u32 index, word mask,
 /* Insert an element into a row at given position */
 extern void put_element_to_clean_row_with_params(u32 nob, u32 index,
                                                  u32 elts_per_word, word *row, word elt);
+
+/* Copy an element from a row into a clean row */
+extern void copy_element_to_clean_row_with_params(u32 nob, word mask,
+                                                  u32 elts_per_word,
+                                                  word *row_in, u32 index,
+                                                  word *row_out, u32 outdex);
+
+/* Copy elements from  a row into a clean row */
+extern void copy_elements_to_clean_row_with_params(u32 count, u32 nob,
+                                                   u32 elts_per_word,
+                                                   word *row_in, u32 index,
+                                                   word *row_out, u32 outdex);
 
 /* Insert an element into a character row at given position */
 extern void put_element_to_char_row(u32 eperb, u32 prime,

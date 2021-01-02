@@ -1,5 +1,5 @@
 /*
- * $Id: mv.c,v 1.6 2015/01/15 09:06:45 jon Exp $
+ * $Id: mv.c,v 1.7 2021/01/02 11:05:15 jon Exp $
  *
  * Function to convert rows to matrices and vv
  * Used for multiplication in tensor space
@@ -20,7 +20,7 @@ void v_to_m(word *row_in, word **rows_out,
             u32 prime)
 {
   const header *h;
-  u32 i, j, len, nob, elts_per_word;
+  u32 i, len, nob, elts_per_word;
   word mask;
   assert(NULL != row_in);
   assert(NULL != rows_out);
@@ -28,18 +28,14 @@ void v_to_m(word *row_in, word **rows_out,
   /* Form a header describing the output matrix */
   nob = bits_of(prime);
   mask = get_mask_and_elts(nob, &elts_per_word);
+  NOT_USED(mask);
   /* Create a header for rows with nor2 columns, and nor1 rows */
   h = header_create(prime, nob, digits_of(prime), nor2, nor1);
   len = header_get_len(h);
   for (i = 0; i < nor1; i++) {
+    u32 k = i * nor2;
     row_init(rows_out[i], len);
-    for (j = 0; j < nor2; j++) {
-      u32 k = i * nor2;
-      word elt = get_element_from_row_with_params(nob, k + j, mask, elts_per_word, row_in);
-      if (elt) {
-        put_element_to_clean_row_with_params(nob, j, elts_per_word, rows_out[i], elt);
-      }
-    }
+    copy_elements_to_clean_row_with_params(nor2, nob, elts_per_word, row_in, k, rows_out[i], 0);
   }
   header_free(h);
 }
@@ -49,7 +45,7 @@ void m_to_v(word **rows_in, word *row_out,
                    u32 prime)
 {
   const header *h;
-  u32 i, j, len, nob, elts_per_word;
+  u32 i, len, nob, elts_per_word;
   word mask;
   assert(NULL != rows_in);
   assert(NULL != row_out);
@@ -57,17 +53,13 @@ void m_to_v(word **rows_in, word *row_out,
   /* Form a header describing the output matrix */
   nob = bits_of(prime);
   mask = get_mask_and_elts(nob, &elts_per_word);
+  NOT_USED(mask);
   h = header_create(prime, nob, digits_of(prime), nor * noc, 1);
   len = header_get_len(h);
   row_init(row_out, len);
   for (i = 0; i < nor; i++) {
-    for (j = 0; j < noc; j++) {
-      u32 k = i * noc;
-      word elt = get_element_from_row_with_params(nob, j, mask, elts_per_word, rows_in[i]);
-      if (elt) {
-        put_element_to_clean_row_with_params(nob, k + j, elts_per_word, row_out, elt);
-      }
-    }
+    u32 k = i * noc;
+    copy_elements_to_clean_row_with_params(noc, nob, elts_per_word, rows_in[i], 0, row_out, k);
   }
   header_free(h);
 }

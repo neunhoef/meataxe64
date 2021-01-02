@@ -1,5 +1,5 @@
 /*
- * $Id: elements.c,v 1.31 2018/04/18 19:29:03 jon Exp $
+ * $Id: elements.c,v 1.32 2021/01/02 11:05:15 jon Exp $
  *
  * Element manipulation for meataxe
  *
@@ -11,6 +11,7 @@
 #include <ctype.h>
 #include "utils.h"
 #include "primes.h"
+#include <limits.h>
 
 static prime_ops prime_operations = {0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL};
 static int inited = 0;
@@ -257,13 +258,67 @@ void put_element_to_clean_row_with_params(u32 nob, u32 index,
   u32 bit_offset = (index % elts_per_word) * nob;
   word word;
   row += word_offset;
+  assert(NULL != row);
   word = *row;
   assert(0 != nob);
-  assert(NULL != row);
   assert(bit_offset + nob <= bits_in_word);
-  elt = elt << bit_offset;
-  word = word | elt;
+  elt <<= bit_offset;
+  word |= elt;
   *row = word;
+}
+
+void copy_element_to_clean_row_with_params(u32 nob, word mask, u32 elts_per_word,
+                                           word *row_in, u32 index,
+                                           word *row_out, u32 outdex)
+{
+  u32 word_offset = index / elts_per_word;
+  u32 bit_offset = (index % elts_per_word) * nob;
+  word elt = row_in[word_offset];
+  word res = (elt >> bit_offset) & mask;
+  word word;
+  assert(0 != nob);
+  assert(NULL != row_in);
+  assert(bit_offset + nob <= bits_in_word);
+  word_offset = outdex / elts_per_word;
+  bit_offset = (outdex % elts_per_word) * nob;
+  row_out += word_offset;
+  assert(NULL != row_out);
+  word = *row_out;
+  assert(bit_offset + nob <= bits_in_word);
+  res <<= bit_offset;
+  word |= res;
+  *row_out = word;
+}
+
+void copy_elements_to_clean_row_with_params(u32 count, u32 nob,
+                                            u32 elts_per_word, word *row_in,
+                                            u32 index, word *row_out, u32 outdex)
+{
+  u32 i = 0;
+  while (i < count) {
+    word word, mask = 0 - 1;
+    u32 in_offset = index % elts_per_word;
+    u32 avail = elts_per_word - in_offset;
+    u32 avail_in = (avail < count - i) ? avail : count - i; /* Don't overrun the input */
+    u32 out_offset = outdex % elts_per_word;
+    u32 avail_out = elts_per_word - out_offset; /* Space in next output word */
+    if (avail_in > avail_out) {
+      avail_in = avail_out; /* How much this copy */
+    }
+    mask >>= sizeof(word) * CHAR_BIT - avail_in * nob;
+    word = row_in[index / elts_per_word];
+    /* Now mask down to size */
+    /* First shift stuff that's too early off the right */
+    word >>= in_offset * nob;
+    /* Now remove anything we don't want from the left */
+    word &= mask;
+    /* Now shift into position for output */
+    word <<= out_offset * nob;
+    row_out[outdex / elts_per_word] |= word;
+    i += avail_in; /* Move on */
+    index += avail_in;
+    outdex += avail_in;
+  }
 }
 
 void put_element_to_char_row(u32 eperb, u32 prime,
