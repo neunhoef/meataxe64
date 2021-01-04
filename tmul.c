@@ -1,5 +1,5 @@
 /*
- * $Id: tmul.c,v 1.9 2005/07/24 11:31:35 jon Exp $
+ * $Id: tmul.c,v 1.10 2021/01/04 19:16:17 jon Exp $
  *
  * Function to multiply a matrix by a tensor product
  *
@@ -33,6 +33,8 @@ static void cleanup(FILE *f1, FILE *f2, FILE *f3)
     fclose(f3);
 }
 
+#define MAX_STRIDE 5
+
 /* Multiply m1 by m2 tensor m3 giving m4. Either of m2 and m3 may be a map */
 /* m1 may not be a map */
 int tmul(const char *m1, const char *m2, const char *m3,
@@ -40,8 +42,8 @@ int tmul(const char *m1, const char *m2, const char *m3,
 {
   FILE *in1 = NULL, *in2 = NULL, *in3 = NULL, *out = NULL;
   const header *h_in, *h1, *h2;
-  u32 prime, nor, noc, nor1, noc1, nor2, noc2, nob, len1, len2, len, max_len, max_nor, max_rows, i;
-  word **rows1, **rows2, *row1, *row2, **ptrs_row1, **ptrs_row2;
+  u32 prime, nor, noc, nor1, noc1, nor2, noc2, nob, len1, len2, len, max_len, max_nor, max_rows, i, stride;
+  word **rows1, **rows2, *row1, *row2, **ptrs_row1, **ptrs_row2, **m_ptrs1, **m_ptrs2;
   int is_map1, is_map2;
   grease_struct grease;
   prime_ops prime_operations;
@@ -91,7 +93,7 @@ int tmul(const char *m1, const char *m2, const char *m3,
   }
   max_nor = (nor1 > nor2) ? nor1 : nor2;
   max_len = (len1 > len2) ? len1 : len2;
-  max_rows = memory_rows(max_len, 350);
+  max_rows = memory_rows(max_len, 100);
   /* Check we can fit the tensor operands */
   if (max_rows < max_nor) {
     fprintf(stderr, "%s: cannot get enough memory to hold operands, terminating\n", name);
@@ -99,39 +101,56 @@ int tmul(const char *m1, const char *m2, const char *m3,
     return 0;
   }
   /* Check we can fit a row of operand 1, in its expanded form */
-  if (memory_rows(noc1 * len2, 100) < 1) {
+  if (memory_rows(nor1 * len2, 350) < 1) {
     fprintf(stderr, "%s: cannot get enough memory to hold a row of operand 1, terminating\n", name);
     cleanup(in1, in2, in3);
     return 0;
   }
   primes_init(prime, &prime_operations);
   rows_init(prime, &row_operations);
+  stride = memory_rows(nor1 * len2, 350);
+  if (stride > MAX_STRIDE) {
+    stride = MAX_STRIDE;
+  }
   grease_init(&row_operations, &grease);
-  if (0 == grease_level(prime, &grease, memory_rows(max_len, 100))) {
+  if (0 == grease_level(prime, &grease, memory_rows(max_len * stride, 100))) {
     fprintf(stderr, "%s: failed to get grease for %s, %s, %s, terminating\n",
             name, m1, m2, m3);
     cleanup(in1, in2, in3);
     return 0;
   }
-  if (0 == grease_allocate(prime, max_len, &grease, 900)){
+  printf("Using Stride %u\n", stride);
+  if (0 == grease_allocate(prime, max_len * stride, &grease, 900)){
     fprintf(stderr, "%s: unable to allocate grease, terminating\n", name);
     cleanup(in1, in2, in3);
     return 0;
   }
+  /* Space for the generator */
   rows1 = matrix_malloc(max_nor);
   rows2 = matrix_malloc(max_nor);
   for (i = 0; i < max_nor; i++) {
-    rows1[i] = memory_pointer_offset(0, i, max_len);
-    rows2[i] = memory_pointer_offset(350, i, max_len);
+    rows1[i] = memory_pointer_offset(700, i, max_len);
+    rows2[i] = memory_pointer_offset(800, i, max_len);
   }
-  /* Allocate the space for the long rows */
-  row1 = memory_pointer(700);
-  row2 = memory_pointer(800);
+  /* Space for the long rows */
+  row1 = memory_pointer(0);
+  row2 = memory_pointer(350);
   /* Initialise the points into these two rows */
-  ptrs_row1 = matrix_malloc(nor1);
-  ptrs_row2 = matrix_malloc(nor1);
-  create_pointers(row1, ptrs_row1, nor1, len2);
-  create_pointers(row2, ptrs_row2, nor1, len2);
+  ptrs_row1 = matrix_malloc(nor1 * stride);
+  ptrs_row2 = matrix_malloc(nor1 * stride);
+  /* Some pointers which step down the rows at an offset in the flat vector */
+  m_ptrs1 = matrix_malloc(nor1 * stride);
+  m_ptrs2 = matrix_malloc(nor1 * stride);
+  create_pointers(row1, ptrs_row1, nor1 * stride, len2);
+  create_pointers(row2, ptrs_row2, nor1 * stride, len2);
+  for (i = 0; i < stride; i++) {
+    u32 j, k = i * nor1;
+    for (j = 0; j < nor1; j++) {
+      /* Pointers with outer loop across, inner down */
+      m_ptrs1[k + j] = ptrs_row1[i + j * stride];
+      m_ptrs2[k + j] = ptrs_row2[i + j * stride];
+    }
+  }
   errno = 0;
   if (0 == endian_read_matrix(in2, rows1, len1, nor1)) {
     if ( 0 != errno) {
@@ -160,29 +179,43 @@ int tmul(const char *m1, const char *m2, const char *m3,
     return 0;
   }
   header_free(h_in);
-  for (i = 0; i < nor; i++) {
-    errno = 0;
-    if (0 == endian_read_row(in1, row1, len)) {
-      if ( 0 != errno) {
-        perror(name);
-      }
-      fprintf(stderr, "%s: failed to read row %u from %s, terminating\n",
-              name, i, m1);
-      cleanup(in1, out, NULL);
-      return 0;
+  i = 0;
+  while (i < nor) {
+    u32 j, to_do = stride;
+    /* Do stride rows at once */
+    /* Start by reading min(stride, nor - i) rows and converting */
+    if (to_do > nor - i) {
+      /* Don't run off the end */
+      to_do = nor - i;
     }
-    v_to_m(row1, ptrs_row2, nor1, nor2, prime);
-    if (0 == mul_in_store(ptrs_row2, rows2, ptrs_row1,
+    for (j = 0; j < to_do; j++) {
+      errno = 0;
+      if (0 == endian_read_row(in1, row2, len)) {
+        if ( 0 != errno) {
+          perror(name);
+        }
+        fprintf(stderr, "%s: failed to read row %u from %s, terminating\n",
+                name, i, m1);
+        cleanup(in1, out, NULL);
+        return 0;
+      }
+      /* Convert so the nth rows of the tensors are continuguous */
+      v_to_m(row2, m_ptrs1 + j * nor1, nor1, nor2, prime);
+    }
+    /* Now we've got them all, start multiplying */
+    /* Multiply by right hand tensor from 1 to 2 */
+    if (0 == mul_in_store(m_ptrs1, rows2, m_ptrs2,
                           noc2, len2,
-                          nob, nor1, prime,
+                          nob, nor1 * to_do, prime,
                           0, &grease)) {
       fprintf(stderr, "%s: failed to multiply using %s, terminating\n",
               name, m3);
       cleanup(in1, out, NULL);
       return 0;
     }
-    if (0 == mul_in_store(rows1, ptrs_row1, ptrs_row2,
-                          noc1, len2,
+    /* Now multiply by left hand tensor from 2 to 1 */
+    if (0 == mul_in_store(rows1, m_ptrs2, m_ptrs1,
+                          noc1, len2 * to_do,
                           nob, nor1, prime,
                           0, &grease)) {
       fprintf(stderr, "%s: failed to multiply using %s, terminating\n",
@@ -190,17 +223,21 @@ int tmul(const char *m1, const char *m2, const char *m3,
       cleanup(in1, out, NULL);
       return 0;
     }
-    m_to_v(ptrs_row2, row1, nor1, noc2, prime);
-    errno = 0;
-    if (0 == endian_write_row(out, row1, len)) {
-      if ( 0 != errno) {
-        perror(name);
+    /* Finally convert result back to vectors and output */
+    for (j = 0; j < to_do; j++) {
+      m_to_v(m_ptrs1 + j * nor1, row2, nor1, noc2, prime);
+      errno = 0;
+      if (0 == endian_write_row(out, row2, len)) {
+        if ( 0 != errno) {
+          perror(name);
+        }
+        fprintf(stderr, "%s: failed to write output row %u to %s, terminating\n",
+                name, i, m4);
+        cleanup(in1, out, NULL);
+        return 0;
       }
-      fprintf(stderr, "%s: failed to write output row %u to %s, terminating\n",
-              name, i, m4);
-      cleanup(in1, out, NULL);
-      return 0;
     }
+    i += to_do;
   }
   fclose(in1);
   fclose(out);
