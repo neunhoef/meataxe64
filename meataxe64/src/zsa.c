@@ -185,7 +185,7 @@ int main(int argc, const char *argv[])
    * make_plain bs rem selc
    * zcx bs gen seln junk
    * zmu selc seln selr
-   * zng seln out
+   * zng selr out
    */
   EPeek(sub_rem, hdr.hdr);
   make_plain(NULL, sub_bs, sub_rem, selc, hdr.named.fdef);

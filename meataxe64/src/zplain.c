@@ -38,4 +38,5 @@ if (argc != 3) {
   make_plain(NULL, sub_bs, sub_rem, argv[2], hdr.named.fdef);
   free(sub_bs);
   free(sub_rem);
+  return 0;
 }

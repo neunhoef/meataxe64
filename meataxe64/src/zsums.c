@@ -306,6 +306,7 @@ int main(int argc, const char *argv[])
   if (found) {
     return 0;
   } else {
+    printf("Failed to find a suitable element\n");
     return 255;
   }
 }
