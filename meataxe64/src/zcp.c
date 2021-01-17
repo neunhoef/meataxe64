@@ -144,6 +144,7 @@ int main(int argc,  char **argv)
     free(polys);
     free(polystart);
     free(polydeg);
+    return 0;
 }
 
 /*  end of zcp.c    */

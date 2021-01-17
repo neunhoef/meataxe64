@@ -1,3 +1,4 @@
+mkdir -p $BIN
 cd $SRC
 gcc $1 -O3 -Wall -pthread fieldreg.c -L$BIN -lmtx -o $BIN/fieldreg
 gcc $1 -O3 -Wall -pthread conreg.c -L$BIN -lmtx -o $BIN/conreg

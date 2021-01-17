@@ -116,6 +116,7 @@ int main(int argc,  char **argv)
     free(multiplicity);
     free(v1);
     free(v2);
+    return 0;
 }
 
 /*  end of zhr.c    */

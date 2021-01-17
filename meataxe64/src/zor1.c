@@ -172,6 +172,7 @@ int main(int argc,  char **argv)
         free(bs);
         return 0;
     }
+    return 0;
 }
 
 /*  end of zor1.c    */
