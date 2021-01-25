@@ -15,6 +15,7 @@ fi
 out=`${dir}/../bin/zsums $*`
 ret=$?
 if [ 0 -ne $ret ]; then
+    echo $out
     exit 1
 fi
 echo ${out}
