@@ -20,11 +20,14 @@ void make_plain(const char *zero_bs, const char *nref_bs, const char *in, const 
   FELT min1;
   header hdrzbs, hdrmbs, hdrio;
   /*uint64_t hdrzbs[5], hdrmbs[5], hdrio[5];*/
-  uint64_t nor, noci1, noci2, noci3, noco, sizz, sizm, i, j, k, l;
+  uint64_t nor, noci1, noci2, noci3, noco, sizz, sizm, i, j, k, l, m;
+  uint64_t zeroes, ones; /* How many zeroes, ones in each row */
   FIELD *f;
   FELT felt;
-  DSPACE dsi, dso; /* Matrix in */
-  Dfmt *mo, *mi; /* Matrix out */
+  DSPACE dsi, dso; /* Matrix in and out descriptors */
+  Dfmt *mo, *mi; /* Matrix in and out storage*/
+  DSPACE cbs; /* Clipboard descriptor */
+  Dfmt *cb; /* Clipboard storage */
   uint64_t *bstz = NULL, *bstm;
   int use_ei;
 
@@ -45,19 +48,23 @@ void make_plain(const char *zero_bs, const char *nref_bs, const char *in, const 
   if (use_ei) {
     ei = ERHdr(in, hdrio.hdr);    // remnant   = 1 fdef nor noc 0
     nor = hdrio.named.nor; /* Rows of input */
+    ones = noci1;
   } else {
     ei = NULL;
     nor = noci1;
     hdrio.named.noc = 0;
+    ones = 0;
   }
   if (NULL != ezbs) {
-    /* Some leading zeros */
+    /* Some leading zeroes */
     noci2 = hdrzbs.named.noc; /* Set bits in zero bitstring */
     noco = hdrzbs.named.nor; /* Total bits in zero bitstring, ie amount to output */
+    zeroes = noci2;
   } else {
-    /* No leading zeros */
+    /* No leading zeroes */
     noci2 = 0;
     noco = hdrmbs.named.nor;
+    zeroes = 0;
   }
   /* Compatibility check */
   if (noci1 != nor /* Number of pivots == number of rows */ || 
@@ -73,9 +80,11 @@ void make_plain(const char *zero_bs, const char *nref_bs, const char *in, const 
   eo = EWHdr(out, hdrio.hdr);  
   DSSet(f, noci3 - nor, &dsi); /* input space */
   DSSet(f, noco, &dso); /* output space */
+  DSSet(f, noco, &cbs); /* clipboard space */
   /* Allocate space for a row of input, and a row of output */
   mi = malloc(dsi.nob);
   mo = malloc(dso.nob);
+  cb = malloc(cbs.nob);
   /* Read the bitstring(s) */
   if (NULL != ezbs) {
     sizz = 8 * (2 + (noco + 63) / 64);
@@ -92,13 +101,15 @@ void make_plain(const char *zero_bs, const char *nref_bs, const char *in, const 
     memset(mo, 0, dso.nob);
     /* TBD: put in -1s and contents of in. DCut and DPaste */
     k = 0; /* Bit position in riffle of -1s and input */
-    l = 0; /* Bit position in -1s */
+    l = 0; /* Bit position in -1s. Also counts total from bs in this row */
+    m = 0; /* No zeroes output yet */
     for (j = 0; j < noco; j++) {
-      if (NULL != ezbs && BSBitRead(bstz, j)) {
+      if (NULL != ezbs && m < zeroes && BSBitRead(bstz, j)) {
         /* No action, we're putting in a zero */
+        m++; /* one more zero out this row */
       } else {
         /* Putting in a -1 or something from the input */
-        if (BSBitRead(bstm, k)) {
+        if (l < ones && BSBitRead(bstm, k)) {
           /* Put in a -1 if we're at the correct row */
           if (l == i) {
             /* Correct row */
@@ -107,7 +118,12 @@ void make_plain(const char *zero_bs, const char *nref_bs, const char *in, const 
           /* Else leave as zero */
           l++; /* Next column for -1s */
         } else {
-          /* Pick the value out of input */
+          if (m == zeroes && l == ones) {
+            DCut(&dsi, 1, k-l, mi, &cbs, cb);
+            DPaste(&cbs, cb, 1, j, &dso, mo);
+            break; /* That's it, all done */
+          }
+          /* else do individually, pick the value out of input */
           felt = DUnpak(&dsi, k - l, mi);
           DPak(&dso, j, mo, felt);
         }
