@@ -21,7 +21,7 @@ infile=$1
 outfile=$2
 shift 3 # Ignore tmp_dir
 tmp=tmp${PPID}
-out=`${dir}/../bin/zsb1 ${infile} ${tmp}.ss $*`
+out=`${dir}/../bin/zsb ${infile} ${tmp}.ss $*`
 ret=$?
 rm -f ${tmp}.ss.{bs,rem}
 mv ${tmp}.ss.sb ${outfile}
