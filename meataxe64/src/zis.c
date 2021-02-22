@@ -1,6 +1,7 @@
 /*
       zis.c     meataxe-64 invariant subspace
       =====     J. G. Thackray   04.10.2017
+                updated 28.1.19 RAP allow perms as generators
 */
 
 #include <stdio.h>
@@ -374,7 +375,7 @@ int main(int argc, const char *argv[])
     my_hdr.named.noc = 0;
     my_hdr.named.rnd2 = 0;
     out = EWHdr(out_rem, my_hdr.hdr);
-    EWClose1(out, 1);
+    EWClose1(out, 0);
     /* Write the bitstring */
     my_hdr.named.rnd1 = 2;
     my_hdr.named.fdef = 1;
@@ -390,7 +391,7 @@ int main(int argc, const char *argv[])
     memset(bsrs + 2, 0xff, rslen - 16);
     /* Write the bitstring */
     EWData(out, rslen, (uint8_t *)bsrs);
-    EWClose1(out, 1);
+    EWClose1(out, 0);
   }
   /* Delete temps */
   remove(mult_result_bs);

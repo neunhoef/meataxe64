@@ -16,6 +16,6 @@
 // MAXCHOP is the maximum number of chops that can be made when
 // doing multi-core work.
 
-#define MAXCHOP 5
+#define MAXCHOP 7
 
 /* end of tuning.h */

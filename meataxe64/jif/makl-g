@@ -1,38 +1,42 @@
-cd $SRC
 mkdir -p $BIN
-gcc -c $1 -pthread -Wall -g field.c -o $BIN/field-g.o
-gcc -c $1 -pthread -Wall -g conex.c -o $BIN/conex-g.o
-gcc -c $1 -pthread -Wall -g pcritc.c -o $BIN/pcritc-g.o
-gcc -c $1 -pthread -Wall     pcrits.s -o $BIN/pcrits-g.o
-gcc -c $1 -pthread -Wall     tfarm0.s -o $BIN/tfarm0-g.o
-gcc -c $1 -pthread -Wall -g tfarm1.c -o $BIN/tfarm1-g.o
-gcc -c $1 -pthread -Wall -g tfarm2.c -o $BIN/tfarm2-g.o
-gcc -c $1 -pthread -Wall -g io.c -o $BIN/io-g.o
-gcc -c $1 -pthread -Wall -g proggies.c -o $BIN/proggies-g.o
-gcc -c $1 -pthread -Wall -g bitstring.c -o $BIN/bitstring-g.o
-gcc -c $1 -pthread -Wall -g slab.c -o $BIN/slab-g.o
-gcc -c $1 -pthread -Wall -g pmul.c -o $BIN/pmul-g.o
-gcc -c $1 -pthread -Wall -g tabmake.c -o $BIN/tabmake-g.o
-gcc -c $1 -pthread -Wall -g hpmi.c -o $BIN/hpmi-g.o
-gcc -c $1 -pthread -Wall -g mtra.c -o $BIN/mtra-g.o
-gcc -c $1 -pthread -Wall -g mmul.c -o $BIN/mmul-g.o
-gcc -c $1 -pthread -Wall -g mpef.c -o $BIN/mpef-g.o
-gcc -c $1 -pthread -Wall -g mech.c -o $BIN/mech-g.o
-gcc -c $1 -pthread -Wall -g linf.c -o $BIN/linf-g.o
-gcc -c $1 -pthread -Wall -g util.c -o $BIN/util-g.o
-gcc -c $1 -pthread -Wall -g fasp.c -o $BIN/fasp-g.o
-gcc -c $1 -pthread -Wall -g fchp.c -o $BIN/fchp-g.o
-gcc -c $1 -pthread -Wall -g fech.c -o $BIN/fech-g.o
-gcc -c $1 -pthread -Wall -g fmul.c -o $BIN/fmul-g.o
-gcc -c $1 -pthread -Wall -g fsmu.c -o $BIN/fsmu-g.o
-gcc -c $1 -pthread -Wall -g ftra.c -o $BIN/ftra-g.o
-gcc -c $1 -pthread -Wall -g fpef.c -o $BIN/fpef-g.o
-gcc -c $1 -pthread -Wall -g funs1.c -o $BIN/funs1-g.o
-gcc -c $1 -pthread -Wall -g funs2.c -o $BIN/funs2-g.o
-gcc -c $1 -pthread -Wall -g funs3.c -o $BIN/funs3-g.o
-gcc -c $1 -pthread -Wall -g funs4.c -o $BIN/funs4-g.o
-gcc -c $1 -pthread -Wall -g funs5.c -o $BIN/funs5-g.o
-gcc -c $1 -pthread -include malloc.h -Wall -g malloc.c -o $BIN/malloc-g.o
-gcc -c $1 -pthread -Wall -g mfuns.c -o $BIN/mfuns-g.o
-rm -f $BIN/libmtx-g.a
-ar rc $BIN/libmtx-g.a $BIN/tfarm0-g.o $BIN/tfarm1-g.o $BIN/tfarm2-g.o $BIN/field-g.o $BIN/io-g.o $BIN/pmul-g.o $BIN/slab-g.o $BIN/proggies-g.o $BIN/pcritc-g.o $BIN/pcrits-g.o $BIN/bitstring-g.o $BIN/hpmi-g.o $BIN/tabmake-g.o $BIN/linf-g.o $BIN/conex-g.o $BIN/fasp-g.o $BIN/fchp-g.o $BIN/fech-g.o $BIN/fmul-g.o $BIN/funs1-g.o $BIN/funs2-g.o $BIN/funs3-g.o $BIN/funs4-g.o $BIN/funs5-g.o $BIN/mmul-g.o $BIN/mpef-g.o $BIN/ftra-g.o $BIN/mtra-g.o $BIN/mech-g.o $BIN/util-g.o $BIN/fpef-g.o $BIN/fsmu-g.o $BIN/malloc-g.o $BIN/mfuns-g.o
+cd $SRC
+gcc -c $1 -pthread -Wall -g gauss.c -o $BIN/gauss.o
+gcc -c $1 -pthread -Wall -g memfuns.c -o $BIN/memfuns.o
+gcc -c $1 -pthread -Wall -g dfmtf.c -o $BIN/dfmtf.o
+gcc -c $1 -pthread -Wall -g field.c -o $BIN/field.o
+gcc -c $1 -pthread -Wall -g conex.c -o $BIN/conex.o
+gcc -c $1 -pthread -Wall -g pcritc.c -o $BIN/pcritc.o
+gcc -c $1 -pthread -Wall     pc1.s -o $BIN/pc1.o
+gcc -c $1 -pthread -Wall     pc2.s -o $BIN/pc2.o
+gcc -c $1 -pthread -Wall     pc3.s -o $BIN/pc3.o
+gcc -c $1 -pthread -Wall     pc5.s -o $BIN/pc5.o
+gcc -c $1 -pthread -Wall     pc6.s -o $BIN/pc6.o
+gcc -c $1 -pthread -Wall -g exten.c -o $BIN/exten.o
+gcc -c $1 -pthread -Wall     tfarm0.s -o $BIN/tfarm0.o
+gcc -c $1 -pthread -Wall -g tfarm1.c -o $BIN/tfarm1.o
+gcc -c $1 -pthread -Wall -g tfarm2.c -o $BIN/tfarm2.o
+gcc -c $1 -pthread -Wall -g io.c -o $BIN/io.o
+gcc -c $1 -pthread -Wall -g proggies.c -o $BIN/proggies.o
+gcc -c $1 -pthread -Wall -g bitstring.c -o $BIN/bitstring.o
+gcc -c $1 -pthread -Wall -g slab.c -o $BIN/slab.o
+gcc -c $1 -pthread -Wall -g pmul.c -o $BIN/pmul.o
+gcc -c $1 -pthread -Wall -g tabmake.c -o $BIN/tabmake.o
+gcc -c $1 -pthread -Wall -g hpmi.c -o $BIN/hpmi.o
+gcc -c $1 -pthread -Wall -g mmul.c -o $BIN/mmul.o
+gcc -c $1 -pthread -Wall -g mpef.c -o $BIN/mpef.o
+gcc -c $1 -pthread -Wall -g mech.c -o $BIN/mech.o
+gcc -c $1 -pthread -Wall -g mfuns.c -o $BIN/mfuns.o
+gcc -c $1 -pthread -Wall -g linf.c -o $BIN/linf.o
+gcc -c $1 -pthread -Wall -g util.c -o $BIN/util.o
+gcc -c $1 -pthread -Wall -g fech.c -o $BIN/fech.o
+gcc -c $1 -pthread -Wall -g fmul.c -o $BIN/fmul.o
+gcc -c $1 -pthread -Wall -g ftra.c -o $BIN/ftra.o
+gcc -c $1 -pthread -Wall -g fpef.c -o $BIN/fpef.o
+gcc -c $1 -pthread -Wall -g funs1.c -o $BIN/funs1.o
+gcc -c $1 -pthread -Wall -g funs2.c -o $BIN/funs2.o
+gcc -c $1 -pthread -Wall -g funs3.c -o $BIN/funs3.o
+gcc -c $1 -pthread -Wall -g funs4.c -o $BIN/funs4.o
+gcc -c $1 -pthread -Wall -g funs5.c -o $BIN/funs5.o
+gcc -c $1 -pthread -include malloc.h -Wall -g malloc.c -o $BIN/malloc.o
+rm -f $BIN/libmtx.a
+ar rc $BIN/libmtx.a $BIN/tfarm0.o $BIN/tfarm1.o $BIN/tfarm2.o $BIN/field.o $BIN/io.o $BIN/pmul.o $BIN/slab.o $BIN/proggies.o $BIN/pcritc.o $BIN/pc1.o $BIN/pc2.o $BIN/pc3.o $BIN/pc5.o $BIN/pc6.o $BIN/bitstring.o $BIN/hpmi.o $BIN/tabmake.o $BIN/linf.o $BIN/conex.o $BIN/fech.o $BIN/fmul.o $BIN/funs1.o $BIN/funs2.o $BIN/funs3.o $BIN/funs4.o $BIN/funs5.o $BIN/mmul.o $BIN/mpef.o $BIN/ftra.o $BIN/mech.o $BIN/util.o $BIN/fpef.o $BIN/mfuns.o $BIN/dfmtf.o $BIN/exten.o $BIN/gauss.o $BIN/memfuns.o $BIN/malloc.o
