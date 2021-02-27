@@ -30,4 +30,6 @@ extern void make_plain(const char *zero_bs, const char *nref_bs, const char *in,
 extern int ident(uint64_t fdef, uint64_t nor, uint64_t noc, uint64_t elt,
                  const char *out);
 
+extern void make_plain(const char *zero_bs, const char *nref_bs, const char *in, const char *out, uint64_t fdef);
+
 #endif /* MFUNS_H */

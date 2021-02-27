@@ -1,6 +1,6 @@
 /*
          slab.c  -   Slab Routines Code
-         ======      R. A. Parker 18.8.2017
+         ======      R. A. Parker 19.2.2018 (SAL RCEch)
 */
 
 #include <stdio.h>
@@ -14,6 +14,10 @@
 #include "linf.h"
 #include "pmul.h"
 #include "bitstring.h"
+#include "dfmtf.h"
+#include "gauss.h"
+
+// #define DEBUG 1
 
 int  FieldSet1(uint64_t fdef, FIELD * f, int flags)
 {
@@ -32,13 +36,13 @@ void FieldSet (uint64_t fdef, FIELD * f)
     (void)res;
 }
 
-uint64_t SLSize (FIELD * f, uint64_t nor, uint64_t noc)
+uint64_t SLSize (const FIELD * f, uint64_t nor, uint64_t noc)
 {
     DSPACE ds;
     DSSet(f,noc,&ds);
     return ds.nob*nor;
 }
-uint64_t SLSizeM(FIELD * f, uint64_t nor, uint64_t noc)
+uint64_t SLSizeM(const FIELD * f, uint64_t nor, uint64_t noc)
 {
     DSPACE ds;
     uint64_t rank;
@@ -48,64 +52,315 @@ uint64_t SLSizeM(FIELD * f, uint64_t nor, uint64_t noc)
     return ds.nob*rank;
 }
 
-// the next two are correct but far too pessimistic
+// For brevity, let e = f->entbyte and b = f->bytesper 
+// Let F(noc,r)=r*[(noc-r+e)/e*b] as real numbers (no rounding)
+// maximum value of F(noc,r) is at r=(noc+e)/2
+// For all r, bytes for Remnant <= F(noc,r)
+// So anyway bytes <= (r^2+1)/e*b with r=(noc+e)/2
+// If nor < (noc+e)/2 then bytes <= F(noc,nor)
 
-uint64_t SLSizeC(FIELD * f, uint64_t nor, uint64_t noc)
+uint64_t SLSizeR(const FIELD * f, uint64_t nor, uint64_t noc)
 {
-    DSPACE ds;
-    uint64_t rank;
-    rank=nor;
-    if(rank>noc) rank=noc;
-    DSSet(f,rank,&ds);
-// columns at most rank, rows at most nor
-    return ds.nob*nor;
+    uint64_t r,sp;
+    r=(noc+f->entbyte)/2;
+    sp=(r*r+1)*f->bytesper/f->entbyte;
+    if(nor<r) sp=nor*((noc-nor+2*f->entbyte)*f->bytesper/f->entbyte);
+    return sp;
 }
 
-uint64_t SLSizeR(FIELD * f, uint64_t nor, uint64_t noc)
+// Now let F(nor,r)=(nor-r)*(r+e) so bytes <= F(nor,r)*b/e
+// max byte at r=(nor-e)/2 so F = (nor-nor/2+e/2)(nor/2-e/2+e)
+// = (nor+e)/2 . (nor+e)/2 so maxbytes = b/e * s^2 with s = (nor+e)/2
+// If noc < (nor-e)/2 max is F(nor,noc)*b/e =(nor-noc)(noc+e)*b/e 
+
+uint64_t SLSizeC(const FIELD * f, uint64_t nor, uint64_t noc)
 {
-    DSPACE ds;
-    DSSet(f,noc,&ds);
-// remnant no bigger than the original matrix
-    return ds.nob*nor;
+    uint64_t s,sp;
+    s=(nor+f->entbyte)/2;
+    sp=(s*s+1)*f->bytesper/f->entbyte;
+    if((noc+f->entbyte)<s) 
+        sp=(nor-noc)*(noc+f->entbyte)*f->bytesper/f->entbyte;
+    return sp;
 }
 
-void SLMul(const FIELD * f, const Dfmt * a, const Dfmt * b,
-          Dfmt * c, uint64_t nora, uint64_t noca, uint64_t nocb)
+void BCMul(DSPACE *dsa, DSPACE * dsbc, uint64_t nora,
+     const Dfmt * a, uint64_t astride, const Dfmt * b, uint64_t bstride,
+           Dfmt * c)
 {
-    FELT e;
-    const Dfmt *da,*db;
-    Dfmt *dc;
-    DSPACE dsa,dsb;
-    uint64_t i,j;
+    const FIELD *f;
+
+    f=dsa->f;
+// if the matrices are tiny use DMul
+    if( (nora<3) || (dsa->noc<3) || (dsbc->noc<3) )
+    {
+        DFMul(dsa,dsbc,nora,a,astride,b,bstride,c);
+        return;
+    }
     if(f->linfscheme!=0)  // linear functions case?
     {
-        LLMul(f,a,b,c,nora,noca,nocb);
+        LLMul(dsa,dsbc,nora,a,astride,b,bstride,c);
         return;
     }
     if(f->pow==1)    // Ground field - just call PLMul
     {
-        PLMul(f,a,b,c,nora,noca,nocb);
+        PLMul(dsa,dsbc,nora,a,astride,b,bstride,c);
         return;
     }
 // else do it by steam over extension field
-    DSSet(f,noca,&dsa);
-    DSSet(f,nocb,&dsb);
-    da=a;
-    dc=c;
-    memset(c,0,nora*dsb.nob);
-    for(i=0;i<nora;i++)
+    DFMul(dsa,dsbc,nora,a,astride,b,bstride,c);
+
+}
+
+void BCMad(DSPACE *dsa, DSPACE * dsbc, uint64_t nora,
+     const Dfmt * a, uint64_t astride, const Dfmt * b, uint64_t bstride,
+           Dfmt * c, uint64_t cstride)
+{
+    Dfmt *temp;
+    temp=malloc(dsbc->nob*nora);
+    BCMul(dsa,dsbc,nora,a,astride,b,bstride,temp);
+    TAdd(dsbc,nora,temp,dsbc->nob,c,cstride,c,cstride);
+    free(temp);
+}
+
+void SWMad(DSPACE *dsa, DSPACE * dsbc, uint64_t nora,
+     const Dfmt * a, uint64_t astride, const Dfmt * b, uint64_t bstride,
+           Dfmt * c, uint64_t cstride, int lev);
+
+void SWMul(DSPACE *dsa, DSPACE * dsbc, uint64_t nora,
+     const Dfmt * a, uint64_t astride, const Dfmt * b, uint64_t bstride,
+           Dfmt * c, int lev)
+{
+    memset(c,0,nora*dsbc->nob);
+    SWMad(dsa,dsbc,nora,a,astride,b,bstride,c,dsbc->nob,lev);
+}
+
+void SWMad(DSPACE *dsa, DSPACE * dsbc, uint64_t nora,
+     const Dfmt * a, uint64_t astride, const Dfmt * b, uint64_t bstride,
+           Dfmt * c, uint64_t cstride, int lev)
+{
+    DSPACE dsha,dshbc;
+    const FIELD *f;
+    const Dfmt *a11,*a12,*a21,*a22,*b11,*b12,*b21,*b22;
+    Dfmt *c11,*c12,*c21,*c22;
+    Dfmt *r1,*r2,*r3;
+    uint64_t rowshac, rowshb, nobha, nobhbc;
+    if(lev==0)
     {
-        db=(Dfmt *) b;
-        for(j=0;j<noca;j++)
-        {
-            e=DUnpak(&dsa,j,da);
-            DSMad(&dsb,e,1,db,dc);
-            db+=dsb.nob;
-        }
-        da+=dsa.nob;
-        dc+=dsb.nob;
+        BCMad(dsa,dsbc,nora,a,astride,b,bstride,c,cstride);
+        return;
     }
+    f=dsa->f;
+    rowshac=nora/2;
+    rowshb=dsa->noc/2;
+    DSSet(f,dsa->noc/2,&dsha);
+    DSSet(f,dsbc->noc/2,&dshbc);
+    nobha=dsha.nob;
+    nobhbc=dshbc.nob;
+    r1=malloc(rowshac*nobha);          // allocate the three work areas
+    r2=malloc(rowshb*nobhbc);
+    r3=malloc(rowshac*nobhbc);
+    a11=a;  b11=b;  c11=c;            // set the 12 pointers
+    a21=a+astride*rowshac;
+    b21=b+bstride*rowshb;
+    c21=c+cstride*rowshac;
+    a12=a11+nobha;  a22=a21+nobha;
+    b12=b11+nobhbc; b22=b21+nobhbc;
+    c12=c11+nobhbc; c22=c21+nobhbc;     
+
+    TAdd(&dsha,rowshac,a21,astride,             // r1=a21+a22
+        a22,astride,r1,nobha);
+    TSub(&dshbc,rowshb,b12,bstride,             // r2=b12-b11
+        b11,bstride,r2,nobhbc);
+    SWMul(&dsha,&dshbc,rowshac,r1,nobha,        // r3=r1*r2
+        r2,nobhbc,r3,lev-1);
+    TAdd(&dshbc,rowshac,c12,cstride,            // c12=c12+r3
+        r3,nobhbc,c12,cstride); 
+    TAdd(&dshbc,rowshac,c22,cstride,            // c22=c22+r3
+        r3,nobhbc,c22,cstride);
+    TSub(&dsha,rowshac,r1,nobha,                // r1=r1-a11
+        a11,astride,r1,nobha);
+    TSub(&dshbc,rowshb,b22,bstride,             // r2=b22-r2
+        r2,nobhbc,r2,nobhbc);
+    SWMul(&dsha,&dshbc,rowshac,a11,astride,     // r3=a11*b11
+        b11,bstride,r3,lev-1);
+    TAdd(&dshbc,rowshac,c11,cstride,            // c11=c11+r3
+        r3,nobhbc,c11,cstride);
+    SWMad(&dsha,&dshbc,rowshac,r1,nobha,        // r3=r3+r1*r2
+        r2,nobhbc,r3,nobhbc,lev-1);
+    SWMad(&dsha,&dshbc,rowshac,a12,astride,     // c11=c11+a12*b21
+        b21,bstride,c11,cstride,lev-1);
+    TSub(&dsha,rowshac,a12,astride,             // r1=a12-r1
+        r1,nobha,r1,nobha);
+    TSub(&dshbc,rowshb,b21,bstride,             // r2=b21-r2
+        r2,nobhbc,r2,nobhbc);
+    SWMad(&dsha,&dshbc,rowshac,r1,nobha,        // c12=c12+r1*b22
+        b22,bstride,c12,cstride,lev-1);
+    TAdd(&dshbc,rowshac,c12,cstride,            // c12=c12+r3
+        r3,nobhbc,c12,cstride);
+    SWMad(&dsha,&dshbc,rowshac,a22,astride,     // c21=c21+a22*r2
+        r2,nobhbc,c21,cstride,lev-1);
+    TSub(&dsha,rowshac,a11,astride,             // r1=a11-a21
+        a21,astride,r1,nobha);
+    TSub(&dshbc,rowshb,b22,bstride,             // r2=b22-b12
+        b12,bstride,r2,nobhbc);
+    SWMad(&dsha,&dshbc,rowshac,r1,nobha,        // r3=r3+r1*r2
+        r2,nobhbc,r3,nobhbc,lev-1);
+    TAdd(&dshbc,rowshac,c21,cstride,            // c21=c21+r3
+        r3,nobhbc,c21,cstride);
+    TAdd(&dshbc,rowshac,c22,cstride,            // c22=c22+r3
+        r3,nobhbc,c22,cstride);
+    free(r1);
+    free(r2);
+    free(r3);
+}
+
+void TSMul(DSPACE *dsa, DSPACE * dsbc, uint64_t nora,
+     const Dfmt * a, uint64_t astride, const Dfmt * b, uint64_t bstride,
+           Dfmt * c)
+{
+    int lev;           // Strassen recursion level
+    uint64_t thresh;
+    const FIELD *f;
+    uint64_t r1,r2,r3,r4,r5,r6;
+   
+    f=dsa->f;
+// compute lev (Strassen level) and divis (2^lev)
+// r1 r2 r3 the three dimensions of the slab
+// for power of two and threshold
+    r1=nora;
+    r2=dsa->noc;
+    r3=dsbc->noc;
+// r4 r5 the number of bytes per row for power of 2
+    r4=dsa->nob;  // fullness of bytes
+    r5=dsbc->nob;  // checked later
+// r6 the number of cauldrons for power of 2
+    if( (f->cauldron!=0) && ((f->pow==1) || (f->linfscheme==1)))
+    {
+        r6=(dsbc->noc+f->cauldron-1)/f->cauldron;
+// allow cauldrons to be increased for Strassen if there are enough
+        if( ((r6%2)==1) && (r6>20)  ) r6++;
+        if( ((r6%4)==2) && (r6>60)  ) r6+=2;
+        if( ((r6%8)==4) && (r6>160) ) r6+=4;
+    }
+    else         r6=0;
+#ifdef DEBUG
+printf("r1 %lu   r2 %lu   r3 %lu   r4 %lu   r5 %lu   r6 %lu  ",
+        r1,r2,r3,r4,r5,r6);
+#endif
+
+    thresh=11111;   // not set yet or default
+    if( (f->cauldron!=0) && (f->pow==1) )  // HPMI primes
+    {
+        if(f->fdef==2) thresh=12000;
+        if(f->fdef==3) thresh=15000;
+        if(f->fdef==5) thresh=2500;
+        if( (f->fdef>=7) && (f->fdef<=13) ) thresh=3000;
+        if( (f->fdef>=17) && (f->fdef<=61) ) thresh=1600;
+        if( (f->fdef>=67) && (f->fdef<=193) ) thresh=1500;
+    }
+    if( (f->cauldron!=0) && (f->linfscheme==1) )  // HPMI non-primes
+    {
+        thresh=10000;  // for those not measured yet
+        if(f->fdef==4) thresh=7000;
+        if(f->fdef==9) thresh=18000;
+        if(f->fdef==16) thresh=12000;
+        if( (f->charc>=67)  && (f->charc<=193) ) thresh=4500;
+    }
+    if( (thresh==11111) && (f->linfscheme==1) )  // linf over Dfmt primes
+    {
+        thresh=110;
+    }
+    if(thresh==11111)  // remaining cases are Dfmt
+    {
+        if(f->madtyp==2)  thresh=1800;  // 8-bit prime > 193
+        if(f->madtyp==4)  thresh=100;   // 16-bit prime
+        if(f->madtyp==5)  thresh=40;    // Zech logs
+        if(f->madtyp==6)  thresh=40;    // Zech logs  untested
+        if(f->madtyp==7)  thresh=40;    // Zech logs
+        if(f->madtyp==8)  thresh=40;    // Zech logs xor untested
+        if(f->madtyp==9)  thresh=20;    // 32-bit prime
+        if(f->madtyp==10) thresh=2;     // qmul 32-bit
+        if(f->madtyp==12)
+        {
+            if(f->pow==1) thresh=25;    // 64-bit prime
+               else       thresh=2;     // qmul 64-bit
+        }
+    }
+    lev=0;
+    while(1)
+    {
+        if( (r1<thresh) || (r2<thresh) || (r3<thresh) ) break;
+        if( ((r1&1)==1) || ((r2&1)==1) || ((r3&1)==1) ||
+            ((r4&1)==1) || ((r5&1)==1) || ((r6&1)==1) ) break;
+        lev++;
+        r1/=2;  r2/=2;  r3/=2;  r4/=2;  r5/=2;   r6/=2;
+    }
+    if( (dsa->noc%f->entbyte)!=0 ) lev=0;
+    if( (dsbc->noc%f->entbyte)!=0 ) lev=0;
+#ifdef DEBUG
+printf("thresh %lu   lev %d\n",thresh,lev);
+#endif
+    SWMul(dsa,dsbc,nora,a,astride,b,bstride,c,lev);
+}
+
+
+
+#ifdef NEVER
+
+// stripping code in case it is needed later
+
+// Need to strip so that everything is divisible by divis
+// Phase 1 - number of rows of A/C must be divisible by divis
+    stnora=nora%divis;
+    if( stnora!=0 )
+    {
+        nora=nora-stnora;
+        DFMul(dsa,dsbc,stnora,a+nora*astride,astride,b,bstride,
+              c+nora*dsbc->nob);
+    }
+// Phase 2 - the number of bytes in a row of A must be divisible
+// by divis*entbyte (doesn't work for PSSet fields!)
+    stnoca=dsa->noc%(divis*f->entbyte);
+    DSSet(f,stnoca,&tempds);
+    newnoca=dsa->noc-stnoca;
+    DSSet(f,newnoca,&newdsa);
+    DFMul(&tempds,dsbc,nora,a+newdsa.nob,astride,
+              b+bstride*newnoca,bstride, c);
+    dsa1=&newdsa;
+// Phase 3 - the number of bytes in a row of B/C must be divisible
+    stnocb=dsbc->noc%(divis*f->entbyte);
+    cstride=dsbc->nob;
+    DSSet(f,stnocb,&tempds);
+    newnocb=dsbc->noc-stnocb;
+    DSSet(f,newnocb,&newdsbc);
+    DFMad(dsa1,&tempds,nora,a,astride,
+          b+newdsbc.nob,bstride,c+newdsbc.nob,cstride);
+    dsbc1=&newdsbc;
+
+#endif
+
+
+void SLMul(const FIELD * f, const Dfmt * a, const Dfmt * b,
+          Dfmt * c, uint64_t nora, uint64_t noca, uint64_t nocb)
+{
+    DSPACE dsa,dsbc;
+    DSSet(f,noca,&dsa);
+    DSSet(f,nocb,&dsbc);
+    TSMul(&dsa,&dsbc,nora,a,dsa.nob,b,dsbc.nob,c);
     return;
+}
+
+extern void SLMad(const FIELD * f, const Dfmt * a, const Dfmt * b,
+                  Dfmt * temp, Dfmt * c, 
+                  uint64_t nora, uint64_t noca, uint64_t nocb)
+{
+    DSPACE ds;
+    if(nora==0) return;
+    if(noca==0) return;
+    if(nocb==0) return;
+    SLMul(f,a,b,temp,nora,noca,nocb);
+    DSSet(f,nocb,&ds);
+    DAdd(&ds,nora,temp,c,c);
 }
 
 void SLTra(const FIELD *f, const Dfmt *am, Dfmt *bm,
@@ -617,137 +872,329 @@ void SLTra(const FIELD *f, const Dfmt *am, Dfmt *bm,
     }
 }
 
-// "recursive" Dfmt echelize routine (not yet recursive)
+// REX rs1 a2 a2p a2np
 
-uint64_t RCEchS(DSPACE * ds, Dfmt *a, uint64_t *rs, uint64_t *cs, 
-             FELT * det, Dfmt *m, Dfmt *c, Dfmt *r, uint64_t nor, int lev)
+void RowSel(DSPACE * ds, uint64_t * bs, Dfmt * x, Dfmt * xs, Dfmt * xn)
 {
-    int * piv;
-    uint64_t fel;
-    uint64_t nck,rank,i,j,z,col;
-    size_t sbsr, sbsc;
-    FELT deter;
-    DSPACE dsk,dsm,dsr;
-    Dfmt *vo, *junk;
-    Dfmt *k;
-    Dfmt *va,*vk;
-    const FIELD * f;
-
-    if(lev!=1)
+    Dfmt *p,*ps,*pn;
+    uint64_t i;
+    p=x;
+    ps=xs;
+    pn=xn;
+    for(i=0;i<bs[0];i++)
     {
-        printf("No recursive stuff implemented yet\n");
-        exit(13);
-    }
-    f=ds->f;
-    deter=1;
-    k=r;    // use remnant area for keeptrack
-    piv=malloc(nor*sizeof(int));
-    vo=malloc(ds->nob);
-    junk=malloc(ds->nob);
-    nck=nor;
-    if(nck>ds->noc) nck=ds->noc;
-    DSSet(f,nck,&dsk);
-    memset(m,0,nck*dsk.nob);
-    memset(k,0,nor*dsk.nob);   // keeptrack starts as zero
-
-    sbsr=8*(2+(nor+63)/64);
-    memset(rs,0,sbsr);
-    rs[0]=nor;
-    sbsc=8*(2+(ds->noc+63)/64);
-    memset(cs,0,sbsc);
-    cs[0]=ds->noc;
-
-    rank=0;
-
-    for(i=0;i<nor;i++)
-    {
-        va=a+i*ds->nob;
-        vk=k+i*dsk.nob;
-        col=DNzl(ds,va);
-        if(col==ZEROROW) continue;
-        piv[i]=col;
-        fel=DUnpak(ds,col,va);
-        fel=FieldInv(f,fel);
-        fel=FieldNeg(f,fel);
-        DSMul(ds,fel,1,va);
-        DPak(&dsk,rank,vk,1);
-        DSMul(&dsk,fel,1,vk);
-        deter=FieldMul(f,fel,deter);
-        BSBitSet(rs,i);
-        BSBitSet(cs,col);
-        rank++;
-        for(j=0;j<nor;j++)
+        if(BSBitRead(bs,i)==1)
         {
-            if(j==i) continue;
-            fel=DUnpak(ds,col,a+j*ds->nob);   // create A1
-            DSMad(ds,fel,1,va,a+j*ds->nob);
-            DSMad(&dsk,fel,1,vk,k+j*dsk.nob); // consume A1
+            memcpy(ps,p,ds->nob);
+            ps+=ds->nob;
         }
-    }
-
-    rs[1]=rank;
-    cs[1]=rank;
-
-    DSSet(f,rank,&dsm);    // first get the cleaner out
-    memset(c,0,(nor-rank)*dsm.nob);
-    z=0;
-    for(j=0;j<nor;j++)
-    {
-        if(BSBitRead(rs,j)==1) continue;
-        DCut(&dsk,1,0,k+j*dsk.nob,&dsm,c+z*dsm.nob);
-        z++;     
-    }
-    z=0;                   // now get multiplier out
-// still need to sort out the sign of the determinant here
-    for(i=0;i<ds->noc;i++)     // by permuting the rows of keeptrack
-    {
-        if(BSBitRead(cs,i)==0) continue;
-        for(j=0;j<nor;j++)
+        else
         {
-            if(BSBitRead(rs,j)==0) continue;
-            if(piv[j]!=i) continue;
-            DCut(&dsk,1,0,k+j*dsk.nob,&dsm,m+z*dsm.nob);
-            z++;
+            memcpy(pn,p,ds->nob);
+            pn+=ds->nob;
         }
+        p+=ds->nob;
     }
-    DSSet(f,ds->noc-rank,&dsr);
-    memset(r,0,(nor-rank)*dsr.nob);
-    z=0;                   // finally the remnant
-    for(i=0;i<ds->noc;i++)     // by permuting the rows of matrix a
-    {
-        if(BSBitRead(cs,i)==0) continue;
-        for(j=0;j<nor;j++)
-        {
-            if(BSBitRead(rs,j)==0) continue;
-            if(piv[j]!=i) continue;
-            BSColSelect(f,cs,1,a+j*ds->nob,junk,r+z*dsr.nob);
-            z++;
-// I think this can break
-        }
-    }
-
-    free(piv);
-    free(vo);
-    free(junk);
-    *det=deter;
-    return rank;
-
 }
 
-// no separate implementation of SLEch as yet with non-standard rows
+// RRF rs1 a2p a2np a2
+
+void RowRif(DSPACE * ds, uint64_t * bs, Dfmt * xs, Dfmt * xn, Dfmt * x)
+{
+    Dfmt *p,*ps,*pn;
+    uint64_t i;
+    p=x;
+    ps=xs;
+    pn=xn;
+    for(i=0;i<bs[0];i++)
+    {
+        if(BSBitRead(bs,i)==1)
+        {
+            memcpy(p,ps,ds->nob);
+            ps+=ds->nob;
+        }
+        else
+        {
+            memcpy(p,pn,ds->nob);
+            pn+=ds->nob;
+        }
+        p+=ds->nob;
+    }
+}
+
+// "recursive" echelize routine
+
+uint64_t RCEch(GAUSS * gs, DSPACE * ds, Dfmt *a, 
+             uint64_t *rs, uint64_t *cs, 
+             FELT * det, Dfmt *m, Dfmt *c, Dfmt *r, uint64_t nor)
+{
+    uint64_t colleft,colright,i,j,rk1,rk2,rank,rowtop,rowbottom;
+    FELT det1,det2;
+    const FIELD * f;
+    Dfmt *a1,*a2,*m1,*c1,*r1,*a2p,*a2np;
+    Dfmt *m2,*c2,*r2,*y,*temp,*rem1,*y1,*y2,*ku,*x1,*x2,*mu,*ml;
+    uint64_t *rs1,*cs1,*rs2,*cs2,*rf,*cf;
+    DSPACE ds1,ds2,ds3,ds4,dsrem,dsm;
+    f=ds->f;
+    if( (nor<=gs->maxrows) && (ds->noc<=gs->maxcols) )
+    {
+        rank = BCEch(gs,ds,a,rs,cs,det,m,c,r,nor,0);
+        return rank;
+    }
+    memset(rs,0,16+8*((nor+63)/64));
+    memset(cs,0,16+8*((ds->noc+63)/64));
+
+//    TRIM    special case if matrix is entirely zero
+    for(i=0;i<nor;i++)
+    {
+        j=DNzl(ds,a+i*ds->nob);
+        if(j!=ZEROROW) break;
+    }
+    if(i==nor)        // matrix is zero
+    {
+        rs[0]=nor;    // rs is nor zero bits
+        rs[1]=0;
+        cs[0]=ds->noc;  // cs is ds->noc zero bits
+        cs[1]=0;
+//  M is rank x rank so nothing of determinant 1
+        *det=1;
+//  C is nor x rank so nothing
+//  R is rank x ds->noc so nothing 
+        return 0;
+    }
+    if(nor<ds->noc)   // chop L/R
+    {
+        colleft=ds->noc/2+8;
+        if(colleft>(nor+10)) colleft=nor+10;
+        i=colleft%f->entbyte;
+        colleft-=i;
+        i=SLSize(f,nor,colleft);
+        a1=(Dfmt *) malloc(i);
+        DSSet(f,colleft,&ds1);
+        DCut(ds,nor,0,a,&ds1,a1);
+        i=SLSizeM(f,nor,colleft);
+        m1=(Dfmt *) malloc(i);
+        i=SLSizeC(f,nor,colleft);
+        c1=(Dfmt *) malloc(i);
+        i=SLSizeR(f,nor,colleft);
+        r1=(Dfmt *) malloc(i);
+        i=16+((nor+63)/64)*8;
+        rs1=malloc(i);
+        rk1=RCEch(gs,&ds1,a1,rs1,cs,&det1,m1,c1,r1,nor);
+        free(a1);
+// special cases rk1=nor and rk1=0 ?
+        colright=ds->noc-colleft;
+        i=SLSize(f,nor,colright);
+        a2=(Dfmt *) malloc(i);
+        DSSet(f,colright,&ds2);
+        DCut(ds,nor,colleft,a,&ds2,a2);
+        i=SLSize(f,rk1,colright);
+        a2p=(Dfmt *) malloc(i);
+        i=SLSize(f,nor-rk1,colright);
+        a2np=(Dfmt *) malloc(i);
+        RowSel(&ds2,rs1,a2,a2p,a2np);
+        free(a2);
+        i=SLSize(f,nor-rk1,colright);
+        temp=malloc(i);
+        SLMad(f,c1,a2p,temp,a2np,nor-rk1,rk1,colright);
+        free(temp);
+        i=SLSizeM(f,nor-rk1,colright);
+        m2=(Dfmt *) malloc(i);
+        i=SLSizeC(f,nor-rk1,colright);
+        c2=(Dfmt *) malloc(i);
+        i=SLSizeR(f,nor-rk1,colright);
+        r2=(Dfmt *) malloc(i);
+        i=16+((nor-rk1+63)/64)*8;
+        rs2=malloc(i);
+        i=16+((colright+63)/64)*8;
+        cs2=malloc(i);
+        rk2=RCEch(gs,&ds2,a2np,rs2,cs2,&det2,m2,c2,r2,nor-rk1);
+        free(a2np);
+        rank=rk1+rk2;
+        DSSet(f,rank,&dsm);
+        i=16+((rank+63)/64)*8;
+        rf=malloc(i); 
+        BSCombine(rs1,rs2,rs,rf);
+        BSShiftOr(cs2,colleft,cs);
+        cs[0]=ds->noc;
+        cs[1]=rank;
+        i=SLSize(f,rk1,colright);
+        temp=malloc(i);
+        SLMul(f,m1,a2p,temp,rk1,rk1,colright);
+        free(a2p);
+        i=SLSize(f,rk1,rk2);
+        x1=malloc(i);
+        i=SLSize(f,rk1,colright-rk2);
+        x2=malloc(i);
+        BSColSelect(f,cs2,rk1,temp,x1,x2);
+        free(cs2);
+        free(temp);
+        i=SLSize(f,rk1,colright-rk2);
+        temp=malloc(i);
+        DSSet(f,colright-rk2,&ds4);
+        SLMad(f,x1,r2,temp,x2,rk1,rk2,colright-rk2);
+        free(temp);
+        DSSet(f,ds->noc-rank,&dsrem);
+        memset(r,0,dsrem.nob*rank);
+        DSSet(f,colleft-rk1,&ds3);
+        DPaste(&ds3,r1,rk1,0,&dsrem,r);
+        free(r1);
+        DPaste(&ds4,x2,rk1,colleft-rk1,&dsrem,r);
+        free(x2);
+        DPaste(&ds4,r2,rk2,colleft-rk1,&dsrem,r+rk1*dsrem.nob);
+        free(r2);
+        i=SLSize(f,nor-rk1,rank);
+        temp=malloc(i);
+        BSColRifZ(f,rf,nor-rk1,c1,temp);
+        free(c1);
+        i=SLSize(f,rk2,rank);
+        y=malloc(i);
+        RowSel(&dsm,rs2,temp,y,c);
+        free(rs2);
+        BSColPutS(f,rf,rk2,1,y);
+        SLMad(f,c2,y,temp,c,nor-rank,rk2,rank);
+        // cleaner
+        free(c2);
+        SLMul(f,m2,y,temp,rk2,rk2,rank);
+        free(m2);
+        free(y);
+        BSColRifZ(f,rf,rk1,m1,m);
+        free(m1);
+        free(rf);
+        i = SLSize(f, rk1, rank);
+        ku = malloc(i);
+        SLMad(f,x1,temp,ku,m,rk1,rk2,rank);
+        free(x1);
+        free(ku);
+        DCpy(&dsm, temp, rk2, m + rk1*dsm.nob);
+        free(temp);
+        if(BSRifDet(rs1)==1) det1=FieldNeg(f,det1);
+        free(rs1);
+        *det=FieldMul(f,det1,det2);
+        return rank;
+    }
+    else              // chop top/bottom
+    {
+        rowtop = nor/2;
+        if (rowtop  > ds->noc + 10)
+            rowtop = ds->noc + 10;
+        rowbottom = nor - rowtop;
+        i=SLSizeM(f,rowtop,ds->noc);
+        m1=(Dfmt *) malloc(i);
+        i=SLSizeC(f,rowtop, ds->noc);
+        c1=(Dfmt *) malloc(i);
+        i=SLSizeR(f,rowtop, ds->noc);
+        r1=(Dfmt *) malloc(i);
+        i=16+((ds->noc+63)/64)*8;
+        cs1=malloc(i);
+        rk1 = RCEch(gs,ds, a, rs, cs1, &det1, m1, c1, r1, rowtop);
+        a2 = a + rowtop*ds->nob;
+        i = SLSize(f,rowbottom, rk1);
+        a2p = malloc(i);
+        i = SLSize(f, rowbottom, ds->noc - rk1);
+        a2np = malloc(i);
+        BSColSelect(f, cs1, rowbottom, a2, a2p, a2np);
+        temp = malloc(i); // same size as a2np
+        DSSet(f, ds->noc - rk1, &ds2);
+        SLMad(f, a2p, r1, temp, a2np, rowbottom, rk1, ds->noc - rk1);
+        free(temp);
+        i=SLSizeM(f,rowbottom,ds->noc-rk1);
+        m2=(Dfmt *) malloc(i);
+        i=SLSizeC(f,rowbottom,ds->noc-rk1);
+        c2=(Dfmt *) malloc(i);
+        i=SLSizeR(f,rowbottom,ds->noc-rk1);
+        r2=(Dfmt *) malloc(i);
+        i=16+(((ds->noc-rk1)+63)/64)*8;
+        cs2=malloc(i);
+        i = 16+((rowbottom + 63)/64)*8;
+        rs2 = malloc(i);
+        rk2 = RCEch(gs,&ds2, a2np, rs2, cs2, &det2, m2, c2, r2, rowbottom);
+        free(a2np);
+        rank = rk1 + rk2;
+        DSSet(f, rank, &dsm);
+        i = 16 + ((rank + 63)/64)*8;
+        cf = malloc(i);
+        BSCombine(cs1, cs2, cs, cf);
+        free(cs1);
+        BSShiftOr(rs2, rowtop, rs);
+        rs[0]=nor;
+        rs[1]=rank;
+        i = SLSize(f, rk1, rk2);
+        x1 = malloc(i);
+        i = SLSize(f, rk1, ds->noc - rank);
+        rem1 = malloc(i);
+        BSColSelect(f, cs2, rk1, r1, x1, rem1);
+        free(r1);
+        free(cs2);
+        temp = malloc(i); //same dimension as rem1
+        DSSet(f, ds->noc - rank, &dsrem);
+        SLMad(f, x1, r2, temp, rem1, rk1, rk2, ds->noc - rank);
+        free(temp);
+        RowRif(&dsrem, cf, rem1, r2, r);
+        free(r2);
+        free(rem1);
+        i = SLSize(f, rowbottom, rk1);
+        temp = malloc(i);
+        SLMul(f,a2p,m1,temp,rowbottom, rk1, rk1);
+        free(a2p);
+        DSSet(f, rk1, &ds3);
+        i = SLSize(f, rk2, rk1);
+        y1 = malloc(i);
+        i = SLSize(f, rowbottom-rk2, rk1);
+        y2 = malloc(i);
+        RowSel(&ds3, rs2, temp, y1, y2);
+        free(rs2);
+        SLMad(f,c2, y1, temp, y2, rowbottom-rk2, rk2, rk1); // temp big enough
+        memset(c, 0, SLSize(f, nor - rank, rank));
+        DPaste(&ds3, c1, rowtop-rk1, 0, &dsm, c);
+        free(c1);
+        DPaste(&ds3, y2, rowbottom-rk2, 0, &dsm, c + dsm.nob*(rowtop - rk1));
+        free(y2);
+        DSSet(f, rk2, &ds4);
+        DPaste(&ds4, c2, rowbottom-rk2, rk1, &dsm, c + dsm.nob*(rowtop - rk1));
+        free(c2);
+        i = SLSize(f, rk1, rank);
+        mu = malloc(i);
+        memset(mu,0,i);
+        DPaste(&ds3, m1, rk1, 0, &dsm, mu);
+        free(m1);
+        i = SLSize(f, rk2, rank);
+        ml = malloc(i);
+        memset(ml,0,i);
+        SLMul(f, m2, y1, temp, rk2, rk2, rk1); // temp still the right size
+        free(y1);
+        DPaste(&ds3, temp, rk2, 0, &dsm, ml);
+        free(temp);
+        DPaste(&ds4, m2, rk2, rk1, & dsm, ml);
+        free(m2);
+        i = SLSize(f, rk1, rank);
+        temp = malloc(i);
+        SLMad(f, x1, ml, temp, mu, rk1, rk2, rank);
+        free(x1);
+        free(temp);
+        memset(m,0,SLSize(f, rank, rank));
+        RowRif(&dsm, cf, mu, ml, m);
+        free(mu);
+        free(ml);
+        if(BSRifDet(cf)==1) det1=FieldNeg(f,det1);
+        free(cf);
+        *det=FieldMul(f,det1,det2);
+        return rank;
+    }
+}
+
+// "exported" slab echelize - needs early release etc. with proggies
 
 uint64_t SLEch(DSPACE * ds, Dfmt *a, uint64_t *rs, uint64_t *cs, 
              FELT * det, Dfmt *m, Dfmt *c, Dfmt *r, uint64_t nor)
 {
-    return RCEchS(ds,a,rs,cs,det,m,c,r,nor,1);
+    GAUSS * gs;
+    uint64_t rank;
+    gs=GaussCreate(ds->f);
+    rank = RCEch(gs,ds,a,rs,cs,det,m,c,r,nor);
+    GaussDestroy(gs);
+    return rank;
 }
 
-// SLEchS must return standard rows in the row select
-
-uint64_t SLEchS(DSPACE * ds, Dfmt *a, uint64_t *rs, uint64_t *cs, 
-             FELT * det, Dfmt *m, Dfmt *c, Dfmt *r, uint64_t nor)
-{
-    return RCEchS(ds,a,rs,cs,det,m,c,r,nor,1);
-}
 
 /* end of slab.c  */
