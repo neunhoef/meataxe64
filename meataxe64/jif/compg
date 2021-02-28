@@ -28,7 +28,6 @@ gcc $1 -g -Wall -pthread -include malloc.h zng.c -L$BIN -lmtx -o $BIN/zng
 gcc $1 -g -Wall -pthread -include malloc.h znu.c -L$BIN -lmtx -o $BIN/znu
 gcc $1 -g -Wall -pthread -include malloc.h zor1.c -L$BIN -lmtx -o $BIN/zor
 gcc $1 -g -Wall -pthread -include malloc.h zpc.c -L$BIN -lmtx -o $BIN/zpc
-gcc $1 -g -Wall -pthread -include malloc.h zpe1.c -L$BIN -lmtx -o $BIN/zpe1
 gcc $1 -g -Wall -pthread -include malloc.h zpe.c -L$BIN -lmtx -o $BIN/zpe
 gcc $1 -g -Wall -pthread -include malloc.h zpm.c -L$BIN -lmtx -o $BIN/zpm
 gcc $1 -g -Wall -pthread -include malloc.h zpr.c -L$BIN -lmtx -o $BIN/zpr
