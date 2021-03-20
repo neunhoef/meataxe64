@@ -1,5 +1,5 @@
 /*
- * $Id: script.c,v 1.12 2019/10/28 22:15:21 jon Exp $
+ * $Id: script.c,v 1.13 2021/03/20 13:18:38 jon Exp $
  *
  * Function to compute a script in two generators
  *
@@ -205,11 +205,38 @@ static int script_mul(const char *id, const char **out, const char *tmp, const c
   return 1;
 }
 
-int exec_script(const char *out, const char *tmp, const char *script,
-                unsigned int argc, const char *const args[], const char *name)
+static int check_inputs(unsigned int argc, const char *const args[], const char *name, int *all_perm, u32 *nor, u32 *prime)
 {
   FILE **files = NULL;
   const header **headers;
+  u32 i;
+  files = my_malloc(argc * sizeof(FILE *));
+  headers = my_malloc(argc * sizeof(const header *));
+  for (i = 0; i < argc; i++) {
+    if (0 == open_and_read_binary_header(files + i, headers + i, args[i], name)) {
+      return close_files(i, files, headers);
+    }
+    if (1 != header_get_prime(headers[i])) {
+      *prime = header_get_prime(headers[i]);
+      *all_perm = 0;
+    }
+  }
+  *nor = header_get_nor(headers[0]);
+  for (i = 0; i < argc; i++) {
+    if (*nor != header_get_noc(headers[i]) ||
+        *nor != header_get_nor(headers[i]) ||
+        (header_get_prime(headers[i]) != *prime && header_get_prime(headers[i]) != 1)) {
+      fprintf(stderr, "%s: unsuitable input %s, terminating\n", name, args[i]);
+      return close_files(argc, files, headers);
+    }
+  }
+  (void)close_files(argc, files, headers);
+  return 1;
+}
+
+int exec_script(const char *out, const char *tmp, const char *script,
+                unsigned int argc, const char *const args[], const char *name)
+{
   u32 i, prime = 1, nor, scalar;
   const char *id;
   const char *current, *new, *summand, *rest;
@@ -220,27 +247,9 @@ int exec_script(const char *out, const char *tmp, const char *script,
   assert(1 <= argc);
   assert(NULL != args);
   assert(NULL != name);
-  files = my_malloc(argc * sizeof(FILE *));
-  headers = my_malloc(argc * sizeof(const header *));
-  for (i = 0; i < argc; i++) {
-    if (0 == open_and_read_binary_header(files + i, headers + i, args[i], name)) {
-      return close_files(i, files, headers);
-    }
-    if (1 != header_get_prime(headers[i])) {
-      prime = header_get_prime(headers[i]);
-      all_perm = 0;
-    }
+  if (0 == check_inputs(argc, args, name, &all_perm, &nor, &prime)) {
+    return 0;
   }
-  nor = header_get_nor(headers[0]);
-  for (i = 0; i < argc; i++) {
-    if (nor != header_get_noc(headers[i]) ||
-        nor != header_get_nor(headers[i]) ||
-        (header_get_prime(headers[i]) != prime && header_get_prime(headers[i]) != 1)) {
-      fprintf(stderr, "%s: unsuitable input %s, terminating\n", name, args[i]);
-      return close_files(argc, files, headers);
-    }
-  }
-  (void)close_files(argc, files, headers);
   id = new_id(tmp);
   summand = parse_plus(script, &rest, &scalar, prime, name);
   if (NULL == summand) {
