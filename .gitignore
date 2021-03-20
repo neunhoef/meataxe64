@@ -33,3 +33,7 @@ profiles/*
 *.pdb
 mtx.txt
 gprof*
+*.new*
+bar*
+baz*
+foo*
