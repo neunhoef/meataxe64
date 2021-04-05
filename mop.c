@@ -1,5 +1,5 @@
 /*
- * $Id: mop.c,v 1.24 2011/01/19 22:47:17 jon Exp $
+ * $Id: mop.c,v 1.25 2021/04/05 17:26:35 jon Exp $
  *
  * Monster operations for meataxe
  *
@@ -88,8 +88,8 @@ void init(void)
 {
   unsigned char uc;
   unsigned int i, j, k, l;
-  strncpy(suz1head, "MONSUZ01", 8);
-  strncpy(suz2head, "MONSUZ02", 8);
+  memcpy(suz1head, "MONSUZ01", 8);
+  memcpy(suz2head, "MONSUZ02", 8);
 
   for(i = 1; i < 7; i++) {
     s3[i][1] = i;
