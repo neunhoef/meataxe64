@@ -1,10 +1,11 @@
 #!/bin/sh
 #
-# Script to do zmu in meataxe 64 until a binary is available
+# Script to do chopped zmu
 #
 # Parameters as for zmu in meataxe 2000
 # ie [-m <memory] <infile1> <infile2> <outfile>
 #
+#set -x
 dir=`dirname $0`
 if [ "$1" = "-m" ]; then
     shift 2 # Ignore -m <memory
@@ -17,5 +18,93 @@ fi
 infile1=$1
 infile2=$2
 outfile=$3
-${dir}/../bin/zmu ${infile1} ${infile2} ${outfile}
+s=`${dir}/../bin/zmu ${infile1} ${infile2} ${outfile}`
 ret=$?
+if [ 0 -eq $ret ]; then
+    exit 0
+fi
+failed=true
+if echo $s | grep "Chopping needed but not yet implemented" 1>/dev/null 2>&1; then
+    # Failed on chopping
+    failed=false
+fi
+if echo $s | grep "No strategy" 1>/dev/null 2>&1; then
+    # Failed on strategy
+    failed=false
+fi
+if $failed; then
+    echo $s
+    exit $ret
+fi
+# Ok, failed for lack of strategy
+# So, at this point the matrices are compatible
+r1=`znor ${infile1}`
+c1=`znoc ${infile1}`
+r2=`znor ${infile2}`
+c2=`znoc ${infile2}`
+let r12a=$r1/2
+let r12b=$r1-$r12a
+let c12a=$c1/2
+let c12b=$c1-$c12a
+let c22a=$c2/2
+let c22b=$c2-$c22a
+if [ 0 -eq $r12a -o 0 -eq $c12a -o 0 -eq $c22a ]; then
+    # Got down to zero rows, so we're stuffed
+    echo $s
+    exit $ret
+fi
+${dir}/../bin/zch ${infile1} 2
+ret1=$?
+if [ 0 -ne $ret1 ]; then
+    # Clean up the crud
+    rm ${infile1}ch0{0,1}0{0,1}
+    exit $ret1
+fi
+${dir}/../bin/zch ${infile2} 2
+ret1=$?
+if [ 0 -ne $ret1 ]; then
+    # Clean up the crud
+    rm ${infile1}ch0{0,1}0{0,1} ${infile2}ch0{0,1}0{0,1}
+    exit $ret1
+fi
+# Now form the 8 products m1ij.m2jk 1<= i, j, k <= 2
+for i in 0 1; do
+    for k in 0 1; do
+        for j in 0 1; do
+            ${dir}/zmu ${infile1}ch0${i}0${j} ${infile2}ch0${j}0${k} ${outfile}ch0${i}0${j}0${k}
+            ret1=$?
+            if [ 0 -ne $ret1 ]; then
+                # Clean up the crud
+                rm ${infile1}ch0{0,1}0{0,1} ${infile2}ch0{0,1}0{0,1} ${outfile}ch0{0,1}0{0,1}0{0,1}
+                exit $ret1
+            fi
+        done
+    done
+done
+# Don't need the chopped up inputs any more
+# Some of these may be the same name if the inputs are identical
+rm -f ${infile1}ch0{0,1}0{0,1} ${infile2}ch0{0,1}0{0,1}
+# Form the 4 sums over common j
+for i in 0 1; do
+    for k in 0 1; do
+        ${dir}/zad ${outfile}ch0${i}000${k} ${outfile}ch0${i}010${k} ${outfile}ch0${i}0${k}
+        ret1=$?
+        if [ 0 -ne $ret1 ]; then
+            # Clean up the crud
+            rm ${outfile}ch0{0,1}0{0,1}0{0,1} ${outfile}ch0{0,1}0{0,1}
+        fi
+    done
+done
+# Create symbolic links
+for i in 0 1; do
+    for k in 0 1; do
+        ln -s ${outfile}ch0${i}0${k} ch0${i}0${k}
+    done
+done
+${dir}/../bin/zas ${outfile} 2
+ret=$?
+# Clean chopped output
+rm ${outfile}ch0{0,1}0{0,1}0{0,1} ${outfile}ch0{0,1}0{0,1}
+# Clean symbolic links
+rm -f ch0{0,1}0{0,1}
+exit $ret
