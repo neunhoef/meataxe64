@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: split,v 1.24 2021/01/02 10:35:16 jon Exp $
+# $Id: split,v 1.25 2021/04/12 08:43:31 jon Exp $
 #
 # Script to split a representation
 #
@@ -129,6 +129,10 @@ if [ 2 -eq $q ]; then
 elif [ 3 -le $q ]; then
   max_null=15
 fi
+# Don't use nullity above dimension, there's no point
+if [ $max_null -gt $nor ]; then
+    max_null=$nor
+fi
 elements_and_orders=
 i=0
 for x in $a $*; do
@@ -137,6 +141,10 @@ for x in $a $*; do
 done
 while [ $ok -eq 0 ]; do
   null=5
+  # Ensure we go once round the loop  
+  if [ $null -gt $max_null ]; then
+      null=$max_null
+  fi
   while [ $null -le $max_null ]; do
     echo Trying zsums with nullity $null
     echo zsums -m $memory ${tmp}.zsums $depth $null $elements_and_orders
