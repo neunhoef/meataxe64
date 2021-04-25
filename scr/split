@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: split,v 1.25 2021/04/12 08:43:31 jon Exp $
+# $Id: split,v 1.26 2021/04/25 09:18:39 jon Exp $
 #
 # Script to split a representation
 #
@@ -112,7 +112,6 @@ for x in $a $*; do
     exit 1
   fi
 done
-ok=0
 memory=200000
 q=1
 for x in $a $b $*; do
@@ -139,41 +138,37 @@ for x in $a $*; do
   elements_and_orders="$elements_and_orders ${y[$i]} ${orders[$i]}"
   let i=$i+1
 done
-while [ $ok -eq 0 ]; do
-  null=5
-  # Ensure we go once round the loop  
-  if [ $null -gt $max_null ]; then
-      null=$max_null
-  fi
-  while [ $null -le $max_null ]; do
-    echo Trying zsums with nullity $null
-    echo zsums -m $memory ${tmp}.zsums $depth $null $elements_and_orders
-    out=`zsums -m $memory ${tmp}.zsums $depth $null $elements_and_orders 2>/dev/null`
+null=5
+# Ensure we go once round the loop  
+if [ $null -gt $max_null ]; then
+    null=$max_null
+fi
+while [ $null -le $max_null ]; do
+  echo Trying zsums with nullity $null
+  echo zsums -m $memory ${tmp}.zsums $depth $null $elements_and_orders
+  out=`zsums -m $memory ${tmp}.zsums $depth $null $elements_and_orders 2>/dev/null`
+  ret=$?
+  if [ 2 -eq $ret ]; then
+    let memory=`more_memory $memory`
+  elif [ 0 -eq $ret ]; then
+    name=`echo $out | sed -e "s/^.*element //g;s/ of nullity.*$//g"`
+    split_with_element ${name} $o 0 0 ${subspace} ${vectors} $a $*
     ret=$?
-    if [ 2 -eq $ret ]; then
-      let memory=`more_memory $memory`
-    elif [ 0 -eq $ret ]; then
-      ok=1
-      name=`echo $out | sed -e "s/^.*element //g;s/ of nullity.*$//g"`
-      split_with_element ${name} $o 0 0 ${subspace} ${vectors} $a $*
-      ret=$?
-      if [ $ret -eq 255 -o $ret -eq 0 ]; then
-        rm -f ${tmp}*
-        exit $ret
-      fi
-      let null=$null+5
-    elif [ 255 -eq $ret ]; then
-      if [ $null -ge $max_null ]; then
-        echo "Failed to find an element of nullity <= $max_null"
-        ok=1
-      fi
-      let null=$null+5
-    else
-      echo zsums unexpectedly returns $ret, terminating
+    if [ $ret -eq 255 -o $ret -eq 0 ]; then
       rm -f ${tmp}*
-      exit 1
+      exit $ret
     fi
-  done
+    let null=$null+5
+  elif [ 255 -eq $ret ]; then
+    if [ $null -ge $max_null ]; then
+      echo "Failed to find an element of nullity <= $max_null"
+    fi
+    let null=$null+5
+  else
+    echo zsums unexpectedly returns $ret, terminating
+    rm -f ${tmp}*
+    exit 1
+  fi
 done
 ok=0
 let max_null=$nor-1
