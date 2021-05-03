@@ -12,6 +12,11 @@ fi
 if [ "-mg" = "$1" ]; then
     shift 2
 fi
-${dir}/../bin/zscript $*
+tmp=tmp$$
+${dir}/../bin/zsh $* > ${tmp}.1
 ret=$?
+if [ 0 -eq $ret ]; then
+    source ./${tmp}.1
+    ret=$?
+fi
 exit ${ret}

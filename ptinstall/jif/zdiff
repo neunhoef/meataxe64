@@ -5,6 +5,7 @@
 # Parameters as for zdiff in meataxe 2000
 # ie [-m <memory] <infile> <outfile> <count>
 #
+dir=`dirname $0`
 if [ $# -ne 2 ]; then
    echo "zdiff: bad parameters"
    echo "usage: zdiff [-m <memory] <file1> <file2>"
@@ -12,10 +13,6 @@ if [ $# -ne 2 ]; then
 fi
 file1=$1
 file2=$2
-tmp=tmp$$
-to_m2000 ${file1} ${tmp}.1
-to_m2000 ${file2} ${tmp}.2
-~/install/zdiff ${tmp}.1 ${tmp}.2
+${dir}/../bin/zdiff ${file1} ${file2}
 ret=$?
-rm ${tmp}.{1,2}
 exit $ret
