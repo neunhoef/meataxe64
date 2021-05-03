@@ -21,7 +21,7 @@ in2=$2
 outfile=$3
 scalar=$4
 # Use meataxe64's zsc program which does X+aY-bI
-# setting b = 0
-${dir}/../bin/zsc ${in1} ${scalar} ${in2} 0 ${outfile}
+# setting b = 0, to obtain aA+B
+${dir}/../bin/zsc ${in2} ${scalar} ${in1} 0 ${outfile}
 ret=$?
 exit $ret
