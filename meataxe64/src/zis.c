@@ -1,6 +1,7 @@
 /*
       zis.c     meataxe-64 invariant subspace
       =====     J. G. Thackray   04.10.2017
+                updated 28.1.19 RAP allow perms as generators
 */
 
 #include <stdio.h>
@@ -44,6 +45,7 @@ typedef struct mult_result mult_result;
 struct gen {
   const char *file;
   mult_result next_tbd;
+  int is_perm; /* 1 if this is a permutation, 0 otherwise */
   struct gen *next;
 };
 
@@ -68,12 +70,17 @@ static void clean(const char *bs, const char *rem, const char *rows, const char 
   /* Extract pivots from rows using bs giving tmp1 */
   /* Also produce tmp3 = nonsel(bs, rows) */
   fColumnExtract(bs, 1, rows, 1, clean_vars[0], 1, clean_vars[2], 1);
-  /* Produce tmp2 = tmp1 * rem */
-  fMultiply(fun_tmp, clean_vars[0], 1, rem, 1, clean_vars[1], 1);
-  /* Produce out = tmp3 + tmp2 */
+  /* Transpose rem and clean_vars[0] */
+  fTranspose(fun_tmp, rem, 1, clean_vars[3], 1);
+  fTranspose(fun_tmp, clean_vars[0], 1, clean_vars[4], 1);
+  /* Produce tmp2 = rem(T) * tmp1(T) */
+  fMultiply(fun_tmp, clean_vars[3], 1, clean_vars[4], 1, clean_vars[5], 1);
+  /* Produce tmp4 = tmp2(T) */
+  fTranspose(fun_tmp, clean_vars[5], 1, clean_vars[1], 1);
+  /* Produce out = tmp3 + tmp4 */
   fAdd(clean_vars[2], 1, clean_vars[1], 1, out, 1);
   /* And delete the temporaries */
-  for (i = 0; i < 3; i++) {
+  for (i = 0; i < 6; i++) {
     remove(clean_vars[i]);
   }
 }
@@ -112,8 +119,10 @@ int main(int argc, const char *argv[])
   int ngens = argc - 3;
   uint64_t res;
   uint64_t nor = 0;
+  uint64_t noc = 0;
   uint64_t fdef = 0;
   uint64_t rank, mrank = 0;
+  uint64_t hdr[5];
   gen *gens, *this_gen;
   CLogCmd(argc, argv);
   /* Check command line <vecs> <output stem> [<gen>*] */
@@ -129,6 +138,11 @@ int main(int argc, const char *argv[])
   fun_tmp = malloc(tmp_len + sizeof(FUN_TMP) + 1);
   strcpy(fun_tmp, tmp_root);
   strcat(fun_tmp, FUN_TMP);
+  /* Get the parameters of the seeds */
+  EPeek(in_vecs, hdr);
+  fdef = hdr[1]; /* The field in which we're working */
+  noc = hdr[3]; /* Columns: this doesn't change */
+  /* We don't care about the nor for the seeds, this will change as we spin */
   /* Echelise initial vecs. Also sets up zero_bs */
   res = fProduceNREF(fun_tmp, in_vecs, 0, zero_bs, 1, in_vecs_rem, 1);
   /* fail if rank 0 */
@@ -143,30 +157,32 @@ int main(int argc, const char *argv[])
   /* Reread to get a second copy of zero_bs: Fudge */
   fProduceNREF(fun_tmp, in_vecs, 1, in_vecs_bs, 1, in_vecs_rem, 1);
   /* Allocate the temporaries for the clean operation */
-  clean_vars = malloc(3 * sizeof(*clean_vars));
-  for (i = 0; i < 3; i++) {
+  /* Three extra are used for transpose operations */
+  clean_vars = malloc(6 * sizeof(*clean_vars));
+  for (i = 0; i < 6; i++) {
     clean_vars[i] = mk_tmp(prog_name, tmp_root, tmp_len);
   }
-  /* Now check all the generators, all square, same size */
-  for (i = 0; i < ngens; i++) {
-    uint64_t hdr[5];
-    EPeek(argv[i + 3], hdr);
-    if (0 == i) {
-      fdef = hdr[1];
-      nor = hdr[2];
-      if (hdr[3] != nor) {
-        fprintf(stderr, "%s: cannot spin with non square matrix %s\n", prog_name, argv[i + 3]);
-        exit(20);
-      }
-    } else {
-      if (fdef != hdr[1] || nor != hdr[2] || nor != hdr[3]) {
-        fprintf(stderr, "%s: cannot spin with incompatible matrix %s\n", prog_name, argv[i + 3]);
-        exit(20);
-      }
-    }
-  }
+  /*
+   * Now check all the generators, all square, same size
+   * Any of them may be a map. If they aren't, they must have
+   * the same fdef as the seeds
+   */
   /* Set up gen structures */
   gens = malloc(ngens * sizeof(*gens));
+  for (i = 0; i < ngens; i++) {
+    EPeek(argv[i + 3], hdr);
+    /*
+     * Check against seeds. We must have consistent noc
+     * But, we may have maps (fdef == 1)
+     * If not, it must be the same
+     */
+    gens[i].is_perm = (1 == hdr[1]);
+    if ((fdef != hdr[1] && 1 != hdr[1]) || (noc != hdr[2] || noc != hdr[3])) {
+      fprintf(stderr, "%s: cannot spin with incompatible matrix %s\n", prog_name, argv[i + 3]);
+      exit(20);
+    }
+    nor = noc;
+  }
   for (i = 0; i < ngens; i++) {
     gens[i].file = argv[i + 3];
     gens[i].next_tbd.bs = mk_tmp(prog_name, tmp_root, tmp_len);
@@ -195,8 +211,22 @@ int main(int argc, const char *argv[])
       gen *clean_gen = this_gen;
       if (0 != mul_gen->next_tbd.size) {
         /* Something to do for the last result from this generator */
-        fMultiply(fun_tmp, mul_gen->next_tbd.plain, 1, 
-                  this_gen->file, 1, mul_tmp, 1);
+        if (this_gen->is_perm) {
+          /*
+           * We transpose and act on the left, ie a row shuffle
+           * Because the transpose and inverse of a permutation
+           * are the same thing, we don't need to tranpose the permutation
+           */
+          fTranspose(fun_tmp, mul_gen->next_tbd.plain, 1, clean_vars[0], 1);
+          fMultiply(fun_tmp, this_gen->file, 1,
+                    clean_vars[0], 1, clean_vars[1], 1);
+          fTranspose(fun_tmp, clean_vars[1], 1, mul_tmp, 1);
+          remove(clean_vars[0]);
+          remove(clean_vars[1]);
+        } else {
+          fMultiply(fun_tmp, mul_gen->next_tbd.plain, 1, 
+                    this_gen->file, 1, mul_tmp, 1);
+        }
         if (0 != mrank) {
           /* Clean this result with the overall multiplied stuff */
           clean(mult_result_bs, mult_result_rem, mul_tmp, clean_tmp1);
@@ -313,21 +343,55 @@ int main(int argc, const char *argv[])
     /* Move on to next generator */
     this_gen = this_gen->next;
   }
+  /* Even if we get whole space, we'll still produce a bs and rem */
+  out_bs = malloc(out_stem_len + 4);
+  out_rem = malloc(out_stem_len + 5);
+  strcpy(out_bs, out_stem);
+  strcat(out_bs, ".bs");
+  strcpy(out_rem, out_stem);
+  strcat(out_rem, ".rem");
   if (rank < nor) {
     /*
      * Finally put the results where requested
      * assuming we have a proper subspace
      */
-    out_bs = malloc(out_stem_len + 4);
-    out_rem = malloc(out_stem_len + 5);
-    strcpy(out_bs, out_stem);
-    strcat(out_bs, ".bs");
-    strcpy(out_rem, out_stem);
-    strcat(out_rem, ".rem");
     rename(mult_result_bs, out_bs);
     rename(mult_result_rem, out_rem);
     free(out_bs);
     free(out_rem);
+  } else {
+    /*
+     * Whole space case.
+     * We produce a 0x0 rem, and a bs of the right width all 1
+     */
+    header my_hdr;
+    EFIL *out;
+    size_t rslen;
+    uint64_t * bsrs;
+    /* Write the remnant */
+    my_hdr.named.rnd1 = 1;
+    my_hdr.named.fdef = fdef;
+    my_hdr.named.nor = 0;
+    my_hdr.named.noc = 0;
+    my_hdr.named.rnd2 = 0;
+    out = EWHdr(out_rem, my_hdr.hdr);
+    EWClose1(out, 0);
+    /* Write the bitstring */
+    my_hdr.named.rnd1 = 2;
+    my_hdr.named.fdef = 1;
+    my_hdr.named.nor = nor;
+    my_hdr.named.noc = nor;
+    my_hdr.named.rnd2 = 0;
+    out = EWHdr(out_bs, my_hdr.hdr);
+    /* Populate the bitstring */
+    rslen = 16 + ((nor + 63) / 64) * 8;
+    bsrs = malloc(rslen);
+    bsrs[0] = nor;
+    bsrs[1] = nor;
+    memset(bsrs + 2, 0xff, rslen - 16);
+    /* Write the bitstring */
+    EWData(out, rslen, (uint8_t *)bsrs);
+    EWClose1(out, 0);
   }
   /* Delete temps */
   remove(mult_result_bs);

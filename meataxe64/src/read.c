@@ -133,7 +133,7 @@ int open_and_read_binary_header(FILE **inp, const header **h, const char *m, con
   assert(NULL != m);
   assert(NULL != name);
   errno = 0;
-  in = fopen64(m, "rb");
+  in = fopen(m, "rb");
   if (NULL == in) {
     if ( 0 != errno) {
       perror(name);

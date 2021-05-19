@@ -10,6 +10,12 @@
 #include "hpmi.h"
 #include "pcrit.h"
 #include "linf.h"
+#include "tuning.h"
+
+
+// size of uint16_t table for extracing small characteristic from
+// large fields in PExtract, where both Barrett and lookup needed.
+#define EXTIVCNT 1000
 
 //  Malloc that aligns to the page - 4096
 
@@ -336,20 +342,7 @@ int  FieldASet1(uint64_t fdef, FIELD * f, int flags)
     FELT a1,a2,a3,a4,a5,a6,a7,a8,b1,b2,b3,b4,b5,an,bn,cn;
     uint8_t * ftab8;
     uint8_t * f8;
-    uint8_t * inv8;
-    uint8_t * late8;
-    uint8_t * early8;
-    uint8_t * add8;
-    uint8_t * sub8;
-    uint8_t * mul8;
-    uint16_t * log16;
-    uint16_t * alog16;
     uint16_t * ftab16;
-    uint16_t * spac16;
-    uint16_t * sqid16;
-    uint16_t * red16;
-    uint16_t * zech16;
-    uint16_t * rdlg16;
     uint16_t * sqrt;
     uint16_t * lfx;
     uint32_t * lfy;
@@ -377,6 +370,11 @@ int  FieldASet1(uint64_t fdef, FIELD * f, int flags)
 //  printf(" - %c\n",f->mact[0]);
 
 //  strcpy(f->mact,"j00");
+
+    f->threads=THREADS;
+    f->megabytes=MEGABYTES;
+    f->maxchop=MAXCHOP;
+
     f8=(uint8_t *)f;
     ftab8=f8 + sizeof(FIELD);
     ftab16=(uint16_t*)ftab8;
@@ -609,9 +607,23 @@ int  FieldASet1(uint64_t fdef, FIELD * f, int flags)
     if( f->charc==7) f->spaclev=4;
     if( f->charc==5) f->spaclev=5;
     if( f->charc==3) f->spaclev=6;
-    f->bong=1;
-    for(i=0;i<f->spaclev;i++) f->bong=f->bong*f->charc;
-    if(f->charc==2) f->bong=256;
+    if( f->charc==2) f->spaclev=8;
+    f->digit=1;
+    for(i=0;i<f->spaclev;i++)
+        f->digit=f->digit*f->charc;
+    if(f->charc==2) f->digit=256;
+    f->digit2=f->digit*f->digit;
+    i=f->fdef;
+    f->nodigits=0;
+    if(f->digit>1)
+    {
+        while(i>1)
+        {
+            i=i/f->digit;
+            f->nodigits++;
+        }
+    }
+
     switch(f->paktyp)
     {
         case 0:
@@ -645,6 +657,7 @@ int  FieldASet1(uint64_t fdef, FIELD * f, int flags)
           else if (f->pow==1) f->addtyp=9;
           else f->addtyp=10;
           f->multyp=7;
+          if((f->charc==2)&&(f->mact[0]>='g')) f->multyp=9;
           break;
         case 1:
           f->bytesper=4;
@@ -694,6 +707,7 @@ int  FieldASet1(uint64_t fdef, FIELD * f, int flags)
 /* multyp  */
           if(f->pow==1) f->multyp=5;
                    else f->multyp=6;
+          if((f->charc==2)&&(f->mact[0]>='g')) f->multyp=8;
           break;
         case 2:
           f->bytesper=2;
@@ -797,7 +811,7 @@ int  FieldASet1(uint64_t fdef, FIELD * f, int flags)
         f->pentbyte=1;
         f->pbytesper=1;
         f->paddtyp=3;
-        f->pmadtyp=3;
+        f->pmadtyp=2;
         f->pmultyp=1;
         break;
       case 4:
@@ -834,22 +848,14 @@ int  FieldASet1(uint64_t fdef, FIELD * f, int flags)
         break;
     }
 /* now to populate the look-up tables    */
-    log16=NULL;         // avoid compilation warnings
-    alog16=NULL;
     if( f->fdef<=65536 )
     {
-        log16=ftab16;
-        f->Tlog16=((uint8_t *)ftab16)-f8;
-        ftab16+=f->fdef;
-        alog16=ftab16;
-        f->Talog16=((uint8_t *)ftab16)-f8;
-        ftab16+=2*f->fdef;
         x=1;
         for(z=0;z<f->fdef-1;z++)
         {
-            log16[x]=z;
-            alog16[z]=x;
-            alog16[z+f->fdef-1]=x;
+            f->log16[x]=z;
+            f->alog16[z]=x;
+            f->alog16[z+f->fdef-1]=x;
             if(f->pow==1)
             {
                 x=(x*f->conp)%f->fdef;
@@ -861,27 +867,19 @@ int  FieldASet1(uint64_t fdef, FIELD * f, int flags)
             if(f->charc!=2)    x=qadd(f,x,smul(f,y,f->conp));
                 else           if(y==1) x^=f->conp;
         }
-        log16[0]=0xffff;
-        alog16[2*fdef-2]=alog16[0];
-        alog16[2*fdef-1]=alog16[1];
+        f->log16[0]=0xffff;
+        for(x=f->fdef-1;x<3*f->fdef;x++)
+                f->alog16[x]=f->alog16[x-f->fdef+1];
         if(f->charc!=2)
         {
-            zech16=ftab16;
-            f->Tzech16=((uint8_t *)ftab16)-f8;
-            ftab16+=f->fdef;
             for(x=0;x<f->fdef-1;x++)
             {
-                z=qadd(f,one,alog16[x]);
-                if(z==0) zech16[x]=f->qminus1;
-                else zech16[x]=log16[z];
+                z=qadd(f,one,f->alog16[x]);
+                if(z==0) f->zech16[x]=f->qminus1;
+                else f->zech16[x]=f->log16[z];
             }
-        }
-        if(f->fdef<4200)
-        {
-            rdlg16=ftab16;
-            f->Trdlg16=((uint8_t *)ftab16)-f8;
-            ftab16+=2*f->fdef;
-            for(x=0;x<2*f->fdef;x++) rdlg16[x]=x%(f->fdef-1);
+            for(x=f->fdef-1;x<3*f->fdef;x++)
+                f->zech16[x]=f->zech16[x-f->fdef+1];
         }
     }
 /*    Populate the spac16 and sqid16 tables    */
@@ -892,8 +890,6 @@ int  FieldASet1(uint64_t fdef, FIELD * f, int flags)
         x=1;
         x=x<<41;
         f->bar41 = 1 + x/f->charc;
-        f->sqpower=f->charc; 
-        f->sqpower2=f->charc*f->charc; 
     }
     if(f->spaclev>1)
     {
@@ -906,14 +902,6 @@ int  FieldASet1(uint64_t fdef, FIELD * f, int flags)
             q2=q2*(2*f->charc-1);
             f->spaczero = f->spaczero*(2*f->charc-1)+f->charc-1;
         }
-        f->sqpower=q1;
-        f->sqpower2=q1*q1;
-        f->Tspac16=((uint8_t *)ftab16)-f8;
-        spac16=ftab16;
-        ftab16+=q1;
-        sqid16=ftab16;
-        f->Tsqid16=((uint8_t *)ftab16)-f8;
-        ftab16+=q2;
         x=1;
         x=x<<41;
         f->bar41=1 + x/q1;
@@ -925,7 +913,7 @@ int  FieldASet1(uint64_t fdef, FIELD * f, int flags)
         q6=f->charc;
         q7=f->charc;
         bias=(f->charc-1)/2;
-        pt1=spac16;
+        pt1=&(f->spac16[0]);
         spacp=2*f->charc-1;
         for(r1=0;r1<q1;r1++) {
           if(f->spaclev<=6) s1=0; else s1=(r1+bias)%f->charc;
@@ -957,7 +945,7 @@ int  FieldASet1(uint64_t fdef, FIELD * f, int flags)
         if(f->spaclev<=2) q5=1;  else q5=2*f->charc-1;
         q6=2*f->charc-1;
         q7=2*f->charc-1;
-        pt2=sqid16;
+        pt2=&(f->sqid16[0]);
         for(r1=0;r1<q1;r1++) {
           if(f->spaclev<=6) s1=0; else s1=(r1+1)%f->charc;
           t1=s1;
@@ -981,14 +969,17 @@ int  FieldASet1(uint64_t fdef, FIELD * f, int flags)
                       t7=t6*f->charc+s7;
                       *(pt2++)=t7;
         } } } } } } }
-        f->spacneg=f->spaczero+spac16[0];
+        f->spacneg=f->spaczero+f->spac16[0];
     }
     if( f->charc<65536 )
     {
-        red16=ftab16;
-        f->Tred16=((uint8_t *)ftab16)-f8;
-        ftab16+=2*f->charc;
-        for(x=0;x<2*f->charc;x++) red16[x]=x%f->charc;
+        y=0;
+        for(x=0;x<131072;x++)
+        {
+            f->red16[x]=y;
+            y++;
+            if(y==f->charc) y=0;
+        }
     }
 
 /*   end of  16-bit look-up tables.  Now for the 8-bit ones  */
@@ -996,13 +987,15 @@ int  FieldASet1(uint64_t fdef, FIELD * f, int flags)
     ftab8=(uint8_t*)ftab16;
 
 /*    add8 depends only on the characterstic and not 2*/
-    add8=0;
-    if((f->charc!=2) && (f->charc<256) )
+    if(f->charc<256)
     {
-        add8=ftab8;
-        f->Tadd8=ftab8-f8;
         switch(f->charc)
         {
+          case 2:
+            for(a1=0;a1<256;a1++)
+              for(b1=0;b1<256;b1++)
+                f->add8[256*a1+b1]=(a1^b1);
+            break;
 /*   add8 table for characteristic 3  */
           case 3:
             for (a1=0;a1<3;a1++)
@@ -1020,9 +1013,8 @@ int  FieldASet1(uint64_t fdef, FIELD * f, int flags)
                 bn=b1*81+b2*27+b3*9+b4*3+b5;
                 cn=((a1+b1)%3)*81 +  ((a2+b2)%3)*27  +
                    ((a3+b3)%3)*9  +  ((a4+b4)%3)*3  + (a5+b5)%3;
-                add8[256*an+bn]=cn;
+                f->add8[256*an+bn]=cn;
             }
-            ftab8+=256*243;
             break;
 /*   add8 table for characteristic 5  */
           case 5:
@@ -1036,9 +1028,8 @@ int  FieldASet1(uint64_t fdef, FIELD * f, int flags)
                           an=a1*25+a2*5+a3;
                           bn=b1*25+b2*5+b3;
                           cn=((a1+b1)%5)*25+((a2+b2)%5)*5+(a3+b3)%5;
-                          add8[256*an+bn]=cn;
+                          f->add8[256*an+bn]=cn;
                       }
-            ftab8+=256*125;
             break;
           case 7:
           case 11:
@@ -1051,27 +1042,21 @@ int  FieldASet1(uint64_t fdef, FIELD * f, int flags)
                       an=a1*f->charc+a2;
                       bn=b1*f->charc+b2;
                       cn=((a1+b1)%f->charc)*f->charc + (a2+b2)%f->charc;
-                      add8[256*an+bn]=cn;
+                      f->add8[256*an+bn]=cn;
                   }
-            ftab8+=256*f->charc*f->charc;
             break;
           default:
             for (a1=0;a1<f->charc;a1++)
               for (b1=0;b1<f->charc;b1++)
-                add8[256*a1+b1]=(a1+b1)%f->charc;
-            ftab8+=256*f->charc;
+                f->add8[256*a1+b1]=(a1+b1)%f->charc;
             break;
         }
     }
 
-    mul8=0;   // just to prevent compiler warnings making sub8
     a5=f->fdef;          // number of values of a
     if(f->fdef>256) a5=f->charc;
     if(a5<=256)
     {
-        mul8=ftab8;
-        f->Tmul8=ftab8-f8;
-        ftab8+=256*a5;
 /* notice that characteristic tables may be partly overwritten */
 /* by later field tables for 9,27,81,25,125,49,121,169         */
 /* and for 4,8,16,32,64,128 and 256                            */
@@ -1079,8 +1064,8 @@ int  FieldASet1(uint64_t fdef, FIELD * f, int flags)
 /* is anyway the same!                                         */
         if(f->charc==2)
         {
-            for(a1=0;a1<256;a1++) mul8[a1]=0;
-            for(a1=0;a1<256;a1++) mul8[a1+256]=a1;
+            for(a1=0;a1<256;a1++) f->mul8[a1]=0;
+            for(a1=0;a1<256;a1++) f->mul8[a1+256]=a1;
         }
         if(f->charc==3)
         {
@@ -1094,7 +1079,7 @@ int  FieldASet1(uint64_t fdef, FIELD * f, int flags)
                 bn=b1*81+b2*27+b3*9+b4*3+b5;
                 cn=((a1*b1)%3)*81 +  ((a1*b2)%3)*27  +
                    ((a1*b3)%3)*9  +  ((a1*b4)%3)*3  + (a1*b5)%3;
-                mul8[256*a1+bn]=cn;
+                f->mul8[256*a1+bn]=cn;
             }
         }
         if(f->charc==5)
@@ -1107,7 +1092,7 @@ int  FieldASet1(uint64_t fdef, FIELD * f, int flags)
                   {
                       bn=b1*25+b2*5+b3;
                       cn=((a1*b1)%5)*25+((a1*b2)%5)*5+(a1*b3)%5;
-                      mul8[256*a1+bn]=cn;
+                      f->mul8[256*a1+bn]=cn;
                   }
         }
         if( (f->charc>6) && (f->charc<16) )    // 7 11 13
@@ -1118,14 +1103,14 @@ int  FieldASet1(uint64_t fdef, FIELD * f, int flags)
                 {
                     bn=b1*f->charc + b2;
                     cn=((a1*b1)%f->charc)*f->charc+(a1*b2)%f->charc;
-                    mul8[256*a1+bn]=cn;
+                    f->mul8[256*a1+bn]=cn;
                 }
         }
         if( (f->charc>16) && (f->charc<256) )   // one byte primes 17-251
         {
             for (a1=0;a1<f->charc;a1++)
               for (b1=0;b1<f->charc;b1++)
-                  mul8[256*a1+b1]=(a1*b1)%f->charc;
+                  f->mul8[256*a1+b1]=(a1*b1)%f->charc;
         }
         if(f->fdef==4)
         {
@@ -1137,7 +1122,7 @@ int  FieldASet1(uint64_t fdef, FIELD * f, int flags)
                     {
                         bn=b1*64+b2*16+b3*4+b4;
     cn=qmul(f,a1,b1)*64+qmul(f,a1,b2)*16+qmul(f,a1,b3)*4+qmul(f,a1,b4);
-                        mul8[256*a1+bn]=cn;
+                        f->mul8[256*a1+bn]=cn;
                     }
         }
         if( (f->fdef==8) || (f->fdef==9) || (f->fdef==16) )
@@ -1148,7 +1133,7 @@ int  FieldASet1(uint64_t fdef, FIELD * f, int flags)
                 {
                     bn=b1*f->fdef+b2;
                     cn=qmul(f,a1,b1)*f->fdef+qmul(f,a1,b2);
-                    mul8[256*a1+bn]=cn;
+                    f->mul8[256*a1+bn]=cn;
                 }
         }
         if( (f->pow>1) && (f->fdef>16) && (f->fdef<=256) )
@@ -1156,74 +1141,60 @@ int  FieldASet1(uint64_t fdef, FIELD * f, int flags)
             for (a1=0;a1<f->fdef;a1++)
               for (b1=0;b1<f->fdef;b1++)
               {
-                if( (a1==0) || (b1==0) ) mul8[256*a1+b1]=0;
-                else mul8[256*a1+b1]=alog16[log16[a1]+log16[b1]];
+                if( (a1==0) || (b1==0) ) f->mul8[256*a1+b1]=0;
+            else f->mul8[256*a1+b1]=f->alog16[f->log16[a1]+f->log16[b1]];
               }
         }
     }
 
 /* sub8 table  - same fields as add8 */
-    if ( add8 != 0)
+    if((f->charc!=2) && (f->charc<256) )
     {
         b5=f->charc;
         if(f->charc<16) b5=f->charc*f->charc;
         if(f->charc==3) b5=243;
         if(f->charc==5) b5=125;
-        sub8=ftab8;
-        f->Tsub8=ftab8-f8;
-        ftab8+=256*b5;
         x=(f->charc-1)*256;
         for (a1=0;a1<b5;a1++)
             for (b1=0;b1<b5;b1++)
-                sub8[256*a1+b1]=
-                    add8[256*a1+mul8[x+b1]];
+                f->sub8[256*a1+b1]=
+                    f->add8[256*a1+f->mul8[x+b1]];
     }
 
 /* inv8 table */
     if (f->fdef <= 256)
     {
-        inv8=ftab8;
-        f->Tinv8=ftab8-f8;
-        ftab8+=f->fdef;
-        inv8[0]=0;
-        for(a1=1;a1<f->fdef;a1++) inv8[a1]=qinv(f,a1);
+        f->inv8[0]=0;
+        for(a1=1;a1<f->fdef;a1++) f->inv8[a1]=qinv(f,a1);
     }
 /* early8 and late8 tables */
     if(f->fdef <=16)
     {
-        f->Tlate8=ftab8-f8;
-        late8=ftab8;
-        ftab8+=f->dbytevals*(f->entbyte-1);
         for(a1=0;a1+1<f->entbyte;a1++)
         {
             for(a2=0;a2<f->dbytevals;a2++)
             {
                 a3=a2;
                 for(i=0;i<a1+1;i++) a3= (a3*f->fdef)%f->dbytevals;
-                late8[a1*f->dbytevals+a2]=a3;
+                f->late8[a1*f->dbytevals+a2]=a3;
             }
         }
 
-        f->Tearly8=ftab8-f8;
-        early8=ftab8;
-        ftab8+=f->dbytevals*(f->entbyte-1);
         for(a1=0;a1+1<f->entbyte;a1++)
         {
             for(a2=0;a2<f->dbytevals;a2++)
             {
                 a3=a2;
                 for(i=0;i<a1+1;i++) a3= (a3/f->fdef);
-                early8[a1*f->dbytevals+a2]=a3;
+                f->early8[a1*f->dbytevals+a2]=a3;
             }
         }
     }
 
 // now for the linf tables
-    f->pextype=5;    // default DUnpak, %, DPak
     f->pastype=5;    
     if(f->fdef==4)
     {
-        f->pextype=1;
         f->pastype=1;
         while( (((long)ftab8)&1) != 0 ) ftab8++;  // align 16 bits
         f->Tlfx=ftab8-f8;
@@ -1250,7 +1221,6 @@ int  FieldASet1(uint64_t fdef, FIELD * f, int flags)
 
     if(f->fdef==8)
     {
-        f->pextype=2;
         f->pastype=2;
         while( (((long)ftab8)&3) != 0 ) ftab8++;  // align 32 bits
         f->Tlfx=ftab8-f8;
@@ -1278,7 +1248,6 @@ int  FieldASet1(uint64_t fdef, FIELD * f, int flags)
 
     if(f->fdef==9)
     {
-        f->pextype=3;
         f->pastype=3;
         while( (((long)ftab8)&3) != 0 ) ftab8++;  // align 32 bits
         f->Tlfx=ftab8-f8;
@@ -1310,7 +1279,6 @@ int  FieldASet1(uint64_t fdef, FIELD * f, int flags)
     }
     if(f->fdef==16)
     {
-        f->pextype=4;
         f->pastype=4;
         while( (((long)ftab8)&3) != 0 ) ftab8++;  // align 32 bits
         f->Tlfx=ftab8-f8;
@@ -1336,7 +1304,7 @@ int  FieldASet1(uint64_t fdef, FIELD * f, int flags)
                       4096*a4+256*a3+16*a2+a1;                
                }
     }
-    if( (f->pextype==5) && (f->charc==2) )
+    if( (f->fdef>=32) && (f->charc==2) )
     {
         while( (((long)ftab8)&7) != 0 ) ftab8++;  // align 64 bits
         f->Tlfx=ftab8-f8;
@@ -1355,10 +1323,8 @@ int  FieldASet1(uint64_t fdef, FIELD * f, int flags)
                   0x100000000000000*a8+0x1000000000000*a7+
                   0x10000000000*a6+0x100000000*a5+0x1000000*a4+0x10000*a3+0x100*a2+a1;
                }
-        f->pextype=6;
-        f->spaclev=8;
     }
-    if( (f->pextype==5) && (f->charc==3) )
+    if( (f->fdef>=27) && (f->charc==3) )
     {
         while( (((long)ftab8)&7) != 0 ) ftab8++;  // align 64 bits
         f->Tlfx=ftab8-f8;
@@ -1374,9 +1340,8 @@ int  FieldASet1(uint64_t fdef, FIELD * f, int flags)
                   lfz[243*a6+81*a5+27*a4+9*a3+3*a2+a1]=
                   0x10000000000*a6+0x100000000*a5+0x1000000*a4+0x10000*a3+0x100*a2+a1;
              }
-        f->pextype=6;
     }
-    if( (f->pextype==5) && (f->charc==5) )
+    if(f->charc==5)  
     {
         while( (((long)ftab8)&7) != 0 ) ftab8++;  // align 64 bits
         f->Tlfx=ftab8-f8;
@@ -1391,9 +1356,8 @@ int  FieldASet1(uint64_t fdef, FIELD * f, int flags)
                 lfz[625*a5+125*a4+25*a3+5*a2+a1]=
                 0x100000000*a5+0x1000000*a4+0x10000*a3+0x100*a2+a1;
             }
-        f->pextype=6;
     }
-    if( (f->pextype==5) && (f->charc==7) )
+    if (f->charc==7)
     {
         while( (((long)ftab8)&7) != 0 ) ftab8++;  // align 64 bits
         f->Tlfx=ftab8-f8;
@@ -1407,9 +1371,8 @@ int  FieldASet1(uint64_t fdef, FIELD * f, int flags)
                lfz[343*a4+49*a3+7*a2+a1]=
                0x1000000*a4+0x10000*a3+0x100*a2+a1;
            }
-        f->pextype=6;
     }
-    if( (f->pextype==5) && (f->charc>=11) && (f->charc<=19) )
+    if( (f->charc>=11) && (f->charc<=19) )
     {
         while( (((long)ftab8)&7) != 0 ) ftab8++;  // align 64 bits
         f->Tlfx=ftab8-f8;
@@ -1422,9 +1385,51 @@ int  FieldASet1(uint64_t fdef, FIELD * f, int flags)
               lfz[f->charc*f->charc*a3+f->charc*a2+a1]=
               0x10000*a3+0x100*a2+a1;
           }
-        f->pextype=6;
     }
-    if( (f->pextype==6) && (f->paktyp==3) ) f->pastype=6;
+
+//  sort out pextype - how to do PExtract
+
+    f->pextype=5;      // default - ulitmately obsolete
+    if(f->ppaktyp<=3)  // prime 8 bits or bigger
+    {
+        f->pextype=6;
+        pcbarprp(f->paktyp,f->ppaktyp,f->charc,f->pow,
+                            f->fdef-1,&(f->barpar[0]));
+    }
+    if( (f->ppaktyp>=4) && (f->ppaktyp<=7) )   // charc 3,5,7,11,13
+    {
+        if(f->fdef==9) f->pextype=3;   // GF9
+        if(f->paktyp==3) f->pextype=7;  // 27,81,243,25,125,49,121,169
+// next is uint16_t FELT but still less than digit
+        if( (f->paktyp==2)&&(f->nodigits==1) ) f->pextype=10;
+        if((f->paktyp<3)&&(f->nodigits>1))
+        {
+            pcbarprp(f->paktyp,2,f->digit, f->nodigits,
+                            f->fdef-1,&(f->barpar[0]));
+            f->atatime=EXTIVCNT/f->nodigits;
+//  each chunk but the last must be an integral number of bytes
+            while((f->atatime%f->pentbyte)!=0) 
+                    f->atatime--;
+            if(f->atatime==0)
+            {
+                printf("EXTIVCNT too low at %d- aborting\n",EXTIVCNT);
+                exit(62);
+            }
+            f->pextype=9;
+        }
+// otherwise default so far
+    }
+    if(f->ppaktyp==8)  // characteristic 2
+    {
+        if(f->pow==2) f->pextype=1;  // GF4
+        if(f->pow==3) f->pextype=2;  // GF8
+        if(f->pow==4) f->pextype=4;  // GF16
+        if(f->paktyp==3) f->pextype=7;  // 32,64,128,256
+        if(f->paktyp <3) f->pextype=8;  // field 16 bits or bigger
+    }
+
+    if(f->paktyp==3) f->pastype=6;
+    if((f->paktyp==2)&&(f->charc<=13)&&(f->fdef!=16807) ) f->pastype=7;
 
 /*  Now for the transpose tables 2-16 */
     if(f->fdef<=16)
@@ -1548,39 +1553,25 @@ void PSSet(const FIELD * f, uint64_t noc, DSPACE * ds)
 FELT FieldAdd(const FIELD * f, FELT a, FELT b)
 {
     uint64_t x64, pb1, pb2, pb3, qb1, qb2, qb3, rb1, rb2, rb3;
-    uint8_t * f8;
-    uint8_t * add8;
-    uint16_t * spac16;
-    uint16_t * sqid16;
-    uint16_t * red16;
     switch ( f->addtyp )
     {
       case 1:
         return a^b;
       case 2:
-        f8=(uint8_t *)f;
-        add8=f8+f->Tadd8;
-        return add8[a*256 + b];
+        return f->add8[a*256 + b];
       case 3:
       case 4:
-        f8=(uint8_t *)f;
-        red16=(uint16_t *)(f8+f->Tred16);
-        return red16[a+b];
+        return f->red16[a+b];
       case 5:
-        f8=(uint8_t *)f;
-        spac16=(uint16_t *)(f8+f->Tspac16);
-        sqid16=(uint16_t *)(f8+f->Tsqid16);
-        return sqid16[spac16[a]+spac16[b]];
+        return f->sqid16[f->spac16[a]+f->spac16[b]];
       case 6:
-        f8=(uint8_t *)f;
-        red16=(uint16_t *)(f8+f->Tred16);
         pb1=(a*f->bar41)>>41;
-        pb2=a-(pb1*f->sqpower);
+        pb2=a-(pb1*f->digit);
         qb1=(b*f->bar41)>>41;
-        qb2=b-(qb1*f->sqpower); 
-        rb1=red16[pb1+qb1];
-        rb2=red16[pb2+qb2];
-        return rb1*f->sqpower+rb2;
+        qb2=b-(qb1*f->digit); 
+        rb1=f->red16[pb1+qb1];
+        rb2=f->red16[pb2+qb2];
+        return rb1*f->digit+rb2;
       case 7:
       case 9:
         x64=a+b;
@@ -1591,52 +1582,42 @@ FELT FieldAdd(const FIELD * f, FELT a, FELT b)
       case 10:
         return qadd(f,a,b);
       case 11:
-        f8=(uint8_t *)f;
-        spac16=(uint16_t *)(f8+f->Tspac16);
-        sqid16=(uint16_t *)(f8+f->Tsqid16);
         pb1=(a*f->bar41)>>41;
-        pb2=a-(pb1*f->sqpower);
+        pb2=a-(pb1*f->digit);
         qb1=(b*f->bar41)>>41;
-        qb2=b-(qb1*f->sqpower); 
-        rb1=sqid16[spac16[pb1]+spac16[qb1]];
-        rb2=sqid16[spac16[pb2]+spac16[qb2]];
-        return rb1*f->sqpower+rb2;
+        qb2=b-(qb1*f->digit); 
+        rb1=f->sqid16[f->spac16[pb1]+f->spac16[qb1]];
+        rb2=f->sqid16[f->spac16[pb2]+f->spac16[qb2]];
+        return rb1*f->digit+rb2;
       case 12:
-        f8=(uint8_t *)f;
-        spac16=(uint16_t *)(f8+f->Tspac16);
-        sqid16=(uint16_t *)(f8+f->Tsqid16);
         pb1=(a*f->bar41)>>41;
-        pb2=a-(pb1*f->sqpower);
+        pb2=a-(pb1*f->digit);
         qb1=(b*f->bar41)>>41;
-        qb2=b-(qb1*f->sqpower); 
-        rb1=sqid16[spac16[pb1]+spac16[qb1]];
-        rb2=sqid16[spac16[pb2]+spac16[qb2]];
-        return rb1*f->sqpower+rb2;
+        qb2=b-(qb1*f->digit); 
+        rb1=f->sqid16[f->spac16[pb1]+f->spac16[qb1]];
+        rb2=f->sqid16[f->spac16[pb2]+f->spac16[qb2]];
+        return rb1*f->digit+rb2;
       case 13:
-        f8=(uint8_t *)f;
-        red16=(uint16_t *)(f8+f->Tred16);
         pb1=(a*f->bar41)>>41;
-        pb2=a-(pb1*f->sqpower);
+        pb2=a-(pb1*f->digit);
         qb1=(b*f->bar41)>>41;
-        qb2=b-(qb1*f->sqpower); 
-        rb1=red16[pb1+qb1];
-        rb2=red16[pb2+qb2];
-        return rb1*f->sqpower+rb2;
+        qb2=b-(qb1*f->digit); 
+        rb1=f->red16[pb1+qb1];
+        rb2=f->red16[pb2+qb2];
+        return rb1*f->digit+rb2;
       case 14:
-        f8=(uint8_t *)f;
-        red16=(uint16_t *)(f8+f->Tred16);
         pb2=(a*f->bar41)>>41;
-        pb3=a-(pb2*f->sqpower);
+        pb3=a-(pb2*f->digit);
         pb1=(pb2*f->bar41)>>41;
-        pb2=pb2-(pb1*f->sqpower);
+        pb2=pb2-(pb1*f->digit);
         qb2=(b*f->bar41)>>41;
-        qb3=b-(qb2*f->sqpower); 
+        qb3=b-(qb2*f->digit); 
         qb1=(qb2*f->bar41)>>41;
-        qb2=qb2-(qb1*f->sqpower);
-        rb1=red16[pb1+qb1];
-        rb2=red16[pb2+qb2];
-        rb3=red16[pb3+qb3];
-        return rb1*f->sqpower2+rb2*f->sqpower+rb3;
+        qb2=qb2-(qb1*f->digit);
+        rb1=f->red16[pb1+qb1];
+        rb2=f->red16[pb2+qb2];
+        rb3=f->red16[pb3+qb3];
+        return rb1*f->digit2+rb2*f->digit+rb3;
       default:
         printf("Internal error in FieldAdd - type not set\n");
         exit(42);
@@ -1646,37 +1627,23 @@ FELT FieldAdd(const FIELD * f, FELT a, FELT b)
 FELT FieldNeg(const FIELD * f, FELT a)
 {
     uint64_t pb1,pb2,pb3;
-    uint8_t * f8;
-    uint8_t * mul8;
-    uint16_t * sqid16;
-    uint16_t * spac16;
-    uint16_t * red16;
     switch ( f->addtyp )
     {
       case 1:
         return a;
       case 2:
-        f8=(uint8_t *)f;
-        mul8=f8+f->Tmul8;
-        return mul8[(f->charc-1)*256 + a];
+        return f->mul8[(f->charc-1)*256 + a];
       case 3:
       case 4:
-        f8=(uint8_t *)f;
-        red16=(uint16_t *)(f8+f->Tred16);
-        return red16[f->fdef-a];
+        return f->red16[f->fdef-a];
       case 5:
-        f8=(uint8_t *)f;
-        sqid16=(uint16_t *)(f8+f->Tsqid16);
-        spac16=(uint16_t *)(f8+f->Tspac16);
-        return sqid16[f->spacneg - spac16[a]];
+        return f->sqid16[f->spacneg - f->spac16[a]];
       case 6:
-        f8=(uint8_t *)f;
-        red16=(uint16_t *)(f8+f->Tred16);
         pb1=(a*f->bar41)>>41;
-        pb2=a-(pb1*f->sqpower);
-        pb1=red16[f->charc-pb1];
-        pb2=red16[f->charc-pb2];
-        return pb1*f->sqpower+pb2;
+        pb2=a-(pb1*f->digit);
+        pb1=f->red16[f->charc-pb1];
+        pb2=f->red16[f->charc-pb2];
+        return pb1*f->digit+pb2;
       case 7:
       case 9:
         if(a==0) return 0;
@@ -1685,44 +1652,34 @@ FELT FieldNeg(const FIELD * f, FELT a)
       case 10:
         return qneg(f,a);
       case 11:
-        f8=(uint8_t *)f;
-        sqid16=(uint16_t *)(f8+f->Tsqid16);
-        spac16=(uint16_t *)(f8+f->Tspac16);
         pb1=(a*f->bar41)>>41;
-        pb2=a-(pb1*f->sqpower); 
-        pb1=sqid16[f->spacneg-spac16[pb1]];
-        pb2=sqid16[f->spacneg-spac16[pb2]];
-        return pb1*f->sqpower+pb2;
+        pb2=a-(pb1*f->digit); 
+        pb1=f->sqid16[f->spacneg-f->spac16[pb1]];
+        pb2=f->sqid16[f->spacneg-f->spac16[pb2]];
+        return pb1*f->digit+pb2;
       case 12:
-        f8=(uint8_t *)f;
-        sqid16=(uint16_t *)(f8+f->Tsqid16);
-        spac16=(uint16_t *)(f8+f->Tspac16);
         pb1=(a*f->bar41)>>41;
-        pb2=a-(pb1*f->sqpower); 
-        pb1=sqid16[f->spacneg - spac16[pb1]];
-        pb2=sqid16[f->spacneg - spac16[pb2]];
-        return pb1*f->sqpower+pb2;
+        pb2=a-(pb1*f->digit); 
+        pb1=f->sqid16[f->spacneg - f->spac16[pb1]];
+        pb2=f->sqid16[f->spacneg - f->spac16[pb2]];
+        return pb1*f->digit+pb2;
       case 13:
-        f8=(uint8_t *)f;
-        red16=(uint16_t *)(f8+f->Tred16);
         pb1=(a*f->bar41)>>41;
-        pb2=a-(pb1*f->sqpower);
-        pb1=red16[f->charc-pb1];
-        pb2=red16[f->charc-pb2];
-        return pb1*f->sqpower+pb2;
+        pb2=a-(pb1*f->digit);
+        pb1=f->red16[f->charc-pb1];
+        pb2=f->red16[f->charc-pb2];
+        return pb1*f->digit+pb2;
       case 14:
         return qneg(f,a);
 //  what is going on here???!!!
-        f8=(uint8_t *)f;
-        red16=(uint16_t *)(f8+f->Tred16);
         pb2=(a*f->bar41)>>41;
-        pb3=a-(pb2*f->sqpower);
+        pb3=a-(pb2*f->digit);
         pb1=(pb2*f->bar41)>>41;
-        pb2=pb2-(pb1*f->sqpower);
-        pb1=red16[f->charc-pb1];
-        pb2=red16[f->charc-pb2];
-        pb3=red16[f->charc-pb3];
-        return pb1*f->sqpower2+pb2*f->sqpower+pb3;
+        pb2=pb2-(pb1*f->digit);
+        pb1=f->red16[f->charc-pb1];
+        pb2=f->red16[f->charc-pb2];
+        pb3=f->red16[f->charc-pb3];
+        return pb1*f->digit2+pb2*f->digit+pb3;
       default:
         printf("Internal error in FieldNeg - type not set\n");
         exit(49);
@@ -1732,39 +1689,25 @@ FELT FieldNeg(const FIELD * f, FELT a)
 FELT FieldSub(const FIELD * f, FELT a, FELT b)
 {
     uint64_t pb1,pb2,pb3,qb1,qb2,qb3,rb1,rb2,rb3;
-    uint8_t * f8;
-    uint8_t * sub8;
-    uint16_t * spac16;
-    uint16_t * sqid16;
-    uint16_t * red16;
     switch ( f->addtyp )
     {
       case 1:
         return a^b;
       case 2:
-        f8=(uint8_t *)f;
-        sub8=f8+f->Tsub8;
-        return sub8[a*256 + b];
+        return f->sub8[a*256 + b];
       case 3:
       case 4:
-        f8=(uint8_t *)f;
-        red16=(uint16_t *)(f8+f->Tred16);
-        return red16[f->fdef+a-b];;
+        return f->red16[f->fdef+a-b];;
       case 5:
-        f8=(uint8_t *)f;
-        sqid16=(uint16_t *)(f8+f->Tsqid16);
-        spac16=(uint16_t *)(f8+f->Tspac16);
-        return sqid16[f->spaczero+spac16[a]-spac16[b]];
+        return f->sqid16[f->spaczero+f->spac16[a]-f->spac16[b]];
       case 6:
-        f8=(uint8_t *)f;
-        red16=(uint16_t *)(f8+f->Tred16);
         pb1=(a*f->bar41)>>41;
-        pb2=a-(pb1*f->sqpower);
+        pb2=a-(pb1*f->digit);
         qb1=(b*f->bar41)>>41;
-        qb2=b-(qb1*f->sqpower); 
-        rb1=red16[f->charc+pb1-qb1];
-        rb2=red16[f->charc+pb2-qb2];
-        return rb1*f->sqpower+rb2;
+        qb2=b-(qb1*f->digit); 
+        rb1=f->red16[f->charc+pb1-qb1];
+        rb2=f->red16[f->charc+pb2-qb2];
+        return rb1*f->digit+rb2;
       case 7:
       case 9:
         if(a>=b) return a-b;
@@ -1773,52 +1716,42 @@ FELT FieldSub(const FIELD * f, FELT a, FELT b)
       case 10:
         return qsub(f,a,b);
       case 11:
-        f8=(uint8_t *)f;
-        sqid16=(uint16_t *)(f8+f->Tsqid16);
-        spac16=(uint16_t *)(f8+f->Tspac16);
         pb1=(a*f->bar41)>>41;
-        pb2=a-(pb1*f->sqpower);
+        pb2=a-(pb1*f->digit);
         qb1=(b*f->bar41)>>41;
-        qb2=b-(qb1*f->sqpower); 
-        rb1=sqid16[f->spaczero+spac16[pb1]-spac16[qb1]];
-        rb2=sqid16[f->spaczero+spac16[pb2]-spac16[qb2]];
-        return rb1*f->sqpower+rb2;
+        qb2=b-(qb1*f->digit); 
+        rb1=f->sqid16[f->spaczero+f->spac16[pb1]-f->spac16[qb1]];
+        rb2=f->sqid16[f->spaczero+f->spac16[pb2]-f->spac16[qb2]];
+        return rb1*f->digit+rb2;
       case 12:
-        f8=(uint8_t *)f;
-        sqid16=(uint16_t *)(f8+f->Tsqid16);
-        spac16=(uint16_t *)(f8+f->Tspac16);
         pb1=(a*f->bar41)>>41;
-        pb2=a-(pb1*f->sqpower);
+        pb2=a-(pb1*f->digit);
         qb1=(b*f->bar41)>>41;
-        qb2=b-(qb1*f->sqpower);
-        rb1=sqid16[f->spaczero+spac16[pb1]-spac16[qb1]]; 
-        rb2=sqid16[f->spaczero+spac16[pb2]-spac16[qb2]]; 
-        return rb1*f->sqpower+rb2;
+        qb2=b-(qb1*f->digit);
+        rb1=f->sqid16[f->spaczero+f->spac16[pb1]-f->spac16[qb1]]; 
+        rb2=f->sqid16[f->spaczero+f->spac16[pb2]-f->spac16[qb2]]; 
+        return rb1*f->digit+rb2;
       case 13:
-        f8=(uint8_t *)f;
-        red16=(uint16_t *)(f8+f->Tred16);
         pb1=(a*f->bar41)>>41;
-        pb2=a-(pb1*f->sqpower);
+        pb2=a-(pb1*f->digit);
         qb1=(b*f->bar41)>>41;
-        qb2=b-(qb1*f->sqpower); 
-        rb1=red16[f->charc+pb1-qb1];
-        rb2=red16[f->charc+pb2-qb2];
-        return rb1*f->sqpower+rb2;
+        qb2=b-(qb1*f->digit); 
+        rb1=f->red16[f->charc+pb1-qb1];
+        rb2=f->red16[f->charc+pb2-qb2];
+        return rb1*f->digit+rb2;
       case 14:
-        f8=(uint8_t *)f;
-        red16=(uint16_t *)(f8+f->Tred16);
         pb2=(a*f->bar41)>>41;
-        pb3=a-(pb2*f->sqpower);
+        pb3=a-(pb2*f->digit);
         pb1=(pb2*f->bar41)>>41;
-        pb2=pb2-(pb1*f->sqpower);
+        pb2=pb2-(pb1*f->digit);
         qb2=(b*f->bar41)>>41;
-        qb3=b-(qb2*f->sqpower); 
+        qb3=b-(qb2*f->digit); 
         qb1=(qb2*f->bar41)>>41;
-        qb2=qb2-(qb1*f->sqpower);
-        rb1=red16[f->charc+pb1-qb1];
-        rb2=red16[f->charc+pb2-qb2];
-        rb3=red16[f->charc+pb3-qb3];     
-        return rb1*f->sqpower2+rb2*f->sqpower+rb3;
+        qb2=qb2-(qb1*f->digit);
+        rb1=f->red16[f->charc+pb1-qb1];
+        rb2=f->red16[f->charc+pb2-qb2];
+        rb3=f->red16[f->charc+pb3-qb3];     
+        return rb1*f->digit2+rb2*f->digit+rb3;
       default:
         printf("Internal error in FieldSub - type not set\n");
         exit(42);
@@ -1828,30 +1761,24 @@ FELT FieldSub(const FIELD * f, FELT a, FELT b)
 FELT FieldMul(const FIELD * f, FELT a, FELT b)
 {
     uint32_t a32,b32;
-    uint16_t *log16,*alog16;
-    uint8_t *f8;
-    uint8_t * mul8;
     if( (a==0) || (b==0) ) return 0;
     switch ( f->multyp )
     {
       case 1:
-        f8=(uint8_t *)f;
-        mul8=f8+f->Tmul8;
-        return mul8[a*256+b];
+        return f->mul8[a*256+b];
       case 2:
         a32=a;
         b32=b;
         return (a32*b32)%f->p32;
       case 3:
       case 4:
-        f8=(uint8_t *)f;
-        log16=(uint16_t *)(f8+f->Tlog16);
-        alog16=(uint16_t *)(f8+f->Talog16);
-        return alog16[log16[a]+log16[b]];
+        return f->alog16[f->log16[a]+f->log16[b]];
       case 5:
         return (a*b)%f->p32;
       case 6:
       case 7:
+      case 8:
+      case 9:
         return qmul(f,a,b);
       default:
         printf("Internal error in FieldMul - type not set\n");
@@ -1861,27 +1788,22 @@ FELT FieldMul(const FIELD * f, FELT a, FELT b)
 
 FELT FieldInv(const FIELD * f, FELT a)
 {
-    uint8_t * inv8;
-    uint8_t * f8;
-    uint16_t *log16,*alog16;
     if(a<=1) return a;
     switch ( f->multyp )
     {
       case 1:
-        inv8 = ((uint8_t *)f) + f->Tinv8;
-        return inv8[a];
+        return f->inv8[a];
       case 2:
       case 5:
         return pinv(f,a);
       case 6:
       case 7:
+      case 8:
+      case 9:
         return qinv(f,a);
       case 3:
       case 4:
-        f8=(uint8_t *)f;
-        log16=(uint16_t *)(f8+f->Tlog16);
-        alog16=(uint16_t *)(f8+f->Talog16);
-        return alog16[f->qminus1-log16[a]];
+        return f->alog16[f->qminus1-f->log16[a]];
       default:
         printf("Internal error in FieldInv - type not set\n");
         exit(42);
@@ -1892,38 +1814,26 @@ FELT FieldInv(const FIELD * f, FELT a)
 FELT FieldDiv(const FIELD * f, FELT a, FELT b)
 {
     uint32_t a32,b32;
-    uint8_t * inv8;
-    uint8_t * mul8;
-    uint16_t * log16;
-    uint16_t * alog16;
-    uint8_t * f8;
     if( (a==0) || (b==0) ) return 0;
-    f8=(uint8_t *)f;
     switch ( f->multyp )
     {
       case 1:
-        mul8=f8+f->Tmul8;
-        inv8 = ((uint8_t *)f)+f->Tinv8;
-        return mul8[a*256+inv8[b]];
+        return f->mul8[a*256+f->inv8[b]];
       case 2:
         a32=a;
         b32=pinv(f,b);
         return (a32*b32)%f->p32;
       case 3:
-        f8=(uint8_t *)f;
-        log16=(uint16_t *)(f8+f->Tlog16);
-        alog16=(uint16_t *)(f8+f->Talog16);
-        return alog16[log16[a]+f->qminus1-log16[b]];
+        return f->alog16[f->log16[a]+f->qminus1-f->log16[b]];
       case 4:
-        f8=(uint8_t *)f;
-        log16=(uint16_t *)(f8+f->Tlog16);
-        alog16=(uint16_t *)(f8+f->Talog16);
-        a32=log16[a]+f->qminus1-log16[b];
-        return alog16[a32];
+        a32=f->log16[a]+f->qminus1-f->log16[b];
+        return f->alog16[a32];
       case 5:
         return (a*pinv(f,b))%f->p32;
       case 6:
       case 7:
+      case 8:
+      case 9:
         return qdiv(f,a,b);
       default:
         printf("Internal error in FieldDiv - type not set\n");
@@ -2154,10 +2064,7 @@ void DCut(const DSPACE *ms, uint64_t nor, uint64_t col,
     uint64_t lbcbits;             /* bits output to last byte */
     uint64_t lbmbits;
     uint8_t *cbp, *mp;
-    uint8_t *ses, *sls, *ges, *gls;
-    uint8_t * f8;
-    uint8_t * early8;
-    uint8_t * late8;
+    const uint8_t *ses, *sls, *ges, *gls;
     const FIELD *f = ms->f;
     int uptoend;       /* flag set if last col of m used */
     uptoend=1;
@@ -2168,9 +2075,6 @@ void DCut(const DSPACE *ms, uint64_t nor, uint64_t col,
         uptoend=0;
         movecols=cbs->noc;
     }
-    f8=(uint8_t *)f;
-    late8=f8+f->Tlate8;
-    early8=f8+f->Tearly8;
 
 /*  Input is col, movecols, the.rest */
 /*  Output is     movecols, 000      */
@@ -2216,8 +2120,8 @@ void DCut(const DSPACE *ms, uint64_t nor, uint64_t col,
             }
             return;
         }
-        sls = late8  + f->dbytevals * (f->entbyte-lbcbits-1);
-        ses = early8 + f->dbytevals * (f->entbyte-lbcbits-1);
+        sls = &(f->late8[0])  + f->dbytevals * (f->entbyte-lbcbits-1);
+        ses = (&f->early8[0]) + f->dbytevals * (f->entbyte-lbcbits-1);
         if(outbyt>1)
         {
 /* Cut Case 3 ---- */
@@ -2242,8 +2146,8 @@ void DCut(const DSPACE *ms, uint64_t nor, uint64_t col,
 
     lbmbits = (col+movecols)%f->entbyte;  /* bits in last input byte */
 /* otherwise generic shift needed  */
-    ges = early8 + f->dbytevals * (gshft - 1);
-    gls = late8 + f->dbytevals * (f->entbyte - gshft - 1);
+    ges = &(f->early8[0]) + f->dbytevals * (gshft - 1);
+    gls = &f->late8[0] + f->dbytevals * (f->entbyte - gshft - 1);
 
 /* Note, lbmbits and lbcbits cannot be equal - not aligned */
 /* cases lbmbits==0, lbcbits==0 lbmbits bigger, lbcbits bigger */
@@ -2300,9 +2204,9 @@ void DCut(const DSPACE *ms, uint64_t nor, uint64_t col,
         return;
     }
 /* sls puts the last input bit at the end of the byte */
-    sls=late8+f->dbytevals*(f->entbyte-lbmbits-1);
+    sls=&f->late8[0]+f->dbytevals*(f->entbyte-lbmbits-1);
 /* ses puts the last bit of a byte to the last wanted position */
-    ses=early8+f->dbytevals*(f->entbyte-lbcbits-1);
+    ses=&(f->early8[0])+f->dbytevals*(f->entbyte-lbcbits-1);
     if (lbmbits > lbcbits)
     {
         if (clearbytes==0)
@@ -2366,14 +2270,11 @@ void DPaste(const DSPACE *cbs, const Dfmt * cb, uint64_t nor, uint64_t col,
     uint64_t lbmbits;             /* bits output to last byte */
     uint64_t inbyt;               /* input bytes used */
     uint8_t *cbp, *mp;
-    uint8_t *me,*ml,*ce,*cl;      /* shifters for removing junk */
-    int wlong;                  /* 1 m longer, 2 = , 3 cb longer */
-    uint8_t *ges, *gls;           /* general early and late shifts */
-    uint8_t *fls, *fes;           /* first byte late and early shifts */
+    const uint8_t *me,*ml,*ce,*cl;  /* shifters for removing junk */
+    int wlong;                    /* 1 m longer, 2 = , 3 cb longer */
+    const uint8_t *ges, *gls;     /* general early and late shifts */
+    const uint8_t *fls, *fes;     /* first byte late and early shifts */
     uint64_t r,s;                 /* index for counting rows    */
-    uint8_t * f8;
-    uint8_t * early8;
-    uint8_t * late8;
     if(cbs->noc==0) return;     /* if no cols, nothing to do */
     gshft = col%f->entbyte;     /* late shift required  */
 
@@ -2389,9 +2290,6 @@ void DPaste(const DSPACE *cbs, const Dfmt * cb, uint64_t nor, uint64_t col,
     lbcbits = movecols%f->entbyte; /* bits in last input byte */
 /* inbyte is movecols in bytes, rounded up */
     inbyt=((movecols+f->entbyte-1)/f->entbyte)*f->bytesper;
-    f8=(uint8_t *)f;
-    late8=f8+f->Tlate8;
-    early8=f8+f->Tearly8;
 /* get pointers to first byte to deal with */
     cbp = (uint8_t *)cb;
     mp = (uint8_t *)m;
@@ -2415,8 +2313,8 @@ void DPaste(const DSPACE *cbs, const Dfmt * cb, uint64_t nor, uint64_t col,
         if(wlong==1)
         {
 /* Paste Case 2 ---- */
-            ml=late8  + f->dbytevals*(lbcbits-1);
-            me=early8 + f->dbytevals*(lbcbits-1);
+            ml=&f->late8[0]  + f->dbytevals*(lbcbits-1);
+            me=&(f->early8[0]) + f->dbytevals*(lbcbits-1);
             for (r=0; r<nor; r++)
             {
                 memcpy(mp, cbp, inbyt-1);
@@ -2429,8 +2327,8 @@ void DPaste(const DSPACE *cbs, const Dfmt * cb, uint64_t nor, uint64_t col,
         if(wlong==3)
         {
 /* Paste Case 3 ---- */
-            ce=early8 + f->dbytevals*(f->entbyte-lbcbits-1);
-            cl=late8  + f->dbytevals*(f->entbyte-lbcbits-1);
+            ce=&(f->early8[0]) + f->dbytevals*(f->entbyte-lbcbits-1);
+            cl=&f->late8[0]  + f->dbytevals*(f->entbyte-lbcbits-1);
             for (r=0; r<nor; r++)
             {
                 memcpy(mp, cbp, inbyt-1);
@@ -2443,10 +2341,10 @@ void DPaste(const DSPACE *cbs, const Dfmt * cb, uint64_t nor, uint64_t col,
     }
 
 /* otherwise generic shift needed  */
-    gls = late8  + f->dbytevals * (gshft - 1);
-    fes = early8 + f->dbytevals * (gshft - 1);
-    ges = early8 + f->dbytevals * (f->entbyte - gshft - 1);
-    fls = late8  + f->dbytevals * (f->entbyte - gshft - 1);
+    gls = &f->late8[0]  + f->dbytevals * (gshft - 1);
+    fes = &(f->early8[0]) + f->dbytevals * (gshft - 1);
+    ges = &(f->early8[0]) + f->dbytevals * (f->entbyte - gshft - 1);
+    fls = &f->late8[0]  + f->dbytevals * (f->entbyte - gshft - 1);
 
 /* Note, lbmbits and lbcbits cannot be equal - not aligned */
 /* cases lbmbits==0, lbcbits==0 lbmbits bigger, lbcbits bigger */
@@ -2497,8 +2395,8 @@ void DPaste(const DSPACE *cbs, const Dfmt * cb, uint64_t nor, uint64_t col,
         if(wlong==1)
         {
 /* Paste Case 7 ---- */
-            ml=late8  + f->dbytevals*(lbmbits-1);
-            me=early8 + f->dbytevals*(lbmbits-1);
+            ml=&f->late8[0]  + f->dbytevals*(lbmbits-1);
+            me=&(f->early8[0]) + f->dbytevals*(lbmbits-1);
             for (r = 0; r < nor; r++)
             {
                 mp[0]=ges[fls[mp[0]]]+gls[cbp[0]];
@@ -2525,8 +2423,8 @@ void DPaste(const DSPACE *cbs, const Dfmt * cb, uint64_t nor, uint64_t col,
             return;
         }
 /* Paste Case 9 ---- */
-        ce=early8 + f->dbytevals*(f->entbyte-lbmbits-1);
-        cl=late8  + f->dbytevals*(f->entbyte-lbcbits-1);
+        ce=&(f->early8[0]) + f->dbytevals*(f->entbyte-lbmbits-1);
+        cl=&f->late8[0]  + f->dbytevals*(f->entbyte-lbcbits-1);
         for (r = 0; r < nor; r++)
         {
             mp[0]=ges[fls[mp[0]]]+gls[cbp[0]];
@@ -2543,8 +2441,8 @@ void DPaste(const DSPACE *cbs, const Dfmt * cb, uint64_t nor, uint64_t col,
         if(inbyt==1)
         {
 /* Paste Case 10 ---- */
-            ml=late8  + f->dbytevals*(lbmbits-1);
-            me=early8 + f->dbytevals*(lbmbits-1);
+            ml=&f->late8[0]  + f->dbytevals*(lbmbits-1);
+            me=&(f->early8[0]) + f->dbytevals*(lbmbits-1);
             for (r = 0; r < nor; r++)
             {
                 mp[0] = ges[fls[mp[0]]] + gls[cbp[0]]
@@ -2555,8 +2453,8 @@ void DPaste(const DSPACE *cbs, const Dfmt * cb, uint64_t nor, uint64_t col,
             return;
         }
 /* Paste Case 11 ---- */
-        ml=late8  + f->dbytevals*(lbmbits-1);
-        me=early8 + f->dbytevals*(lbmbits-1);
+        ml=&f->late8[0]  + f->dbytevals*(lbmbits-1);
+        me=&(f->early8[0]) + f->dbytevals*(lbmbits-1);
         for (r = 0; r < nor; r++)
         {
             mp[0]=ges[fls[mp[0]]]+gls[cbp[0]];
@@ -2582,8 +2480,8 @@ void DPaste(const DSPACE *cbs, const Dfmt * cb, uint64_t nor, uint64_t col,
         }
         return;
     }
-    ce=early8 + f->dbytevals*(f->entbyte-lbmbits-1);
-    cl=late8  + f->dbytevals*(f->entbyte-lbcbits-1);
+    ce=&(f->early8[0]) + f->dbytevals*(f->entbyte-lbmbits-1);
+    cl=&f->late8[0]  + f->dbytevals*(f->entbyte-lbcbits-1);
     if(inbyt==1)
     {
 /* Paste Case 13  */
@@ -2620,269 +2518,804 @@ Dfmt * DPInc(const DSPACE * ds, const Dfmt * d)
     return (Dfmt *) (((char *) d)+ds->nob);
 }
 
+void TAdd(const DSPACE * ds, uint64_t nor, const Dfmt *a, uint64_t astride,
+                  const Dfmt *b, uint64_t bstride, Dfmt *c, uint64_t cstride)
+{
+    const FIELD * f;
+    int addtyp,ast,bst,cst;
+    uint64_t *a64, *b64, *c64, *ap64, *bp64, *cp64;
+    uint32_t *a32, *b32, *c32, *ap32, *bp32, *cp32;
+    uint16_t *a16, *b16, *c16, *ap16, *bp16, *cp16;
+    const uint8_t *a8,*b8,*ap8,*bp8;
+    uint8_t *c8,*cp8;
+    uint64_t x64,y64,z64;
+    uint32_t x32;
+    uint64_t xb1,xb2,xb3,yb1,yb2,yb3,zb1,zb2,zb3;
+    uint64_t r,col,rw;
+
+    f=ds->f;
+    if(ds->ground==0)
+        addtyp=f->addtyp;
+    else     
+        addtyp=f->paddtyp;
+    switch ( addtyp )
+    {
+
+// Characteristic 2
+
+      case 1:
+        a8=a;
+        b8=b;
+        c8=c;
+        if( (f->mact[0]=='j')||(f->mact[0]>='l') ) // AVX2?
+        {
+            for(r=0;r<nor;r++)
+            {
+                pc1xorj(c8,a8,b8,ds->nob);  // AVX2
+                a8+=astride;
+                b8+=bstride;
+                c8+=cstride;
+            }
+            return;
+        }
+        for(r=0;r<nor;r++)
+        {
+            pc1xora(c8,a8,b8,ds->nob);  // SSE
+            a8+=astride;
+            b8+=bstride;
+            c8+=cstride;
+        }
+        return;
+
+// 8-bit cases
+
+      case 2:
+        a8=a;
+        b8=b;
+        c8=c;
+        for(r=0;r<nor;r++)
+        {
+            pcbif(c8,a8,b8,ds->nob,f->add8);
+            a8+=astride;
+            b8+=bstride;
+            c8+=cstride;
+        }
+        return;
+      case 3:
+        a8=a;
+        b8=b;
+        c8=c;
+        y64 = ds->nob;
+        x64 = y64>>2;    // words
+        y64 = y64&3;     // remaining bytes
+        for(r=0;r<nor;r++)
+        {
+            ap8=a8;
+            bp8=b8;
+            cp8=c8;
+            for(rw=0;rw<x64;rw++)
+            {
+                x32=*ap8;
+                *cp8    =f->red16[x32 + (*bp8)];
+                x32=*(ap8+1);
+                *(cp8+1)=f->red16[x32 + (*(bp8+1))];
+                x32=*(ap8+2);
+                *(cp8+2)=f->red16[x32 + (*(bp8+2))];
+                x32=*(ap8+3);
+                *(cp8+3)=f->red16[x32 + (*(bp8+3))];
+                ap8+=4;
+                bp8+=4;
+                cp8+=4;
+            }
+            for(rw=0;rw<y64;rw++)
+            {
+                x32=*(ap8++);
+                *(cp8++) = f->red16[x32+*(bp8++)];
+            }
+            a8+=astride;
+            b8+=bstride;
+            c8+=cstride;
+        }
+        return;
+
+// 16-bit cases
+
+      case 4:
+        a16 = (uint16_t *) a;
+        b16 = (uint16_t *) b;
+        c16 = (uint16_t *) c;
+        ast=astride/2;
+        bst=bstride/2;
+        cst=cstride/2;
+        for(r=0;r<nor;r++)
+        {
+            ap16=a16;
+            bp16=b16;
+            cp16=c16;
+            for(col=0;col<ds->noc;col++)
+            {
+                x64=*(ap16++);
+                y64=*(bp16++);
+                z64=x64+y64;
+                *(cp16++) = f->red16[z64];
+            }
+            a16+=ast;
+            b16+=bst;
+            c16+=cst;
+
+        }
+        return;
+      case 5:
+        a16 = (uint16_t *) a;
+        b16 = (uint16_t *) b;
+        c16 = (uint16_t *) c;
+        ast=astride/2;
+        bst=bstride/2;
+        cst=cstride/2;
+        for(r=0;r<nor;r++)
+        {
+            ap16=a16;
+            bp16=b16;
+            cp16=c16;
+            for(col=0;col<ds->noc;col++)
+      *(cp16++)=f->sqid16[f->spac16[*(ap16++)]+f->spac16[*(bp16++)]];
+            a16+=ast;
+            b16+=bst;
+            c16+=cst;
+        }
+        return;
+      case 6:
+        a16 = (uint16_t *) a;
+        b16 = (uint16_t *) b;
+        c16 = (uint16_t *) c;
+        ast=astride/2;
+        bst=bstride/2;
+        cst=cstride/2;
+        for(r=0;r<nor;r++)
+        {
+            ap16=a16;
+            bp16=b16;
+            cp16=c16;
+            for(col=0;col<ds->noc;col++)
+            {
+                x64=*(ap16++);
+                y64=*(bp16++);
+                xb1=(x64*f->bar41)>>41;
+                xb2=x64-(xb1*f->digit);
+                yb1=(y64*f->bar41)>>41;
+                yb2=y64-(yb1*f->digit); 
+                zb1=f->red16[xb1+yb1];
+                zb2=f->red16[xb2+yb2];
+                *(cp16++) = zb1*f->digit+zb2;
+            }
+            a16+=ast;
+            b16+=bst;
+            c16+=cst;
+        }
+        return;
+      case 12:
+        a16 = (uint16_t *) a;
+        b16 = (uint16_t *) b;
+        c16 = (uint16_t *) c;
+        ast=astride/2;
+        bst=bstride/2;
+        cst=cstride/2;
+        for(r=0;r<nor;r++)
+        {
+            ap16=a16;
+            bp16=b16;
+            cp16=c16;
+            for(col=0;col<ds->noc;col++)
+            {
+                x64=*(ap16++);
+                y64=*(bp16++);
+                xb1=(x64*f->bar41)>>41;
+                xb2=x64-(xb1*f->digit);
+                yb1=(y64*f->bar41)>>41;
+                yb2=y64-(yb1*f->digit); 
+                zb1=f->sqid16[f->spac16[xb1]+f->spac16[yb1]];
+                zb2=f->sqid16[f->spac16[xb2]+f->spac16[yb2]];
+                *(cp16++) = zb1*f->digit+zb2;
+            }
+            a16+=ast;
+            b16+=bst;
+            c16+=cst;
+        }
+        return;
+
+// 32-bit cases
+
+      case 7:
+        a32 = (uint32_t *) a;
+        b32 = (uint32_t *) b;
+        c32 = (uint32_t *) c;
+        ast=astride/4;
+        bst=bstride/4;
+        cst=cstride/4;
+        for(r=0;r<nor;r++)
+        {
+            ap32=a32;
+            bp32=b32;
+            cp32=c32;
+            for(col=0;col<ds->noc;col++)
+            {
+                x64=*(ap32++);
+                y64=*(bp32++);
+                z64=x64+y64;
+/* next line is supposed to compile to cmov */
+                if(z64 >= f->charc) z64-=f->charc;
+                *(cp32++) = z64;
+            }
+            a32+=ast;
+            b32+=bst;
+            c32+=cst;
+        }
+        return;
+      case 8:
+        a32 = (uint32_t *) a;
+        b32 = (uint32_t *) b;
+        c32 = (uint32_t *) c;
+        ast=astride/4;
+        bst=bstride/4;
+        cst=cstride/4;
+        for(r=0;r<nor;r++)
+        {
+            ap32=a32;
+            bp32=b32;
+            cp32=c32;
+            for(col=0;col<ds->noc;col++)
+                *(cp32++)=qadd(f,*(ap32++),*(bp32++));
+            a32+=ast;
+            b32+=bst;
+            c32+=cst;
+        }
+        return;
+      case 11:
+        a32 = (uint32_t *) a;
+        b32 = (uint32_t *) b;
+        c32 = (uint32_t *) c;
+        ast=astride/4;
+        bst=bstride/4;
+        cst=cstride/4;
+        for(r=0;r<nor;r++)
+        {
+            ap32=a32;
+            bp32=b32;
+            cp32=c32;
+            for(col=0;col<ds->noc;col++)
+            {
+                x64=*(ap32++);
+                y64=*(bp32++);
+                xb1=(x64*f->bar41)>>41;
+                xb2=x64-(xb1*f->digit);
+                yb1=(y64*f->bar41)>>41;
+                yb2=y64-(yb1*f->digit); 
+                zb1=f->sqid16[f->spac16[xb1]+f->spac16[yb1]];
+                zb2=f->sqid16[f->spac16[xb2]+f->spac16[yb2]];
+                *(cp32++) = zb1*f->digit+zb2;
+            }
+            a32+=ast;
+            b32+=bst;
+            c32+=cst;
+        }
+        return;
+      case 13:
+        a32 = (uint32_t *) a;
+        b32 = (uint32_t *) b;
+        c32 = (uint32_t *) c;
+        ast=astride/4;
+        bst=bstride/4;
+        cst=cstride/4;
+        for(r=0;r<nor;r++)
+        {
+            ap32=a32;
+            bp32=b32;
+            cp32=c32;
+            for(col=0;col<ds->noc;col++)
+            {
+                x64=*(ap32++);
+                y64=*(bp32++);
+                xb1=(x64*f->bar41)>>41;
+                xb2=x64-(xb1*f->digit);
+                yb1=(y64*f->bar41)>>41;
+                yb2=y64-(yb1*f->digit); 
+                zb1=f->red16[xb1+yb1];
+                zb2=f->red16[xb2+yb2];
+                *(cp32++) = zb1*f->digit+zb2;
+            }
+            a32+=ast;
+            b32+=bst;
+            c32+=cst;
+        }
+        return;
+      case 14:
+        a32 = (uint32_t *) a;
+        b32 = (uint32_t *) b;
+        c32 = (uint32_t *) c;
+        ast=astride/4;
+        bst=bstride/4;
+        cst=cstride/4;
+        for(r=0;r<nor;r++)
+        {
+            ap32=a32;
+            bp32=b32;
+            cp32=c32;
+            for(col=0;col<ds->noc;col++)
+            {
+                x64=*(ap32++);
+                y64=*(bp32++);
+                xb2=(x64*f->bar41)>>41;
+                xb3=x64-(xb2*f->digit);
+                xb1=(xb2*f->bar41)>>41;
+                xb2=xb2-(xb1*f->digit);
+                yb2=(y64*f->bar41)>>41;
+                yb3=y64-(yb2*f->digit);
+                yb1=(yb2*f->bar41)>>41;
+                yb2=yb2-(yb1*f->digit);
+                zb1=f->red16[xb1+yb1];
+                zb2=f->red16[xb2+yb2];
+                zb3=f->red16[xb3+yb3];
+                *(cp32++) = zb1*f->digit2+zb2*f->digit+zb3;
+            }
+            a32+=ast;
+            b32+=bst;
+            c32+=cst;
+        }
+        return;
+
+// 64-bit cases
+
+      case 9:
+        a64 = (uint64_t *) a;
+        b64 = (uint64_t *) b;
+        c64 = (uint64_t *) c;
+        ast=astride/8;
+        bst=bstride/8;
+        cst=cstride/8;
+        for(r=0;r<nor;r++)
+        {
+            ap64=a64;
+            bp64=b64;
+            cp64=c64;
+            for(col=0;col<ds->noc;col++)
+            {
+                x64=*(ap64++);
+                y64=*(bp64++);
+                z64=x64+y64;
+                if( (z64<x64) || (z64>=f->charc) ) z64-=f->charc;
+                *(cp64++) = z64;
+            }
+            a64+=ast;
+            b64+=bst;
+            c64+=cst;
+        }
+        return;
+      case 10:
+        a64 = (uint64_t *) a;
+        b64 = (uint64_t *) b;
+        c64 = (uint64_t *) c;
+        ast=astride/8;
+        bst=bstride/8;
+        cst=cstride/8;
+        for(r=0;r<nor;r++)
+        {
+            ap64=a64;
+            bp64=b64;
+            cp64=c64;
+            for(col=0;col<ds->noc;col++)
+                *(cp64++) = qadd(f,*(ap64++),*(bp64++));
+            a64+=ast;
+            b64+=bst;
+            c64+=cst;
+        }
+        return;
+      default:
+        printf("Internal error in TAdd - type not set\n");
+        exit(41);
+    }
+}
+
 /*   d = d1 + d2    */
 void DAdd(const DSPACE * ds, uint64_t nor, 
                    const Dfmt * d1, const Dfmt * d2, Dfmt * d)
 {
+        TAdd(ds,nor,d1,ds->nob,d2,ds->nob,d,ds->nob);
+}
+
+void TSub(const DSPACE * ds, uint64_t nor, const Dfmt *a, uint64_t astride,
+                  const Dfmt *b, uint64_t bstride, Dfmt *c, uint64_t cstride)
+{
     const FIELD * f;
-    FELT *pfelt, *qfelt, *rfelt;
-    FELT pxf, qxf;
-    uint64_t rw, ops;
-    uint64_t pb1,pb2,pb3,qb1,qb2,qb3,rb1,rb2,rb3;
-    uint64_t *p64, *q64, *r64, x64, y64, z64;
-    uint32_t *p32, *q32, *r32, x32, y32, z32, t32;
-    uint16_t *p16, *q16, *r16;
-    uint8_t *p8, *q8, *r8;
-    uint8_t * f8;
-    uint8_t * add8;
-    uint16_t * sqid16;
-    uint16_t * spac16;
-    uint16_t * red16;
-    int addtyp;
+    int addtyp,ast,bst,cst;
+    uint64_t *a64, *b64, *c64, *ap64, *bp64, *cp64;
+    uint32_t *a32, *b32, *c32, *ap32, *bp32, *cp32;
+    uint16_t *a16, *b16, *c16, *ap16, *bp16, *cp16;
+    const uint8_t *a8,*b8,*ap8,*bp8;
+    uint8_t *c8,*cp8;
+    uint64_t x64,y64,z64;
+    uint32_t x32;
+    uint64_t xb1,xb2,xb3,yb1,yb2,yb3,zb1,zb2,zb3;
+    uint64_t r,col,rw;
 
     f=ds->f;
     if(ds->ground==0)
-    {
-        addtyp=(ds->f)->addtyp;;
-    }
-         else     
-    {
-        addtyp=(ds->f)->paddtyp;
-    }
-
+        addtyp=f->addtyp;
+    else     
+        addtyp=f->paddtyp;
     switch ( addtyp )
     {
+
+// Characteristic 2
+
       case 1:
-        if(f->mact[0]>='j')
+        a8=a;
+        b8=b;
+        c8=c;
+        if( (f->mact[0]=='j')||(f->mact[0]>='l') )
         {
-            pcjxor(d,d1,d2,nor*ds->nob);  // AVX2
+            for(r=0;r<nor;r++)
+            {
+                pc1xorj(c8,a8,b8,ds->nob);  // AVX2
+                a8+=astride;
+                b8+=bstride;
+                c8+=cstride;
+            }
             return;
         }
-        pcaxor(d,d1,d2,nor*ds->nob);    // SSE2
+        for(r=0;r<nor;r++)
+        {
+            pc1xora(c8,a8,b8,ds->nob);  // SSE
+            a8+=astride;
+            b8+=bstride;
+            c8+=cstride;
+        }
         return;
+
+// 8-bit cases
+
       case 2:
-        f8=(uint8_t *)f;
-        add8=f8+f->Tadd8;
-        pcbif(d,d1,d2,nor*ds->nob,add8);
+        a8=a;
+        b8=b;
+        c8=c;
+        for(r=0;r<nor;r++)
+        {
+            pcbif(c8,a8,b8,ds->nob,f->sub8);
+            a8+=astride;
+            b8+=bstride;
+            c8+=cstride;
+        }
         return;
       case 3:
-        f8=(uint8_t *)f;
-        red16=(uint16_t *)(f8+f->Tred16);
-        p8 = (uint8_t *) d1;
-        q8 = (uint8_t *) d2;
-        r8 = (uint8_t *) d;
-        y64 = nor*ds->nob;
+        a8=a;
+        b8=b;
+        c8=c;
+        y64 = ds->nob;
         x64 = y64>>2;    // words
         y64 = y64&3;     // remaining bytes
-        for(rw=0;rw<x64;rw++)
+        for(r=0;r<nor;r++)
         {
-            x32=*p8;
-            *r8    =red16[x32 + (*q8)];
-            y32=*(p8+1);
-            *(r8+1)=red16[y32 + (*(q8+1))];
-            z32=*(p8+2);
-            *(r8+2)=red16[z32 + (*(q8+2))];
-            t32=*(p8+3);
-            *(r8+3)=red16[t32 + (*(q8+3))];
-            p8+=4;
-            q8+=4;
-            r8+=4;
-        }
-        for(rw=0;rw<y64;rw++)
-        {
-            x32=*(p8++);
-            y32=*(q8++);
-            *(r8++) = red16[x32+y32];
+            ap8=a8;
+            bp8=b8;
+            cp8=c8;
+            for(rw=0;rw<x64;rw++)
+            {
+                x32=*ap8;
+                *cp8    =f->red16[f->p32 + x32 - (*bp8)];
+                x32=*(ap8+1);
+                *(cp8+1)=f->red16[f->p32 + x32 - (*(bp8+1))];
+                x32=*(ap8+2);
+                *(cp8+2)=f->red16[f->p32 + x32 - (*(bp8+2))];
+                x32=*(ap8+3);
+                *(cp8+3)=f->red16[f->p32 + x32 - (*(bp8+3))];
+                ap8+=4;
+                bp8+=4;
+                cp8+=4;
+            }
+            for(rw=0;rw<y64;rw++)
+            {
+                x32=*(ap8++);
+                *(cp8++) = f->red16[f->p32 + x32 - *(bp8++)];
+            }
+            a8+=astride;
+            b8+=bstride;
+            c8+=cstride;
         }
         return;
+
+// 16-bit cases
+
       case 4:
-        f8=(uint8_t *)f;
-        red16=(uint16_t *)(f8+f->Tred16);
-        p16 = (uint16_t *) d1;
-        q16 = (uint16_t *) d2;
-        r16 = (uint16_t *) d;
-        ops=nor*ds->noc;
-        for(rw=0;rw<ops;rw++)
+        a16 = (uint16_t *) a;
+        b16 = (uint16_t *) b;
+        c16 = (uint16_t *) c;
+        ast=astride/2;
+        bst=bstride/2;
+        cst=cstride/2;
+        for(r=0;r<nor;r++)
         {
-            x64=*(p16++);
-            y64=*(q16++);
-            x64+=y64;
-            *(r16++) = red16[x64];
+            ap16=a16;
+            bp16=b16;
+            cp16=c16;
+            for(col=0;col<ds->noc;col++)
+            {
+                x64=*(ap16++)+f->p32;
+                y64=*(bp16++);
+                z64=x64-y64;
+                *(cp16++) = f->red16[z64];
+            }
+            a16+=ast;
+            b16+=bst;
+            c16+=cst;
+
         }
         return;
       case 5:
-        f8=(uint8_t *)f;
-        sqid16=(uint16_t *)(f8+f->Tsqid16);
-        spac16=(uint16_t *)(f8+f->Tspac16);
-        p16 = (uint16_t *) d1;
-        q16 = (uint16_t *) d2;
-        r16 = (uint16_t *) d;
-        ops=nor*ds->noc;
-        for(rw=0;rw<ops;rw++)
-            *(r16++)=sqid16[spac16[*(p16++)]+spac16[*(q16++)]];
+        a16 = (uint16_t *) a;
+        b16 = (uint16_t *) b;
+        c16 = (uint16_t *) c;
+        ast=astride/2;
+        bst=bstride/2;
+        cst=cstride/2;
+        for(r=0;r<nor;r++)
+        {
+            ap16=a16;
+            bp16=b16;
+            cp16=c16;
+            for(col=0;col<ds->noc;col++)
+                *(cp16++)=f->sqid16[f->spaczero+
+                f->spac16[*(ap16++)]-f->spac16[*(bp16++)]];
+            a16+=ast;
+            b16+=bst;
+            c16+=cst;
+        }
         return;
       case 6:
-        f8=(uint8_t *)f;
-        red16=(uint16_t *)(f8+f->Tred16);
-        p16 = (uint16_t *) d1;
-        q16 = (uint16_t *) d2;
-        r16 = (uint16_t *) d;
-        ops=nor*ds->noc;
-        for(rw=0;rw<ops;rw++)
+        a16 = (uint16_t *) a;
+        b16 = (uint16_t *) b;
+        c16 = (uint16_t *) c;
+        ast=astride/2;
+        bst=bstride/2;
+        cst=cstride/2;
+        for(r=0;r<nor;r++)
         {
-            pxf=*(p16++);
-            qxf=*(q16++);
-            pb1=(pxf*f->bar41)>>41;
-            pb2=pxf-(pb1*f->sqpower);
-            qb1=(qxf*f->bar41)>>41;
-            qb2=qxf-(qb1*f->sqpower); 
-            rb1=red16[pb1+qb1];
-            rb2=red16[pb2+qb2];
-            *(r16++) = rb1*f->sqpower+rb2;
-        }
-        return;
-      case 7:
-        p32 = (uint32_t *) d1;
-        q32 = (uint32_t *) d2;
-        r32 = (uint32_t *) d;
-        ops=nor*ds->noc;
-        for(rw=0;rw<ops;rw++)
-        {
-            x64=*(p32++);
-            y64=*(q32++);
-            x64+=y64;
-/* next line compiles with cmov gcc -O2 or -O3 */
-            if(x64 >= f->charc) x64-=f->charc;
-            *(r32++) = x64;
-        }
-        return;
-      case 8:
-        p32 = (uint32_t *) d1;
-        q32 = (uint32_t *) d2;
-        r32 = (uint32_t *) d;
-        ops=nor*ds->noc;
-        for(rw=0;rw<ops;rw++)
-        {
-            pxf=*(p32++);
-            qxf=*(q32++);
-            pxf=qadd(ds->f,pxf,qxf);
-            *(r32++) = pxf;
-        }
-        return;
-      case 9:
-        p64 = (uint64_t *) d1;
-        q64 = (uint64_t *) d2;
-        r64 = (uint64_t *) d;
-        ops=nor*ds->noc;
-        for(rw=0;rw<ops;rw++)
-        {
-            x64=*(p64++);
-            y64=*(q64++);
-            z64=x64+y64;
-            if( (z64<x64) || (z64>=f->charc) ) z64-=f->charc;
-            *(r64++) = z64;
-        }
-        return;
-      case 10:
-        pfelt = (FELT *) d1;
-        qfelt = (FELT *) d2;
-        rfelt = (FELT *) d;
-        ops=nor*ds->noc;
-        for(rw=0;rw<ops;rw++)
-        {
-            *rfelt=qadd(ds->f,*(pfelt++),*(qfelt++));
-            rfelt++;
-        }
-        return;
-      case 11:
-        f8=(uint8_t *)f;
-        sqid16=(uint16_t *)(f8+f->Tsqid16);
-        spac16=(uint16_t *)(f8+f->Tspac16);
-        p32 = (uint32_t *) d1;
-        q32 = (uint32_t *) d2;
-        r32 = (uint32_t *) d;
-        ops=nor*ds->noc;
-        for(rw=0;rw<ops;rw++)
-        {
-            pxf=*(p32++);
-            qxf=*(q32++);
-            pb1=(pxf*f->bar41)>>41;
-            pb2=pxf-(pb1*f->sqpower);
-            qb1=(qxf*f->bar41)>>41;
-            qb2=qxf-(qb1*f->sqpower); 
-            rb1=sqid16[spac16[pb1]+spac16[qb1]];
-            rb2=sqid16[spac16[pb2]+spac16[qb2]];
-            *(r32++) = rb1*f->sqpower+rb2;
+            ap16=a16;
+            bp16=b16;
+            cp16=c16;
+            for(col=0;col<ds->noc;col++)
+            {
+                x64=*(ap16++);
+                y64=*(bp16++);
+                xb1=(x64*f->bar41)>>41;
+                xb2=x64-(xb1*f->digit);
+                yb1=(y64*f->bar41)>>41;
+                yb2=y64-(yb1*f->digit); 
+                zb1=f->red16[f->p32+xb1-yb1];
+                zb2=f->red16[f->p32+xb2-yb2];
+                *(cp16++) = zb1*f->digit+zb2;
+            }
+            a16+=ast;
+            b16+=bst;
+            c16+=cst;
         }
         return;
       case 12:
-        f8=(uint8_t *)f;
-        sqid16=(uint16_t *)(f8+f->Tsqid16);
-        spac16=(uint16_t *)(f8+f->Tspac16);
-        p16 = (uint16_t *) d1;
-        q16 = (uint16_t *) d2;
-        r16 = (uint16_t *) d;
-        ops=nor*ds->noc;
-        for(rw=0;rw<ops;rw++)
+        a16 = (uint16_t *) a;
+        b16 = (uint16_t *) b;
+        c16 = (uint16_t *) c;
+        ast=astride/2;
+        bst=bstride/2;
+        cst=cstride/2;
+        for(r=0;r<nor;r++)
         {
-            pxf=*(p16++);
-            qxf=*(q16++);
-            pb1=(pxf*f->bar41)>>41;
-            pb2=pxf-(pb1*f->sqpower);
-            qb1=(qxf*f->bar41)>>41;
-            qb2=qxf-(qb1*f->sqpower); 
-            rb1=sqid16[spac16[pb1]+spac16[qb1]];
-            rb2=sqid16[spac16[pb2]+spac16[qb2]];
-            *(r16++)=rb1*f->sqpower+rb2;
+            ap16=a16;
+            bp16=b16;
+            cp16=c16;
+            for(col=0;col<ds->noc;col++)
+            {
+                x64=*(ap16++);
+                y64=*(bp16++);
+                xb1=(x64*f->bar41)>>41;
+                xb2=x64-(xb1*f->digit);
+                yb1=(y64*f->bar41)>>41;
+                yb2=y64-(yb1*f->digit); 
+                zb1=f->sqid16[f->spaczero+f->spac16[xb1]-f->spac16[yb1]];
+                zb2=f->sqid16[f->spaczero+f->spac16[xb2]-f->spac16[yb2]];
+                *(cp16++) = zb1*f->digit+zb2;
+            }
+            a16+=ast;
+            b16+=bst;
+            c16+=cst;
+        }
+        return;
+
+// 32-bit cases
+
+      case 7:
+        a32 = (uint32_t *) a;
+        b32 = (uint32_t *) b;
+        c32 = (uint32_t *) c;
+        ast=astride/4;
+        bst=bstride/4;
+        cst=cstride/4;
+        for(r=0;r<nor;r++)
+        {
+            ap32=a32;
+            bp32=b32;
+            cp32=c32;
+            for(col=0;col<ds->noc;col++)
+            {
+                x64=*(ap32++)+f->p32;
+                y64=*(bp32++);
+                z64=x64-y64;
+/* next line is supposed to compile to cmov */
+                if(z64 >= f->charc) z64-=f->charc;
+                *(cp32++) = z64;
+            }
+            a32+=ast;
+            b32+=bst;
+            c32+=cst;
+        }
+        return;
+      case 8:
+        a32 = (uint32_t *) a;
+        b32 = (uint32_t *) b;
+        c32 = (uint32_t *) c;
+        ast=astride/4;
+        bst=bstride/4;
+        cst=cstride/4;
+        for(r=0;r<nor;r++)
+        {
+            ap32=a32;
+            bp32=b32;
+            cp32=c32;
+            for(col=0;col<ds->noc;col++)
+                *(cp32++)=qsub(f,*(ap32++),*(bp32++));
+            a32+=ast;
+            b32+=bst;
+            c32+=cst;
+        }
+        return;
+      case 11:;
+        a32 = (uint32_t *) a;
+        b32 = (uint32_t *) b;
+        c32 = (uint32_t *) c;
+        ast=astride/4;
+        bst=bstride/4;
+        cst=cstride/4;
+        for(r=0;r<nor;r++)
+        {
+            ap32=a32;
+            bp32=b32;
+            cp32=c32;
+            for(col=0;col<ds->noc;col++)
+            {
+                x64=*(ap32++);
+                y64=*(bp32++);
+                xb1=(x64*f->bar41)>>41;
+                xb2=x64-(xb1*f->digit);
+                yb1=(y64*f->bar41)>>41;
+                yb2=y64-(yb1*f->digit); 
+                zb1=f->sqid16[f->spaczero+f->spac16[xb1]-f->spac16[yb1]];
+                zb2=f->sqid16[f->spaczero+f->spac16[xb2]-f->spac16[yb2]];
+                *(cp32++) = zb1*f->digit+zb2;
+            }
+            a32+=ast;
+            b32+=bst;
+            c32+=cst;
         }
         return;
       case 13:
-        f8=(uint8_t *)f;
-        red16=(uint16_t *)(f8+f->Tred16);
-        p32 = (uint32_t *) d1;
-        q32 = (uint32_t *) d2;
-        r32 = (uint32_t *) d;
-        ops=nor*ds->noc;
-        for(rw=0;rw<ops;rw++)
+        a32 = (uint32_t *) a;
+        b32 = (uint32_t *) b;
+        c32 = (uint32_t *) c;
+        ast=astride/4;
+        bst=bstride/4;
+        cst=cstride/4;
+        for(r=0;r<nor;r++)
         {
-            pxf=*(p32++);
-            qxf=*(q32++);
-            pb1=(pxf*f->bar41)>>41;
-            pb2=pxf-(pb1*f->sqpower);
-            qb1=(qxf*f->bar41)>>41;
-            qb2=qxf-(qb1*f->sqpower); 
-            rb1=red16[pb1+qb1];
-            rb2=red16[pb2+qb2];
-            *(r32++) = rb1*f->sqpower+rb2;
+            ap32=a32;
+            bp32=b32;
+            cp32=c32;
+            for(col=0;col<ds->noc;col++)
+            {
+                x64=*(ap32++);
+                y64=*(bp32++);
+                xb1=(x64*f->bar41)>>41;
+                xb2=x64-(xb1*f->digit);
+                yb1=(y64*f->bar41)>>41;
+                yb2=y64-(yb1*f->digit); 
+                zb1=f->red16[f->p32+xb1-yb1];
+                zb2=f->red16[f->p32+xb2-yb2];
+                *(cp32++) = zb1*f->digit+zb2;
+            }
+            a32+=ast;
+            b32+=bst;
+            c32+=cst;
         }
         return;
       case 14:
-        f8=(uint8_t *)f;
-        red16=(uint16_t *)(f8+f->Tred16);
-        p32 = (uint32_t *) d1;
-        q32 = (uint32_t *) d2;
-        r32 = (uint32_t *) d;
-        ops=nor*ds->noc;
-        for(rw=0;rw<ops;rw++)
+        a32 = (uint32_t *) a;
+        b32 = (uint32_t *) b;
+        c32 = (uint32_t *) c;
+        ast=astride/4;
+        bst=bstride/4;
+        cst=cstride/4;
+        for(r=0;r<nor;r++)
         {
-            pxf=*(p32++);
-            qxf=*(q32++);
-            pb2=(pxf*f->bar41)>>41;
-            pb3=pxf-(pb2*f->sqpower);
-            pb1=(pb2*f->bar41)>>41;
-            pb2=pb2-(pb1*f->sqpower);
-            qb2=(qxf*f->bar41)>>41;
-            qb3=qxf-(qb2*f->sqpower); 
-            qb1=(qb2*f->bar41)>>41;
-            qb2=qb2-(qb1*f->sqpower);
-            rb1=red16[pb1+qb1];
-            rb2=red16[pb2+qb2];
-            rb3=red16[pb3+qb3];
-            *(r32++) = rb1*f->sqpower2+rb2*f->sqpower+rb3;
+            ap32=a32;
+            bp32=b32;
+            cp32=c32;
+            for(col=0;col<ds->noc;col++)
+            {
+                x64=*(ap32++);
+                y64=*(bp32++);
+                xb2=(x64*f->bar41)>>41;
+                xb3=x64-(xb2*f->digit);
+                xb1=(xb2*f->bar41)>>41;
+                xb2=xb2-(xb1*f->digit);
+                yb2=(y64*f->bar41)>>41;
+                yb3=y64-(yb2*f->digit);
+                yb1=(yb2*f->bar41)>>41;
+                yb2=yb2-(yb1*f->digit);
+                zb1=f->red16[f->p32+xb1-yb1];
+                zb2=f->red16[f->p32+xb2-yb2];
+                zb3=f->red16[f->p32+xb3-yb3];
+                *(cp32++) = zb1*f->digit2+zb2*f->digit+zb3;
+            }
+            a32+=ast;
+            b32+=bst;
+            c32+=cst;
+        }
+        return;
+
+// 64-bit cases
+
+      case 9:
+        a64 = (uint64_t *) a;
+        b64 = (uint64_t *) b;
+        c64 = (uint64_t *) c;
+        ast=astride/8;
+        bst=bstride/8;
+        cst=cstride/8;
+        for(r=0;r<nor;r++)
+        {
+            ap64=a64;
+            bp64=b64;
+            cp64=c64;
+            for(col=0;col<ds->noc;col++)
+            {
+                x64=*(ap64++);
+                y64=*(bp64++);
+                z64=x64-y64;
+                if(z64>x64) z64+=f->charc;
+                *(cp64++) = z64;
+            }
+            a64+=ast;
+            b64+=bst;
+            c64+=cst;
+        }
+        return;
+      case 10:
+        a64 = (uint64_t *) a;
+        b64 = (uint64_t *) b;
+        c64 = (uint64_t *) c;
+        ast=astride/8;
+        bst=bstride/8;
+        cst=cstride/8;
+        for(r=0;r<nor;r++)
+        {
+            ap64=a64;
+            bp64=b64;
+            cp64=c64;
+            for(col=0;col<ds->noc;col++)
+                *(cp64++) = qsub(f,*(ap64++),*(bp64++));
+            a64+=ast;
+            b64+=bst;
+            c64+=cst;
         }
         return;
       default:
-        printf("Internal error in DAdd - type not set\n");
+        printf("Internal error in TSub - type not set\n");
         exit(41);
     }
 }
@@ -2891,260 +3324,7 @@ void DAdd(const DSPACE * ds, uint64_t nor,
 void DSub(const DSPACE * ds, uint64_t nor, 
                    const Dfmt * d1, const Dfmt * d2, Dfmt * d)
 {
-    const FIELD * f;
-    int addtyp;
-    FELT *pfelt, *qfelt, *rfelt;
-    FELT pxf, qxf;
-    uint64_t rw, ops;
-    uint64_t pb1,pb2,pb3,qb1,qb2,qb3,rb1,rb2,rb3;
-    uint64_t *p64, *q64, *r64, x64, y64, z64;
-    uint32_t *p32, *q32, *r32, x32, y32, z32, t32;
-    uint16_t *p16, *q16, *r16;
-    uint8_t *p8, *q8, *r8;
-    uint8_t * f8;
-    uint8_t * sub8;
-    uint16_t * spac16;
-    uint16_t * sqid16;
-    uint16_t * red16;
-    f=ds->f;
-    if(ds->ground==0) addtyp=f->addtyp;
-          else        addtyp=f->paddtyp;
-    switch ( addtyp )
-    {
-      case 1:
-        if(f->mact[0]>='j')
-        {
-            pcjxor(d,d1,d2,nor*ds->nob);  // AVX2
-            return;
-        }
-        pcaxor(d,d1,d2,nor*ds->nob);      // SSE2
-        return;
-      case 2:
-        f8=(uint8_t *)f;
-        sub8=f8+f->Tsub8;
-        pcbif(d,d1,d2,nor*ds->nob,sub8);
-        return;
-      case 3:
-        f8=(uint8_t *)f;
-        red16=(uint16_t *)(f8+f->Tred16);
-        p8 = (uint8_t *) d1;
-        q8 = (uint8_t *) d2;
-        r8 = (uint8_t *) d;
-        y64 = nor*ds->nob;
-        x64 = y64>>2;    // words
-        y64 = y64&3;     // remaining bytes
-        for(rw=0;rw<x64;rw++)
-        {
-            x32=*p8;
-            *r8    =red16[f->p32 + x32 - (*q8)];
-            y32=*(p8+1);
-            *(r8+1)=red16[f->p32 + y32 - (*(q8+1))];
-            z32=*(p8+2);
-            *(r8+2)=red16[f->p32 + z32 - (*(q8+2))];
-            t32=*(p8+3);
-            *(r8+3)=red16[f->p32 + t32 - (*(q8+3))];
-            p8+=4;
-            q8+=4;
-            r8+=4;
-        }
-        for(rw=0;rw<y64;rw++)
-        {
-            x32=*(p8++);
-            y32=*(q8++);
-            *(r8++) = red16[f->p32+x32-y32];
-        }
-        return;
-      case 4:
-        f8=(uint8_t *)f;
-        red16=(uint16_t *)(f8+f->Tred16);
-        p16 = (uint16_t *) d1;
-        q16 = (uint16_t *) d2;
-        r16 = (uint16_t *) d;
-        ops=nor*ds->noc;
-        for(rw=0;rw<ops;rw++)
-        {
-            x64=*(p16++)+f->p32;
-            y64=*(q16++);
-            x64-=y64;
-            *(r16++) = red16[x64];
-        }
-        return;
-      case 5:
-        f8=(uint8_t *)f;
-        sqid16=(uint16_t *)(f8+f->Tsqid16);
-        spac16=(uint16_t *)(f8+f->Tspac16);
-        p16 = (uint16_t *) d1;
-        q16 = (uint16_t *) d2;
-        r16 = (uint16_t *) d;
-        ops=nor*ds->noc;
-        for(rw=0;rw<ops;rw++)
-            *(r16++)=sqid16[f->spaczero+spac16[*(p16++)]
-                      -spac16[*(q16++)]];
-        return;
-      case 6:
-        f8=(uint8_t *)f;
-        red16=(uint16_t *)(f8+f->Tred16);
-        p16 = (uint16_t *) d1;
-        q16 = (uint16_t *) d2;
-        r16 = (uint16_t *) d;
-        ops=nor*ds->noc;
-        for(rw=0;rw<ops;rw++)
-        {
-            pxf=*(p16++);
-            qxf=*(q16++);
-            pb1=(pxf*f->bar41)>>41;
-            pb2=pxf-(pb1*f->sqpower);
-            qb1=(qxf*f->bar41)>>41;
-            qb2=qxf-(qb1*f->sqpower); 
-            rb1=red16[f->p32+pb1-qb1];
-            rb2=red16[f->p32+pb2-qb2];
-            *(r16++) = rb1*f->sqpower+rb2;
-        }
-        return;
-      case 7:
-        p32 = (uint32_t *) d1;
-        q32 = (uint32_t *) d2;
-        r32 = (uint32_t *) d;
-        ops=nor*ds->noc;
-        for(rw=0;rw<ops;rw++)
-        {
-            x64=*(p32++)+f->p32;
-            y64=*(q32++);
-            x64-=y64;
-/* next line compiles with cmov gcc -O2 or -O3 */
-            if(x64 >= f->charc) x64-=f->charc;
-            *(r32++) = x64;
-        }
-        return;
-      case 8:
-        p32 = (uint32_t *) d1;
-        q32 = (uint32_t *) d2;
-        r32 = (uint32_t *) d;
-        ops=nor*ds->noc;
-        for(rw=0;rw<ops;rw++)
-        {
-            pxf=*(p32++);
-            qxf=*(q32++);
-            pxf=qsub(ds->f,pxf,qxf);
-            *(r32++) = pxf;
-        }
-        return;
-      case 9:
-        p64 = (uint64_t *) d1;
-        q64 = (uint64_t *) d2;
-        r64 = (uint64_t *) d;
-        ops=nor*ds->noc;
-        for(rw=0;rw<ops;rw++)
-        {
-            x64=*(p64++);
-            y64=*(q64++);
-            z64=x64-y64;
-            if(y64>x64) z64+=f->charc;
-            *(r64++) =z64;
-        }
-        return;
-      case 10:
-        pfelt = (FELT *) d1;
-        qfelt = (FELT *) d2;
-        rfelt = (FELT *) d;
-        ops=nor*ds->noc;
-        for(rw=0;rw<ops;rw++)
-        {
-            *rfelt=qsub(ds->f,*(pfelt++),*(qfelt++));
-            rfelt++;
-        }
-        return;
-      case 11:
-        f8=(uint8_t *)f;
-        sqid16=(uint16_t *)(f8+f->Tsqid16);
-        spac16=(uint16_t *)(f8+f->Tspac16);
-        p32 = (uint32_t *) d1;
-        q32 = (uint32_t *) d2;
-        r32 = (uint32_t *) d;
-        ops=nor*ds->noc;
-        for(rw=0;rw<ops;rw++)
-        {
-            pxf=*(p32++);
-            qxf=*(q32++);
-            pb1=(pxf*f->bar41)>>41;
-            pb2=pxf-(pb1*f->sqpower);
-            qb1=(qxf*f->bar41)>>41;
-            qb2=qxf-(qb1*f->sqpower); 
-            rb1=sqid16[f->spaczero+spac16[pb1]-spac16[qb1]];
-            rb2=sqid16[f->spaczero+spac16[pb2]-spac16[qb2]];
-            *(r32++) = rb1*f->sqpower+rb2;
-        }
-        return;
-      case 12:
-        f8=(uint8_t *)f;
-        sqid16=(uint16_t *)(f8+f->Tsqid16);
-        spac16=(uint16_t *)(f8+f->Tspac16);
-        p16 = (uint16_t *) d1;
-        q16 = (uint16_t *) d2;
-        r16 = (uint16_t *) d;
-        ops=nor*ds->noc;
-        for(rw=0;rw<ops;rw++)
-        {
-            pxf=*(p16++);
-            qxf=*(q16++);
-            pb1=(pxf*f->bar41)>>41;
-            pb2=pxf-(pb1*f->sqpower);
-            qb1=(qxf*f->bar41)>>41;
-            qb2=qxf-(qb1*f->sqpower); 
-            rb1=sqid16[f->spaczero+spac16[pb1]-spac16[qb1]];
-            rb2=sqid16[f->spaczero+spac16[pb2]-spac16[qb2]];
-            *(r16++)=rb1*f->sqpower+rb2;
-        }
-        return;
-      case 13:
-        f8=(uint8_t *)f;
-        red16=(uint16_t *)(f8+f->Tred16);
-        p32 = (uint32_t *) d1;
-        q32 = (uint32_t *) d2;
-        r32 = (uint32_t *) d;
-        ops=nor*ds->noc;
-        for(rw=0;rw<ops;rw++)
-        {
-            pxf=*(p32++);
-            qxf=*(q32++);
-            pb1=(pxf*f->bar41)>>41;
-            pb2=pxf-(pb1*f->sqpower);
-            qb1=(qxf*f->bar41)>>41;
-            qb2=qxf-(qb1*f->sqpower); 
-            rb1=red16[f->p32+pb1-qb1];
-            rb2=red16[f->p32+pb2-qb2];
-            *(r32++) = rb1*f->sqpower+rb2;
-        }
-        return;
-      case 14:
-        f8=(uint8_t *)f;
-        red16=(uint16_t *)(f8+f->Tred16);
-        p32 = (uint32_t *) d1;
-        q32 = (uint32_t *) d2;
-        r32 = (uint32_t *) d;
-        ops=nor*ds->noc;
-        for(rw=0;rw<ops;rw++)
-        {
-            pxf=*(p32++);
-            qxf=*(q32++);
-            pb2=(pxf*f->bar41)>>41;
-            pb3=pxf-(pb2*f->sqpower);
-            pb1=(pb2*f->bar41)>>41;
-            pb2=pb2-(pb1*f->sqpower);
-            qb2=(qxf*f->bar41)>>41;
-            qb3=qxf-(qb2*f->sqpower); 
-            qb1=(qb2*f->bar41)>>41;
-            qb2=qb2-(qb1*f->sqpower);
-            rb1=red16[f->p32+pb1-qb1];
-            rb2=red16[f->p32+pb2-qb2];
-            rb3=red16[f->p32+pb3-qb3];
-            *(r32++) = rb1*f->sqpower2+rb2*f->sqpower+rb3;
-        }
-        return;
-      default:
-        printf("Internal error in DSub - type not set\n");
-        exit(48);
-    }
+        TSub(ds,nor,d1,ds->nob,d2,ds->nob,d,ds->nob);
 }
 
 /*d2 += scalar*d1 */
@@ -3153,21 +3333,13 @@ void DSMad(const DSPACE * ds, FELT scalar, uint64_t nor, const Dfmt * d1, Dfmt *
     const FIELD * f;
     unsigned int i;
     int madtyp;
-    uint8_t  *pmul8,*p8,*q8;
+    const uint8_t *pmul8;
+    uint8_t  *p8,*q8;
     uint16_t *p16,*q16;
     uint32_t *p32,*q32;
     uint64_t *p64,*q64;
-    uint32_t x32,y32,a32;
-    uint64_t x64,a64,b64;
-    uint8_t x8;
-    uint8_t * f8;
-    uint8_t * mul8;
-    uint8_t * add8;
-    uint16_t * log16;
-    uint16_t * alog16;
-    uint16_t * red16;
-    uint16_t * zech16;
-    uint16_t * rdlg16;
+    uint32_t x32,y32,a32,z32;
+    uint64_t x64,a64,b64;;
     f=ds->f;
     if(ds->ground==0) madtyp=f->madtyp;
            else       madtyp=f->pmadtyp;
@@ -3180,9 +3352,7 @@ void DSMad(const DSPACE * ds, FELT scalar, uint64_t nor, const Dfmt * d1, Dfmt *
             DAdd(ds,nor,d1,d2,d2);
             return;
         }
-        f8=(uint8_t *)f;
-        mul8=f8+f->Tmul8;
-        pmul8=mul8+scalar*256;
+        pmul8=&(f->mul8[scalar*256]);
         p8=(uint8_t *)d1;
         q8=(uint8_t *)d2;
         pcxunf(q8,p8,ds->nob*nor,pmul8);
@@ -3199,34 +3369,15 @@ void DSMad(const DSPACE * ds, FELT scalar, uint64_t nor, const Dfmt * d1, Dfmt *
             DSub(ds,nor,d2,d1,d2);
             return;
         }
-        f8=(uint8_t *)f;
-        mul8=f8+f->Tmul8;
-        add8=f8+f->Tadd8;
-        pmul8=mul8+scalar*256;
+        pmul8=&(f->mul8[scalar*256]);
         p8=(uint8_t *)d1;
         q8=(uint8_t *)d2;
-        pcbunf(q8,p8,ds->nob*nor,pmul8,add8);
+        pcbunf(q8,p8,ds->nob*nor,pmul8,f->add8);
         return;
       case 3:
-        if(scalar==0) return;
-        if(scalar==1)
-        {
-            DAdd(ds,nor,d1,d2,d2);
-            return;
-        }
-        f8=(uint8_t *)f;
-        mul8=f8+f->Tmul8;
-        f8=(uint8_t *)f;
-        red16=(uint16_t *)(f8+f->Tred16);
-        pmul8=mul8+scalar*256;
-        p8=(uint8_t *)d1;
-        q8=(uint8_t *)d2;
-        for(i=0;i<ds->nob*nor;i++)
-        {
-            x8=red16[(*q8)+pmul8[*(p8++)]];
-            *(q8++)=x8;
-        }
-        return;
+printf("Currently not used\n");
+exit(1);
+// used to be 1-byte primes, but pcbunf (case 2) is faster
       case 4:
         p16=(uint16_t *)d1;
         q16=(uint16_t *)d2;
@@ -3243,14 +3394,10 @@ void DSMad(const DSPACE * ds, FELT scalar, uint64_t nor, const Dfmt * d1, Dfmt *
         return;
       case 5:
         if(scalar==0) return;
-        f8=(uint8_t *)f;
-        zech16=(uint16_t *)(f8+f->Tzech16);
-        rdlg16=(uint16_t *)(f8+f->Trdlg16);
-        log16=(uint16_t *)(f8+f->Tlog16);
-        alog16=(uint16_t *)(f8+f->Talog16);
         p16 = (uint16_t *) d1;
         q16 = (uint16_t *) d2;
-        a32=log16[scalar];
+        a32=f->log16[scalar];
+        z32=2*f->qminus1;
         for(i=0;i<ds->noc*nor;i++)
         {
             x32=*(p16++);
@@ -3259,31 +3406,27 @@ void DSMad(const DSPACE * ds, FELT scalar, uint64_t nor, const Dfmt * d1, Dfmt *
               continue;
             }
             y32=*q16;
-            x32=rdlg16[log16[x32]+a32];
+            x32=f->log16[x32]+a32;
             if(y32==0)
             {
-                *(q16++)=alog16[x32];
+                *(q16++)=f->alog16[x32];
                 continue;
             }
-            y32=log16[y32];
-            y32=zech16[rdlg16[f->qminus1+y32-x32]];
+            y32=f->log16[y32];
+            y32=f->zech16[z32+y32-x32];
             if(y32==f->qminus1)
             {
                 *(q16++)=0;
                 continue;
             }
-            *(q16++)=alog16[rdlg16[x32+y32]];
+            *(q16++)=f->alog16[x32+y32];
         }
         return;
       case 6:
-        f8=(uint8_t *)f;
-        rdlg16=(uint16_t *)(f8+f->Trdlg16);
-        log16=(uint16_t *)(f8+f->Tlog16);
-        alog16=(uint16_t *)(f8+f->Talog16);
         if(scalar==0) return;
         p16 = (uint16_t *) d1;
         q16 = (uint16_t *) d2;
-        a32=log16[scalar];
+        a32=f->log16[scalar];
         for(i=0;i<ds->noc*nor;i++)
         {
             x32=*(p16++);
@@ -3291,20 +3434,16 @@ void DSMad(const DSPACE * ds, FELT scalar, uint64_t nor, const Dfmt * d1, Dfmt *
               q16++;
               continue;
             }
-            x32=rdlg16[log16[x32]+a32];
+            x32=f->log16[x32]+a32;
             y32=*q16;
-            *(q16++)=y32^alog16[x32];
+            *(q16++)=y32^f->alog16[x32];
         }
         return;
       case 7:
         if(scalar==0) return;
-        f8=(uint8_t *)f;
-        zech16=(uint16_t *)(f8+f->Tzech16);
-        log16=(uint16_t *)(f8+f->Tlog16);
-        alog16=(uint16_t *)(f8+f->Talog16);
         p16 = (uint16_t *) d1;
         q16 = (uint16_t *) d2;
-        a32=log16[scalar];
+        a32=f->log16[scalar];
         for(i=0;i<ds->noc*nor;i++)
         {
             x32=*(p16++);
@@ -3313,30 +3452,32 @@ void DSMad(const DSPACE * ds, FELT scalar, uint64_t nor, const Dfmt * d1, Dfmt *
               q16++;
               continue;
             }
-            x32=(log16[x32]+a32)%f->qminus1;
+            x32=f->log16[x32]+a32;
+            if(x32>=f->qminus1) x32-=f->qminus1;
             if(y32==0)
             {
-                *(q16++)=alog16[x32];
+                *(q16++)=f->alog16[x32];
                 continue;
             }
-            y32=log16[y32];
-            y32=zech16[(f->qminus1+y32-x32)%f->qminus1];
+            y32=f->log16[y32];
+            y32=f->qminus1+y32-x32;
+            if(y32>=f->qminus1) y32-=f->qminus1;
+            y32=f->zech16[y32];
             if(y32==f->qminus1)
             {
                 *(q16++)=0;
                 continue;
             }
-            *(q16++)=alog16[(x32+y32)%f->qminus1];
+            x32=x32+y32;
+            if(x32>=f->qminus1)x32-=f->qminus1;
+            *(q16++)=f->alog16[x32];
         }
         return;
       case 8:
-        if(scalar==0) return;
-        f8=(uint8_t *)f;
-        log16=(uint16_t *)(f8+f->Tlog16);
-        alog16=(uint16_t *)(f8+f->Talog16);
+        if(scalar==0) return;;
         p16 = (uint16_t *) d1;
         q16 = (uint16_t *) d2;
-        a32=log16[scalar];
+        a32=f->log16[scalar];
         for(i=0;i<ds->noc*nor;i++)
         {
             x32=*(p16++);
@@ -3344,9 +3485,10 @@ void DSMad(const DSPACE * ds, FELT scalar, uint64_t nor, const Dfmt * d1, Dfmt *
               q16++;
               continue;
             }
-            x32=(log16[x32]+a32)%f->qminus1;
+            x32=f->log16[x32]+a32;
+            if(x32>=f->qminus1) x32-=f->qminus1;
             y32=*q16;
-            *(q16++)=y32^alog16[x32];
+            *(q16++)=y32^f->alog16[x32];
         }
         return;
       case 9:
@@ -3390,11 +3532,20 @@ void DSMad(const DSPACE * ds, FELT scalar, uint64_t nor, const Dfmt * d1, Dfmt *
         p64=(uint64_t *)d1;
         q64=(uint64_t *)d2;
         a64=scalar;
+        if(f->pow!=1)
+        {
+            for(i=0;i<ds->noc*nor;i++)
+            {
+                x64=qmul(f,*(p64++),a64);
+                x64=qadd(f,x64,*q64);
+                *(q64++)=x64;
+            }
+            return;
+        }
         for(i=0;i<ds->noc*nor;i++)
         {
-            x64=qmul(f,*(p64++),a64);
-            x64=qadd(f,x64,*q64);
-            *(q64++)=x64;
+            *q64=pcpmad(f->charc,*(p64++),a64,*q64);
+            q64++;
         }
         return;
       case 13:
@@ -3425,17 +3576,13 @@ void DSMul(const DSPACE * ds, FELT a, uint64_t nor, Dfmt * d)
     const FIELD * f;
     unsigned int i;
     int multyp;
-    uint8_t  *pmul8,*p8;
+    const uint8_t *pmul8;
+    uint8_t  *p8;
     uint16_t *p16;
     uint32_t *p32;
     uint64_t *p64;
     uint32_t a32,x32;
-    uint64_t a64,x64;
-    uint8_t * f8;
-    uint8_t * mul8;
-    uint16_t * log16;
-    uint16_t * alog16;
-    uint16_t * rdlg16;
+    uint64_t a64,x64,y64;
     f=ds->f;
     if(ds->ground==0) multyp=f->multyp;
             else      multyp=f->pmultyp;
@@ -3448,19 +3595,20 @@ void DSMul(const DSPACE * ds, FELT a, uint64_t nor, Dfmt * d)
             return;
         }
         if(a==1) return;
-        f8=(uint8_t *)f;
-        mul8=f8+f->Tmul8;
-        pmul8=mul8+a*256;
+        pmul8=&(f->mul8[a*256]);
         p8=(uint8_t *)d;
         pcunf(p8,ds->nob*nor,pmul8);
         return;
       case 2:
         p16=(uint16_t *)d;
-        a32=a;
+        a64=a;
         for(i=0;i<ds->noc*nor;i++)
         {
-            x32=((*p16)*a32)%f->p32;
-            *(p16++)=x32;
+            x64=*p16;
+            x64=x64*a64;
+            y64=(x64*f->bar48)>>48;
+            x64-=(y64*f->charc);
+            *(p16++)=x64&65535;
         }
         return;
       case 3:
@@ -3469,12 +3617,8 @@ void DSMul(const DSPACE * ds, FELT a, uint64_t nor, Dfmt * d)
             memset(d,0,ds->nob*nor);
             return;
         }
-        f8=(uint8_t *)f;
-        rdlg16=(uint16_t *)(f8+f->Trdlg16);
-        log16=(uint16_t *)(f8+f->Tlog16);
-        alog16=(uint16_t *)(f8+f->Talog16);
         p16 = (uint16_t *) d;
-        a32=log16[a];
+        a32=f->log16[a];
         for(i=0;i<ds->noc*nor;i++)
         {
             x32=*p16;
@@ -3482,8 +3626,8 @@ void DSMul(const DSPACE * ds, FELT a, uint64_t nor, Dfmt * d)
               p16++;
               continue;
             }
-            x32=rdlg16[log16[x32]+a32];
-            *(p16++)=alog16[x32];
+            x32=f->log16[x32]+a32;
+            *(p16++)=f->alog16[x32];
         }
         return;
       case 4:
@@ -3492,11 +3636,8 @@ void DSMul(const DSPACE * ds, FELT a, uint64_t nor, Dfmt * d)
             memset(d,0,ds->nob*nor);
             return;
         }
-        f8=(uint8_t *)f;
-        log16=(uint16_t *)(f8+f->Tlog16);
-        alog16=(uint16_t *)(f8+f->Talog16);
         p16 = (uint16_t *) d;
-        a32=log16[a];
+        a32=f->log16[a];
         for(i=0;i<ds->noc*nor;i++)
         {
             x32=*p16;
@@ -3504,8 +3645,9 @@ void DSMul(const DSPACE * ds, FELT a, uint64_t nor, Dfmt * d)
               p16++;
               continue;
             }
-            x32=(log16[x32]+a32)%f->qminus1;
-            *(p16++)=alog16[x32];
+            x32=f->log16[x32]+a32;
+            if(x32>=f->qminus1) x32-=f->qminus1;
+            *(p16++)=f->alog16[x32];
         }
         return;
       case 5:
@@ -3535,34 +3677,60 @@ void DSMul(const DSPACE * ds, FELT a, uint64_t nor, Dfmt * d)
             *(p64++)=x64;
         }
         return;
+      case 8:
+        p32=(uint32_t *)d;
+        x64=a<<f->clpm[2];
+        for(i=0;i<ds->noc*nor;i++)
+        {
+            x32=0;
+            pccl32(f->clpm,x64,1,p32,&x32);
+            *p32=x32;
+            p32++;
+        }
+        return;
+      case 9:
+        p64=(uint64_t *)d;
+        x64=a<<f->clpm[2];
+        for(i=0;i<ds->noc*nor;i++)
+        {
+            y64=0;
+            pccl64(f->clpm,x64,1,p64,&y64);
+            *p64=y64;
+            p64++;
+        }
+        return;
       default:
         printf("Internal error in DSMul - type not set\n");
         exit(47);
     }
 }
 
+
 void PExtract(const DSPACE * ds, const Dfmt *mq, Dfmt *mp,
               uint64_t nor, uint64_t psiz)
 {
     DSPACE dsp;
-    Dfmt *ptp;
-    const Dfmt *ptq;
+    Dfmt *ptp,*ptp1;
+    const Dfmt *ptq, *ptq1;;
     const FIELD * f;
     FELT fq,fp,fr;
-    FELT fel[8];
-    int col,ent;
-    uint64_t i,j,k,dfmt;
+    uint64_t i,j,k,col,dfmt,colstodo,mply;
+    uint64_t eltsleft;
+    uint64_t *lfz;
     uint16_t * lfx;
     uint16_t wk1;
     uint32_t * lfy1,*lfy2;
     uint32_t wk2;
-    uint64_t * lfz;
+    int bymem,byused,bytesout;
+    uint16_t iv[EXTIVCNT];
+    uint16_t *ivp,*ivp1;
+    uint64_t leftiniv,dofromiv,ptodo,pthistime;
 
     f=ds->f;
     PSSet(f,ds->noc,&dsp);
     switch (f->pextype)
     {
-      case 1:
+      case 1:   // GF4
         lfx=(uint16_t *) ((uint8_t *)f + f->Tlfx);
         for(i=0;i<nor;i++)
         {
@@ -3584,7 +3752,7 @@ void PExtract(const DSPACE * ds, const Dfmt *mq, Dfmt *mp,
             }
         }
         return;
-      case 2:
+      case 2:    // GF8
         lfy1=(uint32_t *) ((uint8_t *)f + f->Tlfx);
         for(i=0;i<nor;i++)
         {
@@ -3612,7 +3780,7 @@ void PExtract(const DSPACE * ds, const Dfmt *mq, Dfmt *mp,
             *(ptp+2*psiz)=(wk2>>16)&255;
         }
         return;
-      case 3:
+      case 3:    // GF9
         lfy1=(uint32_t *) ((uint8_t *)f + f->Tlfx);
         lfy2=lfy1+81;
         for(i=0;i<nor;i++)
@@ -3650,7 +3818,7 @@ void PExtract(const DSPACE * ds, const Dfmt *mq, Dfmt *mp,
             }
         }
         return;
-      case 4:
+      case 4:    // GF16
         lfy1=(uint32_t *) ((uint8_t *)f + f->Tlfx);
         for(i=0;i<nor;i++)
         {
@@ -3681,7 +3849,7 @@ void PExtract(const DSPACE * ds, const Dfmt *mq, Dfmt *mp,
         }
         return;
 
-      case 5:
+      case 5:    // default - ulitmately to be obsolete
         for(i=0;i<nor;i++)
         {
             ptq=mq+i*ds->nob;
@@ -3702,7 +3870,10 @@ void PExtract(const DSPACE * ds, const Dfmt *mq, Dfmt *mp,
             }
         }
         return;
-      case 6:
+      case 6:    // primes 17-2^64, simple Barrett
+        pcbarrett(&(f->barpar[0]), mq, mp, nor*ds->noc, psiz);
+        return;
+      case 7:    // all one-byte fields, including char 2.  lookup.
         lfz=(uint64_t *) ((uint8_t *)f + f->Tlfx);
         for(i=0;i<nor;i++)
         {
@@ -3711,61 +3882,222 @@ void PExtract(const DSPACE * ds, const Dfmt *mq, Dfmt *mp,
             col=0;
             while(col<ds->noc)
             {
-                for(j=0;j<f->pentbyte;j++)
+                dfmt=0;
+                mply=1;
+                colstodo=f->pentbyte;
+                if(col+f->pentbyte>ds->noc) colstodo=ds->noc-col;
+                for(j=0;j<colstodo;j++)
                 {
-                    if((col+j)<ds->noc) fel[j]=DUnpak(ds,col+j,ptq);
-                        else            fel[j]=0;
+                    dfmt+=mply*lfz[*(ptq++)];
+                    mply=mply*f->charc;
                 }
-                ent=0;
-                while(ent<f->pow)
+                ptp1=ptp;
+                for(j=0;j<f->pow;j++)
                 {
+                    *ptp1 = dfmt&255;
+                    dfmt=dfmt>>8;
+                    ptp1+=psiz;
+                }
+                ptp++;
+                col+=f->pentbyte;
+            }
+        }
+        return;
+      case 8:    // char 2 of two or more bytes
+        lfz=(uint64_t *) ((uint8_t *)f + f->Tlfx);
+        bymem=8;
+        if(f->paktyp==1) bymem=4;
+        if(f->paktyp==2) bymem=2;
+        byused=(f->pow+7)>>3;
+        for(i=0;i<nor;i++)
+        {
+            ptq=mq+i*ds->nob;
+            ptp=mp+i*dsp.nob;
+            col=0;
+            while(col<ds->noc)
+            {
+                ptp1=ptp;
+                for(k=0;k<byused;k++)
+                {
+                    ptq1=ptq+k;
                     dfmt=0;
-                    if(f->charc==2)
+                    mply=1;
+                    colstodo=f->pentbyte;
+                    if(col+f->pentbyte>ds->noc) colstodo=ds->noc-col;
+                    for(j=0;j<colstodo;j++)
                     {
-                        for(j=1;j<=f->pentbyte;j++)
-                        {
-                            k=f->pentbyte-j;
-                            fq=fel[k]&255;
-                            fel[k]=fel[k]>>8;
-                            dfmt=(dfmt<<1)+lfz[fq];
-                        }
+                        dfmt+=mply*lfz[*(ptq1)];
+                        ptq1+=bymem;
+                        mply=mply*f->charc;
                     }
-                    else
+                    bytesout=f->pow-8*k;
+                    if(bytesout>8) bytesout=8;
+                    for(j=0;j<bytesout;j++)
                     {
-                        if( (ent+f->spaclev)<f->pow)
-                        {
-                            for(j=1;j<=f->pentbyte;j++)
-                            {
-                                k=f->pentbyte-j;
-                                fr=fel[k]/f->bong;
-                                fq=fel[k]-fr*f->bong;
-                                fel[k]=fr;
-                                dfmt=dfmt*f->charc+lfz[fq];
-                            }
-                        }
-                        else
-                        {
-                            for(j=1;j<=f->pentbyte;j++)
-                            {
-                                k=f->pentbyte-j;
-                                dfmt=dfmt*f->charc+lfz[fel[k]];
-                            }
-                        }
-                    }
-                    for(j=0;j<f->spaclev;j++)
-                    {
-                        if(ent>=f->pow) break;
-                        *(ptp+(ent++)*psiz)=dfmt&255;
+                        *ptp1 = dfmt&255;
                         dfmt=dfmt>>8;
+                        ptp1+=psiz;
                     }
                 }
                 col+=f->pentbyte;
                 ptp++;
+                ptq+=bymem*f->pentbyte;
             }
         }
         return;
+      case 9:
+        lfz=(uint64_t *) ((uint8_t *)f + f->Tlfx);
+        eltsleft=nor*ds->noc;
+        ptq=mq;     // Dfmt* so 8 bits
+        ptp=mp;
+        while(eltsleft!=0)
+        {
+            colstodo=eltsleft;
+            if(colstodo>f->atatime) colstodo=f->atatime;
+//  {{ 1 {{   aim now is to do colstodo inputs
+            pcbarrett(&(f->barpar[0]), ptq, (Dfmt *)&(iv[0]),
+                      colstodo, 2*colstodo);
+//  -- 2 --   so now we want to convert colstodo inputs from iv to ptp
+            ivp=(uint16_t *) &(iv[0]);
+
+            leftiniv=colstodo;
+            while(leftiniv>0)
+            {
+                dofromiv=leftiniv;
+                if(dofromiv>f->pentbyte) dofromiv=f->pentbyte;
+//  {{ 3 {{  aim now is to do dofromiv inputs from ivp to ptp1
+//           but now dofrominv is at most f->pentbyte
+                ptodo=f->pow;
+                ivp1=ivp;
+                ptp1=ptp;
+                while(ptodo>0)
+                {
+                    pthistime=ptodo;
+                    if(pthistime>f->spaclev) pthistime=f->spaclev;
+//  {{ 4 {{  aim now do pthistime outputs from ivp1 to ptp1
+                    dfmt=0;
+                    mply=1;
+                    for(j=0;j<dofromiv;j++)
+                    {
+                        dfmt+=mply*lfz[*ivp1];
+                        mply=mply*f->charc;
+                        ivp1++;
+                    }
+                    for(j=0;j<pthistime;j++)
+                    {
+                        *ptp1 = dfmt&255;
+                        dfmt>>=8;
+                        ptp1+=psiz;
+                    }
+//  }} 4 }}
+                    ptodo-=pthistime;
+                    ivp1+=colstodo-dofromiv;
+                }
+//  }} 3 }}  done them
+                leftiniv-=dofromiv;
+                ivp+=dofromiv;
+                ptp++;
+            }
+//  }} 1 }}   done them.
+            ptq+=colstodo*f->bytesper;
+            eltsleft-=colstodo;
+        }
+        return;
+      case 10:    // two byte fields needing no Barrett
+        lfz=(uint64_t *) ((uint8_t *)f + f->Tlfx);
+        for(i=0;i<nor;i++)
+        {
+            ivp=(uint16_t *) (mq+i*ds->nob);
+            ptp=mp+i*dsp.nob;
+            col=0;
+            while(col<ds->noc)
+            {
+                dfmt=0;
+                mply=1;
+                colstodo=f->pentbyte;
+                if(col+f->pentbyte>ds->noc) colstodo=ds->noc-col;
+                for(j=0;j<colstodo;j++)
+                {
+                    dfmt+=mply*lfz[*(ivp++)];
+                    mply=mply*f->charc;
+                }
+                ptp1=ptp;
+                for(j=0;j<f->pow;j++)
+                {
+                    *ptp1 = dfmt&255;
+                    dfmt=dfmt>>8;
+                    ptp1+=psiz;
+                }
+                ptp++;
+                col+=f->pentbyte;
+            }
+        }
+        return;
+      default:
+        printf("Unknown pextype %d\n",(int)f->pextype);
+        exit(82); 
     }
 }
+#ifdef NEVER
+            ptp1=ptp;
+            fullblocks=colstodo/f->pentbyte;
+            for(i=0;i<fullblocks;i++)
+            {
+                dfmt=0;
+                mply=1;
+                for(j=0;j<f->pentbyte;j++)
+                {
+                    dfmt+=mply*lfz[*(iv[i*f->pentbyte+j*colstodo])];
+                    mply=mply*f->charc;
+                }
+                for(j=0;j<f->spaclev;j++)
+                {
+                    *ptp1 = dfmt&255;
+                    dfmt=dfmt>>8;
+                    ptp1+=psiz;
+                }
+            }
+            lastblock=colstodo-f->pentbyte*fullblocks;
+            if(lastblock!=0)
+            {
+                dfmt=0;
+                mply=1;
+                for(j=0;j<lastblock;j++)
+                {
+                    dfmt+=mply*lfz[*(iv[i*f->pentbyte+j*colstodo])];
+                    mply=mply*f->charc;
+                }
+                for(j=0;j<f->pow;j++)
+                {
+                    *ptp1 = dfmt&255;
+                    dfmt=dfmt>>8;
+                    ptp1+=psiz;
+                }
+            }
+
+        }
+        return;
+////
+    dfmt=0;
+    mply=1;
+    intsin=colsleft;
+    if(intsin>f->pentbyte) intsin=f->pentbyte;
+    for(j=0;j<intsin;j++)
+    {
+        dfmt+=mply*lfz[*(pti++)];
+        mply=mply*f->charc;
+    }
+////
+    bytesout=f->pow;
+    if(bytesout>f->spaclev) bytesout=f->spaclev;
+    for(j=0;j<bytesout;j++)
+    {
+        *ptp1 = dfmt&255;
+        dfmt>>=8;
+        ptp1+=psiz;
+    }
+////
+#endif
 
 void PAssemble(const DSPACE * ds, const Dfmt *mp, Dfmt *mq,
               uint64_t nor, uint64_t psiz)
@@ -3778,7 +4110,7 @@ void PAssemble(const DSPACE * ds, const Dfmt *mp, Dfmt *mq,
     uint16_t wk1;
     uint32_t *lfb1, *lfb2;
     uint32_t wk2;
-    uint64_t wk2a,wk2b;
+    uint64_t wk2a,wk2b,wk2aa,pmult;
     uint64_t i,j,k,m;
     uint64_t lefttodo;
     uint64_t * lfx;
@@ -3795,7 +4127,17 @@ void PAssemble(const DSPACE * ds, const Dfmt *mp, Dfmt *mq,
         lfb2=lfb1+243;
     }
     if( f->pastype==4 ) lfb1=(uint32_t *) ((uint8_t *)f + f->Tlfa);
-    if( f->pastype==6 ) lfx=(uint64_t *) ((uint8_t *)f + f->Tlfx);
+    if(f->pastype==6) lfx=(uint64_t *) ((uint8_t *)f + f->Tlfx);
+    pmult=256;
+    if(f->pastype==7)
+    {
+        lfx=(uint64_t *) ((uint8_t *)f + f->Tlfx);
+        if(f->charc==3) pmult=243;
+        if(f->charc==5) pmult=125;
+        if(f->charc==7) pmult=49;
+        if(f->charc==11) pmult=121;
+        if(f->charc==13) pmult=169;
+    }
     for(i=0;i<nor;i++)
     {
         lefttodo=ds->noc;
@@ -3861,6 +4203,8 @@ void PAssemble(const DSPACE * ds, const Dfmt *mp, Dfmt *mq,
                 lefttodo-=8;
             }
             break;
+          case 5:
+            break;
           case 6:
             while(lefttodo>=f->pentbyte)
             {
@@ -3880,7 +4224,36 @@ void PAssemble(const DSPACE * ds, const Dfmt *mp, Dfmt *mq,
                 lefttodo-=f->pentbyte;
             }
             break;
+          case 7:
+            while(lefttodo>=f->pentbyte)
+            {
+                wk2a=0;
+                wk2aa=0;
+                wk2b=1;
+                for(j=0;j<f->pentbyte;j++)
+                {
+                    wk2a+=wk2b*lfx[*(ptp+j*psiz)];
+                    wk2b*=f->charc;
+                }
+                wk2b=1;
+                for(j=f->pentbyte;j<f->pow;j++)
+                {
+                    wk2aa+=wk2b*lfx[*(ptp+j*psiz)];
+                    wk2b*=f->charc;
+                }
+                for(j=0;j<f->pentbyte;j++)
+                {
+                    *((uint16_t *)ptq)=(wk2aa&255)*pmult+(wk2a&255);
+                    ptq+=2;
+                    wk2a=wk2a>>8;
+                    wk2aa=wk2aa>>8;
+                }
+                ptp++;
+                lefttodo-=f->pentbyte;
+            }
+            break;
           default:
+printf("pastype is %d\n",f->pastype);
             break;
         }
 //  Do the remaining columns by steam

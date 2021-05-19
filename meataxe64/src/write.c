@@ -70,7 +70,7 @@ int open_and_write_binary_header(FILE **outp, const header *h, const char *m, co
   assert(NULL != h);
   assert(NULL != m);
   errno = 0;
-  out = fopen64(m, "w+b");
+  out = fopen(m, "w+b");
   if (NULL == out) {
     if ( 0 != errno) {
       perror(name);

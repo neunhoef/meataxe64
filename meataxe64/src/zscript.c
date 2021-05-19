@@ -70,42 +70,50 @@ static const char *get_multiplier(unsigned int argc, const char gen, const char 
     if (argc >= 1) {
       break;
     }
+    /* Fallthrough */
   case 'B':
     multiplier = args[1];
     if (argc >= 2) {
       break;
     }
+    /* Fallthrough */
   case 'C':
     multiplier = args[2];
     if (argc >= 3) {
       break;
     }
+    /* Fallthrough */
   case 'D':
     multiplier = args[3];
     if (argc >= 4) {
       break;
     }
+    /* Fallthrough */
   case 'E':
     multiplier = args[4];
     if (argc >= 5) {
       break;
     }
+    /* Fallthrough */
   case 'F':
     multiplier = args[5];
     if (argc >= 6) {
       break;
     }
+    /* Fallthrough */
   case 'G':
     multiplier = args[6];
     if (argc >= 7) {
       break;
     }
+    /* Fallthrough */
   case 'H':
     multiplier = args[7];
     if (argc >= 8) {
       break;
     }
-  default:
+    /* Fallthrough */
+   default:
     fprintf(stderr, "%s: script element '%c' is not a generator, terminating\n", name, gen);
     multiplier =  NULL;
   }

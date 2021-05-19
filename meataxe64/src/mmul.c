@@ -12,12 +12,15 @@
 #include "proggies.h"
 #include "tuning.h"
 
+// #define DEBUG 1
+
 void mmul(const char *m1, int s1, const char *m2, int s2, const char * m3, int s3)
 {
     M3 A,B,C;
     MOJ flow,fmoj,X,Y,Z;
     FIELD * f;
     uint64_t i,j,k;
+    uint64_t caul,base;
     DSPACE da,db,dw;
     int strat,buffering,concur;
     uint64_t D1,D2,siza,sizb,sizc,sizw;
@@ -74,7 +77,7 @@ void mmul(const char *m1, int s1, const char *m2, int s2, const char * m3, int s
     if(THREADS>25) buffering=4;
 
 /* First consider Strategy 3 - just blast them all off  */
-    if( ((siza+sizb+sizc)/1000000)<MEGABYTES)
+    if( ((siza+sizb+sizc)/1000000)<f->megabytes)
     {
         D2=D1;
         while(1)
@@ -87,10 +90,11 @@ void mmul(const char *m1, int s1, const char *m2, int s2, const char * m3, int s
         }
         DSSet(f,D2,&dw);
         sizw=dw.nob*D2;
-        if(((A->c*sizc+THREADS*5*sizw)/1000000)<MEGABYTES) strat=3;
+        if(((A->c*sizc+THREADS*5*sizw)/1000000)<f->megabytes) strat=3;
     }
 /* strategy 2 may be correct if A+C smaller than B  */
-    if( (strat==0) && ((siza+sizc)<sizb) && (((siza+sizc)/500000)<MEGABYTES))
+    if( (strat==0) && ((siza+sizc)<sizb) &&
+                (((siza+sizc)/500000)<f->megabytes))
     {
         D2=D1;
         while(1)
@@ -104,7 +108,7 @@ void mmul(const char *m1, int s1, const char *m2, int s2, const char * m3, int s
         strat=2;
     }
 /* Now consider Strategy 1 - read B then through A,C flow-controlled */
-    if( (strat==0) && ((sizb/500000)<MEGABYTES) )
+    if( (strat==0) && ((sizb/500000)<f->megabytes) )
     {
         D2=D1;
         while(1)
@@ -136,15 +140,32 @@ void mmul(const char *m1, int s1, const char *m2, int s2, const char * m3, int s
     B->r=A->c;
     C->r=A->r;
     C->c=B->c;
-
-// printf("Strategy %d chops %lu %lu %lu buf %d\n",
-//                strat,A->c,A->r,C->c,buffering);
-
-    M3EvenChop(A,f->entbyte,f->entbyte);      // Chop as evenly as possible
-    M3EvenChop(B,f->entbyte,f->entbyte);      // Chop B likewise
+// Chop all as evenly as possible
+    caul=f->entbyte*8;
+    if( (f->cauldron!=0) && ((f->pow==1) || (f->linfscheme!=0)) )  //HPMI
+    {
+        caul=f->cauldron;
+        base=C->noc/(B->c * caul);
+        if(base>=2) caul=caul*2;
+        if(base>=6) caul=caul*2;
+        if(base>=16) caul=caul*2;
+    }
+    M3EvenChop(A,8,f->entbyte*8,8,f->entbyte*8); 
+    M3EvenChop(B,f->entbyte*8,caul,f->entbyte*8,f->entbyte*8);
     M3MOJs(A);          // Allocate MOJs for A
     M3MOJs(B);          // ditto for B
-    M3EvenChop(C,f->entbyte,f->entbyte);      // Chop C evenly also
+    M3EvenChop(C,8,caul,8,f->entbyte*8);
+#ifdef DEBUG
+printf("%lu %ld Strategy %d chops %lu %lu %lu buf %d\n",
+              A->fdef, A->nor, strat,A->c,A->r,C->c,buffering);
+printf(" Arow");
+for(i=0;i<A->r;i++) printf(" %ld",A->rnor[i]);
+printf(" Acol");
+for(i=0;i<A->c;i++) printf(" %ld",A->cnoc[i]);
+printf(" Bcol");
+for(i=0;i<B->c;i++) printf(" %ld",B->cnoc[i]);
+printf("\n");
+#endif
     M3MOJArray(C);      // allocate MOJ array but not MOJs
     if(strat==1)
     {

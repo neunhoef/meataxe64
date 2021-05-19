@@ -65,7 +65,7 @@ int main(int argc,  char **argv)
             DCpy(&ds,vpt,1,vw);
             DCpy(&ds,v,1,vpt);
             DCpy(&ds,vw,1,v);
-            if( ((j-1)%2)==1 ) det=FieldNeg(f,det);
+            det=FieldNeg(f,det);
         }
         fel=DUnpak(&ds,i,v);  // make leading term 1
         det=FieldMul(f,det,fel);

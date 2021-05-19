@@ -8,38 +8,198 @@
 #include "field.h"
 #include "hpmi.h"
 #include "pcrit.h"
+#include "tabmake.h"
 
-void DtoA(DSPACE * ds1, uint64_t * ix, const Dfmt * d, Afmt * a,
-            uint64_t nora, uint64_t noca)
+void hpmiset(FIELD * f)
+{
+    uint64_t bias;
+    f->cauldron=0;
+    f->recbox=1024;
+    f->abase=1;       // usually right
+    if(f->mact[1]=='1') f->recbox=3072;
+    if(f->mact[1]=='2') f->recbox=5000;
+    if(f->charc==2)
+    {
+        f->AfmtMagic=1;
+        f->alcovebytes=5;
+        f->BfmtMagic=1;
+        f->cauldron=1024;
+        f->bfmtcauld=128;
+        f->cfmtcauld=128;
+        f->dfmtcauld=128;
+        f->CfmtMagic=1;
+        f->BwaMagic=2;
+        f->GreaseMagic=2;
+        f->SeedMagic=2;
+        f->alcove=32;
+        f->czer=0;
+        f->bzer=0;
+        f->bbrickbytes=4097;
+        f->bwasize=16384;
+    }
+    if(f->charc==3)
+    {
+        f->AfmtMagic=3;
+        f->BfmtMagic=3;
+        f->CfmtMagic=3;
+        f->BwaMagic=3;
+        f->GreaseMagic=3;
+        f->SeedMagic=3;
+        f->cauldron=510;
+        f->bfmtcauld=128;
+        f->cfmtcauld=128;
+        f->dfmtcauld=102;
+        f->alcove=12;
+        f->alcovebytes=4;
+        f->bzer=0xffffffffffffffff;
+        f->czer=0xffffffffffffffff;
+        f->bbrickbytes=1537;
+        f->bwasize=15744;
+        hpmitab3(f);
+    }
+    if( (f->charc>=5)&&(f->charc<=193) )
+    {
+        f->AfmtMagic=2;   // Always Table lookup on byte
+
+// CfmtMagic (2,16-bit) (4,10 bit) (5,8 bit 128) (6 8 bit 126)
+        f->CfmtMagic=2;
+        if( (f->charc>=17) && (f->charc<=61) ) f->CfmtMagic=4; // 10 bits?
+        if( (f->charc>=7) && (f->charc<=13) ) f->CfmtMagic=5;
+        if(f->charc==5) f->CfmtMagic=6;
+        if( (f->mact[0]<'d') && (f->CfmtMagic==4) ) f->CfmtMagic=2;  // no SSE4.1
+
+        f->BfmtMagic=1;   // always just Dfmt
+
+        f->BwaMagic=1;   // 16 bit multiply
+        if((f->CfmtMagic==4) || (f->mact[0] > 'l') ) f->BwaMagic=4; //32 bit mult.
+        f->GreaseMagic=1;  // follow addition chain
+        f->SeedMagic=1;     // one row 16 bit
+        if(f->CfmtMagic==4) f->SeedMagic=4;  // one row 10 bits
+        if(f->CfmtMagic==5) f->SeedMagic=5;  // two rows 8 bits
+        if(f->CfmtMagic==6) f->SeedMagic=6;  // three rows mod 5
+        f->cauldron=64;
+        if(f->CfmtMagic==4) f->cauldron=96;
+        if(f->CfmtMagic==5) f->cauldron=128;
+        if(f->CfmtMagic==6) f->cauldron=126;
+        f->bfmtcauld=f->cauldron;
+        if(f->charc<=13) f->bfmtcauld=f->cauldron/2;  //entbyte=2
+        if(f->charc<=5) f->bfmtcauld=f->cauldron/3;   //entbyte=3
+        f->cfmtcauld=128;
+        f->dfmtcauld=f->bfmtcauld;
+        f->alcove=7;
+        if( (f->charc>=7) && (f->charc<=13) ) f->alcove=14;
+        if (f->charc==5) f->alcove=21;
+        f->alcovebytes=8;
+        bias=7*f->charc;
+        if(f->charc<=7) bias=6*f->charc;
+        if(f->CfmtMagic==2)
+            f->czer=bias+(bias<<16)+(bias<<32)+(bias<<48);
+        if(f->CfmtMagic==4)
+            f->czer=bias+(bias<<10)+(bias<<20)
+                   +(bias<<32)+(bias<<42)+(bias<<52);
+        if(f->CfmtMagic>=5)
+            f->czer=bias+(bias<<8)+(bias<<16)+(bias<<24)
+                   +(bias<<32)+(bias<<40)+(bias<<48)+(bias<<56);
+        f->bzer=0;
+        f->bbrickbytes=1+f->alcove*f->bfmtcauld;
+        f->bwasize=16384;
+        hpmitabas(f);
+    }
+    if(f->ppaktyp==1233)  // ppaktup==0 new stuff excluded for now
+//  because it doesn't work!
+    {
+        f->p90=pcpmad(f->charc,0x400000000000, 0x100000000000, 0);
+        f->AfmtMagic=4;
+        f->BfmtMagic=1;
+        f->GreaseMagic=4;
+        f->bzer=0;
+        f->czer=0;
+        f->alcove=21;
+        f->alcovebytes=169;
+        f->dfmtcauld=584;
+        f->bfmtcauld=584;
+        f->cfmtcauld=1168;
+        f->bbrickbytes=12265;
+        f->bwasize=12264;
+        f->cauldron=73;
+        f->CfmtMagic=7;
+        f->BwaMagic=6;
+        f->SeedMagic=8;
+    }
+    return;
+}
+
+void DtoA(DSPACE * ds, uint64_t * ix, const Dfmt * d, Afmt * a,
+            uint64_t nora, uint64_t stride)
 {
     int i,j,k;
     uint64_t nz1;
     uint8_t orc,byte,byte1;
     const uint8_t *pt1,*pt2;
+    const uint32_t * pt32;
+    uint32_t v32, *qt32;
     int s;
     int bits,nbits;
     int copybytes;
     uint8_t  * Thpa;
     uint16_t * Thpv;
     uint64_t alen;
-    DSPACE ds;
     const FIELD * f;
-
     uint8_t * f8;
-    f=ds1->f;
-    PSSet(f,noca,&ds);
+    f=ds->f;
     f8=(uint8_t *)f;
-    alen=1+nora*f->alcovebytes;
-    copybytes=f->alcovebytes-1;
-    pt1=d;
-    nz1=(noca+f->alcove-1)/f->alcove;
+    nz1=(ds->noc+f->alcove-1)/f->alcove;
+    alen=f->abase+nora*f->alcovebytes;
     for(j=0;j<nz1;j++)
     {
         ix[j]=j*alen;
         a[j*alen]=0;  // skip no rows at the start.
     }
+
+    copybytes=f->alcovebytes-1;
+    pt1=d;
     Thpa=f8+f->Thpa;
-    if( (f->AfmtMagic==1)||(f->AfmtMagic==2) )
+    if(f->AfmtMagic==1)   // characteristic 2
+    {
+        for(i=0;i<nora;i++)  // for each row of the matrix
+        {
+            pt32=(uint32_t *) pt1;
+            for(j=0;j<nz1-1;j++)   // j indexes the alcove - all but last
+            {                      // fastpath
+                v32=*(pt32++);
+                if( (v32==0) && (a[ix[j]]<250) )  // sparsity
+                    a[ix[j]]++;                   // skip one more row
+                else
+                {
+                    qt32=(uint32_t *) &a[ix[j]+1];
+                    *qt32=v32;
+                    ix[j]+=f->alcovebytes;  // keep that block
+                    a[ix[j]]=1;             // advance pointer
+                }
+            }
+// now last value of j - slowpath
+            orc=0;               // OR of the bytes
+            pt2=pt1+copybytes*j;         // point to block of bytes
+            for(k=1;k<=copybytes;k++)    // for each byte of block
+            {
+                if( (copybytes*j+k) > ds->nob) byte=0;
+                              else            byte=*pt2;
+                orc|=byte;      // OR in the byte for sparsity
+                a[ix[j]+k]=byte;  // and move it into Afmt
+                pt2++;
+            }
+// Afmt up to 250 (251-254 spare) 255 is terminator
+            if( (orc==0) && (a[ix[j]]<250) )  // sparsity
+                a[ix[j]]++;                   // skip one more row
+            else
+            {
+                ix[j]+=f->alcovebytes;  // keep that block
+                a[ix[j]]=1;             // advance pointer
+            }
+            pt1+=stride;
+        }
+    }
+    if(f->AfmtMagic==2)  // characteristic 5-193
     {
         for(i=0;i<nora;i++)  // for each row of the matrix
         {
@@ -49,10 +209,10 @@ void DtoA(DSPACE * ds1, uint64_t * ix, const Dfmt * d, Afmt * a,
                 pt2=pt1+copybytes*j;         // point to block of bytes
                 for(k=1;k<=copybytes;k++)    // for each byte of block
                 {
-                    if( (copybytes*j+k) > ds.nob) byte=0;
+                    if( (copybytes*j+k) > ds->nob) byte=0;
                                   else            byte=*pt2;
                     orc|=byte;      // OR in the byte for sparsity
-                    if(f->AfmtMagic==2) byte=Thpa[byte];
+                    byte=Thpa[byte];
                     a[ix[j]+k]=byte;  // and move it into Afmt
                     pt2++;
                 }
@@ -65,13 +225,12 @@ void DtoA(DSPACE * ds1, uint64_t * ix, const Dfmt * d, Afmt * a,
                     a[ix[j]]=1;             // advance pointer
                 }
             }
-            pt1+=ds1->nob;
+            pt1+=stride;
         }
 
     }
     if(f->AfmtMagic==3)
     {
-
         Thpv=(uint16_t *)(f8+f->Thpv);
         bits=0;
         for(i=0;i<nora;i++)  // for each row of matrix A
@@ -85,7 +244,7 @@ void DtoA(DSPACE * ds1, uint64_t * ix, const Dfmt * d, Afmt * a,
                 {
                     if(nbits<8)
                     {
-                        if( s >= ds.nob) byte=0;
+                        if( s >= ds->nob) byte=0;
                         else             byte=pt1[s];
                         bits=bits+(Thpv[byte]<<nbits);
                         nbits+=10;
@@ -106,52 +265,87 @@ void DtoA(DSPACE * ds1, uint64_t * ix, const Dfmt * d, Afmt * a,
                     a[ix[j]]=1;         // advance pointer
                 }
             }
-            pt1+=ds1->nob;
+            pt1+=stride;
         }
-
+    }
+    if(f->AfmtMagic==4)   // Just copy Dfmt in copybytes at a time
+    {
+        for(i=0;i<nora;i++)  // for each row of the matrix
+        {
+            for(j=0;j<nz1;j++)   // j indexes the alcove
+            {
+                orc=0;               // OR of the bytes
+                pt2=pt1+copybytes*j;         // point to block of bytes
+                for(k=1;k<=copybytes;k++)    // for each byte of block
+                {
+                    if( (copybytes*j+k) > ds->nob) byte=0;
+                                   else            byte=*pt2;
+                    orc|=byte;      // OR in the byte for sparsity
+                    a[ix[j]+k]=byte;  // and move it into Afmt
+                    pt2++;
+                }
+// Afmt up to 250 (251-254 spare) 255 is terminator
+                if( (orc==0) && (a[ix[j]]<250) )  // sparsity
+                    a[ix[j]]++;                   // skip one more row
+                else
+                {
+                    ix[j]+=f->alcovebytes;  // keep that block
+                    a[ix[j]]=1;             // advance pointer
+                }
+                pt1+=stride;
+            }
+        }
     }
     for(j=0;j<nz1;j++)
         a[ix[j]]=255;  // Put in the terminators
 }
 
-uint64_t DtoB(DSPACE * ds1, const Dfmt * d, Bfmt * b, 
-              uint64_t nor, uint64_t noc)
+uint64_t DtoB(DSPACE * ds, const Dfmt * d, Bfmt * b, 
+              uint64_t nor, uint64_t stride)
 {
     uint64_t i,k;
     const Dfmt *pt0, *pt1, *ad;
     Dfmt xd;
     Bfmt *pt2;
     Bfmt sp;
-    DSPACE ds;
+    uint64_t sp64,*pt164,*pt264;
     uint64_t * Thpb;
     int ubits,tbits,nbits;
     uint8_t *bu,*bt;
     uint64_t m,mu,mt;
     const FIELD * f;
 
-    f=ds1->f;
+    f=ds->f;
     pt0=d;
-    PSSet(f,noc,&ds);
     if(f->BfmtMagic==1)
     {
-        sp=0;
+        sp64=0;
         for(i=0;i<f->alcove;i++)
         {
             pt1=pt0;
             pt2=b+i*f->bfmtcauld+1;
             if(i<nor)
             {
-                for(k=0;k<ds.nob;k++)
+                pt164=(uint64_t *) pt1;
+                pt264=(uint64_t *) pt2;
+                for(k=0;(k+7)<ds->nob;k+=8)
                 {
-                    sp|=*(pt1);
+                    sp64|=*(pt164);
+                    *(pt264++) = *(pt164++);
+                }
+                pt1=(Bfmt *) pt164;
+                pt2=(Bfmt *) pt264;
+                for(;k<ds->nob;k++)
+                {
+                    sp64|=(uint64_t) (*(pt1));
                     *(pt2++) = *(pt1++);
                 }
-                for(k=ds.nob;k<f->bfmtcauld;k++)   *(pt2++)=0;
+                for(k=ds->nob;k<f->bfmtcauld;k++)   *(pt2++)=0;
             }
             else memset(pt2,0,f->bfmtcauld);
-            pt0+=ds1->nob;
+            pt0+=stride;
         }
-        if(sp==0)
+        if(sp64==0)
         {
             *b=0;
             return 1;
@@ -178,10 +372,10 @@ uint64_t DtoB(DSPACE * ds1, const Dfmt * d, Bfmt * b,
             nbits=0;
             ubits=0;
             tbits=0;
-            ad=d+i*ds1->nob;
+            ad=d+i*stride;
             for(k=0;k<f->dfmtcauld;k++)
             {
-                if(k>=ds.nob) xd=0;
+                if(k>=ds->nob) xd=0;
                 else xd=*(ad+k);
                 m=Thpb[xd];
                 mu=(m>>32)&0x1f;
@@ -242,7 +436,7 @@ int BSeed(const FIELD * f, uint8_t * bwa, Bfmt * b)
             pt3+=f->cauldron*f->parms[5];
         }
     }
-    if(f->SeedMagic==2)    // characteristic 2
+    if(f->SeedMagic==2)    // Characteristic 2
     {
         for(i=0;i<8;i++)
         {
@@ -348,146 +542,137 @@ int BSeed(const FIELD * f, uint8_t * bwa, Bfmt * b)
             }
         }
     }
+// 7 used to be new mod 2 using 51-code - now removed
+    if(f->SeedMagic==8)    // just copy it in
+    {
+        memcpy(bwa,pt1,f->alcove*f->bfmtcauld);
+    }
     return *b;
 }
 
+uint8_t pg2[] = { 163 , 2 , 84, 165 , 1 , 3 , 1 ,
+                  88 , 169, 1 , 3 , 1 , 7 , 1 , 3 , 1 , 255 };
+
+//               0001 3/0011 4/0012 10/0112 11/0120 12/0121 13/0122
+uint8_t pg3[] = { 163,  2   ,  1   ,170,5  ,   3   ,   1   ,   1 ,
+
+// 6/0101 7/0102 8/0110 9/0111 27/1111 28/1112 29/1120 30/1121 31/1122
+   166,4 , 1    ,   3  ,   1  ,187,14  ,    1  ,   3   ,   1   ,   1  ,
+
+// 32/1200 33/1201 34/1202 35/1210 36/1211 37/1212 38/1220 39/1221
+      9   ,   1   ,   1   ,   3   ,   1   ,   1   ,   3   ,   1  ,
+
+// 40/1222 15/1001 16/1002 17/1010 18/1011 19/1012 20/1020 21/1021
+      1   ,175,10 ,   1   ,   3   ,   1   ,   1   ,   3   ,   1  ,   
+
+// 22/1022 23/1100 24/1101 25/1102 26/1110
+      1   ,   9   ,   1   ,   1   ,   3   , 255 };
+
 void BGrease(const FIELD * f, uint8_t * bwa, int sparsity)
 {
-    int i,r;
     if(sparsity==0) return;
-    r=f->cfmtcauld;
+    if((f->GreaseMagic)==4) return;   // no grease - prime to large.
     if((f->GreaseMagic)==1)
     {
-        pcdasc(f->prog,bwa,f->parms);
+        pc5aca(f->prog,bwa,f->parms);
         return;
     }
     if((f->GreaseMagic)==2)
     {
-// this should use addition-chain technology
-        if(f->mact[0]>='j')
+        if(f->mact[0]>='m')
         {
-            for(i=0;i<8;i++)
-            {
-                pcjxor(bwa+ 3*r,bwa+2*r,bwa+1*r,r);
-                pcjxor(bwa+ 5*r,bwa+4*r,bwa+1*r,r);
-                pcjxor(bwa+ 6*r,bwa+4*r,bwa+2*r,r);
-                pcjxor(bwa+ 7*r,bwa+4*r,bwa+3*r,r);
-                pcjxor(bwa+ 9*r,bwa+8*r,bwa+1*r,r);
-                pcjxor(bwa+10*r,bwa+8*r,bwa+2*r,r);
-                pcjxor(bwa+11*r,bwa+8*r,bwa+3*r,r);
-                pcjxor(bwa+12*r,bwa+8*r,bwa+4*r,r);
-                pcjxor(bwa+13*r,bwa+8*r,bwa+5*r,r);
-                pcjxor(bwa+14*r,bwa+8*r,bwa+6*r,r);
-                pcjxor(bwa+15*r,bwa+8*r,bwa+7*r,r);
-                bwa+=16*r;
-            }
+            pc2acm(pg2,bwa,2048);
             return;
         }
-        for(i=0;i<8;i++)
-        {
-            pcaxor(bwa+ 3*r,bwa+2*r,bwa+1*r,r);
-            pcaxor(bwa+ 5*r,bwa+4*r,bwa+1*r,r);
-            pcaxor(bwa+ 6*r,bwa+4*r,bwa+2*r,r);
-            pcaxor(bwa+ 7*r,bwa+4*r,bwa+3*r,r);
-            pcaxor(bwa+ 9*r,bwa+8*r,bwa+1*r,r);
-            pcaxor(bwa+10*r,bwa+8*r,bwa+2*r,r);
-            pcaxor(bwa+11*r,bwa+8*r,bwa+3*r,r);
-            pcaxor(bwa+12*r,bwa+8*r,bwa+4*r,r);
-            pcaxor(bwa+13*r,bwa+8*r,bwa+5*r,r);
-            pcaxor(bwa+14*r,bwa+8*r,bwa+6*r,r);
-            pcaxor(bwa+15*r,bwa+8*r,bwa+7*r,r);
-            bwa+=16*r;
-        }
+        if( (f->mact[0]=='j')||(f->mact[0]>='l') )
+            pc2acj(pg2,bwa,2048);
+        else
+            pc2aca(pg2,bwa,2048);
         return;
     }
     if((f->GreaseMagic)==3)
     {
-        for(i=0;i<3;i++)
+        if(f->mact[0]>='m')
         {
-            pcad3(bwa+ 1*r,bwa+ 2*r,bwa+ 3*r);
-            pcad3(bwa+ 1*r,bwa+ 3*r,bwa+ 4*r);
-            pcad3(bwa+ 1*r,bwa+ 5*r,bwa+ 6*r);
-            pcad3(bwa+ 1*r,bwa+ 6*r,bwa+ 7*r);
-            pcad3(bwa+ 2*r,bwa+ 5*r,bwa+ 8*r);
-            pcad3(bwa+ 1*r,bwa+ 8*r,bwa+ 9*r);
-            pcad3(bwa+ 1*r,bwa+ 9*r,bwa+10*r);
-            pcad3(bwa+ 2*r,bwa+ 8*r,bwa+11*r);
-            pcad3(bwa+ 1*r,bwa+11*r,bwa+12*r);
-            pcad3(bwa+ 1*r,bwa+12*r,bwa+13*r);
-            pcad3(bwa+ 1*r,bwa+14*r,bwa+15*r);
-            pcad3(bwa+ 1*r,bwa+15*r,bwa+16*r);
-            pcad3(bwa+ 2*r,bwa+14*r,bwa+17*r);
-            pcad3(bwa+ 1*r,bwa+17*r,bwa+18*r);
-            pcad3(bwa+ 1*r,bwa+18*r,bwa+19*r);
-            pcad3(bwa+ 2*r,bwa+17*r,bwa+20*r);
-            pcad3(bwa+ 1*r,bwa+20*r,bwa+21*r);
-            pcad3(bwa+ 1*r,bwa+21*r,bwa+22*r);
-            pcad3(bwa+ 5*r,bwa+14*r,bwa+23*r);
-            pcad3(bwa+ 1*r,bwa+23*r,bwa+24*r);
-            pcad3(bwa+ 1*r,bwa+24*r,bwa+25*r);
-            pcad3(bwa+ 2*r,bwa+23*r,bwa+26*r);
-            pcad3(bwa+ 1*r,bwa+26*r,bwa+27*r);
-            pcad3(bwa+ 1*r,bwa+27*r,bwa+28*r);
-            pcad3(bwa+ 2*r,bwa+26*r,bwa+29*r);
-            pcad3(bwa+ 1*r,bwa+29*r,bwa+30*r);
-            pcad3(bwa+ 1*r,bwa+30*r,bwa+31*r);
-            pcad3(bwa+ 5*r,bwa+23*r,bwa+32*r);
-            pcad3(bwa+ 1*r,bwa+32*r,bwa+33*r);
-            pcad3(bwa+ 1*r,bwa+33*r,bwa+34*r);
-            pcad3(bwa+ 2*r,bwa+32*r,bwa+35*r);
-            pcad3(bwa+ 1*r,bwa+35*r,bwa+36*r);
-            pcad3(bwa+ 1*r,bwa+36*r,bwa+37*r);
-            pcad3(bwa+ 2*r,bwa+35*r,bwa+38*r);
-            pcad3(bwa+ 1*r,bwa+38*r,bwa+39*r);
-            pcad3(bwa+ 1*r,bwa+39*r,bwa+40*r);
-            bwa+=41*r;
+            pc3acm(pg3,bwa,5248);
+            return;
         }
+        if( (f->mact[0]=='j')||(f->mact[0]>='l') )
+            pc3acj(pg3,bwa,5248);
+        else
+            pc3aca(pg3,bwa,5248);
         return;
     }
+    printf("GreaseMagic error!\n");
+    exit(91);
 }
 
 void BwaMad(const FIELD *f, uint8_t * bwa, int sparsity, Afmt *af, Cfmt *c)
 {
     if(sparsity==0) return;
+// AS codes 5-193 16-bit multiply
     if(f->BwaMagic==1)
     {
-        if(f->mact[0]>='j')
+        if( (f->mact[0]=='j')||(f->mact[0]>='l') )
         {
-            pcjas(af,bwa,c,f->parms);    // AVX2
+            pc5bmwj(af,bwa,c,f->parms);    // AVX2 16-bit
             return;
         }
-        pcaas(af,bwa,c,f->parms);        // SSE2
+        pc5bmwa(af,bwa,c,f->parms);        // SSE2 16-bit
         return;
     }
-// maybe ought to be different BwaMagic values . . . ?
+// Mod 2 xor
     if(f->BwaMagic==2)
     {
-        if(f->mact[0]>='j')
+        if(f->mact[0]>='m')
         {
-            pcjb2(af,bwa,c);    // AVX2
+            pc2bmm(af,bwa,c);    // AVX512
             return;
         }
-        pcab2(af,bwa,c);        // SSE2
+        if( (f->mact[0]=='j')||(f->mact[0]>='l') )
+        {
+            pc2bmj(af,bwa,c);    // AVX2
+            return;
+        }
+        pc2bma(af,bwa,c);        // SSE2
         return;
     }
+// Mod 3 Logic 6
     if(f->BwaMagic==3)
     {
-        if(f->mact[0]>='j')
+        if(f->mact[0]>='m')
         {
-            pcjb3(af,bwa,c);    // AVX2
+            pc3bmm(af,bwa,c);        // AVX512
             return;
         }
-        pcab3(af,bwa,c);        // SSE2
+        if( (f->mact[0]=='j')||(f->mact[0]>='l') )
+        {
+            pc3bmj(af,bwa,c);    // AVX2
+            return;
+        }
+        pc3bma(af,bwa,c);        // SSE2
         return;
     }
+// AS codes 32-bit multiply
     if(f->BwaMagic==4)
     {
-        if(f->mact[0]>='j')
+        if(f->mact[0]>='m')
         {
-            pcjat(af,bwa,c,f->parms);    // AVX2
+            pc5bmdm(af,bwa,c,f->parms);    // AVX2512 32-bit
             return;
         }
-        pcdas(af,bwa,c,f->parms);        // SSE2
+        if( (f->mact[0]=='j')||(f->mact[0]>='l') )
+        {
+            pc5bmdj(af,bwa,c,f->parms);    // AVX2 32-bit
+            return;
+        }
+        pc5bmdd(af,bwa,c,f->parms);        // SSE2 32-bit
+        return;
+    }
+// 64-bit scalar multiply
+    if(f->BwaMagic==6)
+    {
+        pc6bma(af,bwa,c,f->p90);      // scalar 64-bit
         return;
     }
 }
@@ -522,13 +707,15 @@ void CZer(DSPACE * ds, Cfmt * c, uint64_t nor)
     for(i=0;i<nowords;i++) c64[i]=f->czer;
 }
 
-void CtoD(DSPACE * ds, Cfmt * c, Dfmt * d, uint64_t nor)
+void CtoD(DSPACE * ds, Cfmt * c, Dfmt * d, uint64_t nor, uint64_t stride)
 {
     long zlen,cpylen,z2,z0,bits,ix,i;
     uint8_t * sp;
     uint16_t * sp16;
     uint32_t * sp32;
+    uint64_t * sp64;
     Dfmt * dp;
+    uint64_t * dp64;
     Dfmt dbyte;
     uint64_t bu,bt;
     uint8_t * Thpc;
@@ -537,7 +724,7 @@ void CtoD(DSPACE * ds, Cfmt * c, Dfmt * d, uint64_t nor)
     const FIELD * f;
 
     f=ds->f;
-    nz2=(ds->noc+f->cauldron-1)/f->cauldron;
+    nz2=(ds->noc+f->cauldron-1)/f->cauldron;    // number of cauldrons
     
     bu=0;    // stop compiler
     bits=0;
@@ -545,16 +732,16 @@ void CtoD(DSPACE * ds, Cfmt * c, Dfmt * d, uint64_t nor)
     Thpc=(uint8_t *)f + (f->Thpc);
     for(z2=0;z2<nz2;z2++)
     {
-        zlen=((z2+1)*f->cauldron);
-        zlen-=ds->noc;
-        if(zlen<0) zlen=0;
-        if(zlen>f->cauldron) zlen=f->cauldron;  
-        zlen=zlen*f->pbytesper/f->pentbyte;
+        zlen=((z2+1)*f->cauldron);    // first entry not in this cauldron
+        zlen-=ds->noc;                // entries to ignore this cauldron
+        if(zlen<0) zlen=0;            // now correct
+        if(zlen>f->cauldron) zlen=f->cauldron;    // don't think this happns
+        zlen=zlen*f->pbytesper/f->pentbyte;   // Dfmt bytes to ignore
 
-        cpylen=f->dfmtcauld-zlen;
+        cpylen=f->dfmtcauld-zlen;    // Dfmt bytes wanted
         for(z0=0;z0<nor;z0++)
         {
-            dp=d+z0*ds->nob+z2*f->dfmtcauld;
+            dp=d+z0*stride+z2*f->dfmtcauld;
             sp=c+z0*f->cfmtcauld+z2*nor*f->cfmtcauld;
 
             if((f->CfmtMagic)==1)
@@ -666,6 +853,16 @@ void CtoD(DSPACE * ds, Cfmt * c, Dfmt * d, uint64_t nor)
                     y=(z*f->bar48)>>48;
                     z-=y*f->charc;
                     *(dp++)=x+z*f->charc*f->charc;
+                }
+            }
+            if(f->CfmtMagic==7)
+            {
+                dp64=(uint64_t *)dp;
+                sp64=(uint64_t *)sp;
+                for(i=0;i<cpylen;i+=8)
+                {
+                    *(dp64++)=pcrem(f->charc,*sp64,*(sp64+1));
+                    sp64+=2;
                 }
             }
         }

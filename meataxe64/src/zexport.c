@@ -48,20 +48,9 @@ int main(int argc, char **argv)
   nor = hdr[2];
   noc = hdr[3];
   nob = bits_of(fdef);
-  f = malloc(FIELDLEN);
-  if (f == NULL) {
-    LogString(81, "Can't malloc field structure");
-    exit(8);
-  }
-  FieldSet(fdef, f);
-  DSSet(f, noc, &ds);
-  v = malloc(ds.nob + 7);
   /* set up header structure for m2000 matrix */
   endian_init();
   h = header_create(fdef, nob, 1, noc, nor);
-  len = header_get_len(h);
-  row = my_malloc(len * sizeof(*row));
-  DSSet(f, noc, &ds);
   /* open m2000 output */
   if (0 == open_and_write_binary_header(&outp, h, argv[2], name)) {
     if (NULL != outp) {
@@ -70,6 +59,36 @@ int main(int argc, char **argv)
     }
     return 0;
   }
+  if (3 == hdr[0] && 1 == fdef) {
+    /* This is a map, not a matrix */
+    for (i = 0; i < nor; i++) {
+      /* Get an input value */
+      uint64_t j;
+      ERData(in, 8, (uint8_t *)&j);
+      errno = 0;
+      if (0 == endian_write_word(j, outp)) {
+        if ( 0 != errno) {
+          perror(name);
+        }
+        fprintf(stderr, "%s: cannot write output value %lu in row %u to %s\n", name, j - 1, i, argv[2]);
+        fclose(outp);
+        exit(1);
+      }
+    }
+    fclose(outp);
+    return 0;
+  }
+  f = malloc(FIELDLEN);
+  if (f == NULL) {
+    LogString(81, "Can't malloc field structure");
+    exit(8);
+  }
+  FieldSet(fdef, f);
+  DSSet(f, noc, &ds);
+  v = malloc(ds.nob + 7);
+  len = header_get_len(h);
+  row = my_malloc(len * sizeof(*row));
+  DSSet(f, noc, &ds);
   /* loop over rows of m64 producing rows of m2000 */
   mask = get_mask_and_elts(nob, &elts_per_word);
   NOT_USED(mask);

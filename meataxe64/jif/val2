@@ -1,3 +1,4 @@
+rm -f logfile
 zrd a1 2 5071 5071 19
 zch a1 3
 zas a1 3
