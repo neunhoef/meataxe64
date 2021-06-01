@@ -19,11 +19,5 @@ outfile=$2
 shift 2
 out=`${dir}/../bin/zis ${infile} ${outfile} $*`
 ret=$?
-if [ 0 -eq $ret ]; then
-    # Success, but it might be the whole space
-    echo $out
-    exit 0
-else
-    # Failure
-    exit 1
-fi
+echo $out
+exit $ret

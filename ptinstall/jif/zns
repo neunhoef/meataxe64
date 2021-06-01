@@ -22,4 +22,5 @@ if [ 0 -eq $ret ]; then
     echo ${out} | sed -e "s/Nullity //"
     exit 0
 fi
+echo $out
 exit 1
