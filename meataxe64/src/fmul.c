@@ -25,6 +25,7 @@ void fMultiply(const char * tmp,const char *m1, int s1,
     EPeek(m2,hdr2);
     if( (hdr1[0]==1) && (hdr2[0]==1) )  //flat matrix multiply
     {
+        uint64_t old_siz;
         fdef=hdr1[1];
         f = malloc(FIELDLEN);
         FieldSet(fdef,f);
@@ -70,6 +71,7 @@ void fMultiply(const char * tmp,const char *m1, int s1,
         sizac=(ds1.nob+ds2.nob)*nor1;
         siz=sizb;
         if(sizac<siz) siz=sizac;    // siz is smaller of B, A+C
+        old_siz = siz;
         siz=siz/f->megabytes;
         siz=siz/660000;        // how many memoryfulls
         chops=1;
@@ -79,7 +81,7 @@ void fMultiply(const char * tmp,const char *m1, int s1,
             mmul(m1,s1,m2,s2,m3,s3);
             return;
         }
-        printf("Chopping needed but not yet implemented\n");
+        printf("Chopping needed but not yet implemented, chops %lu, siz %lu, old_siz %lu, megabytes %lu\n", chops, siz, old_siz, f->megabytes);
         exit(2);
     }
     if( (hdr1[0]==1) && (hdr2[0]==3) )
