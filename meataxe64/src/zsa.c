@@ -187,6 +187,13 @@ int main(int argc, const char *argv[])
    * zmu selc seln selr
    * zng selr out
    */
+  /*
+   * For permutations steps 2 and 3 need to be order reversed, so
+   * make_plain bs rem selc
+   * zmu selc gen seln
+   * zcx bs seln selr junk
+   * zng selr out
+   */
   EPeek(sub_rem, hdr.hdr);
   make_plain(NULL, sub_bs, sub_rem, selc, hdr.named.fdef);
   fColumnExtract(sub_bs, 0, argv[2], 0, seln, 0, junk, 0);
