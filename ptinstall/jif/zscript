@@ -18,5 +18,6 @@ ret=$?
 if [ 0 -eq $ret ]; then
     source ./${tmp}.1
     ret=$?
+    rm ./${tmp}.1
 fi
 exit ${ret}
