@@ -48,13 +48,30 @@ int main(int argc, const char *argv[])
   }
   /* Check for perms */
   if (1 == h1.named.fdef) {
+    uint64_t j, k;
     if (1 != h2.named.fdef) {
       fprintf(stderr, "%s: cannot compare permutation %s with non permutation %s\n", prog_name, argv[1], argv[2]);
       exit(1);
     }
     /* Do perms case */
     /* Perms case: check dimension */
+    if (h1.named.nor != h2.named.nor || h1.named.nor != h1.named.noc ||
+        h1.named.nor != h2.named.noc) {
+      /* Perms must be square */
+      fprintf(stderr, "%s: incompatible permutations %s and %s\n", prog_name, argv[1], argv[2]);
+      exit(1);
+    }
     /* Perms case: check elements */
+    for (i = 0; i < h1.named.nor; i++) {
+      ERData(f1, 8, (uint8_t *)&j);
+      ERData(f2, 8, (uint8_t *)&k);
+      if (j != k) {
+        return 1;
+      }
+    }
+    ERClose(f1);
+    ERClose(f2);
+    return 0;
   } else {
     if (1 == h2.named.fdef) {
       fprintf(stderr, "%s: cannot compare non permutation %s with permutation %s\n", prog_name, argv[1], argv[2]);
