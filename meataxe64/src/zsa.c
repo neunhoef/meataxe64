@@ -146,7 +146,8 @@ int main(int argc, const char *argv[])
   char *sub_bs;
   char *sub_rem;
 #if jgt
-  header hdr;
+  header hdr, hdr_gen;
+  int is_perm;
 #endif
 
   CLogCmd(argc, argv);
@@ -195,9 +196,16 @@ int main(int argc, const char *argv[])
    * zng selr out
    */
   EPeek(sub_rem, hdr.hdr);
+  EPeek(argv[2], hdr_gen.hdr);
+  is_perm = 1 == hdr_gen.named.fdef;
   make_plain(NULL, sub_bs, sub_rem, selc, hdr.named.fdef);
-  fColumnExtract(sub_bs, 0, argv[2], 0, seln, 0, junk, 0);
-  fMultiply(fun_tmp, selc, 0, seln, 0, selr, 0);
+  if (is_perm) {
+    fMultiply(fun_tmp, selc, 0, argv[2], 0, seln, 0);
+    fColumnExtract(sub_bs, 0, seln, 0, selr, 0, junk, 0);
+  } else {
+    fColumnExtract(sub_bs, 0, argv[2], 0, seln, 0, junk, 0);
+    fMultiply(fun_tmp, selc, 0, seln, 0, selr, 0);
+  }
   fNegate(selr, argv[3]);
 #endif
   remove(junk);
