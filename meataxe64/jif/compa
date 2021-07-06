@@ -58,6 +58,7 @@ gcc -O3 -Wall -pthread -include malloc.h znoc.c -L$BIN -lmtx -o $BIN/znoc
 gcc -O3 -Wall -pthread -include malloc.h zprime.c -L$BIN -lmtx -o $BIN/zprime
 gcc -O3 -Wall -pthread -include malloc.h zchar.c -L$BIN -lmtx -o $BIN/zchar
 gcc -O3 -Wall -pthread -include malloc.h zid.c mfuns.c -L$BIN -lmtx -o $BIN/zid
+gcc -O3 -Wall -pthread -include malloc.h zsid.c mfuns.c -L$BIN -lmtx -o $BIN/zsid
 gcc_comp_options="-Wall -Wpointer-arith -Wwrite-strings -Winline -Waggregate-return -Wmissing-prototypes -Wnested-externs -W -Wunused -Wcast-align -Wstrict-prototypes -Wmissing-declarations -O3 -pthread -include malloc.h"
 gcc_link_options="${gcc_comp_options} -L${BIN} -lmtx"
 gcc -include mt_types.h zimport.c elements.c endian.c header.c primes.c utils.c read.c ${gcc_link_options} -lm -o $BIN/zimport
