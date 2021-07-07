@@ -10,19 +10,9 @@ if [ $# -ne 5 -a $# -ne 7 ]; then
    echo "usage: zsid [-m <memory] <field order> <nor> <noc> <elt> <out_file>"
    exit 1
 fi
-mem=
-if [ 7 -eq $# ]; then
-    mem="-m $2"
-    shift 2
+if [ $# -ne 5 ]; then
+   echo "zsid: bad parameters"
+   echo "usage: zsid [-m <memory] <field order> <nor> <noc> <elt> <out_file>"
+   exit 1
 fi
-prime=$1
-nor=$2
-noc=$3
-elt=$4
-outfile=$5
-tmp=tmp$$
-~/install/zsid ${mem} ${prime} ${nor} ${noc} ${elt} ${tmp}.1
-ret=$?
-to_m64 ${tmp}.1 ${outfile}
-rm ${tmp}.1
-exit $ret
+${dir}/../bin/zid $5 $1 $2 $3 $4

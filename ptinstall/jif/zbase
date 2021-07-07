@@ -31,7 +31,7 @@ if [ 1 -eq $ret ]; then
 fi
 if [ 0 -eq $ret ]; then
     # Success
-    ${dir}/../bin/zex ${tmp}.{bs,rem} ${tmp}.out
+    ${dir}/../bin/zplain ${tmp} ${tmp}.out
     ${dir}/../bin/zng ${tmp}.out ${outfile}
     rm ${tmp}.{bs,rem} ${tmp}.out
     ${dir}/../bin/znor ${outfile}

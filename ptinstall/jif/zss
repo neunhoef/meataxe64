@@ -1,0 +1,24 @@
+#!/bin/sh
+#
+# Script to do zss in meataxe 64 until a binary is available
+#
+# Parameters as for zss in meataxe 2000
+# ie [-m <memory] <subspace> <vectors> <out>
+#
+dir=`dirname $0`
+if [ $# -ne 3 -a $# -ne 5 ]; then
+   echo "zss: bad parameters"
+   echo "usage: zss [-m <memory] <subspace> <vectors> <out>"
+   exit 1
+fi
+if [ 5 -eq $# ]; then
+    shift 2
+fi
+ss=$1
+vecs=$2
+out=$3
+tmp=tmp$$
+${dir}/../bin/zcx ${ss}.bs ${vecs} ${out} ${tmp}.1
+ret=$?
+rm ${tmp}.1
+exit $ret
