@@ -281,8 +281,6 @@ int main(int argc, const char *argv[])
             remove(ech_tmp_rem1);
             remove(ech_tmp_bs1);
           }
-          remove(ech_tmp_bs1);
-          remove(ech_tmp_rem1);
           extra_rank += res;
         }
         remove(clean_tmp1);
