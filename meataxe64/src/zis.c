@@ -302,8 +302,9 @@ int main(int argc, const char *argv[])
      * the new zero_bs comes from the above two
      * The old zero_bs is placed with the new rows just produced
      */
-    if (0 != extra_rank) {
+    if (0 != extra_rank && rank < nor) {
       /* We can make the plain form for the next multiply */
+      /* We don't bother if this is full rank */
       make_plain(zero_bs, ech_tmp_bs, ech_tmp_rem, this_gen->next_tbd.plain, fdef);
     }
     if (0 != this_gen->next_tbd.size) {
