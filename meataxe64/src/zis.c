@@ -318,6 +318,7 @@ int main(int argc, const char *argv[])
         fRowRiffle(ech_tmp_bsr, 1, clean_tmp1, 1, this_gen->next_tbd.rem, 1, mult_result_rem, 1);
         /* Renames and deletes */
         rename(ech_tmp_bsc, mult_result_bs);
+        remove(clean_tmp1);
       } else {
         /* First fully multiplied vectors */
         rename(this_gen->next_tbd.bs, mult_result_bs);
