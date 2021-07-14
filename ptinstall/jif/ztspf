@@ -419,6 +419,8 @@ while [ $mrank -lt $rank -a $rank -lt $full_noc ]; do
       fi
       # And rename
       mv ${tmp}.ech_tmp.bsc ${tmp}.mult_result.bs
+      # Throw away ct1
+      rm ${tmp}.ct1
     else
       # Renames line 321 done
       mv ${tmp}.gen$i.next.bs ${tmp}.mult_result.bs
