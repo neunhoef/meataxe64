@@ -5,6 +5,7 @@
 # Parameters as for zsid in meataxe 2000
 # ie [-m <memory] <field order> <nor> <noc> <elt> <out_file>
 #
+dir=`dirname $0`
 if [ $# -ne 5 -a $# -ne 7 ]; then
    echo "zsid: bad parameters"
    echo "usage: zsid [-m <memory] <field order> <nor> <noc> <elt> <out_file>"
@@ -15,4 +16,4 @@ if [ $# -ne 5 ]; then
    echo "usage: zsid [-m <memory] <field order> <nor> <noc> <elt> <out_file>"
    exit 1
 fi
-${dir}/../bin/zid $5 $1 $2 $3 $4
+${dir}/../bin/zsid $5 $1 $2 $3 $4
