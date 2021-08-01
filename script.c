@@ -1,5 +1,5 @@
 /*
- * $Id: script.c,v 1.13 2021/03/20 13:18:38 jon Exp $
+ * $Id: script.c,v 1.14 2021/08/01 09:53:56 jon Exp $
  *
  * Function to compute a script in two generators
  *
@@ -15,7 +15,9 @@
 #include "ident.h"
 #include "mul.h"
 #include "read.h"
+#include "rn.h"
 #include "scale.h"
+#include "system.h"
 #include "utils.h"
 
 static u32 id = 0;
@@ -234,22 +236,35 @@ static int check_inputs(unsigned int argc, const char *const args[], const char 
   return 1;
 }
 
-int exec_script(const char *out, const char *tmp, const char *script,
-                unsigned int argc, const char *const args[], const char *name)
+#define SCRIPT_LENGTH 64
+static char my_script[SCRIPT_LENGTH + 1];
+
+static char *get_script(FILE *scripts)
 {
-  u32 i, prime = 1, nor, scalar;
+  unsigned int i = 0;
+  while (i < SCRIPT_LENGTH) {
+    char c = fgetc(scripts);
+    if (feof(scripts)) {
+      i = 0;
+      break;
+    }
+    if ( '\n' == c) {
+      my_script[i] = 0;
+      break;
+    } else {
+      my_script[i++] = c;
+    }
+  }
+  return (0 == i || i >= SCRIPT_LENGTH) ? NULL : my_script;
+}
+
+static int make_script(const char *out, const char *tmp, const char *script,
+                       unsigned int argc, const char *const args[],
+                       const char *name, int all_perm, u32 nor, u32 prime)
+{
+  u32 i, scalar;
   const char *id;
   const char *current, *new, *summand, *rest;
-  int all_perm = 1;
-  assert(NULL != out);
-  assert(NULL != tmp);
-  assert(NULL != script);
-  assert(1 <= argc);
-  assert(NULL != args);
-  assert(NULL != name);
-  if (0 == check_inputs(argc, args, name, &all_perm, &nor, &prime)) {
-    return 0;
-  }
   id = new_id(tmp);
   summand = parse_plus(script, &rest, &scalar, prime, name);
   if (NULL == summand) {
@@ -300,4 +315,79 @@ int exec_script(const char *out, const char *tmp, const char *script,
   }
   rename(current, out); /* Turn current summand into output */
   return 1;
+}
+
+int exec_script(const char *out, const char *tmp, const char *script,
+                unsigned int argc, const char *const args[], const char *name)
+{
+  u32 prime = 1, nor;
+  int all_perm = 1;
+  assert(NULL != out);
+  assert(NULL != tmp);
+  assert(NULL != script);
+  assert(1 <= argc);
+  assert(NULL != args);
+  assert(NULL != name);
+  if (0 == check_inputs(argc, args, name, &all_perm, &nor, &prime)) {
+    return 0;
+  }
+  return make_script(out, tmp, script, argc, args, name, all_perm, nor, prime);
+}
+
+#define OUT_SUFFIX "_out"
+
+int exec_scripts(const char *scripts_file, unsigned int argc,
+                 const char *const args[], const char *name)
+{
+  int all_perm = 1;
+  u32 prime = 1, nor;
+  const char *tmp = tmp_name();
+  char *out;
+  FILE *scripts;
+  unsigned int i;
+  char *rem_name;
+  assert(NULL != scripts_file);
+  assert(1 <= argc);
+  assert(NULL != args);
+  assert(NULL != name);
+  scripts = fopen(scripts_file, "r");
+  if (NULL == scripts) {
+    fprintf(stderr, "%s: script file %s not found\n", name, scripts_file);
+    return 1;
+  }
+  if (0 == check_inputs(argc, args, name, &all_perm, &nor, &prime)) {
+    return 0;
+  }
+  out = my_malloc(strlen(tmp) + sizeof(OUT_SUFFIX));
+  strcpy(out, tmp);
+  strcat(out, OUT_SUFFIX);
+  for (;;) {
+    const char *script = get_script(scripts);
+    u32 r;
+    if (NULL == script) {
+      break;
+    }
+    if (1 != make_script(out, tmp, script, argc, args, name, all_perm, nor, prime)) {
+      return 1; /* Failed to make element */
+    }
+    /* Check element rank */
+    if (0 == rank(out, &r, name)) {
+      return 1;
+    }
+    /* If good, output to stdout */
+    if (r == nor) {
+      printf("%s\n", script);
+    }
+    /* Now delete temporary files */
+    /* Space for largest tmp.nnn name */
+    rem_name = my_malloc(strlen(tmp) + 1 + 11 + 1);
+    for (i = 0; i <= strlen(script); i++) {
+      sprintf(rem_name, "%s.%u", tmp, i);
+      remove(rem_name);
+    }
+    free(rem_name);
+    remove(out);
+    id = 0; /* Back to the start */
+  }
+  return 0;
 }

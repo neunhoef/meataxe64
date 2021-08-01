@@ -1,5 +1,5 @@
 /*
- * $Id: zranks.c,v 1.13 2005/05/01 10:10:58 jon Exp $
+ * $Id: zranks.c,v 1.14 2021/08/01 09:53:56 jon Exp $
  *
  * Compute sums in the group algebra in two matrices finding all of given nullity
  *
@@ -51,7 +51,7 @@ int main(int argc, const char * const argv[])
   }
   endian_init();
   memory_init(name, memory);
-  res = sums(argv[1], n, argc - 4, argv + 4, 0, &acceptor, 0, 1, name);
+  res = sums(argv[1], n, argc - 4, argv + 4, 0, &acceptor, 0, 0, name);
   memory_dispose();
   if (0 == res) {
     return 0;

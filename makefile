@@ -81,6 +81,7 @@ ZNOR_TARGET=	znor
 ZNS_TARGET=	zns
 ZNSF_TARGET=	znsf
 ZNTCO_TARGET=	zntco
+ZNU0_TARGET=	znu0
 ZPCO_TARGET=	zpco
 ZPCOL_TARGET=	zpcol
 ZPCV_TARGET=	zpcv
@@ -223,6 +224,7 @@ ZNOR_MODULES=	znor
 ZNS_MODULES=	rows zns
 ZNSF_MODULES=	rows znsf
 ZNTCO_MODULES=	rows zntco
+ZNU0_MODULES=	rows znu0
 ZPCO_MODULES=	rows zpco
 ZPCOL_MODULES=	rows zpcol
 ZPCV_MODULES=	pcv rows zpcv
@@ -364,6 +366,7 @@ MODULES=	$(LIB_MODULES) \
 	$(ZNS_MODULES) \
 	$(ZNSF_MODULES) \
 	$(ZNTCO_MODULES) \
+	$(ZNU0_MODULES) \
 	$(ZPCO_MODULES) \
 	$(ZPCOL_MODULES) \
 	$(ZPCV_MODULES) \
@@ -692,6 +695,9 @@ TARGET:=ZNSF
 include targets.txt
 
 TARGET:=ZNTCO
+include targets.txt
+
+TARGET:=ZNU0
 include targets.txt
 
 TARGET:=ZPCO
