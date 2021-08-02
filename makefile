@@ -134,6 +134,7 @@ ZTCOCON_TARGET=	ztcocon
 ZTCV_TARGET=	ztcv
 ZTE_TARGET=	zte
 ZTMU_TARGET=	ztmu
+ZTMU1_TARGET=	ztmu1
 ZTR_TARGET=	ztr
 ZTR2_TARGET=	ztr2
 ZTRACE_TARGET=	ztrace
@@ -144,6 +145,7 @@ ZTTOV_TARGET=	zttov
 ZTTR_TARGET=	zttr
 ZVP_TARGET=	zvp
 ZVPF_TARGET=	zvpf
+ZVTOPV_TARGET=	zvtopv
 ZVTOT_TARGET=	zvtot
 ZWORDS_TARGET=	zwords
 ZWORD_SIZE_TARGET=	zword_size
@@ -277,6 +279,7 @@ ZTCOCON_MODULES=	rows ztcocon
 ZTCV_MODULES=	tcv rows ztcv
 ZTE_MODULES=	rows zte
 ZTMU_MODULES=	rows ztmu
+ZTMU1_MODULES=	rows ztmu1
 ZTR_MODULES=	rows tr
 ZTR2_MODULES=	rows ztr2
 ZTRACE_MODULES=	rows ztrace
@@ -287,6 +290,7 @@ ZTTOV_MODULES=	rows zttov
 ZTTR_MODULES=	rows zttr
 ZVP_MODULES=	rows zvp
 ZVPF_MODULES=	rows zvpf
+ZVTOPV_MODULES=	rows zvtopv
 ZVTOT_MODULES=	rows zvtot
 ZWORDS_MODULES=	rows zwords
 ZWORD_SIZE_MODULES=	zword_size
@@ -419,6 +423,7 @@ MODULES=	$(LIB_MODULES) \
 	$(ZTCV_MODULES) \
 	$(ZTE_MODULES) \
 	$(ZTMU_MODULES) \
+	$(ZTMU1_MODULES) \
 	$(ZTR_MODULES) \
 	$(ZTR2_MODULES) \
 	$(ZTRECOV_MODULES) \
@@ -429,6 +434,7 @@ MODULES=	$(LIB_MODULES) \
 	$(ZTTR_MODULES) \
 	$(ZVP_MODULES) \
 	$(ZVPF_MODULES) \
+	$(ZVTOPV_MODULES) \
 	$(ZVTOT_MODULES) \
 	$(ZWORDS_MODULES) \
 	$(ZWORD_SIZE_MODULES)
@@ -856,6 +862,9 @@ include targets.txt
 TARGET:=ZTMU
 include targets.txt
 
+TARGET:=ZTMU1
+include targets.txt
+
 TARGET:=ZTR
 include targets.txt
 
@@ -884,6 +893,9 @@ TARGET:=ZVP
 include targets.txt
 
 TARGET:=ZVPF
+include targets.txt
+
+TARGET:=ZVTOPV
 include targets.txt
 
 TARGET:=ZVTOT

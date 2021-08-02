@@ -1,5 +1,5 @@
 /*
- * $Id: header.c,v 1.21 2020/03/02 22:23:58 jon Exp $
+ * $Id: header.c,v 1.22 2021/08/02 18:19:40 jon Exp $
  *
  * Header manipulation
  *
@@ -112,6 +112,13 @@ u32 compute_len(u32 nob, u32 noc)
     u32 elts_in_word = bits_in_word / nob;
     return (noc + elts_in_word - 1) / elts_in_word;
   }
+}
+
+u32 padded_cols(u32 cols, u32 nob)
+{
+  u32 len = compute_len(nob, cols);
+  u32 elts_in_word = bits_in_word / nob;
+  return elts_in_word * len;
 }
 
 static u32 compute_u32_len(u32 nob, u32 noc)

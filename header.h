@@ -1,5 +1,5 @@
 /*
- * $Id: header.h,v 1.10 2005/06/22 21:52:53 jon Exp $
+ * $Id: header.h,v 1.11 2021/08/02 18:19:40 jon Exp $
  *
  * Internal header for meataxe
  *
@@ -23,6 +23,7 @@ extern void header_set_nor(header *, u32);
 extern u32 header_get_noc(const header *);
 extern void header_set_noc(header *, u32);
 extern u32 compute_len(u32 nob, u32 noc);
+extern u32 padded_cols(u32 cols, u32 nob);
 extern u32 header_get_len(const header *);
 extern u32 header_get_u32_len(const header *);
 extern u32 header_get_u64_len(const header *);
