@@ -87,6 +87,11 @@ int main(int argc, const char * const argv[])
   for (i = 0; i < rows_out; i++) {
     out_rows[i] = memory_pointer_offset(500, i, len_out);
   }
+  if (0 == open_and_write_binary_header(&outp, h_out, out, name)) {
+    fprintf(stderr, "%s: cannot create output for %s, terminating\n", name, out);
+    header_free(h_out);
+    exit(1);
+  }
   for (i = 0; i < nor; i++) {
     in_row = memory_pointer_offset(0, 0, len);
     if (0 == endian_read_row(inp, in_row, len)) {
@@ -96,11 +101,6 @@ int main(int argc, const char * const argv[])
     }
     /* Convert to a tensor */
     v_to_m(in_row, out_rows, rows_out, cols_out, prime);
-    if (0 == open_and_write_binary_header(&outp, h_out, out, name)) {
-      fprintf(stderr, "%s: cannot create output for %s, terminating\n", name, out);
-      header_free(h_out);
-      exit(1);
-    }
     if (0 == endian_write_matrix(outp, out_rows, len_out, rows_out)) {
       fprintf(stderr, "%s: cannot output %d rows for %s, terminating\n", name, rows_out, out);
       header_free(h_out);
