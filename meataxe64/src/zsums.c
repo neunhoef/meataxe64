@@ -53,8 +53,8 @@ int main(int argc, const char *argv[])
   char *buf;
   u32 *orders;
   unsigned int argc2 = argc / 2;
-  u32 n, sub_order = 0, keep = 0, invertible = 1, verbose = 0;
-  u32 i, j, k, l, r, s, cur_word = 0, cur_power = 1, base_prime;
+  u32 n, keep = 0, invertible = 1, verbose = 0;
+  u32 i, j, k, l, r, s, cur_word = 0, cur_power = 1;
   u32 prime = 1, nod = 0, nor = 0, noc = 0, count;
   u32 order_sum = 0;
   int m;
@@ -96,11 +96,6 @@ int main(int argc, const char *argv[])
     cleanup(orders);
     exit(1);
   }
-  if (0 != sub_order && 0 == is_a_prime_power(sub_order)) {
-    fprintf(stderr, "%s: bad value %u for subfield order, terminating\n", prog_name, sub_order);
-    cleanup(orders);
-    exit(1);
-  }
   for (i = 0; i < argc2; i++) {
     header hdr;
     EPeek(argv[2 * i], hdr.hdr);
@@ -122,19 +117,6 @@ int main(int argc, const char *argv[])
     cleanup(orders);
     exit(1);
   }
-  if (0 != sub_order) {
-    if (0 != prime % sub_order) {
-      fprintf(stderr, "%s: %u is not a field order, terminating\n", prog_name, sub_order);
-      cleanup(orders);
-      exit(1);
-    }
-    base_prime = prime_divisor(prime);
-    if (0 != prime_index(prime, base_prime) % prime_index(sub_order, base_prime)) {
-      fprintf(stderr, "%s: %u is not a sub field order for %u, terminating\n", prog_name, sub_order, prime);
-      cleanup(orders);
-      exit(1);
-    }
-  }
   i = 1;
   m = -1;
   j = strlen(out);
@@ -145,7 +127,7 @@ int main(int argc, const char *argv[])
   } else {
     n += 1;
   }
-  if (0 == int_pow((0 != sub_order) ? sub_order : prime, n, &count)) {
+  if (0 == int_pow(prime, n, &count)) {
     fprintf(stderr, "%s: too many elements requested (%u ** %u), terminating\n", prog_name, prime, n);
     cleanup(orders);
     exit(1);
@@ -164,9 +146,6 @@ int main(int argc, const char *argv[])
   for (j = 0; j < argc2; j++) {
     names[j + 1] = argv[2 * j];
     words[j + 1] = NULL;
-  }
-  if (0 != sub_order) {
-    prime = sub_order; /* Restrict to subfield if requested */
   }
   while (i < n) {
     char *a;
@@ -249,7 +228,7 @@ int main(int argc, const char *argv[])
             fflush(stdout);
           }
           /* scale names[i] and add to elt_l */
-          if (0 == scaled_add(names[i], elt_l, elt_pos, r, prime, nor, tmp_root)) {
+          if (0 == scaled_add(names[i], elt_l, elt_pos, r, tmp_root)) {
             fprintf(stderr, "%s: scaled add failed on %s + %u * %s, terminating\n",
                     prog_name, elt_l, r, names[i]);
             cleanup(orders);
@@ -306,6 +285,7 @@ int main(int argc, const char *argv[])
   if (found) {
     return 0;
   } else {
+    printf("Failed to find a suitable element\n");
     return 255;
   }
 }

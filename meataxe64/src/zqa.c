@@ -112,6 +112,11 @@ int main(int argc, const char *argv[])
    * zmu selc sub.rem selm
    * zad selm selcn out
    */
+  /*
+   * For permutations the above doesn't work
+   * as we can't row or column select on the generator
+   * So we have to do the multiplication first
+   */
   /* Row select on gen (argv[2]) */
   fRowExtract(sub_bs, argv[2], seln);
   fColumnExtract(sub_bs, 0, seln, 0, selc, 0, selcn, 0);

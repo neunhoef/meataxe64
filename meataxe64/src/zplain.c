@@ -22,7 +22,7 @@ int main(int argc, const char *argv[])
   CLogCmd(argc, argv);
   /* Check command line <vecs> <output stem> */
   /* Must be exactly 3 args */
-if (argc != 3) {
+  if (argc != 3) {
     LogString(80,"usage zplain <subspace stem> <subspace plain form>");
     exit(21);
   }
@@ -38,4 +38,5 @@ if (argc != 3) {
   make_plain(NULL, sub_bs, sub_rem, argv[2], hdr.named.fdef);
   free(sub_bs);
   free(sub_rem);
+  return 0;
 }

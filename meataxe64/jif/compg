@@ -1,78 +1,72 @@
+mkdir -p $BIN
 cd $SRC
-gcc $1 -g -Wall -pthread -include malloc.h fieldreg.c -L$BIN -lmtx-g -o $BIN/fieldreg
-gcc $1 -g -Wall -pthread -include malloc.h conreg.c -L$BIN -lmtx-g -o $BIN/conreg
-gcc $1 -g -Wall -pthread -include malloc.h zad.c -L$BIN -lmtx-g -o $BIN/zad
-gcc $1 -g -Wall -pthread -include malloc.h zas.c -L$BIN -lmtx-g -o $BIN/zas
-gcc $1 -g -Wall -pthread -include malloc.h zbc.c -L$BIN -lmtx-g -o $BIN/zbc
-gcc $1 -g -Wall -pthread -include malloc.h zch.c -L$BIN -lmtx-g -o $BIN/zch
-gcc $1 -g -Wall -pthread -include malloc.h zcn.c -L$BIN -lmtx-g -o $BIN/zcn
-gcc $1 -g -Wall -pthread -include malloc.h zcv.c -L$BIN -lmtx-g -o $BIN/zcv
-gcc $1 -g -Wall -pthread -include malloc.h zcx.c -L$BIN -lmtx-g -o $BIN/zcx
-gcc $1 -g -Wall -pthread -include malloc.h zde1.c -L$BIN -lmtx-g -o $BIN/zde
-gcc $1 -g -Wall -pthread -include malloc.h ze21.c -L$BIN -lmtx-g -o $BIN/ze21
-gcc $1 -g -Wall -pthread -include malloc.h ze2.c -L$BIN -lmtx-g -o $BIN/ze2
-gcc $1 -g -Wall -pthread -include malloc.h ze31.c -L$BIN -lmtx-g -o $BIN/ze31
-gcc $1 -g -Wall -pthread -include malloc.h ze3.c -L$BIN -lmtx-g -o $BIN/ze3
-gcc $1 -g -Wall -pthread -include malloc.h zec1.c -L$BIN -lmtx-g -o $BIN/zec1
-gcc $1 -g -Wall -pthread -include malloc.h zec.c -L$BIN -lmtx-g -o $BIN/zec
-gcc $1 -g -Wall -pthread -include malloc.h zfr1.c -L$BIN -lmtx-g -o $BIN/zfr1
-gcc $1 -g -Wall -pthread -include malloc.h zfr.c -L$BIN -lmtx-g -o $BIN/zfr
-gcc $1 -g -Wall -pthread -include malloc.h zga.c -L$BIN -lmtx-g -o $BIN/zga
-gcc $1 -g -Wall -pthread -include malloc.h ziv.c -L$BIN -lmtx-g -o $BIN/ziv
-gcc $1 -g -Wall -pthread -include malloc.h ziv1.c -L$BIN -lmtx-g -o $BIN/ziv1
-gcc $1 -g -Wall -pthread -include malloc.h zkc.c -L$BIN -lmtx-g -o $BIN/zkc
-gcc $1 -g -Wall -pthread -include malloc.h zkx.c -L$BIN -lmtx-g -o $BIN/zkx
-gcc $1 -g -Wall -pthread -include malloc.h zmu.c -L$BIN -lmtx-g -o $BIN/zmu
-gcc $1 -g -Wall -pthread -include malloc.h zng.c -L$BIN -lmtx-g -o $BIN/zng
-gcc $1 -g -Wall -pthread -include malloc.h znu.c -L$BIN -lmtx-g -o $BIN/znu
-gcc $1 -g -Wall -pthread -include malloc.h zor1.c -L$BIN -lmtx-g -o $BIN/zor
-gcc $1 -g -Wall -pthread -include malloc.h zpc.c -L$BIN -lmtx-g -o $BIN/zpc
-gcc $1 -g -Wall -pthread -include malloc.h zpe1.c -L$BIN -lmtx-g -o $BIN/zpe1
-gcc $1 -g -Wall -pthread -include malloc.h zpe.c -L$BIN -lmtx-g -o $BIN/zpe
-gcc $1 -g -Wall -pthread -include malloc.h zpiv.c -L$BIN -lmtx-g -o $BIN/zpiv
-gcc $1 -g -Wall -pthread -include malloc.h zpmu.c -L$BIN -lmtx-g -o $BIN/zpmu
-gcc $1 -g -Wall -pthread -include malloc.h zpor.c -L$BIN -lmtx-g -o $BIN/zpor
-gcc $1 -g -Wall -pthread -include malloc.h zpte.c -L$BIN -lmtx-g -o $BIN/zpte
-gcc $1 -g -Wall -pthread -include malloc.h zpt1.c -L$BIN -lmtx-g -o $BIN/zpt
-gcc $1 -g -Wall -pthread -include malloc.h zpr.c -L$BIN -lmtx-g -o $BIN/zpr
-gcc $1 -g -Wall -pthread -include malloc.h zrd.c -L$BIN -lmtx-g -o $BIN/zrd
-gcc $1 -g -Wall -pthread -include malloc.h zrn1.c -L$BIN -lmtx-g -o $BIN/zrn1
-gcc $1 -g -Wall -pthread -include malloc.h zrr.c -L$BIN -lmtx-g -o $BIN/zrr
-gcc $1 -g -Wall -pthread -include malloc.h zrx.c -L$BIN -lmtx-g -o $BIN/zrx
-gcc $1 -g -Wall -pthread -include malloc.h zs21.c -L$BIN -lmtx-g -o $BIN/zs21
-gcc $1 -g -Wall -pthread -include malloc.h zs2.c -L$BIN -lmtx-g -o $BIN/zs2
-gcc $1 -g -Wall -pthread -include malloc.h zsb1.c -L$BIN -lmtx-g -o $BIN/zsb
-gcc $1 -g -Wall -pthread -include malloc.h zsb.c -L$BIN -lmtx-g -o $BIN/zsb1
-gcc $1 -g -Wall -pthread -include malloc.h zsp1.c -L$BIN -lmtx-g -o $BIN/zsp
-gcc $1 -g -Wall -pthread -include malloc.h zss.c -L$BIN -lmtx-g -o $BIN/zss
-gcc $1 -g -Wall -pthread -include malloc.h zsv.c -L$BIN -lmtx-g -o $BIN/zsv
-gcc $1 -g -Wall -pthread -include malloc.h ztc.c -L$BIN -lmtx-g -o $BIN/ztc
-gcc $1 -g -Wall -pthread -include malloc.h zte.c -L$BIN -lmtx-g -o $BIN/zte
-gcc $1 -g -Wall -pthread -include malloc.h ztr.c -L$BIN -lmtx-g -o $BIN/ztr
-gcc $1 -g -Wall -pthread -include malloc.h zut.c -L$BIN -lmtx-g -o $BIN/zut
-gcc $1 -g -Wall -pthread -include malloc.h zpk.c -L$BIN -lmtx-g -o $BIN/zpk
-gcc $1 -g -Wall -pthread -include malloc.h ztest.c -L$BIN -lmtx-g -o $BIN/ztest
+gcc $1 -g -Wall -pthread -include malloc.h fieldreg.c -L$BIN -lmtx -o $BIN/fieldreg
+gcc $1 -g -Wall -pthread -include malloc.h conreg.c -L$BIN -lmtx -o $BIN/conreg
+gcc $1 -g -Wall -pthread -include malloc.h zad.c -L$BIN -lmtx -o $BIN/zad
+gcc $1 -g -Wall -pthread -include malloc.h zas.c -L$BIN -lmtx -o $BIN/zas
+gcc $1 -g -Wall -pthread -include malloc.h zbc.c -L$BIN -lmtx -o $BIN/zbc
+gcc $1 -g -Wall -pthread -include malloc.h zch.c -L$BIN -lmtx -o $BIN/zch
+gcc $1 -g -Wall -pthread -include malloc.h zcn.c -L$BIN -lmtx -o $BIN/zcn
+gcc $1 -g -Wall -pthread -include malloc.h zcp.c -L$BIN -lmtx -o $BIN/zcp
+gcc $1 -g -Wall -pthread -include malloc.h zcs.c -L$BIN -lmtx -o $BIN/zcs
+gcc $1 -g -Wall -pthread -include malloc.h zcv.c -L$BIN -lmtx -o $BIN/zcv
+gcc $1 -g -Wall -pthread -include malloc.h zcx.c -L$BIN -lmtx -o $BIN/zcx
+gcc $1 -g -Wall -pthread -include malloc.h zde1.c -L$BIN -lmtx -o $BIN/zde
+gcc $1 -g -Wall -pthread -include malloc.h ze2.c -L$BIN -lmtx -o $BIN/ze2
+gcc $1 -g -Wall -pthread -include malloc.h ze3.c -L$BIN -lmtx -o $BIN/ze3
+gcc $1 -g -Wall -pthread -include malloc.h zec.c -L$BIN -lmtx -o $BIN/zec
+gcc $1 -g -Wall -pthread -include malloc.h zfr.c -L$BIN -lmtx -o $BIN/zfr
+gcc $1 -g -Wall -pthread -include malloc.h zga.c -L$BIN -lmtx -o $BIN/zga
+gcc $1 -g -Wall -pthread -include malloc.h zhr.c -L$BIN -lmtx -o $BIN/zhr
+gcc $1 -g -Wall -pthread -include malloc.h zis.c -L$BIN -lmtx -o $BIN/zis
+gcc $1 -g -Wall -pthread -include malloc.h ziv.c -L$BIN -lmtx -o $BIN/ziv
+gcc $1 -g -Wall -pthread -include malloc.h zkc.c -L$BIN -lmtx -o $BIN/zkc
+gcc $1 -g -Wall -pthread -include malloc.h zkx.c -L$BIN -lmtx -o $BIN/zkx
+gcc $1 -g -Wall -pthread -include malloc.h zmp.c -L$BIN -lmtx -o $BIN/zmp
+gcc $1 -g -Wall -pthread -include malloc.h zmu.c -L$BIN -lmtx -o $BIN/zmu
+gcc $1 -g -Wall -pthread -include malloc.h zng.c -L$BIN -lmtx -o $BIN/zng
+gcc $1 -g -Wall -pthread -include malloc.h znu.c -L$BIN -lmtx -o $BIN/znu
+gcc $1 -g -Wall -pthread -include malloc.h zor1.c -L$BIN -lmtx -o $BIN/zor
+gcc $1 -g -Wall -pthread -include malloc.h zpc.c -L$BIN -lmtx -o $BIN/zpc
+gcc $1 -g -Wall -pthread -include malloc.h zpe1.c -L$BIN -lmtx -o $BIN/zpe1
+gcc $1 -g -Wall -pthread -include malloc.h zpe.c -L$BIN -lmtx -o $BIN/zpe
+gcc $1 -g -Wall -pthread -include malloc.h zpm.c -L$BIN -lmtx -o $BIN/zpm
+gcc $1 -g -Wall -pthread -include malloc.h zpr.c -L$BIN -lmtx -o $BIN/zpr
+gcc $1 -g -Wall -pthread -include malloc.h zqa.c -L$BIN -lmtx -o $BIN/zqa
+gcc $1 -g -Wall -pthread -include malloc.h zrd.c -L$BIN -lmtx -o $BIN/zrd
+gcc $1 -g -Wall -pthread -include malloc.h zrn.c -L$BIN -lmtx -o $BIN/zrn
+gcc $1 -g -Wall -pthread -include malloc.h zrr.c -L$BIN -lmtx -o $BIN/zrr
+gcc $1 -g -Wall -pthread -include malloc.h zrx.c -L$BIN -lmtx -o $BIN/zrx
+gcc $1 -g -Wall -pthread -include malloc.h zs2.c -L$BIN -lmtx -o $BIN/zs2
+gcc $1 -g -Wall -pthread -include malloc.h zsa.c -L$BIN -lmtx -o $BIN/zsa
+gcc $1 -g -Wall -pthread -include malloc.h zsb.c -L$BIN -lmtx -o $BIN/zsb
+gcc $1 -g -Wall -pthread -include malloc.h zsc.c -L$BIN -lmtx -o $BIN/zsc
+gcc $1 -g -Wall -pthread -include malloc.h zsi.c -L$BIN -lmtx -o $BIN/zsi
+gcc $1 -g -Wall -pthread -include malloc.h zsv.c -L$BIN -lmtx -o $BIN/zsv
+gcc $1 -g -Wall -pthread -include malloc.h ztc.c -L$BIN -lmtx -o $BIN/ztc
+gcc $1 -g -Wall -pthread -include malloc.h zte.c -L$BIN -lmtx -o $BIN/zte
+gcc $1 -g -Wall -pthread -include malloc.h ztr.c -L$BIN -lmtx -o $BIN/ztr
+gcc $1 -g -Wall -pthread -include malloc.h zvp.c -L$BIN -lmtx -o $BIN/zvp
+gcc $1 -g -Wall -pthread -include malloc.h zut.c -L$BIN -lmtx -o $BIN/zut
+gcc $1 -g -Wall -pthread -include malloc.h zpk.c -L$BIN -lmtx -o $BIN/zpk
+gcc $1 -g -Wall -pthread -include malloc.h zpk1.c -L$BIN -lmtx -o $BIN/zpk1
+gcc $1 -g -Wall -pthread -include malloc.h zzs.c -L$BIN -lmtx -o $BIN/zzs
 
-gcc $1 -g -Wall -pthread -include malloc.h ztr1.c -L$BIN -lmtx-g -o $BIN/ztr1
-gcc $1 -g -Wall -pthread -include malloc.h zad1.c -L$BIN -lmtx-g -o $BIN/zad1
-gcc $1 -g -Wall -pthread -include malloc.h zmu1.c -L$BIN -lmtx-g -o $BIN/zmu1
-gcc $1 -g -Wall -pthread -include malloc.h znu1.c -L$BIN -lmtx-g -o $BIN/znu1
-
-cp $BIN/zrn1 $BIN/zrn
-gcc $1 -g -Wall -pthread -include malloc.h zis.c -L$BIN -lmtx-g -o $BIN/zis
-gcc $1 -g -Wall -pthread -include malloc.h zqa.c -L$BIN -lmtx-g -o $BIN/zqa
-gcc $1 -g -Wall -pthread -include malloc.h zsa.c -L$BIN -lmtx-g -o $BIN/zsa
-gcc $1 -g -Wall -pthread -include malloc.h zplain.c -L$BIN -lmtx-g -o $BIN/zplain
-gcc -g -Wall -pthread -include malloc.h znor.c -L$BIN -lmtx-g -o $BIN/znor
-gcc -g -Wall -pthread -include malloc.h znoc.c -L$BIN -lmtx-g -o $BIN/znoc
-gcc -g -Wall -pthread -include malloc.h zprime.c -L$BIN -lmtx-g -o $BIN/zprime
-gcc -g -Wall -pthread -include malloc.h zchar.c -L$BIN -lmtx-g -o $BIN/zchar
-gcc -g -Wall -pthread -include malloc.h zid.c mfuns.c -L$BIN -lmtx-g -o $BIN/zid
+gcc $1 -g -Wall -pthread -include malloc.h zplain.c -L$BIN -lmtx -o $BIN/zplain
+gcc $1 -g -Wall -pthread -include malloc.h zplain2.c -L$BIN -lmtx -o $BIN/zplain2
+gcc -g -Wall -pthread -include malloc.h znor.c -L$BIN -lmtx -o $BIN/znor
+gcc -g -Wall -pthread -include malloc.h znoc.c -L$BIN -lmtx -o $BIN/znoc
+gcc -g -Wall -pthread -include malloc.h zprime.c -L$BIN -lmtx -o $BIN/zprime
+gcc -g -Wall -pthread -include malloc.h zchar.c -L$BIN -lmtx -o $BIN/zchar
+gcc -g -Wall -pthread -include malloc.h zid.c mfuns.c -L$BIN -lmtx -o $BIN/zid
+gcc -g -Wall -pthread -include malloc.h zsid.c mfuns.c -L$BIN -lmtx -o $BIN/zsid
 gcc_comp_options="-Wall -Wpointer-arith -Wwrite-strings -Winline -Waggregate-return -Wmissing-prototypes -Wnested-externs -W -Wunused -Wcast-align -Wstrict-prototypes -Wmissing-declarations -g -pthread -include malloc.h"
-gcc_link_options="${gcc_comp_options} -g -L${BIN} -lmtx-g"
+gcc_link_options="${gcc_comp_options} -L${BIN} -lmtx"
 gcc -include mt_types.h zimport.c elements.c endian.c header.c primes.c utils.c read.c ${gcc_link_options} -lm -o $BIN/zimport
 gcc -DEIGHT_BYTE_WORD -include mt_types.h zimport.c elements.c endian.c header.c primes.c utils.c read.c ${gcc_link_options} -lm -o $BIN/zimport64
 gcc -include mt_types.h zexport.c elements.c endian.c header.c primes.c utils.c write.c ${gcc_link_options} -lm -o $BIN/zexport
 gcc -DEIGHT_BYTE_WORD -include mt_types.h zexport.c elements.c endian.c header.c primes.c utils.c write.c ${gcc_link_options} -lm -o $BIN/zexport64
 gcc -DEIGHT_BYTE_WORD -include mt_types.h zscript.c utils.c mfuns.c sums_utils.c ${gcc_link_options} -lm -o $BIN/zscript
+gcc -DEIGHT_BYTE_WORD -include mt_types.h zsh.c utils.c mfuns.c sums_utils.c ${gcc_link_options} -lm -o $BIN/zsh
 gcc -DEIGHT_BYTE_WORD -include mt_types.h zsums.c utils.c mfuns.c sums_utils.c primes.c ${gcc_link_options} -lm -o $BIN/zsums
+gcc -DEIGHT_BYTE_WORD -include mt_types.h zdiff.c utils.c mfuns.c primes.c ${gcc_link_options} -lm -o $BIN/zdiff

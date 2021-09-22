@@ -1,6 +1,7 @@
 /*
       zis.c     meataxe-64 invariant subspace
       =====     J. G. Thackray   04.10.2017
+                updated 28.1.19 RAP allow perms as generators
 */
 
 #include <stdio.h>
@@ -280,8 +281,6 @@ int main(int argc, const char *argv[])
             remove(ech_tmp_rem1);
             remove(ech_tmp_bs1);
           }
-          remove(ech_tmp_bs1);
-          remove(ech_tmp_rem1);
           extra_rank += res;
         }
         remove(clean_tmp1);
@@ -303,8 +302,9 @@ int main(int argc, const char *argv[])
      * the new zero_bs comes from the above two
      * The old zero_bs is placed with the new rows just produced
      */
-    if (0 != extra_rank) {
+    if (0 != extra_rank && rank < nor) {
       /* We can make the plain form for the next multiply */
+      /* We don't bother if this is full rank */
       make_plain(zero_bs, ech_tmp_bs, ech_tmp_rem, this_gen->next_tbd.plain, fdef);
     }
     if (0 != this_gen->next_tbd.size) {
@@ -318,6 +318,7 @@ int main(int argc, const char *argv[])
         fRowRiffle(ech_tmp_bsr, 1, clean_tmp1, 1, this_gen->next_tbd.rem, 1, mult_result_rem, 1);
         /* Renames and deletes */
         rename(ech_tmp_bsc, mult_result_bs);
+        remove(clean_tmp1);
       } else {
         /* First fully multiplied vectors */
         rename(this_gen->next_tbd.bs, mult_result_bs);
@@ -374,7 +375,7 @@ int main(int argc, const char *argv[])
     my_hdr.named.noc = 0;
     my_hdr.named.rnd2 = 0;
     out = EWHdr(out_rem, my_hdr.hdr);
-    EWClose1(out, 1);
+    EWClose1(out, 0);
     /* Write the bitstring */
     my_hdr.named.rnd1 = 2;
     my_hdr.named.fdef = 1;
@@ -390,7 +391,7 @@ int main(int argc, const char *argv[])
     memset(bsrs + 2, 0xff, rslen - 16);
     /* Write the bitstring */
     EWData(out, rslen, (uint8_t *)bsrs);
-    EWClose1(out, 1);
+    EWClose1(out, 0);
   }
   /* Delete temps */
   remove(mult_result_bs);
