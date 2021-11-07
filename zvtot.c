@@ -1,6 +1,6 @@
 /*
- * Vector to tensor. Allow a vector to be put in a form
- * where it can be acted on by a tensor without forming the tensor.
+ * Vector to tensor. Allow a collection of vectors to be put in a form
+ * where they can be acted on by a tensor without forming the tensor.
  * Essentialy internally what ztmu does before multiplying
  */
 
@@ -21,7 +21,7 @@ static const char *name = "zvtot";
 
 static void vtot_usage(void)
 {
-  fprintf(stderr, "%s: usage: %s %s <in_file> <number of columns> <out_file>\n", name, name, parse_usage());
+  fprintf(stderr, "%s: usage: %s %s <number of columns> <in_file> <out_file>\n", name, name, parse_usage());
 }
 
 int main(int argc, const char * const argv[])
@@ -39,8 +39,8 @@ int main(int argc, const char * const argv[])
     vtot_usage();
     exit(1);
   }
-  in = argv[1];
-  cols_out = strtoul(argv[2], NULL, 0);
+  in = argv[2];
+  cols_out = strtoul(argv[1], NULL, 0);
   out = argv[3];
   if (0 == cols_out) {
     fprintf(stderr, "%s: cannot have zero output columns, terminating\n", name);

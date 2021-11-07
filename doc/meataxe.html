@@ -9,7 +9,7 @@ A new (2002) meataxe
 <tr><td>Title:</td><td>A new (2002) meataxe</td></tr>
 <tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
 <tr><td>Version:</td><td>1</td></tr>
-<tr><td>Id:</td><td>$Id: meataxe.html,v 1.89 2019/01/21 08:32:35 jon Exp $</td></tr>
+<tr><td>Id:</td><td>$Id: meataxe.html,v 1.90 2021/11/07 23:12:44 jon Exp $</td></tr>
 <tr><td>Date:</td><td>20020513</td></tr>
 <tr><td>Status:</td><td>Draft</td></tr>
 </table>
@@ -420,6 +420,7 @@ Turn on verbose mode
 <li><a href="#ztsp">ztsp</a></li>
 <li><a href="#ztspf">ztspf</a></li>
 <li><a href="#zttov">zttov</a></li>
+<li><a href="#zttr">zttr</a></li>
 <li><a href="#zvp">zvp</a></li>
 <li><a href="#zvpf">zvpf</a></li>
 <li><a href="#zvtot">zvtot</a></li>
@@ -5067,16 +5068,19 @@ it.
 </li>
 <li>
 <h3><a name="zttov">zttov</a></h3>
-Purpose: Convert a tensor to a flattened form, suitable for use by <a href="#ztmu">ztmu</a>
+Purpose: Convert tensors to flattened form, suitable for use by <a href="#ztmu">ztmu</a>
 <table>
 <thead>
 <td valign=top>Parameters:</td>
 </thead>
 <tr>
-<td valign=top>1</td><td valign=top>Input</td>
+<td valign=top>1</td><td valign=top>Number of rows per tensor</td>
 </tr>
 <tr>
-<td valign=top>2</td><td valign=top>Output</td>
+<td valign=top>2</td><td valign=top>Input</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>Output</td>
 </tr>
 <tr>
 <td valign=top>Textual output on stdout:</td><td valign=top>None</td>
@@ -5098,8 +5102,43 @@ Commentary: Essentially this takes each row of the input and places it
 on the end of the preceding row, thus producing a single row with as
 many columns as entries in the input tensor. Its inverse
 is <a href="#zvtot">zvtot</a>. These, together
-with <a href="#ztr">ztr</a> can be used to transpose the order of a
+with <a href="#zttr">zttr</a> can be used to transpose the order of a
 tensor product.
+</li>
+<li>
+<h3><a name="zttr">zttr</a></h3>
+Purpose: Transpose vector form of tensors
+<table>
+<thead>
+<td valign=top>Parameters:</td>
+</thead>
+<tr>
+<td valign=top>1</td><td valign=top>Number of columns in tensor</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Input</td>
+</tr>
+<tr>
+<td valign=top>3</td><td valign=top>Output</td>
+</tr>
+<tr>
+<td valign=top>Textual output on stdout:</td><td valign=top>None</td>
+</tr>
+</table>
+<table>
+<thead>Return codes:</thead>
+<tr>
+<td valign=top>0</td><td valign=top>Success</td>
+</tr>
+<tr>
+<td valign=top>1</td><td valign=top>Some sort of error, reported textually by the program</td>
+</tr>
+<tr>
+<td valign=top>2</td><td valign=top>Insufficient memory for workspace</td>
+</tr>
+</table>
+Commentary: Essentially this takes each vector and treats it as a
+tensor with the given number of columns, and then transposes that in place.
 </li>
 <li>
 <h3><a name="zvp">zvp</a></h3>
@@ -5198,16 +5237,16 @@ constraining the number of vectors to the total available memory.
 </li>
 <li>
 <h3><a name="zvtot">zvtot</a></h3>
-Purpose: Convert a vector to a tensor suitable for use by <a href="#ztr">ztr</a>
+Purpose: Convert vectors to a tensor suitable for use by <a href="#zttr">zttr</a>
 <table>
 <thead>
 <td valign=top>Parameters:</td>
 </thead>
 <tr>
-<td valign=top>1</td><td valign=top>Input</td>
+<td valign=top>1</td><td valign=top>Number of columns</td>
 </tr>
 <tr>
-<td valign=top>2</td><td valign=top>Number of columns in output</td>
+<td valign=top>2</td><td valign=top>Input</td>
 </tr>
 <tr>
 <td valign=top>3</td><td valign=top>Output</td>
