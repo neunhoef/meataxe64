@@ -32,6 +32,14 @@ if echo $s | grep "No strategy" 1>/dev/null 2>&1; then
     # Failed on strategy
     failed=false
 fi
+if echo $s | grep "memory failure for moj" 1>/dev/null 2>&1; then
+    # Failed on tfarm
+    failed=false
+fi
+if [ 137 -eq $ret ]; then
+    # Failed on out of memory
+    failed=false
+fi
 if $failed; then
     echo $s
     exit $ret
