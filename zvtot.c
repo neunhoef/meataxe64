@@ -76,6 +76,15 @@ int main(int argc, const char * const argv[])
     fclose(inp);
     exit(1);
   }
+  /* We need to check that the total rows output don't exceed 2^32-1 */
+  {
+    u64 r = rows_out, n = nor;
+    if (r * n >= 0x100000000) {
+      fprintf(stderr, "%s: too many rows %" U64_F ", terminating\n", name, r * n);
+      fclose(inp);
+      exit(1);
+    }
+  }
   h_out = header_create(prime, nob, nod, cols_out, rows_out * nor);
   len_out = header_get_len(h_out);
   out_rows = matrix_malloc(rows_out);
