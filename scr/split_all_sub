@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: split_all_sub,v 1.12 2022/01/09 17:22:13 jon Exp $
+# $Id: split_all_sub,v 1.13 2022/01/09 17:27:05 jon Exp $
 #
 # Script to split a representation completely
 # and possibly classify the irreducibles
@@ -49,7 +49,6 @@ subspace=${tmp}.subspace
 ret=254
 if [ -s $vectors ]; then
 #  echo Trying to use vectors in $vectors
-  znor $vectors
   split_with_vectors $vectors $o $path ${subspace} $a $* 2>/dev/null 1>poo
   ret=$?
   if [ 1 -eq $ret ]; then
