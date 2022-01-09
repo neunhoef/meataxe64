@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: space_split,v 1.4 2018/01/31 08:49:55 jon Exp $
+# $Id: space_split,v 1.5 2022/01/09 17:21:50 jon Exp $
 #
 # Script to split a space across a subspace
 # giving te intersection with the subspace
@@ -48,7 +48,13 @@ if [ 0 -ne $ret ]; then
   echo $ns
   exit $ret
 fi
-if [ 0 -ne $ns ]; then
+rn=`znor  -m $memory ${tmp}.1`
+if [ 0 -ne $ret ]; then
+  rm -f ${tmp}.*
+  echo $rn
+  exit $ret
+fi
+if [ $rn -ne $ns ]; then
   zmu -m $memory ${tmp}.2 $v ${tmp}.3
   ret=$?
   if [ 0 -ne $ret ]; then
