@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: split,v 1.26 2021/04/25 09:18:39 jon Exp $
+# $Id: split,v 1.27 2022/01/09 17:22:13 jon Exp $
 #
 # Script to split a representation
 #
@@ -25,17 +25,18 @@
 #
 #set -v
 . functions
-usage="$0: usage: $0 <output_stem> <ignore pathology> <vectors> <subspace> <a> [<other generators>]"
+usage="$0: usage: $0 <output_stem> <ignore pathology> <vectors> <subspace> <f number> <a> [<other generators>]"
 if [ $# -lt 5 ]; then
   echo "$usage"
   exit 1;
 fi
-a=$5
 o=$1
 path=$2
 vectors=$3
 subspace=$4
-shift 5
+fn=$5
+a=$6
+shift 6
 if [ -e $a ]; then
   q=`zprime $a`
   nor=`znor $a`
@@ -65,6 +66,10 @@ tmp=tmp${PPID}
 #
 b=$1
 for i in 1 2 3 4 5 6 7 8 9 10; do
+  if [ $i -lt $fn ]; then
+    echo "Not using f$i to split"
+    continue
+  fi
   echo using f$i to split
   f$i $id $a $b ${tmp}.1 ${tmp}.1
   if [ $? -ne 0 ]; then
@@ -76,9 +81,11 @@ for i in 1 2 3 4 5 6 7 8 9 10; do
 # Only loop on nullity 0 or didn't split
   if [ $ret -ne 253 -a $ret -ne 254 ]; then
     rm -f ${tmp}*
+    echo "Success with $i"
     exit $ret
   fi
 done
+echo "Success with $i" # Terminate the use of fs
 # If any generators are singular, try them
 for x in $a $*; do
   echo "using $x to split"

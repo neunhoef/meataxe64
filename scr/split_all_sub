@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $Id: split_all_sub,v 1.11 2020/11/07 20:10:26 jon Exp $
+# $Id: split_all_sub,v 1.12 2022/01/09 17:22:13 jon Exp $
 #
 # Script to split a representation completely
 # and possibly classify the irreducibles
@@ -10,8 +10,9 @@
 # $2: classify
 # $3: ignore patholgy
 # $4: set of splitting vectors (out)
-# $5: generator a
-# $6-: other generators
+# $5: f to start with
+# $6: generator a
+# $7-: other generators
 #
 # Return codes
 # 1: error in parameters
@@ -19,26 +20,27 @@
 # 252: ran out of possible splitters
 #
 . functions
-usage="$0: usage: $0 <output_stem> <classify> <ignore pathology> <splitting vectors> <a> [<other generators>]"
-if [ $# -lt 6 ]; then
+usage="$0: usage: $0 <output_stem> <classify> <ignore pathology> <splitting vectors> <f number> <a> [<other generators>]"
+if [ $# -lt 7 ]; then
   echo "$usage"
   exit 1;
 fi
-a=$5
 o=$1
 c=$2
 classify=1
 path=$3
 vectors=$4
+fn=$5
 if [ 0 -eq $c ]; then
   classify=0
 fi
 memory=400000
+a=$6
 nor=`znor $a`
 #
 # TODO: find a way of using a process specific temporary for stdout
 #
-shift 5
+shift 6
 tmp=tmp${PPID}
 subspace=${tmp}.subspace
 #
@@ -47,11 +49,12 @@ subspace=${tmp}.subspace
 ret=254
 if [ -s $vectors ]; then
 #  echo Trying to use vectors in $vectors
+  znor $vectors
   split_with_vectors $vectors $o $path ${subspace} $a $* 2>/dev/null 1>poo
   ret=$?
   if [ 1 -eq $ret ]; then
-    echo "parameter problem with module $a"
-    rm -f $vectors $subspace*
+    echo "parameter problem case 1 with module $a"
+    #rm -f $vectors $subspace*
     cat poo
     exit 1
   fi
@@ -62,7 +65,7 @@ if [ 254 -eq $ret ]; then
     rm -f $vectors $subspace*
   fi
   vectors=${tmp}.vectors
-  split $o $path ${vectors} ${subspace} $a $* 2>/dev/null 1>poo
+  split $o $path ${vectors} ${subspace} ${fn} $a $* 2>/dev/null 1>poo
   ret=$?
 fi
 #ls -l ${vectors} ${subspace}
@@ -70,8 +73,8 @@ res=`grep dimension poo 2>/dev/null`
 #cat poo
 #echo res = $res, ret = $ret
 if [ 1 -eq $ret ]; then
-  echo "parameter problem with module $a"
-  rm -f $vectors $subspace*
+  echo "parameter problem case 2 with module $a"
+  #rm -f $vectors $subspace*
   cat poo
   exit 1
 elif [ 255 -eq $ret ]; then
@@ -96,6 +99,11 @@ elif [ 252 -eq $ret ]; then
   exit 252
 else
 # Split, so try some more
+  f_num=`grep "Success with " poo`
+  if [ -n "$f_num" ]; then
+    fn=`echo $f_num | sed -e "s/Success with //"`
+    echo "Updating fn to $fn"
+  fi
   rm -f poo
   echo $res
   dim=`echo $res | sed -e "s/^.* dimension //g;s/,.*$//g"`
@@ -193,7 +201,7 @@ else
     names="$names ${sub_name}_$y"
   done
 #  ls -l $sv
-  split_all_sub ${o} $c $path $sv $names
+  split_all_sub ${o} $c $path $sv ${fn} $names
   names="${quot_name}_1"
   y=1
   for x in $*; do
@@ -201,6 +209,6 @@ else
     names="$names ${quot_name}_$y"
   done
 #  ls -l $qv
-  split_all_sub ${o} $c $path $qv $names
+  split_all_sub ${o} $c $path $qv ${fn} $names
   rm -f ${tmp}.*
 fi
