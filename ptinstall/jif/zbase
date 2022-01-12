@@ -32,7 +32,20 @@ fi
 if [ 0 -eq $ret ]; then
     # Success
     ${dir}/../bin/zplain ${tmp} ${tmp}.out
+    ret=$?
+    if [ 0 -ne $ret ]; then
+        echo "zplain fails, exiting" 1>&2
+        rm ${tmp}.{bs,rem}
+        exit 1
+    fi
+    zpr ${tmp}.out
     ${dir}/../bin/zng ${tmp}.out ${outfile}
+    ret=$?
+    if [ 0 -ne $ret ]; then
+        echo "zneg fails, exiting" 1>&2
+        rm ${tmp}.{bs,rem} ${tmp}.out
+        exit 1
+    fi
     rm ${tmp}.{bs,rem} ${tmp}.out
     ${dir}/../bin/znor ${outfile}
     exit 0
