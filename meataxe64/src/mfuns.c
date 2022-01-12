@@ -48,13 +48,14 @@ void make_plain(const char *zero_bs, const char *nref_bs, const char *in, const 
   if (use_ei) {
     ei = ERHdr(in, hdrio.hdr);    // remnant   = 1 fdef nor noc 0
     nor = hdrio.named.nor; /* Rows of input */
-    ones = noci1;
   } else {
     ei = NULL;
     nor = noci1;
     hdrio.named.noc = 0;
-    ones = 0;
+    hdrio.named.fdef = fdef;
+    hdrio.named.nor = nor;
   }
+  ones = noci1; /* As many ones as set bits */
   if (NULL != ezbs) {
     /* Some leading zeroes */
     noci2 = hdrzbs.named.noc; /* Set bits in zero bitstring */
@@ -96,7 +97,9 @@ void make_plain(const char *zero_bs, const char *nref_bs, const char *in, const 
   ERData(embs, sizm, (uint8_t *)bstm);
   /* Now read through in row by row, inserting minus -1s and zeros */
   for (i = 0; i < nor; i++) {
-    ERData(ei, dsi.nob, mi);
+    if (use_ei) { /* If not, ei is NULL */
+      ERData(ei, dsi.nob, mi);
+    }
     /* Clear output row */
     memset(mo, 0, dso.nob);
     /* TBD: put in -1s and contents of in. DCut and DPaste */
