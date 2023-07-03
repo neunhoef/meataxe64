@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Script to do zdiffd in meataxe 64 until a binary is available
 #

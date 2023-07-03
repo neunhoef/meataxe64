@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Script to convert from meataxe 64 to meataxe 2000
 # meataxe 64 is expected to be on path
 # meataxe 2000 in ~/install

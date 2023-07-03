@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Script to do zrn in meataxe 64
 # Although we have a binary, it is command line incompatible

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Script to split a representation given a particular element to work from
 # Meataxe64 version
