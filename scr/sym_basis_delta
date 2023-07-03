@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: sym_basis_delta,v 1.8 2006/01/28 17:29:53 jon Exp $
+# $Id: sym_basis_delta,v 1.9 2023/07/03 08:30:08 jon Exp $
 #
 # Script to compute a symmetry basis wrt an ordered set of irreducibles,
 # using delta words

@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: new_irred,v 1.14 2016/12/17 10:23:43 jon Exp $
+# $Id: new_irred,v 1.15 2023/07/03 08:30:07 jon Exp $
 #
 # Script to classify an irreducible representation by
 # first trying against existing irreducibles of the same degree

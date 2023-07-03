@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: cn,v 1.2 2006/03/14 19:34:38 jon Exp $
+# $Id: cn,v 1.3 2023/07/03 08:30:07 jon Exp $
 #
 # Compute cn(x)
 #

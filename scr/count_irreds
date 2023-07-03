@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: count_irreds,v 1.4 2016/05/21 11:27:16 jon Exp $
+# $Id: count_irreds,v 1.5 2023/07/03 08:30:07 jon Exp $
 #
 # Script to count the irreducibles found in a split
 #

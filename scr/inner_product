@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: inner_product,v 1.3 2002/10/13 19:09:42 jon Exp $
+# $Id: inner_product,v 1.4 2023/07/03 08:30:07 jon Exp $
 #
 # Script to form x S y_tra
 #

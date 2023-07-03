@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: signature,v 1.10 2014/06/20 20:42:14 jon Exp $
+# $Id: signature,v 1.11 2023/07/03 08:30:07 jon Exp $
 #
 # Script to give a signature for a representation
 #

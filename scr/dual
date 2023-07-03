@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: dual,v 1.12 2014/06/20 20:42:14 jon Exp $
+# $Id: dual,v 1.13 2023/07/03 08:30:07 jon Exp $
 #
 # Script to dual of a matrix
 #

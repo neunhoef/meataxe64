@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: functions,v 1.10 2018/01/17 08:20:22 jon Exp $
+# $Id: functions,v 1.11 2023/07/03 08:30:07 jon Exp $
 #
 # Functions to support the meataxe scripts
 #

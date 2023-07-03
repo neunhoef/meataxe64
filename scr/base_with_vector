@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: base_with_vector,v 1.9 2002/11/26 20:46:23 jon Exp $
+# $Id: base_with_vector,v 1.10 2023/07/03 08:30:06 jon Exp $
 #
 # Script to find a standard base for a representation, given a vector
 #

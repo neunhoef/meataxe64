@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: indicate,v 1.7 2006/12/27 19:09:52 jon Exp $
+# $Id: indicate,v 1.8 2023/07/03 08:30:07 jon Exp $
 #
 # Script to find the indicator of an irreducible representation
 # Assumes a and b in standard base form

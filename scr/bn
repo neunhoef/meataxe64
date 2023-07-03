@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: bn,v 1.4 2006/03/14 19:34:38 jon Exp $
+# $Id: bn,v 1.5 2023/07/03 08:30:07 jon Exp $
 #
 # Compute bn(x)
 #

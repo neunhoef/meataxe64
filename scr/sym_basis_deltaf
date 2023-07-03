@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: sym_basis_deltaf,v 1.1 2006/05/08 19:10:56 jon Exp $
+# $Id: sym_basis_deltaf,v 1.2 2023/07/03 08:30:08 jon Exp $
 #
 # Script to compute a symmetry basis wrt an ordered set of irreducibles,
 # using delta words and intermediate files for the nullspaces and spins

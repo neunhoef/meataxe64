@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: quick_order,v 1.6 2014/06/20 20:42:14 jon Exp $: f1,v 1.2 2001/12/01 10:46:02 jon Exp $
+# $Id: quick_order,v 1.7 2023/07/03 08:30:07 jon Exp $: f1,v 1.2 2001/12/01 10:46:02 jon Exp $
 #
 # Script to compute order of a matrix, in a naive fashion
 # returning 10 if it's greater than 10

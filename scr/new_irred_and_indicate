@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: new_irred_and_indicate,v 1.6 2006/12/27 19:09:52 jon Exp $
+# $Id: new_irred_and_indicate,v 1.7 2023/07/03 08:30:07 jon Exp $
 #
 # Script to classify an irreducible representation
 # and compute its indicator in characteristic two

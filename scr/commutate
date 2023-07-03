@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: commutate,v 1.4 2006/05/08 19:10:56 jon Exp $
+# $Id: commutate,v 1.5 2023/07/03 08:30:07 jon Exp $
 #
 # Script to produce a commutator
 #

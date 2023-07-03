@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: base,v 1.15 2003/04/26 18:22:03 jon Exp $
+# $Id: base,v 1.16 2023/07/03 08:30:06 jon Exp $
 #
 # Script to find a representation in standard base
 #

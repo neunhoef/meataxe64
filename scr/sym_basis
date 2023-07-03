@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: sym_basis,v 1.18 2005/03/21 21:43:56 jon Exp $
+# $Id: sym_basis,v 1.19 2023/07/03 08:30:08 jon Exp $
 #
 # Script to compute a symmetry basis wrt an ordered set of irreducibles
 #

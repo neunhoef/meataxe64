@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: fixed_point_form_sign,v 1.3 2021/06/08 08:00:10 jon Exp $
+# $Id: fixed_point_form_sign,v 1.4 2023/07/03 08:30:07 jon Exp $
 #
 # Script to compute the form sign on the fixed point space
 #

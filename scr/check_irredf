@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: check_irredf,v 1.3 2005/02/14 08:46:11 jon Exp $
+# $Id: check_irredf,v 1.4 2023/07/03 08:30:07 jon Exp $
 #
 # Script to check a representation is irreducible
 #

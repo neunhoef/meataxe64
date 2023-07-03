@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: real_indicate,v 1.17 2007/12/19 20:47:41 jon Exp $
+# $Id: real_indicate,v 1.18 2023/07/03 08:30:07 jon Exp $
 #
 # Script to find the indicator of an irreducible representation
 # assuming it is real, and we have the standard basis conjugating

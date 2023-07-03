@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: spin_vectors,v 1.5 2005/01/08 12:18:04 jon Exp $
+# $Id: spin_vectors,v 1.6 2023/07/03 08:30:07 jon Exp $
 #
 # Compute subspaces, with a memory limit
 #

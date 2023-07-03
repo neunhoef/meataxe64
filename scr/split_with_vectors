@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: split_with_vectors,v 1.4 2016/12/15 20:28:46 jon Exp $
+# $Id: split_with_vectors,v 1.5 2023/07/03 08:30:08 jon Exp $
 #
 # Script to split a representation given a particular set of vector seeds
 #

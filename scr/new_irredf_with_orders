@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: new_irredf_with_orders,v 1.14 2003/04/26 20:13:16 jon Exp $
+# $Id: new_irredf_with_orders,v 1.15 2023/07/03 08:30:07 jon Exp $
 #
 # Script to classify an irreducible representation
 #

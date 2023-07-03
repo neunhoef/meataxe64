@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: f1,v 1.4 2002/09/11 21:20:47 jon Exp $
+# $Id: f1,v 1.5 2023/07/03 08:30:07 jon Exp $
 #
 # Script to add three matrices giving a fourth
 #

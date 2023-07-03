@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: rebase.sh,v 1.2 2006/05/13 15:43:01 jon Exp $
+# $Id: rebase.sh,v 1.3 2023/07/03 08:30:07 jon Exp $
 #
 # Script to rebase a set of representations according to new scripts
 # This is for use in tensor condensation, where the delta words used

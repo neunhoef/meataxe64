@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: irr_base_change,v 1.1 2006/07/29 10:56:52 jon Exp $
+# $Id: irr_base_change,v 1.2 2023/07/03 08:30:07 jon Exp $
 #
 # Script to change the base of a set of irreducibles
 # This is used in tensor condensation to use the null vectors of

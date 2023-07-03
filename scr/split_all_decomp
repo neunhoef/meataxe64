@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: split_all_decomp,v 1.4 2022/01/09 17:22:13 jon Exp $
+# $Id: split_all_decomp,v 1.5 2023/07/03 08:30:07 jon Exp $
 #
 # Script to split a decomposable representation completely
 # Generally used over p' condensation subgroups

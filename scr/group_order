@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: group_order,v 1.1 2006/07/30 11:04:25 jon Exp $
+# $Id: group_order,v 1.2 2023/07/03 08:30:07 jon Exp $
 #
 # Script to compute group order given a set of representations
 # Main purpose is to see if representations are missing, or if we have the right group

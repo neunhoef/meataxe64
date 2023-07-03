@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: irred,v 1.10 2006/07/23 16:02:13 jon Exp $
+# $Id: irred,v 1.11 2023/07/03 08:30:07 jon Exp $
 #
 # Script to discover if a representation is irreducible
 #

@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: space_split,v 1.5 2022/01/09 17:21:50 jon Exp $
+# $Id: space_split,v 1.6 2023/07/03 08:30:07 jon Exp $
 #
 # Script to split a space across a subspace
 # giving te intersection with the subspace

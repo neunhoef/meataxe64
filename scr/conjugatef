@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: conjugatef,v 1.4 2002/10/14 09:10:31 jon Exp $
+# $Id: conjugatef,v 1.5 2023/07/03 08:30:07 jon Exp $
 #
 # Script to conjugate elements into another base, using intermediate files
 #

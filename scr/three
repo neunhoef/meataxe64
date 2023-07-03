@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: three,v 1.1 2004/04/11 22:10:38 jon Exp $
+# $Id: three,v 1.2 2023/07/03 08:30:08 jon Exp $
 #
 # Script to produce _3 from _1
 #

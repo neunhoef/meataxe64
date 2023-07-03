@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: filter_element,v 1.3 2006/07/28 16:11:05 jon Exp $
+# $Id: filter_element,v 1.4 2023/07/03 08:30:07 jon Exp $
 #
 # Script to find an element of given nullity on one representation
 # and nullity zero on a sequence of others

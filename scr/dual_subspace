@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: dual_subspace,v 1.6 2004/10/02 20:29:15 jon Exp $
+# $Id: dual_subspace,v 1.7 2023/07/03 08:30:07 jon Exp $
 #
 # Script to provide a subspace from the dual subspace
 #

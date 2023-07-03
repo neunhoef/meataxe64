@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: restrictf_with_orders,v 1.2 2003/04/26 20:13:16 jon Exp $
+# $Id: restrictf_with_orders,v 1.3 2023/07/03 08:30:07 jon Exp $
 #
 # Script to restrict a representation from a field to a subfield
 #

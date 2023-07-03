@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: tspin_vectors,v 1.4 2002/10/14 09:24:05 jon Exp $
+# $Id: tspin_vectors,v 1.5 2023/07/03 08:30:08 jon Exp $
 #
 # Compute subspaces, with a memory limit,
 # using tensor product generators

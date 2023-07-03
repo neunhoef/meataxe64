@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: xn,v 1.3 2006/03/14 19:34:38 jon Exp $
+# $Id: xn,v 1.4 2023/07/03 08:30:08 jon Exp $
 #
 # Compute xn(n), continuing on from bn, cn etc
 #

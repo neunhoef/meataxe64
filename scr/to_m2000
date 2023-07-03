@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Script to convert from meataxe 64 to meataxe 2000
 # Expect to use back to back zpr znd zcv
 # Ie zpr $1 | 2000/zcv - $2

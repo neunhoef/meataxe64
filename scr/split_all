@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: split_all,v 1.10 2022/01/09 17:22:13 jon Exp $
+# $Id: split_all,v 1.11 2023/07/03 08:30:07 jon Exp $
 #
 # Script to split a representation completely
 #

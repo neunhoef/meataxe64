@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: find_best_nullityf_with_orders,v 1.2 2002/10/14 08:55:31 jon Exp $
+# $Id: find_best_nullityf_with_orders,v 1.3 2023/07/03 08:30:07 jon Exp $
 #
 # Script to find an element of best nullity in two generators
 #

@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: indicatef_with_script,v 1.8 2006/12/27 19:09:52 jon Exp $
+# $Id: indicatef_with_script,v 1.9 2023/07/03 08:30:07 jon Exp $
 #
 # Script to find the indicator of an irreducible representation,
 # given a script describing the null generator

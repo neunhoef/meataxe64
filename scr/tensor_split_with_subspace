@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: tensor_split_with_subspace,v 1.4 2002/10/14 09:31:13 jon Exp $
+# $Id: tensor_split_with_subspace,v 1.5 2023/07/03 08:30:08 jon Exp $
 #
 # Script to split a representation given a particular subspace to work from
 # where the group generators are tensor products

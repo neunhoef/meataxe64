@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: rip_rank,v 1.6 2014/06/20 20:42:14 jon Exp $: irred,v 1.4 2002/01/26 00:36:06 jon Exp $
+# $Id: rip_rank,v 1.7 2023/07/03 08:30:07 jon Exp $: irred,v 1.4 2002/01/26 00:36:06 jon Exp $
 #
 # Script to compute the rank of a rip off element on a representation
 #

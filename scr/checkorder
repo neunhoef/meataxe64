@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 #
-# $Id: checkorder,v 1.1 2005/01/15 11:19:14 jon Exp $
+# $Id: checkorder,v 1.2 2023/07/03 08:30:07 jon Exp $
 #
 # Script to check order of a matrix
 #
