@@ -1,11 +1,10 @@
 #!/bin/bash
 #
-# Script to do chopped zmu
+# Script to do chopped zmu in meataxe 64 until a binary is available
 #
 # Parameters as for zmu in meataxe 2000
 # ie [-m <memory] <infile1> <infile2> <outfile>
 #
-#set -x
 dir=`dirname $0`
 if [ "$1" = "-m" ]; then
     shift 2 # Ignore -m <memory
@@ -68,12 +67,16 @@ if [ 0 -ne $ret1 ]; then
     rm ${infile1}ch0{0,1}0{0,1}
     exit $ret1
 fi
-${dir}/../bin/zch ${infile2} 2
-ret1=$?
-if [ 0 -ne $ret1 ]; then
+if [ "$infile1" != "$infile2" ]; then
+  ${dir}/../bin/zch ${infile2} 2
+  ret1=$?
+  if [ 0 -ne $ret1 ]; then
     # Clean up the crud
     rm ${infile1}ch0{0,1}0{0,1} ${infile2}ch0{0,1}0{0,1}
     exit $ret1
+  fi
+else
+  echo "Not chopping ${infile2} as it's the same name as ${infile1}"
 fi
 # Now form the 8 products m1ij.m2jk 1<= i, j, k <= 2
 for i in 0 1; do
