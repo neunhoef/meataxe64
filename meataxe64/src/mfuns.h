@@ -32,4 +32,9 @@ extern int ident(uint64_t fdef, uint64_t nor, uint64_t noc, uint64_t elt,
 
 extern void make_plain(const char *zero_bs, const char *nref_bs, const char *in, const char *out, uint64_t fdef);
 
+/* Slicing and splicing */
+extern void slice(const char *input, unsigned int slices, const char *output_stem);
+
+extern void splice(const char *input_stem, unsigned int slices, const char *output);
+
 #endif /* MFUNS_H */

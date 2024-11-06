@@ -7,7 +7,7 @@
 #include "io.h"
 #include "field.h"
 #include "funs.h"
-
+#include "util.h"
 
 int main(int argc,  char **argv)
 {
@@ -17,7 +17,7 @@ int main(int argc,  char **argv)
         LogString(80,"usage zmu <m1> <m2> <product>");
         exit(14);
     }
-    fMultiply("temp",argv[1], 0, argv[2], 0, argv[3], 0);    // just call fMultiply
+    fMultiply(tmp_name(), argv[1], 0, argv[2], 0, argv[3], 0);    // just call fMultiply
     return 0;
 }
 

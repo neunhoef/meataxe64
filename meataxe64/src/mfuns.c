@@ -190,3 +190,129 @@ int ident(uint64_t fdef, uint64_t nor, uint64_t noc, uint64_t elt,
   free(f);
   return 1;
 }
+
+/* Slicing and splicing */
+void slice(const char *input, unsigned int slices, const char *output_stem)
+{
+  uint64_t fdef, nor, noc, i, j, rch[100]; 
+  EFIL *inp; /* Input */
+  EFIL *oup; /* Output */
+  header hdr;
+  FIELD *f;
+  DSPACE ds;
+  Dfmt *v1;
+  char fn[200];
+  const char *pt;
+  int lfn;
+
+  if (slices >= 100) {
+    fprintf(stderr, "%u slices is too many (>= 100), terminating\n", slices);
+    exit(1);
+  }
+  inp = ERHdr(input, hdr.hdr);
+  fdef = hdr.named.fdef;
+  nor = hdr.named.nor;
+  noc = hdr.named.noc;
+  f = malloc(FIELDLEN);
+  FieldASet(fdef, f);
+  DSSet(f, noc, &ds);
+  j = nor / slices;
+  for (i = 0; i < slices; i++) {
+    rch[i] = j;
+  }
+  j = nor - j * slices;
+  for (i = 0; i < j; i++) {
+    rch[i]++;
+  }
+  lfn = 0;
+  pt = output_stem;
+  /* Create the root of the temporary file name */
+  while ((*pt) != 0) {
+    fn[lfn++] = *(pt++);
+  }
+  fn[lfn+2] = 0;
+
+  v1 = malloc(ds.nob);
+  for(i = 0; i < slices; i++) {
+    /* Set the temporary file name */
+    fn[lfn] = '0' + i / 10;
+    fn[lfn+1] = '0' + i % 10;
+    hdr.named.nor = rch[i];
+    oup = EWHdr(fn, hdr.hdr);
+    for(j = 0; j < rch[i]; j++) {
+      ERData(inp, ds.nob, v1);
+      EWData(oup, ds.nob, v1);
+    }
+    EWClose(oup);
+  }
+  ERClose(inp);
+  free(f);
+  free(v1);
+}
+
+void splice(const char *input_stem, unsigned int slices, const char *output)
+{
+  uint64_t fdef, nor, noc, norout, nor1, i, j;
+  EFIL *inp; /* Input */
+  EFIL *oup; /* Output */
+  header hdr, hdr1;
+  FIELD *f;
+  DSPACE ds;
+  Dfmt *v1;
+  char fn[200];
+  const char *pt;
+  int lfn;
+
+  if (slices >= 100) {
+    fprintf(stderr, "%u slices is too many (>= 100), terminating\n", slices);
+    exit(1);
+  }
+  lfn = 0;
+  pt = input_stem;
+  /* Create the root of the temporary file name */
+  while ((*pt) != 0) {
+    fn[lfn++] = *(pt++);
+  }
+  fn[lfn+2] = 0;
+  fn[lfn] = '0';
+  fn[lfn+1] = '0';
+
+  EPeek(fn, hdr.hdr);
+  fdef = hdr.named.fdef;
+  nor = hdr.named.nor;
+  norout = nor;
+  noc = hdr.named.noc;
+  f = malloc(FIELDLEN);
+  FieldASet(fdef, f);
+  DSSet(f, noc, &ds);
+
+  for(i = 1; i < slices; i++) {
+    fn[lfn] = '0' + i / 10;
+    fn[lfn+1] = '0' + i % 10;
+    EPeek(fn, hdr1.hdr);
+    if ((fdef != hdr1.named.fdef) || (noc != hdr1.named.noc)) {
+      printf("Matrices incompatible\n");
+      exit(7);
+    }
+    norout += hdr1.named.nor;
+  }
+  hdr.named.nor = norout;
+  oup = EWHdr(output, hdr.hdr);
+
+  v1 = malloc(ds.nob);
+  for(i = 0; i < slices; i++) {
+    /* Set the temporary file name */
+    fn[lfn] = '0' + i / 10;
+    fn[lfn+1] = '0' + i % 10;
+    inp = ERHdr(fn, hdr1.hdr);
+    nor1 = hdr1.named.nor;
+    for(j = 0; j < nor1; j++) {
+      ERData(inp, ds.nob, v1);
+      EWData(oup, ds.nob, v1);
+    }
+    ERClose(inp);
+  }
+  EWClose(oup);
+  free(f);
+  free(v1);
+}
