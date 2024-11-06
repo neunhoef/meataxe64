@@ -81,6 +81,7 @@ void fMultiply(const char *tmp,const char *m1, int s1,
             mmul(m1,s1,m2,s2,m3,s3);
             return;
         }
+<<<<<<< HEAD
 #if 0
         printf("Chopping by 1 < chops <= %lu\n", chops * chops);
 #endif

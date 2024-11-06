@@ -52,7 +52,6 @@ int main(int argc, char **argv)
     return 0;
   }
   /* set up field structure for m64 matrix */
-  hdr[0] = 1;
   fdef = header_get_prime(h);;
   hdr[1] = fdef;
   nor = header_get_nor(h);
@@ -60,58 +59,79 @@ int main(int argc, char **argv)
   noc = header_get_noc(h);
   hdr[3] = noc;
   hdr[4] = 0;
-  len = header_get_len(h);
-  nob = header_get_nob(h);
-  row = my_malloc(len * sizeof(*row));
-  f = malloc(FIELDLEN);
-  if (f == NULL) {
-    LogString(81, "Can't malloc field structure");
-    exit(8);
-  }
-  FieldSet(fdef, f);
-  DSSet(f, noc, &ds);
-  /* Allow room for a full word of output at the end */
-  v = malloc(ds.nob + 7);
-  /* open m64 output */
-  out = EWHdr(argv[2], hdr);
-  /* loop over rows of m2000 producing rows of m64 */
-  mask = get_mask_and_elts(nob, &elts_per_word);
-  for (i = 0; i < nor; i++) {
-    int e;
-    u32 j, word_offset = 0;
-    errno = 0;
-    e = endian_read_row(inp, row, len);
-    if (0 == e) {
-      if ( 0 != errno) {
-        perror(name);
-      }
-      fprintf(stderr, "%s: cannot read row %u from %s, terminating\n", name, i, argv[1]);
-    }
-    /* Clear output row */
-    switch (fdef) {
-    case 2:
-    case 4:
-      /* Characteristic 2 case, just copy */
-      EWData(out, ds.nob, (Dfmt *)row);
-      break;
-    default:
-      memset(v ,0, ds.nob + 7);
-      k = 0;
-      for (j = 0; j < noc; j++) {
-        /* Get a field element from m2000 and put in m64 */
-        word elt;
-        if (0 == k) {
-          val = get_elements_in_word_from_row(row + word_offset, 0, -1);
-          k = elts_per_word;
-          word_offset++;
+  if ( 1== fdef) {
+    word j;
+    /* Importing a permutation */
+    hdr[0] = 3;
+    out = EWHdr(argv[2], hdr);
+    for (i = 0; i < nor; i++) {
+      if (0 == endian_read_word(&j, inp)) {
+        if ( 0 != errno) {
+          perror(name);
         }
-        elt = val & mask;
-        DPak(&ds, j, v, elt);
-        val >>= nob; /* Next value */
-        k--;
+        fprintf(stderr, "%s: cannot read word in row %u from %s, terminating\n", name, i, argv[1]);
+        fclose(inp);
+        exit(1);
       }
-      EWData(out, ds.nob, v);
-      break;
+      EWData(out, 8, (uint8_t *)&j);
+    }
+  } else {
+    hdr[0] = 1;
+    len = header_get_len(h);
+    nob = header_get_nob(h);
+    row = my_malloc(len * sizeof(*row));
+    f = malloc(FIELDLEN);
+    if (f == NULL) {
+      LogString(81, "Can't malloc field structure");
+      exit(8);
+    }
+    FieldSet(fdef, f);
+    DSSet(f, noc, &ds);
+    /* Allow room for a full word of output at the end */
+    v = malloc(ds.nob + 7);
+    /* open m64 output */
+    out = EWHdr(argv[2], hdr);
+    /* loop over rows of m2000 producing rows of m64 */
+    mask = get_mask_and_elts(nob, &elts_per_word);
+    for (i = 0; i < nor; i++) {
+      int e;
+      u32 j, word_offset = 0;
+      errno = 0;
+      e = endian_read_row(inp, row, len);
+      if (0 == e) {
+        if ( 0 != errno) {
+          perror(name);
+        }
+        fprintf(stderr, "%s: cannot read row %u from %s, terminating\n", name, i, argv[1]);
+        fclose(inp);
+        exit(1);
+      }
+      /* Clear output row */
+      switch (fdef) {
+      case 2:
+      case 4:
+        /* Characteristic 2 case, just copy */
+        EWData(out, ds.nob, (Dfmt *)row);
+        break;
+      default:
+        memset(v ,0, ds.nob + 7);
+        k = 0;
+        for (j = 0; j < noc; j++) {
+          /* Get a field element from m2000 and put in m64 */
+          word elt;
+          if (0 == k) {
+            val = get_elements_in_word_from_row(row + word_offset, 0, -1);
+            k = elts_per_word;
+            word_offset++;
+          }
+          elt = val & mask;
+          DPak(&ds, j, v, elt);
+          val >>= nob; /* Next value */
+          k--;
+        }
+        EWData(out, ds.nob, v);
+        break;
+      }
     }
   }
   /* close m2000 and m64 matrices */

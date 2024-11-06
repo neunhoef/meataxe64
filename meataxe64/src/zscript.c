@@ -235,7 +235,7 @@ static int exec_script(const char *out, const char *tmp, size_t tmp_len, const c
       fprintf(stderr, "%s: unable to create summand '%s', terminating\n", name, summand);
       return 0;
     }
-    if (0 == scaled_add(new, current, sum, scalar, prime, nor, tmp)) {
+    if (0 == scaled_add(new, current, sum, scalar, tmp)) {
       fprintf(stderr, "%s: unable to add %s and %s, terminating\n", name, current, new);
       return 0;
     }

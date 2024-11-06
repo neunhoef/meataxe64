@@ -48,13 +48,14 @@ void make_plain(const char *zero_bs, const char *nref_bs, const char *in, const 
   if (use_ei) {
     ei = ERHdr(in, hdrio.hdr);    // remnant   = 1 fdef nor noc 0
     nor = hdrio.named.nor; /* Rows of input */
-    ones = noci1;
   } else {
     ei = NULL;
     nor = noci1;
     hdrio.named.noc = 0;
-    ones = 0;
+    hdrio.named.fdef = fdef;
+    hdrio.named.nor = nor;
   }
+  ones = noci1; /* As many ones as set bits */
   if (NULL != ezbs) {
     /* Some leading zeroes */
     noci2 = hdrzbs.named.noc; /* Set bits in zero bitstring */
@@ -96,7 +97,9 @@ void make_plain(const char *zero_bs, const char *nref_bs, const char *in, const 
   ERData(embs, sizm, (uint8_t *)bstm);
   /* Now read through in row by row, inserting minus -1s and zeros */
   for (i = 0; i < nor; i++) {
-    ERData(ei, dsi.nob, mi);
+    if (use_ei) { /* If not, ei is NULL */
+      ERData(ei, dsi.nob, mi);
+    }
     /* Clear output row */
     memset(mo, 0, dso.nob);
     /* TBD: put in -1s and contents of in. DCut and DPaste */
@@ -156,38 +159,48 @@ int ident(uint64_t fdef, uint64_t nor, uint64_t noc, uint64_t elt,
 {
   uint64_t hdr[5];
   EFIL *e;
-  FIELD *f;
   DSPACE ds;
-  Dfmt *v1;
   uint64_t i;
+  int is_perm;
 
-  hdr[0] = 1;
   hdr[1] = fdef;
   hdr[2] = nor;
   hdr[3] = noc;
   hdr[4] = 0;
-  e = EWHdr(out, hdr);
-  f = malloc(FIELDLEN);
-  if (f == NULL) {
-    LogString(81, "Can't malloc field structure");
-    exit(8);
-  }
-  FieldSet(fdef, f);
-  DSSet(f, noc, &ds);
-  v1 = malloc(ds.nob);
-  if (v1 == NULL) {
-    LogString(81,"Can't malloc a single vector");
-    exit(9);
-  }
-  /******  for each row of the matrix  */
-  for (i = 0; i < nor; i++) {
-    memset(v1, 0, ds.nob);
-    DPak(&ds, i, v1, elt);
-    EWData(e, ds.nob, v1);
+  is_perm = 1 == fdef;
+  if (is_perm) {
+    hdr[0] = 3;
+    e = EWHdr(out, hdr);
+    for (i = 0; i < nor; i++) {
+      EWData(e, 8, (uint8_t *)&i);
+    }
+  } else {
+    FIELD *f;
+    Dfmt *v1;
+    hdr[0] = 1;
+    e = EWHdr(out, hdr);
+    f = malloc(FIELDLEN);
+    if (f == NULL) {
+      LogString(81, "Can't malloc field structure");
+      exit(8);
+    }
+    FieldSet(fdef, f);
+    DSSet(f, noc, &ds);
+    v1 = malloc(ds.nob);
+    if (v1 == NULL) {
+      LogString(81,"Can't malloc a single vector");
+      exit(9);
+    }
+    /******  for each row of the matrix  */
+    for (i = 0; i < nor; i++) {
+      memset(v1, 0, ds.nob);
+      DPak(&ds, i, v1, elt);
+      EWData(e, ds.nob, v1);
+    }
+    free(v1);
+    free(f);
   }
   EWClose(e);
-  free(v1);
-  free(f);
   return 1;
 }
 

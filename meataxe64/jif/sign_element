@@ -1,0 +1,72 @@
+#
+# sign_element
+# Compute the Gabi Nebe formula for a GF2 quadratic form
+# Input
+# $1 the quadratic form (an upper scalar triangular matrix)
+# Output
+# A field element, which is 0 <=> the form is for O+
+#
+# Return codes
+# 1: error in parameters or some other error
+# 0: ok
+#set -x
+usage="$0: usage: $0 <qf>"
+if [ $# -ne 1 ]; then
+  echo "$usage"
+  exit 1;
+fi
+form=$1
+if [ -e ${form} ]; then
+  nor=`znor ${form}`
+  if [ $nor -ne `znoc ${form}` ]; then
+    echo "$0: ${form} is not square"
+    exit 1
+  fi
+  prime=`zprime ${form}`
+  if [ 1 -eq $prime ]; then
+    echo "$0: ${form} cannot be a permutation"
+    exit 1
+  fi
+else
+  echo "$0: missing file ${form}"
+  exit 1
+fi
+tmp=tmp${PPID}
+ztr ${form} ${tmp}.form_tr
+ret=$?
+if [ 0 -ne $ret ]; then
+  rm -f ${tmp}.*
+  exit 1
+fi
+zad ${form} ${tmp}.form_tr ${tmp}.bilinear_form
+ret=$?
+if [ 0 -ne $ret ]; then
+  rm -f ${tmp}.*
+  exit 1
+fi
+ziv ${tmp}.bilinear_form ${tmp}.bilinear_form.iv
+ret=$?
+if [ 0 -ne $ret ]; then
+  rm -f ${tmp}.*
+  exit 1
+fi
+zmu ${tmp}.bilinear_form.iv ${form} ${tmp}.elt
+ret=$?
+if [ 0 -ne $ret ]; then
+  rm -f ${tmp}.*
+  exit 1
+fi
+ztr ${tmp}.elt ${tmp}.elt.tr
+ret=$?
+if [ 0 -ne $ret ]; then
+  rm -f ${tmp}.*
+  exit 1
+fi
+zdm ${tmp}.elt ${tmp}.elt.tr
+ret=$?
+if [ 0 -ne $ret ]; then
+  rm -f ${tmp}.*
+  exit 1
+fi
+rm -f ${tmp}.*
+exit 0

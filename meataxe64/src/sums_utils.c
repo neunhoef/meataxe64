@@ -32,17 +32,15 @@ int scale(const char *m1, const char *m2, u32 scalar, u32 prime, u32 nor, const 
 }
 
 /* m3 = s * m1 + m2 */
-int scaled_add(const char *m1, const char *m2, const char *m3, u32 scalar, u32 prime, u32 nor, const char *tmp)
+int scaled_add(const char *m1, const char *m2, const char *m3, u32 scalar, const char *tmp)
 {
   if (1 == scalar) {
     fAdd(m1, 1, m2, 1, m3, 1);
   } else {
     size_t len = strlen(tmp);
     const char *scaled = mk_tmp("sums", tmp, len);
-    if (0 == scale(m1, scaled, scalar, prime, nor, tmp, len)) {
-      fprintf(stderr, "zscript: unable to scale, terminating\n");
-      return 0;
-    }
+    /* Scale without logging */
+    fScalarMul(m1, 1, scaled, 1, scalar);
     fAdd(scaled, 1, m2, 1, m3, 1);
     remove(scaled);
   }
@@ -149,7 +147,7 @@ int make_element(u32 pos, u32 prime, u32 prime_power, u32 nor,
     }
     elt_l = make_elt_name(base, l);
     elt_pos = make_elt_name(base, pos);
-if (0 == scaled_add(names[i], elt_l, elt_pos, r, prime, nor, name)) {
+if (0 == scaled_add(names[i], elt_l, elt_pos, r, name)) {
       free(elt_l);
       free(elt_pos);
       return 0;
