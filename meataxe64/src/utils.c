@@ -146,6 +146,27 @@ void copy_rest(FILE *new, FILE *old)
   };
 }
 
+void copy_file(const char *new, const char *old)
+{
+  FILE *fn, *fo;
+  assert(NULL != new);
+  assert(NULL != old);
+  fo = fopen(old, "rb");
+  if (NULL == fo) {
+    fprintf(stderr, "Failed to open '%s'\nTerminating\n", old);
+    exit(1);
+  }
+  fn = fopen(new, "wb");
+  if (NULL == fn) {
+    fprintf(stderr, "Failed to open '%s'\nTerminating\n", new);
+    fclose(fn);
+    exit(1);
+  }
+  copy_rest(fn, fo);
+  fclose(fn);
+  fclose(fo);
+}
+
 u32 skip_whitespace(u32 i, const char *chars)
 {
   u32 j = strlen(chars);
