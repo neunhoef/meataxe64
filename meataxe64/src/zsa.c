@@ -23,45 +23,6 @@ static char *fun_tmp;
 
 #define FUN_TMP "_funs"
 
-/* Negate: effectively a copy from zng.c */
-
-static void fNegate(const char *in,  const char *out)
-{
-    EFIL *e1, *e2;
-    FIELD *f;
-    header hdr;
-    uint64_t fdef, nor, noc;
-    FELT min1;
-    DSPACE ds;
-    Dfmt *v1;
-    uint64_t i;
-
-    e1 = ERHdr(in, hdr.hdr);
-    fdef = hdr.named.fdef;
-    nor = hdr.named.nor;
-    noc = hdr.named.noc;
-
-    f = malloc(FIELDLEN);
-    if (f == NULL) {
-      LogString(81,"Can't malloc field structure");
-      exit(22);
-    }
-    FieldASet(fdef, f);
-    min1 = FieldNeg(f, 1);
-    e2 = EWHdr(out, hdr.hdr);
-    DSSet(f, noc, &ds);
-    v1 = malloc(ds.nob);
-    for(i = 0; i < nor; i++) {
-      ERData(e1,ds.nob, v1);
-      DSMul(&ds, min1, 1, v1);
-      EWData(e2, ds.nob, v1);
-    }
-    free(v1);
-    free(f);
-    ERClose(e1);
-    EWClose(e2);
-}
-
 #if !jgt
 /* Get the selected and non selected rows from a generator */
 static void fRowExtract(const char *bs, const char *in, const char *sel, const char *nsel)
