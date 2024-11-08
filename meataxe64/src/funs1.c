@@ -244,5 +244,115 @@ uint64_t fColumnRiffleIdentity(const char *bs, int sbs,
     return nor;
 }
 
+void fRowTriage(const char *zero_bs, const char *sig_bs, const char *in, const char *sel, const char *nsel)
+{
+  /*
+   * Open the file, open the two bitstrings
+   * check file has rows = total bits in bitstring
+   * Loop read a row, if bit clear output else ignore
+   * Pool
+   */
+  EFIL *ezbs, *esbs, *ei, *eos, *eon; /* bitstrings, in, out selected, out non selected */
+  uint64_t hdrzbs[5], hdrsbs[5], hdrio[5];
+  FIELD *f;
+  DSPACE ds; /* Matrix in */
+  Dfmt *mi; /* Matrix out */
+  uint64_t nor, noc, j, k, fdef, size, snor;
+  uint64_t *zbst, *sbst;
+  ezbs = ERHdr(zero_bs, hdrzbs);
+  esbs = ERHdr(sig_bs, hdrsbs);
+  ei = ERHdr(in, hdrio);
+  nor = hdrzbs[2]; /* Total bits */
+  snor = hdrzbs[3]; /* sel bits from zero bitstring */
+  noc = hdrio[3]; /* Elements per row */
+  fdef = hdrio[1];
+  if (nor != hdrio[2]) {
+    /* Should be same as for generator */
+    LogString(90, "fRowTriage: different number of rows or columns");
+    fprintf(stderr, "fRowTriage: %s, %s different number of rows or columns, exiting\n", zero_bs, in);
+    exit(1);
+  }
+  /* TBD: Check nor - snor == hdrsbs[2] */
+  if (nor - snor != hdrsbs[2]) {
+    fprintf(stderr, "Bad parameters to fRowTriage, exiting\n");
+  }
+  f = malloc(FIELDLEN);
+  FieldASet(fdef, f);
+  /* Create the output header  for selected*/
+  hdrio[2] = hdrsbs[3]; /* Only selected rows */
+  eos = EWHdr(sel, hdrio);
+  /* Create the output header  for non selected*/
+  hdrio[2] = hdrsbs[2] - hdrsbs[3]; /* Only non selected rows */
+  eon = EWHdr(nsel, hdrio);
+  DSSet(f, noc, &ds); /* input/output space */
+  mi = malloc(ds.nob);
+  /* Read the zero bitstring */
+  size = 8 * (2 + (nor + 63) / 64);
+  zbst = malloc(size);
+  ERData(ezbs, size, (uint8_t *)zbst);
+  /* Now read the significant bitstring */
+  size = 8 * (2 + (nor - snor + 63) / 64);
+  sbst = malloc(size);
+  ERData(esbs, size, (uint8_t *)sbst);
+  k = 0;
+  for (j = 0; j < nor; j++) {
+    ERData(ei, ds.nob, mi);
+    if (1 != BSBitRead(zbst, j)) { /* Ignore zeros */
+      if (1 == BSBitRead(sbst, k)) {
+        EWData(eos, ds.nob, mi);
+      } else {
+        EWData(eon, ds.nob, mi);
+      }
+      k++;
+    }
+  }
+  EWClose1(eos, 0);
+  EWClose1(eon, 0);
+  ERClose1(ei, 0);
+  ERClose1(ezbs, 0);
+  ERClose1(esbs, 0);
+  free(mi);
+  free(zbst);
+  free(sbst);
+  free(f);
+}
 
+/* Negate: effectively a copy from zng.c */
+
+void fNegate(const char *in,  const char *out)
+{
+    EFIL *e1, *e2;
+    FIELD *f;
+    uint64_t hdr[5];
+    uint64_t fdef, nor, noc;
+    FELT min1;
+    DSPACE ds;
+    Dfmt *v1;
+    uint64_t i;
+
+    e1 = ERHdr(in, hdr);
+    fdef = hdr[1];
+    nor = hdr[2];
+    noc = hdr[3];
+
+    f = malloc(FIELDLEN);
+    if (f == NULL) {
+      LogString(81,"Can't malloc field structure");
+      exit(22);
+    }
+    FieldASet(fdef, f);
+    min1 = FieldNeg(f, 1);
+    e2 = EWHdr(out, hdr);
+    DSSet(f, noc, &ds);
+    v1 = malloc(ds.nob);
+    for(i = 0; i < nor; i++) {
+      ERData(e1,ds.nob, v1);
+      DSMul(&ds, min1, 1, v1);
+      EWData(e2, ds.nob, v1);
+    }
+    free(v1);
+    free(f);
+    ERClose(e1);
+    EWClose(e2);
+}
 /* end of funs1.c  */
