@@ -26,7 +26,7 @@ void XUnlock(void)
     pthread_mutex_unlock(&xlock);
 }
 
-extern void LogCmd(int argc, char ** argv)
+void LogCmd(int argc, char ** argv)
 {
     int i;
     FILE * logfile;

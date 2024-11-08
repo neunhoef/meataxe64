@@ -31,8 +31,10 @@ extern void ERClose(EFIL * e);
 extern int  ERClose1(EFIL * e, int flag);
 extern void EWClose(EFIL * e);
 extern int  EWClose1(EFIL * e, int flag);
-extern void LogCmd(int argc, char ** argv);
+/* Deprecated */
+extern void LogCmd(int argc, char **argv);
 extern void LogString(int type, const char *string);
+/* Use this instead of LogCmd */
 extern void CLogCmd(int argc, const char *argv[]);
 
 /* end of io.h  */

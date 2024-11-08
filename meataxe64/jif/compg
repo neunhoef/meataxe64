@@ -6,6 +6,8 @@ gcc $1 -g -Wall -pthread -include malloc.h zad.c -L$BIN -lmtx -o $BIN/zad
 gcc $1 -g -Wall -pthread -include malloc.h zas.c -L$BIN -lmtx -o $BIN/zas
 gcc $1 -g -Wall -pthread -include malloc.h zbc.c -L$BIN -lmtx -o $BIN/zbc
 gcc $1 -g -Wall -pthread -include malloc.h zch.c -L$BIN -lmtx -o $BIN/zch
+gcc $1 -g -Wall -pthread -include malloc.h zsl.c -L$BIN -lmtx -o $BIN/zsl
+gcc $1 -g -Wall -pthread -include malloc.h zspl.c -L$BIN -lmtx -o $BIN/zspl
 gcc $1 -g -Wall -pthread -include malloc.h zcn.c -L$BIN -lmtx -o $BIN/zcn
 gcc $1 -g -Wall -pthread -include malloc.h zcp.c -L$BIN -lmtx -o $BIN/zcp
 gcc $1 -g -Wall -pthread -include malloc.h zcs.c -L$BIN -lmtx -o $BIN/zcs

@@ -5,14 +5,16 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 #include "mezz.h"
 #include "field.h"
 #include "io.h"
 #include "funs.h"
 #include "slab.h"
+#include "mfuns.h"
 
-void fMultiply(const char * tmp,const char *m1, int s1, 
-         const char *m2, int s2, const char *m3, int s3)
+void fMultiply(const char *tmp,const char *m1, int s1, 
+               const char *m2, int s2, const char *m3, int s3)
 {
     uint64_t hdr1[5],hdr2[5];
     FIELD * f;
@@ -20,12 +22,11 @@ void fMultiply(const char * tmp,const char *m1, int s1,
     Dfmt *am,*bm,*cm;
     uint64_t fdef,siz,sizac,sizb,chops,nor1,noc1,nor2,noc2;
     DSPACE ds1,ds2;
-    uint64_t i,j;
+    uint64_t i, j;
     EPeek(m1,hdr1);
     EPeek(m2,hdr2);
     if( (hdr1[0]==1) && (hdr2[0]==1) )  //flat matrix multiply
     {
-        uint64_t old_siz;
         fdef=hdr1[1];
         f = malloc(FIELDLEN);
         FieldSet(fdef,f);
@@ -71,9 +72,8 @@ void fMultiply(const char * tmp,const char *m1, int s1,
         sizac=(ds1.nob+ds2.nob)*nor1;
         siz=sizb;
         if(sizac<siz) siz=sizac;    // siz is smaller of B, A+C
-        old_siz = siz;
         siz=siz/f->megabytes;
-        siz=siz/660000;        // how many memoryfulls
+        siz=siz/500000;        // how many memoryfulls
         chops=1;
         while((chops*chops)<=siz) chops++;
         if(chops==1)   // chopping into one piece!
@@ -81,8 +81,61 @@ void fMultiply(const char * tmp,const char *m1, int s1,
             mmul(m1,s1,m2,s2,m3,s3);
             return;
         }
-        printf("Chopping needed but not yet implemented, chops %lu, siz %lu, old_siz %lu, megabytes %lu\n", chops, siz, old_siz, f->megabytes);
-        exit(2);
+#if 0
+        printf("Chopping by 1 < chops <= %lu\n", chops * chops);
+#endif
+        /* Extensions of temporary names for split multiply */
+#define IN_EXT "_fmuli"
+#define OUT_EXT "_fmulo"
+        i = strlen(tmp);
+        {
+          uint64_t k;
+          char *tmpi = malloc(i + strlen(IN_EXT) + 2 + 1);
+          char *tmpo = malloc(i + strlen(OUT_EXT) + 2 + 1);
+          /* Leave 2 spaces for digits */
+          uint64_t count = chops * chops;
+          if (count > 100) {
+            count = 100; /* Just let it recurse */
+          }
+          strcpy(tmpi, tmp);
+          strcat(tmpi, IN_EXT);
+          strcpy(tmpo, tmp);
+          strcat(tmpo, OUT_EXT);
+          /*
+           * Note we don't need to remember all the output names,
+           * as splice only needs the root.
+           * But we do need to create them to pass to fmul
+           */
+          slice(m1, count, tmpi);
+          j = strlen(tmpi);
+          k = strlen(tmpo);
+          tmpi[j + 2] = 0;
+          tmpo[k + 2] = 0;
+          for (i = 0; i < count; i++) {
+            /* Put the (same) extension into tmpi and tmpo */
+            tmpi[j] = '0' + i / 10;
+            tmpi[j + 1] = '0' + i % 10;
+            tmpo[k] = '0' + i / 10;
+            tmpo[k + 1] = '0' + i % 10;
+            /* Use tmpi as tmp for next call */
+            fMultiply(tmpi, tmpi, 1, m2, 1, tmpo, 1); /* Don't log */
+          }
+          tmpo[k] = 0; /* Terminate without the numbers */
+          splice(tmpo, count, m3);
+          /* Now delete all the temporaries */
+          for (i = 0; i < count; i++) {
+            /* Put the (same) extension into tmpi and tmpo */
+            tmpi[j] = '0' + i / 10;
+            tmpi[j + 1] = '0' + i % 10;
+            tmpo[k] = '0' + i / 10;
+            tmpo[k + 1] = '0' + i % 10;
+            remove(tmpi);
+            remove(tmpo);
+          }
+          free(tmpi);
+          free(tmpo);
+        }
+        return;
     }
     if( (hdr1[0]==1) && (hdr2[0]==3) )
     {
