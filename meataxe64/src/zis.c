@@ -15,6 +15,7 @@
 #include "funs.h"
 #include "bitstring.h"
 #include "util.h"
+#include "utils.h"
 
 /*
  * temporary files
@@ -33,7 +34,8 @@
 
 /* The multiplication results, concatenated */
 struct mult_result {
-  char *bs; /* The bitstring */
+  char *zbs; /* The leading zeroes */
+  char *sbs; /* The bitstring */
   char *rem; /* The remainder */
   char *plain; /* The NREF unrolled form for multiplying */
   uint64_t size; /* How many vectors */
@@ -55,7 +57,10 @@ static const char prog_name[] = "zis";
 
 static char *fun_tmp;
 
-/* Statics for clean operation */
+/*
+ * Statics for clean operation
+ * Also used in triaged multiply
+ */
 static char **clean_vars;
 
 /*
@@ -85,11 +90,37 @@ static void clean(const char *bs, const char *rem, const char *rows, const char 
   }
 }
 
+/*
+ * Function to do triaged multiply
+ * Two bit strings and a remnant form the left hand argument
+ * The first bitstring represnts the columns that are zero
+ * The second acts only on the non zero columns, and splits them
+ * into negative identity and a remnant.
+ * If the first bitstring is NULL,
+ * the second is assumed to cover the entire width
+ * These are applied to the incoming generator we wish to multiply by
+ * to reduce the size of the multiply in terms of rows of the generator
+ * clean_vars is used for temporary files, as this operation is not
+ * done during clean
+ */
+static void triage_multiply(const char *zbs, const char *sbs,
+                            const char *rem, const char *in, const char *out)
+{
+  /* Triage in into 0 and 1 using zbs and sbs */
+  fRowTriage(zbs, sbs, in, clean_vars[0], clean_vars[1]);
+  /* Negate 0 into 2 */
+  fNegate(clean_vars[0], clean_vars[2]);
+  /* multiply rem by 1 into 3 */
+  fMultiply(fun_tmp, rem, 1, clean_vars[1], 1, clean_vars[3], 1);
+  /* add 2 and 3 into out */
+  fAdd(clean_vars[2], 1, clean_vars[3], 1, out, 1);
+}
+
 #define FUN_TMP "_funs"
 
 int main(int argc, const char *argv[])
 {
-  /* Set up tmp stem tmp_pid*/
+  /* Set up tmp stem tmp_pid */
   const char *tmp_root = tmp_name();
   /* How long the temporary filename root is */
   size_t tmp_len = strlen(tmp_root);
@@ -123,7 +154,12 @@ int main(int argc, const char *argv[])
   uint64_t fdef = 0;
   uint64_t rank, mrank = 0;
   uint64_t hdr[5];
+  Dfmt *zero_bs_mem;
+  uint64_t size;
   gen *gens, *this_gen;
+  header hdrzbs;
+  EFIL *ezbs;
+
   CLogCmd(argc, argv);
   /* Check command line <vecs> <output stem> [<gen>*] */
   /* Must be at least 3 args */
@@ -185,7 +221,8 @@ int main(int argc, const char *argv[])
   }
   for (i = 0; i < ngens; i++) {
     gens[i].file = argv[i + 3];
-    gens[i].next_tbd.bs = mk_tmp(prog_name, tmp_root, tmp_len);
+    gens[i].next_tbd.zbs = mk_tmp(prog_name, tmp_root, tmp_len);
+    gens[i].next_tbd.sbs = mk_tmp(prog_name, tmp_root, tmp_len);
     gens[i].next_tbd.rem = mk_tmp(prog_name, tmp_root, tmp_len);
     gens[i].next_tbd.plain = mk_tmp(prog_name, tmp_root, tmp_len);
     gens[i].next_tbd.size = 0; /* Nothing assigned for multiply yet */
@@ -196,9 +233,26 @@ int main(int argc, const char *argv[])
    * Once multiplied by that it can form the first part
    * of the "multiplied by everything" result
    */
-  make_plain(NULL, in_vecs_bs, in_vecs_rem, gens[ngens - 1].next_tbd.plain, fdef);
+  /*make_plain(NULL, in_vecs_bs, in_vecs_rem, gens[ngens - 1].next_tbd.plain, fdef);*/
   rename(in_vecs_rem, gens[ngens - 1].next_tbd.rem);
-  rename(in_vecs_bs, gens[ngens - 1].next_tbd.bs);
+  rename(in_vecs_bs, gens[ngens - 1].next_tbd.sbs);
+  /* Create a header */
+  hdrzbs.named.nor = nor;
+  hdrzbs.named.noc = 0;
+  /* Create a file for write */
+  ezbs = EWHdr(gens[ngens - 1].next_tbd.zbs, hdrzbs.hdr);
+  /* create an area of correct size */
+  size = 8 * (2 + (nor + 63) / 64);
+  zero_bs_mem = malloc(size);
+  /* zero area */
+  memset(zero_bs_mem, 0, size);
+  /* Set up the first two words */
+  zero_bs_mem[0] = nor;
+  zero_bs_mem[1] = 0;
+  /* Write the data */
+  EWData(ezbs, size, zero_bs_mem);
+  /* close the file */
+  EWClose1(ezbs, 0);
   gens[ngens - 1].next_tbd.size = rank;
   this_gen = gens; /* The first one */
   while (mrank < rank && rank < nor) {
@@ -224,8 +278,11 @@ int main(int argc, const char *argv[])
           remove(clean_vars[0]);
           remove(clean_vars[1]);
         } else {
-          fMultiply(fun_tmp, mul_gen->next_tbd.plain, 1, 
-                    this_gen->file, 1, mul_tmp, 1);
+          /* Replace this with TriageMultiply */
+          triage_multiply(mul_gen->next_tbd.zbs, mul_gen->next_tbd.sbs,
+                          mul_gen->next_tbd.rem, this_gen->file, mul_tmp);
+          /*fMultiply(fun_tmp, mul_gen->next_tbd.plain, 1, 
+            this_gen->file, 1, mul_tmp, 1);*/
         }
         if (0 != mrank) {
           /* Clean this result with the overall multiplied stuff */
@@ -237,7 +294,7 @@ int main(int argc, const char *argv[])
         for (j = 0; j < ngens; j++) {
           /* Clean with clean_gen->mult_result.{bs,rem}, if it exists */
           if (0 != clean_gen->next_tbd.size) {
-            clean(clean_gen->next_tbd.bs, clean_gen->next_tbd.rem, clean_tmp1, clean_tmp2);
+            clean(clean_gen->next_tbd.sbs, clean_gen->next_tbd.rem, clean_tmp1, clean_tmp2);
             /* Now move tmp2 to tmp1 */
             rename (clean_tmp2, clean_tmp1);
           }
@@ -291,11 +348,10 @@ int main(int argc, const char *argv[])
     }
     /* Add in rank */
     rank += extra_rank;
-    /* TBD: is this all in the right order? */
     /*
      * Stuff to be manipulated
      * mult_result_bs: the pivot columns of the multiplied result
-     * this_gen->next_tbd.bs the pivots of what this gen last produced
+     * this_gen->next_tbd.sbs the pivots of what this gen last produced
      * ech_tmp_bsc: the combination of the above two, replacing mult_result_bs
      * zero_bs: the zeros so far in what we've cleaned
      * ech_tmp_bs: the pivots of what we've just produced
@@ -305,15 +361,16 @@ int main(int argc, const char *argv[])
     if (0 != extra_rank && rank < nor) {
       /* We can make the plain form for the next multiply */
       /* We don't bother if this is full rank */
-      make_plain(zero_bs, ech_tmp_bs, ech_tmp_rem, this_gen->next_tbd.plain, fdef);
+      /*make_plain(zero_bs, ech_tmp_bs, ech_tmp_rem, this_gen->next_tbd.plain, fdef);*/
+      copy_file(this_gen->next_tbd.zbs, zero_bs);
     }
     if (0 != this_gen->next_tbd.size) {
       /* Update the vectors multiplied if this generator has any */
       if (0 != mrank) {
         /* Back clean */
-        clean(this_gen->next_tbd.bs, this_gen->next_tbd.rem, mult_result_rem, clean_tmp1);
+        clean(this_gen->next_tbd.sbs, this_gen->next_tbd.rem, mult_result_rem, clean_tmp1);
         /* Combine pivots, getting new pivots and row riffle */
-        fPivotCombine(mult_result_bs, 1, this_gen->next_tbd.bs, 1, ech_tmp_bsc, 1, ech_tmp_bsr, 1);
+        fPivotCombine(mult_result_bs, 1, this_gen->next_tbd.sbs, 1, ech_tmp_bsc, 1, ech_tmp_bsr, 1);
         /* Riffle rows */
         fRowRiffle(ech_tmp_bsr, 1, clean_tmp1, 1, this_gen->next_tbd.rem, 1, mult_result_rem, 1);
         /* Renames and deletes */
@@ -321,7 +378,7 @@ int main(int argc, const char *argv[])
         remove(clean_tmp1);
       } else {
         /* First fully multiplied vectors */
-        rename(this_gen->next_tbd.bs, mult_result_bs);
+        rename(this_gen->next_tbd.sbs, mult_result_bs);
         rename(this_gen->next_tbd.rem, mult_result_rem);
       }
     }
@@ -333,7 +390,7 @@ int main(int argc, const char *argv[])
       /* Don't need the row riffle this time */
       remove(ech_tmp_bsr);
       /* Update this generator's tbd */
-      rename(ech_tmp_bs, this_gen->next_tbd.bs);
+      rename(ech_tmp_bs, this_gen->next_tbd.sbs);
       rename(ech_tmp_rem, this_gen->next_tbd.rem);
     }
     /* Update mrank with size we just multiplied */
@@ -408,8 +465,10 @@ int main(int argc, const char *argv[])
   remove(clean_tmp2);
   /* And the things in the gen structures */
   for (i = 0; i < ngens; i++) {
-    remove(gens[i].next_tbd.bs);
-    free(gens[i].next_tbd.bs);
+    remove(gens[i].next_tbd.sbs);
+    free(gens[i].next_tbd.sbs);
+    remove(gens[i].next_tbd.zbs);
+    free(gens[i].next_tbd.zbs);
     remove(gens[i].next_tbd.rem);
     free(gens[i].next_tbd.rem);
     remove(gens[i].next_tbd.plain);

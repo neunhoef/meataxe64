@@ -41,6 +41,8 @@ extern const char *get_str(FILE *f);
 
 extern void copy_rest(FILE *new, FILE *old);
 
+extern void copy_file(const char *new, const char *old);
+
 extern u32 skip_whitespace(u32 i, const char *chars);
 
 extern u32 skip_non_white(u32 i, const char *chars);

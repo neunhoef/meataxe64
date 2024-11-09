@@ -24,6 +24,18 @@ extern void fPivotCombine(const char *b1, int sb1, const char *b2, int sb2,
                           const char *bc, int sbc, const char *br, int sbr);
 extern uint64_t fColumnRiffleIdentity(const char *bs, int sbs,
               const char *rm, int srm, const char *out, int sout);
+/*
+ * A helper function for zis to take two bitstrings and a matrix
+ * The first bit string gives the rows to be ignored
+ * The second is those rows to be multipled by -1
+ * The non slected is to be multiplied by a remnant
+ */
+extern void fRowTriage(const char *zero_bs, const char *sig_bs, const char *in, const char *sel, const char *nsel);
+
+/*
+ * Helper function for zis and zsa to negate a matrix
+ */
+extern void fNegate(const char *in,  const char *out);
 
 // funs2 (small, composite) functions
 extern void fMultiplyAdd(const char * tmp, const char *m1, int s1,

@@ -149,6 +149,7 @@ void make_plain(const char *zero_bs, const char *nref_bs, const char *in, const 
   free(mo);
   free(f);
   free(bstm);
+  free(cb);
   if (NULL != ezbs) {
     free(bstz);
   }
