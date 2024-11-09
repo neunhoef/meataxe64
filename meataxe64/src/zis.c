@@ -278,7 +278,6 @@ int main(int argc, const char *argv[])
           remove(clean_vars[0]);
           remove(clean_vars[1]);
         } else {
-          /* Replace this with TriageMultiply */
           triage_multiply(mul_gen->next_tbd.zbs, mul_gen->next_tbd.sbs,
                           mul_gen->next_tbd.rem, this_gen->file, mul_tmp);
           /*fMultiply(fun_tmp, mul_gen->next_tbd.plain, 1, 
