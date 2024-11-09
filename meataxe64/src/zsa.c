@@ -126,6 +126,10 @@ int main(int argc, const char *argv[])
   strcat(sub_bs, ".bs");
   strcpy(sub_rem, sub_root);
   strcat(sub_rem, ".rem");
+  /* Temporary root for functions */
+  fun_tmp = malloc(tmp_len + sizeof(FUN_TMP) + 1);
+  strcpy(fun_tmp, tmp_root);
+  strcat(fun_tmp, FUN_TMP);
 #if !jgt
   /*
    * Algorithm (Parker original)
