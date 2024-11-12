@@ -281,10 +281,11 @@ int main(int argc, const char *argv[])
           remove(clean_vars[0]);
           remove(clean_vars[1]);
         } else {
-          triage_multiply(mul_gen->next_tbd.zbs, mul_gen->next_tbd.sbs,
-                          mul_gen->next_tbd.rem, this_gen->file, mul_tmp);
-          /*fMultiply(fun_tmp, mul_gen->next_tbd.plain, 1, 
-            this_gen->file, 1, mul_tmp, 1);*/
+          /*triage_multiply(mul_gen->next_tbd.zbs, mul_gen->next_tbd.sbs,
+            mul_gen->next_tbd.rem, this_gen->file, mul_tmp);*/
+          NOT_USED(triage_multiply);
+          fMultiply(fun_tmp, mul_gen->next_tbd.plain, 1, 
+                    this_gen->file, 1, mul_tmp, 1);
         }
         if (0 != mrank) {
           /* Clean this result with the overall multiplied stuff */
