@@ -61,7 +61,7 @@ static char *fun_tmp;
  * Statics for clean operation
  * Also used in triaged multiply
  */
-static char **clean_vars;
+static const char **clean_vars;
 
 /*
  * The clean operation
@@ -90,6 +90,7 @@ static void clean(const char *bs, const char *rem, const char *rows, const char 
   }
 }
 
+#if 0
 /*
  * Function to do triaged multiply
  * Two bit strings and a remnant form the left hand argument
@@ -115,6 +116,7 @@ static void triage_multiply(const char *zbs, const char *sbs,
   /* add 2 and 3 into out */
   fAdd(clean_vars[2], 1, clean_vars[3], 1, out, 1);
 }
+#endif
 
 #define FUN_TMP "_funs"
 
@@ -278,11 +280,12 @@ int main(int argc, const char *argv[])
           remove(clean_vars[0]);
           remove(clean_vars[1]);
         } else {
-          /* Replace this with TriageMultiply */
-          triage_multiply(mul_gen->next_tbd.zbs, mul_gen->next_tbd.sbs,
+/*          triage_multiply(mul_gen->next_tbd.zbs, mul_gen->next_tbd.sbs,
                           mul_gen->next_tbd.rem, this_gen->file, mul_tmp);
-          /*fMultiply(fun_tmp, mul_gen->next_tbd.plain, 1, 
-            this_gen->file, 1, mul_tmp, 1);*/
+*/
+          triage_multiply(mul_gen->next_tbd.zbs, mul_gen->next_tbd.sbs,
+                          mul_gen->next_tbd.rem, this_gen->file, mul_tmp,
+                          clean_vars, fun_tmp);
         }
         if (0 != mrank) {
           /* Clean this result with the overall multiplied stuff */

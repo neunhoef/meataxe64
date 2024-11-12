@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include "field.h"
 #include "mfuns.h"
+#include "funs.h"
 #include "io.h"
 #include "bitstring.h"
 #include "slab.h"
@@ -203,6 +204,21 @@ int ident(uint64_t fdef, uint64_t nor, uint64_t noc, uint64_t elt,
   }
   EWClose(e);
   return 1;
+}
+
+/* Triaged multiply */
+void triage_multiply(const char *zbs, const char *sbs,
+                     const char *rem, const char *in, const char *out,
+                     const char *tmp_vars[], const char *fun_tmp)
+{
+  /* Triage in into 0 and 1 using zbs and sbs */
+  fRowTriage(zbs, sbs, in, tmp_vars[0], tmp_vars[1]);
+  /* Negate 0 into 2 */
+  fNegate(tmp_vars[0], tmp_vars[2]);
+  /* multiply rem by 1 into 3 */
+  fMultiply(fun_tmp, rem, 1, tmp_vars[1], 1, tmp_vars[3], 1);
+  /* add 2 and 3 into out */
+  fAdd(tmp_vars[2], 1, tmp_vars[3], 1, out, 1);
 }
 
 /* Slicing and splicing */

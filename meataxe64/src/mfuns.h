@@ -30,7 +30,23 @@ extern void make_plain(const char *zero_bs, const char *nref_bs, const char *in,
 extern int ident(uint64_t fdef, uint64_t nor, uint64_t noc, uint64_t elt,
                  const char *out);
 
-extern void make_plain(const char *zero_bs, const char *nref_bs, const char *in, const char *out, uint64_t fdef);
+/*
+ * Function to do triaged multiply
+ * Two bit strings and a remnant form the left hand argument
+ * The first bitstring represnts the columns that are zero
+ * The second acts only on the non zero columns, and splits them
+ * into negative identity and a remnant.
+ * If the first bitstring is NULL,
+ * the second is assumed to cover the entire width
+ * These are applied to what we wish to multiply by
+ * to reduce the size of the multiply in terms of rows
+ * tmp_vars is used for temporary files; the names must be allocated
+ * and there must be at least 4 of them in the array
+ * fun_tmp is passed through as a temporary file root
+ */
+extern void triage_multiply(const char *zbs, const char *sbs,
+                            const char *rem, const char *in, const char *out,
+                            const char *tmp_vars[], const char *fun_tmp);
 
 /* Slicing and splicing */
 extern void slice(const char *input, unsigned int slices, const char *output_stem);
