@@ -37,6 +37,7 @@ struct mult_result {
   char *zbs; /* The leading zeroes */
   char *sbs; /* The bitstring */
   char *rem; /* The remainder */
+  int has_plain; /* 1 if we've made plain, 0 otherwise */
   char *plain; /* The NREF unrolled form for multiplying */
   uint64_t size; /* How many vectors */
 };
@@ -226,6 +227,7 @@ int main(int argc, const char *argv[])
     gens[i].next_tbd.zbs = mk_tmp(prog_name, tmp_root, tmp_len);
     gens[i].next_tbd.sbs = mk_tmp(prog_name, tmp_root, tmp_len);
     gens[i].next_tbd.rem = mk_tmp(prog_name, tmp_root, tmp_len);
+    gens[i].next_tbd.has_plain = 0;
     gens[i].next_tbd.plain = mk_tmp(prog_name, tmp_root, tmp_len);
     gens[i].next_tbd.size = 0; /* Nothing assigned for multiply yet */
     gens[i].next = gens + ((i + 1) % ngens); /* A circular list */
@@ -235,7 +237,8 @@ int main(int argc, const char *argv[])
    * Once multiplied by that it can form the first part
    * of the "multiplied by everything" result
    */
-  /*make_plain(NULL, in_vecs_bs, in_vecs_rem, gens[ngens - 1].next_tbd.plain, fdef);*/
+  make_plain(NULL, in_vecs_bs, in_vecs_rem, gens[ngens - 1].next_tbd.plain, fdef);
+  gens[ngens - 1].next_tbd.has_plain = 1;
   rename(in_vecs_rem, gens[ngens - 1].next_tbd.rem);
   rename(in_vecs_bs, gens[ngens - 1].next_tbd.sbs);
   /* Create a header */
@@ -280,12 +283,11 @@ int main(int argc, const char *argv[])
           remove(clean_vars[0]);
           remove(clean_vars[1]);
         } else {
-/*          triage_multiply(mul_gen->next_tbd.zbs, mul_gen->next_tbd.sbs,
-                          mul_gen->next_tbd.rem, this_gen->file, mul_tmp);
-*/
-          triage_multiply(mul_gen->next_tbd.zbs, mul_gen->next_tbd.sbs,
-                          mul_gen->next_tbd.rem, this_gen->file, mul_tmp,
-                          clean_vars, fun_tmp);
+          /*triage_multiply(mul_gen->next_tbd.zbs, mul_gen->next_tbd.sbs,
+            mul_gen->next_tbd.rem, this_gen->file, mul_tmp);*/
+          NOT_USED(triage_multiply);
+          fMultiply(fun_tmp, mul_gen->next_tbd.plain, 1, 
+                    this_gen->file, 1, mul_tmp, 1);
         }
         if (0 != mrank) {
           /* Clean this result with the overall multiplied stuff */
@@ -364,7 +366,8 @@ int main(int argc, const char *argv[])
     if (0 != extra_rank && rank < nor) {
       /* We can make the plain form for the next multiply */
       /* We don't bother if this is full rank */
-      /*make_plain(zero_bs, ech_tmp_bs, ech_tmp_rem, this_gen->next_tbd.plain, fdef);*/
+      make_plain(zero_bs, ech_tmp_bs, ech_tmp_rem, this_gen->next_tbd.plain, fdef);
+      this_gen->next_tbd.has_plain = 1;
       copy_file(this_gen->next_tbd.zbs, zero_bs);
     }
     if (0 != this_gen->next_tbd.size) {
