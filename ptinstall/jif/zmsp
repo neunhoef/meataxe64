@@ -17,7 +17,7 @@ fi
 infile=$1
 outfile=$2
 shift 2
-out=`${dir}/../bin/zis ${infile} ${outfile} $*`
+out=`${dir}/../bin/zis ${infile} ${outfile} $* | egrep -v "^f" | egrep -v "siz" | grep -v "Adding "`
 ret=$?
 echo $out
 exit $ret

@@ -23,7 +23,7 @@ if [ ! -e ${infile} ]; then
     exit 1
 fi
 tmp=tmp$$
-out=`${dir}/../bin/zpe ${infile} ${tmp}.{bs,rem}`
+out=`${dir}/../bin/zpe ${infile} ${tmp}.{bs,rem} | egrep -v "^f"`
 ret=$?
 if [ 0 -ne $ret ]; then
     exit 1
