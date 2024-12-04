@@ -5,6 +5,7 @@
 # Parameters as for zbase in meataxe 2000
 # ie [-m <memory] <infile> <dir> <outfile>
 #
+set -x
 dir=`dirname $0`
 if [ $# -ne 3 -a $# -ne 5 ]; then
    echo "zbase: bad parameters"
@@ -22,7 +23,7 @@ if [ ! -e ${infile} ]; then
     exit 1
 fi
 tmp=tmp$$
-out=`${dir}/../bin/zpe ${infile} ${tmp}.{bs,rem}`
+out=`${dir}/../bin/zpe ${infile} ${tmp}.{bs,rem} | egrep -v "^f"`
 ret=$?
 if [ 1 -eq $ret ]; then
     if [ -e ${tmp}.bs -a ${tmp}.rem ]; then
@@ -38,7 +39,7 @@ if [ 0 -eq $ret ]; then
         rm ${tmp}.{bs,rem}
         exit 1
     fi
-    zpr ${tmp}.out
+    #zpr ${tmp}.out
     ${dir}/../bin/zng ${tmp}.out ${outfile}
     ret=$?
     if [ 0 -ne $ret ]; then

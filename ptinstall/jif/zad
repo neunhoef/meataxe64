@@ -17,6 +17,6 @@ fi
 infile1=$1
 infile2=$2
 outfile=$3
-${dir}/../bin/zad ${infile1} ${infile2} ${outfile}
+${dir}/../bin/zad ${infile1} ${infile2} ${outfile} 1>/dev/null
 ret=$?
 exit $ret
