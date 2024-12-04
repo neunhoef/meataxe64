@@ -18,7 +18,7 @@ infile=$1
 outfile=$2
 shift 2
 tmp=tmp${PPID}
-out=`${dir}/../bin/zsb ${infile} ${tmp}.ss $*`
+out=`${dir}/../bin/zsb ${infile} ${tmp}.ss $* | egrep -v "^f" | egrep -v "siz"`
 ret=$?
 rm -f ${tmp}.ss.{bs,rem}
 mv ${tmp}.ss.sb ${outfile}

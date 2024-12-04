@@ -16,7 +16,7 @@ if [ 4 -eq $# ]; then
 fi
 infile=$1
 outfile=$2
-out=`${dir}/../bin/znu ${infile} ${outfile}`
+out=`${dir}/../bin/znu ${infile} ${outfile} | grep "Nullity "`
 ret=$?
 if [ 0 -eq $ret ]; then
     echo ${out} | sed -e "s/Nullity //"
