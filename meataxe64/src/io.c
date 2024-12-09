@@ -423,6 +423,7 @@ int EWClose1(EFIL * e, int mode)
         XLock();
         logfile=fopen("logfile","ab");
         fprintf(logfile,"11 %s ",e->fn);
+#if 0
         for(i=1;i<=2;i++)
         {
             x=pt[i];
@@ -434,6 +435,270 @@ int EWClose1(EFIL * e, int mode)
                 fprintf(logfile,"%c",k);
             }
         }
+#else
+        /* Unrolled version so we can see why valgrind objects */
+        i = 1;
+        x=hash1(e);
+        /*x=pt[i];*/
+        j = 0;
+        k=(x>>(60-4*j))&15;
+        if(k<10) {
+          k+='0';
+        } else {
+          k+='A'-10;
+        }
+        fprintf(logfile,"%c",k);
+        j = 1;
+        k=(x>>(60-4*j))&15;
+        if(k<10) {
+          k+='0';
+        } else {
+          k+='A'-10;
+        }
+        fprintf(logfile,"%c",k);
+        j = 2;
+        k=(x>>(60-4*j))&15;
+        if(k<10) {
+          k+='0';
+        } else {
+          k+='A'-10;
+        }
+        fprintf(logfile,"%c",k);
+        j = 3;
+        k=(x>>(60-4*j))&15;
+        if(k<10) {
+          k+='0';
+        } else {
+          k+='A'-10;
+        }
+        fprintf(logfile,"%c",k);
+        j = 4;
+        k=(x>>(60-4*j))&15;
+        if(k<10) {
+          k+='0';
+        } else {
+          k+='A'-10;
+        }
+        fprintf(logfile,"%c",k);
+        j = 5;
+        k=(x>>(60-4*j))&15;
+        if(k<10) {
+          k+='0';
+        } else {
+          k+='A'-10;
+        }
+        fprintf(logfile,"%c",k);
+        j = 6;
+        k=(x>>(60-4*j))&15;
+        if(k<10) {
+          k+='0';
+        } else {
+          k+='A'-10;
+        }
+        fprintf(logfile,"%c",k);
+        j = 7;
+        k=(x>>(60-4*j))&15;
+        if(k<10) {
+          k+='0';
+        } else {
+          k+='A'-10;
+        }
+        fprintf(logfile,"%c",k);
+        j = 8;
+        k=(x>>(60-4*j))&15;
+        if(k<10) {
+          k+='0';
+        } else {
+          k+='A'-10;
+        }
+        fprintf(logfile,"%c",k);
+        j = 9;
+        k=(x>>(60-4*j))&15;
+        if(k<10) {
+          k+='0';
+        } else {
+          k+='A'-10;
+        }
+        fprintf(logfile,"%c",k);
+        j = 10;
+        k=(x>>(60-4*j))&15;
+        if(k<10) {
+          k+='0';
+        } else {
+          k+='A'-10;
+        }
+        fprintf(logfile,"%c",k);
+        j = 11;
+        k=(x>>(60-4*j))&15;
+        if(k<10) {
+          k+='0';
+        } else {
+          k+='A'-10;
+        }
+        fprintf(logfile,"%c",k);
+        j = 12;
+        k=(x>>(60-4*j))&15;
+        if(k<10) {
+          k+='0';
+        } else {
+          k+='A'-10;
+        }
+        fprintf(logfile,"%c",k);
+        j = 13;
+        k=(x>>(60-4*j))&15;
+        if(k<10) {
+          k+='0';
+        } else {
+          k+='A'-10;
+        }
+        fprintf(logfile,"%c",k);
+        j = 14;
+        k=(x>>(60-4*j))&15;
+        if(k<10) {
+          k+='0';
+        } else {
+          k+='A'-10;
+        }
+        fprintf(logfile,"%c",k);
+        j = 15;
+        k=(x>>(60-4*j))&15;
+        if(k<10) {
+          k+='0';
+        } else {
+          k+='A'-10;
+        }
+        fprintf(logfile,"%c",k);
+        i = 2;
+        x=pt[i];
+        j = 0;
+        k=(x>>(60-4*j))&15;
+        if(k<10) {
+          k+='0';
+        } else {
+          k+='A'-10;
+        }
+        fprintf(logfile,"%c",k);
+        j = 1;
+        k=(x>>(60-4*j))&15;
+        if(k<10) {
+          k+='0';
+        } else {
+          k+='A'-10;
+        }
+        fprintf(logfile,"%c",k);
+        j = 2;
+        k=(x>>(60-4*j))&15;
+        if(k<10) {
+          k+='0';
+        } else {
+          k+='A'-10;
+        }
+        fprintf(logfile,"%c",k);
+        j = 3;
+        k=(x>>(60-4*j))&15;
+        if(k<10) {
+          k+='0';
+        } else {
+          k+='A'-10;
+        }
+        fprintf(logfile,"%c",k);
+        j = 4;
+        k=(x>>(60-4*j))&15;
+        if(k<10) {
+          k+='0';
+        } else {
+          k+='A'-10;
+        }
+        fprintf(logfile,"%c",k);
+        j = 5;
+        k=(x>>(60-4*j))&15;
+        if(k<10) {
+          k+='0';
+        } else {
+          k+='A'-10;
+        }
+        fprintf(logfile,"%c",k);
+        j = 6;
+        k=(x>>(60-4*j))&15;
+        if(k<10) {
+          k+='0';
+        } else {
+          k+='A'-10;
+        }
+        fprintf(logfile,"%c",k);
+        j = 7;
+        k=(x>>(60-4*j))&15;
+        if(k<10) {
+          k+='0';
+        } else {
+          k+='A'-10;
+        }
+        fprintf(logfile,"%c",k);
+        j = 8;
+        k=(x>>(60-4*j))&15;
+        if(k<10) {
+          k+='0';
+        } else {
+          k+='A'-10;
+        }
+        fprintf(logfile,"%c",k);
+        j = 9;
+        k=(x>>(60-4*j))&15;
+        if(k<10) {
+          k+='0';
+        } else {
+          k+='A'-10;
+        }
+        fprintf(logfile,"%c",k);
+        j = 10;
+        k=(x>>(60-4*j))&15;
+        if(k<10) {
+          k+='0';
+        } else {
+          k+='A'-10;
+        }
+        fprintf(logfile,"%c",k);
+        j = 11;
+        k=(x>>(60-4*j))&15;
+        if(k<10) {
+          k+='0';
+        } else {
+          k+='A'-10;
+        }
+        fprintf(logfile,"%c",k);
+        j = 12;
+        k=(x>>(60-4*j))&15;
+        if(k<10) {
+          k+='0';
+        } else {
+          k+='A'-10;
+        }
+        fprintf(logfile,"%c",k);
+        j = 13;
+        k=(x>>(60-4*j))&15;
+        if(k<10) {
+          k+='0';
+        } else {
+          k+='A'-10;
+        }
+        fprintf(logfile,"%c",k);
+        j = 14;
+        k=(x>>(60-4*j))&15;
+        if(k<10) {
+          k+='0';
+        } else {
+          k+='A'-10;
+        }
+        fprintf(logfile,"%c",k);
+        j = 15;
+        k=(x>>(60-4*j))&15;
+        if(k<10) {
+          k+='0';
+        } else {
+          k+='A'-10;
+        }
+        fprintf(logfile,"%c",k);
+#endif
         fprintf(logfile,"\n");
         fclose(logfile);
         XUnlock();

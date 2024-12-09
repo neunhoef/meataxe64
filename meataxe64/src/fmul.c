@@ -12,8 +12,9 @@
 #include "funs.h"
 #include "slab.h"
 #include "mfuns.h"
+#include "parse.h"
 
-void fMultiply(const char *tmp,const char *m1, int s1, 
+void fMultiply(const char *tmp, const char *m1, int s1, 
                const char *m2, int s2, const char *m3, int s3)
 {
     uint64_t hdr1[5],hdr2[5];
@@ -25,6 +26,9 @@ void fMultiply(const char *tmp,const char *m1, int s1,
     uint64_t i, j;
     EPeek(m1,hdr1);
     EPeek(m2,hdr2);
+    if (very_verbose) {
+      printf("fMultiply %s by %s giving %s\n", m1, m2, m3);
+    }
     if( (hdr1[0]==1) && (hdr2[0]==1) )  //flat matrix multiply
     {
         fdef=hdr1[1];
@@ -64,6 +68,9 @@ void fMultiply(const char *tmp,const char *m1, int s1,
             free(am);
             free(bm);
             free(cm);
+            if (very_verbose) {
+              printf("fMultiply %s by %s giving %s done\n", m1, m2, m3);
+            }
             return;
         }
 //  Consider disk chopping
@@ -73,17 +80,18 @@ void fMultiply(const char *tmp,const char *m1, int s1,
         siz=sizb;
         if(sizac<siz) siz=sizac;    // siz is smaller of B, A+C
         siz=siz/f->megabytes;
-        siz=siz/500000;        // how many memoryfulls
+        siz=siz/250000;        /* We need 4 times as much memory as the files */
         chops=1;
         while((chops*chops)<=siz) chops++;
         if(chops==1)   // chopping into one piece!
         {
             mmul(m1,s1,m2,s2,m3,s3);
+            if (very_verbose) {
+              printf("fMultiply %s by %s giving %s done\n", m1, m2, m3);
+            }
+            free(f);
             return;
         }
-#if 0
-        printf("Chopping by 1 < chops <= %lu\n", chops * chops);
-#endif
         /* Extensions of temporary names for split multiply */
 #define IN_EXT "_fmuli"
 #define OUT_EXT "_fmulo"
@@ -135,16 +143,26 @@ void fMultiply(const char *tmp,const char *m1, int s1,
           free(tmpi);
           free(tmpo);
         }
+        if (very_verbose) {
+          printf("fMultiply %s by %s giving %s done\n", m1, m2, m3);
+        }
+        free(f);
         return;
     }
     if( (hdr1[0]==1) && (hdr2[0]==3) )
     {
         fMulMatrixMap(m1,s1,m2,s2,m3,s3);
+        if (very_verbose) {
+          printf("fMultiply %s by %s giving %s done\n", m1, m2, m3);
+        }
         return;
     }
     if( (hdr1[0]==3) && (hdr2[0]==3) )
     {
         fMulMaps(m1,s1,m2,s2,m3,s3);
+        if (very_verbose) {
+          printf("fMultiply %s by %s giving %s done\n", m1, m2, m3);
+        }
         return;
     }
     if( (hdr1[0]==3) && (hdr2[0]==1) )    // map * matrix
@@ -176,7 +194,11 @@ void fMultiply(const char *tmp,const char *m1, int s1,
         }
         ERClose1(e1,s1);
         EWClose1(e3,s3);
+        free(f);
         free(bm);
+        if (very_verbose) {
+          printf("fMultiply %s by %s giving %s done\n", m1, m2, m3);
+        }
         return;
     }
     printf("fMultiply cannot handle these matrix types\n");

@@ -17,11 +17,12 @@
 #include "funs.h"
 #include "io.h"
 #include "bitstring.h"
+#include "parse.h"
 
 // fColumnExtract
  
 void fColumnExtract(const char *bs, int sbs, const char *in, int sin, 
-          const char *sel, int ssel, const char * nsel, int snsel) 
+                    const char *sel, int ssel, const char *nsel, int snsel) 
 {
     EFIL *e1,*e2,*e3,*e4;
     uint64_t hdr1[5],hdr2[5];
@@ -33,6 +34,9 @@ void fColumnExtract(const char *bs, int sbs, const char *in, int sin,
     Dfmt *d,*d1,*d2;
     uint64_t * bsdata;
 
+    if (very_verbose) {
+      printf("fColumnExtract %s, %s giving %s, %s\n", bs, in, sel, nsel);
+    }
     e1=ERHdr(bs,hdr1);   // bit string
     e2=ERHdr(in,hdr2);   // matrix
     fdef=hdr2[1];
@@ -90,11 +94,14 @@ void fColumnExtract(const char *bs, int sbs, const char *in, int sin,
     free(d1);
     free(d2);
     free(bsdata);
+    if (very_verbose) {
+      printf("fColumnExtract %s, %s giving %s, %s done\n", bs, in, sel, nsel);
+    }
     return;
 }
 
-void fRowRiffle(const char *bs, int sbs, const char * ins, int sins,
-                 const char * inn, int sinn, const char * out, int sout)
+void fRowRiffle(const char *bs, int sbs, const char *ins, int sins,
+                const char *inn, int sinn, const char *out, int sout)
 {
     EFIL *e1,*e2,*e3,*e4;
     uint64_t hdr1[5],hdr2[5],hdr3[5];
@@ -105,6 +112,9 @@ void fRowRiffle(const char *bs, int sbs, const char * ins, int sins,
     uint64_t * bsdata;
     uint64_t i,siz;
 
+    if (very_verbose) {
+      printf("fRowRiffle %s, %s, %s giving %s\n", bs, ins, inn, out);
+    }
     e1=ERHdr(bs,hdr1);   // bs
     e2=ERHdr(ins,hdr2);   // m1
     e3=ERHdr(inn,hdr3);   // m0
@@ -139,6 +149,9 @@ void fRowRiffle(const char *bs, int sbs, const char * ins, int sins,
     free(f);
     free(v);
     free(bsdata);
+    if (very_verbose) {
+      printf("fRowRiffle %s, %s, %s giving %s done\n", bs, ins, inn, out);
+    }
 }
 
 void fPivotCombine(const char *b1, int sb1, const char *b2, int sb2,
@@ -150,6 +163,9 @@ void fPivotCombine(const char *b1, int sb1, const char *b2, int sb2,
     size_t siz,siz4;
     uint64_t *bs1,*bs2,*bs3,*bs4;
 
+    if (very_verbose) {
+      printf("fPivotCombine %s, %s giving %s, %s\n", b1, b2, bc, br);
+    }
     e1=ERHdr(b1,hdr1);   // b1 old pivots
     e2=ERHdr(b2,hdr2);   // b2 new pivots
     nor=hdr1[2];         // total bits
@@ -190,6 +206,9 @@ void fPivotCombine(const char *b1, int sb1, const char *b2, int sb2,
     free(bs2);
     free(bs3);
     free(bs4);
+    if (very_verbose) {
+      printf("fPivotCombine %s, %s giving %s, %s done\n", b1, b2, bc, br);
+    }
 }
 
 uint64_t fColumnRiffleIdentity(const char *bs, int sbs, 

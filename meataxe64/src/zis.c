@@ -16,6 +16,7 @@
 #include "bitstring.h"
 #include "util.h"
 #include "utils.h"
+#include "parse.h"
 
 /*
  * temporary files
@@ -62,7 +63,7 @@ static char *fun_tmp;
  * Statics for clean operation
  * Also used in triaged multiply
  */
-static const char **clean_vars;
+static char **clean_vars;
 
 /*
  * The clean operation
@@ -258,6 +259,7 @@ int main(int argc, const char *argv[])
   EWData(ezbs, size, zero_bs_mem);
   /* close the file */
   EWClose1(ezbs, 0);
+  free(zero_bs_mem);
   gens[ngens - 1].next_tbd.size = rank;
   this_gen = gens; /* The first one */
   while (mrank < rank && rank < nor) {
@@ -353,6 +355,9 @@ int main(int argc, const char *argv[])
     }
     /* Add in rank */
     rank += extra_rank;
+    if (verbose) {
+      printf("Adding %lu rows giving %lu rows\n", extra_rank, rank);
+    }
     /*
      * Stuff to be manipulated
      * mult_result_bs: the pivot columns of the multiplied result
@@ -420,8 +425,6 @@ int main(int argc, const char *argv[])
      */
     rename(mult_result_bs, out_bs);
     rename(mult_result_rem, out_rem);
-    free(out_bs);
-    free(out_rem);
   } else {
     /*
      * Whole space case.
@@ -455,7 +458,10 @@ int main(int argc, const char *argv[])
     /* Write the bitstring */
     EWData(out, rslen, (uint8_t *)bsrs);
     EWClose1(out, 0);
+    free(bsrs);
   }
+  free(out_bs);
+  free(out_rem);
   /* Delete temps */
   remove(mult_result_bs);
   remove(mult_result_rem);
@@ -497,6 +503,10 @@ int main(int argc, const char *argv[])
   free(clean_tmp1);
   free(clean_tmp2);
   free(fun_tmp);
+  for (i = 0; i < 6; i++) {
+    free(clean_vars[i]);
+  }
+  free(clean_vars);
   /* Return the rank */
   printf("%lu\n", rank);
   return 0;
