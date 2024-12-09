@@ -13,6 +13,7 @@
 #include "io.h"
 #include "bitstring.h"
 #include "slab.h"
+#include "utils.h"
 
 void make_plain(const char *zero_bs, const char *nref_bs, const char *in, const char *out, uint64_t fdef)
 {
@@ -345,4 +346,51 @@ void splice(const char *input_stem, unsigned int slices, const char *output)
   EWClose(oup);
   free(f);
   free(v1);
+}
+
+void cat(const char *files[], const char *out, unsigned int count)
+{
+  unsigned int i;
+  uint64_t fdef, noc, maxnor, norout;
+  uint64_t hdr[5];
+  DSPACE ds;
+  EFIL *e1,*e2;
+  FIELD *f;
+  Dfmt *m;
+
+  EPeek(files[0], hdr);
+  fdef = hdr[1];
+  noc = hdr[3];
+  norout = hdr[2];
+  maxnor = hdr[2];
+  for (i = 1; i < count; i++) {
+    EPeek(files[i], hdr);
+    if ((fdef != hdr[1]) || (noc != hdr[3])) {
+      printf("Matrices incompatible\n");
+      exit(7);
+    }
+    norout += hdr[2];
+    if (maxnor < hdr[2]) {
+      maxnor = hdr[2];
+    }
+  }
+  hdr[2] = norout;
+  e2 = EWHdr(out, hdr);
+  f = malloc(FIELDLEN);
+  if (NULL == f) {
+    LogString(81,"Can't malloc field structure");
+    exit(22);
+  }
+  FieldASet(fdef, f);
+  DSSet(f, noc, &ds);
+  m = malloc(ds.nob * maxnor);
+  for (i = 0; i < count; i++) {
+    e1 = ERHdr(files[i], hdr);
+    ERData(e1, ds.nob * hdr[2], m);
+    EWData(e2, ds.nob * hdr[2], m);
+    ERClose(e1);
+  }
+  EWClose(e2);
+  free(m);
+  free(f);
 }

@@ -53,4 +53,6 @@ extern void slice(const char *input, unsigned int slices, const char *output_ste
 
 extern void splice(const char *input_stem, unsigned int slices, const char *output);
 
+extern void cat(const char *files[], const char *out, unsigned int count);
+
 #endif /* MFUNS_H */
