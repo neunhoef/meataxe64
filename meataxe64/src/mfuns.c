@@ -394,3 +394,30 @@ void cat(const char *files[], const char *out, unsigned int count)
   free(m);
   free(f);
 }
+
+uint64_t *perm_inv(const char *perm, uint64_t *nor)
+{
+  uint64_t hdr[5];
+  uint64_t noc, i, k;
+  uint64_t *inv;
+  EFIL *e1 = ERHdr(perm, hdr);
+  *nor = hdr[2];
+  noc = hdr[3];
+  if (*nor != noc) {
+    printf("Invert - map not square\n");
+    exit(15);
+  }
+  inv = malloc(8 * noc);
+  memset(inv, 0xff, 8 * noc);
+  for (i = 0; i < noc; i++) {
+    ERData(e1, 8, (uint8_t *)&k);
+    if (0xffffffffffffffff == inv[k]) {
+      inv[k] = i;
+    } else {
+      printf("Invert - map not invertible\n");
+      exit(15);
+    }
+  }
+  ERClose(e1);
+  return inv;
+}

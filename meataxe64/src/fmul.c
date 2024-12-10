@@ -167,6 +167,16 @@ void fMultiply(const char *tmp, const char *m1, int s1,
     }
     if( (hdr1[0]==3) && (hdr2[0]==1) )    // map * matrix
     {
+      /* This case is a PITA.
+       * the code below attempts to read the entire right hand argument B
+       * into real memory and then write it out permuted
+       * This is obviously going to run out of memory when B is very large
+       * Probably we should just write out uncompressed vectors into
+       * a file, placing each at the correct offset,
+       * and then read them back and write them using IO
+       * To do this, we need to invert the permutation,
+       * which we can do in memory.
+       */
         e1=ERHdr(m1,hdr1);
         e2=ERHdr(m2,hdr2);
         fdef=hdr2[1];

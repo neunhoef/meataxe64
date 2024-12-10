@@ -130,6 +130,7 @@ int main(int argc, const char *argv[])
 
   if (is_perm) {
     int res;
+    const char *files[] = {sub_rem, seln};
     /*
      * Let the subspace have dimension r and codimension s
      * Then rem is r x s. We extend by adding an s x s identity
@@ -143,7 +144,8 @@ int main(int argc, const char *argv[])
     EPeek(sub_rem, hdr.hdr);
     res = ident(hdr.named.fdef, hdr.named.noc, hdr.named.noc, 1, seln);
     NOT_USED(res);
-    /* Use guts of zcn (split out) to create selc */
+    /* Concatenate rem and seln to create selc */
+    cat(files, selc, 2);
     fMultiply(fun_tmp, argv[2], 0, selc, 0, selm, 0);
     /* Now take the non-selected part of selm */
     fRowExtract(sub_bs, seln, argv[3]);
