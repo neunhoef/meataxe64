@@ -351,7 +351,7 @@ void splice(const char *input_stem, unsigned int slices, const char *output)
 void cat(const char *files[], const char *out, unsigned int count)
 {
   unsigned int i;
-  uint64_t fdef, noc, maxnor, norout;
+  uint64_t fdef, noc, nor, norout, j;
   uint64_t hdr[5];
   DSPACE ds;
   EFIL *e1,*e2;
@@ -362,7 +362,6 @@ void cat(const char *files[], const char *out, unsigned int count)
   fdef = hdr[1];
   noc = hdr[3];
   norout = hdr[2];
-  maxnor = hdr[2];
   for (i = 1; i < count; i++) {
     EPeek(files[i], hdr);
     if ((fdef != hdr[1]) || (noc != hdr[3])) {
@@ -370,9 +369,6 @@ void cat(const char *files[], const char *out, unsigned int count)
       exit(7);
     }
     norout += hdr[2];
-    if (maxnor < hdr[2]) {
-      maxnor = hdr[2];
-    }
   }
   hdr[2] = norout;
   e2 = EWHdr(out, hdr);
@@ -383,11 +379,14 @@ void cat(const char *files[], const char *out, unsigned int count)
   }
   FieldASet(fdef, f);
   DSSet(f, noc, &ds);
-  m = malloc(ds.nob * maxnor);
+  m = malloc(ds.nob);
   for (i = 0; i < count; i++) {
     e1 = ERHdr(files[i], hdr);
-    ERData(e1, ds.nob * hdr[2], m);
-    EWData(e2, ds.nob * hdr[2], m);
+    nor = hdr[2];
+    for (j = 0; j < nor; j++) {
+      ERData(e1, ds.nob, m);
+      EWData(e2, ds.nob, m);
+    }
     ERClose(e1);
   }
   EWClose(e2);

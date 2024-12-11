@@ -42,9 +42,9 @@ static void fRowExtract(const char *bs, const char *in, const char *nsel)
   nor = hdrbs.named.nor; /* Total bits */
   noc = hdrio.named.noc; /* Elements per row */
   fdef = hdrio.named.fdef;
-  if (nor != hdrio.named.nor || noc != nor) {
+  if (nor != hdrio.named.nor) {
     /* Should be same as for generator */
-    fprintf(stderr, "%s: %s, %s different number of rows or columns, exiting\n", prog_name, bs, in);
+    fprintf(stderr, "%s: %s, %s different number of rows, exiting\n", prog_name, bs, in);
     exit(1);
   }
   f = malloc(FIELDLEN);
@@ -140,15 +140,17 @@ int main(int argc, const char *argv[])
      * and N is the non-selected columns, both of the
      * notional non-selected rows of the permutation
      */
-    /* */
     EPeek(sub_rem, hdr.hdr);
     res = ident(hdr.named.fdef, hdr.named.noc, hdr.named.noc, 1, seln);
     NOT_USED(res);
     /* Concatenate rem and seln to create selc */
     cat(files, selc, 2);
+    /* We could consider doing the multiply in line
+     * and only writing out the rows we want (ie the non-sel ones)
+     */
     fMultiply(fun_tmp, argv[2], 0, selc, 0, selm, 0);
     /* Now take the non-selected part of selm */
-    fRowExtract(sub_bs, seln, argv[3]);
+    fRowExtract(sub_bs, selm, argv[3]);
   } else {
     /* Row select non-selected rows from gen (argv[2]) */
     fRowExtract(sub_bs, argv[2], seln);
