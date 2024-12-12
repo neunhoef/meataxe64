@@ -10,3 +10,6 @@ representation theory.
 
 This project was started by Richard Parker and is now maintained by
 Jon Thackray.
+
+Currently, there is no code in this repository, but this is soon to be
+added.
