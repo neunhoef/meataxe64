@@ -8,64 +8,19 @@
 #include <stdint.h>
 #include "field.h"
 #include "io.h"
- 
-int main(int argc,  char **argv)
+#include "mfuns.h"
+
+int main(int argc, const char *argv[])
 {
-    int nof,i;
-    uint64_t fdef,noc,maxnor,norout;
-    uint64_t hdr[5];
-    DSPACE ds;
-    EFIL *e1,*e2;
-    FIELD *f;
-    Dfmt *m;
+  int nof = argc - 2;
 
-    LogCmd(argc,argv);
-    nof=argc-2;
-
-    if(argc<2)
-    {
-        LogString(80,"usage zcn <m1> <m2> . . . <concat>");
-        exit(14);
-    }        
-
-    EPeek(argv[1],hdr);
-    fdef=hdr[1];
-    noc=hdr[3];
-    norout=hdr[2];
-    maxnor=hdr[2];
-    for(i=2;i<=nof;i++)
-    {
-        EPeek(argv[i],hdr);
-        if( (fdef!=hdr[1]) || (noc!=hdr[3]) )
-        {
-            printf("Matrices incompatible\n");
-            exit(7);
-        }
-        norout+=hdr[2];
-        if(maxnor<hdr[2]) maxnor=hdr[2];
-    }
-    hdr[2]=norout;
-    e2=EWHdr(argv[nof+1],hdr);
-    f = malloc(FIELDLEN);
-    if(f==NULL)
-    {
-        LogString(81,"Can't malloc field structure");
-        exit(22);
-    }
-    FieldASet(fdef,f);
-    DSSet(f,noc,&ds);
-    m=malloc(ds.nob*maxnor);
-    for(i=1;i<=nof;i++)
-    {
-        e1=ERHdr(argv[i],hdr);
-        ERData(e1,ds.nob*hdr[2],m);
-        EWData(e2,ds.nob*hdr[2],m);
-        ERClose(e1);
-    }
-    EWClose(e2);
-    free(m);
-    free(f);
-    return 0;
+  CLogCmd(argc, argv);
+  if (argc < 3) {
+    LogString(80,"usage zcn <m1> <m2> . . . <concat>");
+    exit(14);
+  }
+  cat(argv + 1, argv[nof + 1], nof);
+  return 0;
 }
 
 /******  end of zcn.c    ******/

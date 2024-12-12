@@ -1,0 +1,65 @@
+#
+# sub_quot: produce the quotient of a subspace
+# 1: hill stem
+# 2: mountain stem
+# 3: input
+# 4: output
+#
+usage="$0: $0 <hill stem> <mtn stem> <input> <output>"
+if [ 4 -ne $# ]; then
+  echo $usage 1>&2
+  exit 1
+fi
+hill=$1
+mtn=$2
+tmp=tmp$$
+if [ ! -e $hill.bs ] || [ ! -e $hill.rem ]; then
+  echo "$0: $hill bitstring and remainder not found" 1>&2
+  exit 1
+fi
+if [ ! -e $mtn.bs ] || [ ! -e $mtn.rem ]; then
+  echo "$0: $mtn bitstring and remainder not found" 1>&2
+  exit 1
+fi
+input=$3
+output=$4
+if [ ! -e $input ]; then
+  echo "$0: $input not found" 1>&2
+  exit 1
+fi
+# Produce the large space action
+zsa $mtn $input $tmp.o1
+ret=$?
+if [ 0 -ne $ret ]; then
+  rm ${tmp}.*
+  exit $ret
+fi
+# Turn the subspace into plan form
+zplain $hill $tmp.plain
+ret=$?
+if [ 0 -ne $ret ]; then
+  rm ${tmp}.*
+  exit $ret
+fi
+# Express the plain form in terms of the subspace
+zcx $mtn.bs $tmp.plain $tmp.sel $tmp.junk
+if [ 0 -ne $ret ]; then
+  rm ${tmp}.*
+  exit $ret
+fi
+zng $tmp.sel $tmp.sel.neg
+if [ 0 -ne $ret ]; then
+  rm ${tmp}.*
+  exit $ret
+fi
+# Now echelise the cleaned plain form
+r=`zpe $tmp.sel.neg $tmp.sel.neg.bs $tmp.sel.neg.rem`
+if [ 0 -ne $ret ]; then
+  rm ${tmp}.*
+  echo $r
+  exit $ret
+fi
+# Now quotient by this
+zqa $tmp.sel.neg $tmp.o1 $output
+rm ${tmp}.*
+exit $ret

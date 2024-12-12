@@ -17,6 +17,7 @@
 #include "funs.h"
 #include "io.h"
 #include "bitstring.h"
+#include "mfuns.h"
 
 // fMultiplyAdd
 
@@ -72,9 +73,9 @@ extern void fInvert(const char *tmp, const char *m1, int s1,
 {
     FIELD *f;
     uint64_t hdr[5];
-    uint64_t rank,nor,i,k;
+    uint64_t rank,nor;
     uint64_t * inv;
-    EFIL *e1,*e2;
+    EFIL *e2;
     char sta[500];
     char stb[500];
     strcpy(sta,tmp);
@@ -108,22 +109,12 @@ extern void fInvert(const char *tmp, const char *m1, int s1,
     }
     if(hdr[0]==3)   // invert for permutations
     {
-        e1 = ERHdr(m1,hdr);
-        nor=hdr[2];
-// missing checks that nor=noc and invertible.
-        inv=malloc(8*nor);
-        for(i=0;i<nor;i++)
-        {
-            ERData(e1,8,(uint8_t *) &k);
-            inv[k]=i;
-        }
-        ERClose(e1);
-
-        e2 = EWHdr(m2,hdr);
-        EWData(e2,8*nor,(uint8_t *)inv);
-        EWClose(e2);
-        free(inv);
-        return;
+      inv = perm_inv(m1, &nor);
+      e2 = EWHdr(m2,hdr);
+      EWData(e2,8*nor,(uint8_t *)inv);
+      EWClose(e2);
+      free(inv);
+      return;
     }
     printf("Cannot invert objects of type %ld\n",hdr[0]);
 }

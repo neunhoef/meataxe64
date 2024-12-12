@@ -12,8 +12,10 @@
 #include "funs.h"
 #include "slab.h"
 #include "mfuns.h"
+#include "utils.h"
+#include "parse.h"
 
-void fMultiply(const char *tmp,const char *m1, int s1, 
+void fMultiply(const char *tmp, const char *m1, int s1, 
                const char *m2, int s2, const char *m3, int s3)
 {
     uint64_t hdr1[5],hdr2[5];
@@ -25,6 +27,9 @@ void fMultiply(const char *tmp,const char *m1, int s1,
     uint64_t i, j;
     EPeek(m1,hdr1);
     EPeek(m2,hdr2);
+    if (very_verbose) {
+      printf("fMultiply %s by %s giving %s\n", m1, m2, m3);
+    }
     if( (hdr1[0]==1) && (hdr2[0]==1) )  //flat matrix multiply
     {
         fdef=hdr1[1];
@@ -64,6 +69,9 @@ void fMultiply(const char *tmp,const char *m1, int s1,
             free(am);
             free(bm);
             free(cm);
+            if (very_verbose) {
+              printf("fMultiply %s by %s giving %s done\n", m1, m2, m3);
+            }
             return;
         }
 //  Consider disk chopping
@@ -73,17 +81,18 @@ void fMultiply(const char *tmp,const char *m1, int s1,
         siz=sizb;
         if(sizac<siz) siz=sizac;    // siz is smaller of B, A+C
         siz=siz/f->megabytes;
-        siz=siz/500000;        // how many memoryfulls
+        siz=siz/250000;        /* We need 4 times as much memory as the files */
         chops=1;
         while((chops*chops)<=siz) chops++;
         if(chops==1)   // chopping into one piece!
         {
             mmul(m1,s1,m2,s2,m3,s3);
+            if (very_verbose) {
+              printf("fMultiply %s by %s giving %s done\n", m1, m2, m3);
+            }
+            free(f);
             return;
         }
-#if 0
-        printf("Chopping by 1 < chops <= %lu\n", chops * chops);
-#endif
         /* Extensions of temporary names for split multiply */
 #define IN_EXT "_fmuli"
 #define OUT_EXT "_fmulo"
@@ -135,49 +144,89 @@ void fMultiply(const char *tmp,const char *m1, int s1,
           free(tmpi);
           free(tmpo);
         }
+        if (very_verbose) {
+          printf("fMultiply %s by %s giving %s done\n", m1, m2, m3);
+        }
+        free(f);
         return;
     }
     if( (hdr1[0]==1) && (hdr2[0]==3) )
     {
         fMulMatrixMap(m1,s1,m2,s2,m3,s3);
+        if (very_verbose) {
+          printf("fMultiply %s by %s giving %s done\n", m1, m2, m3);
+        }
         return;
     }
     if( (hdr1[0]==3) && (hdr2[0]==3) )
     {
         fMulMaps(m1,s1,m2,s2,m3,s3);
+        if (very_verbose) {
+          printf("fMultiply %s by %s giving %s done\n", m1, m2, m3);
+        }
         return;
     }
-    if( (hdr1[0]==3) && (hdr2[0]==1) )    // map * matrix
+    if((hdr1[0] == 3) && (hdr2[0]==1))    // map * matrix
     {
-        e1=ERHdr(m1,hdr1);
-        e2=ERHdr(m2,hdr2);
-        fdef=hdr2[1];
-        f = malloc(FIELDLEN);
-        FieldSet(fdef,f);
-        nor1=hdr1[2];
-        noc1=hdr1[3];
-        nor2=hdr2[2];
-        noc2=hdr2[3];
-        DSSet(f,noc2,&ds2);
-        if(noc1!=nor2)
-        {
-            printf("map and matrix incompatible\n");
-            exit(7);
-        }
-        hdr2[2]=nor1;
-        e3=EWHdr(m3,hdr2);
-        bm=malloc(ds2.nob*nor2);
-        ERData(e2,ds2.nob*nor2,bm);
-        ERClose1(e2,s2);
-        for(i=0;i<nor1;i++)
-        {
-            ERData(e1,8,(uint8_t *)&j);
-            EWData(e3,ds2.nob,bm+j*ds2.nob);
-        }
-        ERClose1(e1,s1);
-        EWClose1(e3,s3);
-        free(bm);
-        return;
+      /* This case is a PITA.
+       * the code below attempts to read the entire right hand argument B
+       * into real memory and then write it out permuted
+       * This is obviously going to run out of memory when B is very large
+       * Probably we should just write out uncompressed vectors into
+       * a file, placing each at the correct offset,
+       * and then read them back and write them using IO
+       * To do this, we need to invert the permutation,
+       * which we can do in memory.
+       */
+      uint64_t *inv = perm_inv(m1, &nor1);
+      FILE *tmpo = fopen(tmp, "w");
+      size_t junk;
+      e2 = ERHdr(m2, hdr2);
+      fdef = hdr2[1];
+      f = malloc(FIELDLEN);
+      FieldSet(fdef, f);
+      nor2 = hdr2[2];
+      noc2 = hdr2[3];
+      DSSet(f, noc2, &ds2);
+      /* A permutation has noc and nor equal, so noc can be disregarded */
+      if(nor1 != nor2) {
+        printf("map and matrix incompatible\n");
+        exit(7);
+      }
+      hdr2[2] = nor1;
+      e3 = EWHdr(m3, hdr2);
+      /* Open a temporary */
+      /* Allocate enough memory for a row from e2 */
+      bm = malloc(ds2.nob);
+      /* Loop reading a row from e2 and writing to the correct place in emp */
+      for(i = 0; i < nor1; i++) {
+        j = inv[i];
+        /* Read a row */
+        ERData(e2, ds2.nob, bm);
+        /* Place in correct place in tmp */
+        fseek(tmpo, j * ds2.nob, SEEK_SET);
+        junk = fwrite(bm, 1, ds2.nob, tmpo);
+      }
+      ERClose1(e2, s2);
+      fclose(tmpo);
+      tmpo = fopen(tmp, "r");
+      /* Copy the temp back to e3, using IO to compress etc */
+      for(i = 0; i < nor1; i++) {
+        /* Read a row from tmp into bm */
+        junk = fread(bm, 1, ds2.nob, tmpo);
+        /* Write into output */
+        EWData(e3, ds2.nob, bm);
+      }
+      NOT_USED(junk);
+      fclose(tmpo);
+      remove(tmp);
+      EWClose1(e3, s3);
+      free(f);
+      free(bm);
+      if (very_verbose) {
+        printf("fMultiply %s by %s giving %s done\n", m1, m2, m3);
+      }
+      return;
     }
     printf("fMultiply cannot handle these matrix types\n");
     exit(20);
