@@ -1,5 +1,5 @@
 /*
- * $Id: count.c,v 1.11 2005/07/24 09:32:45 jon Exp $
+ * $Id: count.c,v 1.12 2024/12/12 23:56:02 jon Exp $
  *
  * Function to count the non-zero elements in a matrix
  *
@@ -15,13 +15,13 @@
 #include "memory.h"
 #include "read.h"
 
-u32 count(const char *matrix, const char *name)
+u64 count(const char *matrix, const char *name)
 {
   FILE *input;
   u32 prime, noc, nor, nob, len;
   u32 i, j;
   const header *h;
-  unsigned total = 0;
+  u64 total = 0;
   word *row;
 
   assert(NULL != matrix);
