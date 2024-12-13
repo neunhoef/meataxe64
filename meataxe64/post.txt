@@ -1,0 +1,74 @@
+Use of L3 cache in matrix multiplication.
+
+At the bottom end, the "block" multiply-and-add works with matrices of 
+approximately 128K, a scale that is primarily dictated by the size of L2 cache.
+
+Here I consider the most cache-friendly way to multiply matrices, in a single
+core, of "slab" scale - very approximately half a gigabyte
+in size, using this bottom end.
+
+We therefore wish to do Cik += Aij x Bjk for all i,j,k each taken from a large set,
+and for correctness purposes the sequence in which these are done is irrelevant.
+I use the notation <ijk> to mean Cik += Aij x Bjk, and write the sequence in that
+form, so that , for example, <123><456>... means C13+=A12xB23 then C46+=A45xB56 . . .
+For estimation purposes, however, I will assume here that the blocks are all the same size
+(irrespective of whether they are of matrix A, B or C) and that there are about 50 blocks in
+each of the three directions - i.e. i, j and k are all chosen from a set of about 50.
+The format conversions are done at the "slab" scale also, so the points of relevance
+here are to make the blocks of matrices Aij/Cik as large as possible subject to the
+matrix Cik residing in L2 cache, so that the Brick Population (including computing
+the linear combinations for "grease") is used as much as possible.  In other words we
+divide our blocks so that the index set of i is as small as we can. 
+
+Subject to that, our aim is to make best use of L3 cache.
+
+In the total absence of L3 cache, the best approach seems to be to pin each Cik in turn
+into L2 cache, so that the inner loop is over the variable j.  We may represent this
+as <000><010><020><030><040>..., and with this method (I call it "strategy 1") each
+block multiply-and-add needs to fetch both the Aij and the Bjk blocks from memory,
+and once every 50 blocks we must write and read matrix Cik, so the total Data Accesses
+per Block (DAB) is about 2.04 - 1 for A, 1 for B, 0.02 to write C and 0.02 to read C.
+
+V1e used a method assuming space for about 10 blocks in L3 cache, and achieved a
+DAB=1.54 in this case. This was a worthwhile step, implemented without much
+thought, but I will not describe it further here as it seems strictly worse than
+the method below, though this is as yet unimplemented, so I cannot be sure.
+
+It is interesting that a better approach is suggested by studying "space filling
+curves", and in particular the Hilbert curve in 3 dimensions seems relevant.  One
+difference is that, although we want our seqence of <ijk> triples to be such
+that the pairs ij, jk and (particularly) ik occured as recently as possible, either
+two values of (say) i are equal or they are not - we are not interested in how much
+they differ.
+
+Looking at the tables of recent chips - both Intel and AMD - it seems that L3
+cache-per-thread varies between about six and twenty times the size of
+L2 cache-per-thread, and ideally we would like to make optimum use of this in
+a "robust" way that makes good use if it is six, and better use if it is twenty.
+
+I am not really entirely sure exactly what I am trying to optimize here.  The
+relative importance of speed with L3=0, with L3=6xL2, with L3=20xL2 and all
+the values in between is unknown and will probably remain so.
+
+After considerable experimentation, however, I have concluded that the following
+sequence is "good" and propose to implement it.
+
+<000><001><101><100> <110><111><011><010> <020><021><121><120>...
+
+where each triple is the same as the one 8 back, but with the middle (j) value
+increased by two.
+
+By my calculations this achives DAB=1.04 with L3=11, DAB=1.54 with L3=8,
+DAB=2.27 with L3=5 and DAB=3.5 with L3=0.
+
+By way of comparison, assuming mod 2 with blocks 1024, the multiplication work
+takes about 1,000,000 clocks, so a DAB of 1 unit must fetch, from real memory,
+128K in that time.  At 3 GHz with 18 cores on a chip, this requires about
+6.4 GB/s, so even stategy 1 (DAB=2.04) is probably OK on all current chips.
+We are starting to get close, however, and with AVX512 and perhaps ever
+more cores on a chip, it seems likely that these methods will be needed
+fairly soon.
+
+In any case, it seems best to do this as it is nearly always better than the 
+V1e method.  Also it means that meataxe64 can run alongside programs that
+are more demanding on their memory bandwidth.
