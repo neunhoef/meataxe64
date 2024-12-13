@@ -4,7 +4,7 @@
 #
 # Parameter 1: where to install the binaries
 #
-usage="$0 <dir in which to install (will be deleted)>"
+usage="$0 <dir in which to install (will be deleted prior to installation)>"
 if [ 1 -ne $# ]; then
     echo $usage
     exit 1
