@@ -36,4 +36,5 @@ makl
 compa
 cd ..
 tar cf - bin | (cd $install/ptinstall; tar xf -)
-echo add $install/pinstall/:$install/ptinstall/jif:$install/m2000 to the start of your PATH
+echo add ${install}pinstall:${install}ptinstall/jif:${install}m2000 to the start of your PATH
+echo If you only want mtx2000 then omit pinstall and ptinstall
