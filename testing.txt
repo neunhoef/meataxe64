@@ -1,0 +1,19 @@
+Max,
+
+To test the installation, apart from running Richard's tests, you can
+try the following:-
+
+Substitue where you installed stuff for my test_install below. Unzip
+and untar the McL file. We can now demonstrate the splitting of the
+skew fourth power of the 2 modular irreducible 22 for McL, which is
+what I did in my PhD. It should take a couple of minutes, and both
+invocations of split_all should produce the same output. But, because
+this is the first time anyone other than me has tried this, I expect
+there will be bugs instead.
+
+export PATH=~/test_install/m2000:$PATH
+cd ~/groups/McL/GF2
+split_all compound/McL compound/7315_{1,2}
+export PATH=/home/jon/test_install//pinstall:/home/jon/test_install//ptinstall/jif:$PATH
+cd ../GF2.m64/
+export PATH=/home/jon/test_install//pinstall:/home/jon/test_install//ptinstall/jif:$PATH
