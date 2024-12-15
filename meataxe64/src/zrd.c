@@ -19,8 +19,14 @@ static uint64_t prand(void)
     x=x<<63;
     if((x&pseed)!=0) pseed=(pseed<<1)^0x3b4f0bf89;
     else pseed=pseed<<1;
-    pseed1=(pseed1*17)%1000003;
-    pseed2=(pseed2*19)%1000033;
+    /* 17 and 19 are not primitive roots. Changed to 2 and 5 */
+    /* 2 and 5 don't work very well either (though better then 17 and 19) */
+    /* Switched to 101 and 5, or maybe even 101 and 103 */
+    /* They don't work, tried 1021 and 2063, which fail identically */
+    /* Now try a different prime, 1000037, such that 1000002 and 1000036
+     * have no common factor except 2 */
+    pseed1=(pseed1*1021)%1000003;
+    pseed2=(pseed2*2063)%1000037;
     return pseed+pseed1+pseed2;
 }
  
