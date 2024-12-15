@@ -12,16 +12,16 @@ will build the entire system into a directory of your choice, eg
 It will then prompt you to extend your path. You can then start using
 meataxe2000 scripts with the underlying power of meataxe64. There are
 3 possible modes of use: pure meataxe2000, pure meataxe64 and the
-hybridised version including both. meataxe2000 has scripts to drive
-it, which are also available in the hybrid, but it is restricted (at
-present) to fields of order 2, 3, 4, 5, 9. These scripts are also
-available in the hybrid version, with the same restrictions (at
-present). In pure meataxe64 there are no scripts; you need to invoke
-the binaries you need. This can make chopping up a module very long
-and laborious. The PATH extensions required are:-
-meataxe2000: <my meataxe system>/m2000
-meataxe64: <my meataxe system>/ptinstall/bin
-hybrid: <my meataxe system>/pinstall:<my meataxe system>/ptinstall/jif:<my meataxe system>/m2000
+hybridised version including both, in which meataxe2000 driving
+scripts can drive meataxe64 binaries via an adaptation layer.
+meataxe2000 is restricted (at present) to fields of order 2, 3, 4, 5,
+9. The hybrid version, has the same restrictions (at present). In pure
+meataxe64 there are no scripts; you need to invoke the binaries you
+need. This can make chopping up a module very long and laborious. The
+PATH extensions required are:- meataxe2000: <my meataxe system>/m2000
+meataxe64: <my meataxe system>/ptinstall/bin hybrid: <my meataxe
+system>/pinstall:<my meataxe system>/ptinstall/jif:<my meataxe
+system>/m2000
 
 There are also tests (run_all.sh) for meataxe64 in jif. To run these
 you will need <my meataxe system>/ptinstall/bin on your PATH, but none
