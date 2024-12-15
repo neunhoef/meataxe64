@@ -39,6 +39,6 @@ gcc -c $1 -pthread -Wall -g funs4.c -o $BIN/funs4.o
 gcc -c $1 -pthread -Wall -g funs5.c -o $BIN/funs5.o
 gcc -c $1 -pthread -include malloc.h -Wall -g malloc.c -o $BIN/malloc.o
 gcc -c $1 -pthread -Wall -g  parse.c -o $BIN/parse.o
-gcc -c $1 -pthread -Wall -g  utils.c -o $BIN/utils.o
+gcc -c $1 -DEIGHT_BYTE_WORD -include mt_types.h -pthread -Wall -g utils.c -o $BIN/utils.o
 rm -f $BIN/libmtx.a
 ar rc $BIN/libmtx.a $BIN/tfarm0.o $BIN/tfarm1.o $BIN/tfarm2.o $BIN/field.o $BIN/io.o $BIN/pmul.o $BIN/slab.o $BIN/proggies.o $BIN/pcritc.o $BIN/pc1.o $BIN/pc2.o $BIN/pc3.o $BIN/pc5.o $BIN/pc6.o $BIN/bitstring.o $BIN/hpmi.o $BIN/tabmake.o $BIN/linf.o $BIN/conex.o $BIN/fech.o $BIN/fmul.o $BIN/funs1.o $BIN/funs2.o $BIN/funs3.o $BIN/funs4.o $BIN/funs5.o $BIN/mmul.o $BIN/mpef.o $BIN/ftra.o $BIN/mech.o $BIN/util.o $BIN/fpef.o $BIN/mfuns.o $BIN/dfmtf.o $BIN/exten.o $BIN/gauss.o $BIN/memfuns.o $BIN/malloc.o $BIN/parse.o $BIN/utils.o
