@@ -1,5 +1,5 @@
 /*
- * $Id: maps.c,v 1.5 2005/07/24 09:32:45 jon Exp $
+ * $Id: maps.c,v 1.6 2024/12/16 01:47:04 jon Exp $
  *
  * Maps from {0 .. nor-1} -> {0 .. noc-1}
  *
@@ -217,12 +217,10 @@ int map_iv(FILE *inp, const header *h, const char *m1, const char *m2, const cha
   }
   map_free(map1);
   if (0 == open_and_write_binary_header(&outp, h, m2, name)) {
-    map_free(map1);
     map_free(map2);
     return 0;
   }
   if (0 == write_map(outp, nor, map2, name, m2)) {
-    map_free(map1);
     map_free(map2);
     return 0;
   }
