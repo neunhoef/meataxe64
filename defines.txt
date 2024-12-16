@@ -6,7 +6,11 @@
 ifeq "${ARCH}" "em64t"
 DEFAULT_SIZE=64
 else
+ifeq "${ARCH}" "arm"
+DEFAULT_SIZE=64
+else
 DEFAULT_SIZE=32
+endif
 endif
 
 ifeq "" "${WORD_SIZE}"
