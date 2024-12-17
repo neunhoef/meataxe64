@@ -55,7 +55,8 @@ int main(int argc, const char *argv[])
   unsigned int argc2 = argc / 2;
   u32 n, keep = 0, invertible = 1, verbose = 0;
   u32 i, j, k, l, r, s, cur_word = 0, cur_power = 1;
-  u32 prime = 1, nod = 0, nor = 0, noc = 0, count;
+  u32 prime = 1, nod = 0, nor = 0, noc = 0;
+  u64 count;
   u32 order_sum = 0;
   int m;
   int found = 0;
