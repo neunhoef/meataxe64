@@ -53,9 +53,11 @@ void make_plain(const char *zero_bs, const char *nref_bs, const char *in, const 
   } else {
     ei = NULL;
     nor = noci1;
+    hdrio.named.rnd1 = 2;
     hdrio.named.noc = 0;
     hdrio.named.fdef = fdef;
     hdrio.named.nor = nor;
+    hdrio.named.rnd2 = 0;
   }
   ones = noci1; /* As many ones as set bits */
   if (NULL != ezbs) {

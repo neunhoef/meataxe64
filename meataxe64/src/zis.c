@@ -243,8 +243,11 @@ int main(int argc, const char *argv[])
   rename(in_vecs_rem, gens[ngens - 1].next_tbd.rem);
   rename(in_vecs_bs, gens[ngens - 1].next_tbd.sbs);
   /* Create a header */
+  hdrzbs.named.rnd1 = 1;
+  hdrzbs.named.fdef = 1;
   hdrzbs.named.nor = nor;
   hdrzbs.named.noc = 0;
+  hdrzbs.named.rnd2 = 0;
   /* Create a file for write */
   ezbs = EWHdr(gens[ngens - 1].next_tbd.zbs, hdrzbs.hdr);
   /* create an area of correct size */
