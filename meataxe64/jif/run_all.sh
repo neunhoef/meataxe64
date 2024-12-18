@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 val1
 val2
 val3

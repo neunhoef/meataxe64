@@ -38,7 +38,7 @@ int main(int argc,  char **argv)
     EPeek(argv[1],hdr);
     fdef=hdr[1];
     noc=hdr[3];
-    fRandomMatrix(ft1, 1, fdef, N1, noc);
+    fRandomMatrix(ft1, 1, fdef, N1, noc, 31, 0);
     f = malloc(FIELDLEN);
     FieldASet1(fdef,f,NOMUL);
     DSSet(f,noc,&ds);
