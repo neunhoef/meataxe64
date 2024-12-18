@@ -1,6 +1,4 @@
 /*
- * $Id: zspan.c,v 1.17 2006/12/04 22:33:25 jon Exp $
- *
  * Compute the span of a matrix
  *
  */

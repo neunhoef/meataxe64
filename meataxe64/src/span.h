@@ -1,6 +1,4 @@
 /*
- * $Id: span.h,v 1.2 2005/06/22 21:52:54 jon Exp $
- *
  * Function to generate elements of the span of a set of rows
  *
  */
