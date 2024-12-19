@@ -18,9 +18,37 @@ infile=$1
 outfile=$2
 index=$3
 tmp=tmp$$
-to_m2000 ${infile} ${tmp}.1
-~/install/zsel ${tmp}.1 ${tmp}.2 ${index}
-ret=$?
-to_m64 ${tmp}.2 ${outfile}
-rm ${tmp}.{1,2}
-exit ${ret}
+nor=`znor ${infile}`
+if [ 0 -ne $? ]; then
+    echo "$0: ${infile}: cannot get number of rows, terminating"
+    exit 1
+fi
+if [ ${index} -ge $nor ]; then
+    echo "$0: ${index} is out of range for ${infile}, terminating"
+    exit 1
+fi
+echo $nor > ${tmp}.1
+echo 1 >> ${tmp}.1
+i=0
+while [ $i -lt ${index} ]; do
+    echo 0 >> ${tmp}.1
+    let i=$i+1
+done
+echo 1 >> ${tmp}.1
+let i=$i+1
+while [ $i -lt ${nor} ]; do
+    echo 0 >> ${tmp}.1
+    let i=$i+1
+done
+${dir}/../bin/zut 1 ${tmp}.2 $nor 1 < ${tmp}.1
+if [ 0 -ne $? ]; then
+    echo "$0: ${infile}: cannot produce bitstring, terminating"
+    exit 1
+fi
+${dir}/../bin/zrx ${tmp}.2 ${infile} ${outfile} ${tmp}.3
+if [ 0 -ne $? ]; then
+    echo "$0: ${infile}: cannot extract row ${index}, terminating"
+    exit 1
+fi
+rm ${tmp}.{1,2,3}
+exit 0
