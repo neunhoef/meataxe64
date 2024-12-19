@@ -59,4 +59,10 @@ extern void cat(const char *files[], const char *out, unsigned int count);
 /* Invert the permutation found in m and return the result in memory */
 extern uint64_t *perm_inv(const char *perm, uint64_t *nor);
 
+/* Write out a bitstring to a file
+ * Just the string itself is given, the header will be formed for nor and noc
+ */
+
+extern void fWriteBitString(const char *file, Dfmt *string, uint64_t nor, uint64_t noc);
+
 #endif /* MFUNS_H */

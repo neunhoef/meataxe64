@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include "field.h"
 #include "mfuns.h"
 #include "io.h"
 

@@ -422,3 +422,19 @@ uint64_t *perm_inv(const char *perm, uint64_t *nor)
   ERClose(e1);
   return inv;
 }
+
+void fWriteBitString(const char *file, Dfmt *string, uint64_t nor, uint64_t noc)
+{
+  uint64_t h[2] = {nor, noc}; /* Bitstring header */
+  header hdr;
+  EFIL *e;
+  hdr.named.rnd1 = 2;
+  hdr.named.rnd2 = 0; /* We need to set these or valgrind complains */
+  hdr.named.fdef = 1;
+  hdr.named.nor = nor;
+  hdr.named.noc = noc;
+  e = EWHdr(file, hdr.hdr);
+  EWData(e, sizeof(h), (Dfmt *)h);
+  EWData(e, 8 * ((nor + 63) / 64), string);
+  EWClose(e);
+}

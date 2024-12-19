@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include "field.h"
 #include "io.h"
 #include "mfuns.h"
 

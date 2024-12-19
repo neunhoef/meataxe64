@@ -14,8 +14,8 @@
 #include <limits.h>
 #include "util.h"
 #include "utils.h"
-#include "mfuns.h"
 #include "field.h"
+#include "mfuns.h"
 #include "funs.h"
 
 /* Scalar multiply m1 by scalar to give m2 */

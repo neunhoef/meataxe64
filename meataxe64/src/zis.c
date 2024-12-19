@@ -161,8 +161,6 @@ int main(int argc, const char *argv[])
   Dfmt *zero_bs_mem;
   uint64_t size;
   gen *gens, *this_gen;
-  header hdrzbs;
-  EFIL *ezbs;
 
   CLogCmd(argc, argv);
   /* Check command line <vecs> <output stem> [<gen>*] */
@@ -242,26 +240,12 @@ int main(int argc, const char *argv[])
   gens[ngens - 1].next_tbd.has_plain = 1;
   rename(in_vecs_rem, gens[ngens - 1].next_tbd.rem);
   rename(in_vecs_bs, gens[ngens - 1].next_tbd.sbs);
-  /* Create a header */
-  hdrzbs.named.rnd1 = 1;
-  hdrzbs.named.fdef = 1;
-  hdrzbs.named.nor = nor;
-  hdrzbs.named.noc = 0;
-  hdrzbs.named.rnd2 = 0;
-  /* Create a file for write */
-  ezbs = EWHdr(gens[ngens - 1].next_tbd.zbs, hdrzbs.hdr);
   /* create an area of correct size */
-  size = 8 * (2 + (nor + 63) / 64);
+  size = 8 * ((nor + 63) / 64);
   zero_bs_mem = malloc(size);
   /* zero area */
   memset(zero_bs_mem, 0, size);
-  /* Set up the first two words */
-  zero_bs_mem[0] = nor;
-  zero_bs_mem[1] = 0;
-  /* Write the data */
-  EWData(ezbs, size, zero_bs_mem);
-  /* close the file */
-  EWClose1(ezbs, 0);
+  fWriteBitString(gens[ngens - 1].next_tbd.zbs, zero_bs_mem, nor, 0);
   free(zero_bs_mem);
   gens[ngens - 1].next_tbd.size = rank;
   this_gen = gens; /* The first one */
@@ -436,7 +420,7 @@ int main(int argc, const char *argv[])
     header my_hdr;
     EFIL *out;
     size_t rslen;
-    uint64_t * bsrs;
+    Dfmt *bsrs;
     /* Write the remnant */
     my_hdr.named.rnd1 = 1;
     my_hdr.named.fdef = fdef;
@@ -446,21 +430,12 @@ int main(int argc, const char *argv[])
     out = EWHdr(out_rem, my_hdr.hdr);
     EWClose1(out, 0);
     /* Write the bitstring */
-    my_hdr.named.rnd1 = 2;
-    my_hdr.named.fdef = 1;
-    my_hdr.named.nor = nor;
-    my_hdr.named.noc = nor;
-    my_hdr.named.rnd2 = 0;
-    out = EWHdr(out_bs, my_hdr.hdr);
     /* Populate the bitstring */
-    rslen = 16 + ((nor + 63) / 64) * 8;
+    rslen = ((nor + 63) / 64) * 8;
     bsrs = malloc(rslen);
-    bsrs[0] = nor;
-    bsrs[1] = nor;
     memset(bsrs + 2, 0xff, rslen - 16);
     /* Write the bitstring */
-    EWData(out, rslen, (uint8_t *)bsrs);
-    EWClose1(out, 0);
+    fWriteBitString(out_bs, bsrs, nor, nor);
     free(bsrs);
   }
   free(out_bs);
