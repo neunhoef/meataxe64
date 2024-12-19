@@ -433,7 +433,7 @@ int main(int argc, const char *argv[])
     /* Populate the bitstring */
     rslen = ((nor + 63) / 64) * 8;
     bsrs = malloc(rslen);
-    memset(bsrs + 2, 0xff, rslen - 16);
+    memset(bsrs, 0xff, rslen);
     /* Write the bitstring */
     fWriteBitString(out_bs, bsrs, nor, nor);
     free(bsrs);
