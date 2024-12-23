@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include "field.h"
 #include "mfuns.h"
+#include "funs.h"
 #include "io.h"
 #include "bitstring.h"
 #include "slab.h"
@@ -48,13 +49,14 @@ void make_plain(const char *zero_bs, const char *nref_bs, const char *in, const 
   if (use_ei) {
     ei = ERHdr(in, hdrio.hdr);    // remnant   = 1 fdef nor noc 0
     nor = hdrio.named.nor; /* Rows of input */
-    ones = noci1;
   } else {
     ei = NULL;
     nor = noci1;
     hdrio.named.noc = 0;
-    ones = 0;
+    hdrio.named.fdef = fdef;
+    hdrio.named.nor = nor;
   }
+  ones = noci1; /* As many ones as set bits */
   if (NULL != ezbs) {
     /* Some leading zeroes */
     noci2 = hdrzbs.named.noc; /* Set bits in zero bitstring */
@@ -96,7 +98,9 @@ void make_plain(const char *zero_bs, const char *nref_bs, const char *in, const 
   ERData(embs, sizm, (uint8_t *)bstm);
   /* Now read through in row by row, inserting minus -1s and zeros */
   for (i = 0; i < nor; i++) {
-    ERData(ei, dsi.nob, mi);
+    if (use_ei) { /* If not, ei is NULL */
+      ERData(ei, dsi.nob, mi);
+    }
     /* Clear output row */
     memset(mo, 0, dso.nob);
     /* TBD: put in -1s and contents of in. DCut and DPaste */
@@ -146,6 +150,7 @@ void make_plain(const char *zero_bs, const char *nref_bs, const char *in, const 
   free(mo);
   free(f);
   free(bstm);
+  free(cb);
   if (NULL != ezbs) {
     free(bstz);
   }
@@ -199,4 +204,145 @@ int ident(uint64_t fdef, uint64_t nor, uint64_t noc, uint64_t elt,
   }
   EWClose(e);
   return 1;
+}
+
+/* Triaged multiply */
+void triage_multiply(const char *zbs, const char *sbs,
+                     const char *rem, const char *in, const char *out,
+                     const char *tmp_vars[], const char *fun_tmp)
+{
+  /* Triage in into 0 and 1 using zbs and sbs */
+  fRowTriage(zbs, sbs, in, tmp_vars[0], tmp_vars[1]);
+  /* Negate 0 into 2 */
+  fNegate(tmp_vars[0], tmp_vars[2]);
+  /* multiply rem by 1 into 3 */
+  fMultiply(fun_tmp, rem, 1, tmp_vars[1], 1, tmp_vars[3], 1);
+  /* add 2 and 3 into out */
+  fAdd(tmp_vars[2], 1, tmp_vars[3], 1, out, 1);
+}
+
+/* Slicing and splicing */
+void slice(const char *input, unsigned int slices, const char *output_stem)
+{
+  uint64_t fdef, nor, noc, i, j, rch[100]; 
+  EFIL *inp; /* Input */
+  EFIL *oup; /* Output */
+  header hdr;
+  FIELD *f;
+  DSPACE ds;
+  Dfmt *v1;
+  char fn[200];
+  const char *pt;
+  int lfn;
+
+  if (slices >= 100) {
+    fprintf(stderr, "%u slices is too many (>= 100), terminating\n", slices);
+    exit(1);
+  }
+  inp = ERHdr(input, hdr.hdr);
+  fdef = hdr.named.fdef;
+  nor = hdr.named.nor;
+  noc = hdr.named.noc;
+  f = malloc(FIELDLEN);
+  FieldASet(fdef, f);
+  DSSet(f, noc, &ds);
+  j = nor / slices;
+  for (i = 0; i < slices; i++) {
+    rch[i] = j;
+  }
+  j = nor - j * slices;
+  for (i = 0; i < j; i++) {
+    rch[i]++;
+  }
+  lfn = 0;
+  pt = output_stem;
+  /* Create the root of the temporary file name */
+  while ((*pt) != 0) {
+    fn[lfn++] = *(pt++);
+  }
+  fn[lfn+2] = 0;
+
+  v1 = malloc(ds.nob);
+  for(i = 0; i < slices; i++) {
+    /* Set the temporary file name */
+    fn[lfn] = '0' + i / 10;
+    fn[lfn+1] = '0' + i % 10;
+    hdr.named.nor = rch[i];
+    oup = EWHdr(fn, hdr.hdr);
+    for(j = 0; j < rch[i]; j++) {
+      ERData(inp, ds.nob, v1);
+      EWData(oup, ds.nob, v1);
+    }
+    EWClose(oup);
+  }
+  ERClose(inp);
+  free(f);
+  free(v1);
+}
+
+void splice(const char *input_stem, unsigned int slices, const char *output)
+{
+  uint64_t fdef, nor, noc, norout, nor1, i, j;
+  EFIL *inp; /* Input */
+  EFIL *oup; /* Output */
+  header hdr, hdr1;
+  FIELD *f;
+  DSPACE ds;
+  Dfmt *v1;
+  char fn[200];
+  const char *pt;
+  int lfn;
+
+  if (slices >= 100) {
+    fprintf(stderr, "%u slices is too many (>= 100), terminating\n", slices);
+    exit(1);
+  }
+  lfn = 0;
+  pt = input_stem;
+  /* Create the root of the temporary file name */
+  while ((*pt) != 0) {
+    fn[lfn++] = *(pt++);
+  }
+  fn[lfn+2] = 0;
+  fn[lfn] = '0';
+  fn[lfn+1] = '0';
+
+  EPeek(fn, hdr.hdr);
+  fdef = hdr.named.fdef;
+  nor = hdr.named.nor;
+  norout = nor;
+  noc = hdr.named.noc;
+  f = malloc(FIELDLEN);
+  FieldASet(fdef, f);
+  DSSet(f, noc, &ds);
+
+  for(i = 1; i < slices; i++) {
+    fn[lfn] = '0' + i / 10;
+    fn[lfn+1] = '0' + i % 10;
+    EPeek(fn, hdr1.hdr);
+    if ((fdef != hdr1.named.fdef) || (noc != hdr1.named.noc)) {
+      printf("Matrices incompatible\n");
+      exit(7);
+    }
+    norout += hdr1.named.nor;
+  }
+  hdr.named.nor = norout;
+  oup = EWHdr(output, hdr.hdr);
+
+  v1 = malloc(ds.nob);
+  for(i = 0; i < slices; i++) {
+    /* Set the temporary file name */
+    fn[lfn] = '0' + i / 10;
+    fn[lfn+1] = '0' + i % 10;
+    inp = ERHdr(fn, hdr1.hdr);
+    nor1 = hdr1.named.nor;
+    for(j = 0; j < nor1; j++) {
+      ERData(inp, ds.nob, v1);
+      EWData(oup, ds.nob, v1);
+    }
+    ERClose(inp);
+  }
+  EWClose(oup);
+  free(f);
+  free(v1);
 }

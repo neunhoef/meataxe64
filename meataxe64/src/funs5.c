@@ -17,8 +17,8 @@
 #include "io.h"
 #include "funs.h"
  
-void fAdd(const char * fn1, int s1, const char * fn2, int s2,
-         const char * fn3, int s3)
+void fAdd(const char *fn1, int s1, const char *fn2, int s2,
+          const char *fn3, int s3)
 {
     EFIL *e1,*e2,*e3;
     FIELD * f;
@@ -28,6 +28,7 @@ void fAdd(const char * fn1, int s1, const char * fn2, int s2,
     Dfmt *v1,*v2;
     uint64_t i;
 
+    printf("fAdd %s to %s giving %s\n", fn1, fn2, fn3);
     e1=ERHdr(fn1,hdr1);
     e2=ERHdr(fn2,hdr2);
 
@@ -62,6 +63,7 @@ void fAdd(const char * fn1, int s1, const char * fn2, int s2,
     ERClose1(e1,s1);
     ERClose1(e2,s2);
     EWClose1(e3,s3);
+    printf("fAdd %s to %s giving %s done\n", fn1, fn2, fn3);
     return;
 }
 

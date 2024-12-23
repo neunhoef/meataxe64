@@ -6,12 +6,12 @@
 // THREADS should be the number you ideally want to run at once
 // programs should usually run rather more, but that is their choice.
 
-#define THREADS 6
+#define THREADS 8
 
 // MEGABYTES should be the amount of data memory you 
 // would like a program to restrict itself to.
 
-#define MEGABYTES 12000
+#define MEGABYTES 128000
 
 // MAXCHOP is the maximum number of chops that can be made when
 // doing multi-core work.

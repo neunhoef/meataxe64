@@ -21,7 +21,7 @@
 // fColumnExtract
  
 void fColumnExtract(const char *bs, int sbs, const char *in, int sin, 
-          const char *sel, int ssel, const char * nsel, int snsel) 
+                    const char *sel, int ssel, const char *nsel, int snsel) 
 {
     EFIL *e1,*e2,*e3,*e4;
     uint64_t hdr1[5],hdr2[5];
@@ -33,6 +33,7 @@ void fColumnExtract(const char *bs, int sbs, const char *in, int sin,
     Dfmt *d,*d1,*d2;
     uint64_t * bsdata;
 
+    printf("fColumnExtract %s, %s giving %s, %s\n", bs, in, sel, nsel);
     e1=ERHdr(bs,hdr1);   // bit string
     e2=ERHdr(in,hdr2);   // matrix
     fdef=hdr2[1];
@@ -90,11 +91,12 @@ void fColumnExtract(const char *bs, int sbs, const char *in, int sin,
     free(d1);
     free(d2);
     free(bsdata);
+    printf("fColumnExtract %s, %s giving %s, %s done\n", bs, in, sel, nsel);
     return;
 }
 
-void fRowRiffle(const char *bs, int sbs, const char * ins, int sins,
-                 const char * inn, int sinn, const char * out, int sout)
+void fRowRiffle(const char *bs, int sbs, const char *ins, int sins,
+                const char *inn, int sinn, const char *out, int sout)
 {
     EFIL *e1,*e2,*e3,*e4;
     uint64_t hdr1[5],hdr2[5],hdr3[5];
@@ -105,6 +107,7 @@ void fRowRiffle(const char *bs, int sbs, const char * ins, int sins,
     uint64_t * bsdata;
     uint64_t i,siz;
 
+    printf("fRowRiffle %s, %s, %s giving %s\n", bs, ins, inn, out);
     e1=ERHdr(bs,hdr1);   // bs
     e2=ERHdr(ins,hdr2);   // m1
     e3=ERHdr(inn,hdr3);   // m0
@@ -139,6 +142,7 @@ void fRowRiffle(const char *bs, int sbs, const char * ins, int sins,
     free(f);
     free(v);
     free(bsdata);
+    printf("fRowRiffle %s, %s, %s giving %s done\n", bs, ins, inn, out);
 }
 
 void fPivotCombine(const char *b1, int sb1, const char *b2, int sb2,
@@ -150,6 +154,7 @@ void fPivotCombine(const char *b1, int sb1, const char *b2, int sb2,
     size_t siz,siz4;
     uint64_t *bs1,*bs2,*bs3,*bs4;
 
+    printf("fPivotCombine %s, %s giving %s, %s\n", b1, b2, bc, br);
     e1=ERHdr(b1,hdr1);   // b1 old pivots
     e2=ERHdr(b2,hdr2);   // b2 new pivots
     nor=hdr1[2];         // total bits
@@ -190,6 +195,7 @@ void fPivotCombine(const char *b1, int sb1, const char *b2, int sb2,
     free(bs2);
     free(bs3);
     free(bs4);
+    printf("fPivotCombine %s, %s giving %s, %s done\n", b1, b2, bc, br);
 }
 
 uint64_t fColumnRiffleIdentity(const char *bs, int sbs, 
@@ -244,5 +250,115 @@ uint64_t fColumnRiffleIdentity(const char *bs, int sbs,
     return nor;
 }
 
+void fRowTriage(const char *zero_bs, const char *sig_bs, const char *in, const char *sel, const char *nsel)
+{
+  /*
+   * Open the file, open the two bitstrings
+   * check file has rows = total bits in bitstring
+   * Loop read a row, if bit clear output else ignore
+   * Pool
+   */
+  EFIL *ezbs, *esbs, *ei, *eos, *eon; /* bitstrings, in, out selected, out non selected */
+  uint64_t hdrzbs[5], hdrsbs[5], hdrio[5];
+  FIELD *f;
+  DSPACE ds; /* Matrix in */
+  Dfmt *mi; /* Matrix out */
+  uint64_t nor, noc, j, k, fdef, size, snor;
+  uint64_t *zbst, *sbst;
+  ezbs = ERHdr(zero_bs, hdrzbs);
+  esbs = ERHdr(sig_bs, hdrsbs);
+  ei = ERHdr(in, hdrio);
+  nor = hdrzbs[2]; /* Total bits */
+  snor = hdrzbs[3]; /* sel bits from zero bitstring */
+  noc = hdrio[3]; /* Elements per row */
+  fdef = hdrio[1];
+  if (nor != hdrio[2]) {
+    /* Should be same as for generator */
+    LogString(90, "fRowTriage: different number of rows or columns");
+    fprintf(stderr, "fRowTriage: %s, %s different number of rows or columns, exiting\n", zero_bs, in);
+    exit(1);
+  }
+  /* TBD: Check nor - snor == hdrsbs[2] */
+  if (nor - snor != hdrsbs[2]) {
+    fprintf(stderr, "Bad parameters to fRowTriage, exiting\n");
+  }
+  f = malloc(FIELDLEN);
+  FieldASet(fdef, f);
+  /* Create the output header  for selected*/
+  hdrio[2] = hdrsbs[3]; /* Only selected rows */
+  eos = EWHdr(sel, hdrio);
+  /* Create the output header  for non selected*/
+  hdrio[2] = hdrsbs[2] - hdrsbs[3]; /* Only non selected rows */
+  eon = EWHdr(nsel, hdrio);
+  DSSet(f, noc, &ds); /* input/output space */
+  mi = malloc(ds.nob);
+  /* Read the zero bitstring */
+  size = 8 * (2 + (nor + 63) / 64);
+  zbst = malloc(size);
+  ERData(ezbs, size, (uint8_t *)zbst);
+  /* Now read the significant bitstring */
+  size = 8 * (2 + (nor - snor + 63) / 64);
+  sbst = malloc(size);
+  ERData(esbs, size, (uint8_t *)sbst);
+  k = 0;
+  for (j = 0; j < nor; j++) {
+    ERData(ei, ds.nob, mi);
+    if (1 != BSBitRead(zbst, j)) { /* Ignore zeros */
+      if (1 == BSBitRead(sbst, k)) {
+        EWData(eos, ds.nob, mi);
+      } else {
+        EWData(eon, ds.nob, mi);
+      }
+      k++;
+    }
+  }
+  EWClose1(eos, 0);
+  EWClose1(eon, 0);
+  ERClose1(ei, 0);
+  ERClose1(ezbs, 0);
+  ERClose1(esbs, 0);
+  free(mi);
+  free(zbst);
+  free(sbst);
+  free(f);
+}
 
+/* Negate: effectively a copy from zng.c */
+
+void fNegate(const char *in,  const char *out)
+{
+    EFIL *e1, *e2;
+    FIELD *f;
+    uint64_t hdr[5];
+    uint64_t fdef, nor, noc;
+    FELT min1;
+    DSPACE ds;
+    Dfmt *v1;
+    uint64_t i;
+
+    e1 = ERHdr(in, hdr);
+    fdef = hdr[1];
+    nor = hdr[2];
+    noc = hdr[3];
+
+    f = malloc(FIELDLEN);
+    if (f == NULL) {
+      LogString(81,"Can't malloc field structure");
+      exit(22);
+    }
+    FieldASet(fdef, f);
+    min1 = FieldNeg(f, 1);
+    e2 = EWHdr(out, hdr);
+    DSSet(f, noc, &ds);
+    v1 = malloc(ds.nob);
+    for(i = 0; i < nor; i++) {
+      ERData(e1,ds.nob, v1);
+      DSMul(&ds, min1, 1, v1);
+      EWData(e2, ds.nob, v1);
+    }
+    free(v1);
+    free(f);
+    ERClose(e1);
+    EWClose(e2);
+}
 /* end of funs1.c  */

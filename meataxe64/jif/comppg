@@ -6,6 +6,8 @@ gcc $1 -pg -Wall -pthread -include malloc.h zad.c -L$BIN -lmtx -o $BIN/zad
 gcc $1 -pg -Wall -pthread -include malloc.h zas.c -L$BIN -lmtx -o $BIN/zas
 gcc $1 -pg -Wall -pthread -include malloc.h zbc.c -L$BIN -lmtx -o $BIN/zbc
 gcc $1 -pg -Wall -pthread -include malloc.h zch.c -L$BIN -lmtx -o $BIN/zch
+gcc $1 -pg -Wall -pthread -include malloc.h zsl.c -L$BIN -lmtx -o $BIN/zsl
+gcc $1 -pg -Wall -pthread -include malloc.h zspl.c -L$BIN -lmtx -o $BIN/zspl
 gcc $1 -pg -Wall -pthread -include malloc.h zcn.c -L$BIN -lmtx -o $BIN/zcn
 gcc $1 -pg -Wall -pthread -include malloc.h zcp.c -L$BIN -lmtx -o $BIN/zcp
 gcc $1 -pg -Wall -pthread -include malloc.h zcs.c -L$BIN -lmtx -o $BIN/zcs
@@ -18,7 +20,7 @@ gcc $1 -pg -Wall -pthread -include malloc.h zec.c -L$BIN -lmtx -o $BIN/zec
 gcc $1 -pg -Wall -pthread -include malloc.h zfr.c -L$BIN -lmtx -o $BIN/zfr
 gcc $1 -pg -Wall -pthread -include malloc.h zga.c -L$BIN -lmtx -o $BIN/zga
 gcc $1 -pg -Wall -pthread -include malloc.h zhr.c -L$BIN -lmtx -o $BIN/zhr
-gcc $1 -pg -Wall -pthread -include malloc.h zis.c -L$BIN -lmtx -o $BIN/zis
+gcc $1 -pg -Wall -pthread -include malloc.h zis.c utils.c -L$BIN -lmtx -o $BIN/zis
 gcc $1 -pg -Wall -pthread -include malloc.h ziv.c -L$BIN -lmtx -o $BIN/ziv
 gcc $1 -pg -Wall -pthread -include malloc.h zkc.c -L$BIN -lmtx -o $BIN/zkc
 gcc $1 -pg -Wall -pthread -include malloc.h zkx.c -L$BIN -lmtx -o $BIN/zkx
@@ -60,6 +62,7 @@ gcc -pg -Wall -pthread -include malloc.h zprime.c -L$BIN -lmtx -o $BIN/zprime
 gcc -pg -Wall -pthread -include malloc.h zchar.c -L$BIN -lmtx -o $BIN/zchar
 gcc -pg -Wall -pthread -include malloc.h zid.c mfuns.c -L$BIN -lmtx -o $BIN/zid
 gcc -pg -Wall -pthread -include malloc.h zsid.c mfuns.c -L$BIN -lmtx -o $BIN/zsid
+gcc -pg -Wall -pthread -include malloc.h zdm.c -L$BIN -lmtx -o $BIN/zdm
 gcc_comp_options="-Wall -Wpointer-arith -Wwrite-strings -Winline -Waggregate-return -Wmissing-prototypes -Wnested-externs -W -Wunused -Wcast-align -Wstrict-prototypes -Wmissing-declarations -pg -pthread -include malloc.h"
 gcc_link_options="${gcc_comp_options} -L${BIN} -lmtx"
 gcc -include mt_types.h zimport.c elements.c endian.c header.c primes.c utils.c read.c ${gcc_link_options} -lm -o $BIN/zimport

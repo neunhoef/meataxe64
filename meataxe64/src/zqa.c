@@ -90,6 +90,9 @@ int main(int argc, const char *argv[])
   unsigned int sub_root_len;
   char *sub_bs;
   char *sub_rem;
+  header hdr_gen;
+  int is_perm;
+
   CLogCmd(argc, argv);
   /* Check command line <vecs> <output stem> [<gen>*] */
   /* Must be exactly 3 args */
@@ -105,6 +108,10 @@ int main(int argc, const char *argv[])
   strcat(sub_bs, ".bs");
   strcpy(sub_rem, sub_root);
   strcat(sub_rem, ".rem");
+  /* Temporary root for functions */
+  fun_tmp = malloc(tmp_len + sizeof(FUN_TMP) + 1);
+  strcpy(fun_tmp, tmp_root);
+  strcat(fun_tmp, FUN_TMP);
   /*
    * Algorithm
    * zrx sub.bs gen junk seln (probably do this by steam)
@@ -117,11 +124,17 @@ int main(int argc, const char *argv[])
    * as we can't row or column select on the generator
    * So we have to do the multiplication first
    */
-  /* Row select on gen (argv[2]) */
-  fRowExtract(sub_bs, argv[2], seln);
-  fColumnExtract(sub_bs, 0, seln, 0, selc, 0, selcn, 0);
-  fMultiply(fun_tmp, selc, 0, sub_rem, 0, selm, 0);
-  fAdd(selm, 0, selcn, 0, argv[3], 0);
+  EPeek(argv[2], hdr_gen.hdr);
+  is_perm = 1 == hdr_gen.named.fdef;
+
+  if (is_perm) {
+  } else {
+    /* Row select non-selected rows from gen (argv[2]) */
+    fRowExtract(sub_bs, argv[2], seln);
+    fColumnExtract(sub_bs, 0, seln, 0, selc, 0, selcn, 0);
+    fMultiply(fun_tmp, selc, 0, sub_rem, 0, selm, 0);
+    fAdd(selm, 0, selcn, 0, argv[3], 0);
+  }
   remove(seln);
   remove(selc);
   remove(selcn);

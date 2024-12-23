@@ -11,7 +11,7 @@ void pccl64 (const uint64_t * clpm, uint64_t scalar, uint64_t noc,
                       uint64_t * d1, uint64_t * d2);
 extern void pcbunf(Dfmt * d, const Dfmt * s, uint64_t nob,
                    const uint8_t * t1, const uint8_t * t2);
-extern void __attribute__((sysv_abi)) pcxunf(Dfmt * d, const Dfmt * s, uint64_t nob,
+extern void pcxunf(Dfmt * d, const Dfmt * s, uint64_t nob,
                    const uint8_t * t1);
 extern void pcunf(Dfmt * d, uint64_t nob, const uint8_t * t1);
 extern uint64_t pcpmad(uint64_t p,uint64_t a,uint64_t b,uint64_t c);
