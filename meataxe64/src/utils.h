@@ -49,8 +49,7 @@ extern u32 skip_non_white(u32 i, const char *chars);
 
 extern int get_task_line(char *line, FILE *input);
 
-extern int int_pow(u32 n, u32 index,
-                   u32 *res);
+extern int int_pow(u64 n, u64 index, u64 *res);
 
 /* Swap the bit order in a char */
 extern unsigned char convert_char(unsigned char in);

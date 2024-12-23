@@ -16,6 +16,7 @@
 #include "field.h"
 #include "io.h"
 #include "funs.h"
+#include "parse.h"
  
 void fAdd(const char *fn1, int s1, const char *fn2, int s2,
           const char *fn3, int s3)
@@ -28,7 +29,9 @@ void fAdd(const char *fn1, int s1, const char *fn2, int s2,
     Dfmt *v1,*v2;
     uint64_t i;
 
-    printf("fAdd %s to %s giving %s\n", fn1, fn2, fn3);
+    if (very_verbose) {
+      printf("fAdd %s to %s giving %s\n", fn1, fn2, fn3);
+    }
     e1=ERHdr(fn1,hdr1);
     e2=ERHdr(fn2,hdr2);
 
@@ -63,7 +66,9 @@ void fAdd(const char *fn1, int s1, const char *fn2, int s2,
     ERClose1(e1,s1);
     ERClose1(e2,s2);
     EWClose1(e3,s3);
-    printf("fAdd %s to %s giving %s done\n", fn1, fn2, fn3);
+    if (very_verbose) {
+      printf("fAdd %s to %s giving %s done\n", fn1, fn2, fn3);
+    }
     return;
 }
 
@@ -327,13 +332,19 @@ static uint64_t prand(void)
     x=x<<63;
     if((x&pseed)!=0) pseed=(pseed<<1)^0x3b4f0bf89;
     else pseed=pseed<<1;
-    pseed1=(pseed1*17)%1000003;
-    pseed2=(pseed2*19)%1000033;
+    /* 17 and 19 are not primitive roots. Changed to 2 and 5 */
+    /* 2 and 5 don't work very well either (though better then 17 and 19) */
+    /* Switched to 101 and 5, or maybe even 101 and 103 */
+    /* They don't work, tried 1021 and 2063, which fail identically */
+    /* Now try a different prime, 1000037, such that 1000002 and 1000036
+     * have no common factor except 2 */
+    pseed1=(pseed1*1021)%1000003;
+    pseed2=(pseed2*2063)%1000037;
     return pseed+pseed1+pseed2;
 }
 
 void fRandomMatrix(const char *m1, int s1, uint64_t fdef, 
-                       uint64_t nor, uint64_t noc)
+                   uint64_t nor, uint64_t noc, uint64_t seed, uint64_t count)
 {
     EFIL *e1;
     uint64_t hdr[5];
@@ -343,6 +354,9 @@ void fRandomMatrix(const char *m1, int s1, uint64_t fdef,
     uint64_t i,j;
     FELT elt;
 
+    for(i = 0; i < count; i++) {
+      prand();
+    }
     hdr[0]=1;
     hdr[1]=fdef;
     hdr[2]=nor;
@@ -353,7 +367,7 @@ void fRandomMatrix(const char *m1, int s1, uint64_t fdef,
     FieldASet(fdef,f);
     DSSet(f,noc,&ds);
     v=malloc(ds.nob);
-    pseed=31;
+    pseed=seed;
     pseed1=pseed;
     pseed2=pseed;
     for(i=0;i<nor;i++)

@@ -217,7 +217,7 @@ int get_task_line(char *line, FILE *input)
   }
 }
 
-int int_pow(u32 n, u32 index, u32 *res)
+int int_pow(u64 n, u64 index, u64 *res)
 {
   assert(0 != n);
   if (0 == index) {
@@ -245,9 +245,9 @@ static int table_initialised = 0;
 
 static void init_table(void)
 {
-  u32 i;
+  u64 i;
   for (i = 0; i < 256; i++) {
-    u32 j = i, k = 0, l;
+    u64 j = i, k = 0, l;
     for (l = 0; l < 8; l++) {
       k = (k << 1) | (j & 1);
       j >>= 1;

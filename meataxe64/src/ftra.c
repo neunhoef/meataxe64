@@ -13,6 +13,7 @@
 #include "funs.h"
 #include "slab.h"
 #include "io.h"
+#include "parse.h"
 
 void fTranspose(const char *tmp, const char *in, int sin, 
          const char *out, int sout)
@@ -28,7 +29,9 @@ void fTranspose(const char *tmp, const char *in, int sin,
     char ** tempfn;
     char x[500];
 
-    printf("fTranspose %s giving %s\n", in, out);
+    if (very_verbose) {
+      printf("fTranspose %s giving %s\n", in, out);
+    }
     EPeek(in,hdr);
     if(hdr[0]==3)   // permutation
     {
@@ -61,7 +64,9 @@ void fTranspose(const char *tmp, const char *in, int sin,
         free(f);
         free(am);
         free(bm);
-        printf("fTranspose %s giving %s done\n", in, out);
+        if (very_verbose) {
+          printf("fTranspose %s giving %s done\n", in, out);
+        }
         return;
     }
     chops=(tsiz+tsiz/2)/(f->megabytes);
@@ -139,7 +144,9 @@ void fTranspose(const char *tmp, const char *in, int sin,
     free(f);
     free(am);
     free(bm);
-    printf("fTranspose %s giving %s done\n", in, out);
+    if (very_verbose) {
+      printf("fTranspose %s giving %s done\n", in, out);
+    }
 }
 
 /* end of ftra.c  */

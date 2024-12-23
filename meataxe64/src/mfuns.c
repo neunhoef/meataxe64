@@ -13,6 +13,7 @@
 #include "io.h"
 #include "bitstring.h"
 #include "slab.h"
+#include "utils.h"
 
 void make_plain(const char *zero_bs, const char *nref_bs, const char *in, const char *out, uint64_t fdef)
 {
@@ -52,9 +53,11 @@ void make_plain(const char *zero_bs, const char *nref_bs, const char *in, const 
   } else {
     ei = NULL;
     nor = noci1;
+    hdrio.named.rnd1 = 2;
     hdrio.named.noc = 0;
     hdrio.named.fdef = fdef;
     hdrio.named.nor = nor;
+    hdrio.named.rnd2 = 0;
   }
   ones = noci1; /* As many ones as set bits */
   if (NULL != ezbs) {
@@ -345,4 +348,93 @@ void splice(const char *input_stem, unsigned int slices, const char *output)
   EWClose(oup);
   free(f);
   free(v1);
+}
+
+void cat(const char *files[], const char *out, unsigned int count)
+{
+  unsigned int i;
+  uint64_t fdef, noc, nor, norout, j;
+  uint64_t hdr[5];
+  DSPACE ds;
+  EFIL *e1,*e2;
+  FIELD *f;
+  Dfmt *m;
+
+  EPeek(files[0], hdr);
+  fdef = hdr[1];
+  noc = hdr[3];
+  norout = hdr[2];
+  for (i = 1; i < count; i++) {
+    EPeek(files[i], hdr);
+    if ((fdef != hdr[1]) || (noc != hdr[3])) {
+      printf("Matrices incompatible\n");
+      exit(7);
+    }
+    norout += hdr[2];
+  }
+  hdr[2] = norout;
+  e2 = EWHdr(out, hdr);
+  f = malloc(FIELDLEN);
+  if (NULL == f) {
+    LogString(81,"Can't malloc field structure");
+    exit(22);
+  }
+  FieldASet(fdef, f);
+  DSSet(f, noc, &ds);
+  m = malloc(ds.nob);
+  for (i = 0; i < count; i++) {
+    e1 = ERHdr(files[i], hdr);
+    nor = hdr[2];
+    for (j = 0; j < nor; j++) {
+      ERData(e1, ds.nob, m);
+      EWData(e2, ds.nob, m);
+    }
+    ERClose(e1);
+  }
+  EWClose(e2);
+  free(m);
+  free(f);
+}
+
+uint64_t *perm_inv(const char *perm, uint64_t *nor)
+{
+  uint64_t hdr[5];
+  uint64_t noc, i, k;
+  uint64_t *inv;
+  EFIL *e1 = ERHdr(perm, hdr);
+  *nor = hdr[2];
+  noc = hdr[3];
+  if (*nor != noc) {
+    printf("Invert - map not square\n");
+    exit(15);
+  }
+  inv = malloc(8 * noc);
+  memset(inv, 0xff, 8 * noc);
+  for (i = 0; i < noc; i++) {
+    ERData(e1, 8, (uint8_t *)&k);
+    if (0xffffffffffffffff == inv[k]) {
+      inv[k] = i;
+    } else {
+      printf("Invert - map not invertible\n");
+      exit(15);
+    }
+  }
+  ERClose(e1);
+  return inv;
+}
+
+void fWriteBitString(const char *file, Dfmt *string, uint64_t nor, uint64_t noc)
+{
+  uint64_t h[2] = {nor, noc}; /* Bitstring header */
+  header hdr;
+  EFIL *e;
+  hdr.named.rnd1 = 2;
+  hdr.named.rnd2 = 0; /* We need to set these or valgrind complains */
+  hdr.named.fdef = 1;
+  hdr.named.nor = nor;
+  hdr.named.noc = noc;
+  e = EWHdr(file, hdr.hdr);
+  EWData(e, sizeof(h), (Dfmt *)h);
+  EWData(e, 8 * ((nor + 63) / 64), string);
+  EWClose(e);
 }

@@ -14,6 +14,7 @@
 #include "funs.h"
 #include "bitstring.h"
 #include "util.h"
+#include "utils.h"
 
 static const char prog_name[] = "zqa";
 
@@ -41,9 +42,9 @@ static void fRowExtract(const char *bs, const char *in, const char *nsel)
   nor = hdrbs.named.nor; /* Total bits */
   noc = hdrio.named.noc; /* Elements per row */
   fdef = hdrio.named.fdef;
-  if (nor != hdrio.named.nor || noc != nor) {
+  if (nor != hdrio.named.nor) {
     /* Should be same as for generator */
-    fprintf(stderr, "%s: %s, %s different number of rows or columns, exiting\n", prog_name, bs, in);
+    fprintf(stderr, "%s: %s, %s different number of rows, exiting\n", prog_name, bs, in);
     exit(1);
   }
   f = malloc(FIELDLEN);
@@ -90,7 +91,7 @@ int main(int argc, const char *argv[])
   unsigned int sub_root_len;
   char *sub_bs;
   char *sub_rem;
-  header hdr_gen;
+  header hdr, hdr_gen;
   int is_perm;
 
   CLogCmd(argc, argv);
@@ -128,11 +129,35 @@ int main(int argc, const char *argv[])
   is_perm = 1 == hdr_gen.named.fdef;
 
   if (is_perm) {
+    int res;
+    const char *files[] = {sub_rem, seln};
+    /*
+     * Let the subspace have dimension r and codimension s
+     * Then rem is r x s. We extend by adding an s x s identity
+     * We can now multiply by the generator on the left
+     * and take the non-selected rows of the result
+     * This gives us C*rem+N, where C is the selected columns
+     * and N is the non-selected columns, both of the
+     * notional non-selected rows of the permutation
+     */
+    EPeek(sub_rem, hdr.hdr);
+    res = ident(hdr.named.fdef, hdr.named.noc, hdr.named.noc, 1, seln);
+    NOT_USED(res);
+    /* Concatenate rem and seln to create selc */
+    cat(files, selc, 2);
+    /* We could consider doing the multiply in line
+     * and only writing out the rows we want (ie the non-sel ones)
+     */
+    fMultiply(fun_tmp, argv[2], 0, selc, 0, selm, 0);
+    /* Now take the non-selected part of selm */
+    fRowExtract(sub_bs, selm, argv[3]);
   } else {
     /* Row select non-selected rows from gen (argv[2]) */
     fRowExtract(sub_bs, argv[2], seln);
     fColumnExtract(sub_bs, 0, seln, 0, selc, 0, selcn, 0);
+    /* Clean using the pivots */
     fMultiply(fun_tmp, selc, 0, sub_rem, 0, selm, 0);
+    /* Add result of clean into non-selected part */
     fAdd(selm, 0, selcn, 0, argv[3], 0);
   }
   remove(seln);
