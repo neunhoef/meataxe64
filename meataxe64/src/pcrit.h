@@ -14,13 +14,15 @@ extern void pcbunf(Dfmt * d, const Dfmt * s, uint64_t nob,
 extern void pcxunf(Dfmt * d, const Dfmt * s, uint64_t nob,
                    const uint8_t * t1);
 extern void pcunf(Dfmt * d, uint64_t nob, const uint8_t * t1);
+/* pcpmad: return (A * B + C) mod p */
 extern uint64_t pcpmad(uint64_t p,uint64_t a,uint64_t b,uint64_t c);
 extern uint64_t pcrem(uint64_t p,uint64_t a,uint64_t b);
+/* pc1xora: d = s1 ^ s2 (nob bytes long) */
 extern void pc1xora(Dfmt * d, const Dfmt * s1, const Dfmt * s2, uint64_t nob);
 extern void pc1xorj(Dfmt * d, const Dfmt * s1, const Dfmt * s2, uint64_t nob);
 extern void pcbif(Dfmt * d, const Dfmt * s1, const Dfmt * s2,
                    uint64_t nob, const uint8_t * t2);
-void pcbarprp(int inp, int oup, long base, int digits, 
+void pcbarprp(int inp, int oup, uint64_t base, int digits, 
               uint64_t maxval, uint64_t * barpar);
 void pcbarrett(const uint64_t * barpar, const Dfmt * input, Dfmt * output,
                    uint64_t entries, uint64_t stride);
