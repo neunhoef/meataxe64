@@ -538,14 +538,13 @@ pcbarprp:
         movq    %rdx,8(%r9)   /*  base   */
         subq    $1,%rcx       /* one less than actual digits */
         movq    %rcx,16(%r9)  /*  digits */
-        movq    $1,%rcx       /* number of bits in base */
+        movq    $0,%rcx       /* number of bits in base */
 pcbarp1:
         shrq    $1,%rdx
         jz      pcbarp2
         addq    $1,%rcx
         jmp     pcbarp1
 pcbarp2:                      /* %rcx is number of bits to shift */
-        subq    $1,%rcx
         movq    %rcx,24(%r9)
         movq    $1,%rdx
         shlq    %cl,%rdx
