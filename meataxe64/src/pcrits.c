@@ -8,6 +8,7 @@
 #include "pcrit.h"
 #include <string.h>
 #include <stdio.h>
+#include <assert.h>
 
 /* pcpmad: return (A * B + C) mod p */
 /* This has to maintain 128 bit precision internally */
@@ -96,17 +97,45 @@ void pc1xora(Dfmt *d, const Dfmt *s1, const Dfmt *s2, uint64_t nob)
   }
 }
 
-/* Automated conversion */
+void pc1xorj(Dfmt *d, const Dfmt *s1, const Dfmt *s2, uint64_t nob)
+{
+  pc1xora(d, s1, s2, nob);
+}
+
+/* Perform a 128 bit by 64 bit divide
+ * No catering for divisor bigger than hi
+ * where result would overflow 64 bits */
+static uint64_t div128_64(uint64_t hi, uint64_t lo, uint64_t divisor)
+{
+  uint64_t res = 0;
+  unsigned int count = 64;
+  assert(hi < divisor); /* Programming error if not */
+  while (count > 0) {
+    res <<= 1; /* Shift before adding */
+    hi <<= 1;
+    if ((int64_t)lo < 0) {
+      /* Top bit set and about to be shifted out */
+      hi += 1;
+      lo <<= 1;
+    }
+    count--; /* One less bit to go */
+    if (hi >= divisor) {
+      res += 1;
+      hi -= divisor;
+    }
+  }
+  return res;
+}
+
+/* Automated (and currently incorrect) conversion */
 void pcbarprp(int inp, int oup, uint64_t base, int digits,
               uint64_t maxval, uint64_t *barpar)
-/*  void pcbarprp(uint64_t rdx, uint64_t rdi, uint64_t rsi, uint64_t r8, uint64_t *r9)*/
 {
-    uint64_t tmp = 0;
-    uint64_t base_rem;
-    barpar[1] = base;                // base
-    digits -= 1;                  // one less than actual digits
-    barpar[2] = digits;                // digits
-    digits = 1;                   // number of bits in base
+    uint64_t tmp;
+    barpar[1] = base;
+    digits -= 1;                  /* one less than actual digits */
+    barpar[2] = digits;
+    digits = 0;                   /* number of bits in base */
 
     while (base != 0) {
       base >>= 1;
@@ -114,44 +143,31 @@ void pcbarprp(int inp, int oup, uint64_t base, int digits,
         digits++;
       }
     }
-
-    digits -= 1;                  // digits is number of bits to shift
+    /* digits is number of bits to shift */
     barpar[3] = digits;
     base = 1;
-    base <<= (uint8_t)digits;
-    base_rem = base % barpar[1]; // tmp quot, base rem
-    tmp = (base_rem == 0) ? 0 : (base_rem + 1); // round up
-    barpar[4] = tmp;
-    tmp = 0;                   // start flags at zero
-    base = maxval >> 63;
-
-    if (base != 0) {            // OK if max to bit not set
-        tmp += 16;             // else first round is divide
+    base <<= (uint8_t)(digits & 0xff);
+    /* We want (base << digits) * 2^64 / barpar[1]
+     * We round up the quotient and store in barpar[4]
+     * We ignore the remainder
+     */
+    /* We need a 128 bit by 64 bit divide */
+    barpar[4] = 1 + div128_64(base, 0, barpar[1]);
+    tmp = 0;                   /* start flags at zero */
+    if ((int64_t)maxval < 0) {            /* OK if max to bit not set */
+      tmp += 16;             /* else first round is divide */
     }
-
-    if (inp == 1) {
-        // do nothing
-    } else {
+    if (inp != 1) {
+      tmp += 4;
+      if (inp != 2) {
         tmp += 4;
+      }
     }
-
-    if (inp == 2) {
-        // do nothing
-    } else {
-        tmp += 4;
-    }
-
-    if (oup > 2) {
-        // do nothing
-    } else {
+    if (oup <= 2) {
+      tmp += 1;
+      if (oup <= 1) {
         tmp += 1;
+      }
     }
-
-    if (oup > 1) {
-        // do nothing
-    } else {
-        tmp += 1;
-    }
-
-    barpar[0] = tmp;               // flags
+    barpar[0] = tmp;               /* flags */
 }
