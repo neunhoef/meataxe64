@@ -19,6 +19,7 @@ extern uint64_t pcpmad(uint64_t p,uint64_t a,uint64_t b,uint64_t c);
 extern uint64_t pcrem(uint64_t p,uint64_t a,uint64_t b);
 /* pc1xora: d = s1 ^ s2 (nob bytes long) */
 extern void pc1xora(Dfmt * d, const Dfmt * s1, const Dfmt * s2, uint64_t nob);
+/* pc1xorj: d = s1 ^ s2 (nob bytes long) using AVX2 */
 extern void pc1xorj(Dfmt * d, const Dfmt * s1, const Dfmt * s2, uint64_t nob);
 extern void pcbif(Dfmt * d, const Dfmt * s1, const Dfmt * s2,
                    uint64_t nob, const uint8_t * t2);
