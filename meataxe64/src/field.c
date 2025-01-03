@@ -212,7 +212,7 @@ static uint64_t smul(const FIELD * f, uint64_t s , uint64_t a)
     return c;
 }
 
-static uint64_t qmul(const FIELD * f, uint64_t a , uint64_t b)
+uint64_t qmul(const FIELD *f, uint64_t a , uint64_t b)
 {
     unsigned int i;
     uint64_t c,one;

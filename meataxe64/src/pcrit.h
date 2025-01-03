@@ -5,10 +5,12 @@
 
 // pc1.s general functions
 extern void mactype(char * mact);
-void pccl32 (const uint64_t * clpm, uint64_t scalar, uint64_t noc, 
-                      uint32_t * d1, uint32_t * d2);
-void pccl64 (const uint64_t * clpm, uint64_t scalar, uint64_t noc, 
-                      uint64_t * d1, uint64_t * d2);
+/* 32 bit element multiply and add subroutine */
+extern void pccl32(const uint64_t *clpm, uint64_t scalar, uint64_t noc, 
+                   uint32_t *d1, uint32_t *d2);
+/* 64 bit element multiply and add subroutine */
+extern void pccl64(const uint64_t *clpm, uint64_t scalar, uint64_t noc, 
+                   uint64_t *d1, uint64_t *d2);
 extern void pcbunf(Dfmt * d, const Dfmt * s, uint64_t nob,
                    const uint8_t * t1, const uint8_t * t2);
 extern void pcxunf(Dfmt * d, const Dfmt * s, uint64_t nob,

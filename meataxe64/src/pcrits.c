@@ -38,6 +38,13 @@ static uint64_t reduce(uint64_t a, uint64_t i, uint64_t p, uint64_t overflow)
 #define ff32 0xffffffff
 #define ff64 0xffffffffffffffff
 
+/*
+ * This is too slow
+ * Takes about 10 minutes for something that used to take 2 seconds
+ * Ie factor 300 worse. Example
+zrd a1 18446744073709551577 2111 2111
+time zmu a1 a1 a2
+ */
 uint64_t pcpmad(uint64_t p, uint64_t a, uint64_t b, uint64_t c)
 {
   uint64_t l_a = a & ff32,
@@ -49,22 +56,25 @@ uint64_t pcpmad(uint64_t p, uint64_t a, uint64_t b, uint64_t c)
     r3 = (h_a * l_b) % p,
     r4 = (h_a * h_b) % p,
     reducer = (1 + (ff64 % p)) % p;
+  /* We do r2 and r3 together. They can only overflow 1 bit */
+  /* We can also reduce r4 32 bits, and then add into r2+r3 */
+  r4 = reduce(r4, 32, p, reducer); /* Bring into same range as r2, r3 */
+  r2 += r3;
+  if (r2 < r3) {
+    /* We've overflowed, add in 2^64 mod p */
+    r2 += reducer;
+  }
+  r2 += r4;
+  if (r2 < r4) {
+    /* We've overflowed, add in 2^64 mod p */
+    r2 += reducer;
+  }
   r2 = reduce(r2, 32, p, reducer);
-  r3 = reduce(r3, 32, p, reducer);
-  r4 = reduce(r4, 64, p, reducer);
   /* Now have all the remainders in 64 bits,
    * and all in the range 0 <= x < p.
    * add up and deal with overflow as we go */
   r1 += r2;
   if (r1 < r2) {
-    r1 += reducer;
-  }
-  r1 += r3;
-  if (r1 < r3) {
-    r1 += reducer;
-  }
-  r1 += r4;
-  if (r1 < r4) {
     r1 += reducer;
   }
   r1 += c;
@@ -170,4 +180,17 @@ void pcbarprp(int inp, int oup, uint64_t base, int digits,
       }
     }
     barpar[0] = tmp;               /* flags */
+}
+
+void pccl32(const uint64_t *clpm, uint64_t scalar, uint64_t noc, 
+              uint32_t *d1, uint32_t *d2)
+{
+  size_t offs = offsetof(FIELD, clpm);
+  FIELD *f = (FIELD *)((uint8_t *)clpm - offs); /* Find the field */
+  uint64_t i, x64;
+  scalar >>= f->clpm[2]; /* Get the scalar back to the original */
+  for(i = 0; i < noc;i++) {
+    x64 = qmul(f, *(d1++), scalar) ^ *d2;
+    *(d2++) = x64;
+  }
 }

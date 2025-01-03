@@ -152,6 +152,9 @@ extern void PExtract(const DSPACE * ds, const Dfmt *mq,
 extern void PAssemble(const DSPACE * ds, const Dfmt *mp,
                    Dfmt *mq, uint64_t nor, uint64_t psiz); 
 
+/* Field helper fucntions for C implementation */
+extern uint64_t qmul(const FIELD *f, uint64_t a , uint64_t b);
+
 // ==============================================================
 
 /* First to set the field */
