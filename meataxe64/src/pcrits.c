@@ -20,16 +20,10 @@ static uint64_t reduce(uint64_t a, uint64_t i, uint64_t p, uint64_t overflow)
   uint64_t b;
   while (i > 0) {
     a %= p; /* Reduce. We keep 0 <= a < p */
-    b = a;
-    a <<= 1; /* Multiply by 2, which may overflow */
-    if (a < b) {
-      /* we've overflowed */
-      a += overflow;
-      /* we might overflow again */
-      if (a < overflow) {
-        a += overflow;
-      }
-    }
+    /* This code is to avoid unpredictable branches */
+    b = a >> 63; /* Top bit */
+    a <<= 1;
+    a += b * overflow; /* Add in overflow if it occurred */
     i--;
   }
   return a % p;
@@ -41,7 +35,9 @@ static uint64_t reduce(uint64_t a, uint64_t i, uint64_t p, uint64_t overflow)
 /*
  * This is too slow
  * Takes about 10 minutes for something that used to take 2 seconds
- * Ie factor 300 worse. Example
+ * Ie factor 300 worse
+ * After improvements down to around 3 minutes. Factor 100 to go
+ * Example
 zrd a1 18446744073709551577 2111 2111
 time zmu a1 a1 a2
  */
@@ -51,10 +47,10 @@ uint64_t pcpmad(uint64_t p, uint64_t a, uint64_t b, uint64_t c)
     h_a = a >> 32,
     l_b = b & ff32,
     h_b = b >> 32,
-    r1 = (l_a * l_b) % p,
-    r2 = (l_a * h_b) % p,
-    r3 = (h_a * l_b) % p,
-    r4 = (h_a * h_b) % p,
+    r1 = (l_a * l_b),
+    r2 = (l_a * h_b),
+    r3 = (h_a * l_b),
+    r4 = (h_a * h_b),
     reducer = (1 + (ff64 % p)) % p;
   /* We do r2 and r3 together. They can only overflow 1 bit */
   /* We can also reduce r4 32 bits, and then add into r2+r3 */
@@ -183,7 +179,20 @@ void pcbarprp(int inp, int oup, uint64_t base, int digits,
 }
 
 void pccl32(const uint64_t *clpm, uint64_t scalar, uint64_t noc, 
-              uint32_t *d1, uint32_t *d2)
+            uint32_t *d1, uint32_t *d2)
+{
+  size_t offs = offsetof(FIELD, clpm);
+  FIELD *f = (FIELD *)((uint8_t *)clpm - offs); /* Find the field */
+  uint64_t i, x64;
+  scalar >>= f->clpm[2]; /* Get the scalar back to the original */
+  for(i = 0; i < noc;i++) {
+    x64 = qmul(f, *(d1++), scalar) ^ *d2;
+    *(d2++) = x64;
+  }
+}
+
+void pccl64(const uint64_t *clpm, uint64_t scalar, uint64_t noc, 
+            uint64_t *d1, uint64_t *d2)
 {
   size_t offs = offsetof(FIELD, clpm);
   FIELD *f = (FIELD *)((uint8_t *)clpm - offs); /* Find the field */
