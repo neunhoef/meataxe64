@@ -6,6 +6,7 @@
 #include <stddef.h>
 #include "field.h"
 #include "pcrit.h"
+#include "utils.h"
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
@@ -15,16 +16,22 @@
 
 /* Reduce function. Reduces a * 2^i mod p */
 /* overflow gives 2^64 mod p, which we need internally */
-static uint64_t reduce(uint64_t a, uint64_t i, uint64_t p, uint64_t overflow)
+static uint64_t reduce(uint64_t a, uint64_t i, uint64_t p, const FIELD *f)
 {
   uint64_t b;
+  /* We grease using the reductions table */
+  assert(0 == i % 4);
   while (i > 0) {
-    a %= p; /* Reduce. We keep 0 <= a < p */
-    /* This code is to avoid unpredictable branches */
-    b = a >> 63; /* Top bit */
-    a <<= 1;
-    a += b * overflow; /* Add in overflow if it occurred */
-    i--;
+    a %= p; /* Keep in range 0 <= a < p */
+    b = a >> 60; /* Top four bits */
+    b = f->reds[b]; /* Look up the reduction */
+    a <<= 4;
+    a += b; /* Add in overflow */
+    if (a < b) {
+      /* Overflowed 64 bits */
+      a += f->reds[1];
+    }
+    i -= 4;
   }
   return a % p;
 }
@@ -37,48 +44,62 @@ static uint64_t reduce(uint64_t a, uint64_t i, uint64_t p, uint64_t overflow)
  * Takes about 10 minutes for something that used to take 2 seconds
  * Ie factor 300 worse
  * After improvements down to around 3 minutes. Factor 100 to go
+ * We can grease the reductions by computing, at field set up,
+ * i * 2 ^ 64 mod p for 0 <= i < 16
+ * This will reduce the loop to 8 cycles rather than 32
+ * That gets us another factor 4, leaving 25 to go
  * Example
 zrd a1 18446744073709551577 2111 2111
 time zmu a1 a1 a2
  */
-uint64_t pcpmad(uint64_t p, uint64_t a, uint64_t b, uint64_t c)
+uint64_t pcpmad(uint64_t p, uint64_t a, uint64_t b, uint64_t c, const FIELD *f)
 {
-  uint64_t l_a = a & ff32,
-    h_a = a >> 32,
-    l_b = b & ff32,
-    h_b = b >> 32,
-    r1 = (l_a * l_b),
-    r2 = (l_a * h_b),
-    r3 = (h_a * l_b),
-    r4 = (h_a * h_b),
-    reducer = (1 + (ff64 % p)) % p;
-  /* We do r2 and r3 together. They can only overflow 1 bit */
-  /* We can also reduce r4 32 bits, and then add into r2+r3 */
-  r4 = reduce(r4, 32, p, reducer); /* Bring into same range as r2, r3 */
-  r2 += r3;
-  if (r2 < r3) {
-    /* We've overflowed, add in 2^64 mod p */
-    r2 += reducer;
+  if (p <= ff32) {
+    /* The multiply can't overflow */
+    uint64_t res = (a * b) % p; /* Reduce to ensure the add doesn't overflow */
+    return (res + c) % p;
+  } else {
+    uint64_t l_a = a & ff32,
+      h_a = a >> 32,
+      l_b = b & ff32,
+      h_b = b >> 32,
+      r1 = (l_a * l_b),
+      r2 = (l_a * h_b),
+      r3 = (h_a * l_b),
+      r4 = (h_a * h_b),
+      reducer = (1 + (ff64 % p)) % p;
+    /* If the reducer is at most ff32 then we can do
+     * another multiply splitting r4 into hi and lo
+     * and thus only need one multiply by 2^32
+     */
+    /* We do r2 and r3 together. They can only overflow 1 bit */
+    /* We can also reduce r4 32 bits, and then add into r2+r3 */
+    r4 = reduce(r4, 32, p, f); /* Bring into same range as r2, r3 */
+    r2 += r3;
+    if (r2 < r3) {
+      /* We've overflowed, add in 2^64 mod p */
+      r2 += reducer;
+    }
+    r2 += r4;
+    if (r2 < r4) {
+      /* We've overflowed, add in 2^64 mod p */
+      r2 += reducer;
+    }
+    r2 = reduce(r2, 32, p, f);
+    /* Now have all the remainders in 64 bits,
+     * and all in the range 0 <= x < p.
+     * add up and deal with overflow as we go */
+    r1 += r2;
+    if (r1 < r2) {
+      r1 += reducer;
+    }
+    r1 += c;
+    if (r1 < c) {
+      r1 += reducer;
+    }
+    /* Finally reduce mod p */
+    return r1 % p;
   }
-  r2 += r4;
-  if (r2 < r4) {
-    /* We've overflowed, add in 2^64 mod p */
-    r2 += reducer;
-  }
-  r2 = reduce(r2, 32, p, reducer);
-  /* Now have all the remainders in 64 bits,
-   * and all in the range 0 <= x < p.
-   * add up and deal with overflow as we go */
-  r1 += r2;
-  if (r1 < r2) {
-    r1 += reducer;
-  }
-  r1 += c;
-  if (r1 < c) {
-    r1 += reducer;
-  }
-  /* Finally reduce mod p */
-  return r1 % p;
 }
 
 #if 0

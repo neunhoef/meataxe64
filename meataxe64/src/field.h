@@ -122,6 +122,12 @@ typedef struct
 
      int   Ttra;
 
+  /* Reductions for i * 2^64 mod field order
+   * These are used to grease the C implementation of pcpmad
+   * They are computed once at field set up
+   * This is similar to CRC tables
+   */
+  uint64_t reds[16];
 }   FIELD;
 
 

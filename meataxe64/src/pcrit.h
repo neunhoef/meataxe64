@@ -17,7 +17,7 @@ extern void pcxunf(Dfmt * d, const Dfmt * s, uint64_t nob,
                    const uint8_t * t1);
 extern void pcunf(Dfmt * d, uint64_t nob, const uint8_t * t1);
 /* pcpmad: return (A * B + C) mod p */
-extern uint64_t pcpmad(uint64_t p,uint64_t a,uint64_t b,uint64_t c);
+extern uint64_t pcpmad(uint64_t p,uint64_t a,uint64_t b,uint64_t c, const FIELD *f);
 extern uint64_t pcrem(uint64_t p,uint64_t a,uint64_t b);
 /* pc1xora: d = s1 ^ s2 (nob bytes long) */
 extern void pc1xora(Dfmt * d, const Dfmt * s1, const Dfmt * s2, uint64_t nob);
