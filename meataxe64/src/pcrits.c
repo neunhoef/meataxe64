@@ -37,7 +37,6 @@ static uint64_t reduce(uint64_t a, uint64_t i, uint64_t p, const FIELD *f)
 }
 
 #define ff32 0xffffffff
-#define ff64 0xffffffffffffffff
 
 /*
  * This is too slow
@@ -67,7 +66,7 @@ uint64_t pcpmad(uint64_t p, uint64_t a, uint64_t b, uint64_t c, const FIELD *f)
       r2 = (l_a * h_b),
       r3 = (h_a * l_b),
       r4 = (h_a * h_b),
-      reducer = (1 + (ff64 % p)) % p;
+      reducer = f->reds[1];
     /* If the reducer is at most ff32 then we can do
      * another multiply splitting r4 into hi and lo
      * and thus only need one multiply by 2^32
@@ -154,7 +153,10 @@ static uint64_t div128_64(uint64_t hi, uint64_t lo, uint64_t divisor)
   return res;
 }
 
-/* Automated (and currently incorrect) conversion */
+/* Barrett multiplication
+ * (see eg https://en.wikipedia.org/wiki/Barrett_reduction)
+ * Initial set up
+ */
 void pcbarprp(int inp, int oup, uint64_t base, int digits,
               uint64_t maxval, uint64_t *barpar)
 {
@@ -166,10 +168,9 @@ void pcbarprp(int inp, int oup, uint64_t base, int digits,
 
     while (base != 0) {
       base >>= 1;
-      if (base != 0) {
-        digits++;
-      }
+      digits++;
     }
+    digits--;
     /* digits is number of bits to shift */
     barpar[3] = digits;
     base = 1;
@@ -219,8 +220,100 @@ void pccl64(const uint64_t *clpm, uint64_t scalar, uint64_t noc,
   FIELD *f = (FIELD *)((uint8_t *)clpm - offs); /* Find the field */
   uint64_t i, x64;
   scalar >>= f->clpm[2]; /* Get the scalar back to the original */
-  for(i = 0; i < noc;i++) {
+  for(i = 0; i < noc; i++) {
     x64 = qmul(f, *(d1++), scalar) ^ *d2;
     *(d2++) = x64;
   }
 }
+
+#if 1
+/* An auto translated version of pcbarrett */
+/* Bugfixed a bit where the translator failed dismally
+ * eg getting the number of parameters wrong
+ * Needs the mul and div replaced
+ */
+void pcbarrett(const uint64_t *params, const Dfmt *input, Dfmt *output,
+               uint64_t entries, uint64_t stride)
+{
+  uint8_t *r14 = output; // output pointer
+  uint8_t ch = params[0]; // flags
+  uint64_t r9 = *(uint64_t *)(params + 8); // base = denominator
+  uint8_t bh = params[16]; // (constant) number of digits
+  uint8_t cl = params[24]; // shift
+  uint64_t r15 = *(uint64_t *)(params + 32); // Barrett multiplier
+  uint8_t bl; // copy of digits
+  uint8_t *r11; // output pointer
+  const uint8_t *rsi = input; // input pointer
+  uint32_t eax;
+  uint64_t rdx = 0;
+  uint64_t rdi;
+  uint64_t i;
+
+  for (i = entries; i > 0; i--) {
+    bl = bh; // copy of digits
+    r11 = r14; // get output pointer
+    if (ch & 0x0C) { // 32-bit input?
+      eax = *(uint32_t *)rsi; // 32-bit load with zero extension
+      rsi += 4; // next 32-bit number
+    } else {
+      // input is not 32 bits
+      if (ch & 0x04) { // 64-bit load?
+        eax = *(uint64_t *)rsi; // 64-bit load
+        rsi += 8; // next 64-bit number
+      } else {
+        eax = *(uint16_t *)rsi; // 16 bit load with zero extension
+        rsi += 2; // next 16 bit number
+      }
+    }
+
+    if (ch & 0x10) { // do we do first digit by division
+      rdx = 0; // clear rdx ready for divide
+      __asm__("div %1" : "=a"(eax), "=d"(rdx) : "r"(r9)); // eax quot,  rdx rem
+      rdi = rdx; // put remainder into rdi
+    } else {
+    pcbarm2: // X is in eax at this point
+      rdi = eax; // save a copy of X in rdi
+      rdx = 0;
+      /* Unsigned multiply %rax (eax) by %r15, result in %rdx (hi), %rax (lo */
+      __asm__("mul %1" : "=A"(eax) : "r"(r15)); // 64 -> 128 multiply
+      /* rdx comes out of the multiply */
+      rdx >>= cl; // complete the Barrett, rdx=q
+      eax = rdx; // keep a copy of q ready for next round
+      rdx *= r9; // rdx = q.d
+      rdi -= rdx; // so rdi is now remainder
+    }
+    // rdi remainder  eax quotient
+    if (ch & 0x03) { // 8 bit output
+      *r11 = (uint8_t)(rdi & 0xFF); // 8 bit store
+    } else {
+      // store is not 8 bits
+      if (ch & 0x02) { // 16 bit store?
+        *(uint16_t *)r11 = (uint16_t)rdi; // 16 bit store
+      } else {
+        *(uint32_t *)r11 = (uint32_t)rdi; // 32-bit store
+      }
+    }
+
+    r11 += stride; // increment output pointer
+    bl--; // decrement digit count
+    if (bl != 0) {
+      goto pcbarm2; // go do more digits
+    }
+    if (ch & 0x03) { // last digit
+      *r11 = (uint8_t)(eax & 0xFF);
+      r14 += 1; // increment output pointer
+    } else {
+      // last store, not 8 bits
+      if (ch & 0x02) { // 16 bit store?
+        *(uint16_t *)r11 = (uint16_t)(eax & 0xffff); // 16 bit store
+        r14 += 2; // 16 bit increment
+      } else {
+        *(uint32_t *)r11 = eax; // 32-bit store
+        r14 += 4; // 32-bit increment
+      }
+    }
+    continue;
+  }
+  return;
+}
+#endif

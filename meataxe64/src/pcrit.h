@@ -6,15 +6,17 @@
 // pc1.s general functions
 extern void mactype(char * mact);
 /* 32 bit element multiply and add subroutine */
-extern void pccl32(const uint64_t *clpm, uint64_t scalar, uint64_t noc, 
+extern void pccl32(const uint64_t *clpm, uint64_t scalar, uint64_t noc,
                    uint32_t *d1, uint32_t *d2);
 /* 64 bit element multiply and add subroutine */
-extern void pccl64(const uint64_t *clpm, uint64_t scalar, uint64_t noc, 
+extern void pccl64(const uint64_t *clpm, uint64_t scalar, uint64_t noc,
                    uint64_t *d1, uint64_t *d2);
+/* pcbunf: case 2 (madtyp) for DSMad */
 extern void pcbunf(Dfmt * d, const Dfmt * s, uint64_t nob,
                    const uint8_t * t1, const uint8_t * t2);
 extern void pcxunf(Dfmt * d, const Dfmt * s, uint64_t nob,
                    const uint8_t * t1);
+/* pcunf: case 1 (multyp) for DSMul */
 extern void pcunf(Dfmt * d, uint64_t nob, const uint8_t * t1);
 /* pcpmad: return (A * B + C) mod p */
 extern uint64_t pcpmad(uint64_t p,uint64_t a,uint64_t b,uint64_t c, const FIELD *f);
@@ -25,10 +27,21 @@ extern void pc1xora(Dfmt * d, const Dfmt * s1, const Dfmt * s2, uint64_t nob);
 extern void pc1xorj(Dfmt * d, const Dfmt * s1, const Dfmt * s2, uint64_t nob);
 extern void pcbif(Dfmt * d, const Dfmt * s1, const Dfmt * s2,
                    uint64_t nob, const uint8_t * t2);
-void pcbarprp(int inp, int oup, uint64_t base, int digits, 
+/*
+ * Prepare for the Barrett algorithm below. We need
+ * k such that 2^k > n (ie log base 2(n) rounded up)
+ * We then need round down(4^k/n)
+ * There are some flags etc which I don't yet understand
+ */
+void pcbarprp(int inp, int oup, uint64_t base, int digits,
               uint64_t maxval, uint64_t * barpar);
-void pcbarrett(const uint64_t * barpar, const Dfmt * input, Dfmt * output,
-                   uint64_t entries, uint64_t stride);
+/*
+ * This implements the Barrett a*b mod n algorithm
+ * See eg https://en.wikipedia.org/wiki/Barrett_reduction
+ * and https://www.nayuki.io/page/barrett-reduction-algorithm
+ */
+void pcbarrett(const uint64_t *barpar, const Dfmt *input, Dfmt *output,
+               uint64_t entries, uint64_t stride);
 
 // pc2.s HPMI in characteristic 2
 void pc2aca(const uint8_t *prog, uint8_t * bv, uint64_t stride);

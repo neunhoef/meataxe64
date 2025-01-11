@@ -1436,7 +1436,9 @@ int  FieldASet1(uint64_t fdef, FIELD * f, int flags)
         if(f->fdef==9) f->pextype=3;   // GF9
         if(f->paktyp==3) f->pextype=7;  // 27,81,243,25,125,49,121,169
 // next is uint16_t FELT but still less than digit
+        /* paktyp 2: 257 <= fdef <= 2^16 */
         if( (f->paktyp==2)&&(f->nodigits==1) ) f->pextype=10;
+        /* paktype 1: 2^16 < fdef <= 2^32, paktyp 0: 2^32 < fdef */
         if((f->paktyp<3)&&(f->nodigits>1))
         {
             pcbarprp(f->paktyp,2,f->digit, f->nodigits,
