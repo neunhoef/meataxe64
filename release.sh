@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Script to make a release of the meataxe2000 meataxe64 hybrid
 #

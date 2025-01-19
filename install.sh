@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Script to install meataxe2000 meataxe64 hybrid
 #
@@ -30,7 +30,7 @@ cd ../../pinstall
 mkdir -p $install/pinstall
 for x in *; do sed -e "s?~/ptinstall/?$install/ptinstall/?" < $x > $install/pinstall/$x; done
 chmod 755 $install/pinstall/* $install/ptinstall/jif/*
-cd ../../git/meataxe64/test
+cd ../../git/m64/test
 source ./go
 makl
 compa
