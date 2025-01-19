@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 val1 my_vg.sh
 val2 my_vg.sh
 val3 my_vg.sh

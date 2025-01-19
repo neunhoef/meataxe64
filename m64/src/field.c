@@ -136,7 +136,7 @@ static uint64_t pinv(const FIELD * f, uint64_t a)
     b1=one;
     c1=a;
     b2=one + f->charc/a;
-    c2=pcpmad(f->charc,a,b2,0);
+    c2=pcpmad(f->charc,a,b2,0, f);
     if(c1>c2)
     {
         c3=c1;
@@ -150,7 +150,7 @@ static uint64_t pinv(const FIELD * f, uint64_t a)
     {
         d=c2/c1;
         c3=c2-d*c1;
-        b3=psub(f,b2,pcpmad(f->charc,d,b1,0));  // can be done better
+        b3=psub(f,b2,pcpmad(f->charc,d,b1,0, f));  // can be done better
         b2=b1;
         c2=c1;
         b1=b3;
@@ -169,16 +169,16 @@ static uint64_t ppow (const FIELD * f, uint64_t a , uint64_t b )
 /* invariant   answer = c * (a^b) */
     while (b != zero)
     {
-        if((b&one) == one) c = pcpmad(f->charc,a,c,0);
+        if((b&one) == one) c = pcpmad(f->charc,a,c,0, f);
         b >>= one;
-        a = pcpmad(f->charc,a,a,0);
+        a = pcpmad(f->charc,a,a,0, f);
     }
     return c;
 }
 
 static uint64_t pdiv(const FIELD * f, uint64_t a , uint64_t b)
 {
-    return pcpmad(f->charc,a,pinv(f,b),0);
+    return pcpmad(f->charc,a,pinv(f,b),0, f);
 }
 
 /*  q-routines - works for all fields,  but may be slow */
@@ -212,12 +212,12 @@ static uint64_t smul(const FIELD * f, uint64_t s , uint64_t a)
     return c;
 }
 
-static uint64_t qmul(const FIELD * f, uint64_t a , uint64_t b)
+uint64_t qmul(const FIELD *f, uint64_t a , uint64_t b)
 {
     unsigned int i;
     uint64_t c,one;
     one=1;
-    if(f->pow == one) return pcpmad(f->charc,a,b,0);
+    if(f->pow == one) return pcpmad(f->charc,a,b,0, f);
     c=0;
     for(i=0;i<f->pow;i++)
     {
@@ -322,9 +322,11 @@ static uint64_t qdiv(const FIELD * f, uint64_t a , uint64_t b)
 {
     uint64_t one;
     one=1;
-    if(f->pow == one) return pcpmad(f->charc,a,pinv(f,b),0);
+    if(f->pow == one) return pcpmad(f->charc,a,pinv(f,b),0, f);
     return qmul(f,a,qinv(f,b));
 }
+
+#define ff64 0xffffffffffffffff
 
 /* flags are bit-significant  */
 /*   8 => return error code if fdef is not a prime power  */
@@ -382,7 +384,7 @@ int  FieldASet1(uint64_t fdef, FIELD * f, int flags)
     one=1;
     two=2;
 
-/* start investigating fdef  */
+    /* start investigating fdef  */
 
     f->fdef = fdef;
     if(fdef<two)
@@ -391,6 +393,39 @@ int  FieldASet1(uint64_t fdef, FIELD * f, int flags)
         printf("Invalid field order %ld\n",(long)fdef);
         exit(12);
     }
+
+    /* Set up 2^64 mod q tables. These are needed later in this code */
+    f->reds[0] = 0;
+    f->reds[1] = (1 + (ff64 % fdef)) % fdef;
+    for (i = 2; i < 16; i++) {
+      /* Evens we compute by shifting, odds by adding from the table */
+      uint64_t sum;
+      if (i & 1) {
+        sum = f->reds[1] + f->reds[i - 1];
+        if (sum < f->reds[1]) {
+          /* Overflowed */
+          sum += f->reds[1];
+        }
+        sum %= fdef;
+      } else {
+        uint64_t half = f->reds[i >> 1];
+        uint64_t k = half >> 63;
+        /* This is tricky logic
+         * The case k == 0 is obviously correct,
+         * but the reduction mod fdef is vital
+         * When k == 1, we have
+         * half < p, hence 2 * half < 2p
+         * Hence 2 * half - p < p, so we don't overflow
+         */
+        sum = ((half << 1) + k * f->reds[1]) % fdef;
+      }
+      if (sum >= fdef) {
+        fprintf(stderr, "Error, reds table logic broken, i = %lu, fdef = %lu, sum = %lu, f->reds[1] = %lu\n", i, fdef, sum, f->reds[1]);
+        exit(1);
+      }
+      f->reds[i] = sum % fdef;
+    }
+
     if( (flags&4)==4 )  f->charc=smlpr(fdef);
     else
     {
@@ -1401,7 +1436,9 @@ int  FieldASet1(uint64_t fdef, FIELD * f, int flags)
         if(f->fdef==9) f->pextype=3;   // GF9
         if(f->paktyp==3) f->pextype=7;  // 27,81,243,25,125,49,121,169
 // next is uint16_t FELT but still less than digit
+        /* paktyp 2: 257 <= fdef <= 2^16 */
         if( (f->paktyp==2)&&(f->nodigits==1) ) f->pextype=10;
+        /* paktype 1: 2^16 < fdef <= 2^32, paktyp 0: 2^32 < fdef */
         if((f->paktyp<3)&&(f->nodigits>1))
         {
             pcbarprp(f->paktyp,2,f->digit, f->nodigits,
@@ -3544,7 +3581,7 @@ exit(1);
         }
         for(i=0;i<ds->noc*nor;i++)
         {
-            *q64=pcpmad(f->charc,*(p64++),a64,*q64);
+            *q64=pcpmad(f->charc,*(p64++),a64,*q64, f);
             q64++;
         }
         return;

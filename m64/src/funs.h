@@ -78,6 +78,6 @@ void fMulMatrixMap(const char *m1, int s1, const char *x2, int s2,
 void fMulMaps(const char *m1, int s1, const char *x2, int s2,
                        const char *m3, int s3);
 void fRandomMatrix(const char *m1, int s1, uint64_t fdef, 
-                       uint64_t nor, uint64_t noc);
+                   uint64_t nor, uint64_t noc, uint64_t seed, uint64_t count);
 
 /* end of funs.h  */

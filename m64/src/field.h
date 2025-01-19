@@ -122,6 +122,12 @@ typedef struct
 
      int   Ttra;
 
+  /* Reductions for i * 2^64 mod field order
+   * These are used to grease the C implementation of pcpmad
+   * They are computed once at field set up
+   * This is similar to CRC tables
+   */
+  uint64_t reds[16];
 }   FIELD;
 
 
@@ -151,6 +157,9 @@ extern void PExtract(const DSPACE * ds, const Dfmt *mq,
                    Dfmt *mp, uint64_t nor, uint64_t psiz); 
 extern void PAssemble(const DSPACE * ds, const Dfmt *mp,
                    Dfmt *mq, uint64_t nor, uint64_t psiz); 
+
+/* Field helper fucntions for C implementation */
+extern uint64_t qmul(const FIELD *f, uint64_t a , uint64_t b);
 
 // ==============================================================
 

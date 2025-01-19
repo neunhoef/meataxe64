@@ -72,3 +72,4 @@ gcc -DEIGHT_BYTE_WORD -include mt_types.h zscript.c mfuns.c sums_utils.c ${gcc_l
 gcc -DEIGHT_BYTE_WORD -include mt_types.h zsh.c mfuns.c sums_utils.c ${gcc_link_options} -lm -o $BIN/zsh
 gcc -DEIGHT_BYTE_WORD -include mt_types.h zsums.c mfuns.c sums_utils.c primes.c ${gcc_link_options} -lm -o $BIN/zsums
 gcc -DEIGHT_BYTE_WORD -include mt_types.h zdiff.c mfuns.c primes.c ${gcc_link_options} -lm -o $BIN/zdiff
+gcc -DEIGHT_BYTE_WORD -include mt_types.h zspan.c mfuns.c primes.c span.c ${gcc_link_options} -lm -o $BIN/zspan
