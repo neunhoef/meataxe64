@@ -1,5 +1,6 @@
 /*
  * Implementations of assembler pcrit routines in C for portability
+ * WIP
  */
 
 #include <stdint.h>
@@ -226,89 +227,104 @@ void pccl64(const uint64_t *clpm, uint64_t scalar, uint64_t noc,
   }
 }
 
-#if 1
+#if 0
 /* An auto translated version of pcbarrett */
 /* Bugfixed a bit where the translator failed dismally
  * eg getting the number of parameters wrong
  * Needs the mul and div replaced
  */
+/* This doesn't appear to be a classical Barrett,
+ * where we want ab mod p without having to do real divides
+ * Rather, it seems to take a value in an extension field
+ * expressed as Sigma ai*p^i and deliver the sequence ai
+ * The first digit is obtained by a divide, but the others
+ * somehow arrive via a multiply by a precomputed constant
+ */
 void pcbarrett(const uint64_t *params, const Dfmt *input, Dfmt *output,
                uint64_t entries, uint64_t stride)
 {
   uint8_t *r14 = output; // output pointer
-  uint8_t ch = params[0]; // flags
-  uint64_t r9 = *(uint64_t *)(params + 8); // base = denominator
-  uint8_t bh = params[16]; // (constant) number of digits
-  uint8_t cl = params[24]; // shift
-  uint64_t r15 = *(uint64_t *)(params + 32); // Barrett multiplier
-  uint8_t bl; // copy of digits
+  uint8_t ch = params[0] & 0xff; // flags
+  uint64_t base = params[1]; /* base = denominator */
+  uint8_t cl = params[3] & 0xff; // shift
+  uint64_t r15 = params[4]; // Barrett multiplier
+  uint8_t digits;
   uint8_t *r11; // output pointer
   const uint8_t *rsi = input; // input pointer
-  uint32_t eax;
+  uint64_t rax;
   uint64_t rdx = 0;
   uint64_t rdi;
   uint64_t i;
+  int pass = 1;
 
   for (i = entries; i > 0; i--) {
-    bl = bh; // copy of digits
+    digits = params[2]  & 0xff; /* copy of digits */
     r11 = r14; // get output pointer
     if (ch & 0x0C) { // 32-bit input?
-      eax = *(uint32_t *)rsi; // 32-bit load with zero extension
+      rax = *(uint32_t *)rsi; // 32-bit load with zero extension
       rsi += 4; // next 32-bit number
     } else {
       // input is not 32 bits
       if (ch & 0x04) { // 64-bit load?
-        eax = *(uint64_t *)rsi; // 64-bit load
+        rax = *(uint64_t *)rsi; // 64-bit load
         rsi += 8; // next 64-bit number
       } else {
-        eax = *(uint16_t *)rsi; // 16 bit load with zero extension
+        rax = *(uint16_t *)rsi; // 16 bit load with zero extension
         rsi += 2; // next 16 bit number
       }
     }
-
-    if (ch & 0x10) { // do we do first digit by division
-      rdx = 0; // clear rdx ready for divide
-      __asm__("div %1" : "=a"(eax), "=d"(rdx) : "r"(r9)); // eax quot,  rdx rem
-      rdi = rdx; // put remainder into rdi
-    } else {
-    pcbarm2: // X is in eax at this point
-      rdi = eax; // save a copy of X in rdi
-      rdx = 0;
-      /* Unsigned multiply %rax (eax) by %r15, result in %rdx (hi), %rax (lo */
-      __asm__("mul %1" : "=A"(eax) : "r"(r15)); // 64 -> 128 multiply
-      /* rdx comes out of the multiply */
-      rdx >>= cl; // complete the Barrett, rdx=q
-      eax = rdx; // keep a copy of q ready for next round
-      rdx *= r9; // rdx = q.d
-      rdi -= rdx; // so rdi is now remainder
-    }
-    // rdi remainder  eax quotient
-    if (ch & 0x03) { // 8 bit output
-      *r11 = (uint8_t)(rdi & 0xFF); // 8 bit store
-    } else {
-      // store is not 8 bits
-      if (ch & 0x02) { // 16 bit store?
-        *(uint16_t *)r11 = (uint16_t)rdi; // 16 bit store
+    while (digits > 0) {
+      if (/*ch & 0x10 && */pass) { /* do we do first digit by division */
+        rdx = 0; // clear rdx ready for divide
+#if 0
+        __asm__("div %1" : "=a"(rax), "=d"(rdx) : "r"(base)); /* rax quot,  rdx rem */
+#endif
+        rdi = rax % base;
+        rax /= base;
       } else {
-        *(uint32_t *)r11 = (uint32_t)rdi; // 32-bit store
+        /* X is in rax at this point */
+        rdi = rax; // save a copy of X in rdi
+        rdx = 0;
+        /* This is the Barrett divide, done by multiply
+         * by the precomputed constant followed by a shift.
+         * In standard Barrett the quotient may be off by 1 (too small)
+         * This code doesn't seem to take account of that, or
+         * maybe it has a clever workaround
+         */
+        /* Unsigned multiply %rax (rax) by %r15, result in %rdx (hi), %rax (lo */
+        __asm__("mul %1" : "=A"(rax) : "r"(r15)); // 64 -> 128 multiply
+        /* rdx comes out of the multiply (the top 64 bits) */
+        rdx >>= cl; /* complete the Barrett, rdx == quotient */
+        rax = rdx; /* We'll divide this again in the next round */
+        rdx *= base; /* Now get the exact multiple to obtain the remainder */
+        rdi -= rdx; /* so rdi was the divident and is now the remainder */
       }
-    }
+      pass = 1; /* Always use division */
+      // rdi remainder  rax quotient
+      if (ch & 0x03) { // 8 bit output
+        *r11 = (uint8_t)(rdi & 0xFF); // 8 bit store
+      } else {
+        // store is not 8 bits
+        if (ch & 0x02) { // 16 bit store?
+          *(uint16_t *)r11 = (uint16_t)rdi; // 16 bit store
+        } else {
+          *(uint32_t *)r11 = (uint32_t)rdi; // 32-bit store
+        }
+      }
 
-    r11 += stride; // increment output pointer
-    bl--; // decrement digit count
-    if (bl != 0) {
-      goto pcbarm2; // go do more digits
+      r11 += stride; // increment output pointer
+      digits--; // decrement digit count
     }
     if (ch & 0x03) { // last digit
-      *r11 = (uint8_t)(eax & 0xFF);
+      *r11 = (uint8_t)(rax & 0xFF);
       r14 += 1; // increment output pointer
     } else {
       // last store, not 8 bits
       if (ch & 0x02) { // 16 bit store?
-        *(uint16_t *)r11 = (uint16_t)(eax & 0xffff); // 16 bit store
+        *(uint16_t *)r11 = (uint16_t)(rax & 0xffff); // 16 bit store
         r14 += 2; // 16 bit increment
       } else {
-        *(uint32_t *)r11 = eax; // 32-bit store
+        *(uint32_t *)r11 = rax & 0xffffffff; // 32-bit store
         r14 += 4; // 32-bit increment
       }
     }

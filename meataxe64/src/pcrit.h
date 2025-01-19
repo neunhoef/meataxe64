@@ -36,7 +36,9 @@ extern void pcbif(Dfmt * d, const Dfmt * s1, const Dfmt * s2,
 void pcbarprp(int inp, int oup, uint64_t base, int digits,
               uint64_t maxval, uint64_t * barpar);
 /*
- * This implements the Barrett a*b mod n algorithm
+ * This implements something related to the Barrett a*b mod n algorithm
+ * It's used in Frobenius automorphism, and linear forms
+ * for extension fields
  * See eg https://en.wikipedia.org/wiki/Barrett_reduction
  * and https://www.nayuki.io/page/barrett-reduction-algorithm
  */
@@ -77,7 +79,7 @@ void pc6bma(const uint8_t *a, uint8_t * bwa, uint8_t * c,
             uint64_t p90);
 
 // in hpmi.c
-extern void hpmiset(FIELD * f);
+extern void hpmiset(FIELD *f);
 // in pcrit.c
 extern uint64_t pcstride(uint64_t s);
 
