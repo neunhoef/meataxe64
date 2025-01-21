@@ -12,8 +12,7 @@
 #include <stdio.h>
 #include <assert.h>
 
-/* pcpmad: return (A * B + C) mod p */
-/* This has to maintain 128 bit precision internally */
+#define ff32 0xffffffff
 
 /* Reduce function. Reduces a * 2^i mod p */
 /* overflow gives 2^64 mod p, which we need internally */
@@ -37,8 +36,37 @@ static uint64_t reduce(uint64_t a, uint64_t i, uint64_t p, const FIELD *f)
   return a % p;
 }
 
-#define ff32 0xffffffff
+/* A multiply to deliver the top 64 bits of the result */
+static uint64_t top_multiply(uint64_t a, uint64_t b)
+{
+  /* Split the multiplicands into hi and lo and form the products */
+  uint64_t l_a = a & ff32,
+    h_a = a >> 32,
+    l_b = b & ff32,
+    h_b = b >> 32,
+    r1 = (l_a * l_b),
+    r2 = (l_a * h_b),
+    r3 = (h_a * l_b),
+    r4 = (h_a * h_b),
+    tmp;
+  /* Now compute the overflows */
+  r4 += (r2 >> 32) + (r3 >> 32); /* Add in the hi parts from the 2^32 results */
+  r2 &= ff32;
+  r2 += r3 & ff32; /* Get the lo part from the 2^32 */
+  tmp = r2 >> 32; /* Get the overflow bit */
+  r4 += tmp;
+  r2 <<= 32; /* Adjust so we can add in r1 */
+  r2 += r1;
+  if (r2 < r1) {
+    /* Overflowed 64 bits, increment r4 */
+    r4 += 1;
+  }
+  return r4;
+}
 
+
+/* pcpmad: return (A * B + C) mod p */
+/* This has to maintain 128 bit precision internally */
 /*
  * This is too slow
  * Takes about 10 minutes for something that used to take 2 seconds
@@ -227,7 +255,6 @@ void pccl64(const uint64_t *clpm, uint64_t scalar, uint64_t noc,
   }
 }
 
-#if 0
 /* An auto translated version of pcbarrett */
 /* Bugfixed a bit where the translator failed dismally
  * eg getting the number of parameters wrong
@@ -240,6 +267,147 @@ void pccl64(const uint64_t *clpm, uint64_t scalar, uint64_t noc,
  * The first digit is obtained by a divide, but the others
  * somehow arrive via a multiply by a precomputed constant
  */
+#if 1
+void pcbarrett(const uint64_t *params, const Dfmt *input, Dfmt *output,
+                uint64_t entries, uint64_t stride)
+{
+  uint8_t *r14 = output; // output pointer
+  uint8_t ch = params[0] & 0xff; // flags
+  uint64_t base = params[1]; /* base = denominator */
+  uint8_t cl = params[3] & 0xff; // shift
+  uint64_t r15 = params[4]; // Barrett multiplier
+  uint8_t digits;
+  uint8_t *r11; // output pointer
+  const uint8_t *rsi = input; // input pointer
+  uint64_t rax;
+  uint64_t rdx = 0;
+  uint64_t rdi;
+  uint64_t i;
+  int pass = 1;
+
+  for (i = 0; i < entries; i++) {
+    digits = params[2] & 0xff; /* copy of digits */
+    r11 = r14; // get output pointer
+    if (ch & 0x0C) { // 32-bit input?
+      /* input is not 32 bits */
+      if (ch & 0x04) { // 64-bit load?
+        rax = (*(uint16_t *)rsi) & 0xffff; /* 16 bit load with zero extension */
+#if 0
+        printf("16 bit load gives 0x%lx\n", rax);
+#endif
+        rsi += 2; // next 16 bit number
+      } else {
+        rax = *(uint64_t *)rsi; // 64-bit load
+#if 0
+        printf("64 bit load gives 0x%lx\n", rax);
+#endif
+        rsi += 8; // next 64-bit number
+      }
+    } else {
+      rax = (*(uint32_t *)rsi) & ff32; /* 32-bit load with zero extension */
+#if 0
+      printf("32 bit load gives 0x%lx\n", rax);
+#endif
+      rsi += 4; // next 32-bit number
+    }
+    while (digits > 0) {
+      if (ch & 0x10 && pass) { /* do we do first digit by division */
+#if 0
+        __asm__("div %1" : "=a"(rax), "=d"(rdx) : "r"(base)); /* rax quot,  rdx rem */
+#endif
+        rdi = rax % base;
+#if 0
+        printf("Doing first digit by divide, input %lu divided by %lu, remainder %lu", rax, base, rdi);
+#endif
+        rax /= base;
+#if 0
+        printf(" quotient %lu\n", rax);
+#endif
+      } else {
+        /* X is in rax at this point */
+        rdi = rax; // save a copy of X in rdi
+        /* This is the Barrett divide, done by multiply
+         * by the precomputed constant followed by a shift.
+         * In standard Barrett the quotient may be off by 1 (too small)
+         * This code doesn't seem to take account of that, or
+         * maybe it has a clever workaround
+         */
+        /* Unsigned multiply %rax (rax) by %r15, result in %rdx (hi), %rax (lo */
+#if 0
+        printf("Doing Barrett multiply, digits %u, input %lu multiplied by %lu", digits, rax, r15);
+#endif
+#if 0
+        /* This multiply doesn't deliver the high part into rdx, and so fails dismally */
+        __asm__("mul %1" : "=A"(rax) : "r"(r15)); // 64 -> 128 multiply
+#else
+        rdx = top_multiply(rax, r15);
+#endif
+        /* rdx comes out of the multiply (the top 64 bits) */
+#if 0
+        printf(" unshifted quotient %lu", rdx);
+#endif
+        rdx >>= cl; /* complete the Barrett, rdx == quotient */
+        rax = rdx; /* We'll divide this again in the next round */
+        rdx *= base; /* Now get the exact multiple to obtain the remainder */
+        rdi -= rdx; /* so rdi was the divident and is now the remainder */
+#if 0
+        printf(" remainder %lu quotient %lu\n", rdi, rax);
+#endif
+      }
+      pass = 0;
+      // rdi remainder  rax quotient
+      if (ch & 0x03) { // 8 bit output
+        // store is not 8 bits
+        if (ch & 0x02) { // 16 bit store?
+          *(uint32_t *)r11 = (uint32_t)rdi; // 32-bit store
+#if 0
+          printf("32 bit output, storing 0x%lx at %p\n", (rdi & 0xFFFFFFFF), r11);
+#endif
+        } else {
+          *(uint16_t *)r11 = (uint16_t)rdi; // 16 bit store
+#if 0
+          printf("16 bit output, storing 0x%lx at %p\n", (rdi & 0xFFFF), r11);
+#endif
+        }
+      } else {
+        *r11 = (uint8_t)(rdi & 0xFF); // 8 bit store
+#if 0
+        printf("8 bit output, storing 0x%lx at %p\n", (rdi & 0xFF), r11);
+#endif
+      }
+
+      r11 += stride; // increment output pointer
+      digits--; // decrement digit count
+    }
+    if (ch & 0x03) { // last digit
+      // last store, not 8 bits
+      if (ch & 0x02) { // 16 bit store?
+        *(uint32_t *)r11 = rax & ff32; // 32-bit store
+#if 0
+        printf("32 bit output, storing 0x%lx at %p\n", (rdi & 0xFFFFFFFF), r11);
+#endif
+        r14 += 4; // 32-bit increment
+      } else {
+        *(uint16_t *)r11 = (uint16_t)(rax & 0xffff); // 16 bit store
+#if 0
+        printf("16 bit output, storing 0x%lx at %p\n", (rdi & 0xFFFF), r11);
+#endif
+        r14 += 2; // 16 bit increment
+      }
+    } else {
+      *r11 = (uint8_t)(rax & 0xFF);
+#if 0
+      printf("8 bit output, storing 0x%lx at %p\n", (rdi & 0xFF), r11);
+#endif
+      r14 += 1; // increment output pointer
+    }
+    continue;
+  }
+  return;
+}
+
+#else
+
 void pcbarrett(const uint64_t *params, const Dfmt *input, Dfmt *output,
                uint64_t entries, uint64_t stride)
 {
