@@ -255,11 +255,6 @@ void pccl64(const uint64_t *clpm, uint64_t scalar, uint64_t noc,
   }
 }
 
-/* An auto translated version of pcbarrett */
-/* Bugfixed a bit where the translator failed dismally
- * eg getting the number of parameters wrong
- * Needs the mul and div replaced
- */
 /* This doesn't appear to be a classical Barrett,
  * where we want ab mod p without having to do real divides
  * Rather, it seems to take a value in an extension field
@@ -270,84 +265,78 @@ void pccl64(const uint64_t *clpm, uint64_t scalar, uint64_t noc,
 void pcbarrett(const uint64_t *params, const Dfmt *input, Dfmt *output,
                 uint64_t entries, uint64_t stride)
 {
-  uint8_t *r14 = output; // output pointer
-  uint8_t ch = params[0] & 0xff; // flags
+  uint8_t flags = params[0] & 0xff;
   uint64_t base = params[1]; /* base = denominator */
-  uint8_t cl = params[3] & 0xff; // shift
-  uint64_t r15 = params[4]; // Barrett multiplier
+  uint8_t shift = params[3] & 0xff;
   uint8_t digits;
-  uint8_t *r11; // output pointer
-  const uint8_t *rsi = input; // input pointer
-  uint64_t rax;
-  uint64_t rdx = 0;
-  uint64_t rdi;
+  uint8_t *output_copy; /* output pointer */
+  uint64_t dividend;
+  uint64_t quotient = 0;
+  uint64_t remainder;
   uint64_t i;
   int pass = 1;
 
   for (i = 0; i < entries; i++) {
     digits = params[2] & 0xff; /* copy of digits */
-    r11 = r14; // get output pointer
-    if (ch & 0x0C) { // 32-bit input?
+    output_copy = output;
+    if (flags & 0x0C) { /* 32-bit input? */
       /* input is not 32 bits */
-      if (ch & 0x04) { // 64-bit load?
-        rax = (*(uint16_t *)rsi) & 0xffff; /* 16 bit load with zero extension */
-        rsi += 2; // next 16 bit number
+      if (flags & 0x04) { /* 64-bit load? */
+        dividend = (*(uint16_t *)input) & 0xffff; /* 16 bit load with zero extension */
+        input += 2; /* next 16 bit number */
       } else {
-        rax = *(uint64_t *)rsi; // 64-bit load
-        rsi += 8; // next 64-bit number
+        dividend = *(uint64_t *)input; /* 64-bit load */
+        input += 8; /* next 64-bit number */
       }
     } else {
-      rax = (*(uint32_t *)rsi) & ff32; /* 32-bit load with zero extension */
-      rsi += 4; // next 32-bit number
+      dividend = (*(uint32_t *)input) & ff32; /* 32-bit load with zero extension */
+      input += 4; /* next 32-bit number */
     }
     while (digits > 0) {
-      if (ch & 0x10 && pass) { /* do we do first digit by division */
-        rdi = rax % base;
-        rax /= base;
+      if ((flags & 0x10) && pass) { /* do we do first digit by division */
+        remainder = dividend % base;
+        dividend /= base;
       } else {
-        /* X is in rax at this point */
-        rdi = rax; // save a copy of X in rdi
+        remainder = dividend; /* save a copy of dividend in remainder */
         /* This is the Barrett divide, done by multiply
          * by the precomputed constant followed by a shift.
          * In standard Barrett the quotient may be off by 1 (too small)
          * This code doesn't seem to take account of that, or
          * maybe it has a clever workaround
          */
-        /* Unsigned multiply %rax (rax) by %r15, result in %rdx (hi), %rax (lo */
-        rdx = top_multiply(rax, r15);
-        rdx >>= cl; /* complete the Barrett, rdx == quotient */
-        rax = rdx; /* We'll divide this again in the next round */
-        rdx *= base; /* Now get the exact multiple to obtain the remainder */
-        rdi -= rdx; /* so rdi was the divident and is now the remainder */
+        quotient = top_multiply(dividend, params[4]);
+        quotient >>= shift; /* complete the Barrett */
+        dividend = quotient; /* We'll divide this again in the next round */
+        quotient *= base; /* Now get the exact multiple to obtain the remainder */
+        remainder -= quotient;
       }
       pass = 0;
-      // rdi remainder  rax quotient
-      if (ch & 0x03) { // 8 bit output
-        // store is not 8 bits
-        if (ch & 0x02) { // 16 bit store?
-          *(uint32_t *)r11 = (uint32_t)rdi; // 32-bit store
+      if (flags & 0x03) { /* 8 bit output */
+        /* store is not 8 bits */
+        if (flags & 0x02) { /* 16 bit store? */
+          *(uint32_t *)output_copy = (uint32_t)remainder; /* 32-bit store */
         } else {
-          *(uint16_t *)r11 = (uint16_t)rdi; // 16 bit store
+          *(uint16_t *)output_copy = (uint16_t)remainder; /* 16 bit store */
         }
       } else {
-        *r11 = (uint8_t)(rdi & 0xFF); // 8 bit store
+        *output_copy = (uint8_t)remainder; /* 8 bit store */
       }
 
-      r11 += stride; // increment output pointer
-      digits--; // decrement digit count
+      output_copy += stride; /* increment output pointer */
+      digits--; /* decrement digit count */
     }
-    if (ch & 0x03) { // last digit
-      // last store, not 8 bits
-      if (ch & 0x02) { // 16 bit store?
-        *(uint32_t *)r11 = rax & ff32; // 32-bit store
-        r14 += 4; // 32-bit increment
+    if (flags & 0x03) { /* last digit */
+      /* last store, not 8 bits */
+      if (flags & 0x02) { /* 16 bit store? */
+        *(uint32_t *)output_copy = dividend & ff32; /* 32-bit store */
+        output += 4; /* 32-bit increment */
       } else {
-        *(uint16_t *)r11 = (uint16_t)(rax & 0xffff); // 16 bit store
-        r14 += 2; // 16 bit increment
+        *(uint16_t *)output_copy = (uint16_t)(dividend & 0xffff); /* 16 bit store */
+        output += 2; /* 16 bit increment */
       }
     } else {
-      *r11 = (uint8_t)(rax & 0xFF);
-      r14 += 1; // increment output pointer
+      *output_copy = (uint8_t)(dividend & 0xFF);
+      output += 1;
     }
     continue;
   }
