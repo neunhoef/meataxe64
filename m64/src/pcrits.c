@@ -348,76 +348,73 @@ void pcbarrett(const uint64_t *params, const Dfmt *input, Dfmt *output,
  * Uses a table of 65536 entries (t2)
  */
 /* An auto translated version of pcbif */
-void pcbif(Dfmt *rdi, const Dfmt *rsi, const Dfmt *rdx, uint64_t rcx, const uint8_t *table)
+void pcbif(Dfmt *dest, const Dfmt *s1, const Dfmt *s2, uint64_t nob, const uint8_t *table)
 {
-  uint64_t rbp = 0;
-  uint8_t ch, dh;
+  uint64_t byte_index = 0;
+  uint8_t tmp1, tmp2;
 
-  /* The original swaps r8 and rsi here. I've renamed instead */
-  if (rcx == 0) {
+  if (nob == 0) {
     return;
   }
 
-  if (rcx > 8) {
-    uint16_t rbx;
-    uint16_t rax;
+  if (nob > 8) {
+    uint16_t s1_word;
+    uint16_t s2_word;
     uint16_t tmpa;
     uint16_t tmpb;
-    rcx -= 4;
-    rbx = *(uint16_t *)(rsi + rbp); /* I think this only loads a byte, but we want a word */
-    rax = *(uint16_t *)(rdx + rbp);
+    nob -= 4;
+    s1_word = *(uint16_t *)(s1 + byte_index);
+    s2_word = *(uint16_t *)(s2 + byte_index);
     /* xchgb ah, bl */
-    tmpa = (rax & 0x00ff) | ((rbx & 0xff) << 8);
-    tmpb = ((rax & 0xff00) >> 8) | (rbx & 0xff00);
+    tmpa = (s2_word & 0x00ff) | ((s1_word & 0xff) << 8);
+    tmpb = ((s2_word & 0xff00) >> 8) | (s1_word & 0xff00);
     /*
      * tmpa contains bits 0-7 of a in 0-7 and bits 0-7 of b in 8-15
      * tmpb does the same for bits 8 - 15
-     * Thus they can access the 65536 byte table in table
+     * Thus they can access the 65536 byte table
      */
     
-    ch = table[tmpa];
-    dh = table[tmpb];
-    rbx = *(uint16_t *)(rsi+ rbp + 2); /* I think this only loads a byte, but we want a word */
-    rax = *(uint16_t *)(rdx + rbp + 2);
-    tmpa = (rax & 0x00ff) | ((rbx & 0xff) << 8);
-    tmpb = ((rax & 0xff00) >> 8) | (rbx & 0xff00);
-    rdi[rbp] = ch;
-    ch = table[tmpa];
-    rdi[rbp + 1] = dh;
-    dh = table[tmpb];
-    rbp += 4;
-    /* This loop is wrong; there's inline code and then a loop (pcbif4) */
+    tmp1 = table[tmpa];
+    tmp2 = table[tmpb];
+    s1_word = *(uint16_t *)(s1+ byte_index + 2);
+    s2_word = *(uint16_t *)(s2 + byte_index + 2);
+    tmpa = (s2_word & 0x00ff) | ((s1_word & 0xff) << 8);
+    tmpb = ((s2_word & 0xff00) >> 8) | (s1_word & 0xff00);
+    dest[byte_index] = tmp1;
+    tmp1 = table[tmpa];
+    dest[byte_index + 1] = tmp2;
+    tmp2 = table[tmpb];
+    byte_index += 4;
     do {
-      /* Check this stuff, it may not be as above */
-      rbx = *(uint16_t *)(rsi + rbp); /* I think this only loads a byte, but we want a word */
-      rax = *(uint16_t *)(rdx + rbp);
-      tmpa = (rax & 0x00ff) | ((rbx & 0xff) << 8);
-      tmpb = ((rax & 0xff00) >> 8) | (rbx & 0xff00);
-      rdi[rbp - 2] = ch;
-      ch = table[tmpa];
-      rdi[rbp - 1] = dh;
-      dh = table[tmpb];
-      rbx = *(uint16_t *)(rsi+ rbp + 2); /* I think this only loads a byte, but we want a word */
-      rax = *(uint16_t *)(rdx + rbp + 2);
-      tmpa = (rax & 0x00ff) | ((rbx & 0xff) << 8);
-      tmpb = ((rax & 0xff00) >> 8) | (rbx & 0xff00);
-      rdi[rbp] = ch;
-      ch = table[tmpa];
-      rdi[rbp + 1] = dh;
-      dh = table[tmpb];
-      rbp += 4;
-    } while (rbp < rcx);
-    rdi[rbp - 2] = ch;
-    rdi[rbp - 1] = dh;
-    rcx += 4;
+      s1_word = *(uint16_t *)(s1 + byte_index);
+      s2_word = *(uint16_t *)(s2 + byte_index);
+      tmpa = (s2_word & 0x00ff) | ((s1_word & 0xff) << 8);
+      tmpb = ((s2_word & 0xff00) >> 8) | (s1_word & 0xff00);
+      dest[byte_index - 2] = tmp1;
+      tmp1 = table[tmpa];
+      dest[byte_index - 1] = tmp2;
+      tmp2 = table[tmpb];
+      s1_word = *(uint16_t *)(s1+ byte_index + 2);
+      s2_word = *(uint16_t *)(s2 + byte_index + 2);
+      tmpa = (s2_word & 0x00ff) | ((s1_word & 0xff) << 8);
+      tmpb = ((s2_word & 0xff00) >> 8) | (s1_word & 0xff00);
+      dest[byte_index] = tmp1;
+      tmp1 = table[tmpa];
+      dest[byte_index + 1] = tmp2;
+      tmp2 = table[tmpb];
+      byte_index += 4;
+    } while (byte_index < nob);
+    dest[byte_index - 2] = tmp1;
+    dest[byte_index - 1] = tmp2;
+    nob += 4;
   }
 
   do {
-    uint8_t r10 = rsi[rbp]; /* Whereas this does want a byte */
-    uint8_t r11 = rdx[rbp];
-    uint16_t index = (r10 << 8) | r11;
-    /* b in bits 8 - 15, a in 0 - 7 */
-    rdi[rbp] = table[index];
-    rbp++;
-  } while (rbp < rcx);
+    uint8_t tmp1 = s1[byte_index];
+    uint8_t tmp2 = s2[byte_index];
+    uint16_t index = (tmp1 << 8) | tmp2;
+    /* tmp1 in bits 8 - 15, tmp2 in 0 - 7 */
+    dest[byte_index] = table[index];
+    byte_index++;
+  } while (byte_index < nob);
 }
