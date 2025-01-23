@@ -418,3 +418,11 @@ void pcbif(Dfmt *dest, const Dfmt *s1, const Dfmt *s2, uint64_t nob, const uint8
     byte_index++;
   } while (byte_index < nob);
 }
+
+void pcunf(Dfmt *output, uint64_t count, const uint8_t *t1)
+{
+  uint64_t i;
+  for (i = 0; i < count; i++) {
+    output[i] = t1[output[i]];
+  }
+}
