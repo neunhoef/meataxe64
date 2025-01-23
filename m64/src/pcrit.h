@@ -25,8 +25,12 @@ extern uint64_t pcrem(uint64_t p,uint64_t a,uint64_t b);
 extern void pc1xora(Dfmt * d, const Dfmt * s1, const Dfmt * s2, uint64_t nob);
 /* pc1xorj: d = s1 ^ s2 (nob bytes long) using AVX2 */
 extern void pc1xorj(Dfmt * d, const Dfmt * s1, const Dfmt * s2, uint64_t nob);
-extern void pcbif(Dfmt * d, const Dfmt * s1, const Dfmt * s2,
-                   uint64_t nob, const uint8_t * t2);
+/*
+ * Add or subtract for 8 bit fields of characteristic not 2
+ * Uses a table of 65536 entries (t2)
+ */
+extern void pcbif(Dfmt *d, const Dfmt *s1, const Dfmt *s2,
+                  uint64_t nob, const uint8_t *t2);
 /*
  * Prepare for the Barrett algorithm below. We need
  * k such that 2^k > n (ie log base 2(n) rounded up)

@@ -229,7 +229,7 @@ void pcbarprp(int inp, int oup, uint64_t base, int digits,
     barpar[0] = tmp;               /* flags */
 }
 
-void pccl32(const uint64_t *clpm, uint64_t scalar, uint64_t noc, 
+void pccl32(const uint64_t *clpm, uint64_t scalar, uint64_t noc,
             uint32_t *d1, uint32_t *d2)
 {
   size_t offs = offsetof(FIELD, clpm);
@@ -242,7 +242,7 @@ void pccl32(const uint64_t *clpm, uint64_t scalar, uint64_t noc,
   }
 }
 
-void pccl64(const uint64_t *clpm, uint64_t scalar, uint64_t noc, 
+void pccl64(const uint64_t *clpm, uint64_t scalar, uint64_t noc,
             uint64_t *d1, uint64_t *d2)
 {
   size_t offs = offsetof(FIELD, clpm);
@@ -341,4 +341,83 @@ void pcbarrett(const uint64_t *params, const Dfmt *input, Dfmt *output,
     continue;
   }
   return;
+}
+
+/*
+ * Add or subtract for 8 bit fields of characteristic not 2
+ * Uses a table of 65536 entries (t2)
+ */
+/* An auto translated version of pcbif */
+void pcbif(Dfmt *rdi, const Dfmt *rsi, const Dfmt *rdx, uint64_t rcx, const uint8_t *table)
+{
+  uint64_t rbp = 0;
+  uint8_t ch, dh;
+
+  /* The original swaps r8 and rsi here. I've renamed instead */
+  if (rcx == 0) {
+    return;
+  }
+
+  if (rcx > 8) {
+    uint16_t rbx;
+    uint16_t rax;
+    uint16_t tmpa;
+    uint16_t tmpb;
+    rcx -= 4;
+    rbx = *(uint16_t *)(rsi + rbp); /* I think this only loads a byte, but we want a word */
+    rax = *(uint16_t *)(rdx + rbp);
+    /* xchgb ah, bl */
+    tmpa = (rax & 0x00ff) | ((rbx & 0xff) << 8);
+    tmpb = ((rax & 0xff00) >> 8) | (rbx & 0xff00);
+    /*
+     * tmpa contains bits 0-7 of a in 0-7 and bits 0-7 of b in 8-15
+     * tmpb does the same for bits 8 - 15
+     * Thus they can access the 65536 byte table in table
+     */
+    
+    ch = table[tmpa];
+    dh = table[tmpb];
+    rbx = *(uint16_t *)(rsi+ rbp + 2); /* I think this only loads a byte, but we want a word */
+    rax = *(uint16_t *)(rdx + rbp + 2);
+    tmpa = (rax & 0x00ff) | ((rbx & 0xff) << 8);
+    tmpb = ((rax & 0xff00) >> 8) | (rbx & 0xff00);
+    rdi[rbp] = ch;
+    ch = table[tmpa];
+    rdi[rbp + 1] = dh;
+    dh = table[tmpb];
+    rbp += 4;
+    /* This loop is wrong; there's inline code and then a loop (pcbif4) */
+    do {
+      /* Check this stuff, it may not be as above */
+      rbx = *(uint16_t *)(rsi + rbp); /* I think this only loads a byte, but we want a word */
+      rax = *(uint16_t *)(rdx + rbp);
+      tmpa = (rax & 0x00ff) | ((rbx & 0xff) << 8);
+      tmpb = ((rax & 0xff00) >> 8) | (rbx & 0xff00);
+      rdi[rbp - 2] = ch;
+      ch = table[tmpa];
+      rdi[rbp - 1] = dh;
+      dh = table[tmpb];
+      rbx = *(uint16_t *)(rsi+ rbp + 2); /* I think this only loads a byte, but we want a word */
+      rax = *(uint16_t *)(rdx + rbp + 2);
+      tmpa = (rax & 0x00ff) | ((rbx & 0xff) << 8);
+      tmpb = ((rax & 0xff00) >> 8) | (rbx & 0xff00);
+      rdi[rbp] = ch;
+      ch = table[tmpa];
+      rdi[rbp + 1] = dh;
+      dh = table[tmpb];
+      rbp += 4;
+    } while (rbp < rcx);
+    rdi[rbp - 2] = ch;
+    rdi[rbp - 1] = dh;
+    rcx += 4;
+  }
+
+  do {
+    uint8_t r10 = rsi[rbp]; /* Whereas this does want a byte */
+    uint8_t r11 = rdx[rbp];
+    uint16_t index = (r10 << 8) | r11;
+    /* b in bits 8 - 15, a in 0 - 7 */
+    rdi[rbp] = table[index];
+    rbp++;
+  } while (rbp < rcx);
 }
