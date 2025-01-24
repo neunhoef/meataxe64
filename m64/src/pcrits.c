@@ -441,7 +441,6 @@ uint64_t pcrem(uint64_t p, uint64_t lo, uint64_t hi, const FIELD *f)
   return hi;
 }
 
-/* Auto translated pcxunf */
 /*
  * The code in here has some pitfalls worked around
  * The stuff for bits 16 - 31 (shifts 16 and 24) will suffer from
@@ -452,37 +451,38 @@ uint64_t pcrem(uint64_t p, uint64_t lo, uint64_t hi, const FIELD *f)
  * warns about that whereas the promotion bugs are silent)
  */
 void pcxunf(Dfmt *d, const Dfmt *s, uint64_t nob, const uint8_t *t1)
-/* rdi: d, rsi: s, rdx: nob, rcx: t1 */
 {
   while (nob >= 8) {
-    uint64_t rdx = *(uint64_t *)s; /* get unary input */
-    uint8_t dl = rdx & 0xFF;
-    uint64_t tmp = t1[dl];
-    uint64_t r8 = tmp; /* This is intermediary to stop C type promotion introducing signed ints */
-    uint8_t dh = (rdx >> 8) & 0xFF;
-    r8 |= (t1[dh] << 8);
-    rdx >>= 16;
-    dl = rdx & 0xFF;
-    dh = (rdx >> 8) & 0xFF;
-    tmp = t1[dl];
-    r8 |= tmp << 16;
-    tmp = t1[dh];
-    r8 |= tmp << 24;
-    rdx >>= 16;
-    dl = rdx & 0xFF;
-    dh = (rdx >> 8) & 0xFF;
-    r8 |= (uint64_t)t1[dl] << 32; /* These ensure we don't lose by shitfing an int out of range */
-    r8 |= (uint64_t)t1[dh] << 40;
-    rdx >>= 16;
-    dl = rdx & 0xFF;
-    dh = (rdx >> 8) & 0xFF;
-    r8 |= (uint64_t)t1[dl] << 48;
-    r8 |= (uint64_t)t1[dh] << 56;
-    *(uint64_t *)d ^= r8;
+    uint64_t in64 = *(uint64_t *)s; /* get unary input */
+    uint8_t lo_byte = in64 & 0xFF;
+    /* tmp is intermediary to stop C type promotion introducing signed ints */
+    uint64_t tmp = t1[lo_byte];
+    uint64_t out64 = tmp;
+    uint8_t hi_byte = (in64 >> 8) & 0xFF;
+    out64 |= (t1[hi_byte] << 8);
+    in64 >>= 16;
+    lo_byte = in64 & 0xFF;
+    hi_byte = (in64 >> 8) & 0xFF;
+    tmp = t1[lo_byte];
+    out64 |= tmp << 16;
+    tmp = t1[hi_byte];
+    out64 |= tmp << 24;
+    in64 >>= 16;
+    lo_byte = in64 & 0xFF;
+    hi_byte = (in64 >> 8) & 0xFF;
+    out64 |= (uint64_t)t1[lo_byte] << 32; /* These ensure we don't lose by shitfing an int out of range */
+    out64 |= (uint64_t)t1[hi_byte] << 40;
+    in64 >>= 16;
+    lo_byte = in64 & 0xFF;
+    hi_byte = (in64 >> 8) & 0xFF;
+    out64 |= (uint64_t)t1[lo_byte] << 48;
+    out64 |= (uint64_t)t1[hi_byte] << 56;
+    *(uint64_t *)d ^= out64;
     d += 8;
     s += 8;
     nob -= 8;
   }
+  /* Finsh off the stragglers which don't make a full 64 bits */
   while (0 != nob) {
     *(uint8_t *)d ^= t1[*s];
     d++;
