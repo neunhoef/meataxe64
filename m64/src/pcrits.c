@@ -426,3 +426,68 @@ void pcunf(Dfmt *output, uint64_t count, const uint8_t *t1)
     output[i] = t1[output[i]];
   }
 }
+
+/* This function isn't currently used
+ * It was added around 03/07/2019 but the associated code in hpmi.c
+ * is said not to work
+ */
+uint64_t pcrem(uint64_t p, uint64_t lo, uint64_t hi, const FIELD *f)
+{
+  hi = reduce(hi, 64, p, f);
+  hi += lo;
+  if (hi < lo) {
+    hi++;
+  }
+  return hi;
+}
+
+/* Auto translated pcxunf */
+/*
+ * The code in here has some pitfalls worked around
+ * The stuff for bits 16 - 31 (shifts 16 and 24) will suffer from
+ * sign extension due to promotion to signed int if it's not
+ * separated into a load into uint_64_t followed by a separate shift
+ * The code for shifts of 32 or more will suffer internal
+ * loss of the high part without the cast (but at least the compiler
+ * warns about that whereas the promotion bugs are silent)
+ */
+void pcxunf(Dfmt *d, const Dfmt *s, uint64_t nob, const uint8_t *t1)
+/* rdi: d, rsi: s, rdx: nob, rcx: t1 */
+{
+  while (nob >= 8) {
+    uint64_t rdx = *(uint64_t *)s; /* get unary input */
+    uint8_t dl = rdx & 0xFF;
+    uint64_t tmp = t1[dl];
+    uint64_t r8 = tmp; /* This is intermediary to stop C type promotion introducing signed ints */
+    uint8_t dh = (rdx >> 8) & 0xFF;
+    r8 |= (t1[dh] << 8);
+    rdx >>= 16;
+    dl = rdx & 0xFF;
+    dh = (rdx >> 8) & 0xFF;
+    tmp = t1[dl];
+    r8 |= tmp << 16;
+    tmp = t1[dh];
+    r8 |= tmp << 24;
+    rdx >>= 16;
+    dl = rdx & 0xFF;
+    dh = (rdx >> 8) & 0xFF;
+    r8 |= (uint64_t)t1[dl] << 32; /* These ensure we don't lose by shitfing an int out of range */
+    r8 |= (uint64_t)t1[dh] << 40;
+    rdx >>= 16;
+    dl = rdx & 0xFF;
+    dh = (rdx >> 8) & 0xFF;
+    r8 |= (uint64_t)t1[dl] << 48;
+    r8 |= (uint64_t)t1[dh] << 56;
+    *(uint64_t *)d ^= r8;
+    d += 8;
+    s += 8;
+    nob -= 8;
+  }
+  while (0 != nob) {
+    *(uint8_t *)d ^= t1[*s];
+    d++;
+    s++;
+    nob--;
+  }
+  return;
+}

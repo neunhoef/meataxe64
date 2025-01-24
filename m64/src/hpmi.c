@@ -861,8 +861,8 @@ void CtoD(DSPACE * ds, Cfmt * c, Dfmt * d, uint64_t nor, uint64_t stride)
                 sp64=(uint64_t *)sp;
                 for(i=0;i<cpylen;i+=8)
                 {
-                    *(dp64++)=pcrem(f->charc,*sp64,*(sp64+1));
-                    sp64+=2;
+                  *(dp64++)=pcrem(f->charc,*sp64,*(sp64+1), f);
+                  sp64+=2;
                 }
             }
         }
