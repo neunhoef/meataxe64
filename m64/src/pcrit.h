@@ -12,21 +12,27 @@ extern void pccl32(const uint64_t *clpm, uint64_t scalar, uint64_t noc,
 extern void pccl64(const uint64_t *clpm, uint64_t scalar, uint64_t noc,
                    uint64_t *d1, uint64_t *d2);
 /* pcbunf: case 2 (madtyp) for DSMad */
-extern void pcbunf(Dfmt * d, const Dfmt * s, uint64_t nob,
-                   const uint8_t * t1, const uint8_t * t2);
-extern void pcxunf(Dfmt * d, const Dfmt * s, uint64_t nob,
-                   const uint8_t * t1);
+extern void pcbunf(Dfmt *d, const Dfmt *s, uint64_t nob,
+                   const uint8_t *t1, const uint8_t *t2);
+/* pcxunf: case 1 (madtyp) for DSMad */
+extern void pcxunf(Dfmt *d, const Dfmt *s, uint64_t nob,
+                   const uint8_t *t1);
 /* pcunf: case 1 (multyp) for DSMul */
-extern void pcunf(Dfmt * d, uint64_t nob, const uint8_t * t1);
+extern void pcunf(Dfmt *d, uint64_t nob, const uint8_t *t1);
 /* pcpmad: return (A * B + C) mod p */
 extern uint64_t pcpmad(uint64_t p,uint64_t a,uint64_t b,uint64_t c, const FIELD *f);
-extern uint64_t pcrem(uint64_t p,uint64_t a,uint64_t b);
+/* 128 bit number modulo 64 bit number */
+extern uint64_t pcrem(uint64_t p, uint64_t lo, uint64_t hi, const FIELD *f);
 /* pc1xora: d = s1 ^ s2 (nob bytes long) */
 extern void pc1xora(Dfmt * d, const Dfmt * s1, const Dfmt * s2, uint64_t nob);
 /* pc1xorj: d = s1 ^ s2 (nob bytes long) using AVX2 */
 extern void pc1xorj(Dfmt * d, const Dfmt * s1, const Dfmt * s2, uint64_t nob);
-extern void pcbif(Dfmt * d, const Dfmt * s1, const Dfmt * s2,
-                   uint64_t nob, const uint8_t * t2);
+/*
+ * Add or subtract for 8 bit fields of characteristic not 2
+ * Uses a table of 65536 entries (t2)
+ */
+extern void pcbif(Dfmt *d, const Dfmt *s1, const Dfmt *s2,
+                  uint64_t nob, const uint8_t *t2);
 /*
  * Prepare for the Barrett algorithm below. We need
  * k such that 2^k > n (ie log base 2(n) rounded up)

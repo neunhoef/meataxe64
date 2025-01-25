@@ -20,7 +20,7 @@ gcc $1 -O3 -Wall -pthread -include malloc.h zec.c -L$BIN -lmtx -o $BIN/zec
 gcc $1 -O3 -Wall -pthread -include malloc.h zfr.c -L$BIN -lmtx -o $BIN/zfr
 gcc $1 -O3 -Wall -pthread -include malloc.h zga.c -L$BIN -lmtx -o $BIN/zga
 gcc $1 -O3 -Wall -pthread -include malloc.h zhr.c -L$BIN -lmtx -o $BIN/zhr
-gcc $1 -O3 -Wall -pthread -include malloc.h zis.c utils.c -L$BIN -lmtx -o $BIN/zis
+gcc $1 -O3 -Wall -pthread -include malloc.h zis.c -L$BIN -lmtx -o $BIN/zis
 gcc $1 -O3 -Wall -pthread -include malloc.h ziv.c -L$BIN -lmtx -o $BIN/ziv
 gcc $1 -O3 -Wall -pthread -include malloc.h zkc.c -L$BIN -lmtx -o $BIN/zkc
 gcc $1 -O3 -Wall -pthread -include malloc.h zkx.c -L$BIN -lmtx -o $BIN/zkx
@@ -30,6 +30,7 @@ gcc $1 -O3 -Wall -pthread -include malloc.h zng.c -L$BIN -lmtx -o $BIN/zng
 gcc $1 -O3 -Wall -pthread -include malloc.h znu.c -L$BIN -lmtx -o $BIN/znu
 gcc $1 -O3 -Wall -pthread -include malloc.h zor1.c -L$BIN -lmtx -o $BIN/zor
 gcc $1 -O3 -Wall -pthread -include malloc.h zpc.c -L$BIN -lmtx -o $BIN/zpc
+gcc $1 -O3 -Wall -pthread -include malloc.h zpe1.c -L$BIN -lmtx -o $BIN/zpe1
 gcc $1 -O3 -Wall -pthread -include malloc.h zpe.c -L$BIN -lmtx -o $BIN/zpe
 gcc $1 -O3 -Wall -pthread -include malloc.h zpm.c -L$BIN -lmtx -o $BIN/zpm
 gcc $1 -O3 -Wall -pthread -include malloc.h zpr.c -L$BIN -lmtx -o $BIN/zpr
