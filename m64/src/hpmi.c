@@ -108,7 +108,7 @@ void hpmiset(FIELD * f)
     if(f->ppaktyp==1233)  // ppaktup==0 new stuff excluded for now
 //  because it doesn't work!
     {
-        f->p90=pcpmad(f->charc,0x400000000000, 0x100000000000, 0);
+        f->p90=pcpmad(f->charc,0x400000000000, 0x100000000000, 0, f);
         f->AfmtMagic=4;
         f->BfmtMagic=1;
         f->GreaseMagic=4;
@@ -861,8 +861,8 @@ void CtoD(DSPACE * ds, Cfmt * c, Dfmt * d, uint64_t nor, uint64_t stride)
                 sp64=(uint64_t *)sp;
                 for(i=0;i<cpylen;i+=8)
                 {
-                    *(dp64++)=pcrem(f->charc,*sp64,*(sp64+1));
-                    sp64+=2;
+                  *(dp64++)=pcrem(f->charc,*sp64,*(sp64+1), f);
+                  sp64+=2;
                 }
             }
         }
