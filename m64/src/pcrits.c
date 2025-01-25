@@ -452,6 +452,14 @@ uint64_t pcrem(uint64_t p, uint64_t lo, uint64_t hi, const FIELD *f)
  */
 void pcxunf(Dfmt *d, const Dfmt *s, uint64_t nob, const uint8_t *t1)
 {
+  /*
+   * This loop fairly much follows the original assembler
+   * In particular it handles the input 16 bits at a time
+   * The original did this by using 8 bit registers dl and dh
+   * which combined as the bottom 16 bits of rdx
+   * Clearly in C it would be simpler to write  an extract, look up,
+   * shift and put back loop
+   */
   while (nob >= 8) {
     uint64_t in64 = *(uint64_t *)s; /* get unary input */
     uint8_t lo_byte = in64 & 0xFF;
@@ -490,4 +498,38 @@ void pcxunf(Dfmt *d, const Dfmt *s, uint64_t nob, const uint8_t *t1)
     nob--;
   }
   return;
+}
+
+/*void pcbunf(Dfmt *d, const Dfmt *s, uint64_t nob,
+  const uint8_t *t1, const uint8_t *t2)*/
+/* rdi, rsi, rdx, rcx, r8 */
+void pcbunf(Dfmt *dest, const Dfmt *src, uint64_t nob,
+            const uint8_t *t1, const uint8_t *t2)
+{
+  while (nob >= 17) {
+    for (int i = 0; i < 8; i++) {
+      uint8_t rdx = src[i];
+      uint16_t rax = dest[i];
+      uint16_t r9 = t1[rdx];
+      r9 <<= 8;
+      rax += r9;
+      dest[i] = t2[rax];
+    }
+    dest += 8;
+    src += 8;
+    nob -= 8;
+  }
+
+  /* Now the stragglers */
+  while (nob > 0) {
+    uint8_t rdx = src[0];
+    uint16_t rax = dest[0];
+    uint16_t r9 = t1[rdx];
+    r9 <<= 8;
+    rax += r9;
+    dest[0] = t2[rax];
+    dest += 1;
+    src += 1;
+    nob -= 1;
+  }
 }
