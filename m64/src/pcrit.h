@@ -4,7 +4,9 @@
 /*    R. A. Parker      20.3.2019 */
 
 // pc1.s general functions
-extern void mactype(char * mact);
+/* Determine the processor type
+ * This affects whether we try to use AVX etc */
+extern void mactype(char *mact);
 /* 32 bit element multiply and add subroutine */
 extern void pccl32(const uint64_t *clpm, uint64_t scalar, uint64_t noc,
                    uint32_t *d1, uint32_t *d2);
