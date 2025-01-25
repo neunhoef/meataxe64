@@ -507,13 +507,12 @@ void pcbunf(Dfmt *dest, const Dfmt *src, uint64_t nob,
             const uint8_t *t1, const uint8_t *t2)
 {
   while (nob >= 17) {
-    for (int i = 0; i < 8; i++) {
-      uint8_t rdx = src[i];
-      uint16_t rax = dest[i];
-      uint16_t r9 = t1[rdx];
-      r9 <<= 8;
-      rax += r9;
-      dest[i] = t2[rax];
+    unsigned int i;
+    for (i = 0; i < 8; i++) {
+      uint8_t in = src[i];
+      uint16_t tmp = dest[i];
+      tmp += t1[in] << 8;
+      dest[i] = t2[tmp];
     }
     dest += 8;
     src += 8;
@@ -522,12 +521,10 @@ void pcbunf(Dfmt *dest, const Dfmt *src, uint64_t nob,
 
   /* Now the stragglers */
   while (nob > 0) {
-    uint8_t rdx = src[0];
-    uint16_t rax = dest[0];
-    uint16_t r9 = t1[rdx];
-    r9 <<= 8;
-    rax += r9;
-    dest[0] = t2[rax];
+    uint8_t in = src[0];
+    uint16_t tmp = dest[0];
+    tmp += t1[in] << 8;
+    dest[0] = t2[tmp];
     dest += 1;
     src += 1;
     nob -= 1;
