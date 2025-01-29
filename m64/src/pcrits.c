@@ -5,6 +5,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <stdlib.h>
 #include "field.h"
 #include "pcrit.h"
 #include "utils.h"
@@ -13,6 +14,8 @@
 #include <assert.h>
 
 #define ff32 0xffffffff
+
+/* Functions from pc1.s */
 
 /* Reduce function. Reduces a * 2^i mod p */
 /* overflow gives 2^64 mod p, which we need internally */
@@ -373,7 +376,7 @@ void pcbif(Dfmt *dest, const Dfmt *s1, const Dfmt *s2, uint64_t nob, const uint8
      * tmpb does the same for bits 8 - 15
      * Thus they can access the 65536 byte table
      */
-    
+
     tmp1 = table[tmpa];
     tmp2 = table[tmpb];
     s1_word = *(uint16_t *)(s1+ byte_index + 2);
@@ -529,4 +532,76 @@ void pcbunf(Dfmt *dest, const Dfmt *src, uint64_t nob,
     src += 1;
     nob -= 1;
   }
+}
+
+/* Functions from pc2.s */
+
+/*
+ * The next 3 functions are used in the BGrease hpmi function
+ * They are for grease type 2 (characteristic 2), machine various types
+ * It used SSE2. It's basically xor on a larger scale
+ */
+void pc2aca(const uint8_t *program, uint8_t *cauldron, uint64_t stride)
+{
+  uint64_t slice_count = 8;
+  uint64_t xmm[16]; /* Emulate the SSE or AVX registers */
+
+  /* 1: */
+  while (slice_count > 0) {
+    uint64_t *dest = (uint64_t *)(cauldron + 256); // destination starts slot 2
+    const uint8_t *current_program = program;
+    unsigned int i;
+
+    /* Load the xmm registers here */
+    memcpy(xmm, dest - 128 / sizeof(*dest), 128);
+    for (;;) {
+      /* 2: */
+      uint64_t rax = *current_program++; /* get first/next program byte */
+      while (rax <= 79) {
+        /* 3: */
+        uint64_t *src;
+        rax <<= 7; /* convert to displacement */
+        src = (uint64_t *)(cauldron + rax);
+        for (i = 0; i < 16; i++) {
+          xmm[i] ^= src[i];
+        }
+        memcpy(dest, xmm, 128);
+        dest += 128 / sizeof(*dest); /* increment destination slot */
+        rax = *current_program++; /* get next program byte */
+      }
+
+      if (rax <= 159) {
+        rax -= 80;
+        rax <<= 7; /* multiply by slot size */
+        memcpy(xmm, cauldron + rax, 128);
+        continue; /* At 2: */
+      }
+
+      if (rax <= 239) {
+        rax -= 160;
+        rax <<= 7; /* multiply by slot size */
+        dest = (uint64_t *)(cauldron + rax);
+        continue; /* This needs to continue at 2: */
+      }
+      break; /* Break the infinite for loop */
+    }
+    /* anything 240+ is stop at the moment */
+    cauldron += stride; // add in slice stride
+    slice_count--; /* subtract 1 from slice count */
+  }
+}
+
+/* The functions pc2acj and pc2acm implement
+ * the same algorithm with longer registers,
+ * so we get 3 for the price of 1
+ */
+
+void pc2acj(const uint8_t *program, uint8_t *destination, uint64_t stride)
+{
+  pc2aca(program, destination, stride);
+}
+
+void pc2acm(const uint8_t *program, uint8_t *destination, uint64_t stride)
+{
+  pc2aca(program, destination, stride);
 }
