@@ -28,6 +28,7 @@ int main(int argc,  char **argv)
         printf(" 3 bitstring           Print ""Nullity "" then number of unset bits\n");
         printf(" 4 bitstring           return 0 unless bits is 0, in which case 1\n");
         printf(" 5 bitstring           Print ""Split result subspace nnn quotient nnn\n");
+        printf(" 6 Machine type        Print the computed machine type\n");
         exit(21);
     }
     mode = atoi(argv[1]);
@@ -111,6 +112,14 @@ int main(int argc,  char **argv)
             printf("Whole Space\n");
             return 1;
         }
+    }
+    if(mode==6)
+    {
+      char mact[9];
+      mactype(mact);
+      mact[8] = '\0';
+      printf("Machine type ""%s""\n", mact);
+      return 0;
     }
     printf("Unknown mode %d\n",mode);
     return 17;

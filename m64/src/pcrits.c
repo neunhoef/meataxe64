@@ -133,13 +133,6 @@ uint64_t pcpmad(uint64_t p, uint64_t a, uint64_t b, uint64_t c, const FIELD *f)
   }
 }
 
-#if 0
-void mactype(char *mact)
-{
-  strcpy(mact, "a      ");
-}
-#endif
-
 void pc1xora(Dfmt *d, const Dfmt *s1, const Dfmt *s2, uint64_t nob)
 {
   while (nob >= 8) {
