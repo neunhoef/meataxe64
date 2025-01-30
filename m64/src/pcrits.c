@@ -546,7 +546,6 @@ void pc2aca(const uint8_t *program, uint8_t *cauldron, uint64_t stride)
   uint64_t slice_count = 8;
   uint64_t xmm[16]; /* Emulate the SSE or AVX registers */
 
-  /* 1: */
   while (slice_count > 0) {
     uint64_t *dest = (uint64_t *)(cauldron + 256); // destination starts slot 2
     const uint8_t *current_program = program;
@@ -555,33 +554,31 @@ void pc2aca(const uint8_t *program, uint8_t *cauldron, uint64_t stride)
     /* Load the xmm registers here */
     memcpy(xmm, dest - 128 / sizeof(*dest), 128);
     for (;;) {
-      /* 2: */
-      uint64_t rax = *current_program++; /* get first/next program byte */
-      while (rax <= 79) {
-        /* 3: */
+      uint64_t code = *current_program++; /* get first/next program byte */
+      while (code <= 79) {
         uint64_t *src;
-        rax <<= 7; /* convert to displacement */
-        src = (uint64_t *)(cauldron + rax);
+        code <<= 7; /* convert to displacement */
+        src = (uint64_t *)(cauldron + code);
         for (i = 0; i < 16; i++) {
           xmm[i] ^= src[i];
         }
         memcpy(dest, xmm, 128);
         dest += 128 / sizeof(*dest); /* increment destination slot */
-        rax = *current_program++; /* get next program byte */
+        code = *current_program++; /* get next program byte */
       }
 
-      if (rax <= 159) {
-        rax -= 80;
-        rax <<= 7; /* multiply by slot size */
-        memcpy(xmm, cauldron + rax, 128);
-        continue; /* At 2: */
+      if (code <= 159) {
+        code -= 80;
+        code <<= 7; /* multiply by slot size */
+        memcpy(xmm, cauldron + code, 128);
+        continue;
       }
 
-      if (rax <= 239) {
-        rax -= 160;
-        rax <<= 7; /* multiply by slot size */
-        dest = (uint64_t *)(cauldron + rax);
-        continue; /* This needs to continue at 2: */
+      if (code <= 239) {
+        code -= 160;
+        code <<= 7; /* multiply by slot size */
+        dest = (uint64_t *)(cauldron + code);
+        continue;
       }
       break; /* Break the infinite for loop */
     }
