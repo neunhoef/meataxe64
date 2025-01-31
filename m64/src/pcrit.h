@@ -53,10 +53,12 @@ void pcbarprp(int inp, int oup, uint64_t base, int digits,
 void pcbarrett(const uint64_t *barpar, const Dfmt *input, Dfmt *output,
                uint64_t entries, uint64_t stride);
 
-// pc2.s HPMI in characteristic 2
+/* pc2.s HPMI in characteristic 2 */
+/* Brick grease functions, for machine types a, j, m */
 void pc2aca(const uint8_t *prog, uint8_t * bv, uint64_t stride);
 void pc2acj(const uint8_t *prog, uint8_t * bv, uint64_t stride);
 void pc2acm(const uint8_t *prog, uint8_t * bv, uint64_t stride);
+/* Other functions */
 void pc2bma(const uint8_t *a, uint8_t * bv, uint8_t *c);
 void pc2bmj(const uint8_t *a, uint8_t * bv, uint8_t *c);
 void pc2bmm(const uint8_t *a, uint8_t * bv, uint8_t *c);
