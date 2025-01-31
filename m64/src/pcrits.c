@@ -607,60 +607,61 @@ void pc2bma(const uint8_t *Afmt, uint8_t *bv, uint8_t *Cfmt /* Sort out the addi
   while (c_skip != 255) {
     unsigned int i;
     int64_t slice_3;
-    int64_t rax = a_code; /* adslice 0 */
-    int64_t rbp = a_code; /* adslice 1 */
-    int64_t r8 = a_code;  /* adslice 2 */
-    int64_t r9 = a_code;  /* adslice 4 */
-    int64_t r10 = a_code; /* adslice 5 */
-    int64_t r11 = a_code; /* adslice 6 */
+    int64_t silce_0 = a_code; /* adslice 0 */
+    int64_t slice_1 = a_code; /* adslice 1 */
+    int64_t slice_2 = a_code;  /* adslice 2 */
+    int64_t slice_4 = a_code;  /* adslice 4 */
+    int64_t slice_5 = a_code; /* adslice 5 */
+    int64_t slice_6 = a_code; /* adslice 6 */
+    int64_t slice_7 = a_code; /* adslice 7 */
     /* rcs ix slive 7 */
     c_skip <<= 7; /* 128 * byte Afmt */
     Cfmt += c_skip; /* skip some rows of Cfmt */
     slice_3 = a_code; /* adslice 3 */
-    rax >>= 1;   /* shift slice 0 */
-    rbp >>= 5;   /* shift slice 1 */
-    r8 >>= 9;    /* shift slice 2 */
+    silce_0 >>= 1;   /* shift slice 0 */
+    slice_1 >>= 5;   /* shift slice 1 */
+    slice_2 >>= 9;    /* shift slice 2 */
     slice_3 >>= 13;  /* shift slice 3 */
-    r9 >>= 17;   /* shift slice 4 */
-    r10 >>= 21;  /* shift slice 5 */
-    r11 >>= 25;  /* shift slice 6 */
-    a_code >>= 29;  /* shift slice 7 */
+    slice_4 >>= 17;   /* shift slice 4 */
+    slice_5 >>= 21;  /* shift slice 5 */
+    slice_6 >>= 25;  /* shift slice 6 */
+    slice_7 >>= 29;  /* shift slice 7 */
 
-    rax &= 1920; /* and slice 0 */
-    rbp &= 1920; /* and slice 1 */
-    r8 &= 1920;  /* and slice 2 */
+    silce_0 &= 1920; /* and slice 0 */
+    slice_1 &= 1920; /* and slice 1 */
+    slice_2 &= 1920;  /* and slice 2 */
     slice_3 &= 1920; /* and slice 3 */
-    r9 &= 1920;  /* and slice 4 */
-    r10 &= 1920; /* and slice 5 */
-    r11 &= 1920; /* and slice 6 */
-    a_code &= 1920; /* and slice 7 */
+    slice_4 &= 1920;  /* and slice 4 */
+    slice_5 &= 1920; /* and slice 5 */
+    slice_6 &= 1920; /* and slice 6 */
+    slice_7 &= 1920; /* and slice 7 */
 
     Afmt += 5; /* point to next Afmt word (yes, this is unaligned) */
 
     memcpy(xmm, Cfmt, 128);
     for (i = 0; i < 16; i++) {
-      xmm[i] ^= *(uint64_t *)(bv + rax + i * 8);
+      xmm[i] ^= *(uint64_t *)(bv + silce_0 + i * 8);
     }
     for (i = 0; i < 16; i++) {
-      xmm[i] ^= *(uint64_t *)(bv + 2048 + rbp + i * 8);
+      xmm[i] ^= *(uint64_t *)(bv + 2048 + slice_1 + i * 8);
     }
     for (i = 0; i < 16; i++) {
-      xmm[i] ^= *(uint64_t *)(bv + 4096 + r8 + i * 8);
+      xmm[i] ^= *(uint64_t *)(bv + 4096 + slice_2 + i * 8);
     }
     for (i = 0; i < 16; i++) {
       xmm[i] ^= *(uint64_t *)(bv + 6144 + slice_3 + i * 8);
     }
     for (i = 0; i < 16; i++) {
-      xmm[i] ^= *(uint64_t *)(bv + 8192 + r9 + i * 8);
+      xmm[i] ^= *(uint64_t *)(bv + 8192 + slice_4 + i * 8);
     }
     for (i = 0; i < 16; i++) {
-      xmm[i] ^= *(uint64_t *)(bv + 10240 + r10 + i * 8);
+      xmm[i] ^= *(uint64_t *)(bv + 10240 + slice_5 + i * 8);
     }
     for (i = 0; i < 16; i++) {
-      xmm[i] ^= *(uint64_t *)(bv + 12288 + r11 + i * 8);
+      xmm[i] ^= *(uint64_t *)(bv + 12288 + slice_6 + i * 8);
     }
     for (i = 0; i < 16; i++) {
-      xmm[i] ^= *(uint64_t *)(bv + 14336 + a_code + i * 8);
+      xmm[i] ^= *(uint64_t *)(bv + 14336 + slice_7 + i * 8);
     }
     memcpy(Cfmt, xmm, 128);
 
