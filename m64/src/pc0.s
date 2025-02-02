@@ -97,3 +97,165 @@ macp2:
 macp4:
         popq    %rbx
         ret
+
+/* input  rdi Afmt     rsi bwa     rdx  Cfmt  */
+
+/* six registers point in bwa  0   rax   rbx  */
+/*                             1   rbp   r9   */
+/*                             2   rcx   r10  */
+	.text
+	.globl	pc3bma
+pc3bma:
+        pushq   %rbx
+        pushq   %rbp
+        movq    (%rdi),%rcx   /* get Afmt word  */
+        movq    %rcx,%rbx     /* copy for skip  */
+        andq    $255,%rbx
+	cmpq	$255,%rbx     /* have we finished yet   */
+	je      pc3bma5        /* yes - return           */
+pc3bma2:
+	salq	$7, %rbx      /* 128 * byte Afmt        */
+        addq    %rbx,%rdx     /* skip some rows of Cfmt */
+
+        movq    %rcx,%rax    /*  adslice 0  */
+        movq    %rcx,%rbp    /*  adslice 1  */
+/*      movq    %rcx,%rcx    /*  adslice 2  */
+        sarq    $2,%rax      /*  shift slice 0*/
+        sarq    $10,%rbp     /*  shift slice 1*/
+        sarq    $18,%rcx     /*  shift slice 2*/
+        andq    $8128,%rax   /*  and slice 0*/
+        andq    $8128,%rbp   /*  and slice 1  */   
+        andq    $8128,%rcx   /*  and slice 2*/
+        movq    %rax,%rbx    /*  adslice 0+ */
+        movq    %rbp,%r9     /*  adslice 1+ */
+        movq    %rcx,%r10    /*  adslice 2+ */
+        xorq    $64,%rbx
+        xorq    $64,%r9
+        xorq    $64,%r10
+        addq    $4,%rdi       /* point to next Afmt word*/
+
+	movdqa	(%rdx),%xmm0   /* get 32 bytes of Cfmt */
+	movdqa	64(%rdx),%xmm1
+        movdqa  (%rsi,%rax),%xmm2
+        movdqa  (%rsi,%rbx),%xmm3
+        pxor    %xmm0,%xmm2
+        pxor    %xmm3,%xmm1
+        pxor    %xmm2,%xmm3
+        pxor    %xmm1,%xmm0
+        por     %xmm1,%xmm3
+        por     %xmm0,%xmm2
+        movdqa  5248(%rsi,%rbp),%xmm0
+        movdqa  5248(%rsi,%r9),%xmm1
+        pxor    %xmm3,%xmm0
+        pxor    %xmm1,%xmm2
+        pxor    %xmm0,%xmm1
+        pxor    %xmm2,%xmm3
+        por     %xmm1,%xmm2
+        por     %xmm0,%xmm3
+        movdqa  10496(%rsi,%rcx),%xmm1
+        movdqa  10496(%rsi,%r10),%xmm0
+        pxor    %xmm2,%xmm1
+        pxor    %xmm0,%xmm3
+        pxor    %xmm1,%xmm0
+        pxor    %xmm3,%xmm2
+        por     %xmm3,%xmm0
+        por     %xmm2,%xmm1
+        movdqa  %xmm0,(%rdx)
+        movdqa  %xmm1,64(%rdx)
+
+	movdqa	16(%rdx),%xmm0   /* get 32 bytes of Cfmt */
+	movdqa	80(%rdx),%xmm1
+        movdqa  16(%rsi,%rax),%xmm2
+        movdqa  16(%rsi,%rbx),%xmm3
+        pxor    %xmm0,%xmm2
+        pxor    %xmm3,%xmm1
+        pxor    %xmm2,%xmm3
+        pxor    %xmm1,%xmm0
+        por     %xmm1,%xmm3
+        por     %xmm0,%xmm2
+        movdqa  5264(%rsi,%rbp),%xmm0
+        movdqa  5264(%rsi,%r9),%xmm1
+        pxor    %xmm3,%xmm0
+        pxor    %xmm1,%xmm2
+        pxor    %xmm0,%xmm1
+        pxor    %xmm2,%xmm3
+        por     %xmm1,%xmm2
+        por     %xmm0,%xmm3
+        movdqa  10512(%rsi,%rcx),%xmm1
+        movdqa  10512(%rsi,%r10),%xmm0
+        pxor    %xmm2,%xmm1
+        pxor    %xmm0,%xmm3
+        pxor    %xmm1,%xmm0
+        pxor    %xmm3,%xmm2
+        por     %xmm3,%xmm0
+        por     %xmm2,%xmm1
+        movdqa  %xmm0,16(%rdx)
+        movdqa  %xmm1,80(%rdx)
+
+	movdqa	32(%rdx),%xmm0   /* get 32 bytes of Cfmt */
+	movdqa	96(%rdx),%xmm1
+        movdqa  32(%rsi,%rax),%xmm2
+        movdqa  32(%rsi,%rbx),%xmm3
+        pxor    %xmm0,%xmm2
+        pxor    %xmm3,%xmm1
+        pxor    %xmm2,%xmm3
+        pxor    %xmm1,%xmm0
+        por     %xmm1,%xmm3
+        por     %xmm0,%xmm2
+        movdqa  5280(%rsi,%rbp),%xmm0
+        movdqa  5280(%rsi,%r9),%xmm1
+        pxor    %xmm3,%xmm0
+        pxor    %xmm1,%xmm2
+        pxor    %xmm0,%xmm1
+        pxor    %xmm2,%xmm3
+        por     %xmm1,%xmm2
+        por     %xmm0,%xmm3
+        movdqa  10528(%rsi,%rcx),%xmm1
+        movdqa  10528(%rsi,%r10),%xmm0
+        pxor    %xmm2,%xmm1
+        pxor    %xmm0,%xmm3
+        pxor    %xmm1,%xmm0
+        pxor    %xmm3,%xmm2
+        por     %xmm3,%xmm0
+        por     %xmm2,%xmm1
+        movdqa  %xmm0,32(%rdx)
+        movdqa  %xmm1,96(%rdx)
+
+	movdqa	48(%rdx),%xmm0   /* get 32 bytes of Cfmt */
+	movdqa	112(%rdx),%xmm1
+        movdqa  48(%rsi,%rax),%xmm2
+        movdqa  48(%rsi,%rbx),%xmm3
+        pxor    %xmm0,%xmm2
+        pxor    %xmm3,%xmm1
+        pxor    %xmm2,%xmm3
+        pxor    %xmm1,%xmm0
+        por     %xmm1,%xmm3
+        por     %xmm0,%xmm2
+        movdqa  5296(%rsi,%rbp),%xmm0
+        movdqa  5296(%rsi,%r9),%xmm1
+        pxor    %xmm3,%xmm0
+        pxor    %xmm1,%xmm2
+        pxor    %xmm0,%xmm1
+        pxor    %xmm2,%xmm3
+        por     %xmm1,%xmm2
+        por     %xmm0,%xmm3
+        movdqa  10544(%rsi,%rcx),%xmm1
+        movdqa  10544(%rsi,%r10),%xmm0
+        pxor    %xmm2,%xmm1
+        pxor    %xmm0,%xmm3
+        pxor    %xmm1,%xmm0
+        pxor    %xmm3,%xmm2
+        por     %xmm3,%xmm0
+        por     %xmm2,%xmm1
+        movdqa  %xmm0,48(%rdx)
+        movdqa  %xmm1,112(%rdx)
+
+        movq    (%rdi),%rcx   /* get Afmt word  */
+        movq    %rcx,%rbx     /* copy for skip  */
+        andq    $255,%rbx
+	cmpq	$255,%rbx     /* have we finished yet   */
+        jne     pc3bma2
+pc3bma5:
+        popq    %rbp
+        popq    %rbx
+        ret      

@@ -534,49 +534,48 @@ void pcbunf(Dfmt *dest, const Dfmt *src, uint64_t nob,
  * They are for grease type 2 (characteristic 2), machine various types
  * It used SSE2. It's basically xor on a larger scale
  */
-void pc2aca(const uint8_t *program, uint8_t *cauldron, uint64_t stride)
+void pc2aca(const uint8_t *prog, uint8_t *bv, uint64_t stride)
 {
   uint64_t slice_count = 8;
   uint64_t xmm[16]; /* Emulate the SSE or AVX registers */
 
   while (slice_count > 0) {
-    uint64_t *dest = (uint64_t *)(cauldron + 256); // destination starts slot 2
-    const uint8_t *current_program = program;
+    uint64_t *dest = (uint64_t *)(bv + 256); /* destination starts slot 2 */
+    const uint8_t *current_prog = prog; /* restart program */
     unsigned int i;
 
-    /* Load the xmm registers here */
     memcpy(xmm, dest - 128 / sizeof(*dest), 128);
     for (;;) {
-      uint64_t code = *current_program++; /* get first/next program byte */
+      uint64_t code = *current_prog++; /* get first/next program byte */
       while (code <= 79) {
         uint64_t *src;
         code <<= 7; /* convert to displacement */
-        src = (uint64_t *)(cauldron + code);
+        src = (uint64_t *)(bv + code);
         for (i = 0; i < 16; i++) {
           xmm[i] ^= src[i];
         }
         memcpy(dest, xmm, 128);
         dest += 128 / sizeof(*dest); /* increment destination slot */
-        code = *current_program++; /* get next program byte */
+        code = *current_prog++; /* get next program byte */
       }
 
       if (code <= 159) {
         code -= 80;
         code <<= 7; /* multiply by slot size */
-        memcpy(xmm, cauldron + code, 128);
+        memcpy(xmm, bv + code, 128);
         continue;
       }
 
       if (code <= 239) {
         code -= 160;
         code <<= 7; /* multiply by slot size */
-        dest = (uint64_t *)(cauldron + code);
+        dest = (uint64_t *)(bv + code);
         continue;
       }
       break; /* Break the infinite for loop */
     }
     /* anything 240+ is stop at the moment */
-    cauldron += stride; // add in slice stride
+    bv += stride; /* add in slice stride */
     slice_count--; /* subtract 1 from slice count */
   }
 }
@@ -586,14 +585,14 @@ void pc2aca(const uint8_t *program, uint8_t *cauldron, uint64_t stride)
  * so we get 3 for the price of 1
  */
 
-void pc2acj(const uint8_t *program, uint8_t *destination, uint64_t stride)
+void pc2acj(const uint8_t *prog, uint8_t *destination, uint64_t stride)
 {
-  pc2aca(program, destination, stride);
+  pc2aca(prog, destination, stride);
 }
 
-void pc2acm(const uint8_t *program, uint8_t *destination, uint64_t stride)
+void pc2acm(const uint8_t *prog, uint8_t *destination, uint64_t stride)
 {
-  pc2aca(program, destination, stride);
+  pc2aca(prog, destination, stride);
 }
 
 void pc2bma(const uint8_t *Afmt, uint8_t *bv, uint8_t *Cfmt /* Sort out the additions in each of these */)
@@ -684,4 +683,98 @@ void pc2bmj(const uint8_t *a, uint8_t *bv, uint8_t *c)
 void pc2bmm(const uint8_t *a, uint8_t *bv, uint8_t *c)
 {
   pc2bma(a, bv, c);
+}
+
+/*
+ * Now now the same 6 functions for characteristic 3
+ * As above, the j and m versions are just calls to the a version
+ */
+/* Grease functions */
+void pc3aca(const uint8_t *prog, uint8_t *bv, uint64_t stride)
+{
+  uint64_t slice_count = 3;
+  uint64_t xmm[20]; /* Emulate vector registers (extra 4 used differently) */
+
+  while (slice_count > 0) {
+    /* pc3aca1: */
+    uint64_t *dest = (uint64_t *)(bv + 256); /* destination starts slot 2 */
+    const uint8_t *current_prog = prog; /* restart program */
+    unsigned int i;
+
+    memcpy(xmm, dest - 128 / sizeof(*dest), 128);
+    for (;;) {
+      /* pc3aca2: */
+      uint64_t code = *current_prog++; /* get first/next program byte */
+      while (code <= 79) {
+        /* pc3aca3: */
+        uint64_t *src;
+        code <<= 7; /* convert to displacement */
+        src = (uint64_t *)(bv + code);
+        for (i = 0; i < 4; i++) {
+          uint64_t offset = 2 * i;
+          /* Move from (0, 64), (16, 80), (32, 96), (48, 112) */
+          memcpy(xmm + 16, src + offset, 16);
+          memcpy(xmm + 18, src + 8 + offset, 16); /* xmm{8,9} */
+          xmm[16] ^= xmm[offset];
+          xmm[17] ^= xmm[offset + 1]; /*  bu^au -> au   */
+          xmm[offset + 8] ^= xmm[18];
+          xmm[offset + 9] ^= xmm[19]; /*  at^bt -> bt   */
+          xmm[18] ^= xmm[16];
+          xmm[19] ^= xmm[17]; /*  au^at -> at   */
+          xmm[offset] ^= xmm[offset + 8];
+          xmm[offset + 1] ^= xmm[offset + 9]; /*  bt^bu -> bu   */
+          xmm[18] |= xmm[8 + offset];
+          xmm[19] |= xmm[9 + offset]; /*  bt|at -> at   */
+          xmm[16] |= xmm[offset];
+          xmm[17] |= xmm[offset + 1]; /*  bu|au -> au   */
+          memcpy(xmm + offset, xmm + 18, 16);
+          memcpy(dest + offset, xmm + offset, 16);
+          memcpy(xmm + offset + 8, xmm + 16, 16);
+          memcpy(dest + offset + 64 / sizeof(*dest), xmm + offset + 8, 16);
+        }
+        dest += 128 / sizeof(*dest); /* increment destination slot */
+        code = *current_prog++; /* get next program byte */
+      }
+
+      if (code <= 159) {
+        code -= 80;
+        code <<= 7; /* multiply by slot size */
+        memcpy(xmm, bv + code, 128);
+        continue; /* pc3aca2 */
+      }
+
+      if (code <= 239) {
+        code -= 160;
+        code <<= 7; /* multiply by slot size */
+        dest = (uint64_t *)(bv + code);
+        continue; /* At pc3aca2 */
+      }
+      break; /* Break the infinite for loop */
+    }
+    /* anything 240+ is stop at the moment */
+    bv += stride; /* add in slice stride */
+    slice_count--; /* subtract 1 from slice count */
+    /* continue at pc3aca1 */
+  }
+}
+
+void pc3acj(const uint8_t *prog, uint8_t *bv, uint64_t stride)
+{
+  pc3aca(prog, bv, stride);
+}
+
+void pc3acm(const uint8_t *prog, uint8_t *bv, uint64_t stride)
+{
+  pc3aca(prog, bv, stride);
+}
+/* Others */
+
+void pc3bmj(const uint8_t *a, uint8_t *bv, uint8_t *c)
+{
+  pc3bma(a, bv, c);
+}
+
+void pc3bmm(const uint8_t *a, uint8_t *bv, uint8_t *c)
+{
+  pc3bma(a, bv, c);
 }
