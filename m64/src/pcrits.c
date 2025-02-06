@@ -595,7 +595,7 @@ void pc2acm(const uint8_t *prog, uint8_t *destination, uint64_t stride)
   pc2aca(prog, destination, stride);
 }
 
-void pc2bma(const uint8_t *Afmt, uint8_t *bv, uint8_t *Cfmt /* Sort out the additions in each of these */)
+void pc2bma(const uint8_t *Afmt, uint8_t *bv, uint8_t *Cfmt)
 {
   uint64_t c_skip, a_code;
   uint64_t xmm[16]; /* Emulate the SSE or AVX registers */
@@ -605,19 +605,19 @@ void pc2bma(const uint8_t *Afmt, uint8_t *bv, uint8_t *Cfmt /* Sort out the addi
 
   while (c_skip != 255) {
     unsigned int i;
-    int64_t slice_3;
-    int64_t silce_0 = a_code; /* adslice 0 */
+    int64_t slice_0 = a_code; /* adslice 0 */
     int64_t slice_1 = a_code; /* adslice 1 */
     int64_t slice_2 = a_code;  /* adslice 2 */
+    int64_t slice_3;
     int64_t slice_4 = a_code;  /* adslice 4 */
     int64_t slice_5 = a_code; /* adslice 5 */
     int64_t slice_6 = a_code; /* adslice 6 */
     int64_t slice_7 = a_code; /* adslice 7 */
-    /* rcs ix slive 7 */
+
     c_skip <<= 7; /* 128 * byte Afmt */
     Cfmt += c_skip; /* skip some rows of Cfmt */
     slice_3 = a_code; /* adslice 3 */
-    silce_0 >>= 1;   /* shift slice 0 */
+    slice_0 >>= 1;   /* shift slice 0 */
     slice_1 >>= 5;   /* shift slice 1 */
     slice_2 >>= 9;    /* shift slice 2 */
     slice_3 >>= 13;  /* shift slice 3 */
@@ -626,7 +626,7 @@ void pc2bma(const uint8_t *Afmt, uint8_t *bv, uint8_t *Cfmt /* Sort out the addi
     slice_6 >>= 25;  /* shift slice 6 */
     slice_7 >>= 29;  /* shift slice 7 */
 
-    silce_0 &= 1920; /* and slice 0 */
+    slice_0 &= 1920; /* and slice 0 */
     slice_1 &= 1920; /* and slice 1 */
     slice_2 &= 1920;  /* and slice 2 */
     slice_3 &= 1920; /* and slice 3 */
@@ -639,7 +639,7 @@ void pc2bma(const uint8_t *Afmt, uint8_t *bv, uint8_t *Cfmt /* Sort out the addi
 
     memcpy(xmm, Cfmt, 128);
     for (i = 0; i < 16; i++) {
-      xmm[i] ^= *(uint64_t *)(bv + silce_0 + i * 8);
+      xmm[i] ^= *(uint64_t *)(bv + slice_0 + i * 8);
     }
     for (i = 0; i < 16; i++) {
       xmm[i] ^= *(uint64_t *)(bv + 2048 + slice_1 + i * 8);
@@ -768,6 +768,112 @@ void pc3acm(const uint8_t *prog, uint8_t *bv, uint64_t stride)
   pc3aca(prog, bv, stride);
 }
 /* Others */
+
+/* pc3bma has the same structure as pc2bma, but with different operations in the middle */
+void pc3bma(const uint8_t *Afmt, uint8_t *bv, uint8_t *Cfmt)
+{
+  uint64_t c_skip, a_code;
+  uint64_t xmm[16]; /* Emulate the SSE or AVX registers */
+
+  a_code = *(uint64_t *)Afmt; /* get Afmt word */
+  c_skip = a_code & 255;   /* copy for skip */
+
+  while (c_skip != 255) {
+    unsigned int i, j;
+    int64_t slice_0 = a_code; /* adslice 0 */
+    int64_t slice_1 = a_code; /* adslice 1 */
+    int64_t slice_2;
+    int64_t aslice_0, aslice_1, aslice_2;
+
+    c_skip <<= 7; /* 128 * byte Afmt */
+    Cfmt += c_skip; /* skip some rows of Cfmt */
+    slice_2 = a_code; /* adslice 2 */
+    slice_0 >>= 2;   /* shift slice 0 */
+    slice_1 >>= 10;   /* shift slice 1 */
+    slice_2 >>= 18;    /* shift slice 2 */
+
+    slice_0 &= 8128; /* and slice 0 */
+    slice_1 &= 8128; /* and slice 1 */
+    slice_2 &= 8128;  /* and slice 2 */
+
+    aslice_0 = slice_0 ^ 64;
+    aslice_1 = slice_1 ^ 64;
+    aslice_2 = slice_2 ^ 64;
+
+    Afmt += 4; /* point to next Afmt word (yes, this is unaligned) */
+
+    for (j = 0; j < 64; j += 16) {
+      memcpy(xmm, Cfmt + j, 16);
+      memcpy(xmm + 2, Cfmt + 64 + j, 16); /* get 32 bytes of Cfmt */
+      memcpy(xmm + 4, bv + slice_0 + j, 16);
+      memcpy(xmm + 6, bv + aslice_0 + j, 16);
+      for (i = 0; i < 2; i++) {
+        xmm[4 + i] ^= xmm[i];
+      }
+      for (i = 0; i < 2; i++) {
+        xmm[2 + i] ^= xmm[6 + i];
+      }
+      for (i = 0; i < 2; i++) {
+        xmm[6 + i] ^= xmm[4 + i];
+      }
+      for (i = 0; i < 2; i++) {
+        xmm[i] ^= xmm[2 + i];
+      }
+      for (i = 0; i < 2; i++) {
+        xmm[6 + i] |= xmm[2 + i];
+      }
+      for (i = 0; i < 2; i++) {
+        xmm[4 + i] |= xmm[i];
+      }
+      memcpy(xmm, bv + 5248 + slice_1 + j, 16);
+      memcpy(xmm + 2, bv + 5248 + aslice_1 + j, 16);
+      for (i = 0; i < 2; i++) {
+        xmm[i] ^= xmm[6 + i];
+      }
+      for (i = 0; i < 2; i++) {
+        xmm[4 + i] ^= xmm[2 + i];
+      }
+      for (i = 0; i < 2; i++) {
+        xmm[2 + i] ^= xmm[i];
+      }
+      for (i = 0; i < 2; i++) {
+        xmm[6 + i] ^= xmm[4 + i];
+      }
+      for (i = 0; i < 2; i++) {
+        xmm[4 + i] |= xmm[2 + i];
+      }
+      for (i = 0; i < 2; i++) {
+        xmm[6 + i] |= xmm[i];
+      }
+      memcpy(xmm + 2, bv + 10496 + slice_2 + j, 16);
+      memcpy(xmm, bv + 10496 + aslice_2 + j, 16);
+      for (i = 0; i < 2; i++) {
+        xmm[2 + i] ^= xmm[4 + i];
+      }
+      for (i = 0; i < 2; i++) {
+        xmm[6 + i] ^= xmm[i];
+      }
+      for (i = 0; i < 2; i++) {
+        xmm[i] ^= xmm[2 + i];
+      }
+      for (i = 0; i < 2; i++) {
+        xmm[4 + i] ^= xmm[6 + i];
+      }
+      for (i = 0; i < 2; i++) {
+        xmm[i] |= xmm[6 + i];
+      }
+      for (i = 0; i < 2; i++) {
+        xmm[2 + i] |= xmm[4 + i];
+      }
+      memcpy(Cfmt + j, xmm, 16);
+      memcpy(Cfmt + 64 + j, xmm + 2, 16);
+    }
+
+    a_code = *(uint64_t *)Afmt; /* get Afmt word */
+    c_skip = a_code;   /* copy for skip */
+    c_skip &= 255;  /* mask with 255 */
+  }
+}
 
 void pc3bmj(const uint8_t *a, uint8_t *bv, uint8_t *c)
 {
