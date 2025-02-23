@@ -13,6 +13,12 @@
 #include <stdio.h>
 #include <assert.h>
 
+/* Note this assumes little endian implementation */
+typedef union union_128 {
+  uint64_t longs[2];
+  uint32_t ints[4];
+} union_128;
+
 #define ff32 0xffffffff
 
 /* Functions from pc1.s */
@@ -883,4 +889,120 @@ void pc3bmj(const uint8_t *a, uint8_t *bv, uint8_t *c)
 void pc3bmm(const uint8_t *a, uint8_t *bv, uint8_t *c)
 {
   pc3bma(a, bv, c);
+}
+
+/*
+ * Translations from pc5.s, primes between 5 and 193
+ */
+
+/* The p shuffle instruction (turns out not to be needed) */
+void pshufd(union_128 *mmx, uint8_t control)
+{
+  unsigned int i;
+  union_128 temp;
+  for (i = 0; i < 4; i++) {
+    unsigned int j = control & 3;
+    temp.ints[i] = mmx->ints[j];
+    control >>= 2;
+  }
+  *mmx = temp;
+}
+
+void pc5aca(const uint8_t *prog, uint8_t *bv, const uint64_t *parms)
+{
+  uint64_t slice_count;;
+  uint64_t xmm[32]; /* Emulate vector registers */
+  uint64_t slot_size;
+  uint64_t shift;
+  xmm[18] = parms[2];
+  xmm[19] = xmm[18];
+  shift = parms[1];
+  xmm[16] = parms[3];
+  xmm[17] = xmm[16];
+  xmm[22] = parms[0];
+  xmm[23] = xmm[22];
+  slice_count = parms[6];
+  slot_size = parms[4];
+  slot_size *= parms[5];
+
+  while (slice_count > 0) {
+    /* pc5aca1: */
+    uint64_t *dest = (uint64_t *)(bv + 256); /* destination starts slot 2 */
+    const uint8_t *current_prog = prog; /* restart program */
+    unsigned int i;
+
+    memcpy(xmm, dest - 128 / sizeof(*dest), 128);
+    for (;;) {
+      /* pc5aca2: */
+      uint64_t code = *current_prog++; /* get first/next program byte */
+      while (code <= 79) {
+        /* pc5aca3: */
+        uint64_t *src;
+        code <<= 7; /* convert to displacement */
+        src = (uint64_t *)(bv + code);
+        /* This section does 64 bit packed word instructions on mmx registers */
+        /* Eg paddq   16(%rax,%rsi),%xmm1 */
+        for (i = 0; i < 16; i++) {
+          xmm[i] += src[i];
+        }
+        for (i = 0; i < 4; i++) {
+          uint64_t offset = 4 * i;
+          memcpy(xmm + 24, xmm + offset, 16);
+          memcpy(xmm + 28, xmm + 2 + offset, 16);
+          xmm[24] += xmm[16];
+          xmm[28] += xmm[16];
+          xmm[25] += xmm[17];
+          xmm[29] += xmm[17]; /* add 2^N - p */
+          xmm[24] &= xmm[18];
+          xmm[28] &= xmm[18];
+          xmm[25] &= xmm[19];
+          xmm[29] &= xmm[19]; /* and with mask */
+          memcpy(xmm + 26, xmm + 24, 16);
+          memcpy(xmm + 30, xmm + 28, 16);
+          /* Now psrlq   %xmm10,%xmm13 */
+          xmm[26] >>= shift;
+          xmm[27] >>= shift;
+          xmm[30] >>= shift;
+          xmm[31] >>= shift; /* subtract 1 if set */
+          /* Now psubq   %xmm13,%xmm12, similar to paddq */
+          xmm[24] -= xmm[26];
+          xmm[25] -= xmm[27];
+          xmm[28] -= xmm[30];
+          xmm[29] -= xmm[31];
+          /* Now pand    %xmm11,%xmm12 */
+          xmm[24] &= xmm[22];
+          xmm[28] &= xmm[22];
+          xmm[25] &= xmm[23];
+          xmm[29] &= xmm[23]; /* and with p */
+          /* Now psubq   %xmm12,%xmm0 */
+          xmm[0 + offset] -= xmm[24];
+          xmm[1 + offset] -= xmm[25];
+          xmm[2 + offset] -= xmm[28];
+          xmm[3 + offset] -= xmm[29]; /* subtract p if need be */
+          memcpy(dest + offset, xmm + offset, 32);
+        }
+        dest += 128 / sizeof(*dest); /* increment destination slot */
+        code = *current_prog++; /* get next program byte */
+      }
+      /* pc5aca4 */
+      if (code <= 159) {
+        code -= 80;
+        code <<= 7; /* multiply by slot size */
+        memcpy(xmm, bv + code, 128);
+        continue; /* pc5aca2 */
+      }
+      /* pc5aca5 */
+      if (code <= 239) {
+        code -= 160;
+        code <<= 7; /* multiply by slot size */
+        dest = (uint64_t *)(bv + code);
+        continue; /* At pc5aca2 */
+      }
+      break; /* Break the infinite for loop */
+    }
+    /* anything 240+ is stop at the moment */
+    bv += slot_size; /* add in slice stride */
+    slice_count--; /* subtract 1 from slice count */
+    /* continue at pc5aca1 */
+  }
 }
