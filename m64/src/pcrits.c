@@ -19,6 +19,12 @@ typedef union union_128 {
   uint32_t ints[4];
 } union_128;
 
+/* Overlay a 64 bit integer as 4 16 bit integers */
+typedef union union_64 {
+  uint64_t a;
+  uint16_t words[4];
+} union_64;
+
 #define ff32 0xffffffff
 
 /* Functions from pc1.s */
@@ -892,7 +898,7 @@ void pc3bmm(const uint8_t *a, uint8_t *bv, uint8_t *c)
 }
 
 /*
- * Translations from pc5.s, primes between 5 and 193
+ * Translations from pc5.s, Add/subtract primes between 5 and 193
  */
 
 /* The p shuffle instruction (turns out not to be needed) */
@@ -906,6 +912,22 @@ void pshufd(union_128 *mmx, uint8_t control)
     control >>= 2;
   }
   *mmx = temp;
+}
+
+/*
+ * The pmullw instruction.
+ * Multiply packed 16 bit words inside a 64 bit word
+ */
+uint64_t pmullw(uint64_t a, uint64_t b)
+{
+  union_64 x, y;
+  unsigned int i;
+  x.a = a;
+  y.a = b;
+  for (i = 0; i < 4; i++) {
+    y.words[i] *= x.words[i];
+  }
+  return y.a;
 }
 
 void pc5aca(const uint8_t *prog, uint8_t *bv, const uint64_t *parms)
@@ -1005,4 +1027,107 @@ void pc5aca(const uint8_t *prog, uint8_t *bv, const uint64_t *parms)
     slice_count--; /* subtract 1 from slice count */
     /* continue at pc5aca1 */
   }
+}
+
+void pc5bmwa(const uint8_t *a, uint8_t *bv, uint8_t *c,
+             const uint64_t *parms)
+{
+  uint64_t xmm[32]; /* Emulate vector registers */
+  uint64_t slot_size; /* r11 */
+  uint64_t *afmt = (uint64_t *)a;
+  uint64_t code; /* rax */
+  uint64_t skip; /* r9 */
+  uint64_t *alcove; /* r8 */
+  xmm[16] = parms[2]; /* Mask */
+  xmm[17] = xmm[16]; /* The shuffle */
+  xmm[18] = parms[1]; /* Shift S */
+  xmm[20] = parms[7];
+  xmm[21] = xmm[20]; /* 2^S % p */
+  xmm[22] = parms[8];
+  xmm[23] = xmm[22]; /* bias */
+  slot_size = parms[4]; /* size of one slot */
+  slot_size *= parms[5]; /* times slots = slice stride */
+  code = *afmt; /* first word of Afmt   */
+  skip = code & 0xff; /* get skip/terminate   */
+  code >>= 1;
+  while (255 != skip) {
+    /* pc5bmwa1 */
+    uint64_t slices = 7;
+    unsigned int i, k;
+    skip <<= 7; /* multiply by 128      */
+    c += skip; /* add into Cfmt addr   */
+    alcove = (uint64_t *)bv; /* copy BWA addr to alcove */
+    afmt++; /* point to next alcove */
+    memcpy(xmm, c, 128); /* 8 16 byte double quad words */
+    while (0 != slices) {
+      /* pc5bmwa2 */
+      uint64_t lo /* r10 */, hi /* r9 */;
+      hi = (code >> 4) & 0x780;
+      lo = code & 0x780;
+      code >>= 8; /* next byte of Afmt */ 
+      for (i = 0; i < 16; i++) {
+        xmm[i] += alcove[hi]; /* add in cauldron */
+        xmm[i] -= alcove[lo];
+      }
+      alcove += slot_size / sizeof(*alcove); /* move on to next slice */
+    }
+    for (k = 0; k < 2; k++) {
+      unsigned int offset = k * 8;
+      memcpy(xmm + 24, xmm + offset, 64); /* 4 16 word registers */
+      for (i = 0; i < 4; i++) {
+        unsigned int j = 2 * i;
+        uint64_t shift = xmm[18];
+        uint64_t mask32 = (1 << shift) - 1;
+        uint64_t mult = 0x0000000100000001UL;
+        uint64_t mask64 = mult * mask32;
+        unsigned int l;
+        xmm[24 + j] &= xmm[16];
+        xmm[25 + j] &= xmm[17];
+        xmm[j] ^= xmm[24 + j];
+        xmm[1 + j] ^= xmm[25 + j];
+        /* Shift packed double word right logical */
+        for (l = 0; l < 8; l += 2) {
+          xmm[24 + l] >>= xmm[18]; /* An unpacked shift */
+          xmm[24 + l] &= mask64; /* Now mask out the bits moved from one double to the other */
+          xmm[25 + l] >>= xmm[19]; /* An unpacked shift */
+          xmm[25 + l] &= mask64; /* Now mask out the bits moved from one double to the other */
+        }
+        /* pmullw: multiply as collections of 16 bits */
+        for (i = 0; i < 4; i++) {
+          xmm[24 + 2 * i] = pmullw(xmm[24 + 2 * i], xmm[10]);
+          xmm[25 + 2 * i] = pmullw(xmm[25 + 2 * i], xmm[11]);
+        }
+        /* paddq %xmm12,%xmm0 13, 14, 15 etc */
+        for (l = 0; l < 8; l+= 2) {
+          xmm[l + offset] += xmm[24 + l];
+          xmm[1 + l + offset] += xmm[25 + l];
+        }
+        /* paddq %xmm11,%xmm0 11, 11, 11etc */
+        for (l = 0; l < 8; l+= 2) {
+          xmm[l + offset] += xmm[22];
+          xmm[1 + l + offset] += xmm[23];
+        }
+        memcpy(c + offset * sizeof(uint64_t), xmm + offset, 64); /* Put results back into C format area */
+        /* Now repeat for xmm4 - xmm7 */
+      }
+    }
+  }
+}
+
+void pc5bmwj(const uint8_t *a, uint8_t *bv, uint8_t *c,
+             const uint64_t *parms)
+{
+  pc5bmwa(a, bv, c, parms);
+}
+
+void pc5bmdj(const uint8_t *a, uint8_t *bv, uint8_t *c,
+             const uint64_t *parms)
+{
+  pc5bmdd(a, bv, c, parms);
+}
+
+void pc5bmdm(const uint8_t *a, uint8_t *bv, uint8_t *c,
+             const uint64_t *parms)
+{
+  pc5bmdd(a, bv, c, parms);
 }
