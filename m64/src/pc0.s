@@ -106,6 +106,14 @@ macp4:
 /* %rbx counter for slices  */ 
 /* %r9 used for skip terminate then %r9,%r10 add/subtract displacement */
 
+// pc5bmdd Afmt bwa Cfmt parms
+// SSE pmulld slower but can do 10-bit
+
+/* %rdi -> Afmt     %rsi bwa     %rdx -> Cfmt  %rcx parms */
+/* %rax Afmt        %r8 slice in bwa  %r11 constant bwa stride */
+/* %rbx counter for slices  */ 
+/* %r9 used for skip terminate then %r9,%r10 add/subtract displacement */
+
 // untouchted rbp r12 r13 r14 r15
 	.text
 	.globl	pc5bmdd
