@@ -98,13 +98,6 @@ macp4:
         popq    %rbx
         ret
 
-// pc5bmdd Afmt bwa Cfmt parms
-// SSE pmulld slower but can do 10-bit
-
-/* %rdi -> Afmt     %rsi bwa     %rdx -> Cfmt  %rcx parms */
-/* %rax Afmt        %r8 slice in bwa  %r11 constant bwa stride */
-/* %rbx counter for slices  */ 
-/* %r9 used for skip terminate then %r9,%r10 add/subtract displacement */
 
 // pc5bmdd Afmt bwa Cfmt parms
 // SSE pmulld slower but can do 10-bit
@@ -255,5 +248,3 @@ pc5bmdd2:
 pc5bmdd8:
         popq    %rbx
         ret      
-
-// end of pc5bmdd

@@ -1182,43 +1182,33 @@ void pc5bmdd(const uint8_t *a, uint8_t *bv, uint8_t *c,
     }
     for (k = 0; k < 2; k++) {
       unsigned int offset = k * 8;
-      memcpy(xmm + 24, xmm + offset, 64); /* 4 16 word registers */
+      memcpy(xmm + 24, xmm + offset, 64); /* 4 16 byte registers */
       for (i = 0; i < 4; i++) {
         unsigned int j = 2 * i;
         uint64_t shift = xmm[18];
         uint64_t mask32 = (1UL << (32 - shift)) - 1;
         uint64_t mult = 0x0000000100000001UL;
         uint64_t mask64 = mult * mask32;
-        unsigned int l;
         xmm[24 + j] &= xmm[16];
         xmm[25 + j] &= xmm[17];
-        xmm[j] ^= xmm[24 + j];
-        xmm[1 + j] ^= xmm[25 + j];
+        xmm[j + offset] ^= xmm[24 + j];
+        xmm[1 + j + offset] ^= xmm[25 + j];
         /* Shift packed double word right logical */
-        for (l = 0; l < 8; l += 2) {
-          xmm[24 + l] >>= shift; /* An unpacked shift */
-          xmm[24 + l] &= mask64; /* Now mask out the bits moved from one double to the other */
-          xmm[25 + l] >>= shift; /* An unpacked shift */
-          xmm[25 + l] &= mask64; /* Now mask out the bits moved from one double to the other */
-        }
-        /* pmulld: multiply as collections of 32 bits */
-        for (i = 0; i < 4; i++) {
-          xmm[24 + 2 * i] = pmulld(xmm[24 + 2 * i], xmm[10]);
-          xmm[25 + 2 * i] = pmulld(xmm[25 + 2 * i], xmm[11]);
-        }
+        xmm[24 + j] >>= shift; /* An unpacked shift */
+        xmm[24 + j] &= mask64; /* Now mask out the bits moved from one double to the other */
+        xmm[25 + j] >>= shift; /* An unpacked shift */
+        xmm[25 + j] &= mask64; /* Now mask out the bits moved from one double to the other */
+        /* pmulld: multiply as collections of 16 bits */
+        xmm[24 + j] = pmulld(xmm[24 + j], xmm[20]);
+        xmm[25 + j] = pmulld(xmm[25 + j], xmm[21]);
         /* paddq %xmm12,%xmm0 13, 14, 15 etc */
-        for (l = 0; l < 8; l+= 2) {
-          xmm[l + offset] += xmm[24 + l];
-          xmm[1 + l + offset] += xmm[25 + l];
-        }
+        xmm[j + offset] += xmm[24 + j];
+        xmm[1 + j + offset] += xmm[25 + j];
         /* paddq %xmm11,%xmm0 11, 11, 11etc */
-        for (l = 0; l < 8; l+= 2) {
-          xmm[l + offset] += xmm[22];
-          xmm[1 + l + offset] += xmm[23];
-        }
-        memcpy(c + offset * sizeof(uint64_t), xmm + offset, 64); /* Put results back into C format area */
-        /* Now repeat for xmm4 - xmm7 */
+        xmm[j + offset] += xmm[22];
+        xmm[1 + j + offset] += xmm[23];
       }
+      memcpy(c + offset * sizeof(uint64_t), xmm + offset, 64); /* Put results back into C format area */
     }
     code = *afmt;
     skip = code & 0xff;
