@@ -20,10 +20,16 @@ typedef union union_128 {
 } union_128;
 
 /* Overlay a 64 bit integer as 4 16 bit integers */
-typedef union union_64 {
+typedef union union_64_16 {
   uint64_t a;
   uint16_t words[4];
-} union_64;
+} union_64_16;
+
+/* Overlay a 64 bit integer as 2 32 bit integers */
+typedef union union_64_32 {
+  uint64_t a;
+  uint32_t doubles[2];
+} union_64_32;
 
 #define ff32 0xffffffff
 
@@ -920,12 +926,28 @@ void pshufd(union_128 *mmx, uint8_t control)
  */
 uint64_t pmullw(uint64_t a, uint64_t b)
 {
-  union_64 x, y;
+  union_64_16 x, y;
   unsigned int i;
   x.a = a;
   y.a = b;
   for (i = 0; i < 4; i++) {
     y.words[i] *= x.words[i];
+  }
+  return y.a;
+}
+
+/*
+ * The pmulld instruction.
+ * Multiply packed 32 bit words inside a 64 bit word
+ */
+uint64_t pmulld(uint64_t a, uint64_t b)
+{
+  union_64_32 x, y;
+  unsigned int i;
+  x.a = a;
+  y.a = b;
+  for (i = 0; i < 2; i++) {
+    y.doubles[i] *= x.doubles[i];
   }
   return y.a;
 }
@@ -1062,14 +1084,101 @@ void pc5bmwa(const uint8_t *a, uint8_t *bv, uint8_t *c,
     while (0 != slices) {
       /* pc5bmwa2 */
       uint64_t lo /* r10 */, hi /* r9 */;
-      hi = (code >> 4) & 0x780;
-      lo = code & 0x780;
+      hi = ((code >> 4) & 0x780) / sizeof(*alcove);
+      lo = (code & 0x780) / sizeof(*alcove);
       code >>= 8; /* next byte of Afmt */ 
       for (i = 0; i < 16; i++) {
-        xmm[i] += alcove[hi]; /* add in cauldron */
-        xmm[i] -= alcove[lo];
+        xmm[i] += alcove[hi + i]; /* add in cauldron */
+        xmm[i] -= alcove[lo + i];
       }
       alcove += slot_size / sizeof(*alcove); /* move on to next slice */
+      slices--;
+    }
+    for (k = 0; k < 2; k++) {
+      unsigned int offset = k * 8;
+      memcpy(xmm + 24, xmm + offset, 64); /* 4 16 byte registers */
+      for (i = 0; i < 4; i++) {
+        unsigned int j = 2 * i;
+        uint64_t shift = xmm[18];
+        uint64_t mask32 = (1UL << (32 - shift)) - 1;
+        uint64_t mult = 0x0000000100000001UL;
+        uint64_t mask64 = mult * mask32;
+        xmm[24 + j] &= xmm[16];
+        xmm[25 + j] &= xmm[17];
+        xmm[j + offset] ^= xmm[24 + j];
+        xmm[1 + j + offset] ^= xmm[25 + j];
+        /* Shift packed double word right logical */
+        xmm[24 + j] >>= shift; /* An unpacked shift */
+        xmm[24 + j] &= mask64; /* Now mask out the bits moved from one double to the other */
+        xmm[25 + j] >>= shift; /* An unpacked shift */
+        xmm[25 + j] &= mask64; /* Now mask out the bits moved from one double to the other */
+        /* pmullw: multiply as collections of 16 bits */
+        xmm[24 + j] = pmullw(xmm[24 + j], xmm[20]);
+        xmm[25 + j] = pmullw(xmm[25 + j], xmm[21]);
+        /* paddq %xmm12,%xmm0 13, 14, 15 etc */
+        xmm[j + offset] += xmm[24 + j];
+        xmm[1 + j + offset] += xmm[25 + j];
+        /* paddq %xmm11,%xmm0 11, 11, 11etc */
+        xmm[j + offset] += xmm[22];
+        xmm[1 + j + offset] += xmm[23];
+      }
+      memcpy(c + offset * sizeof(uint64_t), xmm + offset, 64); /* Put results back into C format area */
+    }
+    code = *afmt;
+    skip = code & 0xff;
+    code >>= 1;
+  }
+}
+
+void pc5bmwj(const uint8_t *a, uint8_t *bv, uint8_t *c,
+             const uint64_t *parms)
+{
+  pc5bmwa(a, bv, c, parms);
+}
+
+#if 0
+void pc5bmdd(const uint8_t *a, uint8_t *bv, uint8_t *c,
+             const uint64_t *parms)
+{
+  uint64_t xmm[32]; /* Emulate vector registers */
+  uint64_t slot_size; /* r11 */
+  uint64_t *afmt = (uint64_t *)a;
+  uint64_t code; /* rax */
+  uint64_t skip; /* r9 */
+  uint64_t *alcove; /* r8 */
+  xmm[16] = parms[2]; /* Mask */
+  xmm[17] = xmm[16]; /* The shuffle */
+  xmm[18] = parms[1]; /* Shift S */
+  xmm[20] = parms[7];
+  xmm[21] = xmm[20]; /* 2^S % p */
+  xmm[22] = parms[8];
+  xmm[23] = xmm[22]; /* bias */
+  slot_size = parms[4]; /* size of one slot */
+  slot_size *= parms[5]; /* times slots = slice stride */
+  code = *afmt; /* first word of Afmt   */
+  skip = code & 0xff; /* get skip/terminate   */
+  code >>= 1;
+  while (255 != skip) {
+    /* pc5bmwa1 */
+    uint64_t slices = 7;
+    unsigned int i, k;
+    skip <<= 7; /* multiply by 128      */
+    c += skip; /* add into Cfmt addr   */
+    alcove = (uint64_t *)bv; /* copy BWA addr to alcove */
+    afmt++; /* point to next alcove */
+    memcpy(xmm, c, 128); /* 8 16 byte double quad words */
+    while (0 != slices) {
+      /* pc5bmwa2 */
+      uint64_t lo /* r10 */, hi /* r9 */;
+      hi = ((code >> 4) & 0x780) / sizeof(*alcove);
+      lo = (code & 0x780) / sizeof(*alcove);
+      code >>= 8; /* next byte of Afmt */ 
+      for (i = 0; i < 16; i++) {
+        xmm[i] += alcove[hi + i]; /* add in cauldron */
+        xmm[i] -= alcove[lo + i];
+      }
+      alcove += slot_size / sizeof(*alcove); /* move on to next slice */
+      slices--;
     }
     for (k = 0; k < 2; k++) {
       unsigned int offset = k * 8;
@@ -1077,7 +1186,7 @@ void pc5bmwa(const uint8_t *a, uint8_t *bv, uint8_t *c,
       for (i = 0; i < 4; i++) {
         unsigned int j = 2 * i;
         uint64_t shift = xmm[18];
-        uint64_t mask32 = (1 << shift) - 1;
+        uint64_t mask32 = (1UL << (32 - shift)) - 1;
         uint64_t mult = 0x0000000100000001UL;
         uint64_t mask64 = mult * mask32;
         unsigned int l;
@@ -1087,15 +1196,15 @@ void pc5bmwa(const uint8_t *a, uint8_t *bv, uint8_t *c,
         xmm[1 + j] ^= xmm[25 + j];
         /* Shift packed double word right logical */
         for (l = 0; l < 8; l += 2) {
-          xmm[24 + l] >>= xmm[18]; /* An unpacked shift */
+          xmm[24 + l] >>= shift; /* An unpacked shift */
           xmm[24 + l] &= mask64; /* Now mask out the bits moved from one double to the other */
-          xmm[25 + l] >>= xmm[19]; /* An unpacked shift */
+          xmm[25 + l] >>= shift; /* An unpacked shift */
           xmm[25 + l] &= mask64; /* Now mask out the bits moved from one double to the other */
         }
-        /* pmullw: multiply as collections of 16 bits */
+        /* pmulld: multiply as collections of 32 bits */
         for (i = 0; i < 4; i++) {
-          xmm[24 + 2 * i] = pmullw(xmm[24 + 2 * i], xmm[10]);
-          xmm[25 + 2 * i] = pmullw(xmm[25 + 2 * i], xmm[11]);
+          xmm[24 + 2 * i] = pmulld(xmm[24 + 2 * i], xmm[10]);
+          xmm[25 + 2 * i] = pmulld(xmm[25 + 2 * i], xmm[11]);
         }
         /* paddq %xmm12,%xmm0 13, 14, 15 etc */
         for (l = 0; l < 8; l+= 2) {
@@ -1111,15 +1220,12 @@ void pc5bmwa(const uint8_t *a, uint8_t *bv, uint8_t *c,
         /* Now repeat for xmm4 - xmm7 */
       }
     }
+    code = *afmt;
+    skip = code & 0xff;
+    code >>= 1;
   }
 }
-
-void pc5bmwj(const uint8_t *a, uint8_t *bv, uint8_t *c,
-             const uint64_t *parms)
-{
-  pc5bmwa(a, bv, c, parms);
-}
-
+#endif
 void pc5bmdj(const uint8_t *a, uint8_t *bv, uint8_t *c,
              const uint64_t *parms)
 {
