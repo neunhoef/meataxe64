@@ -1136,7 +1136,6 @@ void pc5bmwj(const uint8_t *a, uint8_t *bv, uint8_t *c,
   pc5bmwa(a, bv, c, parms);
 }
 
-#if 0
 void pc5bmdd(const uint8_t *a, uint8_t *bv, uint8_t *c,
              const uint64_t *parms)
 {
@@ -1215,7 +1214,7 @@ void pc5bmdd(const uint8_t *a, uint8_t *bv, uint8_t *c,
     code >>= 1;
   }
 }
-#endif
+
 void pc5bmdj(const uint8_t *a, uint8_t *bv, uint8_t *c,
              const uint64_t *parms)
 {
