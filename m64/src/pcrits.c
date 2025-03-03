@@ -57,18 +57,24 @@ static uint64_t reduce(uint64_t a, uint64_t i, uint64_t p, const FIELD *f)
   return a % p;
 }
 
-/* A multiply to deliver the top 64 bits of the result */
-static uint64_t top_multiply(uint64_t a, uint64_t b)
+/*
+ * A full 128 bit precision 64 x 64 multiply
+ * Intel chips have a singled instruction to do this
+ * Others don't (necessarily)
+ * Operands in a, b
+ * Result in lo and function result
+ */
+uint64_t full_multiply(uint64_t *lo, uint64_t a, uint64_t b)
 {
-  /* Split the multiplicands into hi and lo and form the products */
+  /* Split into 32 x 32 which can't overflow */
   uint64_t l_a = a & ff32,
     h_a = a >> 32,
     l_b = b & ff32,
     h_b = b >> 32,
-    r1 = (l_a * l_b),
+    r1 = (l_a * l_b), /* Bottom 64 bits */
     r2 = (l_a * h_b),
-    r3 = (h_a * l_b),
-    r4 = (h_a * h_b),
+    r3 = (h_a * l_b), /* Bits 32 - 95 */
+    r4 = (h_a * h_b), /* Bits 64 - 127 */
     tmp;
   /* Now compute the overflows */
   r4 += (r2 >> 32) + (r3 >> 32); /* Add in the hi parts from the 2^32 results */
@@ -82,9 +88,16 @@ static uint64_t top_multiply(uint64_t a, uint64_t b)
     /* Overflowed 64 bits, increment r4 */
     r4 += 1;
   }
+  *lo = r2;
   return r4;
-}
+} 
 
+/* A multiply to deliver the top 64 bits of the result */
+static uint64_t top_multiply(uint64_t a, uint64_t b)
+{
+  uint64_t lo;
+  return full_multiply(&lo, a, b);
+}
 
 /* pcpmad: return (A * B + C) mod p */
 /* This has to maintain 128 bit precision internally */
@@ -1225,4 +1238,71 @@ void pc5bmdm(const uint8_t *a, uint8_t *bv, uint8_t *c,
              const uint64_t *parms)
 {
   pc5bmdd(a, bv, c, parms);
+}
+
+/*
+ * Translations from pc6.s, code for very large primes (more than 32 bit)
+ * There are no tests for this code, as it wasn't working at the time
+ * of the latest version
+ */
+/* input  rdi Afmt     rsi bwa     rdx  Cfmt      %rcx 2^90 % p*/
+void pc6bma(const uint8_t *a, uint8_t *bwa, uint8_t *c, uint64_t p90)
+{
+  uint64_t mask /* r10 */ = (1 << 26) - 1;
+  uint64_t *cfmt = (uint64_t *)c; /* r9 */
+  uint64_t code = *a;
+  /* pc6bma1 */
+  /* outer loop One row of A 73 cols of BC*/
+  while (255 != code ) {
+    unsigned int loop_count = 73; /* cl */
+    uint64_t carry /* r13 */ = 0;
+    a++; /* Note this makes afmt unaligned */
+    code *= 1168;
+    cfmt += code / sizeof(*cfmt);
+    /* pc6bma2 */
+    /* middle loop round cols B cols C */
+    while (0 != loop_count) {
+      uint64_t lo /* r11 */ = cfmt[0], hi /* r12 */ = cfmt[1], upper, lo_temp;
+      uint64_t *block = (uint64_t *)bwa;
+      /* Inner loop of 21 */
+      unsigned int inner;
+      /* pc6bma3 */
+      uint64_t * afmt = (uint64_t *)a;
+      for (inner = 0; inner < 21; inner++) {
+        uint64_t hi_temp;
+        lo_temp = lo;
+        code = afmt[inner];
+        /* 128 bit precise multiply */
+        upper = full_multiply(&code, code, block[inner * 168 / sizeof(*cfmt)]);
+        lo += code;
+        if (lo_temp < lo) {
+          hi++; /* Detect carry */
+        }
+        hi_temp = hi;
+        hi += upper; /* The hi part from the mul */
+        if (hi < hi_temp) {
+          carry++;
+        }
+      }
+      a += 8 * 21;
+      /* reduce C back to two words and put back */
+      carry = hi << 38;
+      /* mul 2^90 mod p */
+      upper = full_multiply(&code, carry, p90);
+      hi &= mask;
+      lo_temp = lo;
+      lo += code;
+      hi += upper;
+      if (lo < lo_temp) {
+        hi++;
+      }
+      /* Stuff with carries and high precision multiply etc */
+      cfmt[0] = lo;
+      cfmt[1] = hi;
+      cfmt += 2;
+      bwa += 8;
+      loop_count--;
+    }
+    a += 168; /* Next chunk of Amft */
+  }
 }
