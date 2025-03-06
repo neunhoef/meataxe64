@@ -1,5 +1,5 @@
 /*
-         tfarm1.c   -   Thread Farm - multi-thread scheduler           
+         tfarm3.c   -   Replacement thread farm using stdatomic
          ========       R. A. Parker     9.10.2016
 */
 
@@ -8,6 +8,7 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdatomic.h>
 #include <pthread.h>
 #include <time.h>
 
@@ -21,7 +22,7 @@ typedef struct mojstruct
 {
     void * mem;      // Memory pointer (NULL if none allocated) 
     rdlstruct * RDL; // closable chain of RDLs for this moj
-    int  refc;       // Read reference counter
+    atomic_int refc; // Read reference counter
     int  junk;       // to make sizeof(mojstruct) divisible by 8
 } mojstruct;
 
@@ -30,20 +31,26 @@ struct jobinc
     MOJ parm[MAXPARAMS];    // new parameters
     int  proggyno;   // proggy to be executed
     int  priority;   // priority (lower runs earlier)
-    int  ref;        // how many things it is waiting for 
+    atomic_int ref;  // how many things it is waiting for 
     int nparm;       // number of parameters
 };
 
 /* Global Variables */
+
+/*
+ * Some of these are counting semaphores, implemented using stdatomic
+ * However, TfAdd and its replacement atomic_fetch_add have slightly
+ * different semantics. TfAdd returns the value newly written,
+ * whereas atomic_fetch_add returns the value previously held.
+ * In the cases where the return value is used we have to adjust it
+ */
 
 /* closejobs is incremented by submit and decremented when a */
 /* job completes, allowing TfWaitEnd to know when all the    */
 /* submitted jobs have completed. TFUpJobs and TFDownJobs    */
 /* allows proggies (e.g. M3Read, M3Write) to manipulate it.  */
 
-int closejobs;
-
-
+atomic_int closejobs;
 
 /* stopfree is incremented by TFStopMOJFree and decremented  */
 /* by TFStartMOJFree, and if non-zero, TFRelease blocks      */
@@ -51,16 +58,22 @@ int closejobs;
 /* a release discarding a MOJ when an unsubmitted job will   */
 /* read it                                                   */
  
-int stopfree;
+atomic_int stopfree;
+
+static atomic_int my_atomic_fetch_add(atomic_int *arg, int val)
+{
+  atomic_int i = atomic_fetch_add(arg, val);
+  return i + val;
+}
 
 void TFStopMOJFree(void)
 {
-    TfAdd(&stopfree,1);
+  my_atomic_fetch_add(&stopfree, 1);
 }
 
-extern void   TFStartMOJFree(void)
+extern void TFStartMOJFree(void)
 {
-    TfAdd(&stopfree,-1);
+  my_atomic_fetch_add(&stopfree, -1);
 }
 
 /* nothreads is the (constant) number of started threads     */
@@ -103,13 +116,13 @@ void LcMainKick(void)
 
 void TFUpJobs(void)
 {
-    TfAdd(&closejobs,1);
+  my_atomic_fetch_add(&closejobs, 1);
 }
 
 void TFDownJobs(void)
 {
-    int i;
-    i=TfAdd(&closejobs,-1);
+    int i = my_atomic_fetch_add(&closejobs, -1);
+
     if(i==0)
     {
         Lock();
@@ -138,7 +151,7 @@ parmstruct * tfparms;
 
 int firstfreethread;
 
-int runjobs;
+atomic_int runjobs;
 
 void TFWaitEnd(void)
 {
@@ -209,7 +222,7 @@ void JobPop(jobstruct * JOB, int proggy, int priority)
 {
     JOB->proggyno = proggy;
     JOB->priority = priority;
-    JOB->ref = 1;
+    atomic_init(&JOB->ref, 1);
     JOB->nparm=0;
 }
 
@@ -227,12 +240,12 @@ void LcFreeRdl(rdlstruct * RDL)
 
 void TfUpJobRef(jobstruct * JOB)
 {
-    TfAdd(&(JOB->ref),1);   // maybe lock add someday
+    my_atomic_fetch_add(&(JOB->ref),1);   // maybe lock add someday
 }
 
 void UpMojRef(MOJ mj)
 {
-    TfAdd(&(mj->refc),1);
+    my_atomic_fetch_add(&(mj->refc),1);
 }
 
 void LCBindRdl(jobstruct * job, MOJ moj)
@@ -308,7 +321,7 @@ void TfPutJob(jobstruct * JOBNO)
 
     int i;
     Lock();
-    i=TfAdd(&runjobs,1);
+    i = my_atomic_fetch_add(&runjobs, 1);
     if(i<=0)
     {
         TfUnQThread(JOBNO);
@@ -353,7 +366,7 @@ jobstruct * LcNextRun(void)
 void TfJobRefDown(jobstruct * JOB) 
 {
     int x;
-    x=TfAdd(&(JOB->ref),-1);
+    x = my_atomic_fetch_add(&(JOB->ref),-1);
     if(x!=0) return;
     TfPutJob(JOB);
 }
@@ -412,7 +425,7 @@ jobstruct * GetJob(parmstruct * pp)  // may be 2
     int i;
     jobstruct * JOB;
     Lock();
-    i=TfAdd(&runjobs,-1);
+    i = my_atomic_fetch_add(&runjobs, -1);
     if(i>=0)
     {
         JOB=LcNextRun();
@@ -482,7 +495,7 @@ void TFRelease(MOJ mj)
         if(stopfree==0) break;    // atomic fetch
         TfPause(100);
     }
-    i=TfAdd(&(mj->refc),-1);
+    i = my_atomic_fetch_add(&(mj->refc),-1);
     if(i>0) return;
     if(i<0)
     {
@@ -510,7 +523,7 @@ MOJ TFNewMOJ(void)
     Unlock();
     newone->mem=NULL;
     newone->RDL=NULL;
-    newone->refc=0;
+    atomic_init(&newone->refc, 0);
     return newone;
 }
 
@@ -565,7 +578,7 @@ void TFClose(void)
     free(TFM);
 }
 
-void   TFInit(int threads)
+void TFInit(int threads)
 {
     int i;
     int jobx,rdlx;
@@ -575,7 +588,7 @@ void   TFInit(int threads)
     MOJ mj;
     jobx=SCALE*12;
     nmojes=jobx*2;
-    closejobs=0;
+    atomic_init(&closejobs, 0);
     TFM=malloc(TFMSIZE*sizeof(uint64_t));
     FRE=malloc(FRESIZE*sizeof(uint64_t));
     *(TFM+TFMFRE)=(uint64_t)FRE;
@@ -594,8 +607,8 @@ void   TFInit(int threads)
     RUNJOB=AlignTalloc(jobx*sizeof(jobstruct *));
     TfAppend(FRE,(uint64_t)RUNJOB);
     nfmoj=0;
-    runjobs=0;
-    stopfree=0;
+    atomic_init(&runjobs, 0);
+    atomic_init(&stopfree, 0);
 
 /* Initialize the moj data  */
     tfmoj=AlignTalloc(nmojes*sizeof(mojstruct));
@@ -604,7 +617,7 @@ void   TFInit(int threads)
     {
         mj=tfmoj+i;
         mj->mem=NULL;
-        mj->refc=0;     // This is private, so OK.
+        atomic_init(&mj->refc, 0);     // This is private, so OK.
         mj->RDL=NULL;
     }
 /* Initialize the thread data  */
