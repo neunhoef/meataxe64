@@ -16,6 +16,14 @@
 #include "tuning.h"
 #define SCALE MAXCHOP*MAXCHOP*MAXCHOP
 
+/* Notes TfPause has been replaced by nanosleep
+ * Unlike TfPause, itsdurection is not processor dependent
+ * Ie slow processors will sleep no longer than fast ones
+ * This doesn't seem to be to be a problem.
+ * TfAppend has a lock in it, but is only used before the threads are started
+ * Hence I believe the lock is redundant
+ */
+
 /* type definition completions */
 
 typedef struct mojstruct
@@ -60,10 +68,21 @@ atomic_int closejobs;
  
 atomic_int stopfree;
 
+/* Functions replacing the x86 assembler versions */
+
 static atomic_int my_atomic_fetch_add(atomic_int *arg, int val)
 {
   atomic_int i = atomic_fetch_add(arg, val);
   return i + val;
+}
+
+static void wait(uint64_t ns)
+{
+  struct timespec ts;
+  ns *= 10; /* The original claims to pause about 10 times arg ns */
+  ts.tv_sec = ns / 1000000000;
+  ts.tv_nsec = ns % 1000000000;
+  nanosleep(&ts, NULL);
 }
 
 void TFStopMOJFree(void)
@@ -156,16 +175,14 @@ atomic_int runjobs;
 void TFWaitEnd(void)
 {
     Lock();
-    while(1)  // wait until all submitted jobs completed
-    {
+    for (;;) {  // wait until all submitted jobs completed
         if(closejobs==0) break;
         LcMainPause();
     }
     Unlock();
-    while(1)  // wait until all threads got lock (at least) to suspend
-    {
+    for (;;) {  // wait until all threads got lock (at least) to suspend
         if( (runjobs+nothreads)==0) break;
-        TfPause(3000);
+        wait(3000);
     }
 }
 
@@ -343,8 +360,7 @@ jobstruct * LcNextRun(void)
     RUNJOB[0]=RUNJOB[--jobsready];
 // sink
     k=0;
-    while(1)
-    {
+    for (;;) {
         kc1=2*k+1;
         kc2=2*k+2;
         if(kc1>=jobsready) break;
@@ -408,8 +424,7 @@ void tfdo(int proggyno, MOJ * p);
 
 jobstruct * LcQThread(parmstruct * pp)
 {
-    while(1)
-    {
+    for (;;) {
         pp->JOB=NULL;
         while(pp->JOB==NULL)
         {
@@ -448,8 +463,7 @@ void * worker(void * p)
     int i;
     pp = (parmstruct *) p;
 
-    while(1)
-    {
+    for (;;) {
         JOB=GetJob(pp);
         if(((uint64_t)JOB)==2) break;
         proggyno=JOB->proggyno;
@@ -490,10 +504,9 @@ void TFRelease(MOJ mj)
 {
     int i;
 
-    while(1)
-    {
+    for (;;) {
         if(stopfree==0) break;    // atomic fetch
-        TfPause(100);
+        wait(100);
     }
     i = my_atomic_fetch_add(&(mj->refc),-1);
     if(i>0) return;
@@ -531,8 +544,7 @@ void TFStable (MOJ mj)
 {
     rdlstruct * RDL;
     Lock();
-    while(1)
-    {
+    for (;;) {
         RDL=(rdlstruct *) TfLinkClose((uint64_t *)&(mj->RDL));
         if(RDL==NULL) break;
         Unlock();
@@ -653,8 +665,7 @@ void TFInit(int threads)
 void TFWait(MOJ moj)
 {
     Lock();
-    while(1)
-    {
+    for (;;) {
         if(((uint64_t)(moj->RDL))==2)
         {
             Unlock();
@@ -673,8 +684,7 @@ void TFSubmit(int priority, int proggyno, ...)
     va_start(va,proggyno);
     JOB=NewJob();
     JobPop(JOB, proggyno, priority);
-    while(1)
-    {
+    for (;;) {
         moj=va_arg(va,MOJ);
         if((long)moj==-1) break;
         if((long)moj==-2)
