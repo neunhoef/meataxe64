@@ -200,27 +200,3 @@ TfLinkIn2:                     /* spinlock */
 TfLinkIn3:
         movq    %rax,(%rdi)    /* put it back and unlock */
         ret
-
-/* void TfAppend(uint64_t * list, uint64_t new) */
-/*                      %rdi        %rsi        */
-
-/* First item = number in list. */
-
-	.text
-	.globl	TfAppend
-TfAppend:
-        movq    $-1,%rax       /*  BUSY  */
-        xchg    %rax,(%rdi)    /* first try to get it */
-        cmpq    $-1,%rax       /* already busy? */
-        je      TfAppend2      /* yes so spinlock  */
-TfAppend1:
-        addq    $1,%rax
-        movq    %rsi,(%rdi,%rax,8)
-        movq    %rax,(%rdi)
-        ret
-TfAppend2:                     /* spinlock */
-        pause                  /* spinlock nicely */
-        xchg    %rax,(%rdi)    /* get it again */
-        cmpq    $-1,%rax       /* still busy?  */
-        jne     TfAppend1      /* we finally got it */ 
-        jmp     TfAppend2      /* else keep trying */

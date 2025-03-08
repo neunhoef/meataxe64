@@ -85,6 +85,17 @@ static void wait(uint64_t ns)
   nanosleep(&ts, NULL);
 }
 
+/*
+ * This is used before the threads are started, so doesn't require locks
+ * The lists are in the form of count (element 0) and members (1 -> )
+ */
+static void append(uint64_t *list, uint64_t new)
+{
+  uint64_t old = *list + 1;
+  list[old] = new;
+  *list = old;
+}
+
 void TFStopMOJFree(void)
 {
   my_atomic_fetch_add(&stopfree, 1);
@@ -609,22 +620,22 @@ void TFInit(int threads)
 // redesign it better for V2
     rdlx=3*nmojes;
     tfjob=AlignTalloc(jobx*sizeof(jobstruct));
-    TfAppend(FRE,(uint64_t)tfjob);
+    append(FRE,(uint64_t)tfjob);
     *(TFM+TFMJOB)=0;     // freechain of jobs empty
     for(i=0;i<jobx;i++) TfLinkIn(TFM+TFMJOB,(uint64_t *) (tfjob+i));
     tfrdl=AlignTalloc(rdlx*sizeof(rdlstruct));
-    TfAppend(FRE,(uint64_t)tfrdl);
+    append(FRE,(uint64_t)tfrdl);
     *(TFM+TFMRDL)=0;     // freechain of jobs empty
     for(i=0;i<rdlx;i++) TfLinkIn(TFM+TFMRDL,(uint64_t *) (tfrdl+i));
     RUNJOB=AlignTalloc(jobx*sizeof(jobstruct *));
-    TfAppend(FRE,(uint64_t)RUNJOB);
+    append(FRE,(uint64_t)RUNJOB);
     nfmoj=0;
     atomic_init(&runjobs, 0);
     atomic_init(&stopfree, 0);
 
 /* Initialize the moj data  */
     tfmoj=AlignTalloc(nmojes*sizeof(mojstruct));
-    TfAppend(FRE,(uint64_t)tfmoj);
+    append(FRE,(uint64_t)tfmoj);
     for(i=0;i<nmojes;i++)
     {
         mj=tfmoj+i;
@@ -635,15 +646,15 @@ void TFInit(int threads)
 /* Initialize the thread data  */
     firstfreethread=-1;  // no free threads yet
     tfthread=AlignTalloc(threads*sizeof(int));
-    TfAppend(FRE,(uint64_t)tfthread);
+    append(FRE,(uint64_t)tfthread);
     tfparms =AlignTalloc(threads*sizeof(parmstruct));
-    TfAppend(FRE,(uint64_t)tfparms);
+    append(FRE,(uint64_t)tfparms);
     for(i=0;i<threads;i++) tfparms[i].JOB=(jobstruct *)3;  // so close works
     nothreads=threads;
     mythread=AlignTalloc(threads*sizeof(pthread_t));
-    TfAppend(FRE,(uint64_t)mythread);
+    append(FRE,(uint64_t)mythread);
     wakeworker=AlignTalloc(threads*sizeof(pthread_cond_t));
-    TfAppend(FRE,(uint64_t)wakeworker);
+    append(FRE,(uint64_t)wakeworker);
 
 /* initialize the condition variables for the workers */
     for(i=0;i<threads;i++) pthread_cond_init(wakeworker+i,NULL);
