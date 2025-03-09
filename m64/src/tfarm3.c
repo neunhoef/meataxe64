@@ -718,4 +718,49 @@ void TFSubmit(int priority, int proggyno, ...)
     TfJobRefDown(JOB);
 }
 
-/* end of tfarm.c  */
+/*
+ * Looks like the compare and exchange is done by
+ *     int expected = -1;
+ *     if (atomic_compare_exchange_strong(ptr, &expected, expected)) {
+ *       Spin Lock
+ *       while (-1 == expected) {
+ *         C pause
+ *         atomic_compare_exchange_strong(ptr, &expected, expected);
+ *       }
+ *     }
+ *     Critical section
+ *     Fiddle about using atomic_store
+ */
+int TfLinkIn(uint64_t *chain, uint64_t *ours)
+{
+  uint64_t state = atomic_exchange(chain, 1);
+  for (;;) {
+    if (1 == state) {
+      /* Someone else has the lock */
+      for (;;) {
+        state = atomic_load(chain);
+        if (1 != state) {
+          break;
+        }
+        wait(10); /* Short pause */
+      }
+      /* We can have the lock, so try again */
+      state = atomic_exchange(chain, 1);
+    }
+    if (1 != state) {
+      /* We got it */
+      break;
+    }
+  }
+  /* We have the lock */
+  if (2 == state) {
+    /* List closed */
+    atomic_store(chain, 2); /* Unlock and we're done */
+    return 2;
+  } else {
+    /* List not closed */
+    atomic_store(ours, state); /* chain from ours onwards */
+    atomic_store(chain, (uint64_t)ours); /* unlock and chain ours in */
+    return 0;
+  }
+}

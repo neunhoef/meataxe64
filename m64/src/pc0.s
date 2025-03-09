@@ -170,33 +170,3 @@ TfLinkClose3:                  /* spinlock */
         cmpq    $1,%rax        /* still busy?  */
         jne     TfLinkClose1   /* we finally got it */
         jmp     TfLinkClose3   /* else keep trying */
-
-
-/* int TfLinkIn(uint64_t * chain, uint64_t * ours) */
-/* %eax=%rax           %rdi              %rsi      */
-
-/* Link into chain atomically */
-
-	.text
-	.globl	TfLinkIn
-TfLinkIn:
-        movq    $1,%rax        /*  BUSY  */
-        xchg    %rax,(%rdi)    /* first try to get it */
-        cmpq    $1,%rax        /* already busy? */
-        je      TfLinkIn2      /* yes so spinlock  */
-TfLinkIn1:
-        cmpq    $2,%rax        /* is the list closed? */
-        je      TfLinkIn3      /* yes so process specially */
-        movq    %rax,(%rsi)    /* chain from ours onwards */
-        movq    %rsi,(%rdi)    /* unlock and chain ours in */
-        movq    $0,%rax        /* return 0 - OK */
-        ret
-TfLinkIn2:                     /* spinlock */
-        pause                  /* spinlock nicely */
-        xchg    %rax,(%rdi)    /* get it again */
-        cmpq    $1,%rax        /* still busy?  */
-        jne     TfLinkIn1      /* we finally got it */
-        jmp     TfLinkIn2      /* if so keep trying */
-TfLinkIn3:
-        movq    %rax,(%rdi)    /* put it back and unlock */
-        ret
