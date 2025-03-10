@@ -97,39 +97,3 @@ macp2:
 macp4:
         popq    %rbx
         ret
-
-/* uint64_t * TfLinkClose(uint64_t * chain) */
-/*   %rax                        %rdi       */
-
-/* Unlink from chain atomically      */
-/* return NULL and close if empty    */
-
-	.text
-	.globl	TfLinkClose
-TfLinkClose:
-        movq    $1,%rax        /*  BUSY  */
-        xchg    %rax,(%rdi)    /* first try to get it */
-        cmpq    $1,%rax        /* already busy? */
-        je      TfLinkClose3   /* yes so spinlock  */
-TfLinkClose1:
-        cmpq    $0,%rax        /* is it empty? */
-        je      TfLinkClose15  /* yes - close it then */
-        cmpq    $2,%rax        /* is it locked  */
-        je      TfLinkClose2   /* return "closed" if so  */
-        movq    (%rax),%rdx    /* follow the link  */
-        movq    %rdx,(%rdi)    /* unlock and chain next in */
-        ret
-TfLinkClose15:
-        movq    $2,%rax        /* list is now closed */
-        movq    %rax,(%rdi)    /* put closed back and unlock */
-        movq    $0,%rax        /* return 0 - this call closed it */
-        ret
-TfLinkClose2:
-        movq    %rax,(%rdi)    /* put empty/closed back and unlock */
-        ret
-TfLinkClose3:                  /* spinlock */
-        pause                  /* spinlock nicely */
-        xchg    %rax,(%rdi)    /* get it again */
-        cmpq    $1,%rax        /* still busy?  */
-        jne     TfLinkClose1   /* we finally got it */
-        jmp     TfLinkClose3   /* else keep trying */
