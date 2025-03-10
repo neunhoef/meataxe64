@@ -788,7 +788,7 @@ uint64_t *TfLinkOut(uint64_t *chain)
   }
   /* We have the lock */
   if (0 == state || 2 == state) {
-    /* Empty */
+    /* Empty  or closed */
     atomic_store(chain, state); /* Unlock as empty or closed and we're done */
     return (uint64_t *)state;
   } else {
@@ -799,3 +799,43 @@ uint64_t *TfLinkOut(uint64_t *chain)
     return ours;
   }
 }
+
+uint64_t *TfLinkClose(uint64_t *chain)
+{
+  uint64_t state = atomic_exchange(chain, 1);
+  for (;;) {
+    if (1 == state) {
+      /* Someone else has the lock */
+      for (;;) {
+        state = atomic_load(chain);
+        if (1 != state) {
+          break;
+        }
+        wait(10); /* Short pause */
+      }
+      /* We can have the lock, so try again */
+      state = atomic_exchange(chain, 1);
+    }
+    if (1 != state) {
+      /* We got it */
+      break;
+    }
+  }
+  /* We have the lock */
+  if (0 == state) {
+    /* Empty, we need to close it */
+    atomic_store(chain, 2);
+    return NULL;
+  } else if (2 == state) {
+    /* closed already */
+    atomic_store(chain, state); /* Close it and unlock */
+    return (uint64_t *)state;
+  } else {
+    /* List not closed or empty */
+    uint64_t *ours = (uint64_t *)state;
+    uint64_t new = *ours; /* Follow the link */
+    atomic_store(chain, new); /* unlock and chain next in */
+    return ours;
+  }
+}
+
