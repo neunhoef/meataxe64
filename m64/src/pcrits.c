@@ -35,6 +35,12 @@ typedef union union_64_32 {
 
 /* Functions from pc1.s */
 
+void mactype(char *mact)
+{
+  mact[0] = 'a'; /* Minimal class */
+  mact[1] = '0'; /* Cache class 0 */
+}
+
 /* Reduce function. Reduces a * 2^i mod p */
 /* overflow gives 2^64 mod p, which we need internally */
 static uint64_t reduce(uint64_t a, uint64_t i, uint64_t p, const FIELD *f)
