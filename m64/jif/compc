@@ -1,6 +1,5 @@
 mkdir -p $BIN
 cd $SRC
-set -x
 gcc $1 -ffunction-sections -O3 -Wall -pthread -include malloc.h fieldreg.c -L$BIN -lmtx -o $BIN/fieldreg
 gcc $1 -ffunction-sections -O3 -Wall -pthread -include malloc.h conreg.c -Wl,-gc-sections -L$BIN -lmtx -o $BIN/conreg
 gcc $1 -ffunction-sections -O3 -Wall -pthread -include malloc.h zad.c -Wl,-gc-sections -L$BIN -lmtx -o $BIN/zad
