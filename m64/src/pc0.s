@@ -98,43 +98,6 @@ macp4:
         popq    %rbx
         ret
 
-
-/* parms rdi rsi rdx rcx r8 r9 */
-/* scratch rax (RV) r10 r11 */
-/* not scratch rbx rbp r12 r13 r14 r15 */
-
-/* uint64_t * TfLinkOut(uint64_t * chain) */
-/*   %rax                       %rdi      */
-
-/* Unlink from chain atomically */
-/* return NULL if empty            */
-
-	.text
-	.globl	TfLinkOut
-TfLinkOut:
-        movq    $1,%rax        /*  BUSY  */
-        xchg    %rax,(%rdi)    /* first try to get it */
-        cmpq    $1,%rax        /* already busy? */
-        je      TfLinkOut3     /* yes so spinlock  */
-TfLinkOut1:
-        cmpq    $0,%rax        /* is it empty? */
-        je      TfLinkOut2     /* yes - just unlock and exit */
-        cmpq    $2,%rax        /* is it closed?  */
-        je      TfLinkOut2     /* return "closed" if so  */
-        movq    (%rax),%rdx    /* follow the link  */
-        movq    %rdx,(%rdi)    /* unlock and chain next in */
-        ret
-TfLinkOut2:
-        movq    %rax,(%rdi)    /* put empty/closed back and unlock */
-        ret
-TfLinkOut3:                    /* spinlock */
-        pause                  /* spinlock nicely */
-        xchg    %rax,(%rdi)    /* get it again */
-        cmpq    $1,%rax        /* still busy?  */
-        jne     TfLinkOut1     /* we finally got it */
-        jmp     TfLinkOut3     /* else keep trying */
-
-
 /* uint64_t * TfLinkClose(uint64_t * chain) */
 /*   %rax                        %rdi       */
 
