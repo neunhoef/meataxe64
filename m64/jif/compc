@@ -30,7 +30,6 @@ gcc $1 -O3 -Wall -pthread -include malloc.h zng.c  -Wl,-gc-sections -L$BIN -lmtx
 gcc $1 -O3 -Wall -pthread -include malloc.h znu.c  -Wl,-gc-sections -L$BIN -lmtx -o $BIN/znu
 gcc $1 -O3 -Wall -pthread -include malloc.h zor1.c  -Wl,-gc-sections -L$BIN -lmtx -o $BIN/zor
 gcc $1 -O3 -Wall -pthread -include malloc.h zpc.c  -Wl,-gc-sections -L$BIN -lmtx -o $BIN/zpc
-gcc $1 -O3 -Wall -pthread -include malloc.h zpe1.c  -Wl,-gc-sections -L$BIN -lmtx -o $BIN/zpe1
 gcc $1 -O3 -Wall -pthread -include malloc.h zpe.c  -Wl,-gc-sections -L$BIN -lmtx -o $BIN/zpe
 gcc $1 -O3 -Wall -pthread -include malloc.h zpm.c  -Wl,-gc-sections -L$BIN -lmtx -o $BIN/zpm
 gcc $1 -O3 -Wall -pthread -include malloc.h zpr.c  -Wl,-gc-sections -L$BIN -lmtx -o $BIN/zpr
