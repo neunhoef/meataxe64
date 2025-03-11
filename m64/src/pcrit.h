@@ -4,7 +4,9 @@
 /*    R. A. Parker      20.3.2019 */
 
 // pc1.s general functions
-extern void mactype(char * mact);
+/* Determine the processor type
+ * This affects whether we try to use AVX etc */
+extern void mactype(char *mact);
 /* 32 bit element multiply and add subroutine */
 extern void pccl32(const uint64_t *clpm, uint64_t scalar, uint64_t noc,
                    uint32_t *d1, uint32_t *d2);
@@ -51,10 +53,12 @@ void pcbarprp(int inp, int oup, uint64_t base, int digits,
 void pcbarrett(const uint64_t *barpar, const Dfmt *input, Dfmt *output,
                uint64_t entries, uint64_t stride);
 
-// pc2.s HPMI in characteristic 2
+/* pc2.s HPMI in characteristic 2 */
+/* Brick grease functions, for machine types a, j, m */
 void pc2aca(const uint8_t *prog, uint8_t * bv, uint64_t stride);
 void pc2acj(const uint8_t *prog, uint8_t * bv, uint64_t stride);
 void pc2acm(const uint8_t *prog, uint8_t * bv, uint64_t stride);
+/* Other functions */
 void pc2bma(const uint8_t *a, uint8_t * bv, uint8_t *c);
 void pc2bmj(const uint8_t *a, uint8_t * bv, uint8_t *c);
 void pc2bmm(const uint8_t *a, uint8_t * bv, uint8_t *c);

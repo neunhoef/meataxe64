@@ -15,6 +15,7 @@ int main(int argc,  char **argv)
     uint64_t header[5];
     uint64_t fdef;
     FIELD *f = malloc(FIELDLEN);
+    int res;
     LogCmd(argc,argv);
 
     if ( (argc < 2) || (argc>3) )
@@ -25,7 +26,8 @@ int main(int argc,  char **argv)
     e = ERHdr(argv[1], header);
     (void)e;
     fdef = header[1];
-    FieldSet(fdef, f);
+    res = FieldASet1(fdef, f, 0);
+    (void)res;
     printf("%lu\n", f->charc);
     return 0;
 }

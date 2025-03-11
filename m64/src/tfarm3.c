@@ -1,5 +1,5 @@
 /*
-         tfarm1.c   -   Thread Farm - multi-thread scheduler           
+         tfarm3.c   -   Replacement thread farm using stdatomic
          ========       R. A. Parker     9.10.2016
 */
 
@@ -8,6 +8,7 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <string.h>
+#include <stdatomic.h>
 #include <pthread.h>
 #include <time.h>
 
@@ -15,13 +16,21 @@
 #include "tuning.h"
 #define SCALE MAXCHOP*MAXCHOP*MAXCHOP
 
+/* Notes TfPause has been replaced by nanosleep
+ * Unlike TfPause, itsdurection is not processor dependent
+ * Ie slow processors will sleep no longer than fast ones
+ * This doesn't seem to be to be a problem.
+ * TfAppend has a lock in it, but is only used before the threads are started
+ * Hence I believe the lock is redundant
+ */
+
 /* type definition completions */
 
 typedef struct mojstruct
 {
     void * mem;      // Memory pointer (NULL if none allocated) 
     rdlstruct * RDL; // closable chain of RDLs for this moj
-    int  refc;       // Read reference counter
+    atomic_int refc; // Read reference counter
     int  junk;       // to make sizeof(mojstruct) divisible by 8
 } mojstruct;
 
@@ -30,20 +39,26 @@ struct jobinc
     MOJ parm[MAXPARAMS];    // new parameters
     int  proggyno;   // proggy to be executed
     int  priority;   // priority (lower runs earlier)
-    int  ref;        // how many things it is waiting for 
+    atomic_int ref;  // how many things it is waiting for 
     int nparm;       // number of parameters
 };
 
 /* Global Variables */
+
+/*
+ * Some of these are counting semaphores, implemented using stdatomic
+ * However, TfAdd and its replacement atomic_fetch_add have slightly
+ * different semantics. TfAdd returns the value newly written,
+ * whereas atomic_fetch_add returns the value previously held.
+ * In the cases where the return value is used we have to adjust it
+ */
 
 /* closejobs is incremented by submit and decremented when a */
 /* job completes, allowing TfWaitEnd to know when all the    */
 /* submitted jobs have completed. TFUpJobs and TFDownJobs    */
 /* allows proggies (e.g. M3Read, M3Write) to manipulate it.  */
 
-int closejobs;
-
-
+atomic_int closejobs;
 
 /* stopfree is incremented by TFStopMOJFree and decremented  */
 /* by TFStartMOJFree, and if non-zero, TFRelease blocks      */
@@ -51,16 +66,44 @@ int closejobs;
 /* a release discarding a MOJ when an unsubmitted job will   */
 /* read it                                                   */
  
-int stopfree;
+atomic_int stopfree;
+
+/* Functions replacing the x86 assembler versions */
+
+static atomic_int my_atomic_fetch_add(atomic_int *arg, int val)
+{
+  atomic_int i = atomic_fetch_add(arg, val);
+  return i + val;
+}
+
+static void wait(uint64_t ns)
+{
+  struct timespec ts;
+  ns *= 10; /* The original claims to pause about 10 times arg ns */
+  ts.tv_sec = ns / 1000000000;
+  ts.tv_nsec = ns % 1000000000;
+  nanosleep(&ts, NULL);
+}
+
+/*
+ * This is used before the threads are started, so doesn't require locks
+ * The lists are in the form of count (element 0) and members (1 -> )
+ */
+static void append(uint64_t *list, uint64_t new)
+{
+  uint64_t old = *list + 1;
+  list[old] = new;
+  *list = old;
+}
 
 void TFStopMOJFree(void)
 {
-    TfAdd(&stopfree,1);
+  my_atomic_fetch_add(&stopfree, 1);
 }
 
-extern void   TFStartMOJFree(void)
+extern void TFStartMOJFree(void)
 {
-    TfAdd(&stopfree,-1);
+  my_atomic_fetch_add(&stopfree, -1);
 }
 
 /* nothreads is the (constant) number of started threads     */
@@ -103,13 +146,13 @@ void LcMainKick(void)
 
 void TFUpJobs(void)
 {
-    TfAdd(&closejobs,1);
+  my_atomic_fetch_add(&closejobs, 1);
 }
 
 void TFDownJobs(void)
 {
-    int i;
-    i=TfAdd(&closejobs,-1);
+    int i = my_atomic_fetch_add(&closejobs, -1);
+
     if(i==0)
     {
         Lock();
@@ -138,21 +181,19 @@ parmstruct * tfparms;
 
 int firstfreethread;
 
-int runjobs;
+atomic_int runjobs;
 
 void TFWaitEnd(void)
 {
     Lock();
-    while(1)  // wait until all submitted jobs completed
-    {
+    for (;;) {  // wait until all submitted jobs completed
         if(closejobs==0) break;
         LcMainPause();
     }
     Unlock();
-    while(1)  // wait until all threads got lock (at least) to suspend
-    {
+    for (;;) {  // wait until all threads got lock (at least) to suspend
         if( (runjobs+nothreads)==0) break;
-        TfPause(3000);
+        wait(3000);
     }
 }
 
@@ -209,7 +250,7 @@ void JobPop(jobstruct * JOB, int proggy, int priority)
 {
     JOB->proggyno = proggy;
     JOB->priority = priority;
-    JOB->ref = 1;
+    atomic_init(&JOB->ref, 1);
     JOB->nparm=0;
 }
 
@@ -227,12 +268,12 @@ void LcFreeRdl(rdlstruct * RDL)
 
 void TfUpJobRef(jobstruct * JOB)
 {
-    TfAdd(&(JOB->ref),1);   // maybe lock add someday
+    my_atomic_fetch_add(&(JOB->ref),1);   // maybe lock add someday
 }
 
 void UpMojRef(MOJ mj)
 {
-    TfAdd(&(mj->refc),1);
+    my_atomic_fetch_add(&(mj->refc),1);
 }
 
 void LCBindRdl(jobstruct * job, MOJ moj)
@@ -308,7 +349,7 @@ void TfPutJob(jobstruct * JOBNO)
 
     int i;
     Lock();
-    i=TfAdd(&runjobs,1);
+    i = my_atomic_fetch_add(&runjobs, 1);
     if(i<=0)
     {
         TfUnQThread(JOBNO);
@@ -330,8 +371,7 @@ jobstruct * LcNextRun(void)
     RUNJOB[0]=RUNJOB[--jobsready];
 // sink
     k=0;
-    while(1)
-    {
+    for (;;) {
         kc1=2*k+1;
         kc2=2*k+2;
         if(kc1>=jobsready) break;
@@ -353,7 +393,7 @@ jobstruct * LcNextRun(void)
 void TfJobRefDown(jobstruct * JOB) 
 {
     int x;
-    x=TfAdd(&(JOB->ref),-1);
+    x = my_atomic_fetch_add(&(JOB->ref),-1);
     if(x!=0) return;
     TfPutJob(JOB);
 }
@@ -395,8 +435,7 @@ void tfdo(int proggyno, MOJ * p);
 
 jobstruct * LcQThread(parmstruct * pp)
 {
-    while(1)
-    {
+    for (;;) {
         pp->JOB=NULL;
         while(pp->JOB==NULL)
         {
@@ -412,7 +451,7 @@ jobstruct * GetJob(parmstruct * pp)  // may be 2
     int i;
     jobstruct * JOB;
     Lock();
-    i=TfAdd(&runjobs,-1);
+    i = my_atomic_fetch_add(&runjobs, -1);
     if(i>=0)
     {
         JOB=LcNextRun();
@@ -435,8 +474,7 @@ void * worker(void * p)
     int i;
     pp = (parmstruct *) p;
 
-    while(1)
-    {
+    for (;;) {
         JOB=GetJob(pp);
         if(((uint64_t)JOB)==2) break;
         proggyno=JOB->proggyno;
@@ -477,12 +515,11 @@ void TFRelease(MOJ mj)
 {
     int i;
 
-    while(1)
-    {
+    for (;;) {
         if(stopfree==0) break;    // atomic fetch
-        TfPause(100);
+        wait(100);
     }
-    i=TfAdd(&(mj->refc),-1);
+    i = my_atomic_fetch_add(&(mj->refc),-1);
     if(i>0) return;
     if(i<0)
     {
@@ -510,7 +547,7 @@ MOJ TFNewMOJ(void)
     Unlock();
     newone->mem=NULL;
     newone->RDL=NULL;
-    newone->refc=0;
+    atomic_init(&newone->refc, 0);
     return newone;
 }
 
@@ -518,8 +555,7 @@ void TFStable (MOJ mj)
 {
     rdlstruct * RDL;
     Lock();
-    while(1)
-    {
+    for (;;) {
         RDL=(rdlstruct *) TfLinkClose((uint64_t *)&(mj->RDL));
         if(RDL==NULL) break;
         Unlock();
@@ -565,7 +601,7 @@ void TFClose(void)
     free(TFM);
 }
 
-void   TFInit(int threads)
+void TFInit(int threads)
 {
     int i;
     int jobx,rdlx;
@@ -575,7 +611,7 @@ void   TFInit(int threads)
     MOJ mj;
     jobx=SCALE*12;
     nmojes=jobx*2;
-    closejobs=0;
+    atomic_init(&closejobs, 0);
     TFM=malloc(TFMSIZE*sizeof(uint64_t));
     FRE=malloc(FRESIZE*sizeof(uint64_t));
     *(TFM+TFMFRE)=(uint64_t)FRE;
@@ -584,41 +620,41 @@ void   TFInit(int threads)
 // redesign it better for V2
     rdlx=3*nmojes;
     tfjob=AlignTalloc(jobx*sizeof(jobstruct));
-    TfAppend(FRE,(uint64_t)tfjob);
+    append(FRE,(uint64_t)tfjob);
     *(TFM+TFMJOB)=0;     // freechain of jobs empty
     for(i=0;i<jobx;i++) TfLinkIn(TFM+TFMJOB,(uint64_t *) (tfjob+i));
     tfrdl=AlignTalloc(rdlx*sizeof(rdlstruct));
-    TfAppend(FRE,(uint64_t)tfrdl);
+    append(FRE,(uint64_t)tfrdl);
     *(TFM+TFMRDL)=0;     // freechain of jobs empty
     for(i=0;i<rdlx;i++) TfLinkIn(TFM+TFMRDL,(uint64_t *) (tfrdl+i));
     RUNJOB=AlignTalloc(jobx*sizeof(jobstruct *));
-    TfAppend(FRE,(uint64_t)RUNJOB);
+    append(FRE,(uint64_t)RUNJOB);
     nfmoj=0;
-    runjobs=0;
-    stopfree=0;
+    atomic_init(&runjobs, 0);
+    atomic_init(&stopfree, 0);
 
 /* Initialize the moj data  */
     tfmoj=AlignTalloc(nmojes*sizeof(mojstruct));
-    TfAppend(FRE,(uint64_t)tfmoj);
+    append(FRE,(uint64_t)tfmoj);
     for(i=0;i<nmojes;i++)
     {
         mj=tfmoj+i;
         mj->mem=NULL;
-        mj->refc=0;     // This is private, so OK.
+        atomic_init(&mj->refc, 0);     // This is private, so OK.
         mj->RDL=NULL;
     }
 /* Initialize the thread data  */
     firstfreethread=-1;  // no free threads yet
     tfthread=AlignTalloc(threads*sizeof(int));
-    TfAppend(FRE,(uint64_t)tfthread);
+    append(FRE,(uint64_t)tfthread);
     tfparms =AlignTalloc(threads*sizeof(parmstruct));
-    TfAppend(FRE,(uint64_t)tfparms);
+    append(FRE,(uint64_t)tfparms);
     for(i=0;i<threads;i++) tfparms[i].JOB=(jobstruct *)3;  // so close works
     nothreads=threads;
     mythread=AlignTalloc(threads*sizeof(pthread_t));
-    TfAppend(FRE,(uint64_t)mythread);
+    append(FRE,(uint64_t)mythread);
     wakeworker=AlignTalloc(threads*sizeof(pthread_cond_t));
-    TfAppend(FRE,(uint64_t)wakeworker);
+    append(FRE,(uint64_t)wakeworker);
 
 /* initialize the condition variables for the workers */
     for(i=0;i<threads;i++) pthread_cond_init(wakeworker+i,NULL);
@@ -640,8 +676,7 @@ void   TFInit(int threads)
 void TFWait(MOJ moj)
 {
     Lock();
-    while(1)
-    {
+    for (;;) {
         if(((uint64_t)(moj->RDL))==2)
         {
             Unlock();
@@ -660,8 +695,7 @@ void TFSubmit(int priority, int proggyno, ...)
     va_start(va,proggyno);
     JOB=NewJob();
     JobPop(JOB, proggyno, priority);
-    while(1)
-    {
+    for (;;) {
         moj=va_arg(va,MOJ);
         if((long)moj==-1) break;
         if((long)moj==-2)
@@ -684,4 +718,124 @@ void TFSubmit(int priority, int proggyno, ...)
     TfJobRefDown(JOB);
 }
 
-/* end of tfarm.c  */
+/*
+ * Looks like the compare and exchange is done by
+ *     int expected = -1;
+ *     if (atomic_compare_exchange_strong(ptr, &expected, expected)) {
+ *       Spin Lock
+ *       while (-1 == expected) {
+ *         C pause
+ *         atomic_compare_exchange_strong(ptr, &expected, expected);
+ *       }
+ *     }
+ *     Critical section
+ *     Fiddle about using atomic_store
+ */
+int TfLinkIn(uint64_t *chain, uint64_t *ours)
+{
+  uint64_t state = atomic_exchange(chain, 1);
+  for (;;) {
+    if (1 == state) {
+      /* Someone else has the lock */
+      for (;;) {
+        state = atomic_load(chain);
+        if (1 != state) {
+          break;
+        }
+        wait(10); /* Short pause */
+      }
+      /* We can have the lock, so try again */
+      state = atomic_exchange(chain, 1);
+    }
+    if (1 != state) {
+      /* We got it */
+      break;
+    }
+  }
+  /* We have the lock */
+  if (2 == state) {
+    /* List closed */
+    atomic_store(chain, 2); /* Unlock and we're done */
+    return 2;
+  } else {
+    /* List not closed */
+    atomic_store(ours, state); /* chain from ours onwards */
+    atomic_store(chain, (uint64_t)ours); /* unlock and chain ours in */
+    return 0;
+  }
+}
+
+uint64_t *TfLinkOut(uint64_t *chain)
+{
+  uint64_t state = atomic_exchange(chain, 1);
+  for (;;) {
+    if (1 == state) {
+      /* Someone else has the lock */
+      for (;;) {
+        state = atomic_load(chain);
+        if (1 != state) {
+          break;
+        }
+        wait(10); /* Short pause */
+      }
+      /* We can have the lock, so try again */
+      state = atomic_exchange(chain, 1);
+    }
+    if (1 != state) {
+      /* We got it */
+      break;
+    }
+  }
+  /* We have the lock */
+  if (0 == state || 2 == state) {
+    /* Empty  or closed */
+    atomic_store(chain, state); /* Unlock as empty or closed and we're done */
+    return (uint64_t *)state;
+  } else {
+    /* List not closed or empty */
+    uint64_t *ours = (uint64_t *)state;
+    uint64_t new = *ours; /* Follow the link */
+    atomic_store(chain, new); /* unlock and chain next in */
+    return ours;
+  }
+}
+
+uint64_t *TfLinkClose(uint64_t *chain)
+{
+  uint64_t state = atomic_exchange(chain, 1);
+  for (;;) {
+    if (1 == state) {
+      /* Someone else has the lock */
+      for (;;) {
+        state = atomic_load(chain);
+        if (1 != state) {
+          break;
+        }
+        wait(10); /* Short pause */
+      }
+      /* We can have the lock, so try again */
+      state = atomic_exchange(chain, 1);
+    }
+    if (1 != state) {
+      /* We got it */
+      break;
+    }
+  }
+  /* We have the lock */
+  if (0 == state) {
+    /* Empty, we need to close it */
+    atomic_store(chain, 2);
+    return NULL;
+  } else if (2 == state) {
+    /* closed already */
+    atomic_store(chain, state); /* Close it and unlock */
+    return (uint64_t *)state;
+  } else {
+    /* List not closed or empty */
+    uint64_t *ours = (uint64_t *)state;
+    uint64_t new = *ours; /* Follow the link */
+    atomic_store(chain, new); /* unlock and chain next in */
+    return ours;
+  }
+}
+

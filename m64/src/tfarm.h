@@ -16,30 +16,15 @@ void TfPause(long wait);
 
 #define MAXPARAMS 10
 
+typedef struct jobinc jobstruct;
+
 typedef struct rdlinc
 {
     struct rdlinc *NEXRDL;
     struct jobinc *JOB;  // Job to be notified moj is stable
 } rdlstruct;
 
-typedef struct
-{
-    void * mem;      // Memory pointer (NULL if none allocated) 
-    rdlstruct * RDL; // closable chain of RDLs for this moj
-    int  refc;       // Read reference counter
-    int  junk;       // to make sizeof(mojstruct) divisible by 8
-} mojstruct;
-
-typedef mojstruct * MOJ;
-
-typedef struct jobinc
-{
-    mojstruct * parm[MAXPARAMS];    // new parameters
-    int  proggyno;   // proggy to be executed
-    int  priority;   // priority (lower runs earlier)
-    int  ref;        // how many things it is waiting for 
-    int nparm;       // number of parameters
-} jobstruct;
+typedef struct mojstruct *MOJ;
 
 /* temporary fix!  */
 extern MOJ tfmoj;

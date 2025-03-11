@@ -568,7 +568,7 @@ uint8_t pg3[] = { 163,  2   ,  1   ,170,5  ,   3   ,   1   ,   1 ,
 // 22/1022 23/1100 24/1101 25/1102 26/1110
       1   ,   9   ,   1   ,   1   ,   3   , 255 };
 
-void BGrease(const FIELD * f, uint8_t * bwa, int sparsity)
+void BGrease(const FIELD *f, uint8_t *bwa, int sparsity)
 {
     if(sparsity==0) return;
     if((f->GreaseMagic)==4) return;   // no grease - prime to large.

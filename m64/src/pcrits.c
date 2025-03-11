@@ -5,6 +5,7 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#include <stdlib.h>
 #include "field.h"
 #include "pcrit.h"
 #include "utils.h"
@@ -12,7 +13,33 @@
 #include <stdio.h>
 #include <assert.h>
 
+/* Note this assumes little endian implementation */
+typedef union union_128 {
+  uint64_t longs[2];
+  uint32_t ints[4];
+} union_128;
+
+/* Overlay a 64 bit integer as 4 16 bit integers */
+typedef union union_64_16 {
+  uint64_t a;
+  uint16_t words[4];
+} union_64_16;
+
+/* Overlay a 64 bit integer as 2 32 bit integers */
+typedef union union_64_32 {
+  uint64_t a;
+  uint32_t doubles[2];
+} union_64_32;
+
 #define ff32 0xffffffff
+
+/* Functions from pc1.s */
+
+void mactype(char *mact)
+{
+  mact[0] = 'a'; /* Minimal class */
+  mact[1] = '0'; /* Cache class 0 */
+}
 
 /* Reduce function. Reduces a * 2^i mod p */
 /* overflow gives 2^64 mod p, which we need internally */
@@ -36,18 +63,24 @@ static uint64_t reduce(uint64_t a, uint64_t i, uint64_t p, const FIELD *f)
   return a % p;
 }
 
-/* A multiply to deliver the top 64 bits of the result */
-static uint64_t top_multiply(uint64_t a, uint64_t b)
+/*
+ * A full 128 bit precision 64 x 64 multiply
+ * Intel chips have a singled instruction to do this
+ * Others don't (necessarily)
+ * Operands in a, b
+ * Result in lo and function result
+ */
+uint64_t full_multiply(uint64_t *lo, uint64_t a, uint64_t b)
 {
-  /* Split the multiplicands into hi and lo and form the products */
+  /* Split into 32 x 32 which can't overflow */
   uint64_t l_a = a & ff32,
     h_a = a >> 32,
     l_b = b & ff32,
     h_b = b >> 32,
-    r1 = (l_a * l_b),
+    r1 = (l_a * l_b), /* Bottom 64 bits */
     r2 = (l_a * h_b),
-    r3 = (h_a * l_b),
-    r4 = (h_a * h_b),
+    r3 = (h_a * l_b), /* Bits 32 - 95 */
+    r4 = (h_a * h_b), /* Bits 64 - 127 */
     tmp;
   /* Now compute the overflows */
   r4 += (r2 >> 32) + (r3 >> 32); /* Add in the hi parts from the 2^32 results */
@@ -61,9 +94,16 @@ static uint64_t top_multiply(uint64_t a, uint64_t b)
     /* Overflowed 64 bits, increment r4 */
     r4 += 1;
   }
+  *lo = r2;
   return r4;
-}
+} 
 
+/* A multiply to deliver the top 64 bits of the result */
+static uint64_t top_multiply(uint64_t a, uint64_t b)
+{
+  uint64_t lo;
+  return full_multiply(&lo, a, b);
+}
 
 /* pcpmad: return (A * B + C) mod p */
 /* This has to maintain 128 bit precision internally */
@@ -129,13 +169,6 @@ uint64_t pcpmad(uint64_t p, uint64_t a, uint64_t b, uint64_t c, const FIELD *f)
     return r1 % p;
   }
 }
-
-#if 0
-void mactype(char *mact)
-{
-  strcpy(mact, "a      ");
-}
-#endif
 
 void pc1xora(Dfmt *d, const Dfmt *s1, const Dfmt *s2, uint64_t nob)
 {
@@ -373,7 +406,7 @@ void pcbif(Dfmt *dest, const Dfmt *s1, const Dfmt *s2, uint64_t nob, const uint8
      * tmpb does the same for bits 8 - 15
      * Thus they can access the 65536 byte table
      */
-    
+
     tmp1 = table[tmpa];
     tmp2 = table[tmpb];
     s1_word = *(uint16_t *)(s1+ byte_index + 2);
@@ -528,5 +561,754 @@ void pcbunf(Dfmt *dest, const Dfmt *src, uint64_t nob,
     dest += 1;
     src += 1;
     nob -= 1;
+  }
+}
+
+/* Functions from pc2.s */
+
+/*
+ * The next 3 functions are used in the BGrease hpmi function
+ * They are for grease type 2 (characteristic 2), machine various types
+ * It used SSE2. It's basically xor on a larger scale
+ */
+void pc2aca(const uint8_t *prog, uint8_t *bv, uint64_t stride)
+{
+  uint64_t slice_count = 8;
+  uint64_t xmm[16]; /* Emulate the SSE or AVX registers */
+
+  while (slice_count > 0) {
+    uint64_t *dest = (uint64_t *)(bv + 256); /* destination starts slot 2 */
+    const uint8_t *current_prog = prog; /* restart program */
+    unsigned int i;
+
+    memcpy(xmm, dest - 128 / sizeof(*dest), 128);
+    for (;;) {
+      uint64_t code = *current_prog++; /* get first/next program byte */
+      while (code <= 79) {
+        uint64_t *src;
+        code <<= 7; /* convert to displacement */
+        src = (uint64_t *)(bv + code);
+        for (i = 0; i < 16; i++) {
+          xmm[i] ^= src[i];
+        }
+        memcpy(dest, xmm, 128);
+        dest += 128 / sizeof(*dest); /* increment destination slot */
+        code = *current_prog++; /* get next program byte */
+      }
+
+      if (code <= 159) {
+        code -= 80;
+        code <<= 7; /* multiply by slot size */
+        memcpy(xmm, bv + code, 128);
+        continue;
+      }
+
+      if (code <= 239) {
+        code -= 160;
+        code <<= 7; /* multiply by slot size */
+        dest = (uint64_t *)(bv + code);
+        continue;
+      }
+      break; /* Break the infinite for loop */
+    }
+    /* anything 240+ is stop at the moment */
+    bv += stride; /* add in slice stride */
+    slice_count--; /* subtract 1 from slice count */
+  }
+}
+
+/* The functions pc2acj and pc2acm implement
+ * the same algorithm with longer registers,
+ * so we get 3 for the price of 1
+ */
+
+void pc2acj(const uint8_t *prog, uint8_t *destination, uint64_t stride)
+{
+  pc2aca(prog, destination, stride);
+}
+
+void pc2acm(const uint8_t *prog, uint8_t *destination, uint64_t stride)
+{
+  pc2aca(prog, destination, stride);
+}
+
+void pc2bma(const uint8_t *Afmt, uint8_t *bv, uint8_t *Cfmt)
+{
+  uint64_t c_skip, a_code;
+  uint64_t xmm[16]; /* Emulate the SSE or AVX registers */
+
+  a_code = *(uint64_t *)Afmt; /* get Afmt word */
+  c_skip = a_code & 255;   /* copy for skip */
+
+  while (c_skip != 255) {
+    unsigned int i;
+    int64_t slice_0 = a_code; /* adslice 0 */
+    int64_t slice_1 = a_code; /* adslice 1 */
+    int64_t slice_2 = a_code;  /* adslice 2 */
+    int64_t slice_3;
+    int64_t slice_4 = a_code;  /* adslice 4 */
+    int64_t slice_5 = a_code; /* adslice 5 */
+    int64_t slice_6 = a_code; /* adslice 6 */
+    int64_t slice_7 = a_code; /* adslice 7 */
+
+    c_skip <<= 7; /* 128 * byte Afmt */
+    Cfmt += c_skip; /* skip some rows of Cfmt */
+    slice_3 = a_code; /* adslice 3 */
+    slice_0 >>= 1;   /* shift slice 0 */
+    slice_1 >>= 5;   /* shift slice 1 */
+    slice_2 >>= 9;    /* shift slice 2 */
+    slice_3 >>= 13;  /* shift slice 3 */
+    slice_4 >>= 17;   /* shift slice 4 */
+    slice_5 >>= 21;  /* shift slice 5 */
+    slice_6 >>= 25;  /* shift slice 6 */
+    slice_7 >>= 29;  /* shift slice 7 */
+
+    slice_0 &= 1920; /* and slice 0 */
+    slice_1 &= 1920; /* and slice 1 */
+    slice_2 &= 1920;  /* and slice 2 */
+    slice_3 &= 1920; /* and slice 3 */
+    slice_4 &= 1920;  /* and slice 4 */
+    slice_5 &= 1920; /* and slice 5 */
+    slice_6 &= 1920; /* and slice 6 */
+    slice_7 &= 1920; /* and slice 7 */
+
+    Afmt += 5; /* point to next Afmt word (yes, this is unaligned) */
+
+    memcpy(xmm, Cfmt, 128);
+    for (i = 0; i < 16; i++) {
+      xmm[i] ^= *(uint64_t *)(bv + slice_0 + i * 8);
+    }
+    for (i = 0; i < 16; i++) {
+      xmm[i] ^= *(uint64_t *)(bv + 2048 + slice_1 + i * 8);
+    }
+    for (i = 0; i < 16; i++) {
+      xmm[i] ^= *(uint64_t *)(bv + 4096 + slice_2 + i * 8);
+    }
+    for (i = 0; i < 16; i++) {
+      xmm[i] ^= *(uint64_t *)(bv + 6144 + slice_3 + i * 8);
+    }
+    for (i = 0; i < 16; i++) {
+      xmm[i] ^= *(uint64_t *)(bv + 8192 + slice_4 + i * 8);
+    }
+    for (i = 0; i < 16; i++) {
+      xmm[i] ^= *(uint64_t *)(bv + 10240 + slice_5 + i * 8);
+    }
+    for (i = 0; i < 16; i++) {
+      xmm[i] ^= *(uint64_t *)(bv + 12288 + slice_6 + i * 8);
+    }
+    for (i = 0; i < 16; i++) {
+      xmm[i] ^= *(uint64_t *)(bv + 14336 + slice_7 + i * 8);
+    }
+    memcpy(Cfmt, xmm, 128);
+
+    a_code = *(uint64_t *)Afmt; /* get Afmt word */
+    c_skip = a_code;   /* copy for skip */
+    c_skip &= 255;  /* mask with 255 */
+  }
+}
+
+/* The functions pc2bmj and pc2bmm implement
+ * the same algorithm with longer registers,
+ * so we get 3 for the price of 1 again
+ */
+
+void pc2bmj(const uint8_t *a, uint8_t *bv, uint8_t *c)
+{
+  pc2bma(a, bv, c);
+}
+
+void pc2bmm(const uint8_t *a, uint8_t *bv, uint8_t *c)
+{
+  pc2bma(a, bv, c);
+}
+
+/*
+ * Now now the same 6 functions for characteristic 3
+ * As above, the j and m versions are just calls to the a version
+ */
+/* Grease functions */
+void pc3aca(const uint8_t *prog, uint8_t *bv, uint64_t stride)
+{
+  uint64_t slice_count = 3;
+  uint64_t xmm[20]; /* Emulate vector registers (extra 4 used differently) */
+
+  while (slice_count > 0) {
+    /* pc3aca1: */
+    uint64_t *dest = (uint64_t *)(bv + 256); /* destination starts slot 2 */
+    const uint8_t *current_prog = prog; /* restart program */
+    unsigned int i;
+
+    memcpy(xmm, dest - 128 / sizeof(*dest), 128);
+    for (;;) {
+      /* pc3aca2: */
+      uint64_t code = *current_prog++; /* get first/next program byte */
+      while (code <= 79) {
+        /* pc3aca3: */
+        uint64_t *src;
+        code <<= 7; /* convert to displacement */
+        src = (uint64_t *)(bv + code);
+        for (i = 0; i < 4; i++) {
+          uint64_t offset = 2 * i;
+          /* Move from (0, 64), (16, 80), (32, 96), (48, 112) */
+          memcpy(xmm + 16, src + offset, 16);
+          memcpy(xmm + 18, src + 8 + offset, 16); /* xmm{8,9} */
+          xmm[16] ^= xmm[offset];
+          xmm[17] ^= xmm[offset + 1]; /*  bu^au -> au   */
+          xmm[offset + 8] ^= xmm[18];
+          xmm[offset + 9] ^= xmm[19]; /*  at^bt -> bt   */
+          xmm[18] ^= xmm[16];
+          xmm[19] ^= xmm[17]; /*  au^at -> at   */
+          xmm[offset] ^= xmm[offset + 8];
+          xmm[offset + 1] ^= xmm[offset + 9]; /*  bt^bu -> bu   */
+          xmm[18] |= xmm[8 + offset];
+          xmm[19] |= xmm[9 + offset]; /*  bt|at -> at   */
+          xmm[16] |= xmm[offset];
+          xmm[17] |= xmm[offset + 1]; /*  bu|au -> au   */
+          memcpy(xmm + offset, xmm + 18, 16);
+          memcpy(dest + offset, xmm + offset, 16);
+          memcpy(xmm + offset + 8, xmm + 16, 16);
+          memcpy(dest + offset + 64 / sizeof(*dest), xmm + offset + 8, 16);
+        }
+        dest += 128 / sizeof(*dest); /* increment destination slot */
+        code = *current_prog++; /* get next program byte */
+      }
+
+      if (code <= 159) {
+        code -= 80;
+        code <<= 7; /* multiply by slot size */
+        memcpy(xmm, bv + code, 128);
+        continue; /* pc3aca2 */
+      }
+
+      if (code <= 239) {
+        code -= 160;
+        code <<= 7; /* multiply by slot size */
+        dest = (uint64_t *)(bv + code);
+        continue; /* At pc3aca2 */
+      }
+      break; /* Break the infinite for loop */
+    }
+    /* anything 240+ is stop at the moment */
+    bv += stride; /* add in slice stride */
+    slice_count--; /* subtract 1 from slice count */
+    /* continue at pc3aca1 */
+  }
+}
+
+void pc3acj(const uint8_t *prog, uint8_t *bv, uint64_t stride)
+{
+  pc3aca(prog, bv, stride);
+}
+
+void pc3acm(const uint8_t *prog, uint8_t *bv, uint64_t stride)
+{
+  pc3aca(prog, bv, stride);
+}
+/* Others */
+
+/* pc3bma has the same structure as pc2bma, but with different operations in the middle */
+void pc3bma(const uint8_t *Afmt, uint8_t *bv, uint8_t *Cfmt)
+{
+  uint64_t c_skip, a_code;
+  uint64_t xmm[16]; /* Emulate the SSE or AVX registers */
+
+  a_code = *(uint64_t *)Afmt; /* get Afmt word */
+  c_skip = a_code & 255;   /* copy for skip */
+
+  while (c_skip != 255) {
+    unsigned int i, j;
+    int64_t slice_0 = a_code; /* adslice 0 */
+    int64_t slice_1 = a_code; /* adslice 1 */
+    int64_t slice_2;
+    int64_t aslice_0, aslice_1, aslice_2;
+
+    c_skip <<= 7; /* 128 * byte Afmt */
+    Cfmt += c_skip; /* skip some rows of Cfmt */
+    slice_2 = a_code; /* adslice 2 */
+    slice_0 >>= 2;   /* shift slice 0 */
+    slice_1 >>= 10;   /* shift slice 1 */
+    slice_2 >>= 18;    /* shift slice 2 */
+
+    slice_0 &= 8128; /* and slice 0 */
+    slice_1 &= 8128; /* and slice 1 */
+    slice_2 &= 8128;  /* and slice 2 */
+
+    aslice_0 = slice_0 ^ 64;
+    aslice_1 = slice_1 ^ 64;
+    aslice_2 = slice_2 ^ 64;
+
+    Afmt += 4; /* point to next Afmt word (yes, this is unaligned) */
+
+    for (j = 0; j < 64; j += 16) {
+      memcpy(xmm, Cfmt + j, 16);
+      memcpy(xmm + 2, Cfmt + 64 + j, 16); /* get 32 bytes of Cfmt */
+      memcpy(xmm + 4, bv + slice_0 + j, 16);
+      memcpy(xmm + 6, bv + aslice_0 + j, 16);
+      for (i = 0; i < 2; i++) {
+        xmm[4 + i] ^= xmm[i];
+      }
+      for (i = 0; i < 2; i++) {
+        xmm[2 + i] ^= xmm[6 + i];
+      }
+      for (i = 0; i < 2; i++) {
+        xmm[6 + i] ^= xmm[4 + i];
+      }
+      for (i = 0; i < 2; i++) {
+        xmm[i] ^= xmm[2 + i];
+      }
+      for (i = 0; i < 2; i++) {
+        xmm[6 + i] |= xmm[2 + i];
+      }
+      for (i = 0; i < 2; i++) {
+        xmm[4 + i] |= xmm[i];
+      }
+      memcpy(xmm, bv + 5248 + slice_1 + j, 16);
+      memcpy(xmm + 2, bv + 5248 + aslice_1 + j, 16);
+      for (i = 0; i < 2; i++) {
+        xmm[i] ^= xmm[6 + i];
+      }
+      for (i = 0; i < 2; i++) {
+        xmm[4 + i] ^= xmm[2 + i];
+      }
+      for (i = 0; i < 2; i++) {
+        xmm[2 + i] ^= xmm[i];
+      }
+      for (i = 0; i < 2; i++) {
+        xmm[6 + i] ^= xmm[4 + i];
+      }
+      for (i = 0; i < 2; i++) {
+        xmm[4 + i] |= xmm[2 + i];
+      }
+      for (i = 0; i < 2; i++) {
+        xmm[6 + i] |= xmm[i];
+      }
+      memcpy(xmm + 2, bv + 10496 + slice_2 + j, 16);
+      memcpy(xmm, bv + 10496 + aslice_2 + j, 16);
+      for (i = 0; i < 2; i++) {
+        xmm[2 + i] ^= xmm[4 + i];
+      }
+      for (i = 0; i < 2; i++) {
+        xmm[6 + i] ^= xmm[i];
+      }
+      for (i = 0; i < 2; i++) {
+        xmm[i] ^= xmm[2 + i];
+      }
+      for (i = 0; i < 2; i++) {
+        xmm[4 + i] ^= xmm[6 + i];
+      }
+      for (i = 0; i < 2; i++) {
+        xmm[i] |= xmm[6 + i];
+      }
+      for (i = 0; i < 2; i++) {
+        xmm[2 + i] |= xmm[4 + i];
+      }
+      memcpy(Cfmt + j, xmm, 16);
+      memcpy(Cfmt + 64 + j, xmm + 2, 16);
+    }
+
+    a_code = *(uint64_t *)Afmt; /* get Afmt word */
+    c_skip = a_code;   /* copy for skip */
+    c_skip &= 255;  /* mask with 255 */
+  }
+}
+
+void pc3bmj(const uint8_t *a, uint8_t *bv, uint8_t *c)
+{
+  pc3bma(a, bv, c);
+}
+
+void pc3bmm(const uint8_t *a, uint8_t *bv, uint8_t *c)
+{
+  pc3bma(a, bv, c);
+}
+
+/*
+ * Translations from pc5.s, Add/subtract primes between 5 and 193
+ */
+
+/* The p shuffle instruction (turns out not to be needed) */
+void pshufd(union_128 *mmx, uint8_t control)
+{
+  unsigned int i;
+  union_128 temp;
+  for (i = 0; i < 4; i++) {
+    unsigned int j = control & 3;
+    temp.ints[i] = mmx->ints[j];
+    control >>= 2;
+  }
+  *mmx = temp;
+}
+
+/*
+ * The pmullw instruction.
+ * Multiply packed 16 bit words inside a 64 bit word
+ */
+uint64_t pmullw(uint64_t a, uint64_t b)
+{
+  union_64_16 x, y;
+  unsigned int i;
+  x.a = a;
+  y.a = b;
+  for (i = 0; i < 4; i++) {
+    y.words[i] *= x.words[i];
+  }
+  return y.a;
+}
+
+/*
+ * The pmulld instruction.
+ * Multiply packed 32 bit words inside a 64 bit word
+ */
+uint64_t pmulld(uint64_t a, uint64_t b)
+{
+  union_64_32 x, y;
+  unsigned int i;
+  x.a = a;
+  y.a = b;
+  for (i = 0; i < 2; i++) {
+    y.doubles[i] *= x.doubles[i];
+  }
+  return y.a;
+}
+
+void pc5aca(const uint8_t *prog, uint8_t *bv, const uint64_t *parms)
+{
+  uint64_t slice_count;;
+  uint64_t xmm[32]; /* Emulate vector registers */
+  uint64_t slot_size;
+  uint64_t shift;
+  xmm[18] = parms[2];
+  xmm[19] = xmm[18];
+  shift = parms[1];
+  xmm[16] = parms[3];
+  xmm[17] = xmm[16];
+  xmm[22] = parms[0];
+  xmm[23] = xmm[22];
+  slice_count = parms[6];
+  slot_size = parms[4];
+  slot_size *= parms[5];
+
+  while (slice_count > 0) {
+    /* pc5aca1: */
+    uint64_t *dest = (uint64_t *)(bv + 256); /* destination starts slot 2 */
+    const uint8_t *current_prog = prog; /* restart program */
+    unsigned int i;
+
+    memcpy(xmm, dest - 128 / sizeof(*dest), 128);
+    for (;;) {
+      /* pc5aca2: */
+      uint64_t code = *current_prog++; /* get first/next program byte */
+      while (code <= 79) {
+        /* pc5aca3: */
+        uint64_t *src;
+        code <<= 7; /* convert to displacement */
+        src = (uint64_t *)(bv + code);
+        /* This section does 64 bit packed word instructions on mmx registers */
+        /* Eg paddq   16(%rax,%rsi),%xmm1 */
+        for (i = 0; i < 16; i++) {
+          xmm[i] += src[i];
+        }
+        for (i = 0; i < 4; i++) {
+          uint64_t offset = 4 * i;
+          memcpy(xmm + 24, xmm + offset, 16);
+          memcpy(xmm + 28, xmm + 2 + offset, 16);
+          xmm[24] += xmm[16];
+          xmm[28] += xmm[16];
+          xmm[25] += xmm[17];
+          xmm[29] += xmm[17]; /* add 2^N - p */
+          xmm[24] &= xmm[18];
+          xmm[28] &= xmm[18];
+          xmm[25] &= xmm[19];
+          xmm[29] &= xmm[19]; /* and with mask */
+          memcpy(xmm + 26, xmm + 24, 16);
+          memcpy(xmm + 30, xmm + 28, 16);
+          /* Now psrlq   %xmm10,%xmm13 */
+          xmm[26] >>= shift;
+          xmm[27] >>= shift;
+          xmm[30] >>= shift;
+          xmm[31] >>= shift; /* subtract 1 if set */
+          /* Now psubq   %xmm13,%xmm12, similar to paddq */
+          xmm[24] -= xmm[26];
+          xmm[25] -= xmm[27];
+          xmm[28] -= xmm[30];
+          xmm[29] -= xmm[31];
+          /* Now pand    %xmm11,%xmm12 */
+          xmm[24] &= xmm[22];
+          xmm[28] &= xmm[22];
+          xmm[25] &= xmm[23];
+          xmm[29] &= xmm[23]; /* and with p */
+          /* Now psubq   %xmm12,%xmm0 */
+          xmm[0 + offset] -= xmm[24];
+          xmm[1 + offset] -= xmm[25];
+          xmm[2 + offset] -= xmm[28];
+          xmm[3 + offset] -= xmm[29]; /* subtract p if need be */
+          memcpy(dest + offset, xmm + offset, 32);
+        }
+        dest += 128 / sizeof(*dest); /* increment destination slot */
+        code = *current_prog++; /* get next program byte */
+      }
+      /* pc5aca4 */
+      if (code <= 159) {
+        code -= 80;
+        code <<= 7; /* multiply by slot size */
+        memcpy(xmm, bv + code, 128);
+        continue; /* pc5aca2 */
+      }
+      /* pc5aca5 */
+      if (code <= 239) {
+        code -= 160;
+        code <<= 7; /* multiply by slot size */
+        dest = (uint64_t *)(bv + code);
+        continue; /* At pc5aca2 */
+      }
+      break; /* Break the infinite for loop */
+    }
+    /* anything 240+ is stop at the moment */
+    bv += slot_size; /* add in slice stride */
+    slice_count--; /* subtract 1 from slice count */
+    /* continue at pc5aca1 */
+  }
+}
+
+void pc5bmwa(const uint8_t *a, uint8_t *bv, uint8_t *c,
+             const uint64_t *parms)
+{
+  uint64_t xmm[32]; /* Emulate vector registers */
+  uint64_t slot_size; /* r11 */
+  uint64_t *afmt = (uint64_t *)a;
+  uint64_t code; /* rax */
+  uint64_t skip; /* r9 */
+  uint64_t *alcove; /* r8 */
+  xmm[16] = parms[2]; /* Mask */
+  xmm[17] = xmm[16]; /* The shuffle */
+  xmm[18] = parms[1]; /* Shift S */
+  xmm[20] = parms[7];
+  xmm[21] = xmm[20]; /* 2^S % p */
+  xmm[22] = parms[8];
+  xmm[23] = xmm[22]; /* bias */
+  slot_size = parms[4]; /* size of one slot */
+  slot_size *= parms[5]; /* times slots = slice stride */
+  code = *afmt; /* first word of Afmt   */
+  skip = code & 0xff; /* get skip/terminate   */
+  code >>= 1;
+  while (255 != skip) {
+    /* pc5bmwa1 */
+    uint64_t slices = 7;
+    unsigned int i, k;
+    skip <<= 7; /* multiply by 128      */
+    c += skip; /* add into Cfmt addr   */
+    alcove = (uint64_t *)bv; /* copy BWA addr to alcove */
+    afmt++; /* point to next alcove */
+    memcpy(xmm, c, 128); /* 8 16 byte double quad words */
+    while (0 != slices) {
+      /* pc5bmwa2 */
+      uint64_t lo /* r10 */, hi /* r9 */;
+      hi = ((code >> 4) & 0x780) / sizeof(*alcove);
+      lo = (code & 0x780) / sizeof(*alcove);
+      code >>= 8; /* next byte of Afmt */ 
+      for (i = 0; i < 16; i++) {
+        xmm[i] += alcove[hi + i]; /* add in cauldron */
+        xmm[i] -= alcove[lo + i];
+      }
+      alcove += slot_size / sizeof(*alcove); /* move on to next slice */
+      slices--;
+    }
+    for (k = 0; k < 2; k++) {
+      unsigned int offset = k * 8;
+      memcpy(xmm + 24, xmm + offset, 64); /* 4 16 byte registers */
+      for (i = 0; i < 4; i++) {
+        unsigned int j = 2 * i;
+        uint64_t shift = xmm[18];
+        uint64_t mask32 = (1UL << (32 - shift)) - 1;
+        uint64_t mult = 0x0000000100000001UL;
+        uint64_t mask64 = mult * mask32;
+        xmm[24 + j] &= xmm[16];
+        xmm[25 + j] &= xmm[17];
+        xmm[j + offset] ^= xmm[24 + j];
+        xmm[1 + j + offset] ^= xmm[25 + j];
+        /* Shift packed double word right logical */
+        xmm[24 + j] >>= shift; /* An unpacked shift */
+        xmm[24 + j] &= mask64; /* Now mask out the bits moved from one double to the other */
+        xmm[25 + j] >>= shift; /* An unpacked shift */
+        xmm[25 + j] &= mask64; /* Now mask out the bits moved from one double to the other */
+        /* pmullw: multiply as collections of 16 bits */
+        xmm[24 + j] = pmullw(xmm[24 + j], xmm[20]);
+        xmm[25 + j] = pmullw(xmm[25 + j], xmm[21]);
+        /* paddq %xmm12,%xmm0 13, 14, 15 etc */
+        xmm[j + offset] += xmm[24 + j];
+        xmm[1 + j + offset] += xmm[25 + j];
+        /* paddq %xmm11,%xmm0 11, 11, 11etc */
+        xmm[j + offset] += xmm[22];
+        xmm[1 + j + offset] += xmm[23];
+      }
+      memcpy(c + offset * sizeof(uint64_t), xmm + offset, 64); /* Put results back into C format area */
+    }
+    code = *afmt;
+    skip = code & 0xff;
+    code >>= 1;
+  }
+}
+
+void pc5bmwj(const uint8_t *a, uint8_t *bv, uint8_t *c,
+             const uint64_t *parms)
+{
+  pc5bmwa(a, bv, c, parms);
+}
+
+void pc5bmdd(const uint8_t *a, uint8_t *bv, uint8_t *c,
+             const uint64_t *parms)
+{
+  uint64_t xmm[32]; /* Emulate vector registers */
+  uint64_t slot_size; /* r11 */
+  uint64_t *afmt = (uint64_t *)a;
+  uint64_t code; /* rax */
+  uint64_t skip; /* r9 */
+  uint64_t *alcove; /* r8 */
+  xmm[16] = parms[2]; /* Mask */
+  xmm[17] = xmm[16]; /* The shuffle */
+  xmm[18] = parms[1]; /* Shift S */
+  xmm[20] = parms[7];
+  xmm[21] = xmm[20]; /* 2^S % p */
+  xmm[22] = parms[8];
+  xmm[23] = xmm[22]; /* bias */
+  slot_size = parms[4]; /* size of one slot */
+  slot_size *= parms[5]; /* times slots = slice stride */
+  code = *afmt; /* first word of Afmt   */
+  skip = code & 0xff; /* get skip/terminate   */
+  code >>= 1;
+  while (255 != skip) {
+    /* pc5bmwa1 */
+    uint64_t slices = 7;
+    unsigned int i, k;
+    skip <<= 7; /* multiply by 128      */
+    c += skip; /* add into Cfmt addr   */
+    alcove = (uint64_t *)bv; /* copy BWA addr to alcove */
+    afmt++; /* point to next alcove */
+    memcpy(xmm, c, 128); /* 8 16 byte double quad words */
+    while (0 != slices) {
+      /* pc5bmwa2 */
+      uint64_t lo /* r10 */, hi /* r9 */;
+      hi = ((code >> 4) & 0x780) / sizeof(*alcove);
+      lo = (code & 0x780) / sizeof(*alcove);
+      code >>= 8; /* next byte of Afmt */ 
+      for (i = 0; i < 16; i++) {
+        xmm[i] += alcove[hi + i]; /* add in cauldron */
+        xmm[i] -= alcove[lo + i];
+      }
+      alcove += slot_size / sizeof(*alcove); /* move on to next slice */
+      slices--;
+    }
+    for (k = 0; k < 2; k++) {
+      unsigned int offset = k * 8;
+      memcpy(xmm + 24, xmm + offset, 64); /* 4 16 byte registers */
+      for (i = 0; i < 4; i++) {
+        unsigned int j = 2 * i;
+        uint64_t shift = xmm[18];
+        uint64_t mask32 = (1UL << (32 - shift)) - 1;
+        uint64_t mult = 0x0000000100000001UL;
+        uint64_t mask64 = mult * mask32;
+        xmm[24 + j] &= xmm[16];
+        xmm[25 + j] &= xmm[17];
+        xmm[j + offset] ^= xmm[24 + j];
+        xmm[1 + j + offset] ^= xmm[25 + j];
+        /* Shift packed double word right logical */
+        xmm[24 + j] >>= shift; /* An unpacked shift */
+        xmm[24 + j] &= mask64; /* Now mask out the bits moved from one double to the other */
+        xmm[25 + j] >>= shift; /* An unpacked shift */
+        xmm[25 + j] &= mask64; /* Now mask out the bits moved from one double to the other */
+        /* pmulld: multiply as collections of 16 bits */
+        xmm[24 + j] = pmulld(xmm[24 + j], xmm[20]);
+        xmm[25 + j] = pmulld(xmm[25 + j], xmm[21]);
+        /* paddq %xmm12,%xmm0 13, 14, 15 etc */
+        xmm[j + offset] += xmm[24 + j];
+        xmm[1 + j + offset] += xmm[25 + j];
+        /* paddq %xmm11,%xmm0 11, 11, 11etc */
+        xmm[j + offset] += xmm[22];
+        xmm[1 + j + offset] += xmm[23];
+      }
+      memcpy(c + offset * sizeof(uint64_t), xmm + offset, 64); /* Put results back into C format area */
+    }
+    code = *afmt;
+    skip = code & 0xff;
+    code >>= 1;
+  }
+}
+
+void pc5bmdj(const uint8_t *a, uint8_t *bv, uint8_t *c,
+             const uint64_t *parms)
+{
+  pc5bmdd(a, bv, c, parms);
+}
+
+void pc5bmdm(const uint8_t *a, uint8_t *bv, uint8_t *c,
+             const uint64_t *parms)
+{
+  pc5bmdd(a, bv, c, parms);
+}
+
+/*
+ * Translations from pc6.s, code for very large primes (more than 32 bit)
+ * There are no tests for this code, as it wasn't working at the time
+ * of the latest version
+ */
+/* input  rdi Afmt     rsi bwa     rdx  Cfmt      %rcx 2^90 % p*/
+void pc6bma(const uint8_t *a, uint8_t *bwa, uint8_t *c, uint64_t p90)
+{
+  uint64_t mask /* r10 */ = (1 << 26) - 1;
+  uint64_t *cfmt = (uint64_t *)c; /* r9 */
+  uint64_t code = *a;
+  /* pc6bma1 */
+  /* outer loop One row of A 73 cols of BC*/
+  while (255 != code ) {
+    unsigned int loop_count = 73; /* cl */
+    uint64_t carry /* r13 */ = 0;
+    a++; /* Note this makes afmt unaligned */
+    code *= 1168;
+    cfmt += code / sizeof(*cfmt);
+    /* pc6bma2 */
+    /* middle loop round cols B cols C */
+    while (0 != loop_count) {
+      uint64_t lo /* r11 */ = cfmt[0], hi /* r12 */ = cfmt[1], upper, lo_temp;
+      uint64_t *block = (uint64_t *)bwa;
+      /* Inner loop of 21 */
+      unsigned int inner;
+      /* pc6bma3 */
+      uint64_t * afmt = (uint64_t *)a;
+      for (inner = 0; inner < 21; inner++) {
+        uint64_t hi_temp;
+        lo_temp = lo;
+        code = afmt[inner];
+        /* 128 bit precise multiply */
+        upper = full_multiply(&code, code, block[inner * 168 / sizeof(*cfmt)]);
+        lo += code;
+        if (lo_temp < lo) {
+          hi++; /* Detect carry */
+        }
+        hi_temp = hi;
+        hi += upper; /* The hi part from the mul */
+        if (hi < hi_temp) {
+          carry++;
+        }
+      }
+      a += 8 * 21;
+      /* reduce C back to two words and put back */
+      carry = hi << 38;
+      /* mul 2^90 mod p */
+      upper = full_multiply(&code, carry, p90);
+      hi &= mask;
+      lo_temp = lo;
+      lo += code;
+      hi += upper;
+      if (lo < lo_temp) {
+        hi++;
+      }
+      /* Stuff with carries and high precision multiply etc */
+      cfmt[0] = lo;
+      cfmt[1] = hi;
+      cfmt += 2;
+      bwa += 8;
+      loop_count--;
+    }
+    a += 168; /* Next chunk of Amft */
   }
 }
