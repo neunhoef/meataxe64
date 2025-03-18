@@ -3,6 +3,7 @@
 // conex.c Conway Polynomial Exceptions
 
 #include <stdint.h>
+#include "conex.h"
 
 uint64_t conex(uint64_t fdef)
 {

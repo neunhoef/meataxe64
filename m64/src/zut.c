@@ -15,7 +15,7 @@
 int main(int argc,  char **argv)
 {
     EFIL *e;
-    int mode,b1,b2,c,res;
+    unsigned int mode,b1,b2,c,res;
     uint64_t hdr[5];
     uint64_t siz,i;
     uint64_t * bs;

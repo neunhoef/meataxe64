@@ -19,7 +19,7 @@ int main(int argc,  char **argv)
     uint64_t fdef,nor,noc;
     uint64_t hdr[5];
     FIELD * f;
-    int * piv;
+    unsigned int *piv;
     DSPACE dsm,ds3;
     Dfmt *m, *vo, *junk;
     Dfmt *vm;

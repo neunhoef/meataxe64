@@ -7,6 +7,7 @@
 #include <string.h>
 #include <stdint.h>
 #include "field.h"
+#include "utils.h"
 
 int errors;
 uint64_t fdef;
@@ -18,6 +19,7 @@ int main(int argc, char ** argv)
     FIELD *field;
     uint64_t prim,conp,k;
     int pol[70];
+    NOT_USED(argc);
     f = fopen(argv[1],"rb");
     if(f==NULL)
     {

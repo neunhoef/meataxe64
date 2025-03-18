@@ -10,6 +10,7 @@
 #include "field.h"
 #include "bitstring.h"
 #include "gauss.h"
+#include "utils.h"
 
 GAUSS * GaussCreate(const FIELD * f)
 {
@@ -52,20 +53,22 @@ void GaussDestroy(GAUSS * gs)
 
 void GaussStart(GAUSS * gs, uint64_t nor, uint64_t noc, Dfmt * m)
 {
-    int i;
-    gs->nor=nor;
-    gs->noc=noc;
-    DSSet(gs->f,noc,gs->dsm);
-    gs->nobm=(gs->dsm)->nob;
-    DSSet(gs->f,nor,gs->dst);
-    gs->nobt=(gs->dst)->nob;
-    memcpy(gs->mtx,m,gs->nobm*nor);
-    memset(gs->trf,0,gs->nobt*nor);
-    gs->rank=0;
-    gs->phase=1;
-    for(i=0;i<nor;i++) gs->piv[i]=-1;
-    gs->det=1;
-    gs->detsign=0;
+  unsigned int i;
+  gs->nor=nor;
+  gs->noc=noc;
+  DSSet(gs->f,noc,gs->dsm);
+  gs->nobm=(gs->dsm)->nob;
+  DSSet(gs->f,nor,gs->dst);
+  gs->nobt=(gs->dst)->nob;
+  memcpy(gs->mtx,m,gs->nobm*nor);
+  memset(gs->trf,0,gs->nobt*nor);
+  gs->rank=0;
+  gs->phase=1;
+  for (i = 0; i < nor; i++) {
+    gs->piv[i] = -1;
+  }
+  gs->det=1;
+  gs->detsign=0;
 }
 
 void GaussBack(GAUSS * gs)
@@ -76,7 +79,7 @@ void GaussBack(GAUSS * gs)
     gs->nobrealt=ds.nob;
 }
 
-int GaussNewRowFwd(GAUSS * gs, int row)
+static int GaussNewRowFwd(GAUSS * gs, int row)
 {
     uint64_t col;
     Dfmt *rptr,*tptr;
@@ -100,7 +103,7 @@ int GaussNewRowFwd(GAUSS * gs, int row)
     return 2;       // batch full
 }
 
-int GaussNewRowBack(GAUSS * gs, int row)
+static int GaussNewRowBack(GAUSS * gs, int row)
 {
     Dfmt *rptr,*tptr;
     if(gs->piv[row]==-1) return 0;
@@ -112,7 +115,7 @@ int GaussNewRowBack(GAUSS * gs, int row)
     return 2;       // batch full
 }
 
-void GaussCleanC(GAUSS * gs, int row)
+void GaussCleanC(GAUSS *gs, int row)
 {
     FELT fel;
     fel=DUnpak(gs->dsm,gs->batpiv,gs->mtx+row*gs->nobm);
@@ -120,69 +123,74 @@ void GaussCleanC(GAUSS * gs, int row)
     DSMad(gs->dst,fel,1,gs->battrf,gs->trf+row*gs->nobt);
 }
 
-void GaussCleanA(GAUSS * gs, int row)
+void GaussCleanA(GAUSS *gs, int row)
 {
-    return;     // no batch => no rows at all
+  NOT_USED(gs);
+  NOT_USED(row);
+  return;     /* no batch => no rows at all */
 }
 
-void GaussReduce(GAUSS * gs)
+void GaussReduce(GAUSS *gs)
 {
-    return;
+  NOT_USED(gs);
+  return;
 }
 
 void GaussMultiplier(GAUSS * gs, Dfmt * mul)
 {
-    int i;
-    for(i=0;i<gs->rank;i++)
-        memcpy(mul+i*gs->nobrealt,
-             gs->trf+gs->sorted[i]*gs->nobt,gs->nobrealt);
+  unsigned int i;
+  for(i = 0; i < gs->rank; i++) {
+    memcpy(mul + i*gs->nobrealt,
+           gs->trf+gs->sorted[i] * gs->nobt, gs->nobrealt);
+  }
 }
 
-void GaussCleaner(GAUSS * gs, Dfmt * cln)
+void GaussCleaner(GAUSS *gs, Dfmt *cln)
 {
-    Dfmt * pt;
-    int i;
-    pt=cln;
-    for(i=0;i<gs->nor;i++)
-    {
-        if(gs->piv[i]!=-1) continue;
-        memcpy(pt,gs->trf+i*gs->nobt,gs->nobrealt);
-        pt+=gs->nobrealt;
+    Dfmt *pt;
+    unsigned int i;
+    pt = cln;
+    for (i = 0; i < gs->nor; i++) {
+      if (gs->piv[i] != -1) {
+        continue;
+      }
+      memcpy(pt, gs->trf + i * gs->nobt, gs->nobrealt);
+      pt += gs->nobrealt;
     }
 }
 
-void GaussRemnant(GAUSS * gs, Dfmt * rem)
+void GaussRemnant(GAUSS *gs, Dfmt *rem)
 {
-    const FIELD * f;
-    DSPACE * dsm;
-    DSPACE dsr;
-    FELT fel;
-    int i,j,j1,j2,j3;
-    f=gs->f;
-    DSSet(f,gs->noc-gs->rank,&dsr);
-    memset(rem,0,dsr.nob*gs->rank);
-    dsm=gs->dsm;
-    j2=0;
-    j3=0;
-    for(j=0;j<=gs->rank;j++)
-    {
-        if(j==gs->rank) j1=gs->noc;
-        else j1=gs->piv[gs->sorted[j]];;
-        while(j2!=j1)
-        {
-            for(i=0;i<gs->rank;i++)
-            {
-                fel=DUnpak(dsm,j2,gs->mtx+gs->sorted[i]*gs->nobm);
-                DPak(&dsr,j3,rem+i*dsr.nob,fel);
-            }
-            j3++;
-            j2++;
-        }
-        j2++;
+  const FIELD *f;
+  DSPACE *dsm;
+  DSPACE dsr;
+  FELT fel;
+  unsigned int i, j, j1, j2, j3;
+  f = gs->f;
+  DSSet(f, gs->noc-gs->rank, &dsr);
+  memset(rem, 0, dsr.nob * gs->rank);
+  dsm = gs->dsm;
+  j2 = 0;
+  j3 = 0;
+  for (j = 0; j <= gs->rank; j++) {
+    if (j == gs->rank) {
+      j1 = gs->noc;
+    } else {
+      j1 = gs->piv[gs->sorted[j]];
     }
+    while(j2 != j1) {
+      for(i = 0; i < gs->rank; i++) {
+        fel=DUnpak(dsm,j2,gs->mtx+gs->sorted[i]*gs->nobm);
+        DPak(&dsr,j3,rem+i*dsr.nob,fel);
+      }
+      j3++;
+      j2++;
+    }
+    j2++;
+  }
 }
 
-void GaussRS(GAUSS * gs, uint64_t * rs)
+static void GaussRS(GAUSS * gs, uint64_t * rs)
 {
     uint64_t len,i;
     len=8*((gs->nor+63)/64) + 16;
@@ -193,7 +201,7 @@ void GaussRS(GAUSS * gs, uint64_t * rs)
         if(gs->piv[i]!=-1) BSBitSet(rs,i);
 }
 
-void GaussCS(GAUSS * gs, uint64_t * cs)
+static void GaussCS(GAUSS * gs, uint64_t * cs)
 {
     uint64_t len,i;
     len=8*((gs->noc+63)/64) + 16;
@@ -204,47 +212,48 @@ void GaussCS(GAUSS * gs, uint64_t * cs)
         if(gs->piv[i]!=-1) BSBitSet(cs,gs->piv[i]);
 }
 
-void GaussSort(GAUSS * gs)
+static void GaussSort(GAUSS * gs)
 {
-    int16_t temp,i,j;
-    int parity;
-    j=0;
-    parity=0;
-    for(i=0;i<gs->nor;i++)
-    {
-        if(gs->piv[i]!=-1)
-        {
-            gs->sorted[j++]=i;
-            gs->detsign^=parity;
-        }
-        else
-        {
-            parity^=1;
-        }
+  int16_t temp;
+  unsigned int i, j;
+  int parity;
+  j=0;
+  parity=0;
+  for(i=0;i<gs->nor;i++) {
+    if(gs->piv[i]!=-1) {
+      gs->sorted[j++]=i;
+      gs->detsign^=parity;
+    } else {
+      parity^=1;
     }
+  }
 // bubble sort for now
-    i=0;
-    while(1)
-    {
-        if((i+1)>=gs->rank) break;
-        if(gs->piv[gs->sorted[i]]>gs->piv[gs->sorted[i+1]])
-        {
-            temp=gs->sorted[i];
-            gs->sorted[i]=gs->sorted[i+1];
-            gs->sorted[i+1]=temp;
-            gs->detsign^=1;
-            if(i>0) i--;
-        }
-        else i++;
+  i=0;
+  for (;;) {
+    if((i+1)>=gs->rank) {
+      break;
     }
+    if(gs->piv[gs->sorted[i]]>gs->piv[gs->sorted[i+1]]) {
+      temp=gs->sorted[i];
+      gs->sorted[i]=gs->sorted[i+1];
+      gs->sorted[i+1]=temp;
+      gs->detsign^=1;
+      if (i > 0) {
+        i--;
+      }
+    } else {
+      i++;
+    }
+  }
 }
 
-uint64_t BCEch(GAUSS *gs, DSPACE * ds, Dfmt *a, 
-               uint64_t *rs, uint64_t *cs, FELT * det,
+uint64_t BCEch(GAUSS *gs, DSPACE *ds, Dfmt *a, 
+               uint64_t *rs, uint64_t *cs, FELT *det,
                Dfmt *m, Dfmt *c, Dfmt *r, uint64_t nor, int flags)
 {
-    long currow,rowx;
+    uint64_t currow, rowx;
     int res;
+    NOT_USED(flags);
 // initialization
     GaussStart(gs,nor,ds->noc,a);
     currow=0;
@@ -264,18 +273,20 @@ uint64_t BCEch(GAUSS *gs, DSPACE * ds, Dfmt *a,
     GaussCS(gs,cs);
     GaussCleaner(gs,c);
     currow=nor-1;
-    while(1)
-    {
-        if(currow==-1) break;
+    for (;;) {
+      if ((int64_t)currow == -1) {
+        break;
+      }
 // skip zero rows
 // deal with zero rows left
-        GaussCleanA(gs,currow);
-        res=GaussNewRowBack(gs,currow);  // Should never be zero?
-        currow--;
-        if(res!=2) continue;
-        for(rowx=currow;rowx>=0;rowx--)
-            GaussCleanC(gs,rowx);
-        GaussReduce(gs); 
+      GaussCleanA(gs,currow);
+      res=GaussNewRowBack(gs,currow);  // Should never be zero?
+      currow--;
+      if(res!=2) continue;
+      for(rowx=currow;(int64_t)rowx>=0;rowx--) {
+        GaussCleanC(gs,rowx);
+      }
+      GaussReduce(gs); 
     }
     GaussSort(gs);
     if(gs->detsign==0) *det=gs->det;

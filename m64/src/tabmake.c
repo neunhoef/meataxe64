@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdint.h>
 #include "field.h"
+#include "tabmake.h"
 
 /* NOTE - prog only 40 entries in field.h but longest is 33 so it's OK */
 uint8_t achain[] = {
@@ -57,7 +58,7 @@ uint8_t achain[] = {
             84,9,163,11,167,6,95,175,8,165,5,168,88,1,173,13,170,90,12,255,
                  0 };
 
-void hpmitabas(FIELD * f)
+void hpmitabas(FIELD *f)
 {
     Dfmt ASCode[32];
     Dfmt res;
@@ -202,7 +203,7 @@ void hpmitabas(FIELD * f)
     f->hwm=ftab8-f8;  
 }
 
-void hpmitab3(FIELD * f)
+void hpmitab3(FIELD *f)
 {
     uint8_t * ftab8;
     uint8_t * f8;

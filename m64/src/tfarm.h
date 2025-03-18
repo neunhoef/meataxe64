@@ -41,7 +41,7 @@ extern void   TFGetReadRef(MOJ moj);
 extern void   TFSubmit(int priority, int proggyno, ...);
 extern MOJ    TFNewMOJ(void);
 extern void   TFQuickReady(MOJ moj);
-extern void   TFInit(int threads);
+extern void   TFInit(unsigned int threads);
 extern void   TFWaitEnd(void);
 extern void   TFClose(void);
 extern void   TFUpJobs(void);
@@ -55,5 +55,9 @@ extern  MOJ TFFlowCons(uint64_t res, uint64_t upres, uint64_t downres);
 extern void TFFlowUp(MOJ moj);
 extern void TFFlowWait(MOJ moj);
 extern void TFFlowDest(MOJ moj);
+
+/* Rroutine from proggies */
+
+extern void tfdo(int proggyno, MOJ *p);
 
 /* end of tfarm.h  */

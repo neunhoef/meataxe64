@@ -15,7 +15,7 @@ Dfmt ** m;
 FIELD * f;
 DSPACE ds;
 
-void g1(int a)
+static void g1(int a)
 {
     Dfmt *ma;
     FELT min1;
@@ -30,22 +30,22 @@ void g1(int a)
     }
 }
 
-void mu(int a, int b, int c)
+static void mu(int a, int b, int c)
 {
     SLMul(f,m[a],m[b],m[c],ds.noc,ds.noc,ds.noc);
 }
 
-void ad(int a, int b, int c)
+static void ad(int a, int b, int c)
 {
     DAdd(&ds,ds.noc,m[a],m[b],m[c]);
 }
 
-void sb(int a, int b, int c)
+static void sb(int a, int b, int c)
 {
     DSub(&ds,ds.noc,m[a],m[b],m[c]);
 }
 
-void mkef(int eff)
+static void mkef(int eff)
 {
     switch(eff)
     {

@@ -70,7 +70,7 @@ atomic_int stopfree;
 
 /* Functions replacing the x86 assembler versions */
 
-static atomic_int my_atomic_fetch_add(atomic_int *arg, int val)
+static int my_atomic_fetch_add(atomic_int *arg, int val)
 {
   atomic_int i = atomic_fetch_add(arg, val);
   return i + val;
@@ -109,7 +109,7 @@ extern void TFStartMOJFree(void)
 /* nothreads is the (constant) number of started threads     */
 /* It is set by TFInit and used by TFClose                   */
 
-int nothreads;
+unsigned int nothreads;
 
 /* There is a single "global" mutex called "dodgy" that can  */
 /* be used to prevent data races etc., and this is used      */
@@ -230,8 +230,8 @@ void AlignTree(void * z)
 
 MOJ tfmoj;
 
-int nfmoj;
-int nmojes;
+unsigned int nfmoj;
+unsigned int nmojes;
 
 /* ========== job data and methods ======= */
 
@@ -601,76 +601,76 @@ void TFClose(void)
     free(TFM);
 }
 
-void TFInit(int threads)
+void TFInit(unsigned int threads)
 {
-    int i;
-    int jobx,rdlx;
-    uint64_t * FRE;
-    jobstruct * tfjob;
-    rdlstruct * tfrdl;
-    MOJ mj;
-    jobx=SCALE*12;
-    nmojes=jobx*2;
-    atomic_init(&closejobs, 0);
-    TFM=malloc(TFMSIZE*sizeof(uint64_t));
-    FRE=malloc(FRESIZE*sizeof(uint64_t));
-    *(TFM+TFMFRE)=(uint64_t)FRE;
-    *FRE=0;      // none yet to free
-// following is temporary fix for zpe needs.
-// redesign it better for V2
-    rdlx=3*nmojes;
-    tfjob=AlignTalloc(jobx*sizeof(jobstruct));
-    append(FRE,(uint64_t)tfjob);
-    *(TFM+TFMJOB)=0;     // freechain of jobs empty
-    for(i=0;i<jobx;i++) TfLinkIn(TFM+TFMJOB,(uint64_t *) (tfjob+i));
-    tfrdl=AlignTalloc(rdlx*sizeof(rdlstruct));
-    append(FRE,(uint64_t)tfrdl);
-    *(TFM+TFMRDL)=0;     // freechain of jobs empty
-    for(i=0;i<rdlx;i++) TfLinkIn(TFM+TFMRDL,(uint64_t *) (tfrdl+i));
-    RUNJOB=AlignTalloc(jobx*sizeof(jobstruct *));
-    append(FRE,(uint64_t)RUNJOB);
-    nfmoj=0;
-    atomic_init(&runjobs, 0);
-    atomic_init(&stopfree, 0);
+  unsigned int i;
+  unsigned int jobx,rdlx;
+  uint64_t * FRE;
+  jobstruct * tfjob;
+  rdlstruct * tfrdl;
+  MOJ mj;
+  jobx=SCALE*12;
+  nmojes=jobx*2;
+  atomic_init(&closejobs, 0);
+  TFM=malloc(TFMSIZE*sizeof(uint64_t));
+  FRE=malloc(FRESIZE*sizeof(uint64_t));
+  *(TFM+TFMFRE)=(uint64_t)FRE;
+  *FRE=0;      // none yet to free
+  // following is temporary fix for zpe needs.
+  // redesign it better for V2
+  rdlx=3*nmojes;
+  tfjob=AlignTalloc(jobx*sizeof(jobstruct));
+  append(FRE,(uint64_t)tfjob);
+  *(TFM+TFMJOB)=0;     // freechain of jobs empty
+  for(i=0;i<jobx;i++) TfLinkIn(TFM+TFMJOB,(uint64_t *) (tfjob+i));
+  tfrdl=AlignTalloc(rdlx*sizeof(rdlstruct));
+  append(FRE,(uint64_t)tfrdl);
+  *(TFM+TFMRDL)=0;     // freechain of jobs empty
+  for(i=0;i<rdlx;i++) TfLinkIn(TFM+TFMRDL,(uint64_t *) (tfrdl+i));
+  RUNJOB=AlignTalloc(jobx*sizeof(jobstruct *));
+  append(FRE,(uint64_t)RUNJOB);
+  nfmoj=0;
+  atomic_init(&runjobs, 0);
+  atomic_init(&stopfree, 0);
 
-/* Initialize the moj data  */
-    tfmoj=AlignTalloc(nmojes*sizeof(mojstruct));
-    append(FRE,(uint64_t)tfmoj);
-    for(i=0;i<nmojes;i++)
+  /* Initialize the moj data  */
+  tfmoj=AlignTalloc(nmojes*sizeof(mojstruct));
+  append(FRE,(uint64_t)tfmoj);
+  for(i=0;i<nmojes;i++)
     {
-        mj=tfmoj+i;
-        mj->mem=NULL;
-        atomic_init(&mj->refc, 0);     // This is private, so OK.
-        mj->RDL=NULL;
+      mj=tfmoj+i;
+      mj->mem=NULL;
+      atomic_init(&mj->refc, 0);     // This is private, so OK.
+      mj->RDL=NULL;
     }
-/* Initialize the thread data  */
-    firstfreethread=-1;  // no free threads yet
-    tfthread=AlignTalloc(threads*sizeof(int));
-    append(FRE,(uint64_t)tfthread);
-    tfparms =AlignTalloc(threads*sizeof(parmstruct));
-    append(FRE,(uint64_t)tfparms);
-    for(i=0;i<threads;i++) tfparms[i].JOB=(jobstruct *)3;  // so close works
-    nothreads=threads;
-    mythread=AlignTalloc(threads*sizeof(pthread_t));
-    append(FRE,(uint64_t)mythread);
-    wakeworker=AlignTalloc(threads*sizeof(pthread_cond_t));
-    append(FRE,(uint64_t)wakeworker);
+  /* Initialize the thread data  */
+  firstfreethread=-1;  // no free threads yet
+  tfthread=AlignTalloc(threads*sizeof(int));
+  append(FRE,(uint64_t)tfthread);
+  tfparms =AlignTalloc(threads*sizeof(parmstruct));
+  append(FRE,(uint64_t)tfparms);
+  for(i=0;i<threads;i++) tfparms[i].JOB=(jobstruct *)3;  // so close works
+  nothreads=threads;
+  mythread=AlignTalloc(threads*sizeof(pthread_t));
+  append(FRE,(uint64_t)mythread);
+  wakeworker=AlignTalloc(threads*sizeof(pthread_cond_t));
+  append(FRE,(uint64_t)wakeworker);
 
-/* initialize the condition variables for the workers */
-    for(i=0;i<threads;i++) pthread_cond_init(wakeworker+i,NULL);
-    jobsready=0;    // no jobs ready to run
-/* get the lock so that nothing does   */
-/* any damage while we are starting up         */
-    Lock();
-/* start all the worker threads                */
-    for(i=0;i<nothreads;i++)
+  /* initialize the condition variables for the workers */
+  for(i=0;i<threads;i++) pthread_cond_init(wakeworker+i,NULL);
+  jobsready=0;    // no jobs ready to run
+  /* get the lock so that nothing does   */
+  /* any damage while we are starting up         */
+  Lock();
+  /* start all the worker threads                */
+  for(i=0;i<nothreads;i++)
     {
-        tfparms[i].threadno=i;
-        pthread_create(mythread+i,NULL, worker, tfparms+i);
+      tfparms[i].threadno=i;
+      pthread_create(mythread+i,NULL, worker, tfparms+i);
     }
-/* all is ready - now let's go                 */
-    Unlock();
-    return;
+  /* all is ready - now let's go                 */
+  Unlock();
+  return;
 }
 
 void TFWait(MOJ moj)

@@ -2,6 +2,10 @@
 // Meataxe64 Nikolaus version
 // field.h header file for operations in finite fields
 
+#ifndef FIELD_H
+#define FIELD_H
+#include <stddef.h>
+
 extern uint8_t * AlignMalloc(size_t bytes);
 extern void AlignFree(uint8_t * ptr);
 
@@ -197,5 +201,4 @@ extern void DPaste(const DSPACE * cbs, const Dfmt * cb, uint64_t nor,
 extern Dfmt * DPAdv(const DSPACE * ds, uint64_t nor, const Dfmt * d);
 extern Dfmt * DPInc(const DSPACE * ds, const Dfmt * d);
 
-
-/* end of field.h  */
+#endif /* FIELD_H */

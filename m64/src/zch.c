@@ -12,7 +12,7 @@
  
 int main(int argc,  char **argv)
 {
-    int chops;
+    unsigned int chops;
     uint64_t r1,r2,c1,i,j;
     uint64_t rch[100],cch[100],cac[100]; 
     EFIL * e2[100];
