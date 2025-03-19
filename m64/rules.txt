@@ -1,0 +1,53 @@
+#
+# Generic build rules
+#
+# $Id: rules.txt,v 1.8 2012/01/24 22:15:43 jon Exp $
+#
+
+# Cancel builtin rules
+%.$(OBJEXT): %.c
+%.$(OBJEXT): %.s
+
+# Need corresponding versions for asm sources
+# Release objects from C source
+$(RELOBJDIR)/%.$(OBJEXT): %.c
+	@echo Release compile $<
+	-@mkdir -p $(RELOBJDIR)
+	@$(COMPILE)$@ $< $(REL_COMPILE_FLAGS) $(COMPILE_CFLAGS) $(NA_COMPILE_FLAGS) $(INCLUDES) $(DEFINES)
+
+# Debug objects from C source
+$(DEBUGOBJDIR)/%.$(OBJEXT): %.c
+	@echo Debug compile $<
+	-@mkdir -p $(DEBUGOBJDIR)
+	@$(COMPILE)$@ $< $(DEBUG_COMPILE_FLAGS) $(COMPILE_CFLAGS) $(INCLUDES) $(DEFINES)
+
+# Profile objects from C source
+$(PROFOBJDIR)/%.$(OBJEXT): %.c
+	@echo Profile compile $<
+	-@mkdir -p $(PROFOBJDIR)
+	@$(COMPILE)$@ $< $(DEBUG_COMPILE_FLAGS) $(PROF_COMPILE_FLAGS) $(COMPILE_CFLAGS) $(INCLUDES) $(DEFINES)
+
+# No assert profile objects from C source
+$(PROFNAOBJDIR)/%.$(OBJEXT): %.c
+	@echo Profile no assert compile $<
+	-@mkdir -p $(PROFNAOBJDIR)
+	@$(COMPILE)$@ $< $(DEBUG_COMPILE_FLAGS) $(PROF_COMPILE_FLAGS) $(NA_COMPILE_FLAGS) $(COMPILE_CFLAGS) $(INCLUDES) $(DEFINES)
+
+# Dependencies from C source
+$(DEPENDDIR)/%.$(DEPENDEXT): %.c $(GENFILES)
+	@echo Dependencies $<
+	-@mkdir -p $(DEPENDDIR)
+	@echo "$(RELOBJDIR)/$*.$(OBJEXT) $(DEBUGOBJDIR)/$*.$(OBJEXT) $(PROFOBJDIR)/$*.$(OBJEXT) $(PROFNAOBJDIR)/$*.$(OBJEXT): $(DEPENDDIR)/$*.$(DEPENDEXT)" > $@
+	@$(DEPEND_CC) $< $(DEP_COMPILE_CFLAGS) $(INCLUDES) $(DEFINES) | sed -e 's?$*.$(DEPENDOBJEXT):?$(RELOBJDIR)/$*.$(OBJEXT) $(DEBUGOBJDIR)/$*.$(OBJEXT) $(PROFOBJDIR)/$*.$(OBJEXT) $(PROFNAOBJDIR)/$*.$(OBJEXT) $(DEPENDDIR)/$*.$(DEPENDEXT):?' > $@
+
+# Assembler output from C source
+$(ASMOUTDIR)/%.$(ASMOUTEXT): %.c
+	@echo Assembler for $<
+	-@mkdir -p $(ASMOUTDIR)
+	@$(COMPILE)$@ $< $(REL_COMPILE_FLAGS) $(COMPILE_CFLAGS) $(NA_COMPILE_FLAGS) $(ASMOUT_FLAGS) $(INCLUDES) $(DEFINES)
+
+# Preprocessor output from C source
+$(PPDIR)/%.$(PPEXT): %.c
+	@echo Preprocessed source for $<
+	-@mkdir -p $(PPDIR)
+	@$(COMPILE)$@ $< $(REL_COMPILE_FLAGS) $(COMPILE_CFLAGS) $(NA_COMPILE_FLAGS) $(PP_FLAGS) $(INCLUDES) $(DEFINES)

@@ -1,0 +1,17 @@
+#
+# Generic multiple library rules
+#
+# generate all library names plus rules
+#
+
+TARGET_TYPE:=REL
+include lib.txt
+
+TARGET_TYPE:=DEBUG
+include lib.txt
+
+TARGET_TYPE:=PROF
+include lib.txt
+
+TARGET_TYPE:=PROFNA
+include lib.txt

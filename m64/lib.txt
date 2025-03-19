@@ -1,0 +1,14 @@
+#
+# Generic library rules
+#
+# generate library name plus rule
+#
+$(TARGET_TYPE)_OBJECTS:= $(LIB_MODULES:%=$($(TARGET_TYPE)OBJDIR)/%.$(OBJEXT))
+$(TARGET_TYPE)_LIBTARGET:= $(MTXLIB:%=$($(TARGET_TYPE)BINDIR)/%.$(LIBEXT))
+$(TARGET_TYPE)_TARGETS+= $($(TARGET_TYPE)_LIBTARGET)
+
+# Build archive
+
+COMMAND := $($(TARGET_TYPE)_LIBTARGET): $($(TARGET_TYPE)_OBJECTS) ; @echo Archive $$@; rm -f $$@ || true; mkdir -p $($(TARGET_TYPE)BINDIR) || true ; $(ARCHIVE)$$@ $($(TARGET_TYPE)_OBJECTS)
+
+$(COMMAND)
