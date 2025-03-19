@@ -7,6 +7,7 @@
 #include <assert.h>
 #include <stdint.h>
 #include "field.h"
+#include "utils.h"
 
 // commment this line out for terse output
 // #define PROGRESS 1
@@ -520,6 +521,7 @@ int main(int argc, const char *const argv[])
           for (j = 0; j < 128; j++) {
             d3 = DPAdv(&ds, j, d1);
             assert(d3 == (Dfmt *)(((char *)d1) + j * bytes));
+            NOT_USED(d3);
           }
           d3 = DPInc(&ds, d1);
           assert(d3 == (Dfmt *)(((char *)d1) + bytes));

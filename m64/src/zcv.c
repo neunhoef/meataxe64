@@ -84,7 +84,7 @@ static FELT getz(void)
     else
         return res;
 }
-static void nextline()
+static void nextline(void)
 {
     if(hadcr == 1)
     {
