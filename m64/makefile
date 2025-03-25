@@ -73,6 +73,7 @@ DEFINES=-DMEM_SIZE=200000 -DCACHE_SIZE=1000
 # Make search paths for source
 vpath %.c $(SRCDIR) $(SRCDIR)/$(OS) $(SRCDIR)/$(ARCH) $(GENDIR)
 vpath %.h $(SRCDIR) $(SRCDIR)/$(OS) $(GENDIR)
+vpath %.s $(SRCDIR)
 
 # Get OS and architecture specific portions
 include $(OS)/GNUmake

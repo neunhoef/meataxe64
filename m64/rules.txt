@@ -15,11 +15,23 @@ $(RELOBJDIR)/%.$(OBJEXT): %.c
 	-@mkdir -p $(RELOBJDIR)
 	@$(COMPILE)$@ $< $(REL_COMPILE_FLAGS) $(COMPILE_CFLAGS) $(NA_COMPILE_FLAGS) $(INCLUDES) $(DEFINES)
 
+# Release objects from asm source
+$(RELOBJDIR)/%.$(OBJEXT): %.s
+	@echo Release assemble $<
+	-@mkdir -p $(RELOBJDIR)
+	@$(COMPILE)$@ $< $(COMPILE_AFLAGS)
+
 # Debug objects from C source
 $(DEBUGOBJDIR)/%.$(OBJEXT): %.c
 	@echo Debug compile $<
 	-@mkdir -p $(DEBUGOBJDIR)
 	@$(COMPILE)$@ $< $(DEBUG_COMPILE_FLAGS) $(COMPILE_CFLAGS) $(INCLUDES) $(DEFINES)
+
+# Debug objects from asm source
+$(DEBUGOBJDIR)/%.$(OBJEXT): %.s
+	@echo Debug assemble $<
+	-@mkdir -p $(RELOBJDIR)
+	@$(COMPILE)$@ $< $(COMPILE_AFLAGS)
 
 # Profile objects from C source
 $(PROFOBJDIR)/%.$(OBJEXT): %.c
@@ -27,11 +39,23 @@ $(PROFOBJDIR)/%.$(OBJEXT): %.c
 	-@mkdir -p $(PROFOBJDIR)
 	@$(COMPILE)$@ $< $(DEBUG_COMPILE_FLAGS) $(PROF_COMPILE_FLAGS) $(COMPILE_CFLAGS) $(INCLUDES) $(DEFINES)
 
+# Profile objects from asm source
+$(PROFOBJDIR)/%.$(OBJEXT): %.s
+	@echo Profile assemble $<
+	-@mkdir -p $(PROFOBJDIR)
+	@$(COMPILE)$@ $< $(COMPILE_AFLAGS)
+
 # No assert profile objects from C source
 $(PROFNAOBJDIR)/%.$(OBJEXT): %.c
 	@echo Profile no assert compile $<
 	-@mkdir -p $(PROFNAOBJDIR)
 	@$(COMPILE)$@ $< $(DEBUG_COMPILE_FLAGS) $(PROF_COMPILE_FLAGS) $(NA_COMPILE_FLAGS) $(COMPILE_CFLAGS) $(INCLUDES) $(DEFINES)
+
+# No assert profile objects from asm source
+$(PROFNAOBJDIR)/%.$(OBJEXT): %.s
+	@echo No assert profile assemble $<
+	-@mkdir -p $(PROFNAOBJDIR)
+	@$(COMPILE)$@ $< $(COMPILE_AFLAGS)
 
 # Dependencies from C source
 $(DEPENDDIR)/%.$(DEPENDEXT): %.c $(GENFILES)
