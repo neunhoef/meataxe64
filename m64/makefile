@@ -171,12 +171,18 @@ EXECS=	conreg \
 include exec.txt
 include execs.txt
 
+# The rules cope with the fact that the binary 64 imports and exporters
+# come from the sources import.c and export.c
 debug:	$(DEBUG_TARGETS)
+	@cd $(DEBUGBINDIR) && rm -f zexport64 zimport64 && ln -s zexport zexport64 && ln -s zimport zimport64
 rel:	$(REL_TARGETS)
+	@cd $(RELBINDIR) && rm -f zexport64 zimport64 && ln -s zexport zexport64 && ln -s zimport zimport64
 relpp:	$(RELPP_TARGETS)
 relasm:	$(RELASM_TARGETS)
 profile:	$(PROF_TARGETS)
+	@cd $(PROFBINDIR) && rm -f zexport64 zimport64 && ln -s zexport zexport64 && ln -s zimport zimport64
 profilena:	$(PROFNA_TARGETS)
+	@cd $(PROFNABINDIR) && rm -f zexport64 zimport64 && ln -s zexport zexport64 && ln -s zimport zimport64
 
 clean:
 	rm -rf $(BASEDIR)
