@@ -66,7 +66,7 @@ include defines.txt
 
 SRCDIR=	src
 # Compiler search path for headers
-INCLUDES=-I$(SRCDIR)/$(OS)
+INCLUDES=-I$(SRCDIR) -I$(SRCDIR)/$(OS)
 # Preprocessor defined values
 DEFINES=-DMEM_SIZE=200000 -DCACHE_SIZE=1000
 
