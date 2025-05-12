@@ -21,7 +21,6 @@ LIB_MODULES=	memfuns \
 	conex \
 	pcritc \
 	exten \
-	tfarm1 \
 	tfarm2 \
 	io \
 	proggies \
