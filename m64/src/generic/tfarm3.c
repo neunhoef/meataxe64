@@ -12,8 +12,8 @@
 #include <pthread.h>
 #include <time.h>
 
-#include "tfarm.h"
-#include "tuning.h"
+#include "../tfarm.h"
+#include "../tuning.h"
 #define SCALE MAXCHOP*MAXCHOP*MAXCHOP
 
 /* Notes TfPause has been replaced by nanosleep

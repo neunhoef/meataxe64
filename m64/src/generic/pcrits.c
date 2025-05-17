@@ -6,9 +6,9 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdlib.h>
-#include "field.h"
-#include "pcrit.h"
-#include "utils.h"
+#include "../field.h"
+#include "../pcrit.h"
+#include "../utils.h"
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
