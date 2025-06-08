@@ -1,0 +1,64 @@
+/*
+ * $Id: count.c,v 1.12 2024/12/12 23:56:02 jon Exp $
+ *
+ * Function to count the non-zero elements in a matrix
+ *
+ */
+
+#include "count.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+#include "elements.h"
+#include "endian.h"
+#include "header.h"
+#include "memory.h"
+#include "read.h"
+
+u64 count(const char *matrix, const char *name)
+{
+  FILE *input;
+  u32 prime, noc, nor, nob, len;
+  u32 i, j;
+  const header *h;
+  u64 total = 0;
+  word *row;
+
+  assert(NULL != matrix);
+  if (0 == open_and_read_binary_header(&input, &h, matrix, name)) {
+    exit(1);
+  }
+  prime = header_get_prime(h);
+  nor = header_get_nor(h);
+  noc = header_get_noc(h);
+  if (1 == prime) {
+    /* This is easy, it's just the minimum of nor, noc */
+    fclose(input);
+    header_free(h);
+    return (nor > noc) ? noc : nor;
+  }
+  nob = header_get_nob(h);
+  len = header_get_len(h);
+  if (memory_rows(len, 1000) < 1) {
+    fprintf(stderr, "%s: cannot allocate row for %s, terminating\n", name, matrix);
+    fclose(input);
+    header_free(h);
+    exit(1);
+  }
+  row = memory_pointer_offset(0, 0, len);
+  for (i = 0; i < nor; i++) {
+    if (0 == endian_read_row(input, row, len)) {
+      fprintf(stderr, "%s: cannot read row %u from %s, terminating\n", name, i, matrix);
+      fclose(input);
+      header_free(h);
+      exit(1);
+    }
+    for (j = 0; j < len; j++) {
+      total += count_word(row[j], nob);
+    }
+  }
+  fclose(input);
+  header_free(h);
+  memory_dispose();
+  return total;
+}

@@ -1,0 +1,80 @@
+#!/bin/bash
+#
+# $Id: quick_order,v 1.7 2023/07/03 08:30:07 jon Exp $: f1,v 1.2 2001/12/01 10:46:02 jon Exp $
+#
+# Script to compute order of a matrix, in a naive fashion
+# returning 10 if it's greater than 10
+#
+# Inputs
+# $1: matrix
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+#
+. functions
+usage="$0: usage: $0 <in>"
+if [ $# -ne 1 ]; then
+  echo "$usage"
+  exit 1;
+fi
+a=$1
+if [ -e $a ]; then
+  q=`zprime $a`
+  nor=`znor $a`
+  noc=`znoc $a`
+  if [ $nor -ne $noc ]; then
+    echo "$0: $a is not square"
+    exit 1
+  fi
+else
+  echo "$0: missing file $a"
+  exit 1
+fi
+memory=200000
+ok=0
+while [ $ok -eq 0 ]; do
+  r=`zrn -m $memory $a 2>/dev/null`
+  ret=$?
+  if [ $ret -eq 2 ]; then
+    let memory=`more_memory $memory`
+  elif [ $ret -eq 0 ]; then
+    ok=1
+  else
+    echo "rank failed on $a, exiting"
+    exit 1
+  fi
+done
+if [ $r -ne $nor ]; then
+  echo $a is singular
+  exit 1
+fi
+id=id_${q}_$nor
+if [ ! -e $id ]; then
+  zid $q $nor $nor $id
+fi
+tmp=tmp${PPID}
+o=1
+ok=0
+if zdiff $a $id 1>/dev/null ; then
+  echo 1
+  exit 0
+fi
+t=$a
+while [ $ok -eq 0 -a $o -lt 10 ]; do
+  if zdiff $t $id 1>/dev/null ; then
+    echo $o
+    rm -f ${tmp}*
+    exit 0
+  fi
+  zmu -m $memory $a $t ${tmp}.$o 1>/dev/null
+  ret=$?
+  if [ 0 -ne $ret ]; then
+    rm -f ${tmp}*
+    exit 1
+  fi
+  t=${tmp}.$o
+  let o=$o+1
+done
+rm -f ${tmp}*
+echo 10

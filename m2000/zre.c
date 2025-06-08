@@ -1,0 +1,116 @@
+/*
+ * $Id: zre.c,v 1.9 2005/07/24 09:32:46 jon Exp $
+ *
+ * Convert a matrix from new to old
+ *
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+#include <limits.h>
+#include <errno.h>
+#include "elements.h"
+#include "endian.h"
+#include "header.h"
+#include "memory.h"
+#include "parse.h"
+#include "primes.h"
+#include "read.h"
+#include "rows.h"
+#include "utils.h"
+#include "write.h"
+
+static const char *name = "zre";
+
+static void re_usage(void)
+{
+  fprintf(stderr, "%s: usage: %s %s <in_file> <out_file>\n", name, name, parse_usage());
+}
+
+int main(int argc, const char * const argv[])
+{
+  FILE *inp, *outp;
+  u32 prime, nod, noc, nor, nob, len;
+  u32 i;
+  const header *h_in;
+  header *h_out;
+  word *row;
+  prime_ops prime_operations;
+
+  endian_init();
+  memory_init(name, memory);
+  argv = parse_line(argc, argv, &argc);
+  if (3 != argc) {
+    re_usage();
+    exit(1);
+  }
+  if (0 == open_and_read_binary_header(&inp, &h_in, argv[1], name)) {
+    exit(1);
+  }
+  prime = header_get_prime(h_in);
+  if (1 == prime) {
+    fprintf(stderr, "%s: cannot handle maps, terminating\n", name);
+    fclose(inp);
+    header_free(h_in);
+    exit(1);
+  }
+  nob = header_get_nob(h_in);
+  nod = header_get_nod(h_in);
+  nor = header_get_nor(h_in);
+  noc = header_get_noc(h_in);
+  len = header_get_len(h_in);
+  h_out = header_create(prime, nob, nod, noc, nor);
+  header_set_prime(h_out, endian_invert_u32(prime));
+  header_set_nob(h_out, endian_invert_u32(nob));
+  header_set_noc(h_out, endian_invert_u32(noc));
+  header_set_nor(h_out, endian_invert_u32(nor));
+  if (memory_rows(len, 1000) < 1) {
+    fprintf(stderr, "%s: cannot allocate row for %s, terminating\n", name, argv[1]);
+    fclose(inp);
+    exit(1);
+  }
+  if (0 == open_and_write_binary_header(&outp, h_out, argv[2], name)) {
+    exit(1);
+  }
+  row = memory_pointer_offset(0, 0, len);
+  if (0 == primes_init(prime, &prime_operations)) {
+    fprintf(stderr, "%s: cannot initialise prime operations, terminating\n", name);
+    fclose(inp);
+    exit(1);
+  }
+  for (i = 0; i < nor; i++) {
+    u32 j;
+    unsigned char *char_row = (unsigned char *)row;
+    errno = 0;
+    if (0 == endian_read_row(inp, row, len)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
+      fprintf(stderr, "%s: cannot read row %u from %s, terminating\n", name, i, argv[1]);
+      fclose(inp);
+      fclose(outp);
+      exit(1);
+    }
+    /* Invert the bits */
+    for (j = 0; j < len * sizeof(word); j++) {
+      char_row[j] = convert_char(char_row[j]);
+    }
+    errno = 0;
+    if (0 == endian_write_row(outp, row, len)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
+      fprintf(stderr, "%s: cannot write row %u to %s, terminating\n", name, i, argv[2]);
+      fclose(inp);
+      fclose(outp);
+      exit(1);
+    }
+    /* Invert the bits and write out */
+  }
+  fclose(inp);
+  fclose(outp);
+  memory_dispose();
+  return 0;
+}

@@ -1,0 +1,62 @@
+#!/bin/bash
+#
+# $Id: basef_with_vector,v 1.8 2023/07/03 08:30:07 jon Exp $
+#
+# Script to find a standard base for a representation, given a vector
+#
+# Inputs
+# $1: vector with which to split
+# $2: the standard basis
+# $3: temporary directory
+# $4: memory
+# $5: generator a
+# $6: generator b
+#
+#
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+# 254: reducible
+#
+#set -v
+. functions
+usage="$0: usage: $0 <e> <s> <tmp dir> <memory> <a> <b>"
+if [ $# -lt 6 ]; then
+  echo "$usage"
+  exit 1;
+fi
+e=$1
+s=$2
+dir=$3
+memory=$4
+a=$5
+if [ -e $e -a -e $a ]; then
+  q=`zprime $a`
+  nor=`znor $a`
+  noc=`znoc $a`
+  if [ $nor -ne $noc ]; then
+    echo "$0: $a is not square"
+    exit 1
+  fi
+  if [ $noc -ne `znoc $e` -o 1 -ne `znor $e` ]; then
+    echo "$0: $a and $e are not compatible"
+    exit 1
+  fi
+else
+  echo "$0: missing files $e or $a"
+  exit 1
+fi
+shift 5
+dim=`zmsbf -m $memory $e $s $dir $a $* 2>/dev/null`
+ret=$?
+if [ 0 -eq $ret ]; then
+  if [ $dim -ne $nor ]; then
+    echo Strange result from zmsbf giving wrong dimension $dim vs $nor
+    exit 1
+  fi
+else
+  echo zmsbf unexpectedly returns $ret
+  exit 1
+fi
+exit 0

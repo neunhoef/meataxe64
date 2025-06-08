@@ -1,0 +1,77 @@
+#!/bin/bash
+#
+# $Id: filter_element,v 1.4 2023/07/03 08:30:07 jon Exp $
+#
+# Script to find an element of given nullity on one representation
+# and nullity zero on a sequence of others
+#
+# Inputs
+# $1: number of generators
+# $2: nullity on first generator
+# $3-: the formulae
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+# 255: no elements of required nullity found
+#
+#set -v
+. functions
+usage="$0: usage: $0 <number of generators> <nullity> <file of representations> <formulae>"
+if [ $# -lt 4 ]; then
+  echo "$usage"
+  exit 1;
+fi
+tmp=tmp${PPID}
+name=$0
+n=$1
+nullity=$2
+reps=$3
+shift 3
+len=$#
+for x in `cat $reps`; do
+  nor=`znor ${x}_1`
+  noc=`znoc ${x}_1`
+  prime=`zprime ${x}_1`
+  first=$x
+  break;
+done
+for x in `cat $reps`; do
+  y=1
+  while [ $y -le $n ]; do
+    tmpprime=`zprime ${x}_$y`
+    if [ $prime -ne $tmpprime ]; then
+      echo "$name: parameter mismatch between generators, terminating"
+      exit 1
+    fi
+    let y=$y+1
+  done
+done
+i=0
+zcfl $prime $len ${tmp}.0
+gens=
+z=1
+while [ $z -le $n ]; do
+  gens="$gens ${first}_$z"
+  let z=$z+1
+done
+for y in $*; do zscript $y ${tmp}zscript $y $gens; done
+zfn ${tmp}.0 ${tmp}.1 $nullity $*
+i=1
+for x in `cat $reps`; do
+  if [ "$x" != "$first" ]; then
+    let j=$i+1
+    # And this
+    gens=
+    z=1
+    while [ $z -le $n ]; do
+      gens="$gens ${x}_$z"
+      let z=$z+1
+    done
+    for y in $*; do zscript $y ${tmp}zscript $y $gens; done
+    zfn ${tmp}.$i ${tmp}.$j 0 $*
+    i=$j
+  fi
+done
+zpfl ${tmp}.$j $* | head
+rm ${tmp}* $*

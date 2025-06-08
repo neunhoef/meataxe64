@@ -1,0 +1,61 @@
+/*
+ * $Id: zranks.c,v 1.14 2021/08/01 09:53:56 jon Exp $
+ *
+ * Compute sums in the group algebra in two matrices finding all of given nullity
+ *
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include "endian.h"
+#include "memory.h"
+#include "parse.h"
+#include "sums.h"
+#include "utils.h"
+
+static const char *name = "zranks";
+
+static unsigned int nullity = 0;
+
+static void ranks_usage(void)
+{
+  fprintf(stderr, "%s: usage: %s %s <out_file_stem> <n> <nullity> <in_file a> <order a> [<other elements and orders>]\n", name, name, parse_usage());
+}
+
+static int acceptor(unsigned int rank, unsigned int nor, const char *file, const char *form)
+{
+  NOT_USED(file);
+  NOT_USED(form);
+  if ((0 == nullity && rank == nor) || (rank < nor && rank + nullity >= nor)) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
+int main(int argc, const char * const argv[])
+{
+  unsigned int n;
+  int res;
+
+  argv = parse_line(argc, argv, &argc);
+  if (6 > argc || 0 != argc % 2) {
+    ranks_usage();
+    exit(1);
+  }
+  n = strtoul(argv[2], NULL, 0);
+  nullity = strtoul(argv[3], NULL, 0);
+  if (0 == n) {
+    fprintf(stderr, "%s: no ranks requested\n", name);
+    exit(1);
+  }
+  endian_init();
+  memory_init(name, memory);
+  res = sums(argv[1], n, argc - 4, argv + 4, 0, &acceptor, 0, 0, name);
+  memory_dispose();
+  if (0 == res) {
+    return 0;
+  } else {
+    return 255;
+  }
+}

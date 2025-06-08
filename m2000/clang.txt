@@ -1,0 +1,7 @@
+#
+# gcc specific fragment for building
+#
+# $Id: clang.txt,v 1.2 2025/02/18 11:26:19 jon Exp $
+#
+CC=	clang
+COMPILE_WARNINGS=	-Werror -Wall -Wpointer-arith -Wwrite-strings -Winline -Waggregate-return -Wmissing-prototypes -Wnested-externs -W -Wunused -Wcast-align -Wstrict-prototypes -Wmissing-declarations

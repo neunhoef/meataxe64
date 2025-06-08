@@ -1,0 +1,126 @@
+#!/bin/bash
+#
+# $Id: xn,v 1.4 2023/07/03 08:30:08 jon Exp $
+#
+# Compute xn(n), continuing on from bn, cn etc
+#
+# Inputs: None
+# Values in scope
+# powers: an array of the powers to be made
+# n: the original n value
+# a: the original matrix
+# o: where to output to
+# repeat: the number of times each value is expected to repeat
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+#
+#set -x
+#set -e
+# Check n and repeat values
+if [ $n -lt 3 ]; then
+  echo "n value $n too small"
+  exit 1
+fi
+if [ $repeat -lt 2 ]; then
+  echo "repeat value $repeat too small"
+  exit 1
+fi
+# Check n ~ 1 mod repeat
+let x=$n/$repeat
+let y=$n-$x*$repeat
+if [ 1 -ne $y ]; then
+  echo "$n not congurent to 1 modulo $repeat"
+  exit 1
+fi
+# Now create powers t**n for 1 <= t < n
+i=1
+while  [ $i -lt $n ]; do
+  powers[$i]=0
+  let i=$i+1
+done
+i=1
+while [ $i -lt $n ]; do
+  x=$repeat
+  prod=$i
+  # Compute i**repeat
+  while [ $x -gt 1 ]; do
+    let prod=$prod*$i
+    let x=$x-1
+    # reduce modulo n
+    let y=$prod/$n
+    let prod=$prod-$y*$n
+  done
+  let powers[$prod]=${powers[$prod]}+1
+  let i=$i+1
+done
+# Divide by repeat
+i=1
+while [ $i -lt $n ]; do
+  let powers[$i]=${powers[$i]}/$repeat
+  let i=$i+1
+done
+# Get rid of those which are a multiple of the characteristic
+char=`zchar $a`
+i=1
+while [ $i -lt $n ]; do
+  let x=${powers[$i]}/$char
+  let powers[$i]=${powers[$i]}-$x*$char
+  let i=$i+1
+done
+# Now we have the powers matrix indicating how many of each power we need
+i=1
+while [ $i -lt $n ]; do
+  echo powers[$i] = ${powers[$i]}
+  let i=$i+1
+done
+# Find the maximum difference
+max_diff=1
+i=1
+j=0
+while [ $i -lt $n ]; do
+  let j=$j+1
+  if [ 0 -ne ${powers[$i]} ]; then
+    if [ $j -gt $max_diff ]; then
+      max_diff=$j
+    fi
+    j=0
+  fi
+  let i=$i+1
+done
+echo max_diff = $max_diff
+# Make intermediate powers
+tmp=tmp${PPID}
+mat=${tmp}.mat
+cp $a ${mat}.1
+i=1
+while [ $i -lt $max_diff ]; do
+  let j=$i+1
+  zmu -m 100000 $a ${mat}.$i ${mat}.$j
+  let i=$j
+done
+sum=${tmp}.sum
+cur=${tmp}.cur
+# Initialise sum to 0
+zsid `zprime $a` `znor $a` `znoc $a` 0 ${sum}
+zrn ${sum}
+zid `zprime $a` `znor $a` `znoc $a` ${cur}
+order ${cur}
+set -x
+i=1
+k=1
+while [ $i -lt $n ]; do
+  let j=${powers[$i]}
+  if [ 0 -ne $j ]; then
+    zmu -m 100000 ${cur} ${mat}.$k ${cur}.1
+    zsad -m 10000 ${cur}.1 ${sum} ${tmp}.1 $j
+    mv ${cur}.1 ${cur}
+    mv ${tmp}.1 ${sum}
+    k=0
+  fi
+  let i=$i+1
+  let k=$k+1
+done
+cp ${sum} $o
+rm ${tmp}.*

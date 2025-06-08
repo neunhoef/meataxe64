@@ -1,0 +1,28 @@
+Look into compiling with CPU specific optimisations (-march=pentium4)
+Worry about isspace failure (can't detect \n) (still occurs on RH 7.2) ctype is buggered
+Worry about return (NULL == s) code generation error
+Documentation changes for proj_base, sub_quot
+Think about better instruction ordering for rows.c
+Think about better use of grease for ztmu
+Optimise ztmu
+Write zsignf
+Write span_and_spin for spins on large nullspaces
+Profile multiply (eg on 26750 for Co1) for different memory sizes
+Profile zns on 3584.e.3 for McL for different memory sizes. Think about grease strategy.
+Think about restricting the back echelising in rnf and nsf. Profile zrnf and zrn in best cases
+Think about Sn and symmetrized powers
+Optimise monst by reversing bit order
+Investigate better matrix multiplications
+Fix zvp and zps to take less memory
+Think about better grease vector selection for making vectors
+Find a better algorithm for zsp memory. Investigate performance (1)
+Debug emu/zsl file corruption problem (2)
+Cleanup return vs exit (1)
+Set up performance measurement for differing memory sizes at same grease level (1)
+Fix emu to recheck command file immediately if changed (1)
+Test stop program (1)
+Code quality in commands, mop.c and mmat.c (2)
+Examine profiles from monst (1)
+Consider a more structured error return type (1)
+Convert monster generator to use new operations (2)
+Work on lattice of submodules (5)

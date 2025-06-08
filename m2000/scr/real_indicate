@@ -1,0 +1,252 @@
+#!/bin/bash
+#
+# $Id: real_indicate,v 1.18 2023/07/03 08:30:07 jon Exp $
+#
+# Script to find the indicator of an irreducible representation
+# assuming it is real, and we have the standard basis conjugating
+# the dual back to the original
+#
+# Two distinct algorithms, depending on the characteristic
+# For characteristic 2 we have to try all q possible quadratic forms, where q is the field size
+# For characteristic not 2, we simply determine if $1 is preserved, and if so, is it quadratic or symplectic
+#
+# Inputs
+# $1: the standard basis for the dual
+# $2: initial memory
+# $3: temporary directory
+# $4: a name for the quadratic form
+# $5: generator a
+# $6: generator b
+# $7-: other generators
+#
+# Return codes
+# 1: error in parameters
+# 0: ok
+#
+usage="$0: usage: $0 <sb> <memory> <tmp dir> <form> <a> <b> [<other generators>]"
+if [ $# -lt 6 ]; then
+  echo "$usage"
+  exit 1;
+fi
+. functions
+S=$1
+memory=$2
+init_memory=$2
+tmp_dir=$3
+form=$4
+a=$5
+b=$6
+shift 4
+if [ -e $a -a -e $b -a -e $S ]; then
+  nor=`znor $a`
+  if [ $nor -ne `znoc $a` ]; then
+    echo "$0: $a is not square"
+    exit 1
+  fi
+  if [ $nor -ne `znor $b` -o $nor -ne `znoc $b` -o $nor -ne `znor $S` -o $nor -ne `znoc $S` ]; then
+    echo "$0: $a, $b, $S are not compatible"
+    exit 1
+  fi
+else
+  echo "$0: missing files $a, $b or $S"
+  exit 1
+fi
+p=`zchar $S`
+tmp=tmp${PPID}
+if [ $nor -eq 1 ]; then
+  echo indicator +
+  if [ -e ${a}_+ -o -L ${a}_+ ]; then
+    rm ${a}_+
+  fi
+  ln -s $a ${a}_+
+  exit 0
+fi
+if [ 2 -eq $p ]; then
+# Characteristic 2 case
+  Q=${tmp}.4
+  zqf $S $Q
+  i=0
+  q=`zprime $a`
+  while [ $i -lt $q ]; do
+    zsid $q $nor $nor $i ${tmp}.7
+    zad $Q ${tmp}.7 ${form}
+    ind=1
+    for x in $*; do
+      preserves ${form} $S $x $i $memory
+      ret=$?
+      if [ 254 -eq $ret ]; then
+        echo indicator o
+        rm -f ${tmp}.*
+        if [ -e ${a}_o -o -L ${a}_o ]; then
+          rm ${a}_o
+        fi
+        ln -s $a ${a}_o
+        exit 0
+      elif [ 255 -eq $ret ]; then
+        ind=0
+# We allow for the loop to continue in case the form isn't preserved (indicator o)
+        if [ 0 -ne $i ]; then
+# Only checking for preservation when scalar is zero
+          break;
+        fi
+      elif [ 0 -ne $ret ]; then
+        rm -f ${tmp}.*
+        exit 1
+      fi
+    done
+    if [ 1 -eq $ind ]; then
+      echo indicator +
+      if [ -e ${a}_+* -o -L ${a}_+* ]; then
+        rm ${a}_+*
+      fi
+# Now compute the orthogonal group sign
+      ok=0
+      mem_failed=0
+      while [ 0 -eq $ok ]; do
+        out=`zsign -m $memory ${form} $S 2>&1`
+        ret=$?
+        if [ 2 -eq $ret ]; then
+          let memory=`more_memory $memory 2>/dev/null`
+          mem_failed=1
+        else
+          ok=1
+        fi
+      done
+      if [ 1 -eq $mem_failed -a 1 -eq $ret ]; then
+        ok=0
+        memory=$init_memory
+        while [ 0 -eq $ok ]; do
+          out=`zsignf -m $memory ${form} $S ${tmp_dir} 2>&1`
+          ret=$?
+          if [ 2 -eq $ret ]; then
+            let memory=`more_memory $memory 2>/dev/null`
+          else
+            ok=1
+          fi
+        done
+      fi
+      if [ 0 -eq $ret ]; then
+        ln -s $a ${a}_++
+        echo group +
+      elif [ 255 -eq $ret ]; then
+        ln -s $a ${a}_+-
+        echo group -
+      elif [ 2 -eq $ret ]; then
+        ln -s $a ${a}_+
+        echo insufficient memory to compute group sign
+      else
+        ln -s $a ${a}_+
+        rm -f ${tmp}.*
+        echo $out
+        exit 1
+      fi
+      rm -f ${tmp}.*
+      exit 0
+    fi
+# Try next diagonal
+    let i=$i+1
+  done
+  echo indicator -
+  rm -f ${tmp}.*
+  if [ -e ${a}_- -o -L ${a}_- ]; then
+    rm ${a}_-
+  fi
+  ln -s $a ${a}_-
+else
+# Odd characteristic case
+  ztr -m $memory $S ${tmp}.0
+  if [ 0 -ne $? ]; then
+    rm -f ${tmp}.*
+    exit 1
+  fi
+  for x in $*; do
+    zmu -m $memory $x ${tmp}.0 ${tmp}.1
+    if [ 0 -ne $? ]; then
+      rm -f ${tmp}.*
+      exit 1
+    fi
+    ztr -m $memory ${tmp}.1 ${tmp}.2
+    if [ 0 -ne $? ]; then
+      rm -f ${tmp}.*
+      exit 1
+    fi
+    zmu -m $memory $x ${tmp}.2 ${tmp}.3
+    if [ 0 -ne $? ]; then
+      rm -f ${tmp}.*
+      exit 1
+    fi
+    if ! zdiff $S ${tmp}.3 2>/dev/null 1>&2; then
+      echo indicator o
+      rm -f ${tmp}.*
+      if [ -e ${a}_o -o -L ${a}_o ]; then
+        rm ${a}_o
+      fi
+      ln -s $a ${a}_o
+      exit 0
+    fi
+  done
+  if zdiff $S ${tmp}.0 2>/dev/null 1>&2; then
+    echo indicator +
+# Now compute the orthogonal group sign
+    if [ -e ${a}_+* -o -L ${a}_+* ]; then
+      rm ${a}_+*
+    fi
+    let nor2=$nor/2
+    let t=$nor2*2
+    if [ $nor -eq $t ]; then
+# Even dimensional
+      ok=0
+      mem_failed=0
+      cp $S ${form}
+      while [ 0 -eq $ok ]; do
+        out=`zsign -m $memory $S $S 2>&1`
+        ret=$?
+        if [ 2 -eq $ret ]; then
+          let memory=`more_memory $memory 2>/dev/null`
+          mem_failed=1
+        else
+          ok=1
+        fi
+      done
+      if [ 1 -eq $mem_failed ]; then
+        if [ 0 -ne $ret -a 255 -ne $ret ]; then
+          ok=0
+          memory=$init_memory
+          while [ 0 -eq $ok ]; do
+            out=`zsignf -m $memory $S $S  ${tmp_dir} 2>&1`
+            ret=$?
+            if [ 2 -eq $ret ]; then
+              let memory=`more_memory $memory 2>/dev/null`
+            else
+              ok=1
+            fi
+          done
+        fi
+      fi
+      if [ 0 -eq $ret ]; then
+        ln -s $a ${a}_++
+        echo group +
+      elif [ 255 -eq $ret ]; then
+        ln -s $a ${a}_+-
+        echo group -
+      elif [ 2 -eq $ret ]; then
+        ln -s $a ${a}_+
+        echo insufficient memory to compute group sign
+      else
+        rm -f ${tmp}.*
+        echo $out
+        exit 1
+      fi
+    else
+      ln -s $a ${a}_+
+    fi
+  else
+    echo indicator -
+    if [ -e ${a}_- -o -L ${a}_- ]; then
+      rm ${a}_-
+    fi
+    ln -s $a ${a}_-
+  fi
+  rm -f ${tmp}.*
+fi
+exit 0

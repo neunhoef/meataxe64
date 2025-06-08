@@ -1,0 +1,55 @@
+#!/bin/bash
+#
+# $Id: f6,v 1.9 2023/07/03 08:30:07 jon Exp $
+#
+# Script to perform A + BC + CB
+#
+# Inputs
+# $1: input A
+# $2: input B
+# $3: input C
+# $4: output
+# $5: temporary stem
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+#
+. functions
+usage="$0: usage: $0 <in1> <in2> <in3> <out> <stem>"
+if [ $# -ne 5 ]; then
+  echo "$usage"
+  exit 1;
+fi
+if [ -e $1 -a -e $2 -a -e $3 ]; then
+  memory=400000
+  ok=0
+  while [ 0 -eq $ok ]; do
+    zmu -m $memory $2 $3 ${5}_1
+    ret=$?
+    if [ $ret -eq 0 ]; then
+      ok=1
+    elif [ $ret -eq 2 ]; then
+      let memory=`more_memory $memory 2>/dev/null`
+    else
+      exit 1
+    fi
+  done
+  ok=0
+  while [ 0 -eq $ok ]; do
+    zmu -m $memory $3 $2 ${5}_2
+    ret=$?
+    if [ $ret -eq 0 ]; then
+      ok=1
+    elif [ $ret -eq 2 ]; then
+      let memory=`more_memory $memory 2>/dev/null`
+    else
+      exit 1
+    fi
+  done
+  f1 $1 ${5}_1 ${5}_2 $4 ${5}_1
+  rm ${5}_1 ${5}_2
+else
+  echo "$0: missing files $1, $2 or $3"
+  exit 1
+fi

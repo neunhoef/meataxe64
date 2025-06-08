@@ -1,0 +1,12 @@
+#!/bin/bash
+#
+# $Id: three,v 1.2 2023/07/03 08:30:08 jon Exp $
+#
+# Script to produce _3 from _1
+#
+usage="$0: usage: $0 <a>"
+if [ $# -ne 1 ]; then
+  echo "$usage"
+  exit 1
+fi
+echo $1 | sed -e "s/_1$/_3/g"

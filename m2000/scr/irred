@@ -1,0 +1,89 @@
+#!/bin/bash
+#
+# $Id: irred,v 1.11 2023/07/03 08:30:07 jon Exp $
+#
+# Script to discover if a representation is irreducible
+#
+# Inputs
+# $1: element with which to split
+# $2: output filename base
+# $3: memory
+# $4: subspace name
+# $5: generator a
+# $6-: other generators
+#
+# outputs will be of the form <$3>_<q>_<nor>_$x
+# where nor is number of rows, and q is the prime power
+#
+#
+# Return codes
+# 1: error in parameters
+# 0: split
+# 254: did not split
+# 255: irreducible
+#
+#set -v
+. functions
+usage="$0: usage: $0 <e> <output_stem> <memory> <subspace> <a> [<other generators>]"
+if [ $# -lt 6 ]; then
+  echo "$usage"
+  exit 1;
+fi
+e=$1
+o=$2
+memory=$3
+s=$4
+a=$5
+shift 5
+if [ -e $a -a -e $e ]; then
+  q=`zprime $e`
+  nor=`znor $a`
+  noc=`znoc $a`
+  if [ $nor -ne $noc ]; then
+    echo "$0: $a is not square"
+    exit 1
+  fi
+  if [ 1 -eq $q ]; then
+    echo "$0: $e cannot be a map"
+    exit 1
+  fi
+  if [ $noc -ne `znoc $e` ]; then
+    echo "$0: $a and $e are not compatible"
+    exit 1
+  fi
+else
+  echo "$0: missing files $a or $e"
+  exit 1
+fi
+tmp=tmp${PPID}
+vectors=${tmp}.vectors
+#echo Using tmp stem $tmp
+ok=0
+nullity=0
+ztr -m $memory $a ${tmp}.1
+if [ $? -ne 0 ]; then
+  rm ${tmp}*
+  exit 1
+fi
+ztr -m $memory $e ${tmp}.0
+if [ $? -ne 0 ]; then
+  rm ${tmp}*
+  exit 1
+fi
+x=2
+names=""
+for y in $*; do
+  ztr -m $memory $y ${tmp}.$x
+  if [ $? -ne 0 ]; then
+    rm ${tmp}*
+    exit 1
+  fi
+  names="$names ${tmp}.$x"
+  let x=$x+1
+done
+#echo irred calls split_with_element
+ok=0
+split_with_element ${tmp}.0 ${o}_tra 1 0 $s ${vectors} ${tmp}.1 ${names}
+ret=$?
+rm ${tmp}*
+exit $ret

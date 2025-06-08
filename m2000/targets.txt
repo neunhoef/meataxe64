@@ -1,0 +1,19 @@
+#
+# Generic multiple target rules
+#
+# $Id: targets.txt,v 1.2 2001/08/30 23:13:38 jon Exp $
+#
+# generate target names plus objects
+#
+
+TARGET_TYPE:=REL
+include target.txt
+
+TARGET_TYPE:=DEBUG
+include target.txt
+
+TARGET_TYPE:=PROF
+include target.txt
+
+TARGET_TYPE:=PROFNA
+include target.txt

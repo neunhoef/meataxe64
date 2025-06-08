@@ -1,0 +1,72 @@
+#!/bin/bash
+#
+# $Id: spin_vectors,v 1.6 2023/07/03 08:30:07 jon Exp $
+#
+# Compute subspaces, with a memory limit
+#
+# Inputs
+# $1 file of vectors to try, one at a time
+# $2 number of vectors to use from the file
+# $3 start point within the file from which to get vectors
+# $4 memory
+# $5- generators
+#
+#
+# Return codes
+# 0: success
+# 1: some sort of error
+# 255: failed to find a vector generating a subspace
+#
+. functions
+usage="$0: usage: $0 <vectors> <count> <first vector> <memory> <generators>*"
+if [ $# -lt 5 ]; then
+  echo "$usage"
+  exit 1
+fi
+# First to be tried
+x=$3
+vecs=$1
+# Last to look at
+let y=$x+$2
+# Two generators
+# Temporary file stem
+tmp=tmp${PPID}
+memory=$4
+shift 4
+while [ $x -lt $y ]; do
+  echo Trying $x
+  zsel $vecs ${tmp}.0 $x
+  ret=$?
+  if [ 0 -ne $ret ]; then
+    echo Failed to select vector $x, ignoring
+    let x=$x+1
+    continue
+  fi
+# Check that we haven't selected a zero vector
+  rn=`srn -m $memory ${tmp}.0`
+  ret=$?
+  if [ 0 -ne $ret ]; then
+    echo rn returns $ret on for vector $x, ignoring
+  else
+    if [ $rn -eq 0 ]; then
+      echo vector $x is zero and so not considered
+    else
+      sub=`zmsp -m $memory ${tmp}.0 $vecs.$x.ss $*`
+      ret=$?
+      if [ $ret -eq 0 ]; then
+        echo subspace $vecs.$x.ss of size $sub found for element $x
+        rm -f ${tmp}.0
+        exit
+      elif [ $ret -eq 2 ]; then
+        echo subspace ran out of memory for element $x
+      else
+        echo subspace failed for element $x with return $ret
+      fi
+    fi
+    rm ${tmp}.0
+  fi
+  let x=$x+1
+done
+rm -f ${tmp}.0
+echo Failed to find a subspace
+exit 255

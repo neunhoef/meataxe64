@@ -1,0 +1,62 @@
+#!/bin/bash
+#
+# $Id: checkorder,v 1.2 2023/07/03 08:30:07 jon Exp $
+#
+# Script to check order of a matrix
+#
+# Inputs
+# $1: matrix
+# $2: expected order
+# $3: optional memory allocation
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+# 255: order wrong
+#
+. functions
+usage="$0: usage: $0 <in> <order> [<memory>]"
+if [ 2 -ne $# -a 3 -ne $#  ]; then
+  echo "$usage"
+  exit 1;
+fi
+a=$1
+o=$2
+if [ 0 -eq $o ]; then
+  echo "Order 0 not acceptable"
+  echo "$usage"
+  exit 1;
+fi
+if [ 3 -eq $# ]; then
+  memory=$3
+else
+  memory=400
+fi
+if [ -e $a ]; then
+  q=`zprime $a`
+  nor=`znor $a`
+  noc=`znoc $a`
+  if [ $nor -ne $noc ]; then
+    echo "$0: $a is not square"
+    exit 1
+  fi
+else
+  echo "$0: missing file $a"
+  exit 1
+fi
+tmp=tmp${PPID}
+id=id_${q}_$nor
+if [ ! -e $id ]; then
+  zid $q $nor $nor $id
+fi
+power $a $o ${tmp}.1 $memory
+zdiff ${tmp}.1 $id 1>/dev/null
+ret=$?
+rm ${tmp}.1
+if [ 0 -eq $ret ]; then
+  echo Order correct
+  exit 0
+else
+  echo Order wrong
+  exit 255
+fi

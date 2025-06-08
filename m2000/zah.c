@@ -1,0 +1,124 @@
+/*
+ * $Id: zah.c,v 1.12 2019/01/21 08:32:35 jon Exp $
+ *
+ * Add a header to an intermediate file matrix
+ * Essentially a disaster recovery program
+ *
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
+#include <errno.h>
+#include "elements.h"
+#include "endian.h"
+#include "files.h"
+#include "header.h"
+#include "memory.h"
+#include "parse.h"
+#include "read.h"
+#include "utils.h"
+#include "write.h"
+
+static const char *name = "zah";
+
+static void ah_usage(void)
+{
+  fprintf(stderr, "%s: usage: %s %s <text header> <in_file> <out_file>\n", name, name, parse_usage());
+}
+
+int main(int argc, const char * const argv[])
+{
+  const char *in, *text_in;
+  const char *out;
+  FILE *inp, *text_inp;
+  FILE *outp;
+  u32 nor, len, memory = 0;
+  word *row;
+  u32 i;
+  s64 ptr;
+  const header *h;
+
+  argv = parse_line(argc, argv, &argc);
+  if (4 != argc) {
+    ah_usage();
+    exit(1);
+  }
+  text_in = argv[1];
+  in = argv[2];
+  out = argv[3];
+  memory_init(name, memory);
+  endian_init();
+  errno = 0;
+  text_inp = fopen(text_in, "r");
+  if (NULL == text_inp) {
+    if ( 0 != errno) {
+      perror(name);
+    }
+    fprintf(stderr, "%s: cannot open %s, terminating\n", name, text_in);
+    exit(1);
+  }
+  errno = 0;
+  inp = fopen(in, "r");
+  if (NULL == inp) {
+    if ( 0 != errno) {
+      perror(name);
+    }
+    fprintf(stderr, "%s: cannot open %s, terminating\n", name, in);
+    fclose(text_inp);
+    exit(1);
+  }
+  if (0 == read_text_header(text_inp, &h, text_in, name)) {
+    fclose(text_inp);
+    fclose(inp);
+    exit(1);
+  }
+  fclose(text_inp);
+  nor = header_get_nor(h);
+  len = header_get_len(h);
+  if (memory_rows(len, 1000) < 1) {
+    fprintf(stderr, "%s: cannot obtain memory for one row of %s, terminating\n", name, in);
+    fclose(inp);
+    exit(1);
+  }
+  row = memory_pointer(0);
+  if (0 == open_and_write_binary_header(&outp, h, out, name)) {
+    fclose(inp);
+    header_free(h);
+    exit(1);
+  }
+  for (i = 0; i < nor; i++) {
+    errno = 0;
+    if (0 == endian_read_row(inp, row, len)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
+      fprintf(stderr, "%s: cannot read row %u from %s, terminating\n", name, i, in);
+      fclose(inp);
+      fclose(outp);
+      exit(1);
+    }
+    errno = 0;
+    if (0 == endian_write_row(outp, row, len)) {
+      if ( 0 != errno) {
+        perror(name);
+      }
+      fprintf(stderr, "%s: cannot write row %u to %s, terminating\n", name, i, out);
+      fclose(inp);
+      fclose(outp);
+      exit(1);
+    }
+  }
+  ptr = ftello(inp);
+  fseeko(inp, 0, SEEK_END);
+  if (ftello(inp) != ptr) {
+    fprintf(stderr, "%s: not all of input %s read, terminating\n", name, in);
+    fclose(inp);
+    fclose(outp);
+    (void)remove(out);
+    exit(1);
+  }
+  fclose(inp);
+  fclose(outp);
+  return 0;
+}

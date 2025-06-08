@@ -1,0 +1,146 @@
+#!/bin/bash
+#
+# $Id: find_irred,v 1.6 2023/07/03 08:30:07 jon Exp $
+#
+# Script to find the irreducible corresponding to a representation
+#
+# Inputs
+# $1: memory
+# $2: generator a
+# $3-: other generators
+#
+#
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+# 255: not found
+# 254: reducible
+#
+. functions
+usage="$0: usage: $0 <memory> <a> [<other generators>*]"
+if [ $# -lt 3 ]; then
+  echo "$usage"
+  exit 1;
+fi
+memory=$1
+a=$2
+if [ -e $a ]; then
+  q=`zprime $a`
+  nor=`znor $a`
+  noc=`znoc $a`
+  if [ $nor -ne $noc ]; then
+    echo "$0: $a is not square"
+    exit 1
+  fi
+else
+  echo "$0: missing file $a"
+  exit 1
+fi
+shift 1
+tmp=tmp${PPID}
+for x in `ls irreds/*_1 2>/dev/null`; do
+  if [ -z "$x" ]; then
+    echo "No irreducibles found, terminating"
+    exit 1
+  fi
+  y=`ls ${x}_I*`
+  if [ -z "$y" ]; then
+    echo "Script for $x not found, terminating"
+    exit 1
+  fi
+  if [ $nor -eq `znor $x` ]; then
+    script=`echo $y | sed -e "s?${x}_??g"`
+    l=($script)
+    len=${#l[@]}
+    #echo "Trying script $script of length $len" 1>&2
+    if [ 1 -ne $len ]; then
+      break
+    fi
+    zscript -m $memory ${tmp}.0 ${tmp}.zscript $script $* 2>/dev/null
+    ret=$?
+    rm ${tmp}.zscript*
+    if [ 0 -ne $ret ]; then
+      rm ${tmp}.*
+      exit 1
+    fi
+# Compute nullity
+    ok=0
+    while [ 0 -eq $ok ]; do
+      nullity=`zns -m $memory ${tmp}.0 ${tmp}.1 2>&1`
+      ret=$?
+      if [ $ret -eq 0 ]; then
+        ok=1
+      else
+        if [ $ret -eq 2 ]; then
+          let memory=`more_memory $memory`
+#         echo Allocating more memory for zns, now $memory
+        else
+          rm -f ${tmp}*
+          echo $nullity
+          exit 1
+        fi
+      fi
+    done
+    if [ 0 -eq $nullity ]; then
+# Can't be this one, no null vectors
+      continue
+    fi
+    zsel -m $memory ${tmp}.1 ${tmp}.2 0
+    ret=$?
+    if [ 0 -ne $ret ]; then
+      rm ${tmp}.*
+      exit 1
+    fi
+# TODO: zmsb
+    ok=0
+    while [ 0 -eq $ok ]; do
+      dim=`zmsb -m $memory ${tmp}.2 ${tmp}.3 $* 2>/dev/null`
+      ret=$?
+      if [ 0 -eq $ret ]; then
+        if [ $dim -eq $nor ]; then
+          ok=1
+        else
+          echo Strange result from zmsb giving wrong dimension $dim vs $nor
+          rm ${tmp}.*
+          exit 254
+        fi
+      elif [ $ret -eq 2 ]; then
+        let memory=`more_memory $memory`
+      else
+        echo zmsb unexpectedly returns $ret
+        rm ${tmp}.*
+        exit 1
+      fi
+    done
+# TODO: check all generators
+    ok=1
+    i=1
+    a=`echo $x | sed -e "s/_1$//g"`
+    for z in $*; do
+      zmu -m $memory ${tmp}.3 $z ${tmp}.4
+      if [ 0 -ne $ret ]; then
+        rm ${tmp}.*
+        exit 1
+      fi
+      zmu -m $memory ${a}_$i ${tmp}.3 ${tmp}.5
+      if [ 0 -ne $ret ]; then
+        rm ${tmp}.*
+        exit 1
+      fi
+      if ! zdiff ${tmp}.4 ${tmp}.5 1>/dev/null; then
+        ok=0
+        break
+      fi
+      let i=$i+1
+    done
+    if [ 1 -eq $ok ]; then
+# Found it
+      echo $a
+      rm ${tmp}.*
+      exit 0
+    fi
+  fi
+done
+rm -rf ${tmp}.*
+exit 255

@@ -1,0 +1,99 @@
+#!/bin/bash
+#
+# $Id: new_irred,v 1.15 2023/07/03 08:30:07 jon Exp $
+#
+# Script to classify an irreducible representation by
+# first trying against existing irreducibles of the same degree
+# Will only try if there is a unique such irreducible
+#
+# Inputs
+# $1: initial memory
+# $2-: generators
+#
+# Return codes
+# 1: error in parameters
+# 0: new irreducible
+# 254: no nullity one element found
+# 255: existing irreducible
+#
+name=$0
+usage="$name: usage: $name <memory> <a> [<other generators>]"
+if [ $# -lt 3 ]; then
+  echo "$usage"
+  exit 1;
+fi
+. functions
+memory=$1
+shift
+a=$1
+b=$2
+if [ -e $a -a -e $b ]; then
+  q=`zprime $a`
+  r=`zprime $b`
+  nor=`znor $a`
+  noc=`znoc $a`
+  if [ $nor -ne $noc ]; then
+    echo "$0: $a is not square"
+    exit 1
+  fi
+  if [ $nor -ne `znor $b` -o $nor -ne `znoc $b` ]; then
+    echo "$0: $a and $b are not compatible"
+    exit 1
+  fi
+  if [ 1 -eq $q -a 1 -eq $r ]; then
+    echo "$0: representation on two maps cannot be irreducible"
+    exit 1
+  fi
+  if [ 1 -ne $q -a 1 -ne $r -a $q -ne $r ]; then
+    echo "$0: $a and $b are not compatible"
+    exit 1
+  fi
+else
+  echo "$0: missing files $a or $b"
+  exit 1
+fi
+#
+# Try unique existing irred if it exists first
+#
+if [ -d irreds ]; then
+  # irreds exists
+  out=`find_irred ${memory} $*`
+  ret=$?
+  if [ 0 -eq $ret ]; then
+    # Found what we want
+    echo "Existing irreducible ${out} found"
+    exit 255 # Existing irred
+  elif [ 255 -ne $ret ]; then
+    exit $ret
+  fi
+fi
+i=0
+for x in $*; do
+  ord=`singular_order $x`
+  ret=$?
+  if [ 1 -eq $ret ]; then
+    echo Cannot compute order of $x
+    exit 1
+  fi
+  if [ 0 -eq $ret ]; then
+    order[$i]=$ord
+    y[$i]=$x
+    let i=$i+1
+  elif [ 255 -eq $ret ]; then
+    zero=$x
+    continue
+  else
+    echo singular_order returns unexpected code $ret
+    exit 1
+  fi
+done
+j=0
+line=
+while [ $j -lt $i ]; do
+  line="$line ${y[$j]} ${order[$j]}"
+  let j=$j+1
+done
+if [ 1 -eq $i ]; then
+  line="$line $zero 1"
+fi
+exec new_irred_with_orders $memory $line
