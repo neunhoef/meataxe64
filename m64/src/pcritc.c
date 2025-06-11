@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include "field.h"
+#include "pcrit.h"
 
 /* choose suitable nor from nob  */
 /* probably should use mact also!  */

@@ -70,7 +70,7 @@ atomic_int stopfree;
 
 /* Functions replacing the x86 assembler versions */
 
-static atomic_int my_atomic_fetch_add(atomic_int *arg, int val)
+static int my_atomic_fetch_add(atomic_int *arg, int val)
 {
   atomic_int i = atomic_fetch_add(arg, val);
   return i + val;
@@ -109,7 +109,7 @@ extern void TFStartMOJFree(void)
 /* nothreads is the (constant) number of started threads     */
 /* It is set by TFInit and used by TFClose                   */
 
-int nothreads;
+unsigned int nothreads;
 
 /* There is a single "global" mutex called "dodgy" that can  */
 /* be used to prevent data races etc., and this is used      */
@@ -117,12 +117,12 @@ int nothreads;
 
 pthread_mutex_t dodgy=PTHREAD_MUTEX_INITIALIZER;
 
-void Lock(void)
+static void Lock(void)
 {
-    pthread_mutex_lock(&dodgy);
+  pthread_mutex_lock(&dodgy);
 }
 
-void Unlock(void)
+static void Unlock(void)
 {
     pthread_mutex_unlock(&dodgy);
 }
@@ -134,12 +134,12 @@ void Unlock(void)
 
 pthread_cond_t maincond=PTHREAD_COND_INITIALIZER;
 
-void LcMainPause(void)
+static void LcMainPause(void)
 {
     pthread_cond_wait(&maincond,&dodgy);
 }
 
-void LcMainKick(void)
+static void LcMainKick(void)
 {
     pthread_cond_broadcast(&maincond);
 }
@@ -199,7 +199,7 @@ void TFWaitEnd(void)
 
 //  This should be inlined once it is under regression
 
-void * AlignTalloc(size_t len)
+static void *AlignTalloc(size_t len)
 {
     unsigned long *x,y;
     x=malloc(len+128);
@@ -215,7 +215,7 @@ void * AlignTalloc(size_t len)
     return (void *) x;
 }
 
-void AlignTree(void * z)
+static void AlignTree(void *z)
 {
     unsigned long y,*x;
     x=(unsigned long *) z;
@@ -230,23 +230,23 @@ void AlignTree(void * z)
 
 MOJ tfmoj;
 
-int nfmoj;
-int nmojes;
+unsigned int nfmoj;
+unsigned int nmojes;
 
 /* ========== job data and methods ======= */
 
 
-jobstruct * NewJob(void) 
+static jobstruct *NewJob(void) 
 {
     return (jobstruct *) TfLinkOut(TFM+TFMJOB);
 }
 
-void FreeJob(jobstruct * JOB)
+static void FreeJob(jobstruct *JOB)
 {
     TfLinkIn(TFM+TFMJOB,(uint64_t *) JOB);
 }
 
-void JobPop(jobstruct * JOB, int proggy, int priority)
+static void JobPop(jobstruct *JOB, int proggy, int priority)
 {
     JOB->proggyno = proggy;
     JOB->priority = priority;
@@ -256,27 +256,27 @@ void JobPop(jobstruct * JOB, int proggy, int priority)
 
 /* ========== rdl data and methods ======= */
 
-rdlstruct * LcNewRdl(void) 
+static rdlstruct *LcNewRdl(void) 
 {
      return (rdlstruct *) TfLinkOut(TFM+TFMRDL);
 }
 
-void LcFreeRdl(rdlstruct * RDL)
+static void LcFreeRdl(rdlstruct *RDL)
 {
     TfLinkIn(TFM+TFMRDL,(uint64_t *) RDL);
 }
 
-void TfUpJobRef(jobstruct * JOB)
+static void TfUpJobRef(jobstruct *JOB)
 {
     my_atomic_fetch_add(&(JOB->ref),1);   // maybe lock add someday
 }
 
-void UpMojRef(MOJ mj)
+static void UpMojRef(MOJ mj)
 {
     my_atomic_fetch_add(&(mj->refc),1);
 }
 
-void LCBindRdl(jobstruct * job, MOJ moj)
+static void LCBindRdl(jobstruct *job, MOJ moj)
 {
     rdlstruct * RDL;
     int x;
@@ -288,8 +288,8 @@ void LCBindRdl(jobstruct * job, MOJ moj)
     TfUpJobRef(job);
 }
 
-
-void LcBindRdl(jobstruct * JOB, int moj)
+#if 0 /* Unused */
+static void LcBindRdl(jobstruct * JOB, int moj)
 {
     rdlstruct * RDL;
     MOJ mj;
@@ -302,15 +302,16 @@ void LcBindRdl(jobstruct * JOB, int moj)
     RDL->JOB=JOB;
     TfUpJobRef(JOB);
 }
+#endif
 
 /* ==========  jobs ready to run  ======= */
 
 jobstruct ** RUNJOB;
 long  jobsready;
 
-void LcStartJob(jobstruct * JOB, int thread);
+static void LcStartJob(jobstruct *JOB, int thread);
 
-int TfUnQThread(jobstruct * JOBNO)
+static int TfUnQThread(jobstruct *JOBNO)
 {
     int thread;
     if(firstfreethread!=-1)
@@ -325,7 +326,7 @@ int TfUnQThread(jobstruct * JOBNO)
     exit(17);
 }
 
-void TfQJob(jobstruct * JOBNO)
+static void TfQJob(jobstruct *JOBNO)
 {
     int k,kp;
     jobstruct * t;
@@ -344,7 +345,7 @@ void TfQJob(jobstruct * JOBNO)
     }
 }
 
-void TfPutJob(jobstruct * JOBNO)
+static void TfPutJob(jobstruct *JOBNO)
 {
 
     int i;
@@ -363,7 +364,7 @@ void TfPutJob(jobstruct * JOBNO)
 
 // Rename as TfUnQJob once locking sorted
 
-jobstruct * LcNextRun(void) 
+static jobstruct *LcNextRun(void) 
 {
     int k,kc1,kc2;
     jobstruct * rj, *t;
@@ -390,7 +391,7 @@ jobstruct * LcNextRun(void)
     return rj;
 }
 
-void TfJobRefDown(jobstruct * JOB) 
+static void TfJobRefDown(jobstruct *JOB) 
 {
     int x;
     x = my_atomic_fetch_add(&(JOB->ref),-1);
@@ -398,7 +399,7 @@ void TfJobRefDown(jobstruct * JOB)
     TfPutJob(JOB);
 }
 
-void LcFreeThread(int thread) 
+static void LcFreeThread(int thread) 
 {
     tfthread[thread]=firstfreethread;
     firstfreethread=thread;
@@ -413,17 +414,17 @@ pthread_t * mythread;
 /* wait on when they are idle            */
 pthread_cond_t * wakeworker;
 
-void LcWorkerPause(int thread)
+static void LcWorkerPause(int thread)
 {
     pthread_cond_wait(wakeworker+thread,&dodgy);
 }
 
-void LcWorkerKick(int thread)
+static void LcWorkerKick(int thread)
 {
     pthread_cond_signal(wakeworker+thread);
 }
 
-void LcStartJob(jobstruct * JOB, int thread)
+static void LcStartJob(jobstruct * JOB, int thread)
 {
     tfparms[thread].JOB=JOB;
     LcWorkerKick(thread); 
@@ -433,7 +434,7 @@ void LcStartJob(jobstruct * JOB, int thread)
 
 void tfdo(int proggyno, MOJ * p);
 
-jobstruct * LcQThread(parmstruct * pp)
+static jobstruct *LcQThread(parmstruct *pp)
 {
     for (;;) {
         pp->JOB=NULL;
@@ -446,7 +447,7 @@ jobstruct * LcQThread(parmstruct * pp)
     } 
 }
 
-jobstruct * GetJob(parmstruct * pp)  // may be 2
+static jobstruct *GetJob(parmstruct *pp)  // may be 2
 {
     int i;
     jobstruct * JOB;
@@ -464,7 +465,7 @@ jobstruct * GetJob(parmstruct * pp)  // may be 2
 }
 
 /*  The worker thread  */
-void * worker(void * p)
+static void *worker(void *p)
 {
     int nparm;
     jobstruct * JOB;
@@ -601,76 +602,76 @@ void TFClose(void)
     free(TFM);
 }
 
-void TFInit(int threads)
+void TFInit(unsigned int threads)
 {
-    int i;
-    int jobx,rdlx;
-    uint64_t * FRE;
-    jobstruct * tfjob;
-    rdlstruct * tfrdl;
-    MOJ mj;
-    jobx=SCALE*12;
-    nmojes=jobx*2;
-    atomic_init(&closejobs, 0);
-    TFM=malloc(TFMSIZE*sizeof(uint64_t));
-    FRE=malloc(FRESIZE*sizeof(uint64_t));
-    *(TFM+TFMFRE)=(uint64_t)FRE;
-    *FRE=0;      // none yet to free
-// following is temporary fix for zpe needs.
-// redesign it better for V2
-    rdlx=3*nmojes;
-    tfjob=AlignTalloc(jobx*sizeof(jobstruct));
-    append(FRE,(uint64_t)tfjob);
-    *(TFM+TFMJOB)=0;     // freechain of jobs empty
-    for(i=0;i<jobx;i++) TfLinkIn(TFM+TFMJOB,(uint64_t *) (tfjob+i));
-    tfrdl=AlignTalloc(rdlx*sizeof(rdlstruct));
-    append(FRE,(uint64_t)tfrdl);
-    *(TFM+TFMRDL)=0;     // freechain of jobs empty
-    for(i=0;i<rdlx;i++) TfLinkIn(TFM+TFMRDL,(uint64_t *) (tfrdl+i));
-    RUNJOB=AlignTalloc(jobx*sizeof(jobstruct *));
-    append(FRE,(uint64_t)RUNJOB);
-    nfmoj=0;
-    atomic_init(&runjobs, 0);
-    atomic_init(&stopfree, 0);
+  unsigned int i;
+  unsigned int jobx,rdlx;
+  uint64_t * FRE;
+  jobstruct * tfjob;
+  rdlstruct * tfrdl;
+  MOJ mj;
+  jobx=SCALE*12;
+  nmojes=jobx*2;
+  atomic_init(&closejobs, 0);
+  TFM=malloc(TFMSIZE*sizeof(uint64_t));
+  FRE=malloc(FRESIZE*sizeof(uint64_t));
+  *(TFM+TFMFRE)=(uint64_t)FRE;
+  *FRE=0;      // none yet to free
+  // following is temporary fix for zpe needs.
+  // redesign it better for V2
+  rdlx=3*nmojes;
+  tfjob=AlignTalloc(jobx*sizeof(jobstruct));
+  append(FRE,(uint64_t)tfjob);
+  *(TFM+TFMJOB)=0;     // freechain of jobs empty
+  for(i=0;i<jobx;i++) TfLinkIn(TFM+TFMJOB,(uint64_t *) (tfjob+i));
+  tfrdl=AlignTalloc(rdlx*sizeof(rdlstruct));
+  append(FRE,(uint64_t)tfrdl);
+  *(TFM+TFMRDL)=0;     // freechain of jobs empty
+  for(i=0;i<rdlx;i++) TfLinkIn(TFM+TFMRDL,(uint64_t *) (tfrdl+i));
+  RUNJOB=AlignTalloc(jobx*sizeof(jobstruct *));
+  append(FRE,(uint64_t)RUNJOB);
+  nfmoj=0;
+  atomic_init(&runjobs, 0);
+  atomic_init(&stopfree, 0);
 
-/* Initialize the moj data  */
-    tfmoj=AlignTalloc(nmojes*sizeof(mojstruct));
-    append(FRE,(uint64_t)tfmoj);
-    for(i=0;i<nmojes;i++)
+  /* Initialize the moj data  */
+  tfmoj=AlignTalloc(nmojes*sizeof(mojstruct));
+  append(FRE,(uint64_t)tfmoj);
+  for(i=0;i<nmojes;i++)
     {
-        mj=tfmoj+i;
-        mj->mem=NULL;
-        atomic_init(&mj->refc, 0);     // This is private, so OK.
-        mj->RDL=NULL;
+      mj=tfmoj+i;
+      mj->mem=NULL;
+      atomic_init(&mj->refc, 0);     // This is private, so OK.
+      mj->RDL=NULL;
     }
-/* Initialize the thread data  */
-    firstfreethread=-1;  // no free threads yet
-    tfthread=AlignTalloc(threads*sizeof(int));
-    append(FRE,(uint64_t)tfthread);
-    tfparms =AlignTalloc(threads*sizeof(parmstruct));
-    append(FRE,(uint64_t)tfparms);
-    for(i=0;i<threads;i++) tfparms[i].JOB=(jobstruct *)3;  // so close works
-    nothreads=threads;
-    mythread=AlignTalloc(threads*sizeof(pthread_t));
-    append(FRE,(uint64_t)mythread);
-    wakeworker=AlignTalloc(threads*sizeof(pthread_cond_t));
-    append(FRE,(uint64_t)wakeworker);
+  /* Initialize the thread data  */
+  firstfreethread=-1;  // no free threads yet
+  tfthread=AlignTalloc(threads*sizeof(int));
+  append(FRE,(uint64_t)tfthread);
+  tfparms =AlignTalloc(threads*sizeof(parmstruct));
+  append(FRE,(uint64_t)tfparms);
+  for(i=0;i<threads;i++) tfparms[i].JOB=(jobstruct *)3;  // so close works
+  nothreads=threads;
+  mythread=AlignTalloc(threads*sizeof(pthread_t));
+  append(FRE,(uint64_t)mythread);
+  wakeworker=AlignTalloc(threads*sizeof(pthread_cond_t));
+  append(FRE,(uint64_t)wakeworker);
 
-/* initialize the condition variables for the workers */
-    for(i=0;i<threads;i++) pthread_cond_init(wakeworker+i,NULL);
-    jobsready=0;    // no jobs ready to run
-/* get the lock so that nothing does   */
-/* any damage while we are starting up         */
-    Lock();
-/* start all the worker threads                */
-    for(i=0;i<nothreads;i++)
+  /* initialize the condition variables for the workers */
+  for(i=0;i<threads;i++) pthread_cond_init(wakeworker+i,NULL);
+  jobsready=0;    // no jobs ready to run
+  /* get the lock so that nothing does   */
+  /* any damage while we are starting up         */
+  Lock();
+  /* start all the worker threads                */
+  for(i=0;i<nothreads;i++)
     {
-        tfparms[i].threadno=i;
-        pthread_create(mythread+i,NULL, worker, tfparms+i);
+      tfparms[i].threadno=i;
+      pthread_create(mythread+i,NULL, worker, tfparms+i);
     }
-/* all is ready - now let's go                 */
-    Unlock();
-    return;
+  /* all is ready - now let's go                 */
+  Unlock();
+  return;
 }
 
 void TFWait(MOJ moj)
@@ -733,19 +734,19 @@ void TFSubmit(int priority, int proggyno, ...)
  */
 int TfLinkIn(uint64_t *chain, uint64_t *ours)
 {
-  uint64_t state = atomic_exchange(chain, 1);
+  uint64_t state = atomic_exchange((atomic_uint_least64_t *)chain, 1);
   for (;;) {
     if (1 == state) {
       /* Someone else has the lock */
       for (;;) {
-        state = atomic_load(chain);
+        state = atomic_load((atomic_uint_least64_t *)chain);
         if (1 != state) {
           break;
         }
         wait(10); /* Short pause */
       }
       /* We can have the lock, so try again */
-      state = atomic_exchange(chain, 1);
+      state = atomic_exchange((atomic_uint_least64_t *)chain, 1);
     }
     if (1 != state) {
       /* We got it */
@@ -755,31 +756,31 @@ int TfLinkIn(uint64_t *chain, uint64_t *ours)
   /* We have the lock */
   if (2 == state) {
     /* List closed */
-    atomic_store(chain, 2); /* Unlock and we're done */
+    atomic_store((atomic_uint_least64_t *)chain, 2); /* Unlock and we're done */
     return 2;
   } else {
     /* List not closed */
-    atomic_store(ours, state); /* chain from ours onwards */
-    atomic_store(chain, (uint64_t)ours); /* unlock and chain ours in */
+    atomic_store((atomic_uint_least64_t *)ours, state); /* chain from ours onwards */
+    atomic_store((atomic_uint_least64_t *)chain, (uint64_t)ours); /* unlock and chain ours in */
     return 0;
   }
 }
 
 uint64_t *TfLinkOut(uint64_t *chain)
 {
-  uint64_t state = atomic_exchange(chain, 1);
+  uint64_t state = atomic_exchange((atomic_uint_least64_t *)chain, 1);
   for (;;) {
     if (1 == state) {
       /* Someone else has the lock */
       for (;;) {
-        state = atomic_load(chain);
+        state = atomic_load((atomic_uint_least64_t *)chain);
         if (1 != state) {
           break;
         }
         wait(10); /* Short pause */
       }
       /* We can have the lock, so try again */
-      state = atomic_exchange(chain, 1);
+      state = atomic_exchange((atomic_uint_least64_t *)chain, 1);
     }
     if (1 != state) {
       /* We got it */
@@ -789,32 +790,32 @@ uint64_t *TfLinkOut(uint64_t *chain)
   /* We have the lock */
   if (0 == state || 2 == state) {
     /* Empty  or closed */
-    atomic_store(chain, state); /* Unlock as empty or closed and we're done */
+    atomic_store((atomic_uint_least64_t *)chain, state); /* Unlock as empty or closed and we're done */
     return (uint64_t *)state;
   } else {
     /* List not closed or empty */
     uint64_t *ours = (uint64_t *)state;
     uint64_t new = *ours; /* Follow the link */
-    atomic_store(chain, new); /* unlock and chain next in */
+    atomic_store((atomic_uint_least64_t *)chain, new); /* unlock and chain next in */
     return ours;
   }
 }
 
 uint64_t *TfLinkClose(uint64_t *chain)
 {
-  uint64_t state = atomic_exchange(chain, 1);
+  uint64_t state = atomic_exchange((atomic_uint_least64_t *)chain, 1);
   for (;;) {
     if (1 == state) {
       /* Someone else has the lock */
       for (;;) {
-        state = atomic_load(chain);
+        state = atomic_load((atomic_uint_least64_t *)chain);
         if (1 != state) {
           break;
         }
         wait(10); /* Short pause */
       }
       /* We can have the lock, so try again */
-      state = atomic_exchange(chain, 1);
+      state = atomic_exchange((atomic_uint_least64_t *)chain, 1);
     }
     if (1 != state) {
       /* We got it */
@@ -824,17 +825,17 @@ uint64_t *TfLinkClose(uint64_t *chain)
   /* We have the lock */
   if (0 == state) {
     /* Empty, we need to close it */
-    atomic_store(chain, 2);
+    atomic_store((atomic_uint_least64_t *)chain, 2);
     return NULL;
   } else if (2 == state) {
     /* closed already */
-    atomic_store(chain, state); /* Close it and unlock */
+    atomic_store((atomic_uint_least64_t *)chain, state); /* Close it and unlock */
     return (uint64_t *)state;
   } else {
     /* List not closed or empty */
     uint64_t *ours = (uint64_t *)state;
     uint64_t new = *ours; /* Follow the link */
-    atomic_store(chain, new); /* unlock and chain next in */
+    atomic_store((atomic_uint_least64_t *)chain, new); /* unlock and chain next in */
     return ours;
   }
 }

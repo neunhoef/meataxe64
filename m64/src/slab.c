@@ -83,7 +83,7 @@ uint64_t SLSizeC(const FIELD * f, uint64_t nor, uint64_t noc)
     return sp;
 }
 
-void BCMul(DSPACE *dsa, DSPACE * dsbc, uint64_t nora,
+static void BCMul(DSPACE *dsa, DSPACE * dsbc, uint64_t nora,
      const Dfmt * a, uint64_t astride, const Dfmt * b, uint64_t bstride,
            Dfmt * c)
 {
@@ -111,7 +111,7 @@ void BCMul(DSPACE *dsa, DSPACE * dsbc, uint64_t nora,
 
 }
 
-void BCMad(DSPACE *dsa, DSPACE * dsbc, uint64_t nora,
+static void BCMad(DSPACE *dsa, DSPACE * dsbc, uint64_t nora,
      const Dfmt * a, uint64_t astride, const Dfmt * b, uint64_t bstride,
            Dfmt * c, uint64_t cstride)
 {
@@ -126,7 +126,7 @@ void SWMad(DSPACE *dsa, DSPACE * dsbc, uint64_t nora,
      const Dfmt * a, uint64_t astride, const Dfmt * b, uint64_t bstride,
            Dfmt * c, uint64_t cstride, int lev);
 
-void SWMul(DSPACE *dsa, DSPACE * dsbc, uint64_t nora,
+static void SWMul(DSPACE *dsa, DSPACE * dsbc, uint64_t nora,
      const Dfmt * a, uint64_t astride, const Dfmt * b, uint64_t bstride,
            Dfmt * c, int lev)
 {
@@ -214,7 +214,7 @@ void SWMad(DSPACE *dsa, DSPACE * dsbc, uint64_t nora,
     free(r3);
 }
 
-void TSMul(DSPACE *dsa, DSPACE * dsbc, uint64_t nora,
+static void TSMul(DSPACE *dsa, DSPACE * dsbc, uint64_t nora,
      const Dfmt * a, uint64_t astride, const Dfmt * b, uint64_t bstride,
            Dfmt * c)
 {
@@ -874,7 +874,7 @@ void SLTra(const FIELD *f, const Dfmt *am, Dfmt *bm,
 
 // REX rs1 a2 a2p a2np
 
-void RowSel(DSPACE * ds, uint64_t * bs, Dfmt * x, Dfmt * xs, Dfmt * xn)
+static void RowSel(DSPACE * ds, uint64_t * bs, Dfmt * x, Dfmt * xs, Dfmt * xn)
 {
     Dfmt *p,*ps,*pn;
     uint64_t i;
@@ -899,7 +899,7 @@ void RowSel(DSPACE * ds, uint64_t * bs, Dfmt * x, Dfmt * xs, Dfmt * xn)
 
 // RRF rs1 a2p a2np a2
 
-void RowRif(DSPACE * ds, uint64_t * bs, Dfmt * xs, Dfmt * xn, Dfmt * x)
+static void RowRif(DSPACE * ds, uint64_t * bs, Dfmt * xs, Dfmt * xn, Dfmt * x)
 {
     Dfmt *p,*ps,*pn;
     uint64_t i;
@@ -924,9 +924,9 @@ void RowRif(DSPACE * ds, uint64_t * bs, Dfmt * xs, Dfmt * xn, Dfmt * x)
 
 // "recursive" echelize routine
 
-uint64_t RCEch(GAUSS * gs, DSPACE * ds, Dfmt *a, 
-             uint64_t *rs, uint64_t *cs, 
-             FELT * det, Dfmt *m, Dfmt *c, Dfmt *r, uint64_t nor)
+static uint64_t RCEch(GAUSS *gs, DSPACE *ds, Dfmt *a, 
+                      uint64_t *rs, uint64_t *cs, 
+                      FELT *det, Dfmt *m, Dfmt *c, Dfmt *r, uint64_t nor)
 {
     uint64_t colleft,colright,i,j,rk1,rk2,rank,rowtop,rowbottom;
     FELT det1,det2;

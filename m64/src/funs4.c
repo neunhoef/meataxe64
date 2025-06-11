@@ -33,7 +33,7 @@ void fTensor(const char *mt1, int s1, const char *mt2, int s2,
     uint64_t i1,i2,j1,i,j,k,t;
     DSPACE ds1,ds2,ds3;
     Dfmt *v1,*m2,*v3,*v4;
-    long mem,wkr,thiswkr;
+    unsigned long mem,wkr,thiswkr;
     uint64_t * p2;
  
     ef1 = ERHdr(mt1,hdr1);
@@ -303,7 +303,7 @@ void fExteriorCube(const char *mt1, int s1, const char *mt2, int s2)
     uint64_t hdr1[5],hdr2[5];
     uint64_t fdef,nor1,noc1,nor2,noc2;
     FIELD * f;
-    int i1,i2,i3,j1,j2,ix;
+    unsigned int i1,i2,i3,j1,j2,ix;
     DSPACE ds1,ds2,ds3;
     Dfmt *m1,*v2,*v31,*v32,*v33;
     FELT e11,e12,e13,e21,e22,e23;

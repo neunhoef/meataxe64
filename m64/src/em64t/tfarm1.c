@@ -1,5 +1,5 @@
 /*
-         tfarm1.c   -   Thread Farm - multi-thread scheduler           
+         tfarm1.c   -   Thread Farm - multi-thread scheduler
          ========       R. A. Parker     9.10.2016
 */
 
@@ -11,15 +11,15 @@
 #include <pthread.h>
 #include <time.h>
 
-#include "tfarm.h"
-#include "tuning.h"
+#include "../tfarm.h"
+#include "../tuning.h"
 #define SCALE MAXCHOP*MAXCHOP*MAXCHOP
 
 /* type definition completions */
 
 typedef struct mojstruct
 {
-    void * mem;      // Memory pointer (NULL if none allocated) 
+    void * mem;      // Memory pointer (NULL if none allocated)
     rdlstruct * RDL; // closable chain of RDLs for this moj
     int  refc;       // Read reference counter
     int  junk;       // to make sizeof(mojstruct) divisible by 8
@@ -30,7 +30,7 @@ struct jobinc
     MOJ parm[MAXPARAMS];    // new parameters
     int  proggyno;   // proggy to be executed
     int  priority;   // priority (lower runs earlier)
-    int  ref;        // how many things it is waiting for 
+    int  ref;        // how many things it is waiting for
     int nparm;       // number of parameters
 };
 
@@ -50,7 +50,7 @@ int closejobs;
 /* This allows a string of submissions to proceed without    */
 /* a release discarding a MOJ when an unsubmitted job will   */
 /* read it                                                   */
- 
+
 int stopfree;
 
 void TFStopMOJFree(void)
@@ -66,7 +66,7 @@ extern void   TFStartMOJFree(void)
 /* nothreads is the (constant) number of started threads     */
 /* It is set by TFInit and used by TFClose                   */
 
-int nothreads;
+unsigned int nothreads;
 
 /* There is a single "global" mutex called "dodgy" that can  */
 /* be used to prevent data races etc., and this is used      */
@@ -74,14 +74,14 @@ int nothreads;
 
 pthread_mutex_t dodgy=PTHREAD_MUTEX_INITIALIZER;
 
-void Lock(void)
+static void Lock(void)
 {
-    pthread_mutex_lock(&dodgy);
+  pthread_mutex_lock(&dodgy);
 }
 
-void Unlock(void)
+static void Unlock(void)
 {
-    pthread_mutex_unlock(&dodgy);
+  pthread_mutex_unlock(&dodgy);
 }
 
 /* Similarly there is a single "global" condition variable    */
@@ -91,14 +91,14 @@ void Unlock(void)
 
 pthread_cond_t maincond=PTHREAD_COND_INITIALIZER;
 
-void LcMainPause(void)
+static void LcMainPause(void)
 {
-    pthread_cond_wait(&maincond,&dodgy);
+  pthread_cond_wait(&maincond,&dodgy);
 }
 
-void LcMainKick(void)
+static void LcMainKick(void)
 {
-    pthread_cond_broadcast(&maincond);
+  pthread_cond_broadcast(&maincond);
 }
 
 void TFUpJobs(void)
@@ -158,14 +158,14 @@ void TFWaitEnd(void)
 
 //  This should be inlined once it is under regression
 
-void * AlignTalloc(size_t len)
+static void *AlignTalloc(size_t len)
 {
     unsigned long *x,y;
     x=malloc(len+128);
     if(x==NULL) return NULL;
     y=1;
     x++;
-    while( (((long int) x)&0x3f)!=0) 
+    while( (((long int) x)&0x3f)!=0)
     {
         x++;
         y++;
@@ -174,7 +174,7 @@ void * AlignTalloc(size_t len)
     return (void *) x;
 }
 
-void AlignTree(void * z)
+static void AlignTree(void *z)
 {
     unsigned long y,*x;
     x=(unsigned long *) z;
@@ -189,23 +189,23 @@ void AlignTree(void * z)
 
 MOJ tfmoj;
 
-int nfmoj;
-int nmojes;
+unsigned int nfmoj;
+unsigned int nmojes;
 
 /* ========== job data and methods ======= */
 
 
-jobstruct * NewJob(void) 
+static jobstruct *NewJob(void)
 {
     return (jobstruct *) TfLinkOut(TFM+TFMJOB);
 }
 
-void FreeJob(jobstruct * JOB)
+static void FreeJob(jobstruct *JOB)
 {
     TfLinkIn(TFM+TFMJOB,(uint64_t *) JOB);
 }
 
-void JobPop(jobstruct * JOB, int proggy, int priority)
+static void JobPop(jobstruct *JOB, int proggy, int priority)
 {
     JOB->proggyno = proggy;
     JOB->priority = priority;
@@ -215,27 +215,27 @@ void JobPop(jobstruct * JOB, int proggy, int priority)
 
 /* ========== rdl data and methods ======= */
 
-rdlstruct * LcNewRdl(void) 
+static rdlstruct *LcNewRdl(void)
 {
      return (rdlstruct *) TfLinkOut(TFM+TFMRDL);
 }
 
-void LcFreeRdl(rdlstruct * RDL)
+static void LcFreeRdl(rdlstruct *RDL)
 {
     TfLinkIn(TFM+TFMRDL,(uint64_t *) RDL);
 }
 
-void TfUpJobRef(jobstruct * JOB)
+static void TfUpJobRef(jobstruct *JOB)
 {
     TfAdd(&(JOB->ref),1);   // maybe lock add someday
 }
 
-void UpMojRef(MOJ mj)
+static void UpMojRef(MOJ mj)
 {
     TfAdd(&(mj->refc),1);
 }
 
-void LCBindRdl(jobstruct * job, MOJ moj)
+static void LCBindRdl(jobstruct *job, MOJ moj)
 {
     rdlstruct * RDL;
     int x;
@@ -247,8 +247,8 @@ void LCBindRdl(jobstruct * job, MOJ moj)
     TfUpJobRef(job);
 }
 
-
-void LcBindRdl(jobstruct * JOB, int moj)
+#if 0 /* Unused */
+static void LcBindRdl(jobstruct *JOB, int moj)
 {
     rdlstruct * RDL;
     MOJ mj;
@@ -261,6 +261,7 @@ void LcBindRdl(jobstruct * JOB, int moj)
     RDL->JOB=JOB;
     TfUpJobRef(JOB);
 }
+#endif
 
 /* ==========  jobs ready to run  ======= */
 
@@ -269,7 +270,7 @@ long  jobsready;
 
 void LcStartJob(jobstruct * JOB, int thread);
 
-int TfUnQThread(jobstruct * JOBNO)
+static int TfUnQThread(jobstruct *JOBNO)
 {
     int thread;
     if(firstfreethread!=-1)
@@ -284,7 +285,7 @@ int TfUnQThread(jobstruct * JOBNO)
     exit(17);
 }
 
-void TfQJob(jobstruct * JOBNO)
+static void TfQJob(jobstruct *JOBNO)
 {
     int k,kp;
     jobstruct * t;
@@ -303,7 +304,7 @@ void TfQJob(jobstruct * JOBNO)
     }
 }
 
-void TfPutJob(jobstruct * JOBNO)
+static void TfPutJob(jobstruct *JOBNO)
 {
 
     int i;
@@ -322,7 +323,7 @@ void TfPutJob(jobstruct * JOBNO)
 
 // Rename as TfUnQJob once locking sorted
 
-jobstruct * LcNextRun(void) 
+static jobstruct *LcNextRun(void)
 {
     int k,kc1,kc2;
     jobstruct * rj, *t;
@@ -350,7 +351,7 @@ jobstruct * LcNextRun(void)
     return rj;
 }
 
-void TfJobRefDown(jobstruct * JOB) 
+static void TfJobRefDown(jobstruct *JOB)
 {
     int x;
     x=TfAdd(&(JOB->ref),-1);
@@ -358,7 +359,7 @@ void TfJobRefDown(jobstruct * JOB)
     TfPutJob(JOB);
 }
 
-void LcFreeThread(int thread) 
+static void LcFreeThread(int thread)
 {
     tfthread[thread]=firstfreethread;
     firstfreethread=thread;
@@ -373,12 +374,12 @@ pthread_t * mythread;
 /* wait on when they are idle            */
 pthread_cond_t * wakeworker;
 
-void LcWorkerPause(int thread)
+static void LcWorkerPause(int thread)
 {
     pthread_cond_wait(wakeworker+thread,&dodgy);
 }
 
-void LcWorkerKick(int thread)
+static void LcWorkerKick(int thread)
 {
     pthread_cond_signal(wakeworker+thread);
 }
@@ -386,17 +387,14 @@ void LcWorkerKick(int thread)
 void LcStartJob(jobstruct * JOB, int thread)
 {
     tfparms[thread].JOB=JOB;
-    LcWorkerKick(thread); 
+    LcWorkerKick(thread);
 }
 
 /* ====== Now the code for the routines  =======*/
 
-void tfdo(int proggyno, MOJ * p);
-
-jobstruct * LcQThread(parmstruct * pp)
+static jobstruct *LcQThread(parmstruct *pp)
 {
-    while(1)
-    {
+  for (;;) {
         pp->JOB=NULL;
         while(pp->JOB==NULL)
         {
@@ -404,10 +402,10 @@ jobstruct * LcQThread(parmstruct * pp)
             LcWorkerPause(pp->threadno);
         }
         return pp->JOB;
-    } 
+    }
 }
 
-jobstruct * GetJob(parmstruct * pp)  // may be 2
+static jobstruct *GetJob(parmstruct *pp)  // may be 2
 {
     int i;
     jobstruct * JOB;
@@ -425,7 +423,7 @@ jobstruct * GetJob(parmstruct * pp)  // may be 2
 }
 
 /*  The worker thread  */
-void * worker(void * p)
+static void *worker(void *p)
 {
     int nparm;
     jobstruct * JOB;
@@ -565,13 +563,12 @@ void TFClose(void)
     free(TFM);
 }
 
-void   TFInit(int threads)
+void TFInit(unsigned int threads)
 {
-    int i;
-    int jobx,rdlx;
-    uint64_t * FRE;
-    jobstruct * tfjob;
-    rdlstruct * tfrdl;
+  unsigned int i, jobx, rdlx;
+    uint64_t *FRE;
+    jobstruct *tfjob;
+    rdlstruct *tfrdl;
     MOJ mj;
     jobx=SCALE*12;
     nmojes=jobx*2;
@@ -647,7 +644,7 @@ void TFWait(MOJ moj)
             Unlock();
             return;
         }
-        LcMainPause();    
+        LcMainPause();
     }
 }
 

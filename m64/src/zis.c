@@ -151,7 +151,7 @@ int main(int argc, const char *argv[])
   char *ech_tmp_bsr = mk_tmp(prog_name, tmp_root, tmp_len);
   char *clean_tmp1 = mk_tmp(prog_name, tmp_root, tmp_len);
   char *clean_tmp2 = mk_tmp(prog_name, tmp_root, tmp_len);
-  int ngens = argc - 3;
+  unsigned int ngens = argc - 3;
   uint64_t res;
   uint64_t nor = 0;
   uint64_t noc = 0;

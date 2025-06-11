@@ -6,9 +6,9 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdlib.h>
-#include "field.h"
-#include "pcrit.h"
-#include "utils.h"
+#include "../field.h"
+#include "../pcrit.h"
+#include "../utils.h"
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
@@ -70,7 +70,7 @@ static uint64_t reduce(uint64_t a, uint64_t i, uint64_t p, const FIELD *f)
  * Operands in a, b
  * Result in lo and function result
  */
-uint64_t full_multiply(uint64_t *lo, uint64_t a, uint64_t b)
+static uint64_t full_multiply(uint64_t *lo, uint64_t a, uint64_t b)
 {
   /* Split into 32 x 32 which can't overflow */
   uint64_t l_a = a & ff32,
@@ -926,6 +926,7 @@ void pc3bmm(const uint8_t *a, uint8_t *bv, uint8_t *c)
  * Translations from pc5.s, Add/subtract primes between 5 and 193
  */
 
+#if 0
 /* The p shuffle instruction (turns out not to be needed) */
 void pshufd(union_128 *mmx, uint8_t control)
 {
@@ -938,12 +939,13 @@ void pshufd(union_128 *mmx, uint8_t control)
   }
   *mmx = temp;
 }
+#endif
 
 /*
  * The pmullw instruction.
  * Multiply packed 16 bit words inside a 64 bit word
  */
-uint64_t pmullw(uint64_t a, uint64_t b)
+static uint64_t pmullw(uint64_t a, uint64_t b)
 {
   union_64_16 x, y;
   unsigned int i;
@@ -959,7 +961,7 @@ uint64_t pmullw(uint64_t a, uint64_t b)
  * The pmulld instruction.
  * Multiply packed 32 bit words inside a 64 bit word
  */
-uint64_t pmulld(uint64_t a, uint64_t b)
+static uint64_t pmulld(uint64_t a, uint64_t b)
 {
   union_64_32 x, y;
   unsigned int i;

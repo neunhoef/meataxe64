@@ -132,7 +132,7 @@ static void fRowExtract(const char *bs, const char *in, const char *sel)
 
 static void copy_matrix(const char *from, const char *to)
 {
-  int i;
+  unsigned int i;
   uint64_t fdef, noc, nor;
   header hdr;
   DSPACE ds;
@@ -235,7 +235,7 @@ int main(int argc, const char *argv[])
   char *row_sel = mk_tmp(prog_name, tmp_root, tmp_len);
   char *mul_acc = mk_tmp(prog_name, tmp_root, tmp_len);
   char *mul_acc1 = mk_tmp(prog_name, tmp_root, tmp_len);
-  int ngens = argc - 3;
+  unsigned int ngens = argc - 3;
   uint64_t res;
   uint64_t nor = 0;
   uint64_t rank, mrank = 0;

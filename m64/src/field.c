@@ -11,7 +11,7 @@
 #include "pcrit.h"
 #include "linf.h"
 #include "tuning.h"
-
+#include "conex.h"
 
 // size of uint16_t table for extracing small characteristic from
 // large fields in PExtract, where both Barrett and lookup needed.
@@ -342,18 +342,18 @@ int  FieldASet1(uint64_t fdef, FIELD * f, int flags)
     uint64_t x,y,z,t,one,zero,two,ndv1,ndv2,ndv3,alpha,beta;
     uint64_t dv1[16],dv2[16],dv3[16],tfdef,gamma,delta;
     FELT a1,a2,a3,a4,a5,a6,a7,a8,b1,b2,b3,b4,b5,an,bn,cn;
-    uint8_t * ftab8;
-    uint8_t * f8;
-    uint16_t * ftab16;
-    uint16_t * sqrt;
-    uint16_t * lfx;
-    uint32_t * lfy;
-    uint32_t * lfb;
-    uint64_t * lfz;
-    uint16_t * lfa;
-    uint16_t * tra16;
-    uint32_t * tra32;
-    uint64_t * tra64;
+    uint8_t *ftab8;
+    uint8_t *f8;
+    uint16_t *ftab16;
+    uint16_t *sqrt;
+    uint16_t *lfx;
+    uint32_t *lfy;
+    uint32_t *lfb;
+    uint64_t *lfz;
+    uint16_t *lfa;
+    uint16_t *tra16;
+    uint32_t *tra32;
+    uint64_t *tra64;
     uint64_t i,j;
     int q1,q2,q3,q4,q5,q6,q7,bias;
     int r1,r2,r3,r4,r5,r6,r7,spacp;
@@ -644,7 +644,7 @@ int  FieldASet1(uint64_t fdef, FIELD * f, int flags)
     if( f->charc==3) f->spaclev=6;
     if( f->charc==2) f->spaclev=8;
     f->digit=1;
-    for(i=0;i<f->spaclev;i++)
+    for(i=0;(int64_t)i<f->spaclev;i++)
         f->digit=f->digit*f->charc;
     if(f->charc==2) f->digit=256;
     f->digit2=f->digit*f->digit;
@@ -731,7 +731,7 @@ int  FieldASet1(uint64_t fdef, FIELD * f, int flags)
               else 
               {
                   f->addtyp=8;
-                  if( (f->pow <= 2*f->spaclev) && (f->spaclev>1) )
+                  if( ((int64_t)f->pow <= 2*f->spaclev) && (f->spaclev>1) )
                               f->addtyp=11;
                   if( (f->pow == 2) && (f->spaclev==1) )
                               f->addtyp=13;
@@ -761,8 +761,8 @@ int  FieldASet1(uint64_t fdef, FIELD * f, int flags)
                 f->addtyp=6;
                 if(f->spaclev>=2)
                 {
-                    if(f->pow<=2*f->spaclev) f->addtyp=12;
-                    if(f->pow<=f->spaclev) f->addtyp=5;
+                  if((int64_t)f->pow<=2*f->spaclev) f->addtyp=12;
+                  if((int64_t)f->pow<=f->spaclev) f->addtyp=5;
                 }
             }
           if(f->pow==1) f->multyp=2;
@@ -931,7 +931,7 @@ int  FieldASet1(uint64_t fdef, FIELD * f, int flags)
         q1=1;
         q2=1;
         f->spaczero=0;
-        for(i=0;i<f->spaclev;i++)
+        for(i=0;(int64_t)i<f->spaclev;i++)
         {
             q1=q1*f->charc;
             q2=q2*(2*f->charc-1);
@@ -3758,7 +3758,8 @@ void PExtract(const DSPACE * ds, const Dfmt *mq, Dfmt *mp,
     uint16_t wk1;
     uint32_t * lfy1,*lfy2;
     uint32_t wk2;
-    int bymem,byused,bytesout;
+    int bymem, bytesout;
+    unsigned int byused;
     uint16_t iv[EXTIVCNT];
     uint16_t *ivp,*ivp1;
     uint64_t leftiniv,dofromiv,ptodo,pthistime;
@@ -3969,7 +3970,7 @@ void PExtract(const DSPACE * ds, const Dfmt *mq, Dfmt *mp,
                     }
                     bytesout=f->pow-8*k;
                     if(bytesout>8) bytesout=8;
-                    for(j=0;j<bytesout;j++)
+                    for(j=0;(int64_t)j<bytesout;j++)
                     {
                         *ptp1 = dfmt&255;
                         dfmt=dfmt>>8;
@@ -3990,7 +3991,7 @@ void PExtract(const DSPACE * ds, const Dfmt *mq, Dfmt *mp,
         while(eltsleft!=0)
         {
             colstodo=eltsleft;
-            if(colstodo>f->atatime) colstodo=f->atatime;
+            if((int64_t)colstodo>f->atatime) colstodo=f->atatime;
 //  {{ 1 {{   aim now is to do colstodo inputs
             pcbarrett(&(f->barpar[0]), ptq, (Dfmt *)&(iv[0]),
                       colstodo, 2*colstodo);
@@ -4010,7 +4011,7 @@ void PExtract(const DSPACE * ds, const Dfmt *mq, Dfmt *mp,
                 while(ptodo>0)
                 {
                     pthistime=ptodo;
-                    if(pthistime>f->spaclev) pthistime=f->spaclev;
+                    if((int64_t)pthistime>f->spaclev) pthistime=f->spaclev;
 //  {{ 4 {{  aim now do pthistime outputs from ivp1 to ptp1
                     dfmt=0;
                     mply=1;

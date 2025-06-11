@@ -1,0 +1,6 @@
+#
+# Generic definitions
+#
+
+# Get rid of this in the source ASAP
+COMPILE_DEFINES+=     -DEIGHT_BYTE_WORD

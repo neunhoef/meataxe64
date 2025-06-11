@@ -12,7 +12,7 @@
  
 int main(int argc,  char **argv)
 {
-    int chops;
+    unsigned int chops;
     char fn[200];    //  work area for making filenames
     char *pt;
     int lfn;
