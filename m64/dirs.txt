@@ -1,0 +1,25 @@
+#
+# Generic build directories
+#
+# Modify this from the command line to change where derived files go
+#
+BASEDIR?=derived
+
+OSARCHCOMPBASEDIR=$(BASEDIR)/$(OS)/$(ARCH)/$(COMPILER)
+
+# Release optimised no asserts
+RELOBJDIR=$(OSARCHCOMPBASEDIR)/obj
+RELBINDIR=$(OSARCHCOMPBASEDIR)/bin
+# Debug, asserts
+DEBUGOBJDIR=$(OSARCHCOMPBASEDIR)/debugobj
+DEBUGBINDIR=$(OSARCHCOMPBASEDIR)/debugbin
+# Profiling, debug, asserts
+PROFOBJDIR=$(OSARCHCOMPBASEDIR)/profobj
+PROFBINDIR=$(OSARCHCOMPBASEDIR)/profbin
+#Profiing, debug, without asserts
+PROFNAOBJDIR=$(OSARCHCOMPBASEDIR)/profnaobj
+PROFNABINDIR=$(OSARCHCOMPBASEDIR)/profnabin
+
+DEPENDDIR=$(OSARCHCOMPBASEDIR)/depends
+ASMOUTDIR=$(OSARCHCOMPBASEDIR)/asmout
+PPDIR=$(OSARCHCOMPBASEDIR)/pp

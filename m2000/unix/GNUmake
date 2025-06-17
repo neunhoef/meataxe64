@@ -1,0 +1,8 @@
+#
+# unix specific fragment for meataxe
+#
+# $Id: GNUmake,v 1.1 2001/08/28 21:39:44 jon Exp $
+#
+
+include unix.txt
+

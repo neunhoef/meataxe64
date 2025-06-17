@@ -1,0 +1,4 @@
+#
+# Generic C fragment for building
+#
+LIB_MODULES+=	tfarm3 pcrits

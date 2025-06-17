@@ -16,14 +16,14 @@
 
 pthread_mutex_t xlock=PTHREAD_MUTEX_INITIALIZER;
 
-void XLock(void)
+static void XLock(void)
 {
-    pthread_mutex_lock(&xlock);
+  pthread_mutex_lock(&xlock);
 }
 
-void XUnlock(void)
+static void XUnlock(void)
 {
-    pthread_mutex_unlock(&xlock);
+  pthread_mutex_unlock(&xlock);
 }
 
 void LogCmd(int argc, char ** argv)
@@ -136,7 +136,7 @@ static uint64_t hash2(EFIL * e)
 
 static uint64_t getbytes(EFIL * e, uint8_t * p, size_t len)
 {
-    int r,bt;
+  unsigned int r,bt;
     if(e->nex==64)
     {
         r=fread(e->bk,1,64,e->f);
@@ -168,7 +168,7 @@ static uint64_t getbytes(EFIL * e, uint8_t * p, size_t len)
 
 static size_t putbytes(EFIL * e, const uint8_t * p, size_t bytes)
 {
-    int i,zct,r,bt;
+    unsigned int i,zct,r,bt;
     uint8_t t[64];
     if(e->bk[0]==10)
     {
@@ -232,7 +232,7 @@ static size_t putbytes(EFIL * e, const uint8_t * p, size_t bytes)
     return 1;
 }
 
-char * fnamst(const char * fname)
+static char *fnamst(const char *fname)
 {
     int i,j;
     char * fn;

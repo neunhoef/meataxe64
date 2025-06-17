@@ -1,0 +1,138 @@
+#!/bin/bash
+#
+# $Id: find_element,v 1.10 2023/07/03 08:30:07 jon Exp $
+#
+# Script to find an element of given nullity on one representation
+# and if possible nullity zero on a sequence of others
+#
+# Inputs
+# $1: number of generators
+# $2: generator a
+# $3: order generator a
+# $4-: other generators and orders
+# $(2+2*$1): depth of search
+# $(3+2*$1): the nullity to be found
+# $(4+2*$1): the nullity file
+# $(5+2*$1): memory
+# $(6+2*$1): onwards, the other representations
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+# 255: no elements of required nullity found
+#
+#set -v
+. functions
+usage="$0: usage: $0 <number of generators> <a> <order a> [<other generators and orders>] <depth> <nullity> <output> <memory> <other irreds>"
+if [ $# -lt 8 ]; then
+  echo "$usage"
+  exit 1;
+fi
+n=$1
+let max=2*$1+6
+if [ $# -lt $max ]; then
+  echo "$usage"
+  exit 1;
+fi
+name=$0
+i=0
+line=
+shift
+while [ $i -lt $n ]; do
+  a[$i]=$1
+  line="$line $1"
+  shift
+  o_a[$i]=$1
+  line="$line $1"
+  shift
+  let i=$i+1
+done
+depth=$1
+nullity=$2
+out=$3
+memory=$4
+if [ -e ${a[0]} ]; then
+  q=`zprime ${a[0]}`
+  nor=`znor ${a[0]}`
+  noc=`znoc ${a[0]}`
+  if [ $nor -ne $noc ]; then
+    echo "$name: ${a[0]} is not square"
+    exit 1
+  fi
+else
+  echo "$name: missing file (1) ${a[0]}"
+  exit 1
+fi
+i=1
+while [ $i -lt $n ]; do
+  if [ -e ${a[$i]} ]; then
+    if [ $nor -ne `znor ${a[$i]}` -o $nor -ne `znoc ${a[$i]}` ]; then
+      echo "$name: ${a[0]} and ${a[$i]} are not compatible"
+      exit 1
+    fi
+  else
+    echo "$name: missing files (2) ${a[$i]}"
+    exit 1
+  fi
+  let i=$i+1
+done
+tmp=tmp${PPID}
+# echo zranks -m $memory ${tmp} $depth 1 $line
+zranks -m $memory ${tmp} $depth $nullity $line | grep "of nullity" > ${out}.1
+grep "of nullity $nullity" ${out}.1 | sed -e "s/^.*element //g;s/ of nullity .*$//g" >poo
+if [ -z "`cat poo`" ]; then
+  echo No elements of nullity $nullity found, terminating
+  rm -f poo
+  rm_all ${tmp}
+  exit 255
+fi
+echo >$out
+shift 4
+while [ 1 -le $# ]; do
+  i=0
+  stem=$1
+  line=
+  while [ $i -lt $n ]; do
+    let j=$i+1
+    line="$line ${stem}_$j ${o_a[$i]}"
+    i=$j
+  done
+  echo $stem >>$out
+#  echo zranks -m $memory ${tmp} $depth 10 $line
+  zranks -m $memory ${tmp} $depth 10 $line | grep "of nullity" 1>>$out
+  shift
+done
+zeros=
+ones=
+twos=
+threes=
+fours=
+fives=
+for x in `cat poo`; do
+  size=`grep "$x " $out | wc -l`
+# echo $x: size $size
+  if [ 0 -eq $size ]; then
+    ones="$ones $x"
+  elif [ 1 -eq $size ]; then
+    twos="$twos $x"
+  elif [ 2 -eq $size ]; then
+    threes="$threes $x"
+  elif [ 3 -eq $size ]; then
+    fours="$fours $x"
+  elif [ 4 -eq $size ]; then
+    fives="$fives $x"
+  fi
+done
+echo zeroes are :- $zeroes
+echo
+echo ones are :- $ones
+echo
+echo twos are :- $twos
+echo
+echo threes are :- $threes
+echo
+echo fours are :- $fours
+echo
+echo fives are :- $fives
+rm -f poo
+rm_all ${tmp}

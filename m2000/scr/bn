@@ -1,0 +1,28 @@
+#!/bin/bash
+#
+# $Id: bn,v 1.5 2023/07/03 08:30:07 jon Exp $
+#
+# Compute bn(x)
+#
+# Inputs
+# $1: input
+# $2: power
+# $3: output
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+#
+#set -x
+#set -e
+usage="$0: usage: $0 <mat> <n> <out>"
+if [ 3 -ne $# ]; then
+  echo $usage
+  exit 1;
+fi
+
+a=$1
+n=$2
+o=$3
+repeat=2
+. yn

@@ -15,7 +15,7 @@ FELT dig[11];
 uint64_t fdef;
  
     /******  subroutine to get an integer like FORTRAN does  */
-uint64_t getin(uint64_t a)
+static uint64_t getin(uint64_t a)
 {
     int c;
     uint32_t i,j;
@@ -38,7 +38,7 @@ uint64_t getin(uint64_t a)
 }
 
     /****** get single character as a field element  */
-uint64_t getaz(void)
+static uint64_t getaz(void)
 {
     int c;
     if(hadcr == 1) return 0;
@@ -55,7 +55,7 @@ uint64_t getaz(void)
 }
  
 /* subroutine to get an integer and reduce mod p */
-FELT getz()
+static FELT getz(void)
 {
     FELT res,res1;
     int c, flag;
@@ -84,7 +84,7 @@ FELT getz()
     else
         return res;
 }
-static void nextline()
+static void nextline(void)
 {
     if(hadcr == 1)
     {

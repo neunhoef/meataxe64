@@ -21,7 +21,7 @@ int main(int argc,  char **argv)
     FIELD * f;
     DSPACE ds;
     Dfmt *v,*m;
-    long curde,cursp,i;
+    unsigned long curde,cursp,i;
     uint64_t denvec;
     uint64_t *spsc, *splen, *spdest;
     uint64_t *desc, *delen;

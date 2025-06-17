@@ -1,0 +1,11 @@
+TARGET_TYPE:=REL
+include exec.txt
+
+TARGET_TYPE:=DEBUG
+include exec.txt
+
+TARGET_TYPE:=PROF
+include exec.txt
+
+TARGET_TYPE:=PROFNA
+include exec.txt

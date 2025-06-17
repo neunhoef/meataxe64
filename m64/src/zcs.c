@@ -28,7 +28,7 @@ typedef struct
     Dfmt * m;
 } SpMtx;
 
-void SpMulSingle(SpMtx * spm, Dfmt * vec, Dfmt * res, Dfmt * cpb)
+static void SpMulSingle(SpMtx * spm, Dfmt * vec, Dfmt * res, Dfmt * cpb)
 {
     DSPACE *ds, dsc;
     const FIELD * f;
@@ -57,7 +57,7 @@ void SpMulSingle(SpMtx * spm, Dfmt * vec, Dfmt * res, Dfmt * cpb)
     }
 }
 
-SpMtx * SpRead1(char * fn)
+static SpMtx *SpRead1(char * fn)
 {
     EFIL * e;
     uint64_t hdr[5];
@@ -95,7 +95,7 @@ SpMtx * SpRead1(char * fn)
     return spm;
 }
 
-void SpRead2(SpMtx * spm)
+static void SpRead2(SpMtx *spm)
 {
     uint64_t i;
     spm->denrows=0;

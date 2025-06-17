@@ -1,0 +1,6 @@
+#
+# Generic C fragment for meataxe64
+#
+
+include generic.txt
+

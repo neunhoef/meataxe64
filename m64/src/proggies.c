@@ -97,9 +97,9 @@ void M3EvenChop (M3 a, uint64_t divr, uint64_t divc,
     a->cnoc[a->c-1]+=rem;
 }
 
-void M3MOJs  (M3 a)            // allocate MOJs
+void M3MOJs(M3 a)            // allocate MOJs
 {
-    int i,j;
+    unsigned int i,j;
     a->m=malloc(a->r*sizeof(MOJ*));
     for(i=0;i<a->r;i++)
     {
@@ -112,16 +112,16 @@ void M3MOJs  (M3 a)            // allocate MOJs
     }
 }
 
-void M3MOJArray  (M3 a)            // allocate MOJ array but not MOJs
+void M3MOJArray(M3 a)            // allocate MOJ array but not MOJs
 {
-    int i;
+    unsigned int i;
     a->m=malloc(a->r*sizeof(MOJ*));
     for(i=0;i<a->r;i++)
         *(a->m+i) = malloc(a->c*sizeof(MOJ));
 }
 
 
-void * M3ReadThd(void * pp)
+static void *M3ReadThd(void *pp)
 {
     uint64_t hdr[5];
     FIELD * f;
@@ -171,7 +171,7 @@ void * M3ReadThd(void * pp)
     return pp;    // never used!
 }
 
-void * M3WriteThd(void *pp)
+static void *M3WriteThd(void *pp)
 {
     uint64_t hdr[5];
     FIELD * f;
@@ -241,7 +241,7 @@ void M3Write(M3 a)          // kick off write thread
 
 void M3Dest(M3 a)
 {
-    int i;
+    unsigned int i;
     free(a->fn);
     free(a->rnor);
     free(a->cnoc);
@@ -250,7 +250,7 @@ void M3Dest(M3 a)
     free(a);
 }
 
-void pgadd(MOJ FMOJ,  MOJ AMOJ, MOJ BMOJ, MOJ CMOJ)
+static void pgadd(MOJ FMOJ, MOJ AMOJ, MOJ BMOJ, MOJ CMOJ)
 {
     FIELD * f;
     uint64_t *a,*b,*c;
@@ -285,8 +285,7 @@ printf("ADD %lu x %lu\n",nor,noc);
 }
 
 /*  ================= clean up to here  ==============*/
-
-void genmul(MOJ FMOJ,  MOJ AMOJ, MOJ BMOJ, MOJ CMOJ)
+static void genmul(MOJ FMOJ, MOJ AMOJ, MOJ BMOJ, MOJ CMOJ)
 {
 
     FIELD * f;
@@ -324,9 +323,9 @@ printf(" %lu x %lu  X  %lu x %lu",nor1,noc1,noc1,noc2);
     SLMul(f,da,db,dc,nor1,noc1,noc2);
 }
 
-void gencpy(MOJ FMOJ,  MOJ AMOJ, MOJ CMOJ)
+static void gencpy(MOJ FMOJ, MOJ AMOJ, MOJ CMOJ)
 {
-    FIELD * f;
+    FIELD *f;
     uint64_t *a,*c;
     uint64_t nor,noc;
     DSPACE ds;
@@ -343,7 +342,7 @@ printf(" %lu x %lu\n",nor,noc);
     memcpy(c,a,16+nor*ds.nob);
 }
 
-void pgmul(MOJ FMOJ, MOJ AMOJ, MOJ BMOJ, MOJ CMOJ)
+static void pgmul(MOJ FMOJ, MOJ AMOJ, MOJ BMOJ, MOJ CMOJ)
 {
 #ifdef DEBUG
 printf("MUL ");
@@ -355,10 +354,10 @@ printf("\n");
     TFStable(CMOJ);
 }
 
-void pgmad(MOJ FMOJ,  MOJ AMOJ, MOJ BMOJ, MOJ CMOJ, MOJ SMOJ)
+static void pgmad(MOJ FMOJ, MOJ AMOJ, MOJ BMOJ, MOJ CMOJ, MOJ SMOJ)
 {
 
-    Dfmt * temp;
+    Dfmt *temp;
     uint64_t i;
     const FIELD * f;
     uint64_t *ai,*ci;
@@ -654,7 +653,7 @@ printf("ECH %lu x %lu rank %lu\n",nor,noc,rank);
     TFStable(RMOJ);
 }
 
-void pgfmv(MOJ AMOJ, MOJ FMOJ, MOJ BMOJ)
+static void pgfmv(MOJ AMOJ, MOJ FMOJ, MOJ BMOJ)
 {
     uint64_t * a;
     a=(uint64_t *) TFPointer(AMOJ);
@@ -664,7 +663,7 @@ void pgfmv(MOJ AMOJ, MOJ FMOJ, MOJ BMOJ)
     TFStable(BMOJ);
 }
 
-void pgcpy(MOJ FMOJ, MOJ AMOJ, MOJ BMOJ)
+static void pgcpy(MOJ FMOJ, MOJ AMOJ, MOJ BMOJ)
 {
 #ifdef DEBUG
 printf("MCP ");
@@ -673,7 +672,7 @@ printf("MCP ");
   TFStable(BMOJ);
 }
 
-void pgcrz(MOJ FMOJ, MOJ BS, MOJ IN, MOJ OUT)
+static void pgcrz(MOJ FMOJ, MOJ BS, MOJ IN, MOJ OUT)
 {
     uint64_t * bs;
     uint64_t nor,nocin,nocout;
@@ -704,7 +703,7 @@ printf("CRZ %lu x %lu -> %lu\n",nor,nocin,nocout);
     TFStable(OUT);
 }
 
-void pgadi(MOJ FMOJ, MOJ RF, MOJ IN, MOJ OUT)
+static void pgadi(MOJ FMOJ, MOJ RF, MOJ IN, MOJ OUT)
 {
     uint64_t *rf;
     FIELD * f;
@@ -730,7 +729,7 @@ printf("ADI %lu x %lu, + %lu identity\n",nor,nocout,rf[0]-rf[1]);
     TFStable(OUT);
 }
 
-void pgmkr(MOJ LIT, MOJ BIG, MOJ RES)
+static void pgmkr(MOJ LIT, MOJ BIG, MOJ RES)
 {
     uint64_t *lit,*big,*res;
 
@@ -750,7 +749,8 @@ printf("MKR %lu x %lu -> %lu\n",lit[0],lit[1],big[1]);
     TFStable(RES);
 }
 
-void dump(MOJ *p, int ct)
+#if 0 /* Unused */
+static void dump(MOJ *p, int ct)
 {
     int i;
     printf("\n");
@@ -760,6 +760,7 @@ void dump(MOJ *p, int ct)
     }
     printf("\n");
 }
+#endif
 
 void tfdo(int proggyno, MOJ *p)
 {
@@ -867,5 +868,4 @@ void tfdo(int proggyno, MOJ *p)
     exit(1);
   }
 }
-
 /******  end of proggies.c    ******/

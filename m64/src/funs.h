@@ -3,7 +3,7 @@
 // functions header file
 
 // First the large functions each in a separate own source file
-
+#include "field.h"
 
 extern void fTranspose(const char * tmp, const char *in, int sin,
                  const char *out, int sout);  //ftra.c

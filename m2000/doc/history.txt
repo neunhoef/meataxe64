@@ -1,0 +1,415 @@
+20010825 - Started
+20010828 - first working ip for GF2
+20010830 - first pr and ad for GF2
+20010902 - first mu for GF2
+20010904 - first grease for GF2
+20010905 - first input for GF3
+20010906 - first add for GF3
+20010908 - first successful multiply for GF3
+20010909 - first input and add mod 5
+20010909 - first multiply mod 5
+20010910 - first input, print, add and multiply for GF4
+20010912 - cleaning up, introduced len, started on memory.h Knocked .3 sec off B multiply
+20010913 - Made mul work row by row on matrix 2. Imported monster generator and cleaned it up
+20010914 - More clean up, tested monster generation
+20010916 - Added names to all programs, wrote memory handling and added it to all but mul
+20010918 - Discovered B GF2 multiplication goes much faster in less memory (caching issues)
+20010918 - Same for M, best was about 400k memory
+20010918 - Redid all of mu and grease in terms of new memory strategy
+20010918 - Added row incrementers and shaved more time off
+20010919 - Started on grease for other primes and word overlapping elements
+20010919 - Grease going for all available primes, but only one d for p > 2
+20010924 - Removed return values from rows ops. Changed len to be in words
+20010925 - Cut headers down to prime, nor, noc, in that order
+20010925 - First cut at conversion of emu and slave
+20010926 - First emu running single machine
+20010927 - Better modularisation of makefile
+20010930 - First successful monster multiply on element A (the involution)
+20010930 - Move some junk out of ead and emu into utils, system, files
+20011001 - Abstract out map creation and extended row output
+20011002 - Created eid and used to complete check on A*A, Created zex
+20011003 - Add goals, update design. Fix funny lock files. Finish work on getin. Sort exrows. Add memory to slave
+20010905 - Remove static linking. Remove -lm and -lmcheck.
+20010905 - Remove some optimisation unavailable on RedHat 4.2
+20011006 - Write eim and ct/ect. Start on part 2 on b**3 = 1 demonstration
+20011007 - Test eim. Write tr and etr. Test tr. Rewrite slave and test
+20011008 - Write stop.c to introduce kill commands into the command file
+20011010 - Fix bug introduced into emu. Minor improvments to mmat
+20011010 - Add id subroutine
+20011011 - More improvements to mmat and mop.c
+20011013 - Yet more monster generation work
+20011016 - Wrote input permutation
+20011019 - Wrote exploded input permutation
+20011105 - Moved prime detection into prime.c
+20011106 - Added invert and negate for 2, 3, 4, 5, and for element sets
+20011107 - Added first version of clean and echelise
+20011112 - First in store rn
+20011112 - rn can operate without grease
+20011113 - matrix_malloc can't fail. Debugging rn. Add proper row_incer and in place scale
+20011115 - produced simple rank
+20011116 - rn works. sns produced
+20011118 - ns produced
+20011119 - Produced mul_from_store
+20011120 - Started on in store spin
+20011121 - Complete first attempt at spin
+20011122 - Debug spin to work with B
+20011124 - Subspace splits He 2058 permutation representation
+20011125 - Started on quotient space
+20011125 - quotient space works
+20011128 - wrote split script and reduced He2058
+20011130 - wrote te, reduced He8330 and started on He29155
+20011201 - wrote file based ss and signature
+20011202 - wrote file based qs
+20011204 - wrote zwords for producing words in a representation
+20011210 - improved power, better memory split in ss
+20011215 - added diff, rnf, iv, script functions
+20011216 - add standard base, zcheck and dual
+20011223 - add lazy grease
+20011226 - complete split_all
+20020106 - complete standard base. Add zsums
+20020113 - add indicator claculation for characteristic 2
+20020114 - add zdiag for use in indicator calculation
+20020118 - started on znsf
+20020121 - added intersect, join, zfe
+20020122 - debug zsums problem
+20020123 - work on vector permute
+20020125 - solve multipl McL irreds, bug in the scripts
+20020126 - add esad and zsad
+20020202 - add algebraic conjugate
+20020203 - add skew square
+20020205 - add split_with_vector
+20020212 - add sym square and skew cube
+20020213 - add zranks
+20020215 - add zproj
+20020218 - add script output to sums
+20020221 - add split_with_subspace
+20020224 - add determinants, and more skew powers
+20020227 - add skew sixth and seventh, using Gaussian determinants
+20020302 - optimisations in new irreducible stuff
+20020303 - further memory improvements in scripts
+20020307 - add zexport for exporting back to old meataxe
+20020309 - add zimport for importing from old meataxe
+20020310 - add zscript for computing scripts in generators
+20020313 - use zscript in indicator calculations from new_irred. Find
+several bugs in zsums
+20020320 - add restrict for reducing field of definition. Fix bugs in
+skew seventh
+20020320 - add restrict script and support in zsums to drive zrestrict
+20020323 - first version of zsbf and basef
+20020324 - first version of ivf. Fix bug in znsf
+20020331 - Add zspf and find_element
+20020410 - Starting adding support for permutations
+20020413 - Started work on ivf, abandoning nullspace based solution
+20020414 - First working zivf
+20020422 - Add indicatef and new_irredf
+20020424 - Start first use of new_irredf in anger, on 88000 for Co3
+20020428 - Wrote zsumsf
+20020503 - Started on revised algorithm for ss
+20020504 - Tested and added revised algorithm for ss
+20020507 - Indicator calculation for 88000 for Co3 completes, answer +
+20020511 - Indicator claculation for 83948 for Co2 started
+20020529 - Started use at Aachen. Found scripts need #!/bin/sh Found bug in script.c with backwards parameters to scaled add
+20020529 - Add ps for permutation space
+20020531 - Add spin_vectors to replace the inappropriately named poo3.sh
+20020531 - Modify to deal with 64 bit file offsets. Lose -pedantic
+20020601 - Add map_or_row to handle reading from a map or a matrix seamlessly
+20020601 - Fix bug in get_elements_from_row failing to deal with unused section in word
+20020601 - Replace prime in usage messages with field order
+20020601 - Add permutation capability to most programs, scripts pending
+20020601 - Complete adding permutation capability to programs
+20020603 - Add permutation capability to most scripts
+20020603 - Modify preserves to use sparse matrix and transpose trick
+20020603 - Wrote initial versions of vector to matrix and matrix to vector
+20020603 - Wrote most of ztsp, tensor spin. Still needs in store mul
+20020604 - In store mul done, ztsp ready to test
+20020605 - First apparently working ztsp
+20020606 - Add base_vectors and basef_vectors to do the nullspace and spin part of standard base
+20020606 - Add real_indicate for duoing indicators of self dual representations only
+20020606 - Add version of ztspf, to investigate 132x760 for HN over GF(4)
+20020606 - Complete first pass of documentation of programs, and start on scripts
+20020607 - ztspf finds a subspace of dimension 65703 for HN over GF(2) inside 132 tensor 760.
+20020607 - Start writing ztmu to do tensor multiply (for subspace work)
+20020609 - Fix flaws in ztspf and restart 65703 for HN
+20020610 - Fix zvp to output the representations as it knows them anyway
+20020611 - Found and fixed a bug in my determinants for fields not GF(2)
+20020612 - Investigating funny output ordering from zsums, and decided to leave it
+20020612 - Optimised zsb and zsbf by early closure
+20020612 - Add real_indicate to perform the common code for non-o indicators
+20020613 - Add zfo for finding orbits under a multi-generator group
+20020613 - Add zmsp for multi-generator spin
+20020614 - Add zpco for permutation condense
+20020614 - Work to extend all splitting scripts to accept multiple generators
+20020614 - Cleaned up indicator calculations to do less work
+20020615 - Removed a number of redundant scripts
+20020615 - Find bug in sums when first both elements have order 2
+20020615 - Create split_all_cond for splitting condensations. Still classifies irreducibles, but doesn't indicate
+20020615 - First version of zmspf, spin with multiple generators and intermediate files
+20020615 - First apparently working zmspf
+20020616 - Apparently working new zbase using file cleaning
+20020617 - Lift vectors and vectors from permutation condense added
+20020618 - Modify the way split_with_element deals with dual splits
+20020618 - Find and fix two bugs in zfo
+20020619 - Fix a number of non-ANSI-isms in the source after trying out on SGI origin machine
+20020620 - Make zdiff return 1 when differences found, preparatory to replacing diff which doesn't work on large files.
+20020620 - use new zdiff in scripts
+20020620 - start converting file spinning to use clean_files interface
+20020624 - start allowing multiple module generators in intermediate file versions (spf, mspf, tspf).
+20020627 - Add use of perror and errno to all error diagnostics
+20020627 - Some efficiency improvements in clean and other uses of get_element
+20020630 - More efficiency improvements
+20020701 - New faster zvp, and some script improvements
+20020702 - Made split, base and new_irred_with_orders more robust
+20020702 - Made zdiff handle maps
+20020703 - Add zfln for find least nullity, and zlp for line permute
+20020703 - Add base_with_vector, base_from_vector, conjugate, find_best_nullity_with_orders
+20020704 - Remove nor == 1 restriction from ztspf
+20020705 - Apply reduced memory requirements to ztspf
+20020705 - Remove dependent vectors restrictions in ztsp, zmsp, zsp
+20020705 - Add zmsb and convert base_with_vector to use it
+20020705 - Add new scripts for multiple generator standard base work
+20020707 - Add zmsbf
+20020707 - Modify scripts to use zmsbf. Fix documentation
+20020709 - Add verbose and quiet options
+20020711 - Add ztrecover for recovering tmp files in tensor spins
+20020715 - Brought new_irred_and_indicate into line with other scripts
+20020720 - Add zrand
+20020724 - Fix split_with_element to allow pathological elements
+20020802 - Add new_irredf_and_indiciate_with_orders
+20020806 - Start on tensor condense
+20020823 - Start on tensor uncondense
+20020826 - Fix problem in zscript with renaming large files.
+20020901 - Added decomp for finding irreducibles given restrictions to subgroups
+20020901 - First sym_basis using gamma operators
+20020905 - First apparently working ztco and sym_basis, on 748 x 748* for Co2
+20020905 - Started on span and spin for very large nullspaces
+20020909 - First apparently working ztcv for tensor uncondense
+20020909 - Start on improving zscript to handle multiple generators
+20020910 - zscript handles more than 2 generators
+20020911 - Start on improving zsums and friends to handle multiple generators
+20020911 - Integrate news zsums etc into scripts
+20020911 - Start to extend indicators to cope with multiple generators
+20020912 - Indicators extend to cope with multiple generators
+20020917 - Added doc for ztco, ztcv, sym_basis
+20020918 - Added zrsumsf
+20020918 - Revise restrict_with_orders to accept multiple generators
+20020918 - Add restrictf_with_orders and find_restricted_nullity_onef_with_orders
+20020923 - Added doc for zrand and ztrecover. Fix bug in ztrecover
+20020924 - Sorting return codes from zsums and friends
+20020924 - Add zfln and find_best_nullityf_with_orders
+20020924 - Optimise row increments by searching for first non-zero (good for Gaussian elimination, whilst not harming multiplication)
+20021004 - Add some support for orthogonal group sign
+20021007 - Fixes to singular_vector
+20021012 - Add zclean. Add zsing
+20021012 - Add zsign
+20021013 - Use -m for zmu throughout all scripts
+20021013 - Read memory size from environment
+20021013 - Use -m for ztr throughout all scripts
+20021013 - Use -m for zrn, zns, zbase throughout all scripts
+20021014 - Use -m for zsums and friends
+20021014 - Use -m for zranks and zfln
+20021014 - Use -m for zmsb, znsf and zrnf
+20021014 - Use -m for ziv and zivf
+20021014 - Use -m for zmsp and zmspf
+20021014 - Use -m for ztsp and ztspf
+20021014 - Use -m for ztmu and zproj
+20021014 - Use -m for zscript
+20021014 - Use -m throughout, and document
+20021015 - GF4 version of inner product now available
+20021015 - Indicator calculation for odd characteristics
+20021015 - GF3 and GF5 versions of inner product
+20021015 - Orthogonal group computation for all characteristics as part of indicator calculation
+20021018 - Fix bug in real_indicate. Minor improvements to sign calculation
+20021027 - Added span.{c,h} and used it in zspan.c
+20021027 - Used new span code in singular_vector
+20021102 - Fix bug in zmsbf where memory was wrongly initialised
+20021113 - Fix false assert in zmsbf. Add assembler output option to rules.txt
+20021119 - Fix lack of error checking on endian_copy_matrix
+20021123 - Fix memory issues for zsign within rela_indicate
+20021125 - Added Nikolaus talk.
+20021129 - Tidy up error handling in scripts
+20021130 - fix bug in iv
+20030102 - add zdiffd and convert preserves to use it
+20030114 - new version of zdiffd distinguishing errors from failed comparison
+20030117 - fix fault in find_extent causing memory overwrites
+20030205 - fix a number of minor faults related to sns and bad memory requests
+20030210 - modify nullspace for better memory split
+20030224 - add verbosity for multiply
+20030225 - fix bug in join.c wrong header to output
+20030228 - Add verbose for all calls to clean
+20030301 - Fix bug in clean_vectors
+20030316 - Fix argument bug in ztco, and reduce memory requirement in tco.c
+20030316 - Minor simplification to preserves
+20030322 - Performance improvement to ztco by only scaling what we need
+20030323 - Remove redundant rows_init from mul_from_store and mul_in_store
+20030325 - Reduce memory requirement for left tensor in ztco
+20030329 - Hold P matrices in memory in ztco. Modify find_element to take more generators
+20030418 - Fix bug in field extend
+20030419 - Fix corresponding bug in field restrict
+20030425 - Fix bug in znsf caused by double allocation of same memory space
+20030426 - Add check_irred and check_irredf
+20030426 - Minor improvements in base, indicate_with_element, new_irred_with_orders, restrict_with_orders
+20030426 - Add new_irred_with_script
+20030426 - Add new_irredf_with_script
+20030426 - Minor improvements in indicatef_with_element, new_irredf_with_orders, restrictf_with_orders
+20030428 - Fix further bug in znsf with non-square matrices
+20030516 - Fix minor bug in check_irredf documentation and add text output
+20030517 - Improve sym_basis by using new_irred_with_script. Allow new_irred_with_script to handle non-nullity one case
+20030518 - Improve sym_basis by holding echelised basis so far for given irreducible, and using that to determine if a vector needs spinning. Also compute irred script only once.
+20030518 - Compute entire span spanned by image of gamma operator to prevent time wasted when no more could be produced.
+20030527 - Add sym_basis_delta and doc.
+20030621 - First working version of zsymb plus documentation
+20030621 - First version of zttr, plus sym_basis_delta using zsymb
+20030621 - Added tra_in_situ for use by tsp and tmu
+20030628 - Fixed ztspf to be able to work without reading all of second argument
+20030629 - Fixed sym_basis to use zsymb
+20030720 - Fix minor bug in real_indicate on group signs for odd primes
+20030720 - Add GF9 support first version
+20030725 - Fix bug in zpco where wrong orbit size used
+20030728 - Make the f scripts retry on out of memory
+20030728 - Fix the out of memory exit code in qs.c and project.c
+20030804 - Add stuff to avoid evaluating essentially the same words in sums by eliminating multiples
+20030810 - Added stuff to reduce the disc space requirements of zsums and friends
+20030817 - Fix bug in zfln where temporaries were lost
+20030824 - Add find_irred and split_all_decomp
+20031217 - Fixed a bug where split_with_element incorrectly identified irreducibles
+20031217 - Fixed a bug in power
+20031220 - Fixed a further bug in power to do with insufficient starting memory
+20031228 - Added lift_vectors
+20031230 - Added zsignf for computation of big representation signs
+20031231 - Fixed minor bug in real_indicate when incorporating zsignf
+20040104 - Added function to parse to give usage, and modified others to use it
+20040124 - Changed char row interface to use unsigned char
+20040131 - Made sure memory setting is always used
+20040131 - Echo failure message when find_nullity_onef_with_orders gets unexpected ret
+20040215 - Add skip_mul, plus general improvements to zsign
+20040217 - Improve grease_inc by gnoring the leading zero parts of the rows
+20040221 - Use skip_mul in msp and mspf
+20040329 - Fix slow skew powers and memory corruption bug in ztco
+20040330 - Fix further fault in ztco with very low memory
+20040401 - Added count_irreds
+20040411 - Fix bug in sym_basis_delta when dualising
+20040420 - Improvements to scaling in GF4
+20040421 - Improvements to add in GF3
+20040424 - Further GF3 improvements
+20040425 - Changed row_product for GF3 and GF4 to 64k
+20040425 - Stopped clean and friends from calling rows_init
+20040428 - Minor improvements to GF5
+20040502 - Speed improvements mainly benefiting tensor condense
+20040503 - Reorder multiplies in tco to double speed
+20040504 - Fix faulty error message from tco
+20040504 - Fix accidental fault in mul
+20040505 - Reduce amount of tensor product made, where the multiplying column is zero
+20040506 - Correct minor bug in tco 1 x 1 matrix optimisation
+20040506 - Improvements to inner loop giving significant speed up
+20040512 - Added space_split for splitting null vectors into subspaces and quotients
+20040605 - Several minor improvements for the benefit of tensor condense
+20040605 - Added -mg parameter for setting maximum grease level
+20040606 - Improve grease_row_inc and tco
+20040606 - Remove use of maps from mul_in_store
+20040608 - Replace memset in time critical places. Stop copying grease rows unnecessarily
+20040612 - Add short row operations
+20040612 - Remove element_access_init from mul_in_store
+20040613 - More optimisations to mul_in_store
+20040617 - Split mul_in_store loop into main part and final part, then remove tests
+20040621 - Fix minor fault in error handling in zsymb
+20040728 - Fix minor fault in real_indicate
+20040731 - Add ztcocon to continue a tensor condense eg to recover from an unexpected machine shutdown)
+20040814 - Add ztcocon documentation
+20040821 - Add FreeBSD port
+20040822 - Changed to building a meataxe library for the utility functions
+20040822 - Moved some functions out of library due to name duplication
+20040828 - Gave rank, spin etc unique names so they can be added to the library
+20040828 - Add means to rebuild library without rebuilding everything
+20040917 - Improved verbosity in multiply and spin
+20040919 - Fix bug in space_split whereby subspace vectors were still in original space
+20041002 - Made dual_subspace use znsf to cope with larger subspaces
+20041008 - Make count_irreds report the total dimension
+20041106 - Changed sums and sumsf so as not to allocate very large arrays
+20041115 - Changed zfln and zflnf to remember the file and script
+20041124 - Changed new_irred to try existing irreds first
+20041202 - Changed spin_vectors to use srn
+20041231 - Added missing return when clean_vectors detects header mismatch
+20050101 - Remove redundant spaces in count_irreds
+20050102 - Allow zpro to handle prime not 1
+20050102 - First attempt at zfol working
+20050106 - Got zfol to handle HN 1539000 permutation representation
+20050108 - Fix bug in new_irred_with_script
+20050115 - Add checkorder
+20050212 - Fix arg check bug in check_irredf. Allow new_irredf_and_indiciate_with_orders to compute odd characteristic indicators
+20050220 - Fix bug in real_indicate in odd characteristic calling zsignf
+20050321 - Remove dualise parameter from sym_basis scripts
+20050404 - Fix some documentation errors
+20050406 - Fix bug in nsf for very non-square matrices
+20050428 - Modify split so as to avoid some large nullities from zsums
+20050501 - Improve sums, zfln and zranks to allow single generator algebras
+20050501 - Improve find_best_nullity_with_orders to retry with less generators if it fails completely
+20050506 - Added an rm_all function to deal with large quantities of temporary files
+20050510 - Added commutate
+20050511 - Use rm_all in find_element
+20050520 - Fix bug in sums when only one element
+20050521 - Improved memory usage in vp
+20050525 - Added intermediate file versions of zvp znd zlp
+20050604 - Fix bug in zlpf due to 64 bit vs 32 arithmetic
+20050606 - Remove some verbosity from vpf.c and make lift unique
+20050607 - Fix missing information from parse_usage
+20050619 - Add bn to compute the Atlas function bn on an element
+20050622 - Add 64 bit capability and use sized types
+20050619 - Add cn to compute the Atlas function cn on an element
+20050628 - Fix bug in commutate
+20050710 - Fix bug in sit whereby element orders weren't correctly recorded
+20050713 - Added a cygwin port
+20050724 - Fix some warnings shown up by intel compiler
+20050724 - Addition of intel compiler support
+20050819 - Update singular_order to use a more sensible memory size
+20050727 - Added win32 build
+20051028 - First em64t port
+20051030 - Added sizes program to get the data for 64 bit architectures
+20051030 - Fix bug in header computation for odd primes in 64 bit mode
+20051212 - Added zsize and zformat to say what sort of meataxe
+20051217 - Add new tensor condense algorithm
+20051218 - Add get_elements_from_row_with_params_into_row and use in ntco
+20051219 - Further minor improvements to ntco
+20051221 - Convert t_rows to t_row in ntco
+20051231 - Allow tensor to handle non-square
+20051231 - Fix memory corruption bug in zntco
+20060101 - Better short and word operations for GF(3) and GF(4)
+20060104 - Choose row operation length in ntco dynamically
+20060113 - Minor bug fix in elements.c and weak in ntco.c
+20060126 - Fix minor syntax error in ntco.c
+20060128 - Simplify sym_basis_delta
+20060128 - Fix bug in zsize.c on 64 bit compiler
+20060202 - Fix bug in sums_utils.c shown up by 64 bit system
+20060209 - Fix bug in sums_utils for special case of order 1 elements
+20060209 - Extra compiler options needed by 64 bit icc
+20060304 - Add zsv, to compute Schreier vectors
+20060312 - Add zpofp for finding fixed points in orbits
+20060314 - Improved versions of bn, cb, xn
+20060319 - More common code moved into gen.{c,h}
+20060508 - Add sym_basis_deltaf
+20060509 - Add filter_element and supporting programs
+20060508 - Add rebase.sh for creating irreducibles suitable for e_script
+20060513 - Add documentation for rebase.sh and fix a bug
+20060520 - Add documentation on filter_element and associated programs
+20060614 - Fix bug in allocation of gens
+20060717 - Add zmvp, vector permute with multiple generators
+20060723 - Fix bug in sums_utils whereby two many words were thought to reduce
+20060723 - Add ability to reuse null vectors during recursive split
+20060726 - Use head at end of filter_element to prevent very large output
+20060729 - Added irr_base_change
+20060730 - Added group_order
+20060731 - Fix bug where find_best_nullity gave the wrong script
+20060804 - Add zfr for field retraction
+20060816 - Remove use of expanded_rrows from ntco, as it's not needed and wastes memory
+20061009 - Add support for gcc 3.4
+20061126 - Add some verbose output to ntco
+20061126 - Make zsignf use given temp directory when there is one
+20061204 - Fix missing or late endian_init calls shown up by sparc version
+20061218 - Fix bug in open_and_read_binary_header where unset header was dereferenced
+20061218 - Fix bug in transpose whereby it allocated very big matrices unnecessarilt
+20061223 - Add fixed_point_form_sign and fixed_point_form_signf
+20061227 - Modified indicator scripts to return the form if quadratic
+20070901 - Modified split_with_vectors to start at a more sensible memory setting
+20070903 - Further tweak to memory_from_stat
+20071122 - Correct fault in usage for base_from_vector
+20071214 - Use rm_all in base_from_vector
+20071219 - Copy form even for odd characteristic in real_indicate

@@ -1,0 +1,86 @@
+#!/bin/bash
+#
+# $Id: space_split,v 1.6 2023/07/03 08:30:07 jon Exp $
+#
+# Script to split a space across a subspace
+# giving te intersection with the subspace
+# plus the projection relative to the subspace
+#
+# Inputs
+# $1: subspace name
+# $2: space to be split
+# $3: output stem
+# $4: memory available
+#
+# outputs will be of the form <$3>_ss and <$3>_proj
+#
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+# 2: Out of memory
+#
+. functions
+usage="$0: usage: $0 <subspace> <vectors> <output stem> [<memory>]"
+if [ $# -ne 4 -a $# -ne 3 ]; then
+  echo "$usage"
+  exit 1;
+fi
+s=$1
+v=$2
+stem=$3
+if [ 4 -eq $# ]; then
+  memory=$4
+else
+  memory=400
+fi
+tmp=tmp${PPID}
+zproj -m $memory $s $v ${tmp}.1
+ret=$?
+if [ 0 -ne $ret ]; then
+  rm -f ${tmp}.*
+  exit $ret
+fi
+ns=`zns -m $memory ${tmp}.1 ${tmp}.2`
+ret=$?
+if [ 0 -ne $ret ]; then
+  rm -f ${tmp}.*
+  echo $ns
+  exit $ret
+fi
+rn=`znor  -m $memory ${tmp}.1`
+if [ 0 -ne $ret ]; then
+  rm -f ${tmp}.*
+  echo $rn
+  exit $ret
+fi
+if [ $rn -ne $ns ]; then
+  zmu -m $memory ${tmp}.2 $v ${tmp}.3
+  ret=$?
+  if [ 0 -ne $ret ]; then
+    rm -f ${tmp}.*
+    exit $ret
+  fi
+  zss -m $memory $s ${tmp}.3 $stem.ss
+  ret=$?
+  if [ 0 -ne $ret ]; then
+    rm -f ${tmp}.*
+    exit $ret
+  fi
+  zbase -m $memory ${tmp}.1 . $stem.proj
+  ret=$?
+  if [ 0 -ne $ret ]; then
+    rm -f ${tmp}.*
+    exit $ret
+  fi
+else
+  zss -m $memory $s $v $stem.ss
+  ret=$?
+  if [ 0 -ne $ret ]; then
+    rm -f ${tmp}.*
+    exit $ret
+  fi
+  echo "$v: entirely within $s"
+fi
+rm -f ${tmp}.*
+exit 0

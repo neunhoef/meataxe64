@@ -1,0 +1,62 @@
+/*
+ * $Id: zrranks.c,v 1.11 2004/11/06 22:32:08 jon Exp $
+ *
+ * Compute restricted sums in the group algebra in two matrices finding all of given nullity
+ *
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include "endian.h"
+#include "memory.h"
+#include "parse.h"
+#include "sums.h"
+#include "utils.h"
+
+static const char *name = "zrranks";
+
+static unsigned int nullity = 0;
+
+static void rranks_usage(void)
+{
+  fprintf(stderr, "%s: usage: %s %s <out_file_stem> <n> <nullity> <subfield order> <in_file a> <order a> [<other elements and orders>]\n", name, name, parse_usage());
+}
+
+static int acceptor(unsigned int rank, unsigned int nor, const char *file, const char *form)
+{
+  NOT_USED(file);
+  NOT_USED(form);
+  if ((0 == nullity && rank == nor) || (rank < nor && rank + nullity >= nor)) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
+int main(int argc, const char * const argv[])
+{
+  unsigned int n, sub_order;
+  int res;
+
+  argv = parse_line(argc, argv, &argc);
+  if (9 > argc || 1 != argc % 2) {
+    rranks_usage();
+    exit(1);
+  }
+  n = strtoul(argv[2], NULL, 0);
+  nullity = strtoul(argv[3], NULL, 0);
+  sub_order = strtoul(argv[4], NULL, 0);
+  if (0 == n) {
+    fprintf(stderr, "%s: no ranks requested\n", name);
+    exit(1);
+  }
+  endian_init();
+  memory_init(name, memory);
+  res = sums(argv[1], n, argc - 5, argv + 5, sub_order, &acceptor, 0, 1, name);
+  memory_dispose();
+  if (0 == res) {
+    return 0;
+  } else {
+    return 255;
+  }
+}

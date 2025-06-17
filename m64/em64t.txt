@@ -1,0 +1,4 @@
+#
+# Intel optimised fragment for building
+#
+LIB_MODULES+=	tfarm0 tfarm1 pc1 pc2 pc3 pc5 pc6

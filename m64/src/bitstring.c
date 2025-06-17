@@ -148,10 +148,10 @@ void BSColSelect (const FIELD * f, const uint64_t * bs, uint64_t nor,
 
 // list indices of unset bits
 
-uint32_t * BSLixUn(const uint64_t * bs)
+uint32_t *BSLixUn(const uint64_t *bs)
 {
     uint32_t i,j;
-    uint32_t * ix;
+    uint32_t *ix;
 
     ix=malloc((bs[0]-bs[1])*sizeof(uint32_t));
     j=0;
@@ -197,7 +197,7 @@ uint32_t * BSGpc(const uint64_t * bs)
 // maybe later fastpath if bs[0]==bs[1] or bs[1]=0
     while(bitno<bs[0])
     {
-        if(BSBitRead(bs,bitno)==phase)
+      if(BSBitRead(bs,bitno)==(int)phase)
         {
             bitct++;
             bitno++;

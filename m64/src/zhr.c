@@ -10,7 +10,7 @@
 #include "field.h"
 #include "io.h"
 
-FELT lindiv(FIELD * f, FELT r, Dfmt * p, DSPACE * ds, Dfmt * q)
+static FELT lindiv(FIELD *f, FELT r, Dfmt *p, DSPACE *ds, Dfmt *q)
 {
     FELT val,c;
     long i;

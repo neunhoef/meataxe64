@@ -1,0 +1,141 @@
+#!/bin/bash
+#
+# $Id: split_with_vectors,v 1.5 2023/07/03 08:30:08 jon Exp $
+#
+# Script to split a representation given a particular set of vector seeds
+#
+# Inputs
+# $1: seeds with which to split
+# $2: output filename base
+# $3: ignore pathology (very high nullity)
+# $4: name for subspace
+# $5: generator a
+# $6-: other generators
+#
+# outputs will be of the form <$2>_<nor>_<subnor>_<x>
+# where nor is number of rows, and subnor is
+# the number of rows in the sub or quotient space as appropriate
+#
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+# 254: did not split
+#
+. functions
+usage="$0: usage: $0 <vectors> <output_stem> <ignore pathology> <subspace> <a> [<other generators>]"
+if [ $# -lt 5 ]; then
+  echo "$usage"
+  exit 1;
+fi
+e=$1
+o=$2
+path=$3
+s=$4
+a=$5
+shift 5
+if [ -e $a -a -e $e ]; then
+  q=`zprime $e`
+  nor=`znor $a`
+  noc=`znoc $a`
+  if [ $nor -ne $noc ]; then
+    echo "$0: $a is not square"
+    exit 1
+  fi
+  if [ 1 -eq $q ]; then
+    echo "$0: $e cannot be a map"
+    exit 1
+  fi
+  if [ $noc -ne `znoc $e` ]; then
+    echo "$0: $a and $e are not compatible"
+    exit 1
+  fi
+else
+  echo "$0: missing files $a or $e"
+  exit 1
+fi
+tmp=tmp${PPID}
+#echo Using tmp stem $tmp
+#
+# rm -f ${tmp}*
+# Check above first
+#
+memory=`memory_from_stat $a`
+count=`znor $e`
+nullity=$count
+if [ $count -gt 5 ]; then
+  let count2=$count*$count
+  if [ $count2 -gt $nor -a 0 -ne $path ]; then
+# Pathological element, no point in trying 
+    rm -f ${tmp}*
+    exit 254
+  fi
+  count=5
+  if [ 0 -ne $path ]; then
+    echo Restricting span to 5 vectors
+  else
+# Avoid overflow
+    if [ 2 -eq $q ]; then
+      count=15
+    elif [ 3 -le $q ]; then
+      count=8
+    fi
+    if [ $count -gt $nullity ]; then
+      count=$nullity
+    fi
+  fi
+fi
+#echo Considering $vectors vectors
+zspan $e ${tmp}.3 $count
+if [ $? -ne 0 ]; then
+  rm -f ${tmp}*
+  echo zspan $e ${tmp}.3 $count failed
+  znor $e
+  exit 1
+fi
+vectors=`znor ${tmp}.3`
+vector=0;
+while [ $vector -lt $vectors ]; do
+  split=0
+#
+# Pick vector $vector from ${tmp}.3 and attempt to spin
+#
+#  echo Trying vector $vector
+  zsel ${tmp}.3 ${tmp}.4 $vector
+  mem_ok=0
+  while [ 0 -eq $mem_ok ]; do
+    dim=`zmsp -m $memory ${tmp}.4 $s $a $* 2>/dev/null`
+    ret=$?
+    if [ $ret -eq 0 ]; then
+      mem_ok=1
+    elif [ $ret -eq 2 ]; then
+      let memory=`more_memory $memory`
+#     echo Allocating more memory for zmsp, now $memory
+    else
+      echo Split failed with some sort of error $ret
+      rm -f ${tmp}*
+      exit 1
+    fi
+  done
+  let vector=$vector+1
+  if [ $dim -lt $nor ]; then
+    split=1
+    break
+  fi
+  echo Resplitting with vector $vector
+done
+if [ $split -eq 0 ]; then
+  rm -f ${tmp}*
+  exit 254
+fi
+let codim=$nor-$dim
+ss_name=`new_name ${o} ${nor} ${dim}`
+qs_name=`new_name ${o} ${nor} ${codim}`
+if [ $dim -eq $codim ]; then
+  ss_name=${ss_name}_a
+  qs_name=${qs_name}_b
+fi
+echo Obtained a subspace ${ss_name} of dimension $dim, quotient ${qs_name} codimension $codim
+split_with_subspace $s ${ss_name} ${qs_name} $memory $a $*
+rm -f ${tmp}*
+exit 0

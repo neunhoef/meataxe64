@@ -11,6 +11,7 @@
 #include "tfarm.h"
 #include "proggies.h"
 #include "tuning.h"
+#include "mezz.h"
 
 // #define DEBUG 1
 
@@ -22,7 +23,8 @@ void mmul(const char *m1, int s1, const char *m2, int s2, const char * m3, int s
     uint64_t i,j,k;
     uint64_t caul,base;
     DSPACE da,db,dw;
-    int strat,buffering,concur;
+    int strat,buffering;
+    unsigned int concur;
     uint64_t D1,D2,siza,sizb,sizc,sizw;
 
     TFInit(THREADS);

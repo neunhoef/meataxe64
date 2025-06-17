@@ -1,0 +1,6 @@
+#
+# Intel optimsed fragment for meataxe64
+#
+
+include em64t.txt
+

@@ -1,0 +1,19 @@
+#!/bin/bash
+#set -x
+dim=0
+for x in `ls irreds/*_1`; do
+    z=`znor $x`
+    y=`echo $x | sed -e "s?^.*irreds/?irreds/?g;s/_1$//g"`
+    tot=0
+    for t in *.log; do
+        count=`grep $y $t | sed -e "s/^.*: //g"`
+        if [ -n "$count" ]; then
+            let tot=${tot}+${count}
+        fi
+    done
+    if [ 0 -ne $tot ]; then
+        echo "$y: $tot"
+        let dim=$dim+$z*$tot
+    fi
+done
+echo "Total dimension: $dim"

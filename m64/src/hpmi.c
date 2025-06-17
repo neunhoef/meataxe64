@@ -132,15 +132,15 @@ void hpmiset(FIELD * f)
 void DtoA(DSPACE * ds, uint64_t * ix, const Dfmt * d, Afmt * a,
             uint64_t nora, uint64_t stride)
 {
-    int i,j,k;
+  unsigned int i,j,k;
     uint64_t nz1;
     uint8_t orc,byte,byte1;
     const uint8_t *pt1,*pt2;
     const uint32_t * pt32;
     uint32_t v32, *qt32;
-    int s;
+    unsigned int s;
     int bits,nbits;
-    int copybytes;
+    unsigned int copybytes;
     uint8_t  * Thpa;
     uint16_t * Thpv;
     uint64_t alen;
@@ -244,7 +244,7 @@ void DtoA(DSPACE * ds, uint64_t * ix, const Dfmt * d, Afmt * a,
                 {
                     if(nbits<8)
                     {
-                        if( s >= ds->nob) byte=0;
+                        if (s >= ds->nob) byte=0;
                         else             byte=pt1[s];
                         bits=bits+(Thpv[byte]<<nbits);
                         nbits+=10;
@@ -415,9 +415,9 @@ uint64_t DtoB(DSPACE * ds, const Dfmt * d, Bfmt * b,
     return 0;    // should never happen - compiler warning
 }
 
-int BSeed(const FIELD * f, uint8_t * bwa, Bfmt * b)
+int BSeed(const FIELD *f, uint8_t *bwa, Bfmt *b)
 {
-    int i,j,x;
+    unsigned int i,j,x;
     uint64_t y,z;
     Bfmt *pt1,*pt2;
     uint16_t * pt3;
@@ -707,21 +707,22 @@ void CZer(DSPACE * ds, Cfmt * c, uint64_t nor)
     for(i=0;i<nowords;i++) c64[i]=f->czer;
 }
 
-void CtoD(DSPACE * ds, Cfmt * c, Dfmt * d, uint64_t nor, uint64_t stride)
+void CtoD(DSPACE *ds, Cfmt *c, Dfmt *d, uint64_t nor, uint64_t stride)
 {
-    long zlen,cpylen,z2,z0,bits,ix,i;
-    uint8_t * sp;
-    uint16_t * sp16;
-    uint32_t * sp32;
-    uint64_t * sp64;
-    Dfmt * dp;
-    uint64_t * dp64;
+    long zlen,cpylen,bits,ix,i;
+    unsigned long z2, z0;
+    uint8_t *sp;
+    uint16_t *sp16;
+    uint32_t *sp32;
+    uint64_t *sp64;
+    Dfmt *dp;
+    uint64_t *dp64;
     Dfmt dbyte;
     uint64_t bu,bt;
-    uint8_t * Thpc;
+    uint8_t *Thpc;
     uint64_t nz2;
     uint64_t x,y,z;
-    const FIELD * f;
+    const FIELD *f;
 
     f=ds->f;
     nz2=(ds->noc+f->cauldron-1)/f->cauldron;    // number of cauldrons
@@ -735,7 +736,7 @@ void CtoD(DSPACE * ds, Cfmt * c, Dfmt * d, uint64_t nor, uint64_t stride)
         zlen=((z2+1)*f->cauldron);    // first entry not in this cauldron
         zlen-=ds->noc;                // entries to ignore this cauldron
         if(zlen<0) zlen=0;            // now correct
-        if(zlen>f->cauldron) zlen=f->cauldron;    // don't think this happns
+        if((uint64_t)zlen>f->cauldron) zlen=f->cauldron;    // don't think this happns
         zlen=zlen*f->pbytesper/f->pentbyte;   // Dfmt bytes to ignore
 
         cpylen=f->dfmtcauld-zlen;    // Dfmt bytes wanted

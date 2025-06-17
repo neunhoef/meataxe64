@@ -13,6 +13,7 @@
 #include "proggies.h"
 #include "bitstring.h"
 #include "tuning.h"
+#include "mezz.h"
 
 typedef struct
 {
@@ -363,7 +364,7 @@ uint64_t mech(const char *m1, int s1, const char *b2, int s2,
     {
         mm=TFPointer(M[j][0]);
         chq[j]=mm[0];
-        if(maxrows<chq[j]) maxrows=chq[j];
+        if(maxrows < (uint64_t)chq[j]) maxrows=chq[j];
     }
     k=0;
     for(h=0;h<cha;h++)
@@ -412,7 +413,7 @@ uint64_t mech(const char *m1, int s1, const char *b2, int s2,
     {
         mm=TFPointer(K[i][0]);
         chr[i]=mm[0];
-        if(maxrows<chr[i]) maxrows=chr[i];
+        if(maxrows<(uint64_t)chr[i]) maxrows=chr[i];
     }
     k=0;
     for(h=0;h<cha;h++)

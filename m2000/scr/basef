@@ -1,0 +1,64 @@
+#!/bin/bash
+#
+# $Id: basef,v 1.10 2023/07/03 08:30:06 jon Exp $
+#
+# Script to find a representation in standard base
+# using intermediate files
+#
+# Inputs
+# $1: element with which to split
+# $2: output filename base
+# $3: the standard basis
+# $4: temporary directory to be used
+# $5: memory
+# $6: generator a
+# $7-: other generators
+#
+# outputs will be of the form <$2>_sb_{1,..}
+# where nor is number of rows, and q is the prime power
+#
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+# 254: reducible
+# 255: nullity not 1
+#
+#set -v
+. functions
+usage="$0: usage: $0 <e> <output_stem> <s> <tmp directory> <memory> <a> [<other generators>]"
+if [ $# -lt 7 ]; then
+  echo "$usage"
+  exit 1;
+fi
+e=$1
+o=$2
+s=$3
+dir=$4
+memory=$5
+a=$6
+if [ -e $e -a -e $a ]; then
+  q=`zprime $a`
+  nor=`znor $a`
+  noc=`znoc $a`
+  if [ $nor -ne $noc ]; then
+    echo "$0: $a is not square"
+    exit 1
+  fi
+  if [ $nor -ne `znoc $e` -o $nor -ne `znor $e` ]; then
+    echo "$0: $a and $e are not compatible"
+    exit 1
+  fi
+else
+  echo "$0: missing files $e or $a"
+  exit 1
+fi
+shift 6
+basef_vectors $e $s $dir $memory $a $*
+ret=$?
+if [ 0 -ne $ret ]; then
+  exit $ret
+fi
+conjugatef $s ${o}_sb $dir $memory $a $*
+ret=$?
+exit $ret

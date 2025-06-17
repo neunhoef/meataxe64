@@ -686,7 +686,7 @@ uint8_t lfZ161051[]  = {  6,8,2 , 3,2,8,2 , 3,2,4,2 , 3,5,2,5 , 9,3,8 ,
                    3,3,2,3 , 7,6,1,2 , 7,8,5,1 , 6,9,1 , 6,5,0 ,
                    7,8,0,1 , 7,9,7,3 , 0 };
 
-void runlf(DSPACE * dp, uint8_t * pg, Dfmt * pmx, uint64_t nor,Dfmt * tt)
+static void runlf(DSPACE * dp, uint8_t * pg, Dfmt * pmx, uint64_t nor,Dfmt * tt)
 {
     uint8_t * pgc;
     uint8_t opc;
@@ -776,7 +776,7 @@ void runlf(DSPACE * dp, uint8_t * pg, Dfmt * pmx, uint64_t nor,Dfmt * tt)
     }
 }
 
-void extract(DSPACE * dq, const Dfmt *mq, uint64_t qstride, uint64_t nor,
+static void extract(DSPACE * dq, const Dfmt *mq, uint64_t qstride, uint64_t nor,
                  Dfmt *mp)
 {
     DSPACE dp;
@@ -829,7 +829,7 @@ void extract(DSPACE * dq, const Dfmt *mq, uint64_t qstride, uint64_t nor,
     free(tt);
 }
 
-void assemble(DSPACE * dq, Dfmt *mq, uint64_t nor,  Dfmt *mp)
+static void assemble(DSPACE * dq, Dfmt *mq, uint64_t nor,  Dfmt *mp)
 {
     DSPACE dp;
     const FIELD * f;

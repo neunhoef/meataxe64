@@ -1,0 +1,67 @@
+#!/bin/bash
+#
+# $Id: find_nullity_one_with_orders,v 1.13 2023/07/03 08:30:07 jon Exp $
+#
+# Script to find an element of nullity one in two generators
+#
+# Inputs
+# $1: output file name
+# $2: initial memory
+# $3: generator a
+# $4: order a
+# $5: generator b
+# $6: order b
+# $7-: further generators and orders
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+# 254: nullity not 1
+#
+usage="$0: usage: $0 <out> <memory> <a> <order a> <b> <order b> [<further generators and orders>]"
+if [ $# -lt 6 ]; then
+  echo "$usage"
+  exit 1;
+fi
+. functions
+e=$1
+memory=$2
+a=$3
+o_a=$4
+b=$5
+o_b=$6
+shift 2
+tmp=tmp${PPID}
+ok=0
+nor=`znor $a`
+# Try zsums
+q=1
+for x in $*; do
+  r=`zprime $x`
+  if [ $r -gt $q ]; then
+    q=$r
+    break
+  fi
+done
+depth=`max_depth $q 1023`
+while [ $ok -eq 0 ]; do
+  out=`zsums -m $memory ${tmp}.zsums $depth 1 $* 2>/dev/null`
+  ret=$?
+  if [ 2 -eq $ret ]; then
+    let memory=`more_memory $memory`
+  elif [ 0 -eq $ret ]; then
+    ok=1
+    name=`echo $out | sed -e "s/^.*element //g;s/ of nullity.*$//g"`
+    cp ${name} $e
+    echo $out | sed -e "s/^.*form //g;s/ .*$//g"
+    rm -f ${tmp}*
+  elif [ 255 -eq $ret ]; then
+    echo Failed to find an element of nullity one
+    rm -f ${tmp}*
+    exit 254
+  else
+    echo zsums unexpectedly returns $ret, terminating
+    rm -f ${tmp}*
+    exit 1
+  fi
+done

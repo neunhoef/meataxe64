@@ -17,7 +17,7 @@ int main(int argc,  char **argv)
     uint64_t fdef,nor,noc;
     uint64_t x,y;
     uint8_t *Thpa,*f8;
-    int vals,i;
+    unsigned int vals, i;
     FIELD * f;
     DSPACE ds;
     int hpmi;

@@ -1,0 +1,134 @@
+#!/bin/bash
+#
+# $Id: sym_basis,v 1.19 2023/07/03 08:30:08 jon Exp $
+#
+# Script to compute a symmetry basis wrt an ordered set of irreducibles
+#
+# Inputs
+# $1: a file containing the irreducible element names
+# $2: memory to be used
+# $3: the file to contain the symmetry basis
+# $4: the file of multiplicities
+# $5: a script for computing gamma operators
+# $6-: generators for the condensation group
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+# 255: an irreducible was found outside the list
+#
+usage="$0: usage: $0 <irreducibles> <memory> <output basis> <output multiplicities> <script> <generator 1> [<other generators>]"
+if [ $# -lt 7 ]; then
+  echo "$usage"
+  exit 1;
+fi
+have_basis=0
+name=$0
+irreds=$1
+memory=$2
+out=$3
+mult=$4
+script=$5
+shift 5
+gen_count=$#
+tmp=tmp${PPID}
+basis=${tmp}.31
+local_basis=${tmp}.32
+cat /dev/null > $mult
+for x in `cat $irreds`; do
+  w=$x
+  wdim=`znor ${w}_1`
+  y=`ls ${w}_1_I*`
+  ret=$?
+  if [ 0 -ne $ret ]; then
+    echo "$name: failed to find irreducible script for ${w}, terminating"
+    exit 1
+  fi
+  script_x=`echo $y | sed -e "s?${w}_1_??g"`
+  ret=$?
+  if [ 0 -ne $ret ]; then
+    echo "$name: failed to produce irreducible script for ${w}, terminating"
+    rm -f ${tmp}.*
+    exit 1
+  fi
+  count=0
+  gamma=${tmp}.0
+# compute the gamma operator in the generators for irreducible X
+  $script $gen_count ${w} $memory $gamma $*
+  ret=$?
+  if [ 0 -ne $ret ]; then
+    echo "$name: gamma operator computation failed for ${w}, terminating"
+    exit 1
+  fi
+# compute the image of the gamma operator
+  dim=`zbase -m $memory $gamma . ${tmp}.1`
+  ret=$?
+  if [ 0 -ne $ret ]; then
+    rm -f ${tmp}.*
+    echo $dim
+    echo "$name: failed to compute dim, terminating"
+    exit 1
+  fi
+  if [ $dim -gt 0 ]; then
+# First compute total space spun from image of gamma operator
+    r=`zmspf -m $memory ${tmp}.1 ${tmp}.2 . $*`
+    ret=$?
+    if [ 0 -ne $ret ]; then
+      rm -f ${tmp}.*
+      echo $r
+      echo "$name: failed to spin image of gamma, terminating"
+      exit 1
+    fi
+    let tot=$r/$wdim
+    echo tot=$tot, r=$r, wdim=$wdim, dim=$dim
+    dim=`zsymb -m $memory $tot $wdim ${tmp}.1 ${tmp}.2 . $*`
+    ret=$?
+    if [ 0 -ne $ret ]; then
+      rm -f ${tmp}.*
+      echo $dim
+      echo code $ret
+      echo "$name: failed to base component for $w, terminating"
+      exit 1
+    fi
+    if [ $r -ne $dim ]; then
+      rm -f ${tmp}.*
+      echo "$name: expected dimension $r for component $w but got $dim, terminating"
+      exit 1
+    fi
+    count=$tot
+    if [ 0 -eq $have_basis ]; then
+      cp ${tmp}.2 $basis
+      ret=$?
+      have_basis=1
+    else
+      zjoin $basis ${tmp}.2 ${tmp}.3
+      ret=$?
+      if [ 0 -ne $ret ]; then
+        rm -f ${tmp}.*
+        echo "$name: unexpected failure in zjoin, terminating"
+        exit 1
+      fi
+      cp ${tmp}.3 $basis
+      ret=$?
+    fi
+    if [ 0 -ne $ret ]; then
+      rm -f ${tmp}.*
+      echo "$name: unexpected failure in cp, terminating"
+      exit 1
+    fi
+  fi
+  echo $count >> $mult
+done
+if [ 0 -eq $have_basis ]; then
+  rm -f ${tmp}.*
+  echo "$name: no basis found, terminating"
+  exit 1
+fi
+if [ `znor $basis` -ne `znor $1` ]; then
+  rm -f ${tmp}.*
+  echo "$name: not enough basis found"
+  exit 255
+fi
+cp $basis $out
+rm -f ${tmp}.*
+exit 0

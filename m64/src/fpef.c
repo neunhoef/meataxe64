@@ -9,11 +9,13 @@
 #include "field.h"
 #include "funs.h"
 #include "parse.h"
+#include "utils.h"
 
 uint64_t fProduceNREF(const char *tmp, const char *m1, int s1, 
                       const char *b2, int s2, const char *m3, int s3)
 {
     uint64_t rank;
+    NOT_USED(tmp);
     if (very_verbose) {
       printf("fProduceNREF %s %s %s\n", m1, b2, m3);
     }

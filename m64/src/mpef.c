@@ -13,6 +13,7 @@
 #include "proggies.h"
 #include "bitstring.h"
 #include "tuning.h"
+#include "mezz.h"
 
 typedef struct
 {
