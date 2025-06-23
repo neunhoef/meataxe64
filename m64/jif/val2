@@ -1,3 +1,5 @@
+#!/bin/bash
+wd=`pwd -P`/`dirname $0`
 rm -f logfile
 $1 zrd a1 2 5071 5071 19
 $1 zch a1 3
@@ -977,4 +979,4 @@ $1 ztr a3 a4
 $1 ztc a4 > junk
 $1 zad a3 a4 a5
 $1 ztr a5 a6
-check_log.sh logfile ../reg/val2log
+${wd}/check_log.sh logfile ${wd}/../reg/val2log

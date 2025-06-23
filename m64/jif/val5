@@ -1,3 +1,5 @@
+#!/bin/bash
+wd=`pwd -P`/`dirname $0`
 rm -f logfile
 zrd a1 18446744073709551577 2111 2111
 time zmu a1 a1 a2
@@ -23,4 +25,4 @@ zrd a1 10000000019 2111 2111
 time zmu a1 a1 a2
 zrd a1 4294967311 2111 2111
 time zmu a1 a1 a2
-check_log.sh logfile ../reg/val5log
+${wd}/check_log.sh logfile ${wd}/../reg/val5log
