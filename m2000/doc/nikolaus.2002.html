@@ -1,0 +1,206 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Computing Orthogonal Group Signs</title>
+</head>
+<body>
+<table>
+<tr><td>Title:</td><td>Computing Orthogonal Group Signs</td></tr>
+<tr><td>Author:</td><td><a href=mailto:jgt@pobox.com>Jon Thackray</a><td>
+<tr><td>Version:</td><td>1</td></tr>
+<tr><td>Id:</td><td>$Id: nikolaus.2002.html,v 1.1 2002/11/26 20:46:23 jon Exp $</td></tr>
+<tr><td>Date:</td><td>20021206</td></tr>
+<tr><td>Status:</td><td>Draft</td></tr>
+</table>
+<h1>Contents</h1>
+<ol>
+<li><a href="#Purpose">Purpose</a></li>
+<li><a href="#Background">Background</a></li>
+<li><a href="#Caveats">Caveats</a></li>
+<li><a href="#Algorithm">The algorithm</a></li>
+<li><a href="#Results">Some results</a></li>
+<li><a href="#References">References</a></li>
+<li><a href="#Acknowledgements">Acknowledgements</a></li>
+</ol>
+<a name="Purpose">
+<h1>Purpose of the talk</h1>
+</a>
+<p>
+To describe an algorithm suitable for computer implementation for the
+computation of the isometry types of quadratic forms, and hence the
+group sign for groups preserving such forms. This is of interest for
+understanding the embedding structure of arbitrary finite groups
+inside classical finite orthogonal groups.
+</p>
+<a name="Background">
+<h1>Theoretical background</h1>
+</a>
+<p>
+The finite analogues of the classical orthogonal groups have long been
+known and studied (Dickson). It is well known that in odd dimensions
+there is only one isomorphism class of simple orthogonal group, but
+for even dimensions there are two classes, distinguished by the size
+of a maximal totally singular subspace with respect to the form
+(Aschbacher). These classes are labelled plus and minus, with the plus
+corresponding to the case of dimension n, and the minus corresponding
+to dimension n-1, where the overall dimension is 2n.
+</p>
+<p>
+In the case of dimension 2, there are precisely two isometry classes
+of spaces with non-degenerate forms, labelled D+ (hyperbolic) and D-
+(definite). In a definite space, there are no non-trivial singular (of
+norm zero) vectors. In a hyperbolic space, a basis can be chosen of
+two norm zero vectors whose inner product with respect to the
+associated bilinear form is non-zero
+</p>
+<p>
+We will assume throughout this talk that all forms are non-degenerate,
+ie that the subspace perpendicular to the whole space is {0}. Hence,
+given a space V with form f, and a subspace W, we have dim(W) + dim(W
+perp) = dim(V). A subspace W will be called totally singular if W
+consists entirely of singular vectors and W &lt;= W perp. Clearly then, a
+totally singular subspace W of a subspace V of dimension 2n has
+dimension at most n. Suppose V has dimension 2n, and W is a totally
+singular subspace of dimension less than n-1. Then W perp = U direct
+sum W, where dim(U) &gt; 2. Hence U contains a non-zero singular vector
+u. Further since U &lt;= W perp, if w is an element of W, then (u+w)f =
+uf + wf + (u,w)b, where b is the associated bilinear form, so (u+w)f =
+0. Thus W direct sum &lt;u&gt; is a totally singular subspace. Hence we can
+grow a totally singular subspace up to its maximum possible size by
+adding isotropic elements from its complement in its perp. Clearly
+this process stops when either W = W perp, or the complement U is
+definite. It is also the case that the termination condition (either
+maximum size or definite complement) is independent of the choices of
+vectors u that we have made (Witt).
+</p>
+<a name="Caveats">
+<h1>Caveats</h1>
+</a>
+<p>
+The group sign is a property of the actual representation, including
+the field over which it exists. Finding a non-zero singular vector is
+essentially a matter of solving a quadratic equation over the
+representation field, so extending the field quadratically will always
+allow the sign to become plus. One can interpret this in terms of
+Chevally groups as the embedding of 2Dn(q) in Dn(q**2). Since the
+field of the representation is the field of the reduction of the
+character, it is easy to deduce which field one should look at, but
+nonetheless important to be sure one is looking at the right field.
+</p>
+<a name="Algorithm">
+<h1>The algorithm</h1>
+</a>
+<p>
+The algorithm is a loop. We essentially consider three spaces, V, V
+perp and W, where V perp = V direct sum W. The algorithm terminates
+when dim(W) = 2, at which point the isometry type of W is the answer.
+Initially, V = {0}, and V perp and W are therefore the whole space. We
+actually hold only a basis for W, which we enumerate w1, w2, ...wm.
+Each iteration consists of the following steps, assuming m &gt;= 3 (note
+that m is always even).
+</p>
+<p>
+<ol>
+<li>Find a vector w != 0 within &lt;w1, w2, w3&gt; such that wf = 0. Thus w
+extends V by one dimension to V'.</li>
+<li>Discard one of the vectors w1, w2, w3 from the basis of W, the
+choice having non-zero coefficient in the expression of w. Thus we
+have W' such that V' direct sum W' = V perp. Let w1', ... wk' be the
+basis of W' so derived, where k = m-1.</li>
+<li>Compute the bra (w, )b (a vector by matrix multiplication).</li>
+<li>Now compute ui = (w,wi')b for each wi'.</li>
+<li>Choose i such that ui != 0 (such i must exist because dim(V' perp)
+= dim(V perp) - 1).</li>
+<li>For each j != i such that uj != 0, subtract uj * (ui inverse) *
+wi' from wj'.</li>
+<li>Discard wi' from the basis of W', giving a basis of W'' such that
+V' perp = V' direct sum W''.</li>
+<li>dim(W'') = dim(W) - 2, and V', V' perp and W'' satisfy the entry
+conditions for the loop. If dim(W'') &gt; 2, start again at step 1.</li>
+</ol>
+</p>
+<p>
+Finally, given W such that dim(W) = 2, we attempt to find a non-zero
+isotropic vecvtor. If we succeed, the answer is plus (W'' is
+hyperbolic). If not, the answer is minus (W'' is definite).
+</p>
+<a name="Results">
+<h1>Some results</h1>
+</a>
+<p>
+I have computed the orthogonal group signs for characteristics 2, 3, 5
+for HS and McL (groups for which I have some sentimental attachment).
+I am not prejudiced against larger primes, however, my meataxe
+currently does not support any field sizes larger than 5.
+</p>
+<p>
+For HS the results are:-<br><br>
+p = 2<br><br>
+<ul>
+<li>56: +</li>
+<li>518: +</li>
+<li>1000: +</li>
+<li>1408: +</li>
+</ul>
+p = 3<br><br>
+<ul>
+<li>22: +</li>
+<li>154a: -</li>
+<li>154b: +</li>
+<li>154c: +</li>
+<li>748: +</li>
+<li>1176: -</li>
+<li>1386: -</li>
+<li>2520: -</li>
+</ul>
+p = 5<br><br>
+<ul>
+<li>98: -</li>
+<li>210: +</li>
+<li>518: -</li>
+<li>650: +</li>
+<li>1750: -</li>
+<li>2750: +</li>
+</ul>
+McL<br><br>
+p = 2<br><br>
+<ul>
+<li>22: +</li>
+<li>230: -</li>
+<li>3520: +</li>
+<li>3584: -</li>
+</ul>
+p = 3<br><br>
+<ul>
+<li>210: -</li>
+<li>1498: +</li>
+<li>2794: -</li>
+</ul>
+p = 5<br><br>
+<ul>
+<li>210: +</li>
+<li>230: +</li>
+<li>1750: +</li>
+<li>3038: +</li>
+<li>4500: +</li>
+</ul>
+</p>
+<a name="References">
+<h1>References</h1>
+</a>
+<p>
+<ul>
+<li>[Dickson] L.E.Dickson - Linear groups</li>
+<li>[Aschbacher] M. Aschbacher - Finite Group Theory</li>
+<li>[Witt] ??</li>
+</ul>
+</p>
+<a name="Acknowledgements">
+<h1>Acknowledgements</h1>
+</a>
+<p>
+I wish to thank Juergen Mueller for suggesting the problem, Rob Wilson
+for numerous useful technical conversations, and Richard Parker for a
+number of useful conversations in the polishing stages.
+</p>
+</html>

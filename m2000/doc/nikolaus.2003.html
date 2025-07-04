@@ -1,0 +1,221 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>The 2 modular characters of the Harada Norton group</title>
+</head>
+<body>
+<table>
+<tr><td>Title:</td><td>The 2 modular characters of the Harada Norton group</td></tr>
+<tr><td>Author:</td><td><a href="mailto:jgt@pobox.com">Jon Thackray</a></td></tr>
+<tr><td>Version:</td><td>1</td></tr>
+<tr><td>Id:</td><td>$Id: nikolaus.2003.html,v 1.2 2004/11/28 11:36:53 jon Exp $</td></tr>
+<tr><td>Date:</td><td>20031206</td></tr>
+<tr><td>Status:</td><td>Draft</td></tr>
+</table>
+<h1>Contents</h1>
+<ol>
+<li><a href="#Purpose">Purpose</a></li>
+<li><a href="#Background">Background</a></li>
+<li><a href="#Demonstration">Demonstration of results</a></li>
+<li><a href="#Decomp">The decomposition matrix for the principal block</a></li>
+<li><a href="#References">References</a></li>
+<li><a href="#Acknowledgements">Acknowledgements</a></li>
+</ol>
+<a name="Purpose">
+<h1>Purpose of the talk</h1>
+</a>
+<p>
+To describe present a set of results giving the 2 modular character
+table of the Harada Norton group, suitable for inclusion the the
+forthcoming Atlas of Brauer Characters Part 2.
+</p>
+<a name="Background">
+<h1>Theoretical background</h1>
+</a>
+<p>
+The Harada Norton group is described in [Norton]. Throughout this
+paper, it will be denoted HN. The character table is given in [Conway
+et al] The representations used as a starting point are taken from the
+Birmingham Atlas of Finite Group Representations [Wilson].
+</p>
+<p>
+At the point of starting on the problem, some small representations of
+HN were already known, as well as one character of defect zero and a
+block of defect 4 containing three irreducibles. These are considered
+known, and will not be described in this talk. The talk will address
+only the principal block, in which we are seeking seventeen
+irreducibles.
+</p>
+<a name="Demonstration">
+<h1>Demonstration of results</h1>
+</a>
+<p>
+The starting point for the principal block is the 132 dimensional
+irreducible representation over GF(4) available from the Birmingham
+Atlas. Its Frobenius conjugate 132' is distinct and also irreducible.
+The skew square of 132 reduces as 2.1 + 3344 + 2650 + 2650'. 2650 and
+2650' are a complex conjugate pair having irrationalities on elements
+of order 19 and 35. The problem of algebraic conjugacy is still open,
+at least as far as I am concerned. The character values for 2650 can
+be deduced by restriction of the representation to A12 and U3(8), or
+by direct computation.
+</p>
+<p>
+132 tensored 132' reduces as 2.760 + 15904. This brings the total
+irreducible count to eight, and exhausts those easily obtainable. The
+indicators for all have been computed, and are + with the exception of
+2650 and 2650' (which are complex and therefore o) and 132 and 132'
+which are -.
+</p>
+<p>
+To make further progress we examine the tensor product of 132 with
+760. We already have an ordinary character decomposition of 133
+tensored 760 as 133' + 35112 + 65835. Using tensor condensation, we
+obtain a prediction of 2.1 + 2.132 + 1.132' + 31086 + 2 * 34352,
+suggesting that 35112 reduces as 760 + 34352, and 65835 reduces as
+1 + 2.132 + 132' + 31086 + 34352. Uncondensing proves this prediction
+to be correct. 31086 and 34352 both require GF(4), and have Frobenius
+conjugates. All are real with indicator +. This brings our total to
+twelve.
+</p>
+<p>
+We now need to dig deeper again, and look at the tonsor product of 132
+and 2650. Tensor condensation reveals that this contains a pair of
+irreducibles of degree around 40000 and a further large dimension
+irreducible. Uncondensing and computing indicators reveals a complex
+conjugate pair of degree 43416. Computing the exact character of these
+irreducibles proved quite tricky, and was done in collaboration with
+Gerhard Hiss. The difficult part is to prove that 2650 and 2650' occur
+in the decomposition of the ordinary 69255 with equal decomposition
+number. This is done by computing explicitly the character value of
+43416 on elements of order 19 (on which 69255 is real). Once this is
+done, computing the trace of 43416 on an element of order 25
+distinguishes the two possibilities of either 69255 = 7.1 + 2.132 +
+2.132' + 760 + 3344 + 4.(2650+2650') + 43416 or 69255 = 3.1 + 2.132 +
+2.132' + 760 + 3344 + 2650 + 2650' + 15904 + 43416. The first
+possibility has character value -4 (and therefore trace 0 mod 2),
+whereas the second has character 1. Hence the mod 2 trace is
+sufficient to distinguish them. Computing this reveals 69255 = 3.1 +
+2.132 + 2.132' + 760 + 3344 + 2650+2650' + 15904 + 43416, and
+therefore gives us the character of 43416.
+</p>
+<p>
+A further GF(2) character 177286 also occurs in 132 tensor 2650. This
+can be uncondensed, constructed and proved to have indicator +. The
+final construcible (at present) irreducible occurs in 760 tensor 760.
+A laborious uncondensation can be used to create this. Its degree is
+217130 and its indicator is also +.
+</p>
+<p>
+This leaves one more irreducible to be found, which must therefore be
+constructible over GF(2) and be rational. Character theory demonstrates
+that it can be found in 2650 tensor 2650', as well as several other
+less symmetrical looking constructions of similar sizes. The full
+module here has dimension 7022500, which is well out of reach for
+current technology available to pure mathematicians. Even a
+condensation over an 11.5 subgroup, which was what I had been using,
+still has degree over 100000, over GF(4). Splitting such a module is
+quite a tricky prospect, given that of course the condensation card
+has already been played. In some sense, condensation has run out of
+steam.
+</p>
+<p>
+Using the latest machine I could obtain, a P4/3066 with RAMBUS RD1066
+memory, I began to construct and then split the condensed module.
+Producing the condensed generators, of which I needed four, took four
+days each. The information I had so far on its reduction indicated
+that there would be only one or two factors 217130 in the full module,
+and also a non-principal block irreducible. A search for a near peak
+word was therefore undertaken to find a group algebra element with
+nullity one on the condensation of 217130, and hopefully zero on all
+others (apart from of course perhaps the one I was seeking, and the
+non-principal block irreducible). It turned out that the condensation
+of 217130 occurred twice, giving me considerable leverage in reducing
+the original unwieldy module. I followed this up by targetting the
+condensation of 177286, again using a peak word search, but this time
+without having to worry about the nullity on 217130, which was now out
+of the equation. The final part of the split was relatively routine,
+and suggests an irreducible of degree 1556136. Whilst condensation
+cannot in this case give an accurate answer (we know that if 1556136
+exists it is irreducible, but cannot say if it exists), I have no
+reason to doubt that the generators I used for the condensation
+algebra give an exact mapping on irreducibles. Computing the indicator
+of this final irreducible is currently beyond me. The likes of Richard
+Parker and Rob Wilson have suggested methods for condensing
+indicators, but I have to confess to not understanding them anywhere
+near well enough to be able to implement them.
+</p>
+<p>
+I finish with the decomposition matrix, as proved all bar the final
+irreducible, and suggested by the condensation.
+</p>
+<a name="Decomp">
+<h1>The decomposition matrix for the principal block</h1>
+</a>
+<table width="500">
+<tr><td width="5%",align="right">1</td><td width="5%",align="right">132</td><td width="5%",align="right">132'</td><td width="5%",align="right">760</td><td width="5%",align="right">3344</td><td width="5%",align="right">15904</td><td width="5%",align="right">2650</td><td width="5%",align="right">2650'</td><td width="5%",align="right">31086</td><td width="5%",align="right">31086'</td><td width="5%",align="right">34352</td><td width="5%",align="right">34352'</td><td width="5%",align="right">43416</td><td width="5%",align="right">43416'</td><td width="5%",align="right">177286</td><td width="5%",align="right">217130</td><td width="5%",align="right">1556136</td></tr>
+<tr><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td></tr>
+<tr><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td></tr>
+<tr><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td></tr>
+<tr><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td></tr>
+<tr><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td></tr>
+<tr><td align="right",width="5%">2</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td></tr>
+<tr><td align="right",width="5%">2</td><td align="right",width="5%">0</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td></tr>
+<tr><td align="right",width="5%">2</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td></tr>
+<tr><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td></tr>
+<tr><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td></tr>
+<tr><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td></tr>
+<tr><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td></tr>
+<tr><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">2</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td></tr>
+<tr><td align="right",width="5%">1</td><td align="right",width="5%">2</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td></tr>
+<tr><td align="right",width="5%">3</td><td align="right",width="5%">2</td><td align="right",width="5%">2</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td></tr>
+<tr><td align="right",width="5%">3</td><td align="right",width="5%">2</td><td align="right",width="5%">2</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td></tr>
+<tr><td align="right",width="5%">6</td><td align="right",width="5%">2</td><td align="right",width="5%">2</td><td align="right",width="5%">1</td><td align="right",width="5%">2</td><td align="right",width="5%">2</td><td align="right",width="5%">2</td><td align="right",width="5%">2</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td></tr>
+<tr><td align="right",width="5%">6</td><td align="right",width="5%">2</td><td align="right",width="5%">2</td><td align="right",width="5%">1</td><td align="right",width="5%">3</td><td align="right",width="5%">2</td><td align="right",width="5%">2</td><td align="right",width="5%">2</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td></tr>
+<tr><td align="right",width="5%">8</td><td align="right",width="5%">3</td><td align="right",width="5%">3</td><td align="right",width="5%">3</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">2</td><td align="right",width="5%">2</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td></tr>
+<tr><td align="right",width="5%">6</td><td align="right",width="5%">2</td><td align="right",width="5%">2</td><td align="right",width="5%">2</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">2</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td></tr>
+<tr><td align="right",width="5%">6</td><td align="right",width="5%">2</td><td align="right",width="5%">2</td><td align="right",width="5%">2</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">1</td><td align="right",width="5%">2</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td></tr>
+<tr><td align="right",width="5%">6</td><td align="right",width="5%">4</td><td align="right",width="5%">4</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">2</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td></tr>
+<tr><td align="right",width="5%">13</td><td align="right",width="5%">7</td><td align="right",width="5%">7</td><td align="right",width="5%">3</td><td align="right",width="5%">2</td><td align="right",width="5%">4</td><td align="right",width="5%">2</td><td align="right",width="5%">2</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">2</td><td align="right",width="5%">2</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td></tr>
+<tr><td align="right",width="5%">12</td><td align="right",width="5%">6</td><td align="right",width="5%">6</td><td align="right",width="5%">3</td><td align="right",width="5%">1</td><td align="right",width="5%">3</td><td align="right",width="5%">2</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">2</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td></tr>
+<tr><td align="right",width="5%">12</td><td align="right",width="5%">6</td><td align="right",width="5%">6</td><td align="right",width="5%">3</td><td align="right",width="5%">1</td><td align="right",width="5%">3</td><td align="right",width="5%">1</td><td align="right",width="5%">2</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">2</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td></tr>
+<tr><td align="right",width="5%">14</td><td align="right",width="5%">9</td><td align="right",width="5%">8</td><td align="right",width="5%">2</td><td align="right",width="5%">2</td><td align="right",width="5%">4</td><td align="right",width="5%">2</td><td align="right",width="5%">2</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">2</td><td align="right",width="5%">2</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td></tr>
+<tr><td align="right",width="5%">14</td><td align="right",width="5%">8</td><td align="right",width="5%">9</td><td align="right",width="5%">2</td><td align="right",width="5%">2</td><td align="right",width="5%">4</td><td align="right",width="5%">2</td><td align="right",width="5%">2</td><td align="right",width="5%">0</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">1</td><td align="right",width="5%">2</td><td align="right",width="5%">2</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td></tr>
+<tr><td align="right",width="5%">26</td><td align="right",width="5%">12</td><td align="right",width="5%">12</td><td align="right",width="5%">7</td><td align="right",width="5%">5</td><td align="right",width="5%">6</td><td align="right",width="5%">6</td><td align="right",width="5%">6</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">3</td><td align="right",width="5%">3</td><td align="right",width="5%">2</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td></tr>
+<tr><td align="right",width="5%">19</td><td align="right",width="5%">11</td><td align="right",width="5%">11</td><td align="right",width="5%">5</td><td align="right",width="5%">1</td><td align="right",width="5%">5</td><td align="right",width="5%">2</td><td align="right",width="5%">2</td><td align="right",width="5%">0</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">2</td><td align="right",width="5%">3</td><td align="right",width="5%">3</td><td align="right",width="5%">2</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td></tr>
+<tr><td align="right",width="5%">19</td><td align="right",width="5%">11</td><td align="right",width="5%">11</td><td align="right",width="5%">5</td><td align="right",width="5%">1</td><td align="right",width="5%">5</td><td align="right",width="5%">2</td><td align="right",width="5%">2</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td><td align="right",width="5%">2</td><td align="right",width="5%">1</td><td align="right",width="5%">3</td><td align="right",width="5%">3</td><td align="right",width="5%">2</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td></tr>
+<tr><td align="right",width="5%">20</td><td align="right",width="5%">12</td><td align="right",width="5%">12</td><td align="right",width="5%">5</td><td align="right",width="5%">1</td><td align="right",width="5%">4</td><td align="right",width="5%">2</td><td align="right",width="5%">2</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">3</td><td align="right",width="5%">3</td><td align="right",width="5%">3</td><td align="right",width="5%">3</td><td align="right",width="5%">2</td><td align="right",width="5%">1</td><td align="right",width="5%">0</td></tr>
+<tr><td align="right",width="5%">24</td><td align="right",width="5%">14</td><td align="right",width="5%">14</td><td align="right",width="5%">6</td><td align="right",width="5%">1</td><td align="right",width="5%">8</td><td align="right",width="5%">2</td><td align="right",width="5%">2</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">4</td><td align="right",width="5%">4</td><td align="right",width="5%">2</td><td align="right",width="5%">2</td><td align="right",width="5%">0</td></tr>
+<tr><td align="right",width="5%">30</td><td align="right",width="5%">16</td><td align="right",width="5%">16</td><td align="right",width="5%">7</td><td align="right",width="5%">4</td><td align="right",width="5%">10</td><td align="right",width="5%">4</td><td align="right",width="5%">4</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">4</td><td align="right",width="5%">4</td><td align="right",width="5%">2</td><td align="right",width="5%">3</td><td align="right",width="5%">0</td></tr>
+<tr><td align="right",width="5%">14</td><td align="right",width="5%">8</td><td align="right",width="5%">8</td><td align="right",width="5%">2</td><td align="right",width="5%">2</td><td align="right",width="5%">4</td><td align="right",width="5%">2</td><td align="right",width="5%">2</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">2</td><td align="right",width="5%">2</td><td align="right",width="5%">0</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td></tr>
+<tr><td align="right",width="5%">20</td><td align="right",width="5%">8</td><td align="right",width="5%">8</td><td align="right",width="5%">6</td><td align="right",width="5%">2</td><td align="right",width="5%">2</td><td align="right",width="5%">4</td><td align="right",width="5%">4</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">2</td><td align="right",width="5%">2</td><td align="right",width="5%">3</td><td align="right",width="5%">3</td><td align="right",width="5%">2</td><td align="right",width="5%">0</td><td align="right",width="5%">1</td></tr>
+<tr><td align="right",width="5%">50</td><td align="right",width="5%">26</td><td align="right",width="5%">26</td><td align="right",width="5%">13</td><td align="right",width="5%">6</td><td align="right",width="5%">14</td><td align="right",width="5%">8</td><td align="right",width="5%">8</td><td align="right",width="5%">0</td><td align="right",width="5%">0</td><td align="right",width="5%">2</td><td align="right",width="5%">2</td><td align="right",width="5%">7</td><td align="right",width="5%">7</td><td align="right",width="5%">4</td><td align="right",width="5%">3</td><td align="right",width="5%">0</td></tr>
+<tr><td align="right",width="5%">48</td><td align="right",width="5%">28</td><td align="right",width="5%">28</td><td align="right",width="5%">8</td><td align="right",width="5%">4</td><td align="right",width="5%">14</td><td align="right",width="5%">5</td><td align="right",width="5%">5</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">2</td><td align="right",width="5%">2</td><td align="right",width="5%">7</td><td align="right",width="5%">7</td><td align="right",width="5%">4</td><td align="right",width="5%">4</td><td align="right",width="5%">0</td></tr>
+<tr><td align="right",width="5%">25</td><td align="right",width="5%">14</td><td align="right",width="5%">14</td><td align="right",width="5%">5</td><td align="right",width="5%">2</td><td align="right",width="5%">5</td><td align="right",width="5%">3</td><td align="right",width="5%">3</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">2</td><td align="right",width="5%">2</td><td align="right",width="5%">4</td><td align="right",width="5%">4</td><td align="right",width="5%">2</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td></tr>
+<tr><td align="right",width="5%">48</td><td align="right",width="5%">27</td><td align="right",width="5%">27</td><td align="right",width="5%">10</td><td align="right",width="5%">6</td><td align="right",width="5%">12</td><td align="right",width="5%">7</td><td align="right",width="5%">7</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">3</td><td align="right",width="5%">3</td><td align="right",width="5%">7</td><td align="right",width="5%">7</td><td align="right",width="5%">3</td><td align="right",width="5%">3</td><td align="right",width="5%">1</td></tr>
+<tr><td align="right",width="5%">52</td><td align="right",width="5%">29</td><td align="right",width="5%">29</td><td align="right",width="5%">11</td><td align="right",width="5%">5</td><td align="right",width="5%">13</td><td align="right",width="5%">7</td><td align="right",width="5%">7</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">3</td><td align="right",width="5%">3</td><td align="right",width="5%">8</td><td align="right",width="5%">8</td><td align="right",width="5%">4</td><td align="right",width="5%">3</td><td align="right",width="5%">1</td></tr>
+<tr><td align="right",width="5%">65</td><td align="right",width="5%">36</td><td align="right",width="5%">36</td><td align="right",width="5%">14</td><td align="right",width="5%">7</td><td align="right",width="5%">17</td><td align="right",width="5%">9</td><td align="right",width="5%">9</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">3</td><td align="right",width="5%">3</td><td align="right",width="5%">10</td><td align="right",width="5%">10</td><td align="right",width="5%">5</td><td align="right",width="5%">4</td><td align="right",width="5%">1</td></tr>
+<tr><td align="right",width="5%">68</td><td align="right",width="5%">38</td><td align="right",width="5%">38</td><td align="right",width="5%">14</td><td align="right",width="5%">6</td><td align="right",width="5%">18</td><td align="right",width="5%">8</td><td align="right",width="5%">8</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">4</td><td align="right",width="5%">4</td><td align="right",width="5%">10</td><td align="right",width="5%">10</td><td align="right",width="5%">5</td><td align="right",width="5%">5</td><td align="right",width="5%">1</td></tr>
+<tr><td align="right",width="5%">68</td><td align="right",width="5%">38</td><td align="right",width="5%">38</td><td align="right",width="5%">14</td><td align="right",width="5%">6</td><td align="right",width="5%">18</td><td align="right",width="5%">8</td><td align="right",width="5%">8</td><td align="right",width="5%">1</td><td align="right",width="5%">1</td><td align="right",width="5%">4</td><td align="right",width="5%">4</td><td align="right",width="5%">10</td><td align="right",width="5%">10</td><td align="right",width="5%">5</td><td align="right",width="5%">5</td><td align="right",width="5%">1</td></tr>
+<tr><td align="right",width="5%">71</td><td align="right",width="5%">41</td><td align="right",width="5%">41</td><td align="right",width="5%">16</td><td align="right",width="5%">5</td><td align="right",width="5%">17</td><td align="right",width="5%">8</td><td align="right",width="5%">8</td><td align="right",width="5%">2</td><td align="right",width="5%">2</td><td align="right",width="5%">6</td><td align="right",width="5%">6</td><td align="right",width="5%">11</td><td align="right",width="5%">11</td><td align="right",width="5%">6</td><td align="right",width="5%">4</td><td align="right",width="5%">1</td></tr>
+<tr><td align="right",width="5%">81</td><td align="right",width="5%">47</td><td align="right",width="5%">47</td><td align="right",width="5%">16</td><td align="right",width="5%">7</td><td align="right",width="5%">22</td><td align="right",width="5%">9</td><td align="right",width="5%">9</td><td align="right",width="5%">2</td><td align="right",width="5%">2</td><td align="right",width="5%">5</td><td align="right",width="5%">5</td><td align="right",width="5%">12</td><td align="right",width="5%">12</td><td align="right",width="5%">6</td><td align="right",width="5%">6</td><td align="right",width="5%">1</td></tr>
+</table>
+<a name="References">
+<h1>References</h1>
+</a>
+<p>
+<ul>
+<li>[Norton] S.P.Norton - F and other simple groups</li>
+<li>[Conway et al] Conway, Curtis, Norton, Parker, Wilson - An atlas
+of finite groups</li>
+<li>[Wilson] The Birmingham Atlas of Finite Group Representations</li>
+</ul>
+</p>
+<a name="Acknowledgements">
+<h1>Acknowledgements</h1>
+</a>
+<p>
+I wish to thank Gerhard Hiss and Juergen Mueller for inviting me to
+Aachen in June 2002 where I began work on the problem.
+</p>
+</html>

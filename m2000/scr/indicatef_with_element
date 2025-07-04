@@ -1,0 +1,89 @@
+#!/bin/bash
+#
+# $Id: indicatef_with_element,v 1.11 2023/07/03 08:30:07 jon Exp $
+#
+# Script to find the indicator of an irreducible representation
+# Assumes a and b in standard base form
+#
+# Inputs
+# $1: element to use to get null vector
+# $2: script used to create null element
+# $3: initial memory
+# $4: temporary directory
+# $5: a name for the form
+# $6: generator a
+# $7: generator a in dual representation
+# $8: generator b
+# $9: generator b in dual representation
+# $10-: other generators and duals
+#
+# Return codes
+# 1: error in parameters
+# 0: ok
+#
+usage="$0: usage: $0 <e> <script> <memory> <tmp directory> <form> <a> <a dual> <b> <b dual> [<other generators and duals>]"
+if [ $# -lt 9 ]; then
+  echo "$usage"
+  exit 1;
+fi
+. functions
+e=$1
+script=$2
+memory=$3
+tmp_dir=$4
+form=$5
+a=$6
+b=$8
+a_d=$7
+b_d=$9
+if [ -e $a -a -e $b -a -e $e -a -e $a_d -a -e $b_d ]; then
+  q=`zprime $a`
+  nor=`znor $a`
+  noc=`znoc $a`
+  if [ $nor -ne $noc ]; then
+    echo "$0: $a is not square"
+    exit 1
+  fi
+  if [ $nor -ne `znor $b` -o $nor -ne `znoc $b` -o $nor -ne `znor $e` -o $nor -ne `znoc $e` -o $nor -ne `znor $a_d` -o $nor -ne `znoc $a_d` -o $nor -ne `znor $b_d` -o $nor -ne `znoc $b_d` ]; then
+    echo "$0: $a, $b, $e, $a_d, $b_d are not compatible"
+    exit 1
+  fi
+else
+  echo "$0: missing files $a, $b or $e"
+  exit 1
+fi
+tmp=tmp${PPID}
+S=${tmp}.3
+sb=${tmp}.0
+shift 5
+line=
+d_line=
+while [ $# -gt 0 ]; do
+  if [ 1 -eq $# ]; then
+    rm -f ${tmp}.*
+    echo "$usage"
+    exit 1;
+  fi
+  line="$line $1"
+  d_line="$d_line $2"
+  shift 2
+done
+x=`basef_vectors $e $S ${tmp_dir} $memory $d_line`
+ret=$?
+if [ $ret -eq 0 ]; then
+  real_indicate $S $memory ${tmp_dir} $form $line
+  ret=$?
+  rm -f ${tmp}.*
+  exit $ret
+elif [ $ret -ne 255 ]; then
+  echo $x
+  rm -f ${tmp}.*
+  exit 1
+else
+  rm -f ${tmp}.*
+  if [ -e ${a}_o -o -L ${a}_o ]; then
+    rm ${a}_o
+  fi
+  ln -s $a ${a}_o
+  echo indicator o
+fi

@@ -1,0 +1,167 @@
+/*
+ * $Id: ip.c,v 1.24 2019/01/21 08:32:34 jon Exp $
+ *
+ * Read a matrix
+ *
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <assert.h>
+#include <limits.h>
+#include <errno.h>
+#include "elements.h"
+#include "endian.h"
+#include "header.h"
+#include "parse.h"
+#include "read.h"
+#include "utils.h"
+#include "write.h"
+
+static const char *name = "zcv";
+
+static void ip_usage(void)
+{
+  fprintf(stderr, "%s: usage: %s %s <in_file (- for stdin)> <out_file>\n", name, name, parse_usage());
+}
+
+static int use_stdin = 0;
+
+int main(int argc, const char * const argv[])
+{
+  const char *in;
+  const char *out;
+  FILE *inp;
+  FILE *outp;
+  u32 prime, nob, nod, noc, nor;
+  u32 i, j;
+  const header *h;
+
+  argv = parse_line(argc, argv, &argc);
+  if (3 != argc) {
+    ip_usage();
+    exit(1);
+  }
+  in = argv[1];
+  out = argv[2];
+  errno = 0;
+  if (0 == strcmp("-", in)) {
+    inp = stdin;
+    use_stdin = 1;
+  } else {
+    inp = fopen(in, "r");
+    if (NULL == inp) {
+      if ( 0 != errno) {
+        perror(name);
+      }
+      fprintf(stderr, "%s: cannot open %s, terminating\n", name, in);
+      exit(1);
+    }
+  }
+  endian_init();
+  if (0 == read_text_header(inp, &h, in, name)) {
+    if (0 == use_stdin) {
+      fclose(inp);
+    }
+    exit(1);
+  }
+  prime = header_get_prime(h);
+  nor = header_get_nor(h);
+  if ( 1 == prime) {
+    header_set_noc((header *)h, nor);
+  }
+  header_set_prime((header *)h, prime);
+  if (0 == open_and_write_binary_header(&outp, h, out, name)) {
+    if (0 == use_stdin) {
+      fclose(inp);
+    }
+    header_free(h);
+    exit(1);
+  }
+  if (1 == prime) {
+    /* Input of a map or permutation */
+    header_free(h);
+    noc = nor;
+    for (i = 0; i < nor; i++) {
+      u32 j;
+      int k = fscanf(inp, "%u", &j);
+      NOT_USED(k);
+      if (0 == j || j > noc) {
+        fprintf(stderr, "%s: %u (out of range 1 - %u) found as permutation image, terminating\n", name, j, noc);
+        exit(1);
+      }
+      errno = 0;
+      if (0 == endian_write_word(j - 1, outp)) {
+        if ( 0 != errno) {
+          perror(name);
+        }
+        fprintf(stderr, "%s: cannot write output value %u in row %u to %s\n", name, j - 1, i, out);
+        if (0 == use_stdin) {
+          fclose(inp);
+        }
+        fclose(outp);
+        exit(1);
+      }
+    }
+  } else {
+    noc = header_get_noc(h);
+    nob = header_get_nob(h);
+    nod = header_get_nod(h);
+    header_free(h);
+    for (i = 0; i < nor; i++) {
+      word a = 0;
+      u32 k = 0;
+      for (j = 0; j < noc; j++) {
+        word e;
+        if (get_element_from_text(inp, nod, prime, &e)) {
+          a |= e << (k * nob);
+          k++;
+          if ((k + 1) * nob > bits_in_word) {
+            errno = 0;
+            if (0 == endian_write_word(a, outp)) {
+              if ( 0 != errno) {
+                perror(name);
+              }
+              fprintf(stderr, "Failed to write element to %s at (%u, %u)\n",
+                      out, i, j);
+              if (0 == use_stdin) {
+                fclose(inp);
+              }
+              fclose(outp);
+              exit(1);
+            }
+            k = 0;
+            a = 0;
+          }
+        } else {
+          fprintf(stderr, "Failed to read element from %s at (%u, %u)\n",
+                  in, i, j);
+          if (0 == use_stdin) {
+            fclose(inp);
+          }
+          fclose(outp);
+          exit(1);
+        }
+      }
+      errno = 0;
+      if (0 != k && 0 == endian_write_word(a, outp)) {
+        if ( 0 != errno) {
+          perror(name);
+        }
+        fprintf(stderr, "Failed to write element to %s at (%u, %u)\n",
+                out, i, j);
+        if (0 == use_stdin) {
+          fclose(inp);
+        }
+        fclose(outp);
+        exit(1);
+      }
+    }
+  }
+  if (0 == use_stdin) {
+    fclose(inp);
+  }
+  fclose(outp);
+  return 0;
+}

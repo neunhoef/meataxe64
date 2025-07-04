@@ -1,3 +1,5 @@
+#!/bin/bash
+wd=`pwd -P`/`dirname $0`
 rm -f logfile
 $1 zrd a1 8 28901 28901
 $1 zmu a1 a1 a2
@@ -65,4 +67,4 @@ $1 zrd a1 32768 11111 11111
 $1 zmu a1 a1 a2
 $1 zrd a1 65536 10678 10678
 $1 zmu a1 a1 a2
-check_log.sh logfile ../reg/val4log
+${wd}/check_log.sh logfile ${wd}/../reg/val4log

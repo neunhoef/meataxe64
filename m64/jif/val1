@@ -1,3 +1,5 @@
-conreg $REG/conpol
+#!/bin/bash
+dir=`dirname $0`
+conreg ${dir}/../reg/conpol
 fieldreg
 

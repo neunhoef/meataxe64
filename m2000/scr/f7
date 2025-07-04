@@ -1,0 +1,33 @@
+#!/bin/bash
+#
+# $Id: f7,v 1.5 2023/07/03 08:30:07 jon Exp $
+#
+# Script to perform A + BC + CB + B
+#
+# Inputs
+# $1: input A
+# $2: input B
+# $3: input C
+# $4: output
+# $5: temporary stem
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+#
+usage="$0: usage: $0 <in1> <in2> <in3> <out> <stem>"
+if [ $# -ne 5 ]; then
+  echo "$usage"
+  exit 1;
+fi
+if [ -e $1 -a -e $2 -a -e $3 ]; then
+  zad $1 $2 ${5}_1
+  if [ $? -ne 0 ]; then
+    exit 1
+  fi
+  f6 ${5}_1 $2 $3 $4 ${5}_1
+  rm ${5}_1
+else
+  echo "$0: missing files $1, $2 or $3"
+  exit 1
+fi

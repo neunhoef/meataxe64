@@ -1,0 +1,25 @@
+#!/bin/bash
+#
+# $Id: norm,v 1.2 2023/07/03 08:30:07 jon Exp $
+#
+# Script to form x S x_tra
+#
+# Inputs
+# $1: initial memory
+# $2: x
+# $3: form S
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+#
+# Output on stdout, the rank, 0 or 1
+#
+#set -v
+. functions
+usage="$0: usage: $0 <memory> <x> <S>"
+if [ $# -ne 3 ]; then
+  echo "$usage"
+  exit 1;
+fi
+exec inner_product $* $2

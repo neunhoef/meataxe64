@@ -1,0 +1,78 @@
+#!/bin/bash
+#
+# $Id: indicate_with_orders,v 1.11 2023/07/03 08:30:07 jon Exp $
+#
+# Script to find the indicator of an irreducible representation
+# Assumes a and b in standard base form
+#
+# Inputs
+# $1: initial memory
+# $2: a name for the form
+# $3: generator a
+# $4: order a
+# $5: generator b
+# $6: order b
+# $7-: other generators and orders
+#
+# Return codes
+# 1: error in parameters
+# 0: ok
+#
+usage="$0: usage: $0 <memory> <form> <a> <order a> <b> <order b> [<other generators and orders>]"
+if [ $# -lt 6 ]; then
+  echo "$usage"
+  exit 1;
+fi
+. functions
+memory=$1
+form=$2
+a=$3
+b=$5
+o_a=$4
+o_b=$6
+if [ -e $a -a -e $b ]; then
+  q=`zprime $a`
+  nor=`znor $a`
+  noc=`znoc $a`
+  if [ $nor -ne $noc ]; then
+    echo "$0: $a is not square"
+    exit 1
+  fi
+  if [ $nor -ne `znor $b` -o $nor -ne `znoc $b` ]; then
+    echo "$0: $a and $b are not compatible"
+    exit 1
+  fi
+else
+  echo "$0: missing files $a or $b"
+  exit 1
+fi
+tmp=tmp${PPID}
+shift 2
+i=1
+line=
+duals=
+while [ 0 -ne $# ]; do
+  if [ 1 -eq $# ]; then
+    rm -f ${tmp}.*
+    echo "$usage"
+    exit 1
+  fi
+  line="$line $1 ${tmp}.$i"
+  duals="$duals ${tmp}.$i $2"
+  dual_with_order $1 ${tmp}.$i $2 $memory
+  shift 2
+  let i=$i+1
+done
+e=${tmp}.e
+script=`find_nullity_one_with_orders $e $memory $duals`
+ret=$?
+if [ $ret -ne 0 ]; then
+  rm -f ${tmp}.*
+  echo $script
+  exit $ret
+fi
+indicate_with_element $e $script $memory $form $line
+ret=$?
+rm -f ${tmp}.*
+exit $ret
+

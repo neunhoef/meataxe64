@@ -1,4 +1,6 @@
+#!/bin/bash
+wd=`pwd -P`/`dirname $0`
 rm -f logfile
-cp $JIF/v3b xxx
-v3a $1
-check_log.sh logfile ../reg/val3log
+cp ${wd}/v3b xxx
+${wd}/v3a $1
+${wd}/check_log.sh logfile ${wd}/../reg/val3log

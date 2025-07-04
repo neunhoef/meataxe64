@@ -1,0 +1,96 @@
+#!/bin/bash
+#
+# $Id: functions,v 1.11 2023/07/03 08:30:07 jon Exp $
+#
+# Functions to support the meataxe scripts
+#
+function more_memory()
+{
+  local x
+  if [ $1 -ge 16000000 ]; then
+    let x=$1+1000000
+  else
+    let x=$1*2
+  fi
+  echo $x
+}
+
+function memory_from_stat()
+{
+  local x
+  x=`stat -c "%s" $1`
+  let x=$x/500
+  if [ $x -lt 200 ]; then
+    x=200
+  fi
+  echo $x
+}
+
+function new_name_from_name()
+{
+  local name
+  name=$1
+  if [ -e ${name}_1 ]; then
+    x=1
+    while [ -e ${name}_${x}_1 ]; do
+      let x=$x+1
+    done
+    name=${name}_${x}
+  fi
+  echo $name
+}
+
+function new_name()
+{
+  local o
+  local nor
+  local dim
+  local x
+  o=$1
+  nor=$2
+  dim=$3
+  name=${o}_${nor}_${dim}
+  echo `new_name_from_name $name`
+}
+
+function new_irred_name()
+{
+  local base
+  local x
+  base=$1
+  x=0
+  while [ -e ${base}_${x}_1 ]; do
+    let x=$x+1
+  done
+  echo ${base}_${x}
+}
+
+function fsize()
+{
+  local x
+  x=`ls -s -k $1 | sed -e "s/^ *//g;s/  *.*$//g"`
+  echo $x
+}
+
+function max_depth()
+{
+  local depth
+  local total
+  local max
+  local q
+  depth=0
+  total=1
+  max=$2
+  q=$1
+  while [ $total -lt $max ]; do
+    let depth=$depth+1
+    let total=$total*$q
+  done
+  echo $depth
+}
+
+function rm_all()
+{
+  echo Removing $1
+  find . -name $1\* -exec rm -f {} \;
+}

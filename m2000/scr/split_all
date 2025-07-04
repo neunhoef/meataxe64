@@ -1,0 +1,26 @@
+#!/bin/bash
+#
+# $Id: split_all,v 1.11 2023/07/03 08:30:07 jon Exp $
+#
+# Script to split a representation completely
+#
+# Inputs
+# $1: output filename base
+# $1: generator a
+# $2-: other generators
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+# 252: ran out of possible splitters
+#
+usage="$0: usage: $0 <output_stem> <generators>*"
+if [ $# -lt 3 ]; then
+  echo "$usage"
+  exit 1;
+fi
+# Just a front end for split_all_sub
+stem=$1
+a=$2
+shift 2
+exec split_all_sub $stem 1 1 /dev/null 0 $a $*

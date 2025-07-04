@@ -1,0 +1,125 @@
+#!/bin/bash
+#
+# $Id: preserves,v 1.12 2023/07/03 08:30:07 jon Exp $
+#
+# Script to check if a matrix preservers a quadratic form
+#
+# Inputs
+# $1: quadratic form Q
+# $2: corresponding bilinear form S
+# $3: g
+# $4: field element
+# $5: initial memory (optional)
+#
+# The field element is used to determine whether to
+# perform the preservation of the symmetric form test
+# This only needs to be performed once, in order to
+# distinguish complex from real
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+# 254: fails to preserve the bilinear form
+# 255: fails to preserve the quadratic form
+#
+#set -v
+. functions
+usage="$0: usage: $0 <Q> <S> <g> <field element> [<memory>]"
+if [ $# -ne 4 -a $# -ne 5 ]; then
+  echo "$usage"
+  exit 1;
+fi
+Q=$1
+S=$2
+g=$3
+f=$4
+if [ -e $Q ]; then
+  q=`zprime $Q`
+  nor=`znor $Q`
+  noc=`znoc $Q`
+  if [ $nor -ne $noc ]; then
+    echo "$0: $Q is not square"
+    exit 1
+  fi
+else
+  echo "$0: missing file $Q"
+  exit 1
+fi
+if [ -e $S ]; then
+  if [ `zprime $S` -ne $q -o `znor $S` -ne $nor -o `znoc $S` -ne $noc ]; then
+    echo parameter mismatch between $Q and $S
+    exit 1
+  fi
+else
+  echo "$0: missing file $S"
+  exit 1
+fi
+if [ -e $g ]; then
+  if [ `znor $g` -ne $nor -o `znoc $g` -ne $noc ]; then
+    echo parameter mismatch between $Q and $g
+    exit 1
+  fi
+  r=`zprime $g`
+# This allows $g to be a map
+  if [ $q -ne $r -a 1 -ne $r ]; then
+    echo parameter mismatch between $Q and $g
+    exit 1
+  fi
+else
+  echo "$0: missing file $g"
+  exit 1
+fi
+if [ $# -eq 5 ]; then
+  memory=$5
+else
+  memory=200000
+fi
+# TODO: reuse temps
+tmp=tmp${PPID}
+ok=1
+while [ 1 -eq $ok ]; do
+  zmu -m $memory $g $Q ${tmp}.0
+  ret=$?
+  if [ 2 -eq $ret ]; then
+    let memory=`more_memory $memory`
+  elif [ 0 -ne $ret ]; then
+    rm -f ${tmp}.*
+    exit 1
+  fi
+  ok=0
+done
+ztr -m $memory ${tmp}.0 ${tmp}.1
+ret=$?
+if [ 0 -ne $ret ]; then
+  rm -f ${tmp}.*
+  exit $ret
+fi
+zmu -m $memory $g ${tmp}.1 ${tmp}.2
+ret=$?
+if [ 0 -ne $ret ]; then
+  rm -f ${tmp}.*
+  exit $ret
+fi
+if [ 0 -eq $f ]; then
+# This test is only necessary for once for the entire search
+  ztr -m $memory ${tmp}.2 ${tmp}.3
+  ret=$?
+  if [ 0 -ne $ret ]; then
+    rm -f ${tmp}.*
+    exit $ret
+  fi
+  zad ${tmp}.2 ${tmp}.3 ${tmp}.4
+  ret=$?
+  if [ 0 -ne $ret ]; then
+    rm -f ${tmp}.*
+    exit $ret
+  fi
+  if ! zdiff $S ${tmp}.4 2>/dev/null 1>&2; then
+    rm -f ${tmp}.*
+    exit 254
+  fi
+fi
+zdiffd -m $memory ${tmp}.2 $f
+ret=$?
+rm -f ${tmp}.*
+exit $ret

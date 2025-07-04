@@ -6,9 +6,9 @@ gcc -c $1 -pthread -Wall -Wunused -W -Wmissing-prototypes -O3 dfmtf.c -o $BIN/df
 gcc -c $1 -pthread -Wall -Wunused -W -Wmissing-prototypes -O3 field.c -o $BIN/field.o
 gcc -c $1 -pthread -Wall -Wunused -W -Wmissing-prototypes -O3 conex.c -o $BIN/conex.o
 gcc -c $1 -pthread -Wall -Wunused -W -Wmissing-prototypes -O3 pcritc.c -o $BIN/pcritc.o
-gcc -c $1 -pthread -Wall -Wunused -W -Wmissing-prototypes -O3 pcrits.c -o $BIN/pcrits.o
+gcc -c $1 -pthread -Wall -Wunused -W -Wmissing-prototypes -O3 generic/pcrits.c -o $BIN/pcrits.o
 gcc -c $1 -pthread -Wall -Wunused -W -Wmissing-prototypes -O3 exten.c -o $BIN/exten.o
-gcc -c $1 -pthread -Wall -Wunused -W -Wmissing-prototypes -O3 tfarm3.c -o $BIN/tfarm3.o
+gcc -c $1 -pthread -Wall -Wunused -W -Wmissing-prototypes -O3 generic/tfarm3.c -o $BIN/tfarm3.o
 gcc -c $1 -pthread -Wall -Wunused -W -Wmissing-prototypes -O3 tfarm2.c -o $BIN/tfarm2.o
 gcc -c $1 -pthread -Wall -Wunused -W -Wmissing-prototypes -O3 io.c -o $BIN/io.o
 gcc -c $1 -pthread -Wall -Wunused -W -Wmissing-prototypes -O3 proggies.c -o $BIN/proggies.o

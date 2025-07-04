@@ -1,0 +1,21 @@
+#!/bin/bash
+# Script to convert from meataxe 64 to meataxe 2000
+# Expect to use back to back zpr znd zcv
+# Ie zpr $1 | 2000/zcv - $2
+# meataxe 64 is expected to be on path
+# meataxe 2000 in ~/install
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+usage="$0: usage: $0 <in> <out>"
+if [ $# -ne 2 ]; then
+  echo "$usage"
+  exit 1;
+fi
+if [ -e $1 ]; then
+  zpr $1 | ~/install/zcv - $2
+else
+  echo "$0: missing file $1"
+  exit 1
+fi

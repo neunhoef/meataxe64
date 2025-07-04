@@ -1,0 +1,130 @@
+#!/bin/bash
+#
+# $Id: new_irredf_with_script,v 1.4 2023/07/03 08:30:07 jon Exp $
+#
+# Script to classify an irreducible representation, given its script
+#
+# Inputs
+# $1: initial memory
+# $2: temporary directory
+# $3: script to produce the required element
+# $4: generator a
+# $5: generator b
+# $6-: other generators
+#
+# outputs will be of the form irred/${nor}_${i}_{1,..}
+# where nor = znor $a and i is an available unused index
+#
+#
+# Return codes
+# 1: error in parameters
+# 0: new irreducible
+# 254: no nullity one element found
+# 255: existing irreducible
+#
+usage="$0: usage: $0 <memory> <tmp directory> <script> <a> <b> [<other generators>]"
+if [ $# -lt 5 ]; then
+  echo "$usage"
+  exit 1;
+fi
+. functions
+memory=$1
+tmp_dir=$2
+script=$3
+a=$4
+b=$5
+if [ -e $a -a -e $b ]; then
+  nor=`znor $a`
+  noc=`znoc $a`
+  if [ $nor -ne $noc ]; then
+    echo "$0: $a is not square"
+    exit 1
+  fi
+  if [ $nor -ne `znor $b` -o $nor -ne `znoc $b` ]; then
+    echo $a and $b are not compatible
+    exit 1
+  fi
+else
+  echo "$0: missing files $a or $b"
+  exit 1
+fi
+let j=$#-3
+i=0
+shift 3
+args=
+while [ $i -lt $j ]; do
+  let i=$i+1
+  args="$args $1"
+  shift
+done
+#
+# Now generate element of nullity one
+#
+tmp=tmp${PPID}
+e=${tmp}.1
+name=${tmp}_${nor}
+zscript -m $memory $e zscript.${tmp} $script $args
+ret=$?
+rm zscript.${tmp}*
+if [ 0 -eq $ret ]; then
+  x=`basef $e ${name} ${tmp}.0 ${tmp_dir} $memory ${args}`
+  ret=$?
+  if [ $ret -ne 0 ]; then
+    echo $x
+    rm -f ${tmp}*
+    exit 1
+  fi
+else
+  rm -f ${tmp}.*
+  exit $ret
+fi
+if [ ! -e irreds ]; then
+  mkdir irreds
+fi
+names=`ls irreds/${nor}_*_1 2>/dev/null`
+ret=$?
+if [ $ret -eq 0 ]; then
+# echo Found some irreducibles
+# Some irreds of this dimension
+  for x in $names; do
+    y=`echo $x | sed -e "s/_1$//g"`
+    eq=1
+    i=1;
+    while [ $i -le $j ]; do
+      if [ -e ${y}_$i ]; then
+        if zdiff ${y}_$i ${name}_sb_$i 1>/dev/null; then
+          eq=1
+        else
+          eq=0
+          break
+        fi
+      else
+        eq=0
+        break
+      fi
+      let i=$i+1
+    done
+    if [ 1 -eq $eq ] ; then
+      echo Existing irreducible ${y} found
+      rm -f ${tmp}*
+      exit 255
+    fi
+  done
+fi
+#
+# New irreducible found
+#
+new_name=`new_irred_name irreds/${nor}`
+echo Found a new irreducible ${new_name} of dimension ${nor} using script $script
+#echo assigning new name ${new_name}
+i=1
+while [ $i -le $j ]; do
+  mv ${name}_sb_$i ${new_name}_$i
+  let i=$i+1
+done
+if [ -e ${new_name}_1_${script} -o -L ${new_name}_1_${script} ]; then
+  rm ${new_name}_1_${script}
+fi
+ln -s ${new_name}_1 ${new_name}_1_${script}
+rm -f ${tmp}*
+exit 0

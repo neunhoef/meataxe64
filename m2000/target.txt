@@ -1,0 +1,24 @@
+#
+# Generic target rules
+#
+# $Id: target.txt,v 1.5 2012/01/24 22:15:43 jon Exp $
+#
+# generate target names plus objects
+#
+
+$(TARGET_TYPE)_OBJECTS:= $($(TARGET)_MODULES:%=$($(TARGET_TYPE)OBJDIR)/%.$(OBJEXT))
+$(TARGET_TYPE)_EXETARGET:= $($(TARGET)_TARGET:%=$($(TARGET_TYPE)BINDIR)/%$(EXEEXT))
+$(TARGET_TYPE)_TARGETS+= $($(TARGET_TYPE)_EXETARGET)
+$(TARGET_TYPE)PP_OBJECTS:= $($(TARGET)_MODULES:%=$(PPDIR)/%.$(PPEXT))
+$(TARGET_TYPE)PP_TARGETS+= $($(TARGET_TYPE)PP_OBJECTS)
+$(TARGET_TYPE)ASM_OBJECTS:= $($(TARGET)_MODULES:%=$(ASMOUTDIR)/%.$(ASMOUTEXT))
+$(TARGET_TYPE)ASM_TARGETS+= $($(TARGET_TYPE)ASM_OBJECTS)
+
+# Build executable
+
+COMMAND := $($(TARGET_TYPE)_EXETARGET): $($(TARGET_TYPE)_OBJECTS) $($(TARGET_TYPE)_LIBTARGET) ; @echo Link $$@; rm -f $$@ || true; mkdir -p $($(TARGET_TYPE)BINDIR) || true ; $(LINK)$$@ $($(TARGET_TYPE)_LINK_FLAGS) $($(TARGET_TYPE)_OBJECTS) $($(TARGET_TYPE)_LIBTARGET) $($(TARGET_TYPE)_LIBS)
+
+$(COMMAND)
+
+#Add to list of things to be removed by make clean
+CLEAN_ITEMS+= $($(TARGET_TYPE)_OBJECTS) $($(TARGET_TYPE)_EXETARGET)

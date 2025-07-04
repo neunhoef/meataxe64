@@ -1,0 +1,109 @@
+#!/bin/bash
+#
+# $Id: restrictf_with_orders,v 1.3 2023/07/03 08:30:07 jon Exp $
+#
+# Script to restrict a representation from a field to a subfield
+#
+# Inputs
+# $1: initial memory
+# $2: subfield order
+# $3: output stem
+# $4: temporary directory
+# $5: generator a
+# $6: order a
+# $7: generator b
+# $8: order b
+# $9-: other generators and orders
+#
+# outputs will be of the form <stem>_${nor}_{1,...}
+#
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+# 254: no nullity one element found
+# 255: representation does not restrict
+#
+usage="$0: usage: $0 <memory> <subfield size> <output stem> <tmp dir> <a> <order a> <b> <order b> [<other generators and orders>]"
+if [ $# -lt 8 ]; then
+  echo "$usage"
+  exit 1;
+fi
+. functions
+memory=$1
+sub=$2
+o=$3
+tmp_dir=$4
+a=$5
+o_a=$6
+b=$7
+o_b=$8
+if [ -e $a -a -e $b ]; then
+  q=`zprime $a`
+  nor=`znor $a`
+  noc=`znoc $a`
+  if [ $nor -ne $noc ]; then
+    echo "$0: $a is not square"
+    exit 1
+  fi
+  if [ $nor -ne `znor $b` -o $nor -ne `znoc $b` ]; then
+    echo "$0: $a and $b are not compatible"
+    exit 1
+  fi
+else
+  echo "$0: missing files $a or $b"
+  exit 1
+fi
+let i=$#-4
+let j=$i/2
+let k=$j*2
+if [ $i -ne $k ]; then
+  echo "$0: missing order for final generator"
+  exit 1
+fi
+i=0
+shift 4
+line=
+while [ $i -lt $j ]; do
+  rest[$i]=$1
+  o_rest[$i]=$2
+  let i=$i+1
+  line="$line $1 $2"
+  shift 2
+done
+#
+# Now search for element of nullity one in the restricted group algebra
+#
+tmp=tmp${PPID}
+e=${tmp}.1
+script=`find_restricted_nullity_onef_with_orders $e $sub $memory $tmp_dir $line`
+ret=$?
+if [ $ret -ne 0 ]; then
+  rm -f ${tmp}.*
+  echo $script
+  exit $ret
+fi
+name=${tmp}_${nor}
+x=`basef $e ${name} ${tmp}.0 $tmp_dir $memory ${rest[*]}`
+ret=$?
+if [ $ret -ne 0 ]; then
+  echo $x
+  rm -f ${tmp}*
+  exit 1
+fi
+i=1
+for x in ${rest[*]}; do
+  zrestrict ${name}_sb_$i ${o}_${nor}_$i $sub
+  ret=$?
+  if [ 0 -ne $ret ]; then
+    rm -f ${tmp}*
+    exit $ret
+  fi
+  let i=$i+1
+done
+if [ -e ${o}_${nor}_1_${script} -o -L ${o}_${nor}_1_${script} ]; then
+  rm ${o}_${nor}_1_${script}
+fi
+ln -s ${o}_${nor}_1 ${o}_${nor}_1_${script}
+rm -f ${tmp}*
+exit 0

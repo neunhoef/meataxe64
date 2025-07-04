@@ -1,0 +1,107 @@
+#!/bin/bash
+#
+# $Id: restrict_with_orders,v 1.9 2023/07/03 08:30:07 jon Exp $
+#
+# Script to restrict a representation from a field to a subfield
+#
+# Inputs
+# $1: initial memory
+# $2: subfield order
+# $3: output stem
+# $4: generator a
+# $5: order a
+# $6: generator b
+# $7: order b
+# $8-: other generators and orders
+#
+# outputs will be of the form <stem>_${nor}_{1,...}
+#
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+# 254: no nullity one element found
+# 255: representation does not restrict
+#
+usage="$0: usage: $0 <memory> <subfield size> <output stem> <a> <order a> <b> <order b> [<other generators and orders>]"
+if [ $# -lt 7 ]; then
+  echo "$usage"
+  exit 1;
+fi
+. functions
+memory=$1
+sub=$2
+o=$3
+a=$4
+o_a=$5
+b=$6
+o_b=$7
+if [ -e $a -a -e $b ]; then
+  q=`zprime $a`
+  nor=`znor $a`
+  noc=`znoc $a`
+  if [ $nor -ne $noc ]; then
+    echo "$0: $a is not square"
+    exit 1
+  fi
+  if [ $nor -ne `znor $b` -o $nor -ne `znoc $b` ]; then
+    echo "$0: $a and $b are not compatible"
+    exit 1
+  fi
+else
+  echo "$0: missing files $a or $b"
+  exit 1
+fi
+let i=$#-3
+let j=$i/2
+let k=$j*2
+if [ $i -ne $k ]; then
+  echo "$0: missing order for final generator"
+  exit 1
+fi
+i=0
+shift 3
+line=
+while [ $i -lt $j ]; do
+  rest[$i]=$1
+  o_rest[$i]=$2
+  let i=$i+1
+  line="$line $1 $2"
+  shift 2
+done
+#
+# Now search for element of nullity one in the restricted group algebra
+#
+tmp=tmp${PPID}
+e=${tmp}.1
+script=`find_restricted_nullity_one_with_orders $e $sub $memory $line`
+ret=$?
+if [ $ret -ne 0 ]; then
+  rm -f ${tmp}.*
+  echo $script
+  exit $ret
+fi
+name=${tmp}_${nor}
+x=`base $e ${name} ${tmp}.0 ${rest[*]}`
+ret=$?
+if [ $ret -ne 0 ]; then
+  echo $x
+  rm -f ${tmp}*
+  exit 1
+fi
+i=1
+for x in ${rest[*]}; do
+  zrestrict ${name}_sb_$i ${o}_${nor}_$i $sub
+  ret=$?
+  if [ 0 -ne $ret ]; then
+    rm -f ${tmp}*
+    exit $ret
+  fi
+  let i=$i+1
+done
+if [ -e ${o}_${nor}_1_${script} -o -L ${o}_${nor}_1_${script} ]; then
+  rm ${o}_${nor}_1_${script}
+fi
+ln -s ${o}_${nor}_1 ${o}_${nor}_1_${script}
+rm -f ${tmp}*
+exit 0

@@ -6,14 +6,14 @@ gcc -c $1 -pthread -Wall -Wunused -W -Wmissing-prototypes -O3 dfmtf.c -o $BIN/df
 gcc -c $1 -pthread -Wall -Wunused -W -Wmissing-prototypes -O3 field.c -o $BIN/field.o
 gcc -c $1 -pthread -Wall -Wunused -W -Wmissing-prototypes -O3 conex.c -o $BIN/conex.o
 gcc -c $1 -pthread -Wall -Wunused -W -Wmissing-prototypes -O3 pcritc.c -o $BIN/pcritc.o
-gcc -c $1 -pthread -Wall -Wunused -W -Wmissing-prototypes    pc1.s -o $BIN/pc1.o
-gcc -c $1 -pthread -Wall -Wunused -W -Wmissing-prototypes    pc2.s -o $BIN/pc2.o
-gcc -c $1 -pthread -Wall -Wunused -W -Wmissing-prototypes    pc3.s -o $BIN/pc3.o
-gcc -c $1 -pthread -Wall -Wunused -W -Wmissing-prototypes    pc5.s -o $BIN/pc5.o
-gcc -c $1 -pthread -Wall -Wunused -W -Wmissing-prototypes    pc6.s -o $BIN/pc6.o
+gcc -c $1 -pthread -Wall -Wunused -W -Wmissing-prototypes    em64t/pc1.s -o $BIN/pc1.o
+gcc -c $1 -pthread -Wall -Wunused -W -Wmissing-prototypes    em64t/pc2.s -o $BIN/pc2.o
+gcc -c $1 -pthread -Wall -Wunused -W -Wmissing-prototypes    em64t/pc3.s -o $BIN/pc3.o
+gcc -c $1 -pthread -Wall -Wunused -W -Wmissing-prototypes    em64t/pc5.s -o $BIN/pc5.o
+gcc -c $1 -pthread -Wall -Wunused -W -Wmissing-prototypes    em64t/pc6.s -o $BIN/pc6.o
 gcc -c $1 -pthread -Wall -Wunused -W -Wmissing-prototypes -O3 exten.c -o $BIN/exten.o
-gcc -c $1 -pthread -Wall -Wunused -W -Wmissing-prototypes    tfarm0.s -o $BIN/tfarm0.o
-gcc -c $1 -pthread -Wall -Wunused -W -Wmissing-prototypes -O3 tfarm1.c -o $BIN/tfarm1.o
+gcc -c $1 -pthread -Wall -Wunused -W -Wmissing-prototypes    em64t/tfarm0.s -o $BIN/tfarm0.o
+gcc -c $1 -pthread -Wall -Wunused -W -Wmissing-prototypes -O3 em64t/tfarm1.c -o $BIN/tfarm1.o
 gcc -c $1 -pthread -Wall -Wunused -W -Wmissing-prototypes -O3 tfarm2.c -o $BIN/tfarm2.o
 gcc -c $1 -pthread -Wall -Wunused -W -Wmissing-prototypes -O3 io.c -o $BIN/io.o
 gcc -c $1 -pthread -Wall -Wunused -W -Wmissing-prototypes -O3 proggies.c -o $BIN/proggies.o

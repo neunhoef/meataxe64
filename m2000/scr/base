@@ -1,0 +1,59 @@
+#!/bin/bash
+#
+# $Id: base,v 1.16 2023/07/03 08:30:06 jon Exp $
+#
+# Script to find a representation in standard base
+#
+# Inputs
+# $1: element with which to split
+# $2: output filename base
+# $3: the standard basis
+# $4: generator a
+# $5-: other generators
+#
+# outputs will be of the form <$4>_sb_{1,...}
+# where nor is number of rows, and q is the prime power
+#
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+# 254: reducible
+# 255: nullity not 1
+#
+#set -v
+. functions
+usage="$0: usage: $0 <e> <output_stem> <s> <a> [<other generators>*]"
+if [ $# -lt 5 ]; then
+  echo "$usage"
+  exit 1;
+fi
+e=$1
+o=$2
+s=$3
+a=$4
+if [ -e $e -a -e $a ]; then
+  q=`zprime $a`
+  nor=`znor $a`
+  noc=`znoc $a`
+  if [ $nor -ne $noc ]; then
+    echo "$0: $a is not square"
+    exit 1
+  fi
+  if [ $nor -ne `znoc $e` -o $nor -ne `znor $e` ]; then
+    echo "$0: $a and $e are not compatible"
+    exit 1
+  fi
+else
+  echo "$0: missing files $e or $a"
+  exit 1
+fi
+shift 4
+base_vectors $e $s $a $*
+ret=$?
+if [ 0 -ne $ret ]; then
+  exit $ret
+fi
+conjugate $s ${o}_sb $a $*
+ret=$?
+exit $ret

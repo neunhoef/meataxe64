@@ -1,0 +1,73 @@
+#!/bin/bash
+#
+# $Id: find_restricted_nullity_onef_with_orders,v 1.4 2023/07/03 08:30:07 jon Exp $
+#
+# Script to find an element of nullity one in two generators in a restricted group algebra
+#
+# Inputs
+# $1: output file name
+# $2: subfield order
+# $3: initial memory
+# $4: temporary directory
+# $5: generator a
+# $6: order a
+# $7: generator b
+# $8: order b
+# $9-: further generators and orders
+#
+usage="$0: usage: $0 <out> <subfield size> <memory> <tmp dir> <a> <order a> <b> <order b> [<other generators and orders>]"
+if [ $# -lt 8 ]; then
+  echo "$usage"
+  exit 1;
+fi
+. functions
+e=$1
+sub=$2
+memory=$3
+tmp_dir=$4
+a=$5
+o_a=$6
+b=$7
+o_b=$8
+shift 4
+tmp=tmp${PPID}
+ok=0
+nor=`znor $a`
+# Try zrsums
+q=1
+line=
+while [ $# -ne 0 ]; do
+  if [ 1 -eq $# ]; then
+    echo $usage
+    exit 1
+  fi
+  line="$line $1 $2"
+  r=`zprime $1`
+  if [ $r -gt $q ]; then
+    q=$r
+  fi
+  shift 2
+done
+depth=`max_depth $q 1023`
+while [ $ok -eq 0 ]; do
+  out=`zrsumsf -m $memory ${tmp}.zsums $depth 1 $sub $tmp_dir $line 2>/dev/null`
+  ret=$?
+  if [ 2 -eq $ret ]; then
+    let memory=`more_memory $memory`
+  elif [ 0 -eq $ret ]; then
+    ok=1
+    name=`echo $out | sed -e "s/^.*element //g;s/ of nullity.*$//g"`
+    cp ${name} $e
+    echo $out | sed -e "s/^.*form //g;s/ .*$//g"
+  elif [ 255 -eq $ret ]; then
+    echo Failed to find an element of nullity one
+    rm -f ${tmp}*
+    exit 254
+  else
+    echo zrsumsf unexpectedly returns $ret, terminating
+    rm -f ${tmp}*
+    exit 1
+  fi
+done
+rm -f ${tmp}*
+exit 0

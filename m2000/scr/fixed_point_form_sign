@@ -1,0 +1,152 @@
+#!/bin/bash
+#
+# $Id: fixed_point_form_sign,v 1.4 2023/07/03 08:30:07 jon Exp $
+#
+# Script to compute the form sign on the fixed point space
+#
+# Inputs
+# $1: form
+# $2: group element
+# $3: memory (optional)
+#
+# Return codes
+# 1: error in parameters
+# 0: sign plus
+# 255: sign minus
+#
+. functions
+usage="$0: usage: $0 <form> <element> [<memory>]"
+if [ $# -ne 2 -a $# -ne 3 ]; then
+  echo "$usage"
+  exit 1;
+fi
+form=$1
+elt=$2
+if [ 3 -eq $# ]; then
+  memory=$3
+else
+  memory=400
+fi
+if [ -e $form -a -e $elt ]; then
+  q=`zprime $form`
+  r=`zprime $elt`
+  nor=`znor $form`
+  noc=`znoc $form`
+  if [ $nor -ne $noc ]; then
+    echo "$0: $form is not square"
+    exit 1
+  fi
+  if [ $nor -ne `znor $elt` -o $nor -ne `znoc $elt` ]; then
+    echo "$0: $form and $elt are not compatible"
+    exit 1
+  fi
+  if [ 1 -eq $q -a 1 -eq $r ]; then
+    echo "$0: form and element cannot be maps"
+    exit 1
+  fi
+  if [ 1 -ne $q -a 1 -ne $r -a $q -ne $r ]; then
+    echo "$0: $form and $elt are not compatible"
+    exit 1
+  fi
+else
+  echo "$0: missing files $form or $elt"
+  exit 1
+fi
+prime=`zchar $form`
+let minus1=$prime-1
+tmp=tmp${PPID}
+zsid $q $nor $nor $minus1 ${tmp}.1
+ret=$?
+if [ 0 -ne $ret ]; then
+  rm -f ${tmp}.*
+  exit 1
+fi
+zad -m $memory ${tmp}.1 $elt ${tmp}.2
+ret=$?
+if [ 0 -ne $ret ]; then
+  rm -f ${tmp}.*
+  exit 1
+fi
+rm -f ${tmp}.1
+n=`znsf -m $memory ${tmp}.2 ${tmp}.2.ns .`
+ret=$?
+if [ 0 -ne $ret ]; then
+  echo $n
+  rm -f ${tmp}.*
+  exit 1
+fi
+if [ 0 -eq $n ]; then
+  echo "No null vectors found, use zsign on full form"
+  rm -f ${tmp}.*
+  exit 1
+fi
+rm -f ${tmp}.2
+zmu -m $memory ${tmp}.2.ns $form ${tmp}.3
+ret=$?
+if [ 0 -ne $ret ]; then
+  rm -f ${tmp}.*
+  exit 1
+fi
+ztr -m $memory ${tmp}.2.ns ${tmp}.4
+ret=$?
+if [ 0 -ne $ret ]; then
+  rm -f ${tmp}.*
+  exit 1
+fi
+rm -f ${tmp}.2.ns
+zmu -m $memory ${tmp}.3 ${tmp}.4 ${tmp}.form
+ret=$?
+if [ 0 -ne $ret ]; then
+  rm -f ${tmp}.*
+  exit 1
+fi
+rm -f ${tmp}.3 ${tmp}.4
+new_nor=`znor ${tmp}.form`
+ret=$?
+if [ 0 -ne $ret ]; then
+  echo $new_nor
+  rm -f ${tmp}.*
+  exit 1
+fi
+if [ 2 -eq $prime ]; then
+  ztr -m $memory ${tmp}.form ${tmp}.form.tra
+  ret=$?
+  if [ 0 -ne $ret ]; then
+    rm -f ${tmp}.*
+    exit 1
+  fi
+  zad -m $memory ${tmp}.form ${tmp}.form.tra ${tmp}.form.sym
+  ret=$?
+  if [ 0 -ne $ret ]; then
+    rm -f ${tmp}.*
+    exit 1
+  fi
+else
+  ln -s ${tmp}.form ${tmp}.form.sym
+fi
+ok=0
+mem_failed=0
+while [ 0 -eq $ok ]; do
+  out=`zsign -m $memory ${tmp}.form ${tmp}.form.sym 2>&1`
+  ret=$?
+  if [ 2 -eq $ret ]; then
+    let memory=`more_memory $memory 2>/dev/null`
+    mem_failed=1
+  else
+    ok=1
+  fi
+done
+if [ 0 -ne $ret -a 255 -ne $ret ]; then
+  rm -f ${tmp}.*
+  echo $out
+  exit 1
+fi
+if [ 0 -eq $ret ]; then
+  echo sign +
+else
+  echo sign -
+fi
+let diff=$nor-$new_nor
+echo Remaining dimension $diff
+rm -f ${tmp}.*
+exit $ret

@@ -1,0 +1,148 @@
+#!/bin/sh
+#
+# $Id$
+#
+# Script to continue computation of a symmetry basis
+# wrt an ordered set of irreducibles, using delta words
+#
+# Inputs
+# $1: a file containing the irreducible element names
+# $2: memory to be used
+# $3: the file to contain the symmetry basis
+# $4: the file of multiplicities
+# $5: the file of delta word scripts
+# $6: the restart point (1 means start from scratch)
+# $7: the basis so far
+# $8: the multiplicities so far
+# $9-: generators for the condensation group
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+# 255: an irreducible was found outside the list
+#
+usage="$0: usage: $0 <irreducibles> <memory> <output basis> <output multiplicities> <script> <restart at> <partial basis> <partial multiplicities> <generator 1> [<other generators>]"
+if [ $# -lt 10 ]; then
+  echo "$usage"
+  exit 1;
+fi
+have_basis=0
+name=$0
+irreds=$1
+memory=$2
+out=$3
+mult=$4
+deltas=`cat $5`
+restart=$6
+partial_basis=$7
+partial_mult=$8
+shift 8
+gen_count=$#
+tmp=tmp${PPID}
+basis=${tmp}.31
+local_basis=${tmp}.32
+cat /dev/null > $mult
+irred_num=1
+# Sort out basis and multiplicities so far
+# If restart is 1 nothing to do. Otherwise copy in the partial basis and mult
+if [ 1 -lt $restart ]; then
+  # Use the incoming partial basis
+  cp ${partial_basis} $basis
+  cp ${partial_mult} $mult
+  have_basis=1
+fi
+for x in `cat $irreds`; do
+  w=$x
+  # Ignore irreds we've already done
+  if [ $irred_num -lt $restart ]; then
+    let irred_num=$irred_num+1
+    continue
+  fi
+  i=1
+  for y in $deltas; do
+    if [ $i -eq $irred_num ]; then
+      script=$y
+      break
+    fi
+    let i=$i+1
+  done
+  wdim=`znor ${w}_1`
+  count=0
+# Compute the delta word in the generators for irreducible X
+  zscript -m $memory ${tmp}.0 ${tmp}.zscript $script $*
+  ret=$?
+  if [ 0 -ne $ret ]; then
+    echo "$name: delta word computation failed for ${w}, terminating"
+    exit 1
+  fi
+  dim=`znsf -m $memory ${tmp}.0 ${tmp}.1 .`
+  ret=$?
+  if [ 0 -ne $ret ]; then
+    echo $dim
+    echo "$name: nullspace computation failed for delta word for ${w}, terminating"
+    exit 1
+  fi
+  if [ $dim -gt 0 ]; then
+# First compute total space spun from image of gamma operator
+    r=`zmspf -m $memory ${tmp}.1 ${tmp}.2 . $*`
+    ret=$?
+    if [ 0 -ne $ret ]; then
+      rm -f ${tmp}.*
+      echo $r
+      echo "$name: failed to spin image of gamma, terminating"
+      exit 1
+    fi
+    let tot=$r/$wdim
+    echo tot=$tot, r=$r, wdim=$wdim, dim=$dim
+    dim=`zsymb -m $memory $tot $wdim ${tmp}.1 ${tmp}.2 . $*`
+    ret=$?
+    if [ 0 -ne $ret ]; then
+      rm -f ${tmp}.*
+      echo $dim
+      echo code $ret
+      echo "$name: failed to base component for $w, terminating"
+      exit 1
+    fi
+    if [ $r -ne $dim ]; then
+      rm -f ${tmp}.*
+      echo "$name: expected dimension $r for component $w but got $dim, terminating"
+      exit 1
+    fi
+    count=$tot
+    if [ 0 -eq $have_basis ]; then
+      cp ${tmp}.2 $basis
+      ret=$?
+      have_basis=1
+    else
+      zjoin $basis ${tmp}.2 ${tmp}.3
+      ret=$?
+      if [ 0 -ne $ret ]; then
+        rm -f ${tmp}.*
+        echo "$name: unexpected failure in zjoin, terminating"
+        exit 1
+      fi
+      cp ${tmp}.3 $basis
+      ret=$?
+    fi
+    if [ 0 -ne $ret ]; then
+      rm -f ${tmp}.*
+      echo "$name: unexpected failure in cp, terminating"
+      exit 1
+    fi
+  fi
+  echo $count >> $mult
+  let irred_num=$irred_num+1
+done
+if [ 0 -eq $have_basis ]; then
+  rm -f ${tmp}.*
+  echo "$name: no basis found, terminating"
+  exit 1
+fi
+if [ `znor $basis` -ne `znor $1` ]; then
+  rm -f ${tmp}.*
+  echo "$name: not enough basis found"
+  exit 255
+fi
+cp $basis $out
+rm -f ${tmp}.*
+exit 0
