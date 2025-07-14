@@ -1,0 +1,21 @@
+#!/bin/bash
+#
+# Script to do zsums in meataxe 64 until a binary is available
+#
+# Parameters as for zsums in meataxe 2000
+# ie [-m <memory] <outfile> <depth> <nullity> <generators and orders>
+#
+dir=`dirname $0`
+if [ "-m" = "$1" ]; then
+    shift 2
+fi
+if [ "-mg" = "$1" ]; then
+    shift 2
+fi
+out=`${dir}/../bin/zsums $*`
+ret=$?
+if [ 0 -ne $ret ]; then
+    echo $out
+    exit 1
+fi
+echo ${out}

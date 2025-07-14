@@ -1,0 +1,27 @@
+#!/bin/bash
+#
+# Script to do zsad in meataxe 64 until a binary is available
+#
+# Parameters as for zsad in meataxe 2000
+# ie [-m <memory] <infile> <infile> <out_file> <scalar>
+#
+dir=`dirname $0`
+if [ $# -ne 4 -a $# -ne 6 ]; then
+   echo "zsad: bad parameters"
+   echo "usage: zsad [-m <memory] <infile> <infile> <out_file> <scalar>"
+   exit 1
+fi
+mem=
+if [ 6 -eq $# ]; then
+    mem="-m $2"
+    shift 2
+fi
+in1=$1
+in2=$2
+outfile=$3
+scalar=$4
+# Use meataxe64's zsc program which does X+aY-bI
+# setting b = 0, to obtain aA+B
+${dir}/../bin/zsc ${in2} ${scalar} ${in1} 0 ${outfile}
+ret=$?
+exit $ret

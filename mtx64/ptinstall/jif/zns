@@ -1,0 +1,26 @@
+#!/bin/bash
+#
+# Script to do zns in meataxe 64 until a binary is available
+#
+# Parameters as for zns in meataxe 2000
+# ie [-m <memory] <infile> <outfile>
+#
+dir=`dirname $0`
+if [ $# -ne 2 -a $# -ne 4 ]; then
+   echo "zns: bad parameters"
+   echo "usage: zns [-m <memory] <infile> <outfile>"
+   exit 1
+fi
+if [ 4 -eq $# ]; then
+    shift 2
+fi
+infile=$1
+outfile=$2
+out=`${dir}/../bin/znu ${infile} ${outfile} | grep "Nullity "`
+ret=$?
+if [ 0 -eq $ret ]; then
+    echo ${out} | sed -e "s/Nullity //"
+    exit 0
+fi
+echo $out
+exit 1

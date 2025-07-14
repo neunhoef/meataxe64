@@ -1,0 +1,25 @@
+#!/bin/bash
+#
+# Script to do znsf in meataxe 64 until a binary is available
+#
+# Parameters as for znsf in meataxe 2000
+# ie [-m <memory] <infile> <outfile> <dir>
+#
+dir=`dirname $0`
+if [ $# -ne 3 -a $# -ne 5 ]; then
+   echo "znsf: bad parameters"
+   echo "usage: znsf [-m <memory] <infile> <outfile> <dir>"
+   exit 1
+fi
+if [ 5 -eq $# ]; then
+    shift 2
+fi
+infile=$1
+outfile=$2
+out=`${dir}/../bin/znu ${infile} ${outfile} | grep "Nullity "`
+ret=$?
+if [ 0 -eq $ret ]; then
+    echo ${out} | sed -e "s/Nullity //"
+    exit 0
+fi
+exit 1

@@ -1,0 +1,71 @@
+#!/bin/bash
+#
+# Script to split a representation given a particular subspace to work from
+# Meataxe64 version
+#
+# Inputs
+# $1: subspace stem with which to split
+# $2: output subspace representation filename
+# $3: output quotient representation filename
+# $4-: generators
+#
+# The subspace parameter is the stem, and the files are <stem>.{bs,rem}
+#
+# outputs will be of the form <$3>_<q>_<nor>
+# where nor is number of rows, and q is the prime power
+#
+# Return codes
+# 1: error in parameters
+# 0: success
+# 254: did not split
+#
+. functions
+usage="$0: usage: $0 <s> <o_s> <o_q> <a> [<other generators>]"
+if [ $# -lt 4 ]; then
+  echo "$usage"
+  exit 1;
+fi
+s=$1
+o_s=$2
+o_q=$3
+a=$4
+if [ -e $a -a -e $s.bs -a -e $s.rem ]; then
+  q=`zprime $a`
+  nor=`znor $a`
+  noc=`znoc $a`
+  if [ $nor -ne $noc ]; then
+    echo "$0: $a is not square"
+    exit 1
+  fi
+  cols=`~/ptinstall/bin/zut 2 $s.bs | head -1 | sed -e "s/^ *//;s/ .*$//"`
+  if [ $noc -ne $cols -o \( $q -ne `zprime $s.rem` -a 1 -ne $q \) ]; then
+    echo "$0: $a and $s are not compatible"
+    exit 1
+  fi
+else
+  echo "$0: missing files $a or $s"
+  exit 1
+fi
+dim=`znor $s.rem`
+let codim=$nor-$dim
+shift 3
+x=1
+while [ 0 -ne $# ]; do
+  if [ $dim -lt $nor ]; then
+    ~/ptinstall/bin/zsa $s $1 ${o_s}_$x
+    if [ 0 -ne $? ]; then
+        echo "$0: zsa failed"
+        exit 1
+    fi
+    ~/ptinstall/bin/zqa $s $1 ${o_q}_$x
+    if [ 0 -ne $? ]; then
+        echo "$0: zqa failed"
+        exit 1
+    fi
+  else
+    echo failed to split
+    exit 254
+  fi
+  let x=$x+1
+  shift
+done

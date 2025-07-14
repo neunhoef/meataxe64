@@ -1,0 +1,76 @@
+#!/bin/bash
+#
+# Script to provide a subspace from the dual subspace
+# Meataxe64 version
+#
+# Inputs
+# $1: dual subspace
+# $2: output filename
+# $3: memory
+#
+# The subspace names parameters are the stems, and the files will be <stem>.{bs,rem}
+# Return codes
+# 1: error in parameters
+# 0: ok
+#
+#set -v
+. functions
+usage="$0: usage: $0 <dual subspace> <output> <memory>"
+if [ $# -ne 3 ]; then
+  echo "$usage"
+  exit 1;
+fi
+i=$1
+o=$2
+memory=$3
+if [ -e $i.bs -a -e $i.rem ]; then
+  q=`zprime $i.rem`
+  nor=`znor $i.rem`
+  noc=`~/ptinstall/bin/zut 2 $i.bs | head -1 | sed -e "s/^ *//;s/ .*$//"`
+  if [ 1 -eq $q ]; then
+    echo "$0: $i cannot be a map"
+    exit 1
+  fi
+else
+  echo "$0: missing file $i.bs or $i.rem"
+  exit 1
+fi
+tmp=tmp${PPID}
+# M64 algorithm. We have a subspace in the form bs, rem
+# Tranposing this gives a block column of the form -I / R(T)
+# So, the vectors which are null for that are block row (R(T) | I)
+# But our bitstrings represent -I, so we use (-R(T), -I)
+# Where the I in this case if the complement of the I in the original subspace
+# zbc gives complement, zng the negative
+# Negate the remnant
+~/ptinstall/bin/zng ${i}.rem ${tmp}.rem_neg
+if [ 0 -ne $? ]; then
+    ~/ptinstall/bin/zng ${i}.rem ${tmp}.rem_neg
+    rm -f ${tmp}.*
+    exit 1
+fi
+# Then transpose it
+~/ptinstall/bin/ztr ${tmp}.rem_neg ${o}.rem
+if [ 0 -ne $? ]; then
+    ~/ptinstall/bin/ztr ${tmp}.rem_neg ${o}.rem
+    rm -f ${tmp}.*
+    exit 1
+fi
+# Now complement the bitstring
+~/ptinstall/bin/zbc ${i}.bs ${o}.bs
+if [ 0 -ne $? ]; then
+    ~/ptinstall/bin/zbc ${i}.bs ${o}.bs
+    rm -f ${tmp}.*
+    exit 1
+fi
+# Now we just need the nullity, which is the number of rows
+# of the new remnant, ie the number of columns of the original remnant
+nullity=`~/ptinstall/bin/znoc ${i}.rem`
+if [ 0 -ne $? ]; then
+    ~/ptinstall/bin/znor ${i}.rem
+    rm -f ${tmp}.*
+    exit 1
+fi
+rm -f ${tmp}.*
+echo $nullity
+exit 0

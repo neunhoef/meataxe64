@@ -1,0 +1,460 @@
+#!/bin/bash
+# Hybrid script to do tensor spin
+# Uses mtx2000 zmtu for multiplies and mtx64 clean and extend
+# Parameters as for meataxe2000 ztspf, but with mtx64 matrices
+# Output will be in plan form, suitable for use by ztmu and zss
+
+#set -x
+set -e
+usage="ztspf [-m <memory>] <in> <out> <gen_a1> <gen_a2> <gen_b1> <gen_b2> <tmp dir>"
+memory=1000000
+if [ 9 != $# -a 7 -ne $# ]; then
+  echo $usage 1>&2
+  exit 1
+fi
+if [ 9 -eq $# ]; then
+  memory=$2
+  shift 2
+fi
+in=$1
+out=$2
+gen1_l=$3
+gen1_r=$4
+gen2_l=$5
+gen2_r=$6
+tmp_dir=$7
+tmp=$tmp_dir/tmp$$
+
+# This is clean bitstring rem, input, output
+function clean()
+{
+  zcx $1 $3 ${tmp}.cv0 ${tmp}.cv2
+  ret=$?
+  if [ 0 -ne $ret ]; then
+    echo "ztspf: zcx $1 $3 ${tmp}.cv0 ${tmp}.cv2 failed with code $ret" 1>&2
+    rm ${tmp}.*
+    exit 1
+  fi
+  zmu ${tmp}.cv0 $2 ${tmp}.cv1
+  ret=$?
+  if [ 0 -ne $ret ]; then
+    echo "ztspf: zmu ${tmp}.cv0 $2 ${tmp}.cv1 failed with code $ret" 1>&2
+    rm ${tmp}.*
+    exit 1
+  fi
+  zad ${tmp}.cv2 ${tmp}.cv1 $4
+  if [ 0 -ne $ret ]; then
+    echo "ztspf: zad ${tmp}.cv2 ${tmp}.cv1 $4 failed with code $ret" 1>&2
+    rm ${tmp}.*
+    exit 1
+  fi
+  rm ${tmp}.cv0 ${tmp}.cv1 ${tmp}.cv2
+}
+
+# Check gen1_l square and get field
+l_nor=`znor $gen1_l`
+ret=$?
+if [ 0 -ne $ret ]; then
+  echo -n "ztspf failed: " 1>&2
+  znor $gen1_l 1>&2
+  exit 1
+fi
+l_noc=`znoc $gen1_l`
+ret=$?
+if [ 0 -ne $ret ]; then
+  echo -n "ztspf failed: " 1>&2
+  znoc $gen1_l 1>&2
+  exit 1
+fi
+if [ $l_noc -ne $l_nor ]; then
+  echo "ztspf: $gen1_l is not square" 1>&2
+  exit 1
+fi
+prime=`zprime $gen1_l`
+ret=$?
+if [ 0 -ne $ret ]; then
+  echo -n "ztspf failed: " 1>&2
+  zprime $gen1_l 1>&2
+  exit 1
+fi
+# Check gen2_l compatible with gen1_l
+l_nor2=`znor $gen2_l`
+ret=$?
+if [ 0 -ne $ret ]; then
+  echo -n "ztspf failed: " 1>&2
+  znor $gen2_l 1>&2
+  exit 1
+fi
+l_noc2=`znoc $gen2_l`
+ret=$?
+if [ 0 -ne $ret ]; then
+  echo -n "ztspf failed: " 1>&2
+  znoc $gen2_l 1>&2
+  exit 1
+fi
+if [ $l_noc -ne $l_nor ]; then
+  echo "ztspf: $gen2_l is not square" 1>&2
+  exit 1
+fi
+prime2=`zprime $gen2_l`
+ret=$?
+if [ 0 -ne $ret ]; then
+  echo -n "ztspf failed: " 1>&2
+  zprime $gen2_l 1>&2
+  exit 1
+fi
+if [ $l_nor2 -ne $l_nor -o $l_noc2 -ne $l_nor -o $prime2 -ne $prime ]; then
+  echo "ztspf: incompatible matrices $gen1_l and $gen2_l" 1>&2
+  exit 1
+fi
+# Now get gen1_r and check square and field compatible
+r_nor=`znor $gen1_r`
+ret=$?
+if [ 0 -ne $ret ]; then
+  echo -n "ztspf failed: " 1>&2
+  znor $gen1_r 1>&2
+  exit 1
+fi
+r_noc=`znoc $gen1_r`
+ret=$?
+if [ 0 -ne $ret ]; then
+  echo -n "ztspf failed: " 1>&2
+  znoc $gen1_r 1>&2
+  exit 1
+fi
+if [ $r_noc -ne $r_nor ]; then
+  echo "ztspf: $gen1_r is not square" 1>&2
+  exit 1
+fi
+prime_r=`zprime $gen1_r`
+ret=$?
+if [ 0 -ne $ret ]; then
+  echo -n "ztspf failed: " 1>&2
+  zprime $gen1_r 1>&2
+  exit 1
+fi
+if [ $prime -ne $prime_r ]; then
+  echo "ztspf: $gen1_r is not compatible with $gen1_l" 1>&2
+  exit 1
+fi
+# Check gen2_r compatible with gen1_r
+r_nor2=`znor $gen2_r`
+ret=$?
+if [ 0 -ne $ret ]; then
+  echo -n "ztspf failed: " 1>&2
+  znor $gen2_r 1>&2
+  exit 1
+fi
+r_noc2=`znoc $gen2_r`
+ret=$?
+if [ 0 -ne $ret ]; then
+  echo -n "ztspf failed: " 1>&2
+  znoc $gen2_r 1>&2
+  exit 1
+fi
+if [ $r_noc -ne $r_nor ]; then
+  echo "ztspf: $gen2_r is not square" 1>&2
+  exit 1
+fi
+prime2=`zprime $gen2_r`
+ret=$?
+if [ 0 -ne $ret ]; then
+  echo -n "ztspf failed: " 1>&2
+  zprime $gen2_r 1>&2
+  exit 1
+fi
+if [ $r_nor2 -ne $r_nor -o $r_noc2 -ne $r_nor -o $prime2 -ne $prime ]; then
+  echo "ztspf: incompatible matrices $gen1_r and $gen2_r" 1>&2
+  exit 1
+fi
+# Now check the input matrix for compatibility
+let full_noc=$l_nor*$r_nor
+r_noc2=`znoc $in`
+ret=$?
+if [ 0 -ne $ret ]; then
+  echo -n "ztspf failed: " 1>&2
+  znoc $in 1>&2
+  exit 1
+fi
+prime2=`zprime $in`
+ret=$?
+if [ 0 -ne $ret ]; then
+  echo -n "ztspf failed: " 1>&2
+  zprime $in 1>&2
+  exit 1
+fi
+if [ $full_noc -ne $r_noc2 -o $prime2 -ne $prime ]; then
+  echo "ztspf: $in incompatible with $gen1_l or $gen1_r" 1>&2
+  exit 1
+fi
+# Ok, all ok, and we have the nor/noc for each side
+# Create the m2000 versions of the generators for ztmu
+to_m2000 ${gen1_l} ${tmp}.gen1_l.m2000
+ret=$?
+if [ 0 -ne $ret ]; then
+  echo "ztspf: m2000 ${gen1_l} ${tmp}.gen1_l.m2000 failed" 1>&2
+  rm ${tmp}.*
+  exit 1
+fi
+to_m2000 ${gen1_r} ${tmp}.gen1_r.m2000
+ret=$?
+if [ 0 -ne $ret ]; then
+  echo "ztspf: to_m2000 ${gen1_l} ${tmp}.gen1_l.m2000 failed" 1>&2
+  rm ${tmp}.*
+  exit 1
+fi
+to_m2000 ${gen2_l} ${tmp}.gen2_l.m2000
+ret=$?
+if [ 0 -ne $ret ]; then
+  echo "ztspf: to_m2000 ${gen2_l} ${tmp}.gen2_l.m2000 failed" 1>&2
+  rm ${tmp}.*
+  exit 1
+fi
+to_m2000 ${gen2_r} ${tmp}.gen2_r.m2000
+ret=$?
+if [ 0 -ne $ret ]; then
+  echo "ztspf: to_m2000 ${gen2_r} ${tmp}.gen2_r.m2000 failed" 1>&2
+  rm ${tmp}.*
+  exit 1
+fi
+# Time to read in and echelise it
+r=`zpe $in ${tmp}.in_vecs.{bs,rem} 1>/dev/null`
+ret=$?
+if [ 0 -ne $? ]; then
+  echo "ztspf: cannot echelise invectors: $r" 1>&2
+  rm ${tmp}.*
+  exit 1
+fi
+# Needed elsewhere
+cp ${tmp}.in_vecs.bs ${tmp}.zero_bs.bs
+rank=`znor ${tmp}.in_vecs.rem`
+ret=$?
+if [ 0 -ne $ret ]; then
+  echo "ztspf: znor failed on ${tmp}.in_vecs.rem from zpe" 1>&2
+  rm ${tmp}.*
+  rm ${tmp}.*
+  exit 1
+fi
+# Now convert the input vectors into plain form and assign to gen2
+zplain ${tmp}.in_vecs ${tmp}.gen2.next.plain
+ret=$?
+if [ 0 -ne $ret ]; then
+  echo "ztspf: zplain failed on ${tmp}.in_vecs from zpe" 1>&2
+  rm ${tmp}.*
+  exit 1
+fi
+# And provide the m2000 for for ztmu
+to_m2000 ${tmp}.gen2.next.plain ${tmp}.gen2.next.plain.m2000
+ret=$?
+if [ 0 -ne $ret ]; then
+  echo "ztspf: to_m2000 ${tmp}.gen2.next.plain ${tmp}.gen2.next.plain.m2000 failed" 1>&2
+  rm ${tmp}.*
+  exit 1
+fi
+# Assign to gen2
+mv ${tmp}.in_vecs.bs ${tmp}.gen2.next.bs
+mv ${tmp}.in_vecs.rem ${tmp}.gen2.next.rem
+gen_next_size[2]=$rank
+gen_next_size[1]=0
+i=1 # The generator number
+mrank=0
+while [ $mrank -lt $rank -a $rank -lt $full_noc ]; do
+  let j=$i # Generator whose stuff we want to multiply (mul_gen)
+  first=true
+  extra_rank=0
+  for k in 1 2; do # line 210 done
+    let l=$i # clean_gen
+    if [ 0 -ne ${gen_next_size[$j]} ]; then # line 212 done
+      # No need to handle permuations here
+      # ztmu time
+      echo ztspf: multiplying `znor ${tmp}.gen$j.next.plain` rows
+      ztmu -m $memory ${tmp}.gen$j.next.plain.m2000 ${tmp}.gen${i}_l.m2000 ${tmp}.gen${i}_r.m2000 ${tmp}.mul_tmp.m2000 1>/dev/null
+      ret=$?
+      if [ 0 -ne $ret ]; then
+        echo "ztspf: ztmu -m $memory ${tmp}.gen$j.next.plain.m2000 ${tmp}.gen$i_l.m2000 ${tmp}.gen$i_r.m2000 ${tmp}.mul_tmp.m2000 failed" 1>&2
+        rm ${tmp}.*
+        exit 1
+      fi
+      to_m64 ${tmp}.mul_tmp.m2000 ${tmp}.mul_tmp
+      ret=$?
+      if [ 0 -ne $ret ]; then
+        echo "ztspf: to_m64 ${tmp}.mul_tmp.m2000 ${tmp}.mul_tmp failed" 1>&2
+        rm ${tmp}.*
+        exit 1
+      fi
+      # Now possible clean, unless first time
+      if [ 0 -ne $mrank ]; then
+        clean ${tmp}.mult_result.bs ${tmp}.mult_result.rem ${tmp}.mul_tmp ${tmp}.ct1
+      else
+        mv ${tmp}.mul_tmp ${tmp}.ct1
+      fi
+      # Now clean starting at clean_gen for all gens (1 and 2) line 237 done
+      for m in 1 2; do
+        if [ 0 -ne ${gen_next_size[${l}]} ]; then
+          clean ${tmp}.gen$l.next.bs ${tmp}.gen$l.next.rem ${tmp}.ct1 ${tmp}.ct2
+          mv ${tmp}.ct2 ${tmp}.ct1
+        fi
+        let l=$l+1
+        if [ $l -gt 2 ]; then
+          l=1
+        fi
+      done
+      # Now clean with this result from last time
+      if $first; then
+        # Just echelise line 250 done
+        zpe ${tmp}.ct1 ${tmp}.ech_tmp.bs ${tmp}.ech_tmp.rem 1>/dev/null
+        ret=$?
+        if [ 0 -ne $ret ]; then
+          echo "ztspf: zpe ${tmp}.ct1 ${tmp}.ech_tmp.bs ${tmp}.ech_tmp.rem failed" 1>&2
+          rm ${tmp}.*
+          exit 1
+        fi
+        res=`znor ${tmp}.ech_tmp.rem`
+        ret=$?
+        if [ 0 -ne $ret ]; then
+          echo "ztspf: znor ${tmp}.ech_tmp.rem failed" 1>&2
+          rm ${tmp}.*
+          exit 1
+        fi
+        if [ 0 -ne $res ]; then
+          first=false
+        else
+          rm ${tmp}.ech_tmp.bs ${tmp}.ech_tmp.rem
+        fi
+      else
+        # Clean with previous echelised line 259 done
+        clean ${tmp}.ech_tmp.bs ${tmp}.ech_tmp.rem ${tmp}.ct1 ${tmp}.ct2
+        # And then echelise
+        zpe ${tmp}.ct2 ${tmp}.ech_tmp1.bs ${tmp}.ech_tmp1.rem 1>/dev/null
+        ret=$?
+        if [ 0 -ne $ret ]; then
+          echo "ztspf: zpe ${tmp}.ct2 ${tmp}.ech_tmp1.bs ${tmp}.ech_tmp1.rem failed" 1>&2
+          rm ${tmp}.*
+          exit 1
+        fi
+        # Echelise line 263 done
+        res=`znor ${tmp}.ech_tmp1.rem`
+        ret=$?
+        if [ 0 -ne $ret ]; then
+          echo "ztspf: znor ${tmp}.ech_tmp1.rem failed" 1>&2
+          rm ${tmp}.*
+          exit 1
+        fi
+        if [ 0 -ne $res ]; then
+          # Back clean etc line 264 done
+          clean ${tmp}.ech_tmp1.bs ${tmp}.ech_tmp1.rem ${tmp}.ech_tmp.rem ${tmp}.ct1
+          # Join as if all echelised at the same time
+          zpc ${tmp}.ech_tmp.bs ${tmp}.ech_tmp1.bs ${tmp}.ech_tmp.bsc ${tmp}.ech_tmp.bsr
+          ret=$?
+          if [ 0 -ne $ret ]; then
+            echo "ztspf: zpc ${tmp}.ech_tmp.bs ${tmp}.ech_tmp1.bs ${tmp}.ech_tmp.bsc ${tmp}.ech_tmp.bsr failed" 1>&2
+            rm ${tmp}.*
+            exit 1
+          fi
+          # Row riffle, line 274 done
+          zrr ${tmp}.ech_tmp.bsr ${tmp}.ct1 ${tmp}.ech_tmp1.rem ${tmp}.ech_tmp.rem
+          ret=$?
+          if [ 0 -ne $ret ]; then
+            echo "ztspf: zrr ${tmp}.ech_tmp.bsr ${tmp}.ct1 ${tmp}.ech_tmp1.rem ${tmp}.ech_tmp.rem failed" 1>&2
+            rm ${tmp}.*
+            exit 1
+          fi
+          # Renames
+          mv ${tmp}.ech_tmp.bsc ${tmp}.ech_tmp.bs
+          rm ${tmp}.ech_tmp.bsr ${tmp}.ech_tmp1.bs ${tmp}.ech_tmp1.rem
+        fi
+        # rm -f ${tmp}.ech_tmp1.bs ${tmp}.ech_tmp1.rem
+      fi
+      rm -f ${tmp}.ct1 ${tmp}.ct2
+      set +e
+      let extra_rank=$extra_rank+$res
+      set -e
+    fi
+    let j=$j+1
+    if [ $j -gt 2 ]; then
+      j=1
+    fi
+  done
+  echo -n ztspf: adding $extra_rank new rows giving
+  let rank=$rank+$extra_rank
+  echo " $rank rows"
+  if [ 0 -ne $extra_rank -a $rank -lt $full_noc ]; then
+    # Make plain for next time etc (line 306) done
+    # We only need this if we haven't got to whole space
+    zplain2 ${tmp}.zero_bs.bs ${tmp}.ech_tmp ${tmp}.gen$i.next.plain
+    ret=$?
+    if [ 0 -ne $ret ]; then
+      echo "ztspf: zplain failed on ${tmp}.in_vecs from zpe" 1>&2
+      rm ${tmp}.*
+      exit 1
+    fi
+    # And now convert to m2000
+    to_m2000 ${tmp}.gen$i.next.plain ${tmp}.gen$i.next.plain.m2000
+    ret=$?
+    if [ 0 -ne $ret ]; then
+      echo "ztspf: to_m2000 ${tmp}.gen$i.next.plain ${tmp}.gen$i.next.plain.m2000 failed" 1>&2
+      rm ${tmp}.*
+      exit 1
+    fi
+  fi
+  if [ 0 -ne ${gen_next_size[${i}]} ]; then
+    if [ 0 -ne $mrank ]; then
+      # Back clean line 313 done
+      clean ${tmp}.gen$i.next.bs ${tmp}.gen$i.next.rem ${tmp}.mult_result.rem ${tmp}.ct1
+      # Combine pivots
+      zpc ${tmp}.mult_result.bs ${tmp}.gen$i.next.bs ${tmp}.ech_tmp.bsc ${tmp}.ech_tmp.bsr
+      ret=$?
+      if [ 0 -ne $ret ]; then
+        echo "ztspf: zpc ${tmp}.mult_result.bs ${tmp}.gen$i.next.bs ${tmp}.ech_tmp.bsc ${tmp}.ech_tmp.bsr failed" 1>&2
+        rm ${tmp}.*
+        exit 1
+      fi
+      # Riffle rows
+      zrr ${tmp}.ech_tmp.bsr ${tmp}.ct1 ${tmp}.gen$i.next.rem ${tmp}.mult_result.rem
+      ret=$?
+      if [ 0 -ne $ret ]; then
+        echo "ztspf: zrr ${tmp}.ech_tmp.bsr ${tmp}.ct1 ${tmp}.gen$i.next.rem ${tmp}.mult_result.rem failed" 1>&2
+        rm ${tmp}.*
+        exit 1
+      fi
+      # And rename
+      mv ${tmp}.ech_tmp.bsc ${tmp}.mult_result.bs
+      # Throw away ct1
+      rm ${tmp}.ct1
+    else
+      # Renames line 321 done
+      mv ${tmp}.gen$i.next.bs ${tmp}.mult_result.bs
+      mv ${tmp}.gen$i.next.rem ${tmp}.mult_result.rem
+    fi
+  fi
+  if [ 0 -ne $extra_rank ]; then
+    # Pivot combing and renames line 328
+    zpc ${tmp}.zero_bs.bs ${tmp}.ech_tmp.bs ${tmp}.ech_tmp.bsc ${tmp}.ech_tmp.bsr
+    ret=$?
+    if [ 0 -ne $ret ]; then
+      echo "ztspf: zpc ${tmp}.zero_bs.bs ${tmp}.ech_tmp.bs ${tmp}.ech_tmp.bsc ${tmp}.ech_tmp.bsr failed" 1>&2
+      rm ${tmp}.*
+      exit 1
+    fi
+    # Renames and deletes
+    mv ${tmp}.ech_tmp.bsc ${tmp}.zero_bs.bs
+    rm ${tmp}.ech_tmp.bsr
+    mv ${tmp}.ech_tmp.bs ${tmp}.gen$i.next.bs
+    mv ${tmp}.ech_tmp.rem ${tmp}.gen$i.next.rem
+  fi
+  # End of loop stuff
+  set +e
+  let mrank=$mrank+${gen_next_size[${i}]}
+  set -e
+  gen_next_size[${i}]=$extra_rank
+  let i=$i+1
+  if [ $i -gt 2 ]; then
+    i=1
+  fi
+done
+if [ $rank -lt $full_noc ]; then
+  mv ${tmp}.mult_result.bs ${out}.bs
+  mv ${tmp}.mult_result.rem ${out}.rem
+fi
+echo $rank
+rm ${tmp}.*

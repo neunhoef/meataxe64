@@ -15,11 +15,6 @@ y
 z6
 [0-9]*
 perms.txt
-# CVS default ignores begin
-tags
-TAGS
-.make.state
-.nse_depinfo
 *~
 \#*
 .#*
@@ -27,31 +22,13 @@ TAGS
 _$*
 *$
 *.old
-*.bak
-*.BAK
-*.orig
-*.rej
-.del-*
-*.a
-*.olb
-*.o
-*.obj
-*.so
-*.exe
-*.Z
-*.elc
-*.ln
 core
-# CVS default ignores end
 poo*
 derived*
 install
 profiles/*
-*.pdb
-mtx.txt
 gprof*
 *.new*
 bar*
 baz*
 foo*
->>>>>>> m2000

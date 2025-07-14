@@ -1,0 +1,21 @@
+#!/bin/bash
+#
+# Script to do ziv in meataxe 64
+#
+# Parameters as for ziv in meataxe 2000
+# ie [-m <memory] <infile> <outfile>
+#
+dir=`dirname $0`
+if [ "-m" = "$1" ]; then
+    shift 2
+fi
+if [ $# -ne 2 ]; then
+   echo "ziv: bad parameters"
+   echo "usage: ziv [-m <memory] <infile> <outfile>"
+   exit 1
+fi
+infile=$1
+outfile=$2
+${dir}/../bin/ziv ${infile} ${outfile}
+ret=$?
+exit ${ret}
