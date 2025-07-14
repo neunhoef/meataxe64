@@ -1,0 +1,19 @@
+#!/bin/bash
+#
+# Script to do zsid in meataxe 64 until a binary is available
+#
+# Parameters as for zsid in meataxe 2000
+# ie [-m <memory] <field order> <nor> <noc> <elt> <out_file>
+#
+dir=`dirname $0`
+if [ $# -ne 5 -a $# -ne 7 ]; then
+   echo "zsid: bad parameters"
+   echo "usage: zsid [-m <memory] <field order> <nor> <noc> <elt> <out_file>"
+   exit 1
+fi
+if [ $# -ne 5 ]; then
+   echo "zsid: bad parameters"
+   echo "usage: zsid [-m <memory] <field order> <nor> <noc> <elt> <out_file>"
+   exit 1
+fi
+${dir}/../bin/zsid $5 $1 $2 $3 $4

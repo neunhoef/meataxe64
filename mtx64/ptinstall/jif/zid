@@ -1,0 +1,11 @@
+#!/bin/bash
+dir=`dirname $0`
+if [ "$1" = "-m" ]; then
+    shift 2 # Ignore -m <memory
+fi
+if [ $# -ne 4 ]; then
+   echo "zid: bad parameters"
+   echo "usage: zid [-m <memory] <field order> <nor> <noc> <out_file>"
+   exit 1
+fi
+${dir}/../bin/zid $4 $1 $2 $3

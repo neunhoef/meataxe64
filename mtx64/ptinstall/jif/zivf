@@ -1,0 +1,22 @@
+#!/bin/bash
+#
+# Script to do zivf in meataxe 64 until a binary is available
+#
+# Parameters as for zivf in meataxe 2000
+# ie [-m <memory] <infile> <outfile> <temp dir>
+#
+dir=`dirname $0`
+if [ "-m" = "$1" ]; then
+    mem="-m $2"
+    shift 2
+fi
+if [ $# -ne 3 ]; then
+   echo "zivf: bad parameters"
+   echo "usage: zivf [-m <memory] <infile> <outfile> <temp dir>"
+   exit 1
+fi
+infile=$1
+outfile=$2
+${dir}/../bin/ziv ${infile} ${outfile}
+ret=$?
+exit ${ret}

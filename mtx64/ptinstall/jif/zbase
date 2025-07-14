@@ -1,0 +1,57 @@
+#!/bin/bash
+#
+# Script to do zbase in meataxe 64 until a binary is available
+#
+# Parameters as for zbase in meataxe 2000
+# ie [-m <memory] <infile> <dir> <outfile>
+#
+set -x
+dir=`dirname $0`
+if [ $# -ne 3 -a $# -ne 5 ]; then
+   echo "zbase: bad parameters"
+   echo "usage: zbase [-m <memory] <infile> <dir> <outfile>"
+   exit 1
+fi
+if [ 5 -eq $# ]; then
+    shift 2
+fi
+infile=$1
+outfile=$3
+if [ ! -e ${infile} ]; then
+    echo "zbase: No such file or directory" 1>&2
+    echo "zbase: cannot open poo, terminating" 1>&2
+    exit 1
+fi
+tmp=tmp$$
+out=`${dir}/../bin/zpe ${infile} ${tmp}.{bs,rem} | egrep -v "^f"`
+ret=$?
+if [ 1 -eq $ret ]; then
+    if [ -e ${tmp}.bs -a ${tmp}.rem ]; then
+        ret=0
+    fi
+fi
+if [ 0 -eq $ret ]; then
+    # Success
+    ${dir}/../bin/zplain ${tmp} ${tmp}.out
+    ret=$?
+    if [ 0 -ne $ret ]; then
+        echo "zplain fails, exiting" 1>&2
+        rm ${tmp}.{bs,rem}
+        exit 1
+    fi
+    #zpr ${tmp}.out
+    ${dir}/../bin/zng ${tmp}.out ${outfile}
+    ret=$?
+    if [ 0 -ne $ret ]; then
+        echo "zneg fails, exiting" 1>&2
+        rm ${tmp}.{bs,rem} ${tmp}.out
+        exit 1
+    fi
+    rm ${tmp}.{bs,rem} ${tmp}.out
+    ${dir}/../bin/znor ${outfile}
+    exit 0
+else
+    # Failure
+    rm -f ${tmp}*
+    exit 1
+fi
