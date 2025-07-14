@@ -4,7 +4,6 @@
 #
 # Parameter 1: where to install the binaries
 #
-usage="$0 <dir in which to install (will be deleted prior to installation)>"
 if [ 1 -ne $# ]; then
     echo $usage
     exit 1
@@ -18,7 +17,7 @@ fi
 if [ -d $install ]; then
     rm -rf $install
 fi
-cd $dir/src
+cd $dir/../m2000
 make OS=unix ARCH=em64t rel
 mkdir -p $install/m2000
 cp -p scr/* derived/unix/em64t/gcc/bin/* $install/m2000
@@ -30,12 +29,10 @@ cd ../../pinstall
 mkdir -p $install/pinstall
 for x in *; do sed -e "s?~/ptinstall/?$install/ptinstall/?" < $x > $install/pinstall/$x; done
 chmod 755 $install/pinstall/* $install/ptinstall/jif/*
-cd ../../git/m64/test
-source ./go
-makl
-compa
-cd ..
-tar cf - bin | (cd $install/ptinstall; tar xf -)
+cd ../../m64
+mkdir $install/ptinstall/bin
+make OS=unix ARCH=em64t rel
+cp -p derived/unix/em64t/gcc/bin/* $install/ptinstall/bin
 echo add ${install}/pinstall:${install}/ptinstall/jif:${install}/m2000 to the start of your PATH
 echo If you only want mtx2000 then omit pinstall and ptinstall
-echo If you only want mtx64 then add ${install}ptinstall/bin
+echo If you only want mtx64 then add ${install}/ptinstall/bin and omit ${install}/m2000
