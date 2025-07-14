@@ -1,6 +1,0 @@
-cd $BLD
-gcc -O2 -Wall zad.c field.c -o $BIN/zad
-gcc -O2 -Wall zcv.c field.c -o $BIN/zcv
-gcc -O2 -Wall zpr.c field.c -o $BIN/zpr
-gcc -O2 -Wall zte.c field.c -o $BIN/zte
-gcc -O2 -Wall zmu.c lay3s.c lay2do.c pgcva.c pgcvb.c pgmul.c pgcvd.c field.c hpmi.c bkmad.c -o $BIN/zmu

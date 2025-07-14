@@ -1,2 +1,0 @@
-time zmu ../reg/e ../reg/e r1
-diff r1 ../reg/esqr
