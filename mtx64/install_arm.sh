@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Script to install Intel versions of meataxe2000 meataxe64 hybrid
+# Script to install ARM versions of meataxe2000 meataxe64 hybrid
 #
 # Parameter 1: where to install the binaries
 #
@@ -18,9 +18,9 @@ if [ -d $install ]; then
     rm -rf $install
 fi
 cd $dir/../m2000
-make OS=unix ARCH=em64t rel
+make OS=unix ARCH=arm rel
 mkdir -p $install/m2000
-cp -p scr/* derived/unix/em64t/gcc/bin/* $install/m2000
+cp -p scr/* derived/unix/arm/gcc/bin/* $install/m2000
 cd ../mtx64
 cd ptinstall/jif
 mkdir -p $install/ptinstall/jif
@@ -31,8 +31,8 @@ for x in *; do sed -e "s?~/ptinstall/?$install/ptinstall/?" < $x > $install/pins
 chmod 755 $install/pinstall/* $install/ptinstall/jif/*
 cd ../../m64
 mkdir $install/ptinstall/bin
-make OS=unix ARCH=em64t rel
-cp -p derived/unix/em64t/gcc/bin/* $install/ptinstall/bin
+make OS=unix ARCH=arm rel
+cp -p derived/unix/arm/gcc/bin/* $install/ptinstall/bin
 echo add ${install}/pinstall:${install}/ptinstall/jif:${install}/m2000 to the start of your PATH
 echo If you only want mtx2000 then omit pinstall and ptinstall
 echo If you only want mtx64 then add ${install}/ptinstall/bin and omit ${install}/m2000
