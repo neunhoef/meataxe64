@@ -33,6 +33,6 @@ cd ../../m64
 mkdir $install/ptinstall/bin
 make OS=unix ARCH=em64t rel
 cp -p derived/unix/em64t/gcc/bin/* $install/ptinstall/bin
-echo add ${install}/pinstall:${install}/ptinstall/jif:${install}/m2000 to the start of your PATH
+echo add ${install}/pinstall:${install}/ptinstall/jif:${install}/ptinstall/bin:${install}/m2000 to the start of your PATH
 echo If you only want mtx2000 then omit pinstall and ptinstall
-echo If you only want mtx64 then add ${install}/ptinstall/bin and omit ${install}/m2000
+echo If you only want mtx64 then just use ${install}/ptinstall/bin
