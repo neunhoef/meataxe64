@@ -1,4 +1,4 @@
-This is relase 2 via github
+This is release 3 via github
 
 It has no known bugs.
 
@@ -13,33 +13,41 @@ maxchops is probably OK at 25, at least for now.
 To use the Intel architecture optimised version do
 
 bash
-cd m64/test
-source go
-makl
-compa
+cd mtx64
+make OS=unix ARCH=em64t
 
 For the C generic version (usable eg on an ARM based system) do
 
 bash
-cd m64/test
-source go
-maklc
-compc
+cd mtx64
+make OS=unix ARCH=generic
 
-To check all is well, use the run_all.sh script found in m64/jif
+For the arm specific version (currently no different from the generic
+version but may use NEON in the future) do
 
-The binaries have names starting "z" and can be found in m64/bin
+bash
+cd mtx64
+make OS=unix ARCH=arm
 
-At present there is no support for running multiple operations in
-series, eg to chop up a representation. This will be provided at a
-later stage with the addition of the scripts, plus some binaries, from
-meataxe 2000.
+To check all is well, use the run_all.sh script found in m64/jif.
+You'll need to put the m64 binaries on your path, as described by the
+install script
 
-The fast primes are 2-193, and quadratic and cubic extensions of fast
-primes are fast, as are {81,243,16,32,64,128,256,625}
+This version supports meataxe64, meataxe2000 and the adaptation layer
+to allow meataxe2000 scripts to use meataxe64 binaries. See the output
+of the install script for how to set up your path. Meataxe2000 has a
+documentation page m2000/doc/meataxe.html. There are also some word
+documents describing meataxe64. For using the hybrid system, probably
+the most important script is split_all, which will reduce a module to
+its irreduicble factors, classifying them en route. A small script
+count_irreds can be fed the output from split_all to produce a list of
+factors and multiplicities. You need the full path recommended by the
+install script to use this.
 
 If using the Intel optimised version, the type of machine is tested at
-run-time, but megabytes and threads are still compiled in. There is no
-ARM specific code at present.
+run-time, but megabytes and threads are still compiled in. The other
+versions do not have support for specific processor extensions as yet.
 
-Jon Thackray 10.3.2025
+All bugs found now belong to me; email me for help, clarification etc.
+
+Jon Thackray (jgt@pobox.com) 17.7.2025
