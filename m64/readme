@@ -48,7 +48,7 @@ See the output of the install scripts for how to set up your path.
 Meataxe2000 has a documentation page m2000/doc/meataxe.html. There are
 also some word documents describing meataxe64. For using the hybrid
 system, probably the most important script is split_all, which will
-reduce a module to its irreduicble factors, classifying them en route.
+reduce a module to its irreducible factors, classifying them en route.
 A small script count_irreds can be fed the output from split_all to
 produce a list of factors and multiplicities. You need the full path
 recommended by the install script to use this.
