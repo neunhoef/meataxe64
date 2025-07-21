@@ -4,6 +4,7 @@
 #
 # Parameter 1: where to install the binaries
 #
+set -x
 if [ 1 -ne $# ]; then
     echo $usage
     exit 1
