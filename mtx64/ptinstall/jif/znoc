@@ -1,0 +1,13 @@
+#!/bin/bash
+dir=`dirname $0`
+if [ "$1" = "-m" ]; then
+    shift 2 # Ignore -m <memory
+fi
+if [ $# -ne 1 ]; then
+   echo "znoc: bad parameters"
+   echo "usage: znoc [-m <memory] <infile>"
+   exit 1
+fi
+infile=$1
+${dir}/../bin/znoc ${infile}
+ret=$?

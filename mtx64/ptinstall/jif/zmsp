@@ -1,0 +1,23 @@
+#!/bin/bash
+#
+# Script to do zmsp in meataxe 64
+#
+# Parameters as for zmsp in meataxe 2000
+# ie [-m <memory] <infile> <outfile> <generators>
+#
+dir=`dirname $0`
+if [ "-m" = "$1" ]; then
+    shift 2
+fi
+if [ $# -le 3 ]; then
+   echo "zmsp: bad parameters"
+   echo "usage: zmsp [-m <memory] <infile> <outfile> <generators>"
+   exit 1
+fi
+infile=$1
+outfile=$2
+shift 2
+out=`${dir}/../bin/zis ${infile} ${outfile} $* | egrep -v "^f" | egrep -v "siz" | grep -v "Adding "`
+ret=$?
+echo $out
+exit $ret

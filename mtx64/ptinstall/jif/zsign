@@ -1,0 +1,34 @@
+#!/bin/bash
+#
+# Script to do zsign in meataxe 64 until a binary is available
+#
+# Parameters as for zsign in meataxe 2000
+# ie [-m <memory] <infile> <outfile>
+#
+. ~/install/functions
+if [ $# -ne 2 -a $# -ne 4 ]; then
+   echo "zsign: bad parameters"
+   echo "usage: zsign [-m <memory] <quadratic form> <bilinear form>"
+   exit 1
+fi
+memory=1000000
+if [ 4 -eq $# ]; then
+    memory=$2
+    shift 2
+fi
+qf=$1
+bf=$2
+tmp=tmp$$
+to_m2000 ${qf} ${tmp}.1
+to_m2000 ${bf} ${tmp}.2
+while true; do
+  ~/install/zsign -m ${memory} ${tmp}.1 ${tmp}.2
+  ret=$?
+  if [ 2 -eq $ret ]; then
+    let memory=`more_memory $memory`
+  else
+    break
+  fi
+done
+rm ${tmp}.{1,2}
+exit $ret

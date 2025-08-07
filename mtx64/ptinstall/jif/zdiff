@@ -1,0 +1,18 @@
+#!/bin/bash
+#
+# Script to do zdiff in meataxe 64 until a binary is available
+#
+# Parameters as for zdiff in meataxe 2000
+# ie [-m <memory] <infile> <outfile> <count>
+#
+dir=`dirname $0`
+if [ $# -ne 2 ]; then
+   echo "zdiff: bad parameters"
+   echo "usage: zdiff [-m <memory] <file1> <file2>"
+   exit 1
+fi
+file1=$1
+file2=$2
+${dir}/../bin/zdiff ${file1} ${file2}
+ret=$?
+exit $ret

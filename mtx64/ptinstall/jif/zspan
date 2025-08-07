@@ -1,0 +1,19 @@
+#!/bin/sh
+#
+# Script to do zspan in meataxe 64 until a binary is available
+#
+# Parameters as for zspan in meataxe 2000
+# ie [-m <memory] <infile> <outfile> <count>
+#
+dir=`dirname $0`
+if [ $# -ne 3 ]; then
+   echo "zspan: bad parameters"
+   echo "usage: zspan <infile> <outfile> <count>"
+   exit 1
+fi
+infile=$1
+outfile=$2
+count=$3
+${dir}/../bin/zspan ${infile} ${outfile} $count
+ret=$?
+exit $ret

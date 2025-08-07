@@ -1,0 +1,41 @@
+#!/bin/bash
+#
+# Script to do zproj in meataxe 64 until a binary is available
+#
+# Parameters as for zproj in meataxe 2000
+# ie [-m <memory] <range> <input> <output>
+#
+mem=
+if [ "-m" = "$1" ]; then
+    mem="-m $2"
+    shift 2
+fi
+if [ $# -ne 3 ]; then
+   echo "zproj: bad parameters"
+   echo "usage: zproj [-m <memory] <range> <input> <output>"
+   exit 1
+fi
+range=$1
+infile=$2
+outfile=$3
+tmp=tmp$$
+# Meataxe 64 implementation
+# Extract significant and insignificant columns
+# Multiply significant by rem
+# Add result to insignificant
+zcx ${range}.bs $infile ${tmp}.sel ${tmp}.nsel
+ret=$?
+if [ 0 -ne $ret ]; then
+    rm -f ${tmp}.{sel,nsel}
+    exit ${ret}
+fi
+zmu ${tmp}.sel ${range}.rem ${tmp}.clean
+ret=$?
+if [ 0 -ne $ret ]; then
+    rm -f ${tmp}.{sel,nsel,clean}
+    exit ${ret}
+fi
+zad ${tmp}.nsel ${tmp}.clean ${outfile}
+ret=$?
+rm -f ${tmp}.{sel,nsel,clean}
+exit ${ret}
