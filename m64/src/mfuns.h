@@ -48,10 +48,22 @@ extern void triage_multiply(const char *zbs, const char *sbs,
                             const char *rem, const char *in, const char *out,
                             const char *tmp_vars[], const char *fun_tmp);
 
-/* Slicing and splicing */
+/*
+ * Slicing, splicing and chopping
+ * slice and splice are used to reduce multiply to in memory capable
+ * Chopping is used for recursive Gaussian elimination
+ */
 extern void slice(const char *input, unsigned int slices, const char *output_stem);
 
 extern void splice(const char *input_stem, unsigned int slices, const char *output);
+
+/*
+ * Chop input into a chops by chops square collection of submatrices
+ * whose names are given in the array outputs
+ * outputs must be an array of size chops^2
+ * The fragments are written out with columns varying fastest
+ */
+extern void chop(const char *input, unsigned int chops, const char *outputs[]);
 
 /* Concatenate a number of files giving out */
 extern void cat(const char *files[], const char *out, unsigned int count);
