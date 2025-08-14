@@ -2,6 +2,7 @@
 // Meataxe64 Nikolaus version funs1.c Simple Gaussian-related functions
 
 // Contents
+// fRowExtract
 // fColumnExtract
 // fRowRiffle
 // fPivotCombine
@@ -18,11 +19,66 @@
 #include "io.h"
 #include "bitstring.h"
 #include "parse.h"
+#include "mfuns.h"
 
-// fColumnExtract
- 
-void fColumnExtract(const char *bs, int sbs, const char *in, int sin, 
-                    const char *sel, int ssel, const char *nsel, int snsel) 
+void fRowExtract(const char *bs, int sbs, const char *in, int sin,
+                 const char *sel, int ssel, const char *nsel, int snsel)
+{
+  EFIL *e1, *e2, *e3, *e4;
+  FIELD *f;
+  uint64_t hdr1[5], hdr2[5];
+  uint64_t fdef, nor, noc, nor1, nor2;
+  DSPACE ds;
+  Dfmt *v;
+  uint64_t i,siz;
+  uint64_t *bsdata;
+
+  e1 = ERHdr(bs, hdr1);
+  e2 = ERHdr(in ,hdr2);   /* matrix */
+  if(hdr1[2] != hdr2[2]) {      /* bits must equal rows */
+    LogString(80, "Matrices incompatible");
+    exit(22);
+  }
+  fdef = hdr2[1];
+  nor = hdr2[2];
+  noc = hdr2[3];
+  nor1 = hdr1[3];
+  nor2 = nor-nor1;
+  f = malloc(FIELDLEN);
+  FieldASet(fdef, f);
+  DSSet(f, noc, &ds);
+  hdr1[0] = 1;
+  hdr1[1] = fdef;
+  hdr1[2] = nor1;
+  hdr1[3] = noc;
+  hdr1[4] = 0;
+  e3 = EWHdr(sel, hdr1);
+  hdr1[2] = nor2;
+  e4 = EWHdr(nsel, hdr1);
+  v = malloc(ds.nob);
+  siz = 8*(2+(nor+63)/64);
+  bsdata = malloc(siz);
+  ERData(e1, siz, (uint8_t *)bsdata);
+  for(i = 0;i<nor;i++) {
+    ERData(e2, ds.nob, v);;
+    if(BSBitRead(bsdata, i)==1) {
+      EWData(e3, ds.nob, v);
+    } else  {
+      EWData(e4, ds.nob, v);
+    }
+  }
+  ERClose1(e1, sbs);
+  ERClose1(e2, sin);
+  EWClose1(e3, ssel);
+  EWClose1(e4, snsel);
+  free(f);
+  free(v);
+  free(bsdata);
+  return;
+}
+
+void fColumnExtract(const char *bs, int sbs, const char *in, int sin,
+                    const char *sel, int ssel, const char *nsel, int snsel)
 {
     EFIL *e1,*e2,*e3,*e4;
     uint64_t hdr1[5],hdr2[5];
@@ -32,13 +88,13 @@ void fColumnExtract(const char *bs, int sbs, const char *in, int sin,
     FIELD * f;
     uint64_t RowsThatFit, RowsAtOnce,r,r1;
     Dfmt *d,*d1,*d2;
-    uint64_t * bsdata;
+    uint64_t *bsdata;
 
     if (very_verbose) {
       printf("fColumnExtract %s, %s giving %s, %s\n", bs, in, sel, nsel);
     }
-    e1=ERHdr(bs,hdr1);   // bit string
-    e2=ERHdr(in,hdr2);   // matrix
+    e1=ERHdr(bs,hdr1);   /* bit string */
+    e2=ERHdr(in,hdr2);   /* matrix */
     fdef=hdr2[1];
     f = malloc(FIELDLEN);
     FieldASet(fdef,f);
@@ -211,7 +267,88 @@ void fPivotCombine(const char *b1, int sb1, const char *b2, int sb2,
     }
 }
 
-uint64_t fColumnRiffleIdentity(const char *bs, int sbs, 
+void fPivotCombine0(const char *b2, int sb2,
+                    const char *bc, int sbc, const char *br, int sbr)
+{
+  EFIL *e2, *e3, *e4;
+  uint64_t hdr1[5];
+  uint64_t nor, noc;
+  size_t siz, siz4;
+  uint64_t *bs2, *bs3, *bs4;
+
+  if (very_verbose) {
+    printf("fPivotCombine0 %s giving %s, %s\n", b2, bc, br);
+  }
+  e2 = ERHdr(b2, hdr1);  /* b2 new pivots */
+  nor = hdr1[2];         /* total bits */
+  noc = hdr1[3];         /* new bits */
+  e3 = EWHdr(bc, hdr1);  /* bc is like b2 */
+  hdr1[2] = noc;         /* riffle bits = set-bits */
+  e4 = EWHdr(br, hdr1);  /* write header for riffle */
+
+  siz = sizeof(uint64_t) * (2 + (nor + 63) / 64); // read b2 into bs2
+  bs2 = malloc(siz);
+  ERData(e2, siz, (uint8_t *)bs2);
+  ERClose1(e2, sb2);
+
+  bs3 = malloc(siz);
+  memcpy(bs3, bs2, siz);
+  siz4 = sizeof(uint64_t) * (2 + (noc + 63) / 64);
+  bs4 = malloc(siz4);
+  memset(bs4, 0, siz4); /* There were no set bits in the empty input */
+
+  EWData(e3, siz, (uint8_t *)bs3);
+  EWData(e4, siz4, (uint8_t *)bs4);
+
+  EWClose1(e3, sbc);
+  EWClose1(e4, sbr);
+  free(bs2);
+  free(bs3);
+  free(bs4);
+  if (very_verbose) {
+    printf("fPivotCombine0 %s giving %s, %s done\n", b2, bc, br);
+  }
+}
+
+void fMKR(const char *bs1, int sbs1, const char *bs2, int sbs2,
+          const char *rif, int srif)
+{
+  EFIL *e1, *e2, *erif;
+  header hdr1, hdr2;
+  uint64_t siz, siz_rif;
+  unsigned int nor, noc;
+  uint64_t *bs1data, *bs2data, *rifdata;
+  e1 = ERHdr(bs1, hdr1.hdr);
+  e2 = ERHdr(bs2, hdr2.hdr);
+  nor = hdr1.named.nor;
+  noc = hdr1.named.noc;
+  if (nor != hdr2.named.nor) {
+    printf("fMKR with bitstrings of different lengths %lu %lu\n",
+           hdr1.named.nor, hdr2.named.nor);
+    exit(22);
+  }
+  siz = sizeof(uint64_t) * (2 + (nor + 63) / 64);
+  siz_rif = sizeof(uint64_t) * (2 + (noc + 63) / 64);
+  bs1data = malloc(siz);
+  bs2data = malloc(siz);
+  rifdata = malloc(siz_rif);
+  ERData(e1, siz, (uint8_t *)bs1data);
+  ERData(e2, siz, (uint8_t *)bs2data);
+  ERClose1(e1, sbs1);
+  ERClose1(e2, sbs2);
+  BSMkr(bs1data, bs2data, rifdata);
+  hdr1.named.nor = rifdata[0];
+  hdr1.named.noc = rifdata[1];
+  erif = EWHdr(rif, hdr1.hdr);
+  EWData(erif, siz_rif, (uint8_t *)rifdata);
+  EWClose1(erif, srif);
+}
+
+/*
+ * FIXME: The next 3 functions assume they can read the whole file at once
+ * That may not be a valid assumption
+ */
+uint64_t fColumnRiffleIdentity(const char *bs, int sbs,
              const char *rm, int srm, const char *out, int sout)
 {
     EFIL *ebs,*ei,*eo;   // bitstring, input, output
@@ -252,7 +389,7 @@ uint64_t fColumnRiffleIdentity(const char *bs, int sbs,
     BSColRifZ(f,bst,nor,mi,mo);
     BSColPutS(f,bst,nor,1,mo);
     EWData(eo,dso.nob*nor,mo);
-    
+
     free(mi);
     free(mo);
     free(f);
@@ -261,6 +398,104 @@ uint64_t fColumnRiffleIdentity(const char *bs, int sbs,
     ERClose1(ei,srm);
     EWClose1(eo,sout);
     return nor;
+}
+
+/* Like the above, but without 1s */
+void fColumnRiffleZero(const char *bs, int sbs,
+                       const char *rm, int srm, const char *out, int sout)
+{
+  EFIL *ebs, *ei, *eo;   /* bitstring, input, output */
+  uint64_t hdrbs[5], hdrio[5];
+  uint64_t nor, noci, noco, fdef, siz;
+  FIELD *f;
+  DSPACE dsi, dso;    /* input output */
+  Dfmt *mo, *mi;      /* output input */
+  uint64_t *bst;
+
+  ebs = ERHdr(bs, hdrbs);   /* bitstring = 2 1 bits setb 0 */
+  ei = ERHdr(rm, hdrio);    /* remnant   = 1 fdef nor noc 0 */
+  nor = hdrio[2];         /* rows in */
+  noco = hdrbs[2];         /* bits = output cols */
+  noci = hdrio[3];         /* input cols */
+  /* Check # columns in input matrix is #set bits in string */
+  if (noci != hdrbs[3]) {
+    LogString(80, "Inputs incompatible");
+    exit(22);
+  }
+  fdef = hdrio[1];
+  f = malloc(FIELDLEN);
+  FieldASet(fdef, f);
+  hdrio[3] = noco;
+  eo = EWHdr(out, hdrio);
+
+  DSSet(f, noci, &dsi);   /* input space */
+  DSSet(f, noco, &dso);   /* output space */
+
+  mi = malloc(dsi.nob * nor);   /* input */
+  mo = malloc(dso.nob * nor);   /* output */
+
+  /* read the bit string */
+  siz = sizeof(uint64_t) * (2 + (noco + 63) / 64);
+  bst = malloc(siz);
+  ERData(ebs, siz, (uint8_t *)bst);
+  ERData(ei, dsi.nob * nor, mi);
+  BSColRifZ(f, bst, nor, mi, mo);
+  EWData(eo, dso.nob*nor, mo);
+
+  free(mi);
+  free(mo);
+  free(f);
+  free(bst);
+  ERClose1(ebs, sbs);
+  ERClose1(ei, srm);
+  EWClose1(eo, sout);
+}
+
+/* Like the above, but only putting in the 1s */
+void fAddIdentity(const char *bs, int sbs,
+                  const char *rm, int srm, const char *out, int sout)
+{
+  EFIL *ebs, *ei, *eo;   /* bitstring, input, output */
+  uint64_t hdrbs[5], hdrio[5];
+  uint64_t nor, noci, noco, fdef, siz;
+  FIELD *f;
+  DSPACE dsi;    /* input == output */
+  Dfmt *mi;      /* output == input */
+  uint64_t *rf;
+
+  ebs = ERHdr(bs, hdrbs);   /* bitstring = 2 1 bits setb 0 */
+  ei = ERHdr(rm, hdrio);    /* remnant   = 1 fdef nor noc 0 */
+  nor = hdrio[2];         /* rows in */
+  noco = hdrbs[2];         /* bits = output cols */
+  noci = hdrio[3];         /* input cols */
+  if (noci != noco) {
+    LogString(80, "Inputs incompatible");
+    exit(22);
+  }
+  fdef = hdrio[1];
+  f = malloc(FIELDLEN);
+  FieldASet(fdef, f);
+  hdrio[3] = noco;
+  eo = EWHdr(out, hdrio);
+
+  DSSet(f, noci, &dsi);   /* input space */
+
+  mi = malloc(dsi.nob * nor);   /* input */
+
+  /* read the bit string */
+  siz = sizeof(uint64_t) * (2 + (noco + 63) / 64);
+  rf = malloc(siz);
+  ERData(ebs, siz, (uint8_t *)rf);
+  ERData(ei, dsi.nob * nor, mi);
+  BSColPutS(f, rf, nor, 1, (Dfmt *)mi);
+  EWData(eo, dsi.nob * nor, mi);
+
+  free(mi);
+  free(f);
+  free(rf);
+  ERClose1(ebs, sbs);
+  ERClose1(ei, srm);
+  EWClose1(eo, sout);
 }
 
 void fRowTriage(const char *zero_bs, const char *sig_bs, const char *in, const char *sel, const char *nsel)
