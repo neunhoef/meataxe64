@@ -347,6 +347,9 @@ void fMKR(const char *bs1, int sbs1, const char *bs2, int sbs2,
   erif = EWHdr(rif, hdr1.hdr);
   EWData(erif, siz_rif, (uint8_t *)rifdata);
   EWClose1(erif, srif);
+  free(bs1data);
+  free(bs2data);
+  free(rifdata);
 }
 
 /*
