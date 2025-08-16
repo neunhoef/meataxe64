@@ -179,6 +179,11 @@ void fRowRiffle(const char *bs, int sbs, const char *ins, int sins,
     noc=hdr2[3];
     nor0=hdr3[2];
     nor=nor0+nor1;
+    if (nor != hdr1[2]) {
+      fprintf(stderr, "RowRiffle to produce %lu rows from %lu rows and %lu rows\n",
+              hdr1[2], nor0, nor1);
+      exit(95);
+    }
     f = malloc(FIELDLEN);
     FieldASet(fdef,f);
     DSSet(f,noc,&ds);
@@ -320,8 +325,8 @@ void fMKR(const char *bs1, int sbs1, const char *bs2, int sbs2,
   uint64_t *bs1data, *bs2data, *rifdata;
   e1 = ERHdr(bs1, hdr1.hdr);
   e2 = ERHdr(bs2, hdr2.hdr);
-  nor = hdr1.named.nor;
-  noc = hdr1.named.noc;
+  nor = hdr1.named.nor; /* Total bits in either */
+  noc = hdr2.named.noc; /* Number of set bits in larger bitstring */
   if (nor != hdr2.named.nor) {
     printf("fMKR with bitstrings of different lengths %lu %lu\n",
            hdr1.named.nor, hdr2.named.nor);

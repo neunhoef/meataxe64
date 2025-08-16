@@ -42,6 +42,7 @@ static void RowLengthen(const char *name, const char *temp,
   char *lam = mk_tmp(name, temp, str_len);
   fMKR(rho1, 1, rho2, 1, lam, 1);
   fColumnRiffleZero(lam, 1, min, 1, mout, 1);
+  /* FIXME: this should remove lam and free it */
 }
 
 /* Task 3: ClearUp */
@@ -94,11 +95,11 @@ static void ClearDown(const char *name, const char *temp,
     char *nsel2 = mk_tmp(name, temp, str_len);
     fColumnExtract(dgin, 1, c, 1, a, 1, nsel, 1);
     fMultiplyAdd(temp, a, 1, drin, 1, nsel, 1, H, 1);
-    fRecurse_ECH(0, name, H, H, rho, gamma, m, k, R);
+    fRecurse_ECH(0, name, temp, H, rho, gamma, m, k, R);
     fColumnExtract(gamma, 1, drin, 1, e, 1, nsel2, 1);
     fMultiplyAdd(temp, e, 1, R, 1, nsel2, 1, nsel1, 1);
     fPivotCombine(dgin, 1, gamma, 1, dgout, 1, lam, 1);
-    fRowRiffle(rho, 1, nsel1, 1, R, 1, drout, 1);
+    fRowRiffle(lam, 1, nsel1, 1, R, 1, drout, 1);
     /* Remove and free internal temporaries */
     remove(nsel2);
     free(nsel2);
@@ -126,7 +127,7 @@ static void UpdateRow(const char *name, const char *temp,
   char *V = mk_tmp(name, temp, str_len);
   char *W = mk_tmp(name, temp, str_len);
   if (1 == i) {
-    /* Short version: REX, MUL, MAD */
+    /* Short version: REX, MUL, MAD, finessing Z and X */
     fRowExtract(rho, 1, cin, 1, V, 1, W, 1);
     fMultiply(temp, m, 1, V, 1, bout, 1);
   } else {
@@ -175,14 +176,16 @@ static void UpdateRowTrafo(const char *name, const char *temp,
     if (h == i) {
       /* Step 2 and second + case empty */
       /* Use A.M in place of X */
-      /* Step 4 depends if i == 1 */
-      if (1 != i) {
+      if (1 == i) {
         /* Step 4 empty when i = 1*/
-        /* MUL to temp S := A.E * X = A.E * A.M  in this case*/
+        /* Step 5 output M is X which is A.M */
+        copy_file(mout, m);
+      } else {
+        /* Step 4: MUL to temp S := A.E * X = A.E * A.M  in this case*/
         fMultiply(temp, e, 1, m, 1, S, 1);
+        /* Step 5 when i != 1 */
+        fRowRiffle(lam, 1, S, 1, m, 1, mout, 1);
       }
-      /* Step 5 output M is X which is A.M */
-      copy_file(mout, m);
       /* Step 6 output K is A.K */
       copy_file(kout, k);
       /* Only one temporary created here */
@@ -446,6 +449,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
                     (1 == i) ? NULL : B[index3(i - 1, j, k)], i,
                     C[index3(j + 1, i, k)], B[index3(i, j, k)]);
         }
+#if 1
         for (h = 1; h <= i; h++) {
           printf("UpdateRowTrafo making K[%u, %u, %u] in %s\n", j + 1, i, h,
                  K[index3(j + 1, i, h)]);
@@ -455,9 +459,13 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
                          EDelta[index2(h, j)], i, h, j,
                          K[index3(j + 1, i, h)], M[index3(i, j, h)]);
         }
+#else
+        NOT_USED(UpdateRowTrafo);
+#endif
       }
     }
     /* Step 2: multiplier lengthening */
+    printf("Step 2: lengthening multiplier\n");
     for (j = 1; j <= COL_SPLIT; j++) {
       for (h = 1; h <= ROW_SPLIT; h++) {
         RowLengthen(name, temp, tmp_len,
@@ -483,6 +491,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
                   R[index3(l + 1 - k, k, l)], R[index3(l + 2 - k, j, l)],
                   temp);
         }
+#if 1
         for (h = 1; h <= ROW_SPLIT; h++) {
           char *T = mk_tmp(name, temp, tmp_len);
           /* Note the increment on the superscripts on M */
@@ -500,6 +509,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
 #endif
           free(T);
         }
+#endif
       }
     }
     /* Step 4: splice the multiplier, cleaner and remnant, concatenate the selects */
@@ -651,9 +661,11 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
           buf1 = malloc(ds1.nob * hdr2.named.nor);
           ERData(e2, ds1.nob * hdr2.named.nor, (uint8_t *)buf1);
           DPaste(&ds1, buf1, chp[j], colstart[k], &ds, buf);
+          free(buf1);
         }
         EWData(e, chp[j] * ds.nob, (uint8_t *)buf);
       }
+      free(buf);
       EWClose1(e, mode);
     }
 #endif
@@ -705,10 +717,12 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
           buf1 = malloc(hdr1.named.nor * ds1.nob);
           ERData(e1, ds1.nob * hdr1.named.nor, (uint8_t *)buf1);
           DPaste(&ds1, buf1, chq[j], coqstart[h], &ds, buf);
+          free(buf1);
         }
         EWData(e, chq[j] * ds.nob, (uint8_t *)buf);
       }
       EWClose1(e, mode);
+      free(buf);
     }
     /* compute the row-select bit string */
     /*
@@ -779,7 +793,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
       for (i = 1; i <= ROW_SPLIT; i++) {
         for (j = 1; j <= COL_SPLIT; j++) {
           /* Delete the M matrix file names */
-          remove(M[index3(h, i, j)]);
+          /*remove(M[index3(h, i, j)]);*/
         }
       }
     }
@@ -795,7 +809,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
       for (j = 1; j <= COL_SPLIT; j++) {
         /* Remove the A, X, DR, DGamma, ERho, EDelta matrix files */
         remove(A[index2(i, j)]);
-        remove(X[index2(i, j)]);
+        /*remove(X[index2(i, j)]);*/
         remove(DR[index2(i, j)]);
         /*remove(DGamma[index2(i, j)]);*/
         /*remove(ERho[index2(i, j)]);*/
