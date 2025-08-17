@@ -44,6 +44,7 @@ LIB_MODULES=	memfuns \
 	funs3 \
 	funs4 \
 	funs5 \
+	recech \
 	malloc \
 	parse \
 	utils
@@ -143,6 +144,7 @@ EXECS=	conreg \
 	zprime \
 	zqa \
 	zrd \
+	zrec \
 	zrn \
 	zrr \
 	zrx \
