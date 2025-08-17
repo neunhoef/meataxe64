@@ -322,21 +322,23 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
    * Allowing fFullEchelise to recurse to here is a separate project
    * as it will require calibration in the way multiply does
    * to determine whether to do the job itself or pass it back
-   * As a first step, it could simpy bounce anything
+   * As a first step, it could simply bounce anything
    * with less than 50 rows and columns
    */
   /* Step -1: Check we can actually split, ie nor, noc >= 2 */
   int mode = (1 == first) ? 0 : 1;
   header hdr;
+  uint64_t nor;
+  uint64_t noc;
   EPeek(input, hdr.hdr);
-  if ((1 == hdr.named.nor || 1 == hdr.named.noc) || (0 == first)){
+  nor = hdr.named.nor;
+  noc = hdr.named.noc;
+  if ((1 == nor || 1 == noc) || (0 == first)) {
     /* Too small for us */
     return fFullEchelize(temp, input, mode, row_sel, mode, col_sel, mode,
                          multiplier, mode, cleaner, mode, remnant, mode);
   } else {
     uint64_t rank = 0;
-    uint64_t nor = hdr.named.nor;
-    uint64_t noc = hdr.named.noc;
     unsigned int h, i, j, k, l;
     char **B = malloc(size3(2, 2, 2)); /* Max super 2 */
     char **C = malloc(size3(3, 2, 2)); /* Max super 3 */
