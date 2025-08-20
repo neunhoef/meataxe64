@@ -21,7 +21,25 @@
  * are split into their individual components
  */
 
-/* TODO: translate the proggy for MKR ADI */
+/* TODO:
+ * translate the proggy for MKR ADI - done
+ * Write out remnant one row at a time - done
+ * Write out cleaner one row at a time - done
+ * Write out multiplier one row at a time - done
+ * Remove superscripted files by creating temps and renaming
+ *   B
+ *   C
+ *   K
+ *   M
+ *   R
+ * Remove subscripted X by creating temp and renaming
+ * Delete all temporaries as soon as possible
+ * Add modes for rank, PE, FE for top level
+ * Modify zrn to use recech if not enough memory
+ * Modify znu to use recech if not enough memory
+ * Modify zpe to use recech if not enough memory
+ * Modify zec to use recech if not enough memory
+ */
 
 /* Task 1: Extend */
 static void Extend(const char *arho, const char *erho_in,
@@ -639,10 +657,11 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
           /* Done a row, write to putput */
           EWData(e, ds.nob, (uint8_t *)buf);
         }
-        /* Now free and all the stuff we allocated earlier */
+        /* Now free all the stuff we allocated earlier */
         for (h = 0; h <= i; h++) {
           ERClose1(es[h], 1);
           free(bufs[h]);
+          remove(K[index3(COL_SPLIT + 1, i + 1, h + 1)]);
         }
 #else
         memset(buf, 0, chr[i] * ds.nob);
@@ -745,7 +764,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
         }
         while (row_num < chp[j]) {
           memset(buf, 0, ds.nob); /* Zero 1 row of output */
-          for (k = j; k < COL_SPLIT; k++)  {
+          for (k = j; k < COL_SPLIT; k++) {
             /* Read a row from es[j] if we haven't exceeded it max rows
              * then paste it in */
             if (row_num < hdrs[k].named.nor) {
@@ -758,7 +777,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
           /* Done a row, write to putput */
           EWData(e, ds.nob, (uint8_t *)buf);
         }
-        /* Now free and all the stuff we allocated earlier */
+        /* Now free all the stuff we allocated earlier */
         for (k = j; k < COL_SPLIT; k++) {
           ERClose1(es[k], 1);
           free(bufs[k]);
@@ -817,18 +836,27 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
       unsigned int *chq = malloc(COL_SPLIT * sizeof(*chq));
       unsigned int *chqcol = malloc(ROW_SPLIT * sizeof(*chqcol));
       unsigned int *coqstart = malloc(ROW_SPLIT * sizeof(*coqstart));
+#ifdef ROW_BY_ROW
+      header hdr, *hdrs;
+      DSPACE ds, *dss;
+      Dfmt *buf, **bufs;
+      EFIL *e, **es;
+#else
       uint64_t maxrows = 0;
       DSPACE ds, ds1;
       header hdr, hdr1;
       Dfmt *buf, *buf1;
       EFIL *e, *e1;
+#endif
       for (j = 0; j < COL_SPLIT; j++) {
         header hdr;
         EPeek(M[index3(ROW_SPLIT + 1, j + 1, 1)], hdr.hdr);
         chq[j] = hdr.named.nor;
+#ifndef ROW_BY_ROW
         if (maxrows < (uint64_t)chq[j]) {
           maxrows = chq[j];
         }
+#endif
       }
       k = 0;
       for (h = 0; h < ROW_SPLIT; h++) {
@@ -838,16 +866,55 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
         k += chqcol[h]; 
       }
       DSSet(f, k, &ds);
+#ifdef ROW_BY_ROW
+      buf = malloc(ds.nob);
+      /* Allocate headers, buffers and DSs */
+      hdrs = malloc(ROW_SPLIT * sizeof(*hdrs));
+      es = malloc(ROW_SPLIT * sizeof(*es));
+      bufs = malloc(ROW_SPLIT * sizeof(*bufs));
+      dss = malloc(ROW_SPLIT * sizeof(*dss));
+#else
       buf = malloc(ds.nob * maxrows);
+#endif
       hdr.named.rnd1 = 1;
       hdr.named.fdef = f->fdef;
       hdr.named.nor = rank;
       hdr.named.noc = rank;
       hdr.named.rnd2 = 0;
       e = EWHdr(multiplier, hdr.hdr);
-      for (j = 0; j < COL_SPLIT; j++)  {
+      for (j = 0; j < COL_SPLIT; j++) {
+#ifdef ROW_BY_ROW
+        uint64_t row_num = 0; /* This will count output rows */
+        for (h = 0; h < ROW_SPLIT; h++) {
+          es[h] = ERHdr(M[index3(ROW_SPLIT + 1, j + 1, h + 1)], hdrs[h].hdr);
+          DSSet(f, chqcol[h], &dss[h]); /* Width of this column segment */
+          /* We only allocate one row for each fragment */
+          bufs[h] = malloc(dss[h].nob); /* Space for this fragment */
+        }
+        while (row_num < chq[j]) {
+          memset(buf, 0, ds.nob); /* Zero 1 row of output */
+          for (h = 0; h < ROW_SPLIT; h++) {
+            /* Read a row from es[h] if we haven't exceeded it max rows
+             * then paste it in */
+            if (row_num < hdrs[h].named.nor) {
+              ERData(es[h], dss[h].nob, (uint8_t *)bufs[h]);
+              /* Only paste 1 row */
+              DPaste(&dss[h], bufs[h], 1, coqstart[h], &ds, buf);
+            }
+          }
+          row_num++;
+          /* Done a row, write to putput */
+          EWData(e, ds.nob, (uint8_t *)buf);
+        }
+        /* Now free all the stuff we allocated earlier */
+        for (h = 0; h < ROW_SPLIT ; h++) {
+          ERClose1(es[h], 1);
+          free(bufs[h]);
+          remove(M[index3(ROW_SPLIT + 1, j + 1, h + 1)]);
+        }
+#else
         memset(buf, 0, chq[j] * ds.nob);
-        for (h = 0; h < ROW_SPLIT; h++)  {
+        for (h = 0; h < ROW_SPLIT; h++) {
           e1 = ERHdr(M[index3(ROW_SPLIT + 1, j + 1, h + 1)], hdr1.hdr);
           DSSet(f, chqcol[h], &ds1);
           buf1 = malloc(hdr1.named.nor * ds1.nob);
@@ -859,12 +926,20 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
           remove(M[index3(ROW_SPLIT + 1, j + 1, h + 1)]);
         }
         EWData(e, chq[j] * ds.nob, (uint8_t *)buf);
+#endif
       }
       EWClose1(e, mode);
       free(buf);
       free(chq);
       free(chqcol);
       free(coqstart);
+#ifdef ROW_BY_ROW
+      /* free headers, buffers and DSs */
+      free(hdrs);
+      free(es);
+      free(bufs);
+      free(dss);
+#endif
     }
     free(f); /* Don't need the field any more */
     /* compute the row-select bit string */
