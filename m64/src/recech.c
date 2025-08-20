@@ -330,11 +330,21 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
   header hdr;
   uint64_t nor;
   uint64_t noc;
+  DSPACE ds;
+  FIELD *f;
+  uint64_t size;
   EPeek(input, hdr.hdr);
   nor = hdr.named.nor;
   noc = hdr.named.noc;
-  if ((1 == nor || 1 == noc) || (0 == first)) {
+  f = malloc(FIELDLEN);
+  FieldASet1(hdr.named.fdef, f, NOMUL);
+  DSSet(f, noc, &ds);
+  size = ds.nob * nor;
+  size /= f->megabytes;
+  size /= 500000; /* We need double the file size for in memory */
+  if (0 == size) {
     /* Too small for us */
+    free(f);
     return fFullEchelize(temp, input, mode, row_sel, mode, col_sel, mode,
                          multiplier, mode, cleaner, mode, remnant, mode);
   } else {
@@ -361,8 +371,6 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     char *Mtmp = mk_tmp(name, temp, tmp_len);
     char *rho = mk_tmp(name, temp, tmp_len);
     char *lambda = mk_tmp(name, temp, tmp_len);
-    uint64_t fdef;
-    FIELD *f;
     unsigned int *chp = malloc(COL_SPLIT * sizeof(*chp));
     unsigned int *chpcol = malloc(COL_SPLIT * sizeof(*chpcol));
 
@@ -566,7 +574,6 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
       /* Row shape */
       for (i = 0; i < ROW_SPLIT; i++) {
         EPeek(K[index3(COL_SPLIT + 1, i + 1, 1)], hdr.hdr);
-        fdef = hdr.named.fdef; /* Need this at some point */
         chr[i] = hdr.named.nor;
         if (maxrows < (uint64_t)chr[i]) {
           maxrows = chr[i];
@@ -580,8 +587,6 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
         corstart[h] = k;
         k += chrcol[h];
       }
-      f = malloc(FIELDLEN);
-      FieldASet1(fdef,f,NOMUL);
       DSSet(f, k, &ds);
       /* FIXME: The following code assumes we can fit the cleaner in memory. We may not want that */
       buf = malloc(ds.nob * maxrows);
