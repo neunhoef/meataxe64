@@ -62,8 +62,10 @@ extern void splice(const char *input_stem, unsigned int slices, const char *outp
  * whose names are given in the array outputs
  * outputs must be an array of size chops^2
  * The fragments are written out with columns varying fastest
+ * mode says whether to log the input (output never logged)
  */
-extern void chop(const char *input, unsigned int chops, const char *outputs[]);
+extern void chop(const char *input, unsigned int chops, const char *outputs[],
+                 int mode);
 
 /* Concatenate a number of files giving out */
 extern void cat(const char *files[], const char *out, unsigned int count);
