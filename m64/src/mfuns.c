@@ -354,7 +354,8 @@ void splice(const char *input_stem, unsigned int slices, const char *output)
 }
 
 /* Implementation adapted from that in zch.c */
-void chop(const char *input, unsigned int chops, const char *outputs[])
+void chop(const char *input, unsigned int chops, const char *outputs[],
+          int mode)
 {
   uint64_t r1, r2, c1, i, j;
   uint64_t rch[100], cch[100], cac[100]; 
@@ -422,7 +423,7 @@ void chop(const char *input, unsigned int chops, const char *outputs[])
     }
     o += chops; /* Next set of names */
   }
-  ERClose1(e1, 1);
+  ERClose1(e1, mode);
   free(f);
   free(v1);
   free(v2);
