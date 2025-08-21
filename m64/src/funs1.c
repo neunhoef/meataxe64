@@ -414,7 +414,7 @@ void fColumnRiffleZero(const char *bs, int sbs,
 {
   EFIL *ebs, *ei, *eo;   /* bitstring, input, output */
   uint64_t hdrbs[5], hdrio[5];
-  uint64_t nor, noci, noco, fdef, siz;
+  uint64_t i, nor, noci, noco, fdef, siz;
   FIELD *f;
   DSPACE dsi, dso;    /* input output */
   Dfmt *mo, *mi;      /* output input */
@@ -439,17 +439,20 @@ void fColumnRiffleZero(const char *bs, int sbs,
   DSSet(f, noci, &dsi);   /* input space */
   DSSet(f, noco, &dso);   /* output space */
 
-  mi = malloc(dsi.nob * nor);   /* input */
-  mo = malloc(dso.nob * nor);   /* output */
+  /* Make these allocate one row */
+  mi = malloc(dsi.nob);   /* input */
+  mo = malloc(dso.nob);   /* output */
 
   /* read the bit string */
   siz = sizeof(uint64_t) * (2 + (noco + 63) / 64);
   bst = malloc(siz);
   ERData(ebs, siz, (uint8_t *)bst);
-  ERData(ei, dsi.nob * nor, mi);
-  BSColRifZ(f, bst, nor, mi, mo);
-  EWData(eo, dso.nob*nor, mo);
-
+  /* Do this one row at a time. Just pass 1 instead of nor */
+  for (i = 0; i < nor; i++) {
+    ERData(ei, dsi.nob, mi);
+    BSColRifZ(f, bst, 1, mi, mo);
+    EWData(eo, dso.nob, mo);
+  }
   free(mi);
   free(mo);
   free(f);
@@ -488,11 +491,13 @@ void fAddIdentity(const char *bs, int sbs,
 
   DSSet(f, noci, &dsi);   /* input space */
 
+  /* This should only allocate one row */
   mi = malloc(dsi.nob * nor);   /* input */
 
   /* read the bit string */
   siz = sizeof(uint64_t) * (2 + (noco + 63) / 64);
   rf = malloc(siz);
+  /* This will need a different fucntion to add the scalar */
   ERData(ebs, siz, (uint8_t *)rf);
   ERData(ei, dsi.nob * nor, mi);
   BSColPutS(f, rf, nor, 1, (Dfmt *)mi);
