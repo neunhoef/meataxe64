@@ -468,7 +468,8 @@ void fAddIdentity(const char *bs, int sbs,
 {
   EFIL *ebs, *ei, *eo;   /* bitstring, input, output */
   uint64_t hdrbs[5], hdrio[5];
-  uint64_t nor, noci, noco, fdef, siz;
+  uint64_t i, nor, noci, noco, fdef, siz;
+  uint32_t *lix; /* For the converted bitstring */
   FIELD *f;
   DSPACE dsi;    /* input == output */
   Dfmt *mi;      /* output == input */
@@ -491,18 +492,22 @@ void fAddIdentity(const char *bs, int sbs,
 
   DSSet(f, noci, &dsi);   /* input space */
 
-  /* This should only allocate one row */
-  mi = malloc(dsi.nob * nor);   /* input */
+  /* Only allocate one row */
+  mi = malloc(dsi.nob);   /* input */
 
   /* read the bit string */
   siz = sizeof(uint64_t) * (2 + (noco + 63) / 64);
   rf = malloc(siz);
-  /* This will need a different fucntion to add the scalar */
   ERData(ebs, siz, (uint8_t *)rf);
-  ERData(ei, dsi.nob * nor, mi);
-  BSColPutS(f, rf, nor, 1, (Dfmt *)mi);
-  EWData(eo, dsi.nob * nor, mi);
-
+  lix = BSLixUn(rf);   /* where does the scalar go */
+  for (i = 0; i < nor; i++) {
+    ERData(ei, dsi.nob, mi);
+    /* Inline version of BSColPutS(1) */
+    DPak(&dsi, lix[i], mi, 1);
+    /*BSColPutS(f, rf, nor, 1, (Dfmt *)mi);*/
+    EWData(eo, dsi.nob, mi);
+  }
+  free(lix);
   free(mi);
   free(f);
   free(rf);
