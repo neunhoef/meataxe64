@@ -279,9 +279,9 @@ void slice(const char *input, unsigned int slices, const char *output_stem)
       ERData(inp, ds.nob, v1);
       EWData(oup, ds.nob, v1);
     }
-    EWClose(oup);
+    EWClose1(oup, 1);
   }
-  ERClose(inp);
+  ERClose1(inp, 1);
   free(f);
   free(v1);
 }
@@ -346,9 +346,9 @@ void splice(const char *input_stem, unsigned int slices, const char *output)
       ERData(inp, ds.nob, v1);
       EWData(oup, ds.nob, v1);
     }
-    ERClose(inp);
+    ERClose1(inp, 1);
   }
-  EWClose(oup);
+  EWClose1(oup, 1);
   free(f);
   free(v1);
 }
