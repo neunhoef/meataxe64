@@ -40,7 +40,7 @@ void LogCmd(int argc, char ** argv)
 }
 
 
-void CLogCmd(int argc, const char *argv[])
+void CLogCmd(int argc, const char * const argv[])
 {
     int i;
     FILE * logfile;

@@ -35,6 +35,6 @@ extern int  EWClose1(EFIL * e, int flag);
 extern void LogCmd(int argc, char **argv);
 extern void LogString(int type, const char *string);
 /* Use this instead of LogCmd */
-extern void CLogCmd(int argc, const char *argv[]);
+extern void CLogCmd(int argc, const char * const argv[]);
 
 /* end of io.h  */
