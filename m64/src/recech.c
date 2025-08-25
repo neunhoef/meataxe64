@@ -14,6 +14,7 @@
 #include "util.h"
 #include "io.h"
 #include "bitstring.h"
+#include "parse.h"
 
 /*
  * This algorithm relies on 8 subroutines: the tasks in the paper
@@ -361,7 +362,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
   size = ds.nob * nor;
   size /= f->megabytes;
   size /= 500000; /* We need double the file size for in memory */
-  if (0 == first) {
+  if (0 == size) {
     /* Too small for us */
     free(f);
     return fFullEchelize(temp, input, mode, row_sel, mode, col_sel, mode,
@@ -393,6 +394,10 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     unsigned int *chp = malloc(COL_SPLIT * sizeof(*chp));
     unsigned int *chpcol = malloc(COL_SPLIT * sizeof(*chpcol));
 
+    if (verbose) {
+      printf("Step 0: splitting\n");
+      fflush(stdout);
+    }
     /* Step 0: chop input using chop to give C superscript 1, at 2 x 2 */
     for (h = 1; h <= COL_SPLIT + 1; h++) {
       for (i = 1; i <= ROW_SPLIT; i++) {
@@ -446,6 +451,10 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
         C[index3(1, 2, 1)], C[index3(1, 2, 2)]}; /* Needs work if bigger split */
       chop(input, 2, C1, mode);
     }
+    if (verbose) {
+      printf("Step 1: down clearing\n");
+      fflush(stdout);
+    }
     /* Step 1: down clearing */
     /* This step uses temporaries A, E, M, K, rho, lambda */
     for (i = 1; i <= ROW_SPLIT; i++) {
@@ -492,6 +501,10 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     free(rho);
     remove(lambda);
     free(lambda);
+    if (verbose) {
+      printf("Step 2: lengthening\n");
+      fflush(stdout);
+    }
     /* Step 2: multiplier lengthening */
     for (j = 1; j <= COL_SPLIT; j++) {
       for (h = 1; h <= ROW_SPLIT; h++) {
@@ -502,6 +515,10 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
         /* Don't need input M so remove */
         remove(M[index3(ROW_SPLIT, j, h)]);
       }
+    }
+    if (verbose) {
+      printf("Step 3: back cleaning\n");
+      fflush(stdout);
     }
     /* Step 3: back cleaning */
     for (k = 1; k <= COL_SPLIT; k++) {
@@ -535,6 +552,10 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
           free(T);
         }
       }
+    }
+    if (verbose) {
+      printf("Step 4: splicing\n");
+      fflush(stdout);
     }
     /* Step 4: splice the multiplier, cleaner and remnant, concatenate the selects */
     /* We should be able to find how this is done in mech.c */
@@ -578,6 +599,10 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
       EWClose1(e, mode);
       free(bscs);
       free(inbs);
+    }
+    if (verbose) {
+      printf("Writing cleaner\n");
+      fflush(stdout);
     }
 #define ROW_BY_ROW
     /* now write out cleaner  */
@@ -691,6 +716,10 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
       free(bufs);
       free(dss);
 #endif
+    }
+    if (verbose) {
+      printf("Writing remnant\n");
+      fflush(stdout);
     }
     /* now write out remnant, very similar to cleaner */
     {
@@ -823,6 +852,10 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
       free(bufs);
       free(dss);
 #endif
+    }
+    if (verbose) {
+      printf("Writing multiplier\n");
+      fflush(stdout);
     }
     /* now write out multiplier */
     /*
