@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include "parse.h"
 #include "field.h"
 #include "io.h"
 #include "funs.h"
@@ -19,6 +20,7 @@ int main(int argc, const char * const argv[])
   uint64_t rank;
   const char *tmp_root = tmp_name();
 
+  argv = parse_line(argc, argv, &argc);
   CLogCmd(argc, argv);
   argv = parse_line(argc, argv, &argc);
   if (7 !=argc) {
