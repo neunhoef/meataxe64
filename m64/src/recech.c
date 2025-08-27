@@ -26,9 +26,12 @@
  * Write out remnant one row at a time - done
  * Write out cleaner one row at a time - done
  * Write out multiplier one row at a time - done
+ * Fix fColumnRiffleZero to work one row at a time - done
+ * Fix fAddZero to work one row at a time - done
  * Remove superscripted files by creating temps and renaming
  *   B
  *   C
+ *   D
  *   K
  *   M
  *   R
