@@ -27,8 +27,12 @@ typedef union header {
 
 extern void make_plain(const char *zero_bs, const char *nref_bs, const char *in, const char *out, uint64_t fdef);
 
+/*
+ * mode: 0 - log file
+ * mode: 1 - don't log file
+ */
 extern int ident(uint64_t fdef, uint64_t nor, uint64_t noc, uint64_t elt,
-                 const char *out);
+                 const char *out, int mode);
 
 /*
  * Function to do triaged multiply

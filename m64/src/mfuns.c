@@ -160,7 +160,7 @@ void make_plain(const char *zero_bs, const char *nref_bs, const char *in, const 
 }
 
 int ident(uint64_t fdef, uint64_t nor, uint64_t noc, uint64_t elt,
-          const char *out)
+          const char *out, int mode)
 {
   uint64_t hdr[5];
   EFIL *e;
@@ -208,7 +208,7 @@ int ident(uint64_t fdef, uint64_t nor, uint64_t noc, uint64_t elt,
     free(v1);
     free(f);
   }
-  EWClose(e);
+  EWClose1(e, mode);
   return 1;
 }
 
