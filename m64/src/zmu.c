@@ -21,5 +21,3 @@ int main(int argc, const char * const argv[])
   fMultiply(tmp_name(), argv[1], 0, argv[2], 0, argv[3], 0);    // just call fMultiply
   return 0;
 }
-
-/* end of zmu.c  */
