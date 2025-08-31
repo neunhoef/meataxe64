@@ -11,6 +11,7 @@
 #include "io.h"
 #include "funs.h"
 #include "util.h"
+#include "parse.h"
 
 static const char prog[] = "zrec";
 
@@ -21,6 +22,7 @@ int main(int argc, const char * const argv[])
 
   argv = parse_line(argc, argv, &argc);
   CLogCmd(argc, argv);
+  argv = parse_line(argc, argv, &argc);
   if (7 !=argc) {
     LogString(80,"usage zrec input row_select column_select multiplier cleaner remnant");
     exit(14);

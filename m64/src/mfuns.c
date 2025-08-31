@@ -160,7 +160,7 @@ void make_plain(const char *zero_bs, const char *nref_bs, const char *in, const 
 }
 
 int ident(uint64_t fdef, uint64_t nor, uint64_t noc, uint64_t elt,
-          const char *out)
+          const char *out, int mode)
 {
   uint64_t hdr[5];
   EFIL *e;
@@ -208,7 +208,7 @@ int ident(uint64_t fdef, uint64_t nor, uint64_t noc, uint64_t elt,
     free(v1);
     free(f);
   }
-  EWClose(e);
+  EWClose1(e, mode);
   return 1;
 }
 
@@ -279,9 +279,9 @@ void slice(const char *input, unsigned int slices, const char *output_stem)
       ERData(inp, ds.nob, v1);
       EWData(oup, ds.nob, v1);
     }
-    EWClose(oup);
+    EWClose1(oup, 1);
   }
-  ERClose(inp);
+  ERClose1(inp, 1);
   free(f);
   free(v1);
 }
@@ -346,9 +346,9 @@ void splice(const char *input_stem, unsigned int slices, const char *output)
       ERData(inp, ds.nob, v1);
       EWData(oup, ds.nob, v1);
     }
-    ERClose(inp);
+    ERClose1(inp, 1);
   }
-  EWClose(oup);
+  EWClose1(oup, 1);
   free(f);
   free(v1);
 }

@@ -81,6 +81,7 @@ include $(ARCH)/GNUmake
 # Get implicit rules
 include rules.txt
 # Get dependencies. Don't include when we make clean. Avoid the empty set
+SOURCES=	${MODULES} ${EXECS}
 DEPENDS=$(MODULES:%=$(DEPENDDIR)/%.$(DEPENDEXT))
 ifeq "$(findstring clean,$(MAKECMDGOALS))" ""
 ifneq "$(strip $(DEPENDS))" ""

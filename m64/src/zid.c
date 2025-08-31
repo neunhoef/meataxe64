@@ -25,7 +25,7 @@ int main(int argc,  char **argv)
   fdef = strtoull(argv[2], NULL, 0);
   nor = strtoull(argv[3], NULL, 0);
   noc = strtoull(argv[4], NULL, 0);
-  res = ident(fdef, nor, noc, 1, argv[1]);
+  res = ident(fdef, nor, noc, 1, argv[1], 0);
   NOT_USED(res);
   return 0;
 }
