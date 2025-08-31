@@ -376,7 +376,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     char **B = malloc(size3(2, 2, 2)); /* Max super 2 */
     char **C = malloc(size3(3, 2, 2)); /* Max super 3 */
     char **K = malloc(size3(3, 2, 2)); /* Max super 3 */
-    char **M = malloc(size3(5, 2, 2)); /* Max super 5 */
+    char **M = malloc(size3(3, 2, 2)); /* Max super 3 */
     /* R needs more care, as it starts at 0 rather than 1 */
     char **R = malloc(size3(3, 2, 2)); /* Min super 0 */
     /* D, the one in 2 parts */
@@ -420,7 +420,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
         }
       }
     }
-    for (h = 1; h <= ROW_SPLIT * 2; h++) {
+    for (h = 1; h <= ROW_SPLIT + 1; h++) {
       for (i = 1; i <= ROW_SPLIT; i++) {
         for (j = 1; j <= COL_SPLIT; j++) {
           /* Create the M matrix file names */
@@ -538,19 +538,11 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
         }
         for (h = 1; h <= ROW_SPLIT; h++) {
           char *T = mk_tmp(name, temp, tmp_len);
-          /* Note the increment on the superscripts on M */
-#if 1
           ClearUp(M[index3(ROW_SPLIT + 1, j, h)], Xtmp,
                   M[index3(ROW_SPLIT + 1, k, h)],
                   T,
                   temp);
           rename(T, M[index3(ROW_SPLIT + 1, j, h)]);
-#else /* Removed in favour of not incrementing superscripts */
-          ClearUp(M[index3(ROW_SPLIT + h, j, h)], Xtmp,
-                  M[index3(ROW_SPLIT + h, k, h)],
-                  M[index3(ROW_SPLIT + h + 1, j, h)],
-                  temp);
-#endif
           free(T);
         }
       }
@@ -1073,7 +1065,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
         }
       }
     }
-    for (h = 1; h <= ROW_SPLIT * 2; h++) {
+    for (h = 1; h <= ROW_SPLIT + 1; h++) {
       for (i = 1; i <= ROW_SPLIT; i++) {
         for (j = 1; j <= COL_SPLIT; j++) {
           /* Free the M matrix file names */
