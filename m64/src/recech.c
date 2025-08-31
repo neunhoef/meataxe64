@@ -379,7 +379,6 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     char **M = malloc(size3(5, 2, 2)); /* Max super 5 */
     /* R needs more care, as it starts at 0 rather than 1 */
     char **R = malloc(size3(3, 2, 2)); /* Min super 0 */
-    char **A = malloc(size2(2, 2));
     char **X = malloc(size2(2, 2));
     /* D, the one in 2 parts */
     char **DR = malloc(size2(2, 2));
@@ -440,8 +439,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     /* Now those without superscripts */
     for (i = 1; i <= ROW_SPLIT; i++) {
       for (j = 1; j <= COL_SPLIT; j++) {
-        /* Create the A, X, DR, DGamma, ERho, EDelta matrix file names */
-        A[index2(i, j)] = mk_tmp(name, temp, tmp_len);
+        /* Create the X, DR, DGamma, ERho, EDelta matrix file names */
         X[index2(i, j)] = mk_tmp(name, temp, tmp_len);
         DR[index2(i, j)] = mk_tmp(name, temp, tmp_len);
         DGamma[index2(i, j)] = mk_tmp(name, temp, tmp_len);
@@ -1049,8 +1047,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     }
     for (i = 1; i <= ROW_SPLIT; i++) {
       for (j = 1; j <= COL_SPLIT; j++) {
-        /* Remove the A, X, DR, DGamma, ERho, EDelta matrix files */
-        remove(A[index2(i, j)]);
+        /* Remove the X, DR, DGamma, ERho, EDelta matrix files */
         remove(X[index2(i, j)]);
         remove(DR[index2(i, j)]);
         remove(DGamma[index2(i, j)]);
@@ -1095,8 +1092,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     /* Now those without superscripts */
     for (i = 1; i <= ROW_SPLIT; i++) {
       for (j = 1; j <= COL_SPLIT; j++) {
-        /* Free the A, X, DR, DGamma, ERho, EDelta matrix file names */
-        free(A[index2(i, j)]);
+        /* Free the X, DR, DGamma, ERho, EDelta matrix file names */
         free(X[index2(i, j)]);
         free(DR[index2(i, j)]);
         free(DGamma[index2(i, j)]);
@@ -1114,7 +1110,6 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     free(K);
     free(C);
     free(B);
-    free(A);
     return rank;
   }
 }
