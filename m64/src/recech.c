@@ -379,7 +379,6 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     char **M = malloc(size3(5, 2, 2)); /* Max super 5 */
     /* R needs more care, as it starts at 0 rather than 1 */
     char **R = malloc(size3(3, 2, 2)); /* Min super 0 */
-    char **X = malloc(size2(2, 2));
     /* D, the one in 2 parts */
     char **DR = malloc(size2(2, 2));
     char **DGamma = malloc(size2(2, 2));
@@ -391,6 +390,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     char *Etmp = mk_tmp(name, temp, tmp_len);
     char *Ktmp = mk_tmp(name, temp, tmp_len);
     char *Mtmp = mk_tmp(name, temp, tmp_len);
+    char *Xtmp = mk_tmp(name, temp, tmp_len);
     char *rho = mk_tmp(name, temp, tmp_len);
     char *lambda = mk_tmp(name, temp, tmp_len);
     unsigned int *chp = malloc(COL_SPLIT * sizeof(*chp));
@@ -439,8 +439,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     /* Now those without superscripts */
     for (i = 1; i <= ROW_SPLIT; i++) {
       for (j = 1; j <= COL_SPLIT; j++) {
-        /* Create the X, DR, DGamma, ERho, EDelta matrix file names */
-        X[index2(i, j)] = mk_tmp(name, temp, tmp_len);
+        /* Create the DR, DGamma, ERho, EDelta matrix file names */
         DR[index2(i, j)] = mk_tmp(name, temp, tmp_len);
         DGamma[index2(i, j)] = mk_tmp(name, temp, tmp_len);
         ERho[index2(i, j)] = mk_tmp(name, temp, tmp_len);
@@ -498,6 +497,8 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     free(Ktmp);
     remove(Mtmp);
     free(Mtmp);
+    remove(Xtmp);
+    free(Xtmp);
     remove(rho);
     free(rho);
     remove(lambda);
@@ -529,9 +530,9 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     for (k = COL_SPLIT; k >= 1; k--) {
       for (j = 1; j + 1 <= k; j++) {
         PreClearUp(B[index3(ROW_SPLIT, j, k)], DGamma[index2(ROW_SPLIT, k)],
-                   X[index2(j, k)], R[index3(1, j, k)]);
+                   Xtmp, R[index3(1, j, k)]);
         for (l = k; l <= COL_SPLIT; l++) {
-          ClearUp(R[index3(l + 1 - k, j, l)], X[index2(j, k)],
+          ClearUp(R[index3(l + 1 - k, j, l)], Xtmp,
                   R[index3(l + 1 - k, k, l)], R[index3(l + 2 - k, j, l)],
                   temp);
         }
@@ -539,13 +540,13 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
           char *T = mk_tmp(name, temp, tmp_len);
           /* Note the increment on the superscripts on M */
 #if 1
-          ClearUp(M[index3(ROW_SPLIT + 1, j, h)], X[index2(j, k)],
+          ClearUp(M[index3(ROW_SPLIT + 1, j, h)], Xtmp,
                   M[index3(ROW_SPLIT + 1, k, h)],
                   T,
                   temp);
           rename(T, M[index3(ROW_SPLIT + 1, j, h)]);
 #else /* Removed in favour of not incrementing superscripts */
-          ClearUp(M[index3(ROW_SPLIT + h, j, h)], X[index2(j, k)],
+          ClearUp(M[index3(ROW_SPLIT + h, j, h)], Xtmp,
                   M[index3(ROW_SPLIT + h, k, h)],
                   M[index3(ROW_SPLIT + h + 1, j, h)],
                   temp);
@@ -1047,8 +1048,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     }
     for (i = 1; i <= ROW_SPLIT; i++) {
       for (j = 1; j <= COL_SPLIT; j++) {
-        /* Remove the X, DR, DGamma, ERho, EDelta matrix files */
-        remove(X[index2(i, j)]);
+        /* Remove the DR, DGamma, ERho, EDelta matrix files */
         remove(DR[index2(i, j)]);
         remove(DGamma[index2(i, j)]);
         remove(ERho[index2(i, j)]);
@@ -1092,8 +1092,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     /* Now those without superscripts */
     for (i = 1; i <= ROW_SPLIT; i++) {
       for (j = 1; j <= COL_SPLIT; j++) {
-        /* Free the X, DR, DGamma, ERho, EDelta matrix file names */
-        free(X[index2(i, j)]);
+        /* Free the DR, DGamma, ERho, EDelta matrix file names */
         free(DR[index2(i, j)]);
         free(DGamma[index2(i, j)]);
         free(ERho[index2(i, j)]);
@@ -1104,7 +1103,6 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     free(EDelta);
     free(DGamma);
     free(DR);
-    free(X);
     free(R);
     free(M);
     free(K);
