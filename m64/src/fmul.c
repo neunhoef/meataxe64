@@ -75,7 +75,7 @@ void fMultiply(const char *tmp, const char *m1, int s1,
             if (very_verbose) {
               printf("No rows case\n");
             }
-            res = ident(fdef, nor1, noc2, 0, m3);
+            res = ident(fdef, nor1, noc2, 0, m3, 1);
             NOT_USED(res);
             if (very_verbose) {
               printf("fMultiply %s by %s giving %s done\n", m1, m2, m3);
