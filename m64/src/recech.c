@@ -98,7 +98,7 @@ static void ClearDown(const char *name, const char *temp,
 {
   if ( 1 == i) {
     /* First row, just echelise */
-    uint64_t r = fRecurse_ECH(0, name, temp, c, rho, dgout, m, k, drout);
+    uint64_t r = fRecurse_ECH(0, name, temp, c, 1, rho, dgout, m, k, drout);
     NOT_USED(r);
   } else {
     unsigned int str_len = strlen(temp);
@@ -110,7 +110,7 @@ static void ClearDown(const char *name, const char *temp,
     char *nsel2 = mk_tmp(name, temp, str_len);
     fColumnExtract(dgin, 1, c, 1, a, 1, nsel, 1);
     fMultiplyAdd(temp, a, 1, drin, 1, nsel, 1, H, 1);
-    fRecurse_ECH(0, name, temp, H, rho, gamma, m, k, R);
+    fRecurse_ECH(0, name, temp, H, 1, rho, gamma, m, k, R);
     fColumnExtract(gamma, 1, drin, 1, e, 1, nsel2, 1);
     fMultiplyAdd(temp, e, 1, R, 1, nsel2, 1, nsel1, 1);
     fPivotCombine(dgin, 1, gamma, 1, dgout, 1, lam, 1);
@@ -303,7 +303,7 @@ static void UpdateRowTrafo(const char *name, const char *temp,
 uint64_t fRecurse_ECH(int first, /* Is this top level */
                       const char *name, /* The name of the calling program */
                       const char *temp, /* Base for creating tmp files */
-                      const char *input, const char *row_sel,
+                      const char *input, int in_mode, const char *row_sel,
                       const char *col_sel, const char *multiplier,
                       const char *cleaner, const char *remnant)
 {
@@ -441,7 +441,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     {
       const char *C1[] = {C[index2(1, 1)], C[index2(1, 2)],
         C[index2(2, 1)], C[index2(2, 2)]}; /* Needs work if bigger split */
-      chop(input, 2, C1, mode);
+      chop(input, 2, C1, in_mode);
     }
     if (verbose) {
       printf("Step 1: down clearing\n");

@@ -120,7 +120,7 @@ void fRandomMatrix(const char *m1, int s1, uint64_t fdef,
 extern uint64_t fRecurse_ECH(int first, /* Top level call? */
                              const char *name, /* Calling program name */
                              const char *temp, /* Base for creating tmp files */
-                             const char *input, const char *row_sel,
+                             const char *input, int in_mode, const char *row_sel,
                              const char *col_sel, const char *multiplier,
                              const char *cleaner, const char *remnant);
 
