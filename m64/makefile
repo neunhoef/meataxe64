@@ -134,6 +134,7 @@ EXECS=	conreg \
 	znoc \
 	znor \
 	znu \
+	znu1 \
 	zor1 \
 	zpc \
 	zpe \
