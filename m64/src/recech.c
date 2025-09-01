@@ -365,7 +365,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
   size = ds.nob * nor;
   size /= f->megabytes;
   size /= 500000; /* We need double the file size for in memory */
-  if (0 == first) {
+  if (0 == first && 0 == size) {
     /* Too small for us */
     free(f);
     return fFullEchelize(temp, input, mode, row_sel, mode, col_sel, mode,
@@ -374,11 +374,11 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     uint64_t rank = 0;
     unsigned int h, i, j, k, l;
     char **B = malloc(size3(2, 2, 2)); /* Max super 2 */
-    char **C = malloc(size3(3, 2, 2)); /* Max super 3 */
-    char **K = malloc(size3(3, 2, 2)); /* Max super 3 */
     char **M = malloc(size3(3, 2, 2)); /* Max super 3 */
     /* R needs more care, as it starts at 0 rather than 1 */
     char **R = malloc(size3(3, 2, 2)); /* Min super 0 */
+    char **K = malloc(size2(2, 2));
+    char **C = malloc(size2(2, 2));
     /* D, the one in 2 parts */
     char **DR = malloc(size2(2, 2));
     char **DGamma = malloc(size2(2, 2));
@@ -386,6 +386,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     char **ERho = malloc(size2(2, 2));
     char **EDelta = malloc(size2(2, 2));
     unsigned int tmp_len = strlen(temp);
+    /* These tmps are the A strucutre in the Chief algorithm */
     char *Atmp = mk_tmp(name, temp, tmp_len);
     char *Etmp = mk_tmp(name, temp, tmp_len);
     char *Ktmp = mk_tmp(name, temp, tmp_len);
@@ -393,6 +394,10 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     char *Xtmp = mk_tmp(name, temp, tmp_len);
     char *rho = mk_tmp(name, temp, tmp_len);
     char *lambda = mk_tmp(name, temp, tmp_len);
+    /* An extra K temporary for use by UpdateRowTrafo */
+    char *Ktmp1 = mk_tmp(name, temp, tmp_len);
+    /* Ctmp to allow in place update of C */
+    char *Ctmp = mk_tmp(name, temp, tmp_len);
     unsigned int *chp = malloc(COL_SPLIT * sizeof(*chp));
     unsigned int *chpcol = malloc(COL_SPLIT * sizeof(*chpcol));
 
@@ -400,22 +405,13 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
       printf("Step 0: splitting\n");
       fflush(stdout);
     }
-    /* Step 0: chop input using chop to give C superscript 1, at 2 x 2 */
-    for (h = 1; h <= COL_SPLIT + 1; h++) {
-      for (i = 1; i <= ROW_SPLIT; i++) {
-        for (j = 1; j <= COL_SPLIT; j++) {
-          /* Create the C matrix file names */
-          C[index3(h, i, j)] = mk_tmp(name, temp, tmp_len);
-        }
-      }
-    }
-    /* Now allocate the other temporaries */
+    /* Step 0: chop input using chop to give C at 2 x 2 */
+    /* Allocate the temporaries */
     /* First those with superscripts */
     for (h = 1; h <= COL_SPLIT + 1; h++) {
       for (i = 1; i <= ROW_SPLIT; i++) {
         for (j = 1; j <= COL_SPLIT; j++) {
-          /* Create the K and R matrix file names */
-          K[index3(h, i, j)] = mk_tmp(name, temp, tmp_len);
+          /* Create the R matrix file names */
           R[index3(h, i, j)] = mk_tmp(name, temp, tmp_len);
         }
       }
@@ -439,7 +435,9 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     /* Now those without superscripts */
     for (i = 1; i <= ROW_SPLIT; i++) {
       for (j = 1; j <= COL_SPLIT; j++) {
-        /* Create the DR, DGamma, ERho, EDelta matrix file names */
+        /* Create the C, K, DR, DGamma, ERho, EDelta matrix file names */
+        C[index2(i, j)] = mk_tmp(name, temp, tmp_len);
+        K[index2(i, j)] = mk_tmp(name, temp, tmp_len);
         DR[index2(i, j)] = mk_tmp(name, temp, tmp_len);
         DGamma[index2(i, j)] = mk_tmp(name, temp, tmp_len);
         ERho[index2(i, j)] = mk_tmp(name, temp, tmp_len);
@@ -447,8 +445,8 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
       }
     }
     {
-      const char *C1[] = {C[index3(1, 1, 1)], C[index3(1, 1, 2)],
-        C[index3(1, 2, 1)], C[index3(1, 2, 2)]}; /* Needs work if bigger split */
+      const char *C1[] = {C[index2(1, 1)], C[index2(1, 2)],
+        C[index2(2, 1)], C[index2(2, 2)]}; /* Needs work if bigger split */
       chop(input, 2, C1, mode);
     }
     if (verbose) {
@@ -461,7 +459,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
       for (j = 1; j <= COL_SPLIT; j++) {
         /* It's unclear that this needs a loop index dependent A */
         /* For the moment I've use Atmp instead */
-        ClearDown(name, temp, C[index3(j, i, j)],
+        ClearDown(name, temp, C[index2(i, j)],
                   (1 == i) ? NULL : DGamma[index2(i - 1, j)],
                   (1 == i) ? NULL : DR[index2(i - 1, j)], i,
                   DGamma[index2(i, j)], DR[index2(i, j)], Atmp,
@@ -470,18 +468,18 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
                ERho[index2(i, j)], EDelta[index2(i, j)], j);
         for (k = j + 1; k <= COL_SPLIT; k++) {
           UpdateRow(name, temp, Atmp, Mtmp, Ktmp, rho, Etmp, lambda,
-                    C[index3(j, i, k)],
+                    C[index2(i, k)],
                     (1 == i) ? NULL : B[index3(i - 1, j, k)], i,
-                    C[index3(j + 1, i, k)], B[index3(i, j, k)]);
+                    Ctmp, B[index3(i, j, k)]);
+          rename(Ctmp, C[index2(i, k)]);
         }
         for (h = 1; h <= i; h++) {
           UpdateRowTrafo(name, temp, Atmp, Mtmp, Ktmp, rho, Etmp, lambda,
-                         K[index3(j, i, h)],
+                         K[index2(i, h)],
                          (1 == i) ? NULL : M[index3(i - 1, j, h)],
                          EDelta[index2(h, j)], i, h, j,
-                         K[index3(j + 1, i, h)], M[index3(i, j, h)]);
-          /* Don't need input K so remove */
-          remove(K[index3(j, i, h)]);
+                         Ktmp1, M[index3(i, j, h)]);
+          rename(Ktmp1, K[index2(i, h)]);
           /* Don't need input M so remove */
           if (1 != i) {
             remove(M[index3(i - 1, j, h)]);
@@ -491,6 +489,8 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     }
     remove(Atmp);
     free(Atmp);
+    remove(Ctmp);
+    free(Ctmp);
     remove(Etmp);
     free(Etmp);
     remove(Ktmp);
@@ -501,6 +501,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     free(rho);
     remove(lambda);
     free(lambda);
+    free(Ktmp1);
     if (verbose) {
       printf("Step 2: lengthening\n");
       fflush(stdout);
@@ -619,7 +620,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
       /* First work out the shape */
       /* Row shape */
       for (i = 0; i < ROW_SPLIT; i++) {
-        EPeek(K[index3(COL_SPLIT + 1, i + 1, 1)], hdr.hdr);
+        EPeek(K[index2(i + 1, 1)], hdr.hdr);
         chr[i] = hdr.named.nor;
 #ifndef ROW_BY_ROW
         if (maxrows < (uint64_t)chr[i]) {
@@ -630,7 +631,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
       /* Column shape */
       k = 0;
       for (h = 0; h < ROW_SPLIT; h++) {
-        EPeek(K[index3(COL_SPLIT + 1, ROW_SPLIT, h + 1)], hdr.hdr);
+        EPeek(K[index2(ROW_SPLIT, h + 1)], hdr.hdr);
         chrcol[h] = hdr.named.noc;
         corstart[h] = k;
         k += chrcol[h];
@@ -656,7 +657,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
 #ifdef ROW_BY_ROW
         uint64_t row_num = 0; /* This will count output rows */
         for (h = 0; h <= i; h++) {
-          es[h] = ERHdr(K[index3(COL_SPLIT + 1, i + 1, h + 1)], hdrs[h].hdr);
+          es[h] = ERHdr(K[index2(i + 1, h + 1)], hdrs[h].hdr);
           DSSet(f, chrcol[h], &dss[h]); /* Width of this column segment */
           /* We only allocate one row for each fragment */
           bufs[h] = malloc(dss[h].nob); /* Space for this fragment */
@@ -680,19 +681,19 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
         for (h = 0; h <= i; h++) {
           ERClose1(es[h], 1);
           free(bufs[h]);
-          remove(K[index3(COL_SPLIT + 1, i + 1, h + 1)]);
+          remove(K[index2(i + 1, h + 1)]);
         }
 #else
         memset(buf, 0, chr[i] * ds.nob);
         for (h = 0; h <= i; h++) {
-          EFIL *e2 = ERHdr(K[index3(COL_SPLIT + 1, i + 1, h + 1)], hdr2.hdr);
+          EFIL *e2 = ERHdr(K[index2(i + 1, h + 1)], hdr2.hdr);
           DSSet(f, chrcol[h], &ds1);
           buf1 = malloc(ds1.nob * hdr2.named.nor);
           ERData(e2, ds1.nob * hdr2.named.nor, (uint8_t *)buf1);
           DPaste(&ds1, buf1, chr[i], corstart[h], &ds, buf);
           ERClose1(e2, 1);
           free(buf1);
-          remove(K[index3(COL_SPLIT + 1, i + 1, h + 1)]);
+          remove(K[index2(i + 1, h + 1)]);
         }
         EWData(e, chr[i] * ds.nob, (uint8_t *)buf);
 #endif
@@ -1006,26 +1007,16 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
       free(bsrs);
       free(inbs);
     }
-    /* Remove temporary files */
-    for (i = 1; i <= 2; i++) {
-      for (j = 1; j <= 2; j++) {
-        /* Those created by chop */
-        remove(C[index3(1, i, j)]);
-      }
-    }
     /* Delete temporaries */
-    for (h = 1; h <= COL_SPLIT + 1; h++) {
-      for (i = 1; i <= ROW_SPLIT; i++) {
-        for (j = 1; j <= COL_SPLIT; j++) {
-          remove(C[index3(h, i, j)]);
-        }
+    for (i = 1; i <= ROW_SPLIT; i++) {
+      for (j = 1; j <= COL_SPLIT; j++) {
+        remove(C[index2(i, j)]);
       }
     }
     for (h = 1; h <= COL_SPLIT + 1; h++) {
       for (i = 1; i <= ROW_SPLIT; i++) {
         for (j = 1; j <= COL_SPLIT; j++) {
           /* Delete the R matrix file names */
-          /*remove(K[index3(h, i, j)]); */
           remove(R[index3(h, i, j)]);
         }
       }
@@ -1040,7 +1031,8 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     }
     for (i = 1; i <= ROW_SPLIT; i++) {
       for (j = 1; j <= COL_SPLIT; j++) {
-        /* Remove the DR, DGamma, ERho, EDelta matrix files */
+        /* Remove the K, DR, DGamma, ERho, EDelta matrix files */
+        remove(K[index2(i, j)]);
         remove(DR[index2(i, j)]);
         remove(DGamma[index2(i, j)]);
         remove(ERho[index2(i, j)]);
@@ -1048,19 +1040,11 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
       }
     }
     /* Free filenames */
-    for (h = 1; h <= COL_SPLIT + 1; h++) {
-      for (i = 1; i <= ROW_SPLIT; i++) {
-        for (j = 1; j <= COL_SPLIT; j++) {
-          free(C[index3(h, i, j)]);
-        }
-      }
-    }
     /* First those with superscripts */
     for (h = 1; h <= COL_SPLIT + 1; h++) {
       for (i = 1; i <= ROW_SPLIT; i++) {
         for (j = 1; j <= COL_SPLIT; j++) {
-          /* Create the K and R matrix file names */
-          free(K[index3(h, i, j)]);
+          /* Delete the R matrix file names */
           free(R[index3(h, i, j)]);
         }
       }
@@ -1084,7 +1068,9 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     /* Now those without superscripts */
     for (i = 1; i <= ROW_SPLIT; i++) {
       for (j = 1; j <= COL_SPLIT; j++) {
-        /* Free the DR, DGamma, ERho, EDelta matrix file names */
+        /* Free the C, K, DR, DGamma, ERho, EDelta matrix file names */
+        free(C[index2(i, j)]);
+        free(K[index2(i, j)]);
         free(DR[index2(i, j)]);
         free(DGamma[index2(i, j)]);
         free(ERho[index2(i, j)]);
