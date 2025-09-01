@@ -34,7 +34,7 @@ int main(int argc, const char * const argv[])
     LogString(80,"usage znu1 input nullspace");
     exit(14);
   }
-  rank = fRecurse_ECH(0, prog, tmp_root, argv[1], rs, cs, m, k, r);
+  rank = fRecurse_ECH(0, prog, tmp_root, argv[1], 0, rs, cs, m, k, r);
   nullity = fColumnRiffleIdentity(rs, 1, k, 1, argv[2], 0);
   printf("%lu\n", nullity);
   NOT_USED(rank);

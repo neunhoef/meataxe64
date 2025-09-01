@@ -28,7 +28,7 @@ int main(int argc, const char * const argv[])
     exit(14);
   }
   rank = fRecurse_ECH(1, prog, tmp_root,
-                      argv[1], argv[2], argv[3], argv[4],
+                      argv[1], 0, argv[2], argv[3], argv[4],
                       argv[5], argv[6]);
   printf("%lu\n", rank);
   return 0;
