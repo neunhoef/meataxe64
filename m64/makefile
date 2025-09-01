@@ -108,6 +108,7 @@ EXECS=	conreg \
 	zchar \
 	zcn \
 	zcp \
+	zcri \
 	zcs \
 	zcv \
 	zcx \
