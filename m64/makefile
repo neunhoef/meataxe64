@@ -44,6 +44,7 @@ LIB_MODULES=	memfuns \
 	funs3 \
 	funs4 \
 	funs5 \
+	recech \
 	malloc \
 	parse \
 	utils
@@ -79,13 +80,6 @@ include $(OS)/GNUmake
 include $(ARCH)/GNUmake
 # Get implicit rules
 include rules.txt
-# Get dependencies. Don't include when we make clean. Avoid the empty set
-DEPENDS=$(MODULES:%=$(DEPENDDIR)/%.$(DEPENDEXT))
-ifeq "$(findstring clean,$(MAKECMDGOALS))" ""
-ifneq "$(strip $(DEPENDS))" ""
--include $(DEPENDS)
-endif
-endif
 
 REL_TARGETS:=
 DEBUG_TARGETS:=
@@ -106,6 +100,7 @@ EXECS=	conreg \
 	zchar \
 	zcn \
 	zcp \
+	zcri \
 	zcs \
 	zcv \
 	zcx \
@@ -131,6 +126,7 @@ EXECS=	conreg \
 	znoc \
 	znor \
 	znu \
+	znu1 \
 	zor1 \
 	zpc \
 	zpe \
@@ -143,6 +139,7 @@ EXECS=	conreg \
 	zprime \
 	zqa \
 	zrd \
+	zrec \
 	zrn \
 	zrr \
 	zrx \
@@ -165,6 +162,15 @@ EXECS=	conreg \
 	zut \
 	zvp \
 	zzs
+
+# Get dependencies. Don't include when we make clean. Avoid the empty set
+SOURCES=	${MODULES} ${EXECS}
+DEPENDS=$(SOURCES:%=$(DEPENDDIR)/%.$(DEPENDEXT))
+ifeq "$(findstring clean,$(MAKECMDGOALS))" ""
+ifneq "$(strip $(DEPENDS))" ""
+-include $(DEPENDS)
+endif
+endif
 
 include exec.txt
 include execs.txt

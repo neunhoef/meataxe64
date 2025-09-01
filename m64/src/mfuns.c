@@ -160,7 +160,7 @@ void make_plain(const char *zero_bs, const char *nref_bs, const char *in, const 
 }
 
 int ident(uint64_t fdef, uint64_t nor, uint64_t noc, uint64_t elt,
-          const char *out)
+          const char *out, int mode)
 {
   uint64_t hdr[5];
   EFIL *e;
@@ -199,13 +199,16 @@ int ident(uint64_t fdef, uint64_t nor, uint64_t noc, uint64_t elt,
     /******  for each row of the matrix  */
     for (i = 0; i < nor; i++) {
       memset(v1, 0, ds.nob);
-      DPak(&ds, i, v1, elt);
+      if (i < noc) {
+        /* No entries if more rows than columns */
+        DPak(&ds, i, v1, elt);
+      }
       EWData(e, ds.nob, v1);
     }
     free(v1);
     free(f);
   }
-  EWClose(e);
+  EWClose1(e, mode);
   return 1;
 }
 
@@ -276,9 +279,9 @@ void slice(const char *input, unsigned int slices, const char *output_stem)
       ERData(inp, ds.nob, v1);
       EWData(oup, ds.nob, v1);
     }
-    EWClose(oup);
+    EWClose1(oup, 1);
   }
-  ERClose(inp);
+  ERClose1(inp, 1);
   free(f);
   free(v1);
 }
@@ -343,11 +346,87 @@ void splice(const char *input_stem, unsigned int slices, const char *output)
       ERData(inp, ds.nob, v1);
       EWData(oup, ds.nob, v1);
     }
-    ERClose(inp);
+    ERClose1(inp, 1);
   }
-  EWClose(oup);
+  EWClose1(oup, 1);
   free(f);
   free(v1);
+}
+
+/* Implementation adapted from that in zch.c */
+void chop(const char *input, unsigned int chops, const char *outputs[],
+          int mode)
+{
+  uint64_t r1, r2, c1, i, j;
+  uint64_t rch[100], cch[100], cac[100]; 
+  EFIL *e2[100];
+  uint64_t fdef, nor, noc;
+  header hdr;
+  EFIL *e1;
+  FIELD *f;
+  DSPACE ds1, ds2;
+  Dfmt *v1, *v2;
+  const char **o = outputs;
+
+  e1 = ERHdr(input, hdr.hdr);
+  fdef = hdr.named.fdef;
+  nor = hdr.named.nor;
+  noc = hdr.named.noc;
+  f = malloc(FIELDLEN);
+  FieldASet(fdef, f);
+  DSSet(f, noc, &ds1);
+  j = nor / chops;
+  /* Work out how many rows in each piece */
+  for (i = 0; i < chops; i++) {
+    rch[i] = j;
+  }
+  /* Distribute the remainder over the initial set of rows */
+  j = nor - j * chops;
+  for (i = 0; i < j; i++) {
+    rch[i]++;
+  }
+  /* Repeat for columns */
+  j = noc / chops;
+  for (i = 0; i < chops; i++) {
+    cch[i] = j;
+  }
+  /* And handle remainder */
+  j = noc-j * chops;
+  for (i = 0; i < j; i++) {
+    cch[i]++;
+  }
+  /* First column number for each block */
+  cac[0] = 0;
+  for (i = 1; i < chops; i++) {
+    cac[i] = cac[i - 1] + cch[i - 1];
+  }
+    
+  v1 = malloc(ds1.nob);
+  DSSet(f, cch[0], &ds2);
+  v2 = malloc(ds2.nob);
+  for (r1 = 0; r1 < chops; r1++) {
+    hdr.named.nor = rch[r1]; /* Correct number of rows */
+    for (c1 = 0; c1 < chops; c1++) {
+      hdr.named.noc = cch[c1]; /* Correct number of columns */
+      e2[c1] = EWHdr(o[c1], hdr.hdr);
+    }
+    for (r2 = 0; r2 < rch[r1]; r2++) {
+      ERData(e1, ds1.nob, v1);
+      for (c1 = 0; c1 < chops; c1++) {
+        DSSet(f, cch[c1], &ds2);
+        DCut(&ds1, 1, cac[c1], v1, &ds2, v2);
+        EWData(e2[c1], ds2.nob, v2);
+      }
+    }
+    for (c1 = 0; c1 < chops; c1++) {
+      EWClose1(e2[c1], 1);
+    }
+    o += chops; /* Next set of names */
+  }
+  ERClose1(e1, mode);
+  free(f);
+  free(v1);
+  free(v2);
 }
 
 void cat(const char *files[], const char *out, unsigned int count)

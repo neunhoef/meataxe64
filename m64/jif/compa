@@ -53,7 +53,6 @@ gcc $1 -O3 -Wall -Wunused -W -Wmissing-prototypes -pthread -include malloc.h zut
 gcc $1 -O3 -Wall -Wunused -W -Wmissing-prototypes -pthread -include malloc.h zpk.c -L$BIN -lmtx -o $BIN/zpk
 gcc $1 -O3 -Wall -Wunused -W -Wmissing-prototypes -pthread -include malloc.h zpk1.c -L$BIN -lmtx -o $BIN/zpk1
 gcc $1 -O3 -Wall -Wunused -W -Wmissing-prototypes -pthread -include malloc.h zzs.c -L$BIN -lmtx -o $BIN/zzs
-
 gcc $1 -O3 -Wall -Wunused -W -Wmissing-prototypes -pthread -include malloc.h zplain.c -L$BIN -lmtx -o $BIN/zplain
 gcc $1 -O3 -Wall -Wunused -W -Wmissing-prototypes -pthread -include malloc.h zplain2.c -L$BIN -lmtx -o $BIN/zplain2
 gcc -O3 -Wall -Wunused -W -Wmissing-prototypes -pthread -include malloc.h znor.c -L$BIN -lmtx -o $BIN/znor

@@ -80,7 +80,7 @@ static void clean(const char *bs, const char *rem, const char *rows, const char 
 }
 
 /* Get the selected rows from a generator */
-static void fRowExtract(const char *bs, const char *in, const char *sel)
+static void fRowExtractG(const char *bs, const char *in, const char *sel)
 {
   /*
    * Open the file, open the bs
@@ -313,7 +313,7 @@ int main(int argc, const char *argv[])
    * of the "multiplied by everything" result
    * Also, this is the first part of the output standard base
    */
-  fRowExtract(row_sel, in_vecs, gens[ngens - 1].next_tbd.plain);
+  fRowExtractG(row_sel, in_vecs, gens[ngens - 1].next_tbd.plain);
   copy_matrix(gens[ngens - 1].next_tbd.plain, out_sb);
   rename(in_vecs_rem, gens[ngens - 1].next_tbd.rem);
   rename(in_vecs_bs, gens[ngens - 1].next_tbd.bs);
@@ -399,7 +399,7 @@ int main(int argc, const char *argv[])
          * }
          */
         if (0 != res) {
-          fRowExtract(row_sel, mul_tmp, mul_acc1);
+          fRowExtractG(row_sel, mul_tmp, mul_acc1);
           if (first) {
             first = 0;
             rename(mul_acc1, mul_acc);
