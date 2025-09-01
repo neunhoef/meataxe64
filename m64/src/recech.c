@@ -365,7 +365,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
   size = ds.nob * nor;
   size /= f->megabytes;
   size /= 500000; /* We need double the file size for in memory */
-  if (0 == size) {
+  if (0 == first) {
     /* Too small for us */
     free(f);
     return fFullEchelize(temp, input, mode, row_sel, mode, col_sel, mode,
@@ -497,8 +497,6 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     free(Ktmp);
     remove(Mtmp);
     free(Mtmp);
-    remove(Xtmp);
-    free(Xtmp);
     remove(rho);
     free(rho);
     remove(lambda);
@@ -551,6 +549,8 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
       printf("Step 4: splicing\n");
       fflush(stdout);
     }
+    remove(Xtmp);
+    free(Xtmp);
     /* Step 4: splice the multiplier, cleaner and remnant, concatenate the selects */
     /* We should be able to find how this is done in mech.c */
     /* compute the column-select bit string */
