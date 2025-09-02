@@ -356,56 +356,61 @@ void fMKR(const char *bs1, int sbs1, const char *bs2, int sbs2,
  * FIXME: The next 3 functions assume they can read the whole file at once
  * That may not be a valid assumption
  */
-uint64_t fColumnRiffleIdentity(const char *bs, int sbs,
-             const char *rm, int srm, const char *out, int sout)
+uint64_t fColumnRiffleIdentity(const char *bs, int sbs, const char *rm,
+                               int srm, const char *out, int sout)
 {
-    EFIL *ebs,*ei,*eo;   // bitstring, input, output
-    uint64_t hdrbs[5],hdrio[5];
-    uint64_t nor,noci,noco,fdef,siz;
-    FIELD * f;
-    DSPACE dsi,dso;    // input output
-    Dfmt *mo,*mi;      // output input
-    uint64_t * bst;
+  EFIL *ebs, *ei, *eo;   /* bitstring, input, output */
+  uint64_t hdrbs[5], hdrio[5];
+  uint64_t i, nor, noci, noco, fdef, siz;
+  uint32_t *lix; /* For the converted bitstring */
+  FIELD *f;
+  DSPACE dsi, dso;    /* input output */
+  Dfmt *mo, *mi;      /* output input */
+  uint64_t *bst;
 
-    ebs=ERHdr(bs,hdrbs);   // bitstring = 2 1 bits setb 0
-    ei=ERHdr(rm,hdrio);    // remnant   = 1 fdef nor noc 0
-    nor =hdrio[2];         // rows in
-    noco=hdrbs[2];         // bits = output cols
-    noci=hdrio[3];         // input cols
-    if( (noci!=hdrbs[3]) || (nor!=(noco-noci)) )
-    {
-        LogString(80,"Inputs incompatible");
-        exit(22);
-    }
-    fdef=hdrio[1];
-    f = malloc(FIELDLEN);
-    FieldASet(fdef,f);
-    hdrio[3]=noco;
-    eo=EWHdr(out,hdrio);
+  ebs = ERHdr(bs, hdrbs);   /* bitstring = 2 1 bits setb 0 */
+  ei = ERHdr(rm, hdrio);    /* remnant   = 1 fdef nor noc 0 */
+  nor = hdrio[2];         /* rows in */
+  noco = hdrbs[2];         /* bits = output cols */
+  noci = hdrio[3];         /* input cols */
+  if((noci != hdrbs[3]) || (nor != (noco-noci))) {
+    LogString(80, "Inputs incompatible");
+    exit(22);
+  }
+  fdef = hdrio[1];
+  f = malloc(FIELDLEN);
+  FieldASet(fdef, f);
+  hdrio[3] = noco;
+  eo = EWHdr(out, hdrio);
 
-    DSSet(f,noci,&dsi);   // input space
-    DSSet(f,noco,&dso);   // output space
+  DSSet(f, noci, &dsi);   /* input space */
+  DSSet(f, noco, &dso);   /* output space */
 
-    mi=malloc(dsi.nob*nor);   // input
-    mo=malloc(dso.nob*nor);   // output
+  /* Work one row at a time */
+  mi = malloc(dsi.nob);   /* input */
+  mo = malloc(dso.nob);   /* output */
 
-// read the bit string
-    siz = 8*(2+(noco+63)/64);
-    bst=malloc(siz);
-    ERData(ebs,siz,(uint8_t *)bst);
-    ERData(ei,dsi.nob*nor,mi);
-    BSColRifZ(f,bst,nor,mi,mo);
-    BSColPutS(f,bst,nor,1,mo);
-    EWData(eo,dso.nob*nor,mo);
+  /* read the bit string */
+  siz = 8 *(2 + (noco + 63) / 64);
+  bst = malloc(siz);
+  ERData(ebs, siz, (uint8_t *)bst);
+  lix = BSLixUn(bst);   /* where does the scalar go */
+  for (i = 0; i < nor; i++) {
+    ERData(ei, dsi.nob, mi);
+    BSColRifZ(f, bst, 1, mi, mo);
+    DPak(&dso, lix[i], mo, 1);
+    /* Insert the 1 */
+    EWData(eo, dso.nob, mo);
+  }
 
-    free(mi);
-    free(mo);
-    free(f);
-    free(bst);
-    ERClose1(ebs,sbs);
-    ERClose1(ei,srm);
-    EWClose1(eo,sout);
-    return nor;
+  free(mi);
+  free(mo);
+  free(f);
+  free(bst);
+  ERClose1(ebs, sbs);
+  ERClose1(ei, srm);
+  EWClose1(eo, sout);
+  return nor;
 }
 
 /* Like the above, but without 1s */
