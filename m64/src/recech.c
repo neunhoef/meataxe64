@@ -312,15 +312,15 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
    * It uses a great deal of temporary files
    * Some have 2 subscripts, and some have 2 subscripts and a superscript
    * For those with a superscript, that will be the slowest changing
-   * The temporaries are A, B, C, D, K, M, R, X
-   * Of these B, C, K, M, R have superscripts as well
+   * The temporaries are B, C, D, K, M, R, X
+   * Of these M has superscripts as well
    * D comes in 2 halves, DR and DGamma
    * Some subscripts and superscripts exceed 2, and some go below 1
    * Those going below 1 are B, D and R
    * For D, the callee using 0 (ClearDown) doesn't reference D in this case
    * Similarly for B, UpdateRow doesn't reference the zero case
    * But step 3 does define and use the superscript 0
-   * Those that exceed 2 occur for C, K, M
+   * Those that exceed 2 occur for M
    * M in particular can get to 5 in step 3
    * There is also E, a pair of bistrings rho and delta
    * and D, a bitstring gamma and a pair of files R, Rdash
@@ -373,11 +373,11 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
   } else {
     uint64_t rank = 0;
     unsigned int h, i, j, k, l;
-    char **B = malloc(size3(2, 2, 2)); /* Max super 2 */
     char **M = malloc(size3(3, 2, 2)); /* Max super 3 */
     char **R = malloc(size2(2, 2));
     char **K = malloc(size2(2, 2));
     char **C = malloc(size2(2, 2));
+    char **B = malloc(size2(2, 2));
     /* D, the one in 2 parts */
     char **DR = malloc(size2(2, 2));
     char **DGamma = malloc(size2(2, 2));
@@ -399,6 +399,8 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     char *Rtmp = mk_tmp(name, temp, tmp_len);
     /* Ctmp to allow in place update of C */
     char *Ctmp = mk_tmp(name, temp, tmp_len);
+    /* Btmp to allow in place update of B */
+    char *Btmp = mk_tmp(name, temp, tmp_len);
     unsigned int *chp = malloc(COL_SPLIT * sizeof(*chp));
     unsigned int *chpcol = malloc(COL_SPLIT * sizeof(*chpcol));
 
@@ -417,18 +419,11 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
         }
       }
     }
-    for (h = 1; h <= COL_SPLIT; h++) {
-      for (i = 1; i <= ROW_SPLIT; i++) {
-        for (j = 1; j <= COL_SPLIT; j++) {
-          /* Create the B matrix file names */
-          B[index3(h, i, j)] = mk_tmp(name, temp, tmp_len);
-        }
-      }
-    }
     /* Now those without superscripts */
     for (i = 1; i <= ROW_SPLIT; i++) {
       for (j = 1; j <= COL_SPLIT; j++) {
-        /* Create the C, K, DR, DGamma, ERho, EDelta matrix file names */
+        /* Create the B, C, K, DR, DGamma, ERho, EDelta matrix file names */
+        B[index2(i, j)] = mk_tmp(name, temp, tmp_len);
         C[index2(i, j)] = mk_tmp(name, temp, tmp_len);
         K[index2(i, j)] = mk_tmp(name, temp, tmp_len);
         R[index2(i, j)] = mk_tmp(name, temp, tmp_len);
@@ -463,9 +458,10 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
         for (k = j + 1; k <= COL_SPLIT; k++) {
           UpdateRow(name, temp, Atmp, Mtmp, Ktmp, rho, Etmp, lambda,
                     C[index2(i, k)],
-                    (1 == i) ? NULL : B[index3(i - 1, j, k)], i,
-                    Ctmp, B[index3(i, j, k)]);
+                    (1 == i) ? NULL : B[index2(j, k)], i,
+                    Ctmp, Btmp);
           rename(Ctmp, C[index2(i, k)]);
+          rename(Btmp, B[index2(j, k)]);
         }
         for (h = 1; h <= i; h++) {
           UpdateRowTrafo(name, temp, Atmp, Mtmp, Ktmp, rho, Etmp, lambda,
@@ -483,6 +479,8 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     }
     remove(Atmp);
     free(Atmp);
+    remove(Btmp);
+    free(Btmp);
     remove(Ctmp);
     free(Ctmp);
     remove(Etmp);
@@ -522,7 +520,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     }
     for (k = COL_SPLIT; k >= 1; k--) {
       for (j = 1; j + 1 <= k; j++) {
-        PreClearUp(B[index3(ROW_SPLIT, j, k)], DGamma[index2(ROW_SPLIT, k)],
+        PreClearUp(B[index2(j, k)], DGamma[index2(ROW_SPLIT, k)],
                    Xtmp, R[index2(j, k)]);
         for (l = k; l <= COL_SPLIT; l++) {
           ClearUp(R[index2(j, l)], Xtmp,
@@ -1008,14 +1006,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     for (i = 1; i <= ROW_SPLIT; i++) {
       for (j = 1; j <= COL_SPLIT; j++) {
         remove(C[index2(i, j)]);
-      }
-    }
-    for (h = 1; h <= COL_SPLIT; h++) {
-      for (i = 1; i <= ROW_SPLIT; i++) {
-        for (j = 1; j <= COL_SPLIT; j++) {
-          /* Create the B matrix file names */
-          remove(B[index3(h, i, j)]);
-        }
+        remove(B[index2(i, j)]);
       }
     }
     for (i = 1; i <= ROW_SPLIT; i++) {
@@ -1039,18 +1030,11 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
         }
       }
     }
-    for (h = 1; h <= COL_SPLIT; h++) {
-      for (i = 1; i <= ROW_SPLIT; i++) {
-        for (j = 1; j <= COL_SPLIT; j++) {
-          /* Free the B matrix file names */
-          free(B[index3(h, i, j)]);
-        }
-      }
-    }
     /* Now those without superscripts */
     for (i = 1; i <= ROW_SPLIT; i++) {
       for (j = 1; j <= COL_SPLIT; j++) {
-        /* Free the C, K, DR, DGamma, ERho, EDelta matrix file names */
+        /* Free the B, C, K, R, DR, DGamma, ERho, EDelta matrix file names */
+        free(B[index2(i, j)]);
         free(C[index2(i, j)]);
         free(K[index2(i, j)]);
         free(R[index2(i, j)]);
