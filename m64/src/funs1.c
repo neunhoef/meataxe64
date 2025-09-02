@@ -352,10 +352,6 @@ void fMKR(const char *bs1, int sbs1, const char *bs2, int sbs2,
   free(rifdata);
 }
 
-/*
- * FIXME: The next 3 functions assume they can read the whole file at once
- * That may not be a valid assumption
- */
 uint64_t fColumnRiffleIdentity(const char *bs, int sbs, const char *rm,
                                int srm, const char *out, int sout)
 {
