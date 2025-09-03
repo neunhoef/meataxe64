@@ -393,8 +393,9 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     char *Xtmp = mk_tmp(name, temp, tmp_len);
     char *rho = mk_tmp(name, temp, tmp_len);
     char *lambda = mk_tmp(name, temp, tmp_len);
-    /* An extra K temporary for use by UpdateRowTrafo */
+    /* Extra K, M temporaries for use by UpdateRowTrafo */
     char *Ktmp1 = mk_tmp(name, temp, tmp_len);
+    char *Mtmp1 = mk_tmp(name, temp, tmp_len);
     /* A temp for R to avoid superscripts */
     char *Rtmp = mk_tmp(name, temp, tmp_len);
     /* Ctmp to allow in place update of C */
@@ -466,14 +467,11 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
         for (h = 1; h <= i; h++) {
           UpdateRowTrafo(name, temp, Atmp, Mtmp, Ktmp, rho, Etmp, lambda,
                          K[index2(i, h)],
-                         (1 == i) ? NULL : M[index3(i - 1, j, h)],
+                         (1 == i) ? NULL : M[index3(1, j, h)],
                          EDelta[index2(h, j)], i, h, j,
-                         Ktmp1, M[index3(i, j, h)]);
+                         Ktmp1, Mtmp1);
           rename(Ktmp1, K[index2(i, h)]);
-          /* Don't need input M so remove */
-          if (1 != i) {
-            remove(M[index3(i - 1, j, h)]);
-          }
+          rename(Mtmp1, M[index3(1, j, h)]);
         }
       }
     }
@@ -487,13 +485,12 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     free(Etmp);
     remove(Ktmp);
     free(Ktmp);
-    remove(Mtmp);
-    free(Mtmp);
     remove(rho);
     free(rho);
     remove(lambda);
     free(lambda);
     free(Ktmp1);
+    free(Mtmp1);
     if (verbose) {
       printf("Step 2: lengthening\n");
       fflush(stdout);
@@ -502,11 +499,10 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     for (j = 1; j <= COL_SPLIT; j++) {
       for (h = 1; h <= ROW_SPLIT; h++) {
         RowLengthen(name, temp, tmp_len,
-                    M[index3(ROW_SPLIT, j, h)], ERho[index2(h, j)],
+                    M[index3(1, j, h)], ERho[index2(h, j)],
                     ERho[index2(h, COL_SPLIT)],
-                    M[index3(1 + ROW_SPLIT, j, h)]);
-        /* Don't need input M so remove */
-        remove(M[index3(ROW_SPLIT, j, h)]);
+                    Mtmp);
+        rename(Mtmp, M[index3(1, j, h)]);
       }
     }
     if (verbose) {
@@ -529,13 +525,11 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
           rename(Rtmp, R[index2(j, l)]);
         }
         for (h = 1; h <= ROW_SPLIT; h++) {
-          char *T = mk_tmp(name, temp, tmp_len);
-          ClearUp(M[index3(ROW_SPLIT + 1, j, h)], Xtmp,
-                  M[index3(ROW_SPLIT + 1, k, h)],
-                  T,
+          ClearUp(M[index3(1, j, h)], Xtmp,
+                  M[index3(1, k, h)],
+                  Mtmp,
                   temp);
-          rename(T, M[index3(ROW_SPLIT + 1, j, h)]);
-          free(T);
+          rename(Mtmp, M[index3(1, j, h)]);
         }
       }
     }
@@ -545,6 +539,8 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     }
     remove(Xtmp);
     free(Xtmp);
+    remove(Mtmp);
+    free(Mtmp);
     remove(Rtmp);
     free(Rtmp);
     /* Step 4: splice the multiplier, cleaner and remnant, concatenate the selects */
@@ -873,7 +869,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
 #endif
       for (j = 0; j < COL_SPLIT; j++) {
         header hdr;
-        EPeek(M[index3(ROW_SPLIT + 1, j + 1, 1)], hdr.hdr);
+        EPeek(M[index3(1, j + 1, 1)], hdr.hdr);
         chq[j] = hdr.named.nor;
 #ifndef ROW_BY_ROW
         if (maxrows < (uint64_t)chq[j]) {
@@ -883,7 +879,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
       }
       k = 0;
       for (h = 0; h < ROW_SPLIT; h++) {
-        EPeek(M[index3(ROW_SPLIT + 1, 1, h + 1)], hdr.hdr);
+        EPeek(M[index3(1, 1, h + 1)], hdr.hdr);
         chqcol[h] = hdr.named.noc;
         coqstart[h] = k;
         k += chqcol[h]; 
@@ -909,7 +905,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
 #ifdef ROW_BY_ROW
         uint64_t row_num = 0; /* This will count output rows */
         for (h = 0; h < ROW_SPLIT; h++) {
-          es[h] = ERHdr(M[index3(ROW_SPLIT + 1, j + 1, h + 1)], hdrs[h].hdr);
+          es[h] = ERHdr(M[index3(1, j + 1, h + 1)], hdrs[h].hdr);
           DSSet(f, chqcol[h], &dss[h]); /* Width of this column segment */
           /* We only allocate one row for each fragment */
           bufs[h] = malloc(dss[h].nob); /* Space for this fragment */
@@ -933,12 +929,12 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
         for (h = 0; h < ROW_SPLIT ; h++) {
           ERClose1(es[h], 1);
           free(bufs[h]);
-          remove(M[index3(ROW_SPLIT + 1, j + 1, h + 1)]);
+          remove(M[index3(1, j + 1, h + 1)]);
         }
 #else
         memset(buf, 0, chq[j] * ds.nob);
         for (h = 0; h < ROW_SPLIT; h++) {
-          e1 = ERHdr(M[index3(ROW_SPLIT + 1, j + 1, h + 1)], hdr1.hdr);
+          e1 = ERHdr(M[index3(1, j + 1, h + 1)], hdr1.hdr);
           DSSet(f, chqcol[h], &ds1);
           buf1 = malloc(hdr1.named.nor * ds1.nob);
           ERData(e1, ds1.nob * hdr1.named.nor, (uint8_t *)buf1);
@@ -946,7 +942,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
           free(buf1);
           ERClose1(e1, 1);
           /* M no longer bneeded, so remove */
-          remove(M[index3(ROW_SPLIT + 1, j + 1, h + 1)]);
+          remove(M[index3(1, j + 1, h + 1)]);
         }
         EWData(e, chq[j] * ds.nob, (uint8_t *)buf);
 #endif
