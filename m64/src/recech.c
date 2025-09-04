@@ -399,8 +399,8 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     /* DGtmp, DRtmp to allow in place update of DGamma, DR */
     char *DGtmp = mk_tmp(name, temp, tmp_len);
     char *DRtmp = mk_tmp(name, temp, tmp_len);
-    unsigned int *chp = malloc(COL_SPLIT * sizeof(*chp));
-    unsigned int *chpcol = malloc(COL_SPLIT * sizeof(*chpcol));
+    unsigned int chp[COL_SPLIT];
+    unsigned int chpcol[COL_SPLIT];
 
     if (verbose) {
       printf("Step 0: splitting\n");
@@ -584,13 +584,13 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     }
     /* now write out cleaner  */
     {
-      unsigned int *chr = malloc(ROW_SPLIT * sizeof(*chr));
-      unsigned int *chrcol = malloc(ROW_SPLIT * sizeof(*chrcol));
-      unsigned int *corstart = malloc(ROW_SPLIT * sizeof(*corstart));
-      header hdr, *hdrs;
-      DSPACE ds, *dss;
-      Dfmt *buf, **bufs;
-      EFIL *e, **es;
+      unsigned int chr[ROW_SPLIT];
+      unsigned int chrcol[ROW_SPLIT];
+      unsigned int corstart[ROW_SPLIT];
+      header hdr, hdrs[ROW_SPLIT];
+      DSPACE ds, dss[ROW_SPLIT];
+      Dfmt *buf, *bufs[ROW_SPLIT];
+      EFIL *e, *es[ROW_SPLIT];
       /* First work out the shape */
       /* Row shape */
       for (i = 0; i < ROW_SPLIT; i++) {
@@ -607,11 +607,6 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
       }
       DSSet(f, k, &ds);
       buf = malloc(ds.nob);
-      /* Allocate headers, buffers and DSs */
-      hdrs = malloc(ROW_SPLIT * sizeof(*hdrs));
-      es = malloc(ROW_SPLIT * sizeof(*es));
-      bufs = malloc(ROW_SPLIT * sizeof(*bufs));
-      dss = malloc(ROW_SPLIT * sizeof(*dss));
       hdr.named.rnd1 = 1;
       hdr.named.fdef = f->fdef;
       hdr.named.nor = nor - rank;
@@ -649,16 +644,8 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
         }
       }
       EWClose1(e, mode);
-      free(chr);
-      free(chrcol);
-      free(corstart);
       free(buf);
       /* FIXME: We can remove the cleaner files here and free the strings */
-      /* free headers, buffers and DSs */
-      free(hdrs);
-      free(es);
-      free(bufs);
-      free(dss);
     }
     if (verbose) {
       printf("Writing remnant\n");
@@ -666,11 +653,11 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     }
     /* now write out remnant, very similar to cleaner */
     {
-      unsigned int *colstart = malloc(COL_SPLIT * sizeof(*colstart));
-      header hdr, *hdrs;
-      DSPACE ds, *dss;
-      Dfmt *buf, **bufs;
-      EFIL *e, **es;
+      unsigned int colstart[COL_SPLIT];
+      header hdr, hdrs[COL_SPLIT];
+      DSPACE ds, dss[COL_SPLIT];
+      Dfmt *buf, *bufs[COL_SPLIT];
+      EFIL *e, *es[COL_SPLIT];
       k = 0;
       for (j = 0; j < COL_SPLIT; j++) {
         /* We've already acquired chp and chpcol whilst writing the column select */
@@ -679,11 +666,6 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
       }
       DSSet(f, noc - rank, &ds); /* Width of remnant */
       buf = malloc(ds.nob); /* Space for one output row */
-      /* Allocate headers, buffers and DSs */
-      hdrs = malloc(COL_SPLIT * sizeof(*hdrs));
-      es = malloc(COL_SPLIT * sizeof(*es));
-      bufs = malloc(COL_SPLIT * sizeof(*bufs));
-      dss = malloc(COL_SPLIT * sizeof(*dss));
       hdr.named.rnd1 = 1;
       hdr.named.nor = rank;
       hdr.named.noc = noc - rank;
@@ -732,16 +714,8 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
           free(bufs[k]);
         }
       }
-      free(chp);
-      free(chpcol);
-      free(colstart);
       free(buf);
       EWClose1(e, mode);
-      /* free headers, buffers and DSs */
-      free(hdrs);
-      free(es);
-      free(bufs);
-      free(dss);
     }
     if (verbose) {
       printf("Writing multiplier\n");
@@ -756,13 +730,13 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
      * M super(ROW_SPLIT + 1) sub(j, h)
      */
     {
-      unsigned int *chq = malloc(COL_SPLIT * sizeof(*chq));
-      unsigned int *chqcol = malloc(ROW_SPLIT * sizeof(*chqcol));
-      unsigned int *coqstart = malloc(ROW_SPLIT * sizeof(*coqstart));
-      header hdr, *hdrs;
-      DSPACE ds, *dss;
-      Dfmt *buf, **bufs;
-      EFIL *e, **es;
+      unsigned int chq[COL_SPLIT];
+      unsigned int chqcol[ROW_SPLIT];
+      unsigned int coqstart[ROW_SPLIT];
+      header hdr, hdrs[ROW_SPLIT];
+      DSPACE ds, dss[ROW_SPLIT];
+      Dfmt *buf, *bufs[ROW_SPLIT];
+      EFIL *e, *es[ROW_SPLIT];
       for (j = 0; j < COL_SPLIT; j++) {
         header hdr;
         EPeek(M[index2(j + 1, 1)], hdr.hdr);
@@ -777,11 +751,6 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
       }
       DSSet(f, k, &ds);
       buf = malloc(ds.nob);
-      /* Allocate headers, buffers and DSs */
-      hdrs = malloc(ROW_SPLIT * sizeof(*hdrs));
-      es = malloc(ROW_SPLIT * sizeof(*es));
-      bufs = malloc(ROW_SPLIT * sizeof(*bufs));
-      dss = malloc(ROW_SPLIT * sizeof(*dss));
       hdr.named.rnd1 = 1;
       hdr.named.fdef = f->fdef;
       hdr.named.nor = rank;
@@ -820,14 +789,6 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
       }
       EWClose1(e, mode);
       free(buf);
-      free(chq);
-      free(chqcol);
-      free(coqstart);
-      /* free headers, buffers and DSs */
-      free(hdrs);
-      free(es);
-      free(bufs);
-      free(dss);
     }
     free(f); /* Don't need the field any more */
     /* compute the row-select bit string */
