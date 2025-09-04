@@ -311,13 +311,11 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
    * The temporaries are B, C, D, K, M, R, X
    * Of these M has superscripts as well
    * D comes in 2 halves, DR and DGamma
-   * Some subscripts and superscripts exceed 2, and some go below 1
+   * Some subscripts exceed 2, and some go below 1
    * Those going below 1 are B, D and R
    * For D, the callee using 0 (ClearDown) doesn't reference D in this case
    * Similarly for B, UpdateRow doesn't reference the zero case
    * But step 3 does define and use the superscript 0
-   * Those that exceed 2 occur for M
-   * M in particular can get to 5 in step 3
    * There is also E, a pair of bistrings rho and delta
    * and D, a bitstring gamma and a pair of files R, Rdash
    *
@@ -398,6 +396,8 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     char *Ctmp = mk_tmp(name, temp, tmp_len);
     /* Btmp to allow in place update of B */
     char *Btmp = mk_tmp(name, temp, tmp_len);
+    /* DGtmp to allow in place update of DGamma */
+    char *DGtmp = mk_tmp(name, temp, tmp_len);
     unsigned int *chp = malloc(COL_SPLIT * sizeof(*chp));
     unsigned int *chpcol = malloc(COL_SPLIT * sizeof(*chpcol));
 
@@ -434,13 +434,13 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     /* This step uses temporaries A, E, M, K, rho, lambda */
     for (i = 1; i <= ROW_SPLIT; i++) {
       for (j = 1; j <= COL_SPLIT; j++) {
-        /* It's unclear that this needs a loop index dependent A */
-        /* For the moment I've use Atmp instead */
+        /* This doesn't need a loop index dependent A */
         ClearDown(name, temp, C[index2(i, j)],
-                  (1 == i) ? NULL : DGamma[index2(i - 1, j)],
+                  (1 == i) ? NULL : DGamma[index2(1, j)],
                   (1 == i) ? NULL : DR[index2(i - 1, j)], i,
-                  DGamma[index2(i, j)], DR[index2(i, j)], Atmp,
+                  DGtmp, DR[index2(i, j)], Atmp,
                   Mtmp, Ktmp, rho, Etmp, lambda);
+        rename(DGtmp, DGamma[index2(1, j)]);
         Extend(rho, (1 == j) ? NULL : ERho[index2(i, j - 1)],
                ERho[index2(i, j)], EDelta[index2(i, j)], j);
         for (k = j + 1; k <= COL_SPLIT; k++) {
@@ -478,6 +478,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     free(lambda);
     free(Ktmp1);
     free(Mtmp1);
+    free(DGtmp);
     if (verbose) {
       printf("Step 2: lengthening\n");
       fflush(stdout);
@@ -503,7 +504,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     }
     for (k = COL_SPLIT; k >= 1; k--) {
       for (j = 1; j + 1 <= k; j++) {
-        PreClearUp(B[index2(j, k)], DGamma[index2(ROW_SPLIT, k)],
+        PreClearUp(B[index2(j, k)], DGamma[index2(1, k)],
                    Xtmp, R[index2(j, k)]);
         for (l = k; l <= COL_SPLIT; l++) {
           ClearUp(R[index2(j, l)], Xtmp,
@@ -534,9 +535,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     /* We should be able to find how this is done in mech.c */
     /* compute the column-select bit string */
     /*
-     * We need the superscript ROW_SPLIT of the elements DGamma
-     * for all the column block indixes j from 1 to COL_SPLIT
-     * ie DGamma[index2(ROW_SPLIT, j)] for all j
+     * We need all the column block indexes j from 1 to COL_SPLIT
      * We can also compute some of the values needed for the remnant here
      * Note: this doesn't depend on back cleaning
      */
@@ -550,7 +549,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
       shift = 0;
       for (j = 1; j <= COL_SPLIT; j++) {
         header hdr1;
-        EFIL *e1 = ERHdr(DGamma[index2(ROW_SPLIT, j)], hdr1.hdr);
+        EFIL *e1 = ERHdr(DGamma[index2(1, j)], hdr1.hdr);
         uint64_t in_size = sizeof(uint64_t) * (2 + (hdr1.named.nor + 63) / 64);
         ERData(e1, in_size, (uint8_t *)inbs);
         ERClose1(e1, 1);
@@ -871,14 +870,17 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     }
     for (i = 1; i <= ROW_SPLIT; i++) {
       for (j = 1; j <= COL_SPLIT; j++) {
-        /* Remove the K, R, DR, DGamma, ERho, EDelta matrix files */
+        /* Remove the K, R, DR, ERho, EDelta matrix files */
         remove(R[index2(i, j)]);
         remove(K[index2(i, j)]);
         remove(DR[index2(i, j)]);
-        remove(DGamma[index2(i, j)]);
         remove(ERho[index2(i, j)]);
         remove(EDelta[index2(i, j)]);
       }
+    }
+    for (i = 1; i <= COL_SPLIT; i++) {
+      /* Remove DGamma files */
+      remove(DGamma[index2(1, j)]);
     }
     /* Free filenames */
     for (i = 1; i <= ROW_SPLIT; i++) {
