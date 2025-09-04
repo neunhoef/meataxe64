@@ -373,7 +373,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     char **C = malloc(size2(2, 2));
     char **B = malloc(size2(2, 2));
     /* D, the one in 2 parts */
-    char **DR = malloc(size2(2, 2));
+    char *DR[COL_SPLIT];
     char *DGamma[COL_SPLIT];
     /* E, the other one in two parts */
     char **ERho = malloc(size2(2, 2));
@@ -396,8 +396,9 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     char *Ctmp = mk_tmp(name, temp, tmp_len);
     /* Btmp to allow in place update of B */
     char *Btmp = mk_tmp(name, temp, tmp_len);
-    /* DGtmp to allow in place update of DGamma */
+    /* DGtmp, DRtmp to allow in place update of DGamma, DR */
     char *DGtmp = mk_tmp(name, temp, tmp_len);
+    char *DRtmp = mk_tmp(name, temp, tmp_len);
     unsigned int *chp = malloc(COL_SPLIT * sizeof(*chp));
     unsigned int *chpcol = malloc(COL_SPLIT * sizeof(*chpcol));
 
@@ -410,20 +411,20 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     /* 2-d arrays */
     for (i = 1; i <= ROW_SPLIT; i++) {
       for (j = 1; j <= COL_SPLIT; j++) {
-        /* Create the B, C, K, M, DR, ERho, EDelta matrix file names */
+        /* Create the B, C, K, M, ERho, EDelta matrix file names */
         B[index2(i, j)] = mk_tmp(name, temp, tmp_len);
         C[index2(i, j)] = mk_tmp(name, temp, tmp_len);
         K[index2(i, j)] = mk_tmp(name, temp, tmp_len);
         M[index2(j, i)] = mk_tmp(name, temp, tmp_len);
         R[index2(i, j)] = mk_tmp(name, temp, tmp_len);
-        DR[index2(i, j)] = mk_tmp(name, temp, tmp_len);
         ERho[index2(i, j)] = mk_tmp(name, temp, tmp_len);
         EDelta[index2(i, j)] = mk_tmp(name, temp, tmp_len);
       }
     }
-    /* 1-d arrays, DGamma */
+    /* 1-d arrays, DGamma, DR */
     for (j = 0; j < COL_SPLIT; j++) {
       DGamma[j] = mk_tmp(name, temp, tmp_len);
+      DR[j] = mk_tmp(name, temp, tmp_len);
     }
     {
       const char *C1[] = {C[index2(1, 1)], C[index2(1, 2)],
@@ -441,10 +442,11 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
         /* This doesn't need a loop index dependent A */
         ClearDown(name, temp, C[index2(i, j)],
                   (1 == i) ? NULL : DGamma[j - 1],
-                  (1 == i) ? NULL : DR[index2(i - 1, j)], i,
-                  DGtmp, DR[index2(i, j)], Atmp,
+                  (1 == i) ? NULL : DR[j - 1], i,
+                  DGtmp, DRtmp, Atmp,
                   Mtmp, Ktmp, rho, Etmp, lambda);
         rename(DGtmp, DGamma[j - 1]);
+        rename(DRtmp, DR[j - 1]);
         Extend(rho, (1 == j) ? NULL : ERho[index2(i, j - 1)],
                ERho[index2(i, j)], EDelta[index2(i, j)], j);
         for (k = j + 1; k <= COL_SPLIT; k++) {
@@ -483,6 +485,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     free(Ktmp1);
     free(Mtmp1);
     free(DGtmp);
+    free(DRtmp);
     if (verbose) {
       printf("Step 2: lengthening\n");
       fflush(stdout);
@@ -503,8 +506,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     }
     /* Step 3: back cleaning */
     for (k = 1; k <= COL_SPLIT; k++) {
-      /* Note we run the superscript on R from 1 to 3 rather than 0 to 2 */
-      copy_file(R[index2(k, k)], DR[index2(ROW_SPLIT, k)]);
+      rename(DR[k - 1], R[index2(k, k)]);
     }
     for (k = COL_SPLIT; k >= 1; k--) {
       for (j = 1; j + 1 <= k; j++) {
@@ -877,7 +879,6 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
         /* Remove the K, R, DR, ERho, EDelta matrix files */
         remove(R[index2(i, j)]);
         remove(K[index2(i, j)]);
-        remove(DR[index2(i, j)]);
         remove(ERho[index2(i, j)]);
         remove(EDelta[index2(i, j)]);
       }
@@ -885,6 +886,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     for (i = 0; i < COL_SPLIT; i++) {
       /* Remove DGamma files */
       remove(DGamma[i]);
+      remove(DR[i]);
     }
     /* Free filenames */
     for (i = 1; i <= ROW_SPLIT; i++) {
@@ -895,17 +897,16 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
         free(K[index2(i, j)]);
         free(M[index2(j, i)]);
         free(R[index2(i, j)]);
-        free(DR[index2(i, j)]);
         free(ERho[index2(i, j)]);
         free(EDelta[index2(i, j)]);
       }
     }
     for (j = 0; j < COL_SPLIT; j++) {
       free(DGamma[j]);
+      free(DR[j]);
     }
     free(ERho);
     free(EDelta);
-    free(DR);
     free(R);
     free(M);
     free(K);
