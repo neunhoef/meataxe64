@@ -374,7 +374,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     char **B = malloc(size2(2, 2));
     /* D, the one in 2 parts */
     char **DR = malloc(size2(2, 2));
-    char **DGamma = malloc(size2(2, 2));
+    char *DGamma[COL_SPLIT];
     /* E, the other one in two parts */
     char **ERho = malloc(size2(2, 2));
     char **EDelta = malloc(size2(2, 2));
@@ -407,19 +407,23 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     }
     /* Step 0: chop input using chop to give C at 2 x 2 */
     /* Allocate the temporaries */
+    /* 2-d arrays */
     for (i = 1; i <= ROW_SPLIT; i++) {
       for (j = 1; j <= COL_SPLIT; j++) {
-        /* Create the B, C, K, M, DR, DGamma, ERho, EDelta matrix file names */
+        /* Create the B, C, K, M, DR, ERho, EDelta matrix file names */
         B[index2(i, j)] = mk_tmp(name, temp, tmp_len);
         C[index2(i, j)] = mk_tmp(name, temp, tmp_len);
         K[index2(i, j)] = mk_tmp(name, temp, tmp_len);
         M[index2(j, i)] = mk_tmp(name, temp, tmp_len);
         R[index2(i, j)] = mk_tmp(name, temp, tmp_len);
         DR[index2(i, j)] = mk_tmp(name, temp, tmp_len);
-        DGamma[index2(i, j)] = mk_tmp(name, temp, tmp_len);
         ERho[index2(i, j)] = mk_tmp(name, temp, tmp_len);
         EDelta[index2(i, j)] = mk_tmp(name, temp, tmp_len);
       }
+    }
+    /* 1-d arrays, DGamma */
+    for (j = 0; j < COL_SPLIT; j++) {
+      DGamma[j] = mk_tmp(name, temp, tmp_len);
     }
     {
       const char *C1[] = {C[index2(1, 1)], C[index2(1, 2)],
@@ -436,11 +440,11 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
       for (j = 1; j <= COL_SPLIT; j++) {
         /* This doesn't need a loop index dependent A */
         ClearDown(name, temp, C[index2(i, j)],
-                  (1 == i) ? NULL : DGamma[index2(1, j)],
+                  (1 == i) ? NULL : DGamma[j - 1],
                   (1 == i) ? NULL : DR[index2(i - 1, j)], i,
                   DGtmp, DR[index2(i, j)], Atmp,
                   Mtmp, Ktmp, rho, Etmp, lambda);
-        rename(DGtmp, DGamma[index2(1, j)]);
+        rename(DGtmp, DGamma[j - 1]);
         Extend(rho, (1 == j) ? NULL : ERho[index2(i, j - 1)],
                ERho[index2(i, j)], EDelta[index2(i, j)], j);
         for (k = j + 1; k <= COL_SPLIT; k++) {
@@ -504,7 +508,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     }
     for (k = COL_SPLIT; k >= 1; k--) {
       for (j = 1; j + 1 <= k; j++) {
-        PreClearUp(B[index2(j, k)], DGamma[index2(1, k)],
+        PreClearUp(B[index2(j, k)], DGamma[k - 1],
                    Xtmp, R[index2(j, k)]);
         for (l = k; l <= COL_SPLIT; l++) {
           ClearUp(R[index2(j, l)], Xtmp,
@@ -549,7 +553,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
       shift = 0;
       for (j = 1; j <= COL_SPLIT; j++) {
         header hdr1;
-        EFIL *e1 = ERHdr(DGamma[index2(1, j)], hdr1.hdr);
+        EFIL *e1 = ERHdr(DGamma[j - 1], hdr1.hdr);
         uint64_t in_size = sizeof(uint64_t) * (2 + (hdr1.named.nor + 63) / 64);
         ERData(e1, in_size, (uint8_t *)inbs);
         ERClose1(e1, 1);
@@ -878,28 +882,29 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
         remove(EDelta[index2(i, j)]);
       }
     }
-    for (i = 1; i <= COL_SPLIT; i++) {
+    for (i = 0; i < COL_SPLIT; i++) {
       /* Remove DGamma files */
-      remove(DGamma[index2(1, j)]);
+      remove(DGamma[i]);
     }
     /* Free filenames */
     for (i = 1; i <= ROW_SPLIT; i++) {
       for (j = 1; j <= COL_SPLIT; j++) {
-        /* Free the B, C, K, M, R, DR, DGamma, ERho, EDelta matrix file names */
+        /* Free the B, C, K, M, R, DR, ERho, EDelta matrix file names */
         free(B[index2(i, j)]);
         free(C[index2(i, j)]);
         free(K[index2(i, j)]);
         free(M[index2(j, i)]);
         free(R[index2(i, j)]);
         free(DR[index2(i, j)]);
-        free(DGamma[index2(i, j)]);
         free(ERho[index2(i, j)]);
         free(EDelta[index2(i, j)]);
       }
     }
+    for (j = 0; j < COL_SPLIT; j++) {
+      free(DGamma[j]);
+    }
     free(ERho);
     free(EDelta);
-    free(DGamma);
     free(DR);
     free(R);
     free(M);
