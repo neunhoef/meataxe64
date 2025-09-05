@@ -369,7 +369,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     unsigned int h, i, j, k, l;
     char **M = malloc(size2(2, 2));
     char **R = malloc(size2(2, 2));
-    char **K = malloc(size2(2, 2));
+    char *K[ROW_SPLIT][ROW_SPLIT];
     char *C[ROW_SPLIT][COL_SPLIT];
     char *B[COL_SPLIT][COL_SPLIT];
     /* D, the one in 2 parts */
@@ -413,16 +413,20 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
       for (j = 1; j <= COL_SPLIT; j++) {
         /* Create the B, C, K, M, ERho, EDelta matrix file names */
         C[i - 1][j - 1] = mk_tmp(name, temp, tmp_len);
-        K[index2(i, j)] = mk_tmp(name, temp, tmp_len);
         M[index2(j, i)] = mk_tmp(name, temp, tmp_len);
         R[index2(i, j)] = mk_tmp(name, temp, tmp_len);
         ERho[i - 1][j - 1] = mk_tmp(name, temp, tmp_len);
         EDelta[i - 1][j - 1] = mk_tmp(name, temp, tmp_len);
       }
     }
-    for (i = 1; i <= COL_SPLIT; i++) {
-      for (j = 1; j <= COL_SPLIT; j++) {
-        B[i - 1][j - 1] = mk_tmp(name, temp, tmp_len);
+    for (i = 0; i < COL_SPLIT; i++) {
+      for (j = 0; j < COL_SPLIT; j++) {
+        B[i][j] = mk_tmp(name, temp, tmp_len);
+      }
+    }
+    for (i = 0; i < ROW_SPLIT; i++) {
+      for (j = 0; j < ROW_SPLIT; j++) {
+        K[i][j] = mk_tmp(name, temp, tmp_len);
       }
     }
     /* 1-d arrays, DGamma, DR */
@@ -463,11 +467,11 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
         }
         for (h = 1; h <= i; h++) {
           UpdateRowTrafo(name, temp, Atmp, Mtmp, Ktmp, rho, Etmp, lambda,
-                         K[index2(i, h)],
+                         K[i - 1][h - 1],
                          (1 == i) ? NULL : M[index2(j, h)],
                          EDelta[h - 1][j - 1], i, h, j,
                          Ktmp1, Mtmp1);
-          rename(Ktmp1, K[index2(i, h)]);
+          rename(Ktmp1, K[i - 1][h - 1]);
           rename(Mtmp1, M[index2(j, h)]);
         }
       }
@@ -598,13 +602,13 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
       /* First work out the shape */
       /* Row shape */
       for (i = 0; i < ROW_SPLIT; i++) {
-        EPeek(K[index2(i + 1, 1)], hdr.hdr);
+        EPeek(K[i][0], hdr.hdr);
         chr[i] = hdr.named.nor;
       }
       /* Column shape */
       k = 0;
       for (h = 0; h < ROW_SPLIT; h++) {
-        EPeek(K[index2(ROW_SPLIT, h + 1)], hdr.hdr);
+        EPeek(K[ROW_SPLIT - 1][h], hdr.hdr);
         chrcol[h] = hdr.named.noc;
         corstart[h] = k;
         k += chrcol[h];
@@ -620,7 +624,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
       for (i = 0; i < ROW_SPLIT; i++) {
         uint64_t row_num = 0; /* This will count output rows */
         for (h = 0; h <= i; h++) {
-          es[h] = ERHdr(K[index2(i + 1, h + 1)], hdrs[h].hdr);
+          es[h] = ERHdr(K[i][h], hdrs[h].hdr);
           DSSet(f, chrcol[h], &dss[h]); /* Width of this column segment */
           /* We only allocate one row for each fragment */
           bufs[h] = malloc(dss[h].nob); /* Space for this fragment */
@@ -644,7 +648,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
         for (h = 0; h <= i; h++) {
           ERClose1(es[h], 1);
           free(bufs[h]);
-          remove(K[index2(i + 1, h + 1)]);
+          remove(K[i][h]);
         }
       }
       EWClose1(e, mode);
@@ -843,9 +847,13 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
       for (j = 1; j <= COL_SPLIT; j++) {
         /* Remove the K, R, DR, ERho, EDelta matrix files */
         remove(R[index2(i, j)]);
-        remove(K[index2(i, j)]);
         remove(ERho[i - 1][j - 1]);
         remove(EDelta[i - 1][j - 1]);
+      }
+    }
+    for (i = 0; i < ROW_SPLIT; i++) {
+      for (j = 0; j < ROW_SPLIT; j++) {
+        remove(K[i][j]);
       }
     }
     for (i = 0; i < COL_SPLIT; i++) {
@@ -859,11 +867,15 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
         /* Free the B, C, K, M, R, DR, ERho, EDelta matrix file names */
         free(B[i - 1][j - 1]);
         free(C[i - 1][j - 1]);
-        free(K[index2(i, j)]);
         free(M[index2(j, i)]);
         free(R[index2(i, j)]);
         free(ERho[i - 1][j - 1]);
         free(EDelta[i - 1][j - 1]);
+      }
+    }
+    for (i = 0; i < ROW_SPLIT; i++) {
+      for (j = 0; j < ROW_SPLIT; j++) {
+        free(K[i][j]);
       }
     }
     for (j = 0; j < COL_SPLIT; j++) {
@@ -872,7 +884,6 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     }
     free(R);
     free(M);
-    free(K);
     return rank;
   }
 }
