@@ -117,7 +117,21 @@ void fRandomMatrix(const char *m1, int s1, uint64_t fdef,
  * in fFullEchelize aren't required here
  * The returned value is the rank
  */
-extern uint64_t fRecurse_ECH(int first, /* Top level call? */
+
+/*
+ * Ways to use fRecurse_ECH, depending on what we want at the end
+ * All recursions need to use full EC
+ */
+
+typedef enum recech_enum {
+  RN, /* Just get the rank, in the easiest possible way */
+  PE, /* Get the column select and remnant */
+  NS, /* Get the cleaner and column riffle in identity */
+  EC, /* Full echelise */
+  IV  /* Get the multiplier and negate */
+} recech_enum;
+
+extern uint64_t fRecurse_ECH(recech_enum ren, int first, /* Top level call? */
                              const char *name, /* Calling program name */
                              const char *temp, /* Base for creating tmp files */
                              const char *input, int in_mode, const char *row_sel,

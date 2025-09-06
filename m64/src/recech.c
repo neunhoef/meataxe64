@@ -98,7 +98,7 @@ static void ClearDown(const char *name, const char *temp,
 {
   if ( 1 == i) {
     /* First row, just echelise */
-    uint64_t r = fRecurse_ECH(0, name, temp, c, 1, rho, dgout, m, k, drout);
+    uint64_t r = fRecurse_ECH(EC, 0, name, temp, c, 1, rho, dgout, m, k, drout);
     NOT_USED(r);
   } else {
     unsigned int str_len = strlen(temp);
@@ -110,7 +110,7 @@ static void ClearDown(const char *name, const char *temp,
     char *nsel2 = mk_tmp(name, temp, str_len);
     fColumnExtract(dgin, 1, c, 1, a, 1, nsel, 1);
     fMultiplyAdd(temp, a, 1, drin, 1, nsel, 1, H, 1);
-    fRecurse_ECH(0, name, temp, H, 1, rho, gamma, m, k, R);
+    fRecurse_ECH(EC, 0, name, temp, H, 1, rho, gamma, m, k, R);
     fColumnExtract(gamma, 1, drin, 1, e, 1, nsel2, 1);
     fMultiplyAdd(temp, e, 1, R, 1, nsel2, 1, nsel1, 1);
     fPivotCombine(dgin, 1, gamma, 1, dgout, 1, lam, 1);
@@ -292,7 +292,7 @@ static void UpdateRowTrafo(const char *name, const char *temp,
  * This is basically a reimplementation of the contents of mech.c
  * using files and recursion rather than memory objects and iteration
  */
-uint64_t fRecurse_ECH(int first, /* Is this top level */
+uint64_t fRecurse_ECH(recech_enum ren, int first, /* Is this top level */
                       const char *name, /* The name of the calling program */
                       const char *temp, /* Base for creating tmp files */
                       const char *input, int in_mode, const char *row_sel,
@@ -338,7 +338,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
    * with less than 50 rows and columns
    */
   /* Step -1: Check we can actually split, ie nor, noc >= 2 */
-  int mode = (1 == first) ? 0 : 1;
+  int io_mode = (1 == first) ? 0 : 1;
   header hdr;
   uint64_t nor;
   uint64_t noc;
@@ -346,6 +346,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
   FIELD *f;
   uint64_t size;
   
+  NOT_USED(ren);
   EPeek(input, hdr.hdr);
   nor = hdr.named.nor;
   noc = hdr.named.noc;
@@ -358,8 +359,8 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
   if (0 == first && 0 == size) {
     /* Too small for us */
     free(f);
-    return fFullEchelize(temp, input, mode, row_sel, mode, col_sel, mode,
-                         multiplier, mode, cleaner, mode, remnant, mode);
+    return fFullEchelize(temp, input, io_mode, row_sel, io_mode, col_sel, io_mode,
+                         multiplier, io_mode, cleaner, io_mode, remnant, io_mode);
   } else {
     uint64_t rank = 0;
     unsigned int h, i, j, k, l;
@@ -578,7 +579,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
       hdr.hdr[4] = 0;
       e = EWHdr(col_sel, hdr.hdr);
       EWData(e, cslen, (uint8_t *)bscs);
-      EWClose1(e, mode);
+      EWClose1(e, io_mode);
       free(bscs);
       free(inbs);
     }
@@ -647,7 +648,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
           remove(K[i][h]);
         }
       }
-      EWClose1(e, mode);
+      EWClose1(e, io_mode);
       free(buf);
       /* FIXME: We can remove the cleaner files here and free the strings */
     }
@@ -719,7 +720,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
         }
       }
       free(buf);
-      EWClose1(e, mode);
+      EWClose1(e, io_mode);
     }
     if (verbose) {
       printf("Writing multiplier\n");
@@ -791,7 +792,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
           remove(M[j][h]);
         }
       }
-      EWClose1(e, mode);
+      EWClose1(e, io_mode);
       free(buf);
     }
     free(f); /* Don't need the field any more */
@@ -822,7 +823,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
       hdr.hdr[4] = 0;
       e = EWHdr(row_sel, hdr.hdr);
       EWData(e, rslen, (uint8_t *)bsrs);
-      EWClose1(e, mode);
+      EWClose1(e, io_mode);
       free(bsrs);
       free(inbs);
     }
