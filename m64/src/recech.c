@@ -288,17 +288,9 @@ static void UpdateRowTrafo(const char *name, const char *temp,
 #define ROW_SPLIT 2
 #define COL_SPLIT 2
 
-/* A macro to convert a nx2 2d array to 2nx1, plus the size */
-#define index2(i, j) ((COL_SPLIT * ((i) - 1)) + (j) - 1)
-#define size2(i, j) ((i) * (j) * sizeof(const char *))
-
-/* A macro to convert a nx2x2 3d array to 4nx1 */
-#define index3(h, i, j) ((ROW_SPLIT * COL_SPLIT * ((h) - 1)) + (COL_SPLIT * ((i) - 1)) + (j) - 1)
-#define size3(h, i, j) ((h) * (i) * (j) * sizeof(const char *))
-
 /*
  * This is basically a reimplementation of the contents of mech.c
- * using filres and recursion rather than memory objects and iteration
+ * using files and recursion rather than memory objects and iteration
  */
 uint64_t fRecurse_ECH(int first, /* Is this top level */
                       const char *name, /* The name of the calling program */
@@ -312,16 +304,14 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
    * It uses a great deal of temporary files
    * Some have 2 subscripts, and some have 2 subscripts and a superscript
    * For those with a superscript, that will be the slowest changing
-   * The temporaries are A, B, C, D, K, M, R, X
-   * Of these B, C, K, M, R have superscripts as well
+   * The temporaries are B, C, D, K, M, R, X
+   * Of these M has superscripts as well
    * D comes in 2 halves, DR and DGamma
-   * Some subscripts and superscripts exceed 2, and some go below 1
+   * Some subscripts exceed 2, and some go below 1
    * Those going below 1 are B, D and R
    * For D, the callee using 0 (ClearDown) doesn't reference D in this case
    * Similarly for B, UpdateRow doesn't reference the zero case
    * But step 3 does define and use the superscript 0
-   * Those that exceed 2 occur for C, K, M
-   * M in particular can get to 5 in step 3
    * There is also E, a pair of bistrings rho and delta
    * and D, a bitstring gamma and a pair of files R, Rdash
    *
@@ -373,17 +363,17 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
   } else {
     uint64_t rank = 0;
     unsigned int h, i, j, k, l;
-    char **B = malloc(size3(2, 2, 2)); /* Max super 2 */
-    char **M = malloc(size3(3, 2, 2)); /* Max super 3 */
-    char **R = malloc(size2(2, 2));
-    char **K = malloc(size2(2, 2));
-    char **C = malloc(size2(2, 2));
+    char *M[COL_SPLIT][ROW_SPLIT];
+    char *R[COL_SPLIT][COL_SPLIT];
+    char *K[ROW_SPLIT][ROW_SPLIT];
+    char *C[ROW_SPLIT][COL_SPLIT];
+    char *B[COL_SPLIT][COL_SPLIT];
     /* D, the one in 2 parts */
-    char **DR = malloc(size2(2, 2));
-    char **DGamma = malloc(size2(2, 2));
+    char *DR[COL_SPLIT];
+    char *DGamma[COL_SPLIT];
     /* E, the other one in two parts */
-    char **ERho = malloc(size2(2, 2));
-    char **EDelta = malloc(size2(2, 2));
+    char *ERho[ROW_SPLIT][COL_SPLIT];
+    char *EDelta[ROW_SPLIT][COL_SPLIT];
     unsigned int tmp_len = strlen(temp);
     /* These tmps are the A strucutre in the Chief algorithm */
     char *Atmp = mk_tmp(name, temp, tmp_len);
@@ -393,14 +383,20 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     char *Xtmp = mk_tmp(name, temp, tmp_len);
     char *rho = mk_tmp(name, temp, tmp_len);
     char *lambda = mk_tmp(name, temp, tmp_len);
-    /* An extra K temporary for use by UpdateRowTrafo */
+    /* Extra K, M temporaries for use by UpdateRowTrafo */
     char *Ktmp1 = mk_tmp(name, temp, tmp_len);
+    char *Mtmp1 = mk_tmp(name, temp, tmp_len);
     /* A temp for R to avoid superscripts */
     char *Rtmp = mk_tmp(name, temp, tmp_len);
     /* Ctmp to allow in place update of C */
     char *Ctmp = mk_tmp(name, temp, tmp_len);
-    unsigned int *chp = malloc(COL_SPLIT * sizeof(*chp));
-    unsigned int *chpcol = malloc(COL_SPLIT * sizeof(*chpcol));
+    /* Btmp to allow in place update of B */
+    char *Btmp = mk_tmp(name, temp, tmp_len);
+    /* DGtmp, DRtmp to allow in place update of DGamma, DR */
+    char *DGtmp = mk_tmp(name, temp, tmp_len);
+    char *DRtmp = mk_tmp(name, temp, tmp_len);
+    unsigned int chp[COL_SPLIT];
+    unsigned int chpcol[COL_SPLIT];
 
     if (verbose) {
       printf("Step 0: splitting\n");
@@ -408,39 +404,35 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     }
     /* Step 0: chop input using chop to give C at 2 x 2 */
     /* Allocate the temporaries */
-    /* First those with superscripts */
-    for (h = 1; h <= ROW_SPLIT + 1; h++) {
-      for (i = 1; i <= ROW_SPLIT; i++) {
-        for (j = 1; j <= COL_SPLIT; j++) {
-          /* Create the M matrix file names */
-          M[index3(h, j, i)] = mk_tmp(name, temp, tmp_len);
-        }
+    /* 2-d arrays */
+    for (i = 0; i < ROW_SPLIT; i++) {
+      for (j = 0; j < COL_SPLIT; j++) {
+        /* Create the B, C, K, M, ERho, EDelta matrix file names */
+        C[i][j] = mk_tmp(name, temp, tmp_len);
+        M[j][i] = mk_tmp(name, temp, tmp_len);
+        ERho[i][j] = mk_tmp(name, temp, tmp_len);
+        EDelta[i][j] = mk_tmp(name, temp, tmp_len);
       }
     }
-    for (h = 1; h <= COL_SPLIT; h++) {
-      for (i = 1; i <= ROW_SPLIT; i++) {
-        for (j = 1; j <= COL_SPLIT; j++) {
-          /* Create the B matrix file names */
-          B[index3(h, i, j)] = mk_tmp(name, temp, tmp_len);
-        }
+    for (i = 0; i < COL_SPLIT; i++) {
+      for (j = 0; j < COL_SPLIT; j++) {
+        B[i][j] = mk_tmp(name, temp, tmp_len);
+        R[i][j] = mk_tmp(name, temp, tmp_len);
       }
     }
-    /* Now those without superscripts */
-    for (i = 1; i <= ROW_SPLIT; i++) {
-      for (j = 1; j <= COL_SPLIT; j++) {
-        /* Create the C, K, DR, DGamma, ERho, EDelta matrix file names */
-        C[index2(i, j)] = mk_tmp(name, temp, tmp_len);
-        K[index2(i, j)] = mk_tmp(name, temp, tmp_len);
-        R[index2(i, j)] = mk_tmp(name, temp, tmp_len);
-        DR[index2(i, j)] = mk_tmp(name, temp, tmp_len);
-        DGamma[index2(i, j)] = mk_tmp(name, temp, tmp_len);
-        ERho[index2(i, j)] = mk_tmp(name, temp, tmp_len);
-        EDelta[index2(i, j)] = mk_tmp(name, temp, tmp_len);
+    for (i = 0; i < ROW_SPLIT; i++) {
+      for (j = 0; j < ROW_SPLIT; j++) {
+        K[i][j] = mk_tmp(name, temp, tmp_len);
       }
+    }
+    /* 1-d arrays, DGamma, DR */
+    for (j = 0; j < COL_SPLIT; j++) {
+      DGamma[j] = mk_tmp(name, temp, tmp_len);
+      DR[j] = mk_tmp(name, temp, tmp_len);
     }
     {
-      const char *C1[] = {C[index2(1, 1)], C[index2(1, 2)],
-        C[index2(2, 1)], C[index2(2, 2)]}; /* Needs work if bigger split */
+      const char *C1[] = {C[0][0], C[0][1],
+        C[1][0], C[1][1]}; /* Needs work if bigger split */
       chop(input, 2, C1, in_mode);
     }
     if (verbose) {
@@ -451,51 +443,53 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     /* This step uses temporaries A, E, M, K, rho, lambda */
     for (i = 1; i <= ROW_SPLIT; i++) {
       for (j = 1; j <= COL_SPLIT; j++) {
-        /* It's unclear that this needs a loop index dependent A */
-        /* For the moment I've use Atmp instead */
-        ClearDown(name, temp, C[index2(i, j)],
-                  (1 == i) ? NULL : DGamma[index2(i - 1, j)],
-                  (1 == i) ? NULL : DR[index2(i - 1, j)], i,
-                  DGamma[index2(i, j)], DR[index2(i, j)], Atmp,
+        /* This doesn't need a loop index dependent A */
+        ClearDown(name, temp, C[i - 1][j - 1],
+                  (1 == i) ? NULL : DGamma[j - 1],
+                  (1 == i) ? NULL : DR[j - 1], i,
+                  DGtmp, DRtmp, Atmp,
                   Mtmp, Ktmp, rho, Etmp, lambda);
-        Extend(rho, (1 == j) ? NULL : ERho[index2(i, j - 1)],
-               ERho[index2(i, j)], EDelta[index2(i, j)], j);
+        rename(DGtmp, DGamma[j - 1]);
+        rename(DRtmp, DR[j - 1]);
+        Extend(rho, (1 == j) ? NULL : ERho[i - 1][j - 2],
+               ERho[i - 1][j - 1], EDelta[i - 1][j - 1], j);
         for (k = j + 1; k <= COL_SPLIT; k++) {
           UpdateRow(name, temp, Atmp, Mtmp, Ktmp, rho, Etmp, lambda,
-                    C[index2(i, k)],
-                    (1 == i) ? NULL : B[index3(i - 1, j, k)], i,
-                    Ctmp, B[index3(i, j, k)]);
-          rename(Ctmp, C[index2(i, k)]);
+                    C[i - 1][k - 1],
+                    (1 == i) ? NULL : B[j - 1][k - 1], i,
+                    Ctmp, Btmp);
+          rename(Ctmp, C[i - 1][k - 1]);
+          rename(Btmp, B[j - 1][k - 1]);
         }
         for (h = 1; h <= i; h++) {
           UpdateRowTrafo(name, temp, Atmp, Mtmp, Ktmp, rho, Etmp, lambda,
-                         K[index2(i, h)],
-                         (1 == i) ? NULL : M[index3(i - 1, j, h)],
-                         EDelta[index2(h, j)], i, h, j,
-                         Ktmp1, M[index3(i, j, h)]);
-          rename(Ktmp1, K[index2(i, h)]);
-          /* Don't need input M so remove */
-          if (1 != i) {
-            remove(M[index3(i - 1, j, h)]);
-          }
+                         K[i - 1][h - 1],
+                         (1 == i) ? NULL : M[j - 1][h - 1],
+                         EDelta[h - 1][j - 1], i, h, j,
+                         Ktmp1, Mtmp1);
+          rename(Ktmp1, K[i - 1][h - 1]);
+          rename(Mtmp1, M[j - 1][h - 1]);
         }
       }
     }
     remove(Atmp);
     free(Atmp);
+    remove(Btmp);
+    free(Btmp);
     remove(Ctmp);
     free(Ctmp);
     remove(Etmp);
     free(Etmp);
     remove(Ktmp);
     free(Ktmp);
-    remove(Mtmp);
-    free(Mtmp);
     remove(rho);
     free(rho);
     remove(lambda);
     free(lambda);
     free(Ktmp1);
+    free(Mtmp1);
+    free(DGtmp);
+    free(DRtmp);
     if (verbose) {
       printf("Step 2: lengthening\n");
       fflush(stdout);
@@ -504,11 +498,10 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     for (j = 1; j <= COL_SPLIT; j++) {
       for (h = 1; h <= ROW_SPLIT; h++) {
         RowLengthen(name, temp, tmp_len,
-                    M[index3(ROW_SPLIT, j, h)], ERho[index2(h, j)],
-                    ERho[index2(h, COL_SPLIT)],
-                    M[index3(1 + ROW_SPLIT, j, h)]);
-        /* Don't need input M so remove */
-        remove(M[index3(ROW_SPLIT, j, h)]);
+                    M[j - 1][h - 1], ERho[h - 1][j - 1],
+                    ERho[h - 1][COL_SPLIT - 1],
+                    Mtmp);
+        rename(Mtmp, M[j - 1][h - 1]);
       }
     }
     if (verbose) {
@@ -516,28 +509,25 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
       fflush(stdout);
     }
     /* Step 3: back cleaning */
-    for (k = 1; k <= COL_SPLIT; k++) {
-      /* Note we run the superscript on R from 1 to 3 rather than 0 to 2 */
-      copy_file(R[index2(k, k)], DR[index2(ROW_SPLIT, k)]);
+    for (k = 0; k < COL_SPLIT; k++) {
+      rename(DR[k], R[k][k]);
     }
     for (k = COL_SPLIT; k >= 1; k--) {
       for (j = 1; j + 1 <= k; j++) {
-        PreClearUp(B[index3(ROW_SPLIT, j, k)], DGamma[index2(ROW_SPLIT, k)],
-                   Xtmp, R[index2(j, k)]);
+        PreClearUp(B[j - 1][k - 1], DGamma[k - 1],
+                   Xtmp, R[j - 1][k - 1]);
         for (l = k; l <= COL_SPLIT; l++) {
-          ClearUp(R[index2(j, l)], Xtmp,
-                  R[index2(k, l)], Rtmp,
+          ClearUp(R[j - 1][l - 1], Xtmp,
+                  R[k - 1][l - 1], Rtmp,
                   temp);
-          rename(Rtmp, R[index2(j, l)]);
+          rename(Rtmp, R[j - 1][l - 1]);
         }
         for (h = 1; h <= ROW_SPLIT; h++) {
-          char *T = mk_tmp(name, temp, tmp_len);
-          ClearUp(M[index3(ROW_SPLIT + 1, j, h)], Xtmp,
-                  M[index3(ROW_SPLIT + 1, k, h)],
-                  T,
+          ClearUp(M[j - 1][h - 1], Xtmp,
+                  M[k - 1][h - 1],
+                  Mtmp,
                   temp);
-          rename(T, M[index3(ROW_SPLIT + 1, j, h)]);
-          free(T);
+          rename(Mtmp, M[j - 1][h - 1]);
         }
       }
     }
@@ -547,15 +537,15 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     }
     remove(Xtmp);
     free(Xtmp);
+    remove(Mtmp);
+    free(Mtmp);
     remove(Rtmp);
     free(Rtmp);
     /* Step 4: splice the multiplier, cleaner and remnant, concatenate the selects */
     /* We should be able to find how this is done in mech.c */
     /* compute the column-select bit string */
     /*
-     * We need the superscript ROW_SPLIT of the elements DGamma
-     * for all the column block indixes j from 1 to COL_SPLIT
-     * ie DGamma[index2(ROW_SPLIT, j)] for all j
+     * We need all the column block indexes j from 1 to COL_SPLIT
      * We can also compute some of the values needed for the remnant here
      * Note: this doesn't depend on back cleaning
      */
@@ -569,7 +559,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
       shift = 0;
       for (j = 1; j <= COL_SPLIT; j++) {
         header hdr1;
-        EFIL *e1 = ERHdr(DGamma[index2(ROW_SPLIT, j)], hdr1.hdr);
+        EFIL *e1 = ERHdr(DGamma[j - 1], hdr1.hdr);
         uint64_t in_size = sizeof(uint64_t) * (2 + (hdr1.named.nor + 63) / 64);
         ERData(e1, in_size, (uint8_t *)inbs);
         ERClose1(e1, 1);
@@ -596,54 +586,31 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
       printf("Writing cleaner\n");
       fflush(stdout);
     }
-#define ROW_BY_ROW
     /* now write out cleaner  */
     {
-      unsigned int *chr = malloc(ROW_SPLIT * sizeof(*chr));
-      unsigned int *chrcol = malloc(ROW_SPLIT * sizeof(*chrcol));
-      unsigned int *corstart = malloc(ROW_SPLIT * sizeof(*corstart));
-#ifdef ROW_BY_ROW
-      header hdr, *hdrs;
-      DSPACE ds, *dss;
-      Dfmt *buf, **bufs;
-      EFIL *e, **es;
-#else
-      uint64_t maxrows = 0;
-      header hdr, hdr2;
-      DSPACE ds, ds1;
-      Dfmt *buf, *buf1;
-      EFIL *e;
-#endif
+      unsigned int chr[ROW_SPLIT];
+      unsigned int chrcol[ROW_SPLIT];
+      unsigned int corstart[ROW_SPLIT];
+      header hdr, hdrs[ROW_SPLIT];
+      DSPACE ds, dss[ROW_SPLIT];
+      Dfmt *buf, *bufs[ROW_SPLIT];
+      EFIL *e, *es[ROW_SPLIT];
       /* First work out the shape */
       /* Row shape */
       for (i = 0; i < ROW_SPLIT; i++) {
-        EPeek(K[index2(i + 1, 1)], hdr.hdr);
+        EPeek(K[i][0], hdr.hdr);
         chr[i] = hdr.named.nor;
-#ifndef ROW_BY_ROW
-        if (maxrows < (uint64_t)chr[i]) {
-          maxrows = chr[i];
-        }
-#endif
       }
       /* Column shape */
       k = 0;
       for (h = 0; h < ROW_SPLIT; h++) {
-        EPeek(K[index2(ROW_SPLIT, h + 1)], hdr.hdr);
+        EPeek(K[ROW_SPLIT - 1][h], hdr.hdr);
         chrcol[h] = hdr.named.noc;
         corstart[h] = k;
         k += chrcol[h];
       }
       DSSet(f, k, &ds);
-#ifdef ROW_BY_ROW
       buf = malloc(ds.nob);
-      /* Allocate headers, buffers and DSs */
-      hdrs = malloc(ROW_SPLIT * sizeof(*hdrs));
-      es = malloc(ROW_SPLIT * sizeof(*es));
-      bufs = malloc(ROW_SPLIT * sizeof(*bufs));
-      dss = malloc(ROW_SPLIT * sizeof(*dss));
-#else
-      buf = malloc(ds.nob * maxrows);
-#endif
       hdr.named.rnd1 = 1;
       hdr.named.fdef = f->fdef;
       hdr.named.nor = nor - rank;
@@ -651,10 +618,9 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
       hdr.named.rnd2 = 0;
       e = EWHdr(cleaner, hdr.hdr);
       for (i = 0; i < ROW_SPLIT; i++) {
-#ifdef ROW_BY_ROW
         uint64_t row_num = 0; /* This will count output rows */
         for (h = 0; h <= i; h++) {
-          es[h] = ERHdr(K[index2(i + 1, h + 1)], hdrs[h].hdr);
+          es[h] = ERHdr(K[i][h], hdrs[h].hdr);
           DSSet(f, chrcol[h], &dss[h]); /* Width of this column segment */
           /* We only allocate one row for each fragment */
           bufs[h] = malloc(dss[h].nob); /* Space for this fragment */
@@ -678,36 +644,12 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
         for (h = 0; h <= i; h++) {
           ERClose1(es[h], 1);
           free(bufs[h]);
-          remove(K[index2(i + 1, h + 1)]);
+          remove(K[i][h]);
         }
-#else
-        memset(buf, 0, chr[i] * ds.nob);
-        for (h = 0; h <= i; h++) {
-          EFIL *e2 = ERHdr(K[index2(i + 1, h + 1)], hdr2.hdr);
-          DSSet(f, chrcol[h], &ds1);
-          buf1 = malloc(ds1.nob * hdr2.named.nor);
-          ERData(e2, ds1.nob * hdr2.named.nor, (uint8_t *)buf1);
-          DPaste(&ds1, buf1, chr[i], corstart[h], &ds, buf);
-          ERClose1(e2, 1);
-          free(buf1);
-          remove(K[index2(i + 1, h + 1)]);
-        }
-        EWData(e, chr[i] * ds.nob, (uint8_t *)buf);
-#endif
       }
       EWClose1(e, mode);
-      free(chr);
-      free(chrcol);
-      free(corstart);
       free(buf);
       /* FIXME: We can remove the cleaner files here and free the strings */
-#ifdef ROW_BY_ROW
-      /* free headers, buffers and DSs */
-      free(hdrs);
-      free(es);
-      free(bufs);
-      free(dss);
-#endif
     }
     if (verbose) {
       printf("Writing remnant\n");
@@ -715,46 +657,19 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     }
     /* now write out remnant, very similar to cleaner */
     {
-      unsigned int *colstart = malloc(COL_SPLIT * sizeof(*colstart));
-#ifdef ROW_BY_ROW
-      header hdr, *hdrs;
-      DSPACE ds, *dss;
-      Dfmt *buf, **bufs;
-      EFIL *e, **es;
-#else
-      uint64_t maxrows = 0;
-      header hdr, hdr2;
-      DSPACE ds, ds1;
-      Dfmt *buf, *buf1;
-      EFIL *e;
-#endif
+      unsigned int colstart[COL_SPLIT];
+      header hdr, hdrs[COL_SPLIT];
+      DSPACE ds, dss[COL_SPLIT];
+      Dfmt *buf, *bufs[COL_SPLIT];
+      EFIL *e, *es[COL_SPLIT];
       k = 0;
       for (j = 0; j < COL_SPLIT; j++) {
         /* We've already acquired chp and chpcol whilst writing the column select */
-#ifndef ROW_BY_ROW
-        if (maxrows < chp[j]) {
-          /*
-           * Every block in a column has the same number of columns
-           * This is an upper bound on the rank of any block
-           * and hence an upper bound on the number of rows in its remnant
-           */
-          maxrows = chp[j];
-        }
-#endif
         colstart[j] = k;
         k += chpcol[j];
       }
       DSSet(f, noc - rank, &ds); /* Width of remnant */
-#ifdef ROW_BY_ROW
       buf = malloc(ds.nob); /* Space for one output row */
-      /* Allocate headers, buffers and DSs */
-      hdrs = malloc(COL_SPLIT * sizeof(*hdrs));
-      es = malloc(COL_SPLIT * sizeof(*es));
-      bufs = malloc(COL_SPLIT * sizeof(*bufs));
-      dss = malloc(COL_SPLIT * sizeof(*dss));
-#else
-      buf = malloc(ds.nob * maxrows); /* Space for width * depth */
-#endif
       hdr.named.rnd1 = 1;
       hdr.named.nor = rank;
       hdr.named.noc = noc - rank;
@@ -774,11 +689,10 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
          * rather than a single hdr2, and a corresponding array of EFIL
          * rather than just e2
          */
-#ifdef ROW_BY_ROW
         uint64_t row_num = 0; /* This will count output rows */
         /* Read in all the headers for this row */
         for (k = j; k < COL_SPLIT; k++) {
-          es[k] = ERHdr(R[index2(j + 1, k + 1)], hdrs[k].hdr);
+          es[k] = ERHdr(R[j][k], hdrs[k].hdr);
           DSSet(f, chpcol[k], &dss[k]); /* Width of this column segment */
           /* We only allocate one row for each fragment */
           bufs[k] = malloc(dss[k].nob); /* Space for this fragment */
@@ -803,47 +717,9 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
           ERClose1(es[k], 1);
           free(bufs[k]);
         }
-#else
-        memset(buf, 0, chp[j] * ds.nob); /* Zero block of output */
-        for (k = j; k < COL_SPLIT; k++) {
-          /*
-           * k indexs across column blocks
-           * The final remnant is block upper triangular
-           * so as we go down we have less and less blocks to paste together
-           */
-          /* Get R[J,k] latest version and paste in */
-          EFIL *e2;
-          /* This is all a bit tricky
-           * I think the possible superscript gets higher
-           * the bigger the splits. The on diagonal fragment is superscript 0
-           * the others come from UpdateRowTrafo and have maximum superscript
-           */
-          e2 = ERHdr(R[index2(j + 1, k + 1)], hdr2.hdr);
-          DSSet(f, chpcol[k], &ds1); /* Width of this column segment */
-          buf1 = malloc(ds1.nob * hdr2.named.nor); /* Space for this fragment */
-          ERData(e2, ds1.nob * hdr2.named.nor, (uint8_t *)buf1);
-          /* Take the data described by ds1, and paste
-           * chp[j] rows into the output starting at colstart[k]
-           */
-          DPaste(&ds1, buf1, chp[j], colstart[k], &ds, buf);
-          ERClose1(e2, 1);
-          free(buf1);
-        }
-        EWData(e, chp[j] * ds.nob, (uint8_t *)buf);
-#endif
       }
-      free(chp);
-      free(chpcol);
-      free(colstart);
       free(buf);
       EWClose1(e, mode);
-#ifdef ROW_BY_ROW
-      /* free headers, buffers and DSs */
-      free(hdrs);
-      free(es);
-      free(bufs);
-      free(dss);
-#endif
     }
     if (verbose) {
       printf("Writing multiplier\n");
@@ -858,49 +734,27 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
      * M super(ROW_SPLIT + 1) sub(j, h)
      */
     {
-      unsigned int *chq = malloc(COL_SPLIT * sizeof(*chq));
-      unsigned int *chqcol = malloc(ROW_SPLIT * sizeof(*chqcol));
-      unsigned int *coqstart = malloc(ROW_SPLIT * sizeof(*coqstart));
-#ifdef ROW_BY_ROW
-      header hdr, *hdrs;
-      DSPACE ds, *dss;
-      Dfmt *buf, **bufs;
-      EFIL *e, **es;
-#else
-      uint64_t maxrows = 0;
-      DSPACE ds, ds1;
-      header hdr, hdr1;
-      Dfmt *buf, *buf1;
-      EFIL *e, *e1;
-#endif
+      unsigned int chq[COL_SPLIT];
+      unsigned int chqcol[ROW_SPLIT];
+      unsigned int coqstart[ROW_SPLIT];
+      header hdr, hdrs[ROW_SPLIT];
+      DSPACE ds, dss[ROW_SPLIT];
+      Dfmt *buf, *bufs[ROW_SPLIT];
+      EFIL *e, *es[ROW_SPLIT];
       for (j = 0; j < COL_SPLIT; j++) {
         header hdr;
-        EPeek(M[index3(ROW_SPLIT + 1, j + 1, 1)], hdr.hdr);
+        EPeek(M[j][0], hdr.hdr);
         chq[j] = hdr.named.nor;
-#ifndef ROW_BY_ROW
-        if (maxrows < (uint64_t)chq[j]) {
-          maxrows = chq[j];
-        }
-#endif
       }
       k = 0;
       for (h = 0; h < ROW_SPLIT; h++) {
-        EPeek(M[index3(ROW_SPLIT + 1, 1, h + 1)], hdr.hdr);
+        EPeek(M[0][h], hdr.hdr);
         chqcol[h] = hdr.named.noc;
         coqstart[h] = k;
         k += chqcol[h]; 
       }
       DSSet(f, k, &ds);
-#ifdef ROW_BY_ROW
       buf = malloc(ds.nob);
-      /* Allocate headers, buffers and DSs */
-      hdrs = malloc(ROW_SPLIT * sizeof(*hdrs));
-      es = malloc(ROW_SPLIT * sizeof(*es));
-      bufs = malloc(ROW_SPLIT * sizeof(*bufs));
-      dss = malloc(ROW_SPLIT * sizeof(*dss));
-#else
-      buf = malloc(ds.nob * maxrows);
-#endif
       hdr.named.rnd1 = 1;
       hdr.named.fdef = f->fdef;
       hdr.named.nor = rank;
@@ -908,10 +762,9 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
       hdr.named.rnd2 = 0;
       e = EWHdr(multiplier, hdr.hdr);
       for (j = 0; j < COL_SPLIT; j++) {
-#ifdef ROW_BY_ROW
         uint64_t row_num = 0; /* This will count output rows */
         for (h = 0; h < ROW_SPLIT; h++) {
-          es[h] = ERHdr(M[index3(ROW_SPLIT + 1, j + 1, h + 1)], hdrs[h].hdr);
+          es[h] = ERHdr(M[j][h], hdrs[h].hdr);
           DSSet(f, chqcol[h], &dss[h]); /* Width of this column segment */
           /* We only allocate one row for each fragment */
           bufs[h] = malloc(dss[h].nob); /* Space for this fragment */
@@ -935,45 +788,14 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
         for (h = 0; h < ROW_SPLIT ; h++) {
           ERClose1(es[h], 1);
           free(bufs[h]);
-          remove(M[index3(ROW_SPLIT + 1, j + 1, h + 1)]);
+          remove(M[j][h]);
         }
-#else
-        memset(buf, 0, chq[j] * ds.nob);
-        for (h = 0; h < ROW_SPLIT; h++) {
-          e1 = ERHdr(M[index3(ROW_SPLIT + 1, j + 1, h + 1)], hdr1.hdr);
-          DSSet(f, chqcol[h], &ds1);
-          buf1 = malloc(hdr1.named.nor * ds1.nob);
-          ERData(e1, ds1.nob * hdr1.named.nor, (uint8_t *)buf1);
-          DPaste(&ds1, buf1, chq[j], coqstart[h], &ds, buf);
-          free(buf1);
-          ERClose1(e1, 1);
-          /* M no longer bneeded, so remove */
-          remove(M[index3(ROW_SPLIT + 1, j + 1, h + 1)]);
-        }
-        EWData(e, chq[j] * ds.nob, (uint8_t *)buf);
-#endif
       }
       EWClose1(e, mode);
       free(buf);
-      free(chq);
-      free(chqcol);
-      free(coqstart);
-#ifdef ROW_BY_ROW
-      /* free headers, buffers and DSs */
-      free(hdrs);
-      free(es);
-      free(bufs);
-      free(dss);
-#endif
     }
     free(f); /* Don't need the field any more */
     /* compute the row-select bit string */
-    /*
-     * We need the superscript COL_SPLIT of the elements E
-     * for all the row block indixes i from 1 to ROW_SPLIT
-     * ie ERho[index2(i, ROW_SPLIT)] for all i
-     * Note: this doesn't depend on back cleaning
-     */
     {
       uint64_t rslen = 2 * sizeof(uint64_t) + ((nor + 63) / 64) * sizeof(uint64_t);
       uint64_t *bsrs = malloc(rslen);
@@ -984,7 +806,7 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
       shift = 0;
       for (i = 1; i <= ROW_SPLIT; i++) {
         header hdr1;
-        EFIL *e1 = ERHdr(ERho[index2(i, COL_SPLIT)], hdr1.hdr);
+        EFIL *e1 = ERHdr(ERho[i - 1][COL_SPLIT - 1], hdr1.hdr);
         uint64_t in_size = sizeof(uint64_t) * (2 + (hdr1.named.nor + 63) / 64);
         ERData(e1, in_size, (uint8_t *)inbs);
         ERClose1(e1, 1);
@@ -1007,68 +829,57 @@ uint64_t fRecurse_ECH(int first, /* Is this top level */
     /* Delete temporaries */
     for (i = 1; i <= ROW_SPLIT; i++) {
       for (j = 1; j <= COL_SPLIT; j++) {
-        remove(C[index2(i, j)]);
+        remove(C[i - 1][j - 1]);
+        remove(B[i - 1][j - 1]);
       }
     }
-    for (h = 1; h <= COL_SPLIT; h++) {
-      for (i = 1; i <= ROW_SPLIT; i++) {
-        for (j = 1; j <= COL_SPLIT; j++) {
-          /* Create the B matrix file names */
-          remove(B[index3(h, i, j)]);
-        }
+    for (i = 0; i < COL_SPLIT; i++) {
+      for (j = 0; j < COL_SPLIT; j++) {
+        remove(R[i][j]);
       }
     }
-    for (i = 1; i <= ROW_SPLIT; i++) {
-      for (j = 1; j <= COL_SPLIT; j++) {
-        /* Remove the K, R, DR, DGamma, ERho, EDelta matrix files */
-        remove(R[index2(i, j)]);
-        remove(K[index2(i, j)]);
-        remove(DR[index2(i, j)]);
-        remove(DGamma[index2(i, j)]);
-        remove(ERho[index2(i, j)]);
-        remove(EDelta[index2(i, j)]);
+    for (i = 0; i < ROW_SPLIT; i++) {
+      for (j = 0; j < COL_SPLIT; j++) {
+        /* Remove the K, R, DR, ERho, EDelta matrix files */
+        remove(ERho[i][j]);
+        remove(EDelta[i][j]);
       }
+    }
+    for (i = 0; i < ROW_SPLIT; i++) {
+      for (j = 0; j < ROW_SPLIT; j++) {
+        remove(K[i][j]);
+      }
+    }
+    for (i = 0; i < COL_SPLIT; i++) {
+      /* Remove DGamma files */
+      remove(DGamma[i]);
+      remove(DR[i]);
     }
     /* Free filenames */
-    /* First those with superscripts */
-    for (h = 1; h <= ROW_SPLIT + 1; h++) {
-      for (i = 1; i <= ROW_SPLIT; i++) {
-        for (j = 1; j <= COL_SPLIT; j++) {
-          /* Free the M matrix file names */
-          free(M[index3(h, j, i)]);
-        }
+    for (i = 0; i < ROW_SPLIT; i++) {
+      for (j = 0; j < COL_SPLIT; j++) {
+        /* Free the B, C, K, M, R, DR, ERho, EDelta matrix file names */
+        free(B[i][j]);
+        free(C[i][j]);
+        free(M[j][i]);
+        free(ERho[i][j]);
+        free(EDelta[i][j]);
       }
     }
-    for (h = 1; h <= COL_SPLIT; h++) {
-      for (i = 1; i <= ROW_SPLIT; i++) {
-        for (j = 1; j <= COL_SPLIT; j++) {
-          /* Free the B matrix file names */
-          free(B[index3(h, i, j)]);
-        }
+    for (i = 0; i < ROW_SPLIT; i++) {
+      for (j = 0; j < ROW_SPLIT; j++) {
+        free(K[i][j]);
       }
     }
-    /* Now those without superscripts */
-    for (i = 1; i <= ROW_SPLIT; i++) {
-      for (j = 1; j <= COL_SPLIT; j++) {
-        /* Free the C, K, DR, DGamma, ERho, EDelta matrix file names */
-        free(C[index2(i, j)]);
-        free(K[index2(i, j)]);
-        free(R[index2(i, j)]);
-        free(DR[index2(i, j)]);
-        free(DGamma[index2(i, j)]);
-        free(ERho[index2(i, j)]);
-        free(EDelta[index2(i, j)]);
+    for (i = 0; i < COL_SPLIT; i++) {
+      for (j = 0; j < COL_SPLIT; j++) {
+        free(R[i][j]);
       }
     }
-    free(ERho);
-    free(EDelta);
-    free(DGamma);
-    free(DR);
-    free(R);
-    free(M);
-    free(K);
-    free(C);
-    free(B);
+    for (j = 0; j < COL_SPLIT; j++) {
+      free(DGamma[j]);
+      free(DR[j]);
+    }
     return rank;
   }
 }

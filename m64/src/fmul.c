@@ -55,10 +55,10 @@ void fMultiply(const char *tmp, const char *m1, int s1,
           if (very_verbose) {
             printf("Very small, nor1 = %lu, noc1 = %lu, noc2 = %lu\n", nor1, noc1, noc2);
           }
-          if (0 == noc2) {
-            /* Ouptut has no columns, just get header correct */
+          if (0 == noc2 || 0 == nor1) {
+            /* Ouptut has no rows or no columns, just get header correct */
             if (very_verbose) {
-              printf("No columns case\n");
+              printf("No rows or no columns case\n");
             }
             hdr2[2] = nor1;
             e3 = EWHdr(m3, hdr2);
