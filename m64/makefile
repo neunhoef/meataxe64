@@ -141,6 +141,7 @@ EXECS=	conreg \
 	zrd \
 	zrec \
 	zrn \
+	zrn1 \
 	zrr \
 	zrx \
 	zs2 \
