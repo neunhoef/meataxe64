@@ -19,7 +19,7 @@ fi
 infile=$1
 if [ ! -e ${infile} ]; then
     echo "zrn: No such file or directory" 1>&2
-    echo "zrn: cannot open poo, terminating" 1>&2
+    echo "zrn: cannot open ${infile}, terminating" 1>&2
     exit 1
 fi
 tmp=tmp$$
@@ -28,6 +28,6 @@ ret=$?
 if [ 0 -ne $ret ]; then
     exit 1
 fi
-echo ${out} | sed -e "s?^Rank of ${infile} is ??"
+echo ${out}
 rm -f ${tmp}.{bs,rem}
 exit $ret
