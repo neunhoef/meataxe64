@@ -22,7 +22,7 @@ static char *fun_tmp;
 
 #define FUN_TMP "_funs"
 /* Get the non selected rows from a generator */
-static void fRowExtract(const char *bs, const char *in, const char *nsel)
+static void fRowExtractNG(const char *bs, const char *in, const char *nsel)
 {
   /*
    * Open the file, open the bs
@@ -141,7 +141,7 @@ int main(int argc, const char *argv[])
      * notional non-selected rows of the permutation
      */
     EPeek(sub_rem, hdr.hdr);
-    res = ident(hdr.named.fdef, hdr.named.noc, hdr.named.noc, 1, seln);
+    res = ident(hdr.named.fdef, hdr.named.noc, hdr.named.noc, 1, seln, 1);
     NOT_USED(res);
     /* Concatenate rem and seln to create selc */
     cat(files, selc, 2);
@@ -150,10 +150,10 @@ int main(int argc, const char *argv[])
      */
     fMultiply(fun_tmp, argv[2], 0, selc, 0, selm, 0);
     /* Now take the non-selected part of selm */
-    fRowExtract(sub_bs, selm, argv[3]);
+    fRowExtractNG(sub_bs, selm, argv[3]);
   } else {
     /* Row select non-selected rows from gen (argv[2]) */
-    fRowExtract(sub_bs, argv[2], seln);
+    fRowExtractNG(sub_bs, argv[2], seln);
     fColumnExtract(sub_bs, 0, seln, 0, selc, 0, selcn, 0);
     /* Clean using the pivots */
     fMultiply(fun_tmp, selc, 0, sub_rem, 0, selm, 0);

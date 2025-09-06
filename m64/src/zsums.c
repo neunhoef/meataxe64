@@ -136,7 +136,7 @@ int main(int argc, const char *argv[])
   names = my_malloc((n + 1) * sizeof(const char *));
   words = my_malloc((n + 1) * sizeof(const char *));
   elt_l = make_elt_name(out, 0);
-  if (0 == ident(prime, nor, noc, 1, elt_l)) {
+  if (0 == ident(prime, nor, noc, 1, elt_l, 1)) {
     fprintf(stderr, "%s: cannot write identity, terminating\n", prog_name);
     cleanup(orders);
     exit(1);

@@ -14,6 +14,7 @@
 #include "mfuns.h"
 #include "utils.h"
 #include "parse.h"
+#include "mfuns.h"
 
 void fMultiply(const char *tmp, const char *m1, int s1, 
                const char *m2, int s2, const char *m3, int s3)
@@ -49,30 +50,61 @@ void fMultiply(const char *tmp, const char *m1, int s1,
 // first look if matrix "small" - N^3 < 10^6
         siz=nor1*noc1;
         if(siz<=1000000) siz=siz*noc2;   // avoid overflow
-        if(siz<1000000)   // small matrix - do in using slab;
-        {
-            e1=ERHdr(m1,hdr1);
-            e2=ERHdr(m2,hdr2);
-            hdr2[2]=nor1;
-            e3=EWHdr(m3,hdr2);
-            am=malloc(ds1.nob*nor1);
-            bm=malloc(ds2.nob*nor2);
-            cm=malloc(ds2.nob*nor1);
-            ERData(e1,ds1.nob*nor1,am);
-            ERClose1(e1,s1);
-            ERData(e2,ds2.nob*nor2,bm);
-            ERClose1(e2,s2);
-            SLMul(f,am,bm,cm,nor1,noc1,noc2);
-            EWData(e3,ds2.nob*nor1,cm);
-            EWClose1(e3,s3);
-            free(f);
-            free(am);
-            free(bm);
-            free(cm);
+        if (siz < 1000000) {  /* small matrix - do in using slab; */
+          /* Special cases: siz may be 0 */
+          if (very_verbose) {
+            printf("Very small, nor1 = %lu, noc1 = %lu, noc2 = %lu\n", nor1, noc1, noc2);
+          }
+          if (0 == noc2 || 0 == nor1) {
+            /* Ouptut has no rows or no columns, just get header correct */
+            if (very_verbose) {
+              printf("No rows or no columns case\n");
+            }
+            hdr2[2] = nor1;
+            e3 = EWHdr(m3, hdr2);
+            EWClose1(e3, s3);
             if (very_verbose) {
               printf("fMultiply %s by %s giving %s done\n", m1, m2, m3);
             }
+            free(f);
             return;
+          }
+          if (0 == noc1) {
+            int res;
+            /* No columns in A, no rows in B, just make a big zero matrix */
+            if (very_verbose) {
+              printf("No rows case\n");
+            }
+            res = ident(fdef, nor1, noc2, 0, m3, 1);
+            NOT_USED(res);
+            if (very_verbose) {
+              printf("fMultiply %s by %s giving %s done\n", m1, m2, m3);
+            }
+            free(f);
+            return;
+          }
+          e1=ERHdr(m1,hdr1);
+          e2=ERHdr(m2,hdr2);
+          hdr2[2]=nor1;
+          e3=EWHdr(m3,hdr2);
+          am=malloc(ds1.nob*nor1);
+          bm=malloc(ds2.nob*nor2);
+          cm=malloc(ds2.nob*nor1);
+          ERData(e1,ds1.nob*nor1,am);
+          ERClose1(e1,s1);
+          ERData(e2,ds2.nob*nor2,bm);
+          ERClose1(e2,s2);
+          SLMul(f,am,bm,cm,nor1,noc1,noc2);
+          EWData(e3,ds2.nob*nor1,cm);
+          EWClose1(e3,s3);
+          free(f);
+          free(am);
+          free(bm);
+          free(cm);
+          if (very_verbose) {
+            printf("fMultiply %s by %s giving %s done\n", m1, m2, m3);
+          }
+          return;
         }
 //  Consider disk chopping
 //  if B, or A+C fit in memory,mmul is the way to go
@@ -81,7 +113,7 @@ void fMultiply(const char *tmp, const char *m1, int s1,
         siz=sizb;
         if(sizac<siz) siz=sizac;    // siz is smaller of B, A+C
         siz=siz/f->megabytes;
-        siz=siz/250000;        /* We need 4 times as much memory as the files */
+        siz=siz/200000;        /* We need 5 times as much memory as the files */
         chops=1;
         while((chops*chops)<=siz) chops++;
         if(chops==1)   // chopping into one piece!

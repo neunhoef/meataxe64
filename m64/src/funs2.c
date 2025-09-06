@@ -18,22 +18,38 @@
 #include "io.h"
 #include "bitstring.h"
 #include "mfuns.h"
+#include "parse.h"
+#include "utils.h"
 
 // fMultiplyAdd
 
-void fMultiplyAdd(const char * tmp, const char *m1, int s1,
-           const char *m2, int s2, const char *m3, int s3,
-           const char * m4, int s4)
+void fMultiplyAdd(const char *tmp, const char *m1, int s1,
+                  const char *m2, int s2, const char *m3, int s3,
+                  const char *m4, int s4)
 {
-    char sta[500];
-    char stb[500];
-    strcpy(sta,tmp);
-    strcat(sta,"a");
-    strcpy(stb,tmp);
-    strcat(stb,"b");
-    fMultiply(sta,m1,s1,m2,s2,stb,1);
-    fAdd(stb,1,m3,s3,m4,s4);
-    remove(stb);
+  char sta[500];
+  char stb[500];
+  /*
+   * It can occur that the multiplicands produce a zero matrix
+   * In that case we don't want the multiplication or the addition
+   * The criterion is that the first multiplicand has zero columns
+   */
+  uint64_t hdr[5];
+  EPeek(m1, hdr);
+  if (0 == hdr[3]) {
+    if (very_verbose) {
+      printf("zero matrix produced by %s * %s, ignoring\n", m1, m2);
+    }
+    copy_file(m4, m3);
+    return;
+  }
+  strcpy(sta, tmp);
+  strcat(sta, "a");
+  strcpy(stb, tmp);
+  strcat(stb, "b");
+  fMultiply(sta, m1, s1, m2, s2, stb, 1);
+  fAdd(stb, 1, m3, s3, m4, s4);
+  remove(stb);
 }
 
 // fNullSpace

@@ -207,7 +207,7 @@ static int exec_script(const char *out, const char *tmp, size_t tmp_len, const c
   if (NULL == summand) {
     return 0;
   }
-  if (0 == ident(prime, nor, nor, 1, id)) {
+  if (0 == ident(prime, nor, nor, 1, id, 1)) {
     fprintf(stderr, "%s: unable to create identity, terminating\n", name);
     return 0;
     /* Note, id not needed if no additions */

@@ -27,8 +27,12 @@ typedef union header {
 
 extern void make_plain(const char *zero_bs, const char *nref_bs, const char *in, const char *out, uint64_t fdef);
 
+/*
+ * mode: 0 - log file
+ * mode: 1 - don't log file
+ */
 extern int ident(uint64_t fdef, uint64_t nor, uint64_t noc, uint64_t elt,
-                 const char *out);
+                 const char *out, int mode);
 
 /*
  * Function to do triaged multiply
@@ -48,10 +52,24 @@ extern void triage_multiply(const char *zbs, const char *sbs,
                             const char *rem, const char *in, const char *out,
                             const char *tmp_vars[], const char *fun_tmp);
 
-/* Slicing and splicing */
+/*
+ * Slicing, splicing and chopping
+ * slice and splice are used to reduce multiply to in memory capable
+ * Chopping is used for recursive Gaussian elimination
+ */
 extern void slice(const char *input, unsigned int slices, const char *output_stem);
 
 extern void splice(const char *input_stem, unsigned int slices, const char *output);
+
+/*
+ * Chop input into a chops by chops square collection of submatrices
+ * whose names are given in the array outputs
+ * outputs must be an array of size chops^2
+ * The fragments are written out with columns varying fastest
+ * mode says whether to log the input (output never logged)
+ */
+extern void chop(const char *input, unsigned int chops, const char *outputs[],
+                 int mode);
 
 /* Concatenate a number of files giving out */
 extern void cat(const char *files[], const char *out, unsigned int count);

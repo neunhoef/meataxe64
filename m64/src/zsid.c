@@ -30,7 +30,7 @@ int main(int argc,  char **argv)
     fprintf(stderr, "zsid: element %lu out of range for field %lu\n", elt, fdef);
     exit(1);
   }
-  res = ident(fdef, nor, noc, elt, argv[1]);
+  res = ident(fdef, nor, noc, elt, argv[1], 0);
   NOT_USED(res);
   return 0;
 }
