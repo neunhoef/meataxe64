@@ -21,11 +21,9 @@ int main(int argc, const char * const argv[])
   uint64_t rank, nullity;
   const char *tmp_root = tmp_name();
   uint64_t tmp_len = strlen(tmp_root);
+  char st[200];
   const char *rs = mk_tmp(prog, tmp_root, tmp_len);
-  const char *cs = mk_tmp(prog, tmp_root, tmp_len);
-  const char *m = mk_tmp(prog, tmp_root, tmp_len);
   const char *k = mk_tmp(prog, tmp_root, tmp_len);
-  const char *r = mk_tmp(prog, tmp_root, tmp_len);
 
   argv = parse_line(argc, argv, &argc);
   CLogCmd(argc, argv);
@@ -34,8 +32,11 @@ int main(int argc, const char * const argv[])
     LogString(80,"usage znu1 input nullspace");
     exit(14);
   }
-  rank = fRecurse_ECH(NS, 1, prog, tmp_root, argv[1], 0, rs, cs, m, k, r);
+  rank = fRecurse_ECH(NS, 1, prog, tmp_root, argv[1], 0, rs, "NULL", "NULL",
+                      k, "NULL");
   nullity = fColumnRiffleIdentity(rs, 1, k, 1, argv[2], 0);
+  sprintf(st, "Nullity %lu", nullity);
+  LogString(20, st);
   printf("%lu\n", nullity);
   NOT_USED(rank);
   return 0;

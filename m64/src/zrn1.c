@@ -30,7 +30,7 @@ int main(int argc, const char * const argv[])
   }
   rank = fRecurse_ECH(RN, 1, prog, tmp_root, argv[1], 0, "NULL", "NULL", "NULL",
                       "NULL", "NULL");
-  sprintf(st,"Rank of %s is %lu", argv[1], rank);
+  sprintf(st, "Rank of %s is %lu", argv[1], rank);
   LogString(20, st);
   printf("%lu\n", rank);
   return 0;
