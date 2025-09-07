@@ -505,6 +505,8 @@ uint64_t fRecurse_ECH(recech_enum ren, int first, /* Is this top level */
     switch (ren) {
     case RN:
       break;
+    case NS:
+      break;
     default:
       if (verbose) {
         printf("Step 2: lengthening\n");
@@ -565,6 +567,7 @@ uint64_t fRecurse_ECH(recech_enum ren, int first, /* Is this top level */
      * We need all the column block indexes j from 1 to COL_SPLIT
      * We can also compute some of the values needed for the remnant here
      * Note: this doesn't depend on back cleaning
+     * Note: this case computes the rank, which other cases depend upon
      */
     {
       uint64_t cslen = 2 * sizeof(uint64_t) + ((noc + 63) / 64) * sizeof(uint64_t);
@@ -586,16 +589,21 @@ uint64_t fRecurse_ECH(recech_enum ren, int first, /* Is this top level */
         chp[j - 1] = hdr1.named.noc;
         chpcol[j - 1] = hdr1.named.nor - hdr1.named.noc;
       }
-      bscs[0] = noc;
-      bscs[1] = rank;
-      hdr.hdr[0] = 2;
-      hdr.hdr[1] = 1;
-      hdr.hdr[2] = noc;
-      hdr.hdr[3] = rank;
-      hdr.hdr[4] = 0;
-      e = EWHdr(col_sel, hdr.hdr);
-      EWData(e, cslen, (uint8_t *)bscs);
-      EWClose1(e, io_mode);
+      switch (ren) {
+      case NS: /* Don't write this file if only doing nullspace */
+        break;
+      default:
+        bscs[0] = noc;
+        bscs[1] = rank;
+        hdr.hdr[0] = 2;
+        hdr.hdr[1] = 1;
+        hdr.hdr[2] = noc;
+        hdr.hdr[3] = rank;
+        hdr.hdr[4] = 0;
+        e = EWHdr(col_sel, hdr.hdr);
+        EWData(e, cslen, (uint8_t *)bscs);
+        EWClose1(e, io_mode);
+      }
       free(bscs);
       free(inbs);
     }
@@ -672,6 +680,13 @@ uint64_t fRecurse_ECH(recech_enum ren, int first, /* Is this top level */
         free(buf);
         /* FIXME: We can remove the cleaner files here and free the strings */
       }
+    }
+    switch (ren) {
+    case NS:
+      break;
+    case RN:
+      break;
+    default:
       if (verbose) {
         printf("Writing remnant\n");
         fflush(stdout);
@@ -815,8 +830,18 @@ uint64_t fRecurse_ECH(recech_enum ren, int first, /* Is this top level */
         EWClose1(e, io_mode);
         free(buf);
       }
-      free(f); /* Don't need the field any more */
-      /* compute the row-select bit string */
+    }
+    for (j = 0; j < COL_SPLIT; j++) {
+      for (h = 0; h < ROW_SPLIT ; h++) {
+        remove(M[j][h]);
+      }
+    }
+    free(f); /* Don't need the field any more */
+    /* compute the row-select bit string */
+    switch (ren) {
+    case RN:
+      break;
+    default:
       {
         uint64_t rslen = 2 * sizeof(uint64_t) + ((nor + 63) / 64) * sizeof(uint64_t);
         uint64_t *bsrs = malloc(rslen);
@@ -849,15 +874,15 @@ uint64_t fRecurse_ECH(recech_enum ren, int first, /* Is this top level */
       }
     }
     /* Delete temporaries */
+    for (i = 0; i < COL_SPLIT; i++) {
+      for (j = 0; j < COL_SPLIT; j++) {
+        remove(R[i][j]);
+      }
+    }
     for (i = 1; i <= ROW_SPLIT; i++) {
       for (j = 1; j <= COL_SPLIT; j++) {
         remove(C[i - 1][j - 1]);
         remove(B[i - 1][j - 1]);
-      }
-    }
-    for (i = 0; i < COL_SPLIT; i++) {
-      for (j = 0; j < COL_SPLIT; j++) {
-        remove(R[i][j]);
       }
     }
     for (i = 0; i < ROW_SPLIT; i++) {

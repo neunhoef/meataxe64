@@ -22,8 +22,8 @@ int main(int argc, const char * const argv[])
   const char *tmp_root = tmp_name();
   uint64_t tmp_len = strlen(tmp_root);
   char st[200];
-  const char *rs = mk_tmp(prog, tmp_root, tmp_len);
-  const char *k = mk_tmp(prog, tmp_root, tmp_len);
+  char *rs = mk_tmp(prog, tmp_root, tmp_len);
+  char *k = mk_tmp(prog, tmp_root, tmp_len);
 
   argv = parse_line(argc, argv, &argc);
   CLogCmd(argc, argv);
@@ -39,5 +39,9 @@ int main(int argc, const char * const argv[])
   LogString(20, st);
   printf("%lu\n", nullity);
   NOT_USED(rank);
+  remove(k);
+  remove(rs);
+  free(k);
+  free(rs);
   return 0;
 }
