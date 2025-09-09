@@ -140,6 +140,7 @@ EXECS=	conreg \
 	zprime \
 	zqa \
 	zrd \
+	zrd1 \
 	zrec \
 	zrn \
 	zrn1 \
