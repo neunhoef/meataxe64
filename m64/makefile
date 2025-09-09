@@ -130,6 +130,7 @@ EXECS=	conreg \
 	zor1 \
 	zpc \
 	zpe \
+	zpe1 \
 	zpk \
 	zpk1 \
 	zplain \

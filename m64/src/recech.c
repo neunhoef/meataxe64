@@ -346,9 +346,11 @@ uint64_t fRecurse_ECH(recech_enum ren, int first, /* Is this top level */
   FIELD *f;
   uint64_t size;
 
-  /* Don't log outputs unless from ecehlise call. May change later */
+  /* Don't log outputs unless from ecehlise or PE call */
   switch (ren) {
   case EC:
+    break;
+  case PE:
     break;
   default:
     io_mode = 1;
@@ -471,6 +473,8 @@ uint64_t fRecurse_ECH(recech_enum ren, int first, /* Is this top level */
         switch(ren) {
         case RN:
           break;
+        case PE:
+          break;
         default:
           for (h = 1; h <= i; h++) {
             UpdateRowTrafo(name, temp, Atmp, Mtmp, Ktmp, rho, Etmp, lambda,
@@ -512,21 +516,26 @@ uint64_t fRecurse_ECH(recech_enum ren, int first, /* Is this top level */
         printf("Step 2: lengthening\n");
         fflush(stdout);
       }
-      /* Step 2: multiplier lengthening */
-      for (j = 1; j <= COL_SPLIT; j++) {
-        for (h = 1; h <= ROW_SPLIT; h++) {
-          RowLengthen(name, temp, tmp_len,
-                      M[j - 1][h - 1], ERho[h - 1][j - 1],
-                      ERho[h - 1][COL_SPLIT - 1],
-                      Mtmp);
-          rename(Mtmp, M[j - 1][h - 1]);
+      switch (ren) {
+      case PE:
+        break; /* Don't need lengthening for PE */
+      default:
+        /* Step 2: multiplier lengthening */
+        for (j = 1; j <= COL_SPLIT; j++) {
+          for (h = 1; h <= ROW_SPLIT; h++) {
+            RowLengthen(name, temp, tmp_len,
+                        M[j - 1][h - 1], ERho[h - 1][j - 1],
+                        ERho[h - 1][COL_SPLIT - 1],
+                        Mtmp);
+            rename(Mtmp, M[j - 1][h - 1]);
+          }
         }
       }
       if (verbose) {
         printf("Step 3: back cleaning\n");
         fflush(stdout);
       }
-    /* Step 3: back cleaning */
+      /* Step 3: back cleaning */
       for (k = 0; k < COL_SPLIT; k++) {
         rename(DR[k], R[k][k]);
       }
@@ -540,12 +549,17 @@ uint64_t fRecurse_ECH(recech_enum ren, int first, /* Is this top level */
                     temp);
             rename(Rtmp, R[j - 1][l - 1]);
           }
-          for (h = 1; h <= ROW_SPLIT; h++) {
-            ClearUp(M[j - 1][h - 1], Xtmp,
-                    M[k - 1][h - 1],
-                    Mtmp,
-                    temp);
-            rename(Mtmp, M[j - 1][h - 1]);
+          switch (ren) {
+          case PE:
+            break; /* Don't need multiplier for PE */
+          default:
+            for (h = 1; h <= ROW_SPLIT; h++) {
+              ClearUp(M[j - 1][h - 1], Xtmp,
+                      M[k - 1][h - 1],
+                      Mtmp,
+                      temp);
+              rename(Mtmp, M[j - 1][h - 1]);
+            }
           }
         }
       }
@@ -602,13 +616,20 @@ uint64_t fRecurse_ECH(recech_enum ren, int first, /* Is this top level */
         hdr.hdr[4] = 0;
         e = EWHdr(col_sel, hdr.hdr);
         EWData(e, cslen, (uint8_t *)bscs);
-        EWClose1(e, io_mode);
+        if (PE == ren && 1 == first) {
+          /* Need to log in top level PE call */
+          EWClose1(e, 0);
+        } else {
+          EWClose1(e, io_mode);
+        }
       }
       free(bscs);
       free(inbs);
     }
     switch (ren) {
     case RN:
+      break;
+    case PE:
       break;
     default:
       if (verbose) {
@@ -678,7 +699,6 @@ uint64_t fRecurse_ECH(recech_enum ren, int first, /* Is this top level */
         }
         EWClose1(e, io_mode);
         free(buf);
-        /* FIXME: We can remove the cleaner files here and free the strings */
       }
     }
     switch (ren) {
@@ -755,80 +775,90 @@ uint64_t fRecurse_ECH(recech_enum ren, int first, /* Is this top level */
           }
         }
         free(buf);
-        EWClose1(e, io_mode);
-      }
-      if (verbose) {
-        printf("Writing multiplier\n");
-        fflush(stdout);
-      }
-      /* now write out multiplier */
-      /*
-       * We need
-       * for j from 1 to COL_SPLIT - 1
-       * for h from 1 to ROW_SPLIT
-       * Changed to use the reviwed ClearUp
-       * M super(ROW_SPLIT + 1) sub(j, h)
-       */
-      {
-        unsigned int chq[COL_SPLIT];
-        unsigned int chqcol[ROW_SPLIT];
-        unsigned int coqstart[ROW_SPLIT];
-        header hdr, hdrs[ROW_SPLIT];
-        DSPACE ds, dss[ROW_SPLIT];
-        Dfmt *buf, *bufs[ROW_SPLIT];
-        EFIL *e, *es[ROW_SPLIT];
-        for (j = 0; j < COL_SPLIT; j++) {
-          header hdr;
-          EPeek(M[j][0], hdr.hdr);
-          chq[j] = hdr.named.nor;
+        if (PE == ren && 1 == first) {
+          /* Need to log in top level PE call */
+          EWClose1(e, 0);
+        } else {
+          EWClose1(e, io_mode);
         }
-        k = 0;
-        for (h = 0; h < ROW_SPLIT; h++) {
-          EPeek(M[0][h], hdr.hdr);
-          chqcol[h] = hdr.named.noc;
-          coqstart[h] = k;
-          k += chqcol[h]; 
+      }
+      switch (ren) {
+      case PE:
+        break;
+      default:
+        if (verbose) {
+          printf("Writing multiplier\n");
+          fflush(stdout);
         }
-        DSSet(f, k, &ds);
-        buf = malloc(ds.nob);
-        hdr.named.rnd1 = 1;
-        hdr.named.fdef = f->fdef;
-        hdr.named.nor = rank;
-        hdr.named.noc = rank;
-        hdr.named.rnd2 = 0;
-        e = EWHdr(multiplier, hdr.hdr);
-        for (j = 0; j < COL_SPLIT; j++) {
-          uint64_t row_num = 0; /* This will count output rows */
+        /* now write out multiplier */
+        /*
+         * We need
+         * for j from 1 to COL_SPLIT - 1
+         * for h from 1 to ROW_SPLIT
+         * Changed to use the reviwed ClearUp
+         * M super(ROW_SPLIT + 1) sub(j, h)
+         */
+        {
+          unsigned int chq[COL_SPLIT];
+          unsigned int chqcol[ROW_SPLIT];
+          unsigned int coqstart[ROW_SPLIT];
+          header hdr, hdrs[ROW_SPLIT];
+          DSPACE ds, dss[ROW_SPLIT];
+          Dfmt *buf, *bufs[ROW_SPLIT];
+          EFIL *e, *es[ROW_SPLIT];
+          for (j = 0; j < COL_SPLIT; j++) {
+            header hdr;
+            EPeek(M[j][0], hdr.hdr);
+            chq[j] = hdr.named.nor;
+          }
+          k = 0;
           for (h = 0; h < ROW_SPLIT; h++) {
-            es[h] = ERHdr(M[j][h], hdrs[h].hdr);
-            DSSet(f, chqcol[h], &dss[h]); /* Width of this column segment */
-            /* We only allocate one row for each fragment */
-            bufs[h] = malloc(dss[h].nob); /* Space for this fragment */
+            EPeek(M[0][h], hdr.hdr);
+            chqcol[h] = hdr.named.noc;
+            coqstart[h] = k;
+            k += chqcol[h]; 
           }
-          while (row_num < chq[j]) {
-            memset(buf, 0, ds.nob); /* Zero 1 row of output */
+          DSSet(f, k, &ds);
+          buf = malloc(ds.nob);
+          hdr.named.rnd1 = 1;
+          hdr.named.fdef = f->fdef;
+          hdr.named.nor = rank;
+          hdr.named.noc = rank;
+          hdr.named.rnd2 = 0;
+          e = EWHdr(multiplier, hdr.hdr);
+          for (j = 0; j < COL_SPLIT; j++) {
+            uint64_t row_num = 0; /* This will count output rows */
             for (h = 0; h < ROW_SPLIT; h++) {
-              /* Read a row from es[h] if we haven't exceeded it max rows
-               * then paste it in */
-              if (row_num < hdrs[h].named.nor) {
-                ERData(es[h], dss[h].nob, (uint8_t *)bufs[h]);
-                /* Only paste 1 row */
-                DPaste(&dss[h], bufs[h], 1, coqstart[h], &ds, buf);
-              }
+              es[h] = ERHdr(M[j][h], hdrs[h].hdr);
+              DSSet(f, chqcol[h], &dss[h]); /* Width of this column segment */
+              /* We only allocate one row for each fragment */
+              bufs[h] = malloc(dss[h].nob); /* Space for this fragment */
             }
-            row_num++;
-            /* Done a row, write to putput */
-            EWData(e, ds.nob, (uint8_t *)buf);
+            while (row_num < chq[j]) {
+              memset(buf, 0, ds.nob); /* Zero 1 row of output */
+              for (h = 0; h < ROW_SPLIT; h++) {
+                /* Read a row from es[h] if we haven't exceeded it max rows
+                 * then paste it in */
+                if (row_num < hdrs[h].named.nor) {
+                  ERData(es[h], dss[h].nob, (uint8_t *)bufs[h]);
+                  /* Only paste 1 row */
+                  DPaste(&dss[h], bufs[h], 1, coqstart[h], &ds, buf);
+                }
+              }
+              row_num++;
+              /* Done a row, write to putput */
+              EWData(e, ds.nob, (uint8_t *)buf);
+            }
+            /* Now free all the stuff we allocated earlier */
+            for (h = 0; h < ROW_SPLIT ; h++) {
+              ERClose1(es[h], 1);
+              free(bufs[h]);
+              remove(M[j][h]);
+            }
           }
-          /* Now free all the stuff we allocated earlier */
-          for (h = 0; h < ROW_SPLIT ; h++) {
-            ERClose1(es[h], 1);
-            free(bufs[h]);
-            remove(M[j][h]);
-          }
+          EWClose1(e, io_mode);
+          free(buf);
         }
-        EWClose1(e, io_mode);
-        free(buf);
       }
     }
     for (j = 0; j < COL_SPLIT; j++) {
@@ -840,6 +870,8 @@ uint64_t fRecurse_ECH(recech_enum ren, int first, /* Is this top level */
     /* compute the row-select bit string */
     switch (ren) {
     case RN:
+      break;
+    case PE:
       break;
     default:
       {
