@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# A test for zec znd zrec
+# A test for zec and zrec
 #
 # We check that applying the row and column selects, and then
 # mulitplying on the left by

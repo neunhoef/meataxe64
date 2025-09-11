@@ -118,6 +118,7 @@ EXECS=	conreg \
 	zimport \
 	zis \
 	ziv \
+	ziv1 \
 	zkc \
 	zkx \
 	zmp \
