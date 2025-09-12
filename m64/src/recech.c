@@ -543,11 +543,16 @@ uint64_t fRecurse_ECH(recech_enum ren, int first, /* Is this top level */
         for (j = 1; j + 1 <= k; j++) {
           PreClearUp(B[j - 1][k - 1], DGamma[k - 1],
                      Xtmp, R[j - 1][k - 1]);
-          for (l = k; l <= COL_SPLIT; l++) {
-            ClearUp(R[j - 1][l - 1], Xtmp,
-                    R[k - 1][l - 1], Rtmp,
-                    temp);
-            rename(Rtmp, R[j - 1][l - 1]);
+          switch (ren) {
+          case IV:
+            break; /* Don't need remnant for invert */
+          default:
+            for (l = k; l <= COL_SPLIT; l++) {
+              ClearUp(R[j - 1][l - 1], Xtmp,
+                      R[k - 1][l - 1], Rtmp,
+                      temp);
+              rename(Rtmp, R[j - 1][l - 1]);
+            }
           }
           switch (ren) {
           case PE:
@@ -606,6 +611,8 @@ uint64_t fRecurse_ECH(recech_enum ren, int first, /* Is this top level */
       switch (ren) {
       case NS: /* Don't write this file if only doing nullspace */
         break;
+      case IV: /* Or invert */
+        break;
       default:
         bscs[0] = noc;
         bscs[1] = rank;
@@ -630,6 +637,8 @@ uint64_t fRecurse_ECH(recech_enum ren, int first, /* Is this top level */
     case RN:
       break;
     case PE:
+      break;
+    case IV:
       break;
     default:
       if (verbose) {
@@ -711,75 +720,80 @@ uint64_t fRecurse_ECH(recech_enum ren, int first, /* Is this top level */
         printf("Writing remnant\n");
         fflush(stdout);
       }
+      switch (ren) {
+      case IV:
+        break;
+      default:
       /* now write out remnant, very similar to cleaner */
-      {
-        unsigned int colstart[COL_SPLIT];
-        header hdr, hdrs[COL_SPLIT];
-        DSPACE ds, dss[COL_SPLIT];
-        Dfmt *buf, *bufs[COL_SPLIT];
-        EFIL *e, *es[COL_SPLIT];
-        k = 0;
-        for (j = 0; j < COL_SPLIT; j++) {
-          /* We've already acquired chp and chpcol whilst writing the column select */
-          colstart[j] = k;
-          k += chpcol[j];
-        }
-        DSSet(f, noc - rank, &ds); /* Width of remnant */
-        buf = malloc(ds.nob); /* Space for one output row */
-        hdr.named.rnd1 = 1;
-        hdr.named.nor = rank;
-        hdr.named.noc = noc - rank;
-        hdr.named.fdef = f->fdef;
-        hdr.named.rnd2 = 0;
-        e = EWHdr(remnant, hdr.hdr);
-        for (j = 0; j < COL_SPLIT; j++) {
-          /* j indexes blocks of remnant fragments */
-          /* What we want to do here is to do each set of column blocks
-           * one row at a time. So we must open all the
-           * fragments that will be indexed by j at once
-           * buf must be allocated 1 row in size (as if maxrows were 1)
-           * Do we know if all fragments have the same number of rows?
-           * Not sure, so we may have to remember nor for each of them and
-           * take care not to exceed it
-           * So we need an array of headers, indexed by j,
-           * rather than a single hdr2, and a corresponding array of EFIL
-           * rather than just e2
-           */
-          uint64_t row_num = 0; /* This will count output rows */
-          /* Read in all the headers for this row */
-          for (k = j; k < COL_SPLIT; k++) {
-            es[k] = ERHdr(R[j][k], hdrs[k].hdr);
-            DSSet(f, chpcol[k], &dss[k]); /* Width of this column segment */
-            /* We only allocate one row for each fragment */
-            bufs[k] = malloc(dss[k].nob); /* Space for this fragment */
+        {
+          unsigned int colstart[COL_SPLIT];
+          header hdr, hdrs[COL_SPLIT];
+          DSPACE ds, dss[COL_SPLIT];
+          Dfmt *buf, *bufs[COL_SPLIT];
+          EFIL *e, *es[COL_SPLIT];
+          k = 0;
+          for (j = 0; j < COL_SPLIT; j++) {
+            /* We've already acquired chp and chpcol whilst writing the column select */
+            colstart[j] = k;
+            k += chpcol[j];
           }
-          while (row_num < chp[j]) {
-            memset(buf, 0, ds.nob); /* Zero 1 row of output */
+          DSSet(f, noc - rank, &ds); /* Width of remnant */
+          buf = malloc(ds.nob); /* Space for one output row */
+          hdr.named.rnd1 = 1;
+          hdr.named.nor = rank;
+          hdr.named.noc = noc - rank;
+          hdr.named.fdef = f->fdef;
+          hdr.named.rnd2 = 0;
+          e = EWHdr(remnant, hdr.hdr);
+          for (j = 0; j < COL_SPLIT; j++) {
+            /* j indexes blocks of remnant fragments */
+            /* What we want to do here is to do each set of column blocks
+             * one row at a time. So we must open all the
+             * fragments that will be indexed by j at once
+             * buf must be allocated 1 row in size (as if maxrows were 1)
+             * Do we know if all fragments have the same number of rows?
+             * Not sure, so we may have to remember nor for each of them and
+             * take care not to exceed it
+             * So we need an array of headers, indexed by j,
+             * rather than a single hdr2, and a corresponding array of EFIL
+             * rather than just e2
+             */
+            uint64_t row_num = 0; /* This will count output rows */
+            /* Read in all the headers for this row */
             for (k = j; k < COL_SPLIT; k++) {
-              /* Read a row from es[j] if we haven't exceeded it max rows
-               * then paste it in */
-              if (row_num < hdrs[k].named.nor) {
-                ERData(es[k], dss[k].nob, (uint8_t *)bufs[k]);
-                /* Only paste 1 row */
-                DPaste(&dss[k], bufs[k], 1, colstart[k], &ds, buf);
-              }
+              es[k] = ERHdr(R[j][k], hdrs[k].hdr);
+              DSSet(f, chpcol[k], &dss[k]); /* Width of this column segment */
+              /* We only allocate one row for each fragment */
+              bufs[k] = malloc(dss[k].nob); /* Space for this fragment */
             }
-            row_num++;
-            /* Done a row, write to putput */
-            EWData(e, ds.nob, (uint8_t *)buf);
+            while (row_num < chp[j]) {
+              memset(buf, 0, ds.nob); /* Zero 1 row of output */
+              for (k = j; k < COL_SPLIT; k++) {
+                /* Read a row from es[j] if we haven't exceeded it max rows
+                 * then paste it in */
+                if (row_num < hdrs[k].named.nor) {
+                  ERData(es[k], dss[k].nob, (uint8_t *)bufs[k]);
+                  /* Only paste 1 row */
+                  DPaste(&dss[k], bufs[k], 1, colstart[k], &ds, buf);
+                }
+              }
+              row_num++;
+              /* Done a row, write to putput */
+              EWData(e, ds.nob, (uint8_t *)buf);
+            }
+            /* Now free all the stuff we allocated earlier */
+            for (k = j; k < COL_SPLIT; k++) {
+              ERClose1(es[k], 1);
+              free(bufs[k]);
+            }
           }
-          /* Now free all the stuff we allocated earlier */
-          for (k = j; k < COL_SPLIT; k++) {
-            ERClose1(es[k], 1);
-            free(bufs[k]);
+          free(buf);
+          if (PE == ren && 1 == first) {
+            /* Need to log in top level PE call */
+            EWClose1(e, 0);
+          } else {
+            EWClose1(e, io_mode);
           }
-        }
-        free(buf);
-        if (PE == ren && 1 == first) {
-          /* Need to log in top level PE call */
-          EWClose1(e, 0);
-        } else {
-          EWClose1(e, io_mode);
         }
       }
       switch (ren) {
@@ -872,6 +886,8 @@ uint64_t fRecurse_ECH(recech_enum ren, int first, /* Is this top level */
     case RN:
       break;
     case PE:
+      break;
+    case IV:
       break;
     default:
       {

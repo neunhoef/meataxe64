@@ -51,6 +51,7 @@ int main(int argc, const char * const argv[])
     f = malloc(FIELDLEN);
     FieldASet(hdr[1], f);
     fScalarMul(m, 1, argv[2], 0, f->charc - 1);
+    free(f);
     remove(m);
     free(m);
   } else {
