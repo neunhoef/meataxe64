@@ -176,7 +176,6 @@ ifneq "$(strip $(DEPENDS))" ""
 endif
 endif
 
-include exec.txt
 include execs.txt
 
 # The rules cope with the fact that the binary 64 imports and exporters

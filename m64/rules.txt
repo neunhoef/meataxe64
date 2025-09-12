@@ -70,8 +70,20 @@ $(ASMOUTDIR)/%.$(ASMOUTEXT): %.c
 	-@mkdir -p $(ASMOUTDIR)
 	@$(COMPILE)$@ $< $(REL_COMPILE_FLAGS) $(COMPILE_CFLAGS) $(NA_COMPILE_FLAGS) $(ASMOUT_FLAGS) $(INCLUDES) $(DEFINES)
 
+# Assembler output from assembler source
+$(ASMOUTDIR)/%.$(ASMOUTEXT): %.s
+	@echo Assembler for $<
+	-@mkdir -p $(ASMOUTDIR)
+	@cp $< $@
+
 # Preprocessor output from C source
 $(PPDIR)/%.$(PPEXT): %.c
 	@echo Preprocessed source for $<
 	-@mkdir -p $(PPDIR)
 	@$(COMPILE)$@ $< $(REL_COMPILE_FLAGS) $(COMPILE_CFLAGS) $(NA_COMPILE_FLAGS) $(PP_FLAGS) $(INCLUDES) $(DEFINES)
+
+# Preprocessor output from assembler source
+$(PPDIR)/%.$(PPEXT): %.s
+	@echo Preprocessed source for $<
+	-@mkdir -p $(PPDIR)
+	cp $< $@
