@@ -9,25 +9,28 @@
 #include "field.h"
 #include "io.h"
 #include "funs.h"
+#include "util.h"
+#include "parse.h"
 
-int main(int argc,  char **argv)
+int main(int argc, const char * const argv[])
 {
-    uint64_t rank;
-    char st[200];
-    LogCmd(argc,argv);
-    if (argc != 2) 
-    {
-        LogString(80,"usage zrn m");
-        exit(14);
-    }
-// make the temps properly!
-// also should probably be an fRank avoiding some work
+  uint64_t rank;
+  char st[200];
+  const char *tmp_root = tmp_name();
+  CLogCmd(argc, argv);
+  argv = parse_line(argc, argv, &argc);
+  if (2 != argc) {
+    LogString(80,"usage zrn m");
+    exit(14);
+  }
+  // make the temps properly!
+  // also should probably be an fRank avoiding some work
 
-    rank=fProduceNREF("temp",argv[1],0,"NULL",1,"NULL",1);
-    sprintf(st,"Rank of %s is %lu", argv[1], rank);
-    printf("%s\n", st);
-    LogString(20, st);
-    return 0;
+  rank = fProduceNREF(tmp_root, argv[1], 0, "NULL", 1, "NULL", 1);
+  sprintf(st,"Rank of %s is %lu", argv[1], rank);
+  printf("%lu\n", rank);
+  LogString(20, st);
+  return 0;
 }
 
 /*  end of zrn.c    */

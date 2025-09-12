@@ -27,7 +27,7 @@ int main(int argc, const char * const argv[])
     LogString(80,"usage zrec input row_select column_select multiplier cleaner remnant");
     exit(14);
   }
-  rank = fRecurse_ECH(1, prog, tmp_root,
+  rank = fRecurse_ECH(EC, 1, prog, tmp_root,
                       argv[1], 0, argv[2], argv[3], argv[4],
                       argv[5], argv[6]);
   printf("%lu\n", rank);

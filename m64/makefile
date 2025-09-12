@@ -118,6 +118,7 @@ EXECS=	conreg \
 	zimport \
 	zis \
 	ziv \
+	ziv1 \
 	zkc \
 	zkx \
 	zmp \
@@ -130,6 +131,7 @@ EXECS=	conreg \
 	zor1 \
 	zpc \
 	zpe \
+	zpe1 \
 	zpk \
 	zpk1 \
 	zplain \
@@ -139,8 +141,10 @@ EXECS=	conreg \
 	zprime \
 	zqa \
 	zrd \
+	zrd1 \
 	zrec \
 	zrn \
+	zrn1 \
 	zrr \
 	zrx \
 	zs2 \

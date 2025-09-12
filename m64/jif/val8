@@ -1,0 +1,163 @@
+#!/bin/bash
+wd=`pwd -P`/`dirname $0`
+rm -f logfile
+# Sadly, ivtest.sh produces lots of PPID dependent names
+# so we can't check the log
+$1 zrd a1 2 5077 5077 4
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 4 3703 3703 1
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 5 3200 3200
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 8 1803 1803 5
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 9 1707 1707 21
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 11 1403 1403 23
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 13 1800 1800 1
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 25 1507 1507 24
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 49 1717 1717 24
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 64 1600 1600 1
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 121 1543 1543 55
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 125 1321 1321 42
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 2 6667 6667 6
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 3 4667 4667 5
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 3 4667 4667 8
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 4 3667 3667 4
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 5 3067 3067 3
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 7 2767 2767 3
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 8 2567 2567 1
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 9 2467 2467 18
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 11 2267 2267 21
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 13 2167 2167 29
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 16 1963 1963 10
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 17 1933 1933 11
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 19 1930 1930 38
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 23 1880 1880 9
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 25 1800 1800 18
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 27 1740 1740 53
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 29 1720 1720 12
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 163 1202 1202 1
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 256 1102 1102 1
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 343 992 992 1
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 729 922 922 1
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 3539 922 922 1
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 3539 1000 1000 1
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 15625 632 632 1
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 17161 612 612 1
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 100019 632 632 1
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 1953125 72 72 1
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 2476099 102 102 1
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 3798601 192 192 1
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 10000079 462 462 1
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 1234564627 402 402 1
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 5000000029 342 342 1
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 10604499373 62 62 1
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 646541456023 132 132 1
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 1000000000039 332 332 1
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 476837158203125 42 42 1
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 450283905890997363 27 27 1
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 1000009000027000027 142 142 1
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 6445601806155464899 102 102 1
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv
+$1 zrd a1 11841258135073152241 112 112 1
+$1 ziv1 a1 iv
+${wd}/ivtest.sh a1 iv

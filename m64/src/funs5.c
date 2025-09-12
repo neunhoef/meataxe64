@@ -101,6 +101,7 @@ void fScalarMul(const char *m1, int s1, const char *m2, int s2, FELT sc)
         EWData(e2,ds.nob,v1);
     }
     free(v1);
+    free(f);
     ERClose1(e1,s1);
     EWClose1(e2,s2);
     return;

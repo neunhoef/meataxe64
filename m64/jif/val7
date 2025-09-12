@@ -3,241 +3,240 @@ wd=`pwd -P`/`dirname $0`
 rm -f logfile
 # Sadly, ectest.sh produces lots of PPID dependent names
 # so we can't check the log
-set -x
 $1 zrd a1 2 5077 5077 750
 $1 zrec a1 rs cs m k r > junk
-$1 ${wd}/ectest.sh a1 rs cs m k r
+${wd}/ectest.sh a1 rs cs m k r
 $1 zrd a1 2 6300 3000 1
 $1 zrd a2 2 3000 5700 2
 $1 zmu a1 a2 a3
 $1 zrec a3 rs cs m k r > junk
-$1 ${wd}/ectest.sh a3 rs cs m k r
+${wd}/ectest.sh a3 rs cs m k r
 $1 zrd a1 2 10 50 1
 $1 ze2 a1 a2
 $1 zrec a2 rs cs m k r > junk
-$1 ${wd}/ectest.sh a2 rs cs m k r
+${wd}/ectest.sh a2 rs cs m k r
 $1 zrd a1 3 4400 2500 1
 $1 zrd a2 3 2500 3600 2
 $1 zmu a1 a2 a3
 $1 zrec a3 rs cs m k r > junk
-$1 ${wd}/ectest.sh a3 rs cs m k r
+${wd}/ectest.sh a3 rs cs m k r
 $1 zrd a1 4 3703 3703 224
 $1 zrec a1 rs cs m k r > junk
-$1 ${wd}/ectest.sh a1 rs cs m k r
+${wd}/ectest.sh a1 rs cs m k r
 $1 zrd a1 5 3200 2500 1
 $1 zrd a2 5 2500 3200 2
 $1 zmu a1 a2 a3
 $1 zrec a3 rs cs m k r > junk
-$1 ${wd}/ectest.sh a3 rs cs m k r
+${wd}/ectest.sh a3 rs cs m k r
 $1 zrd a1 8 1803 1803 5
 $1 zrec a1 rs cs m k r > junk
-$1 ${wd}/ectest.sh a1 rs cs m k r
+${wd}/ectest.sh a1 rs cs m k r
 $1 zrd a1 9 1707 1707 21
 $1 zrec a1 rs cs m k r > junk
-$1 ${wd}/ectest.sh a1 rs cs m k r
+${wd}/ectest.sh a1 rs cs m k r
 $1 zrd a1 11 1403 1403 23
 $1 zrec a1 rs cs m k r > junk
-$1 ${wd}/ectest.sh a1 rs cs m k r
+${wd}/ectest.sh a1 rs cs m k r
 $1 zrd a1 13 1800 1200 1
 $1 zrd a2 13 1200 1700 2
 $1 zmu a1 a2 a3
 $1 zrec a3 rs cs m k r > junk
-$1 ${wd}/ectest.sh a3 rs cs m k r
+${wd}/ectest.sh a3 rs cs m k r
 $1 zrd a1 25 1507 1507 24
 $1 zrec a1 rs cs m k r > junk
-$1 ${wd}/ectest.sh a1 rs cs m k r
+${wd}/ectest.sh a1 rs cs m k r
 $1 zrd a1 49 1717 1717 24
 $1 zrec a1 rs cs m k r > junk
-$1 ${wd}/ectest.sh a1 rs cs m k r
+${wd}/ectest.sh a1 rs cs m k r
 $1 zrd a1 64 1600 1100 1
 $1 zrd a2 64 1100 1700 2
 $1 zmu a1 a2 a3
 $1 zrec a3 rs cs m k r > junk
-$1 ${wd}/ectest.sh a3 rs cs m k r
+${wd}/ectest.sh a3 rs cs m k r
 $1 zrd a1 121 1543 1543 55
 $1 zrec a1 rs cs m k r > junk
-$1 ${wd}/ectest.sh a1 rs cs m k r
+${wd}/ectest.sh a1 rs cs m k r
 $1 zrd a1 125 1321 1321 42
 $1 zrec a1 rs cs m k r > junk
-$1 ${wd}/ectest.sh a1 rs cs m k r
+${wd}/ectest.sh a1 rs cs m k r
 $1 zrd a1 2 6667 6667 1
 $1 zrec a1 rs cs m k r > junk
-$1 ${wd}/ectest.sh a1 rs cs m k r
+${wd}/ectest.sh a1 rs cs m k r
 $1 zrd a1 3 4667 4667 3
 $1 zrec a1 rs cs m k r > junk
-$1 ${wd}/ectest.sh a1 rs cs m k r
+${wd}/ectest.sh a1 rs cs m k r
 $1 zrd a1 3 4667 4667 1
 $1 zrec a1 rs cs m k r > junk
-$1 ${wd}/ectest.sh a1 rs cs m k r
+${wd}/ectest.sh a1 rs cs m k r
 $1 zrd a1 4 3667 3667 4
 $1 zrec a1 rs cs m k r > junk
-$1 ${wd}/ectest.sh a1 rs cs m k r
+${wd}/ectest.sh a1 rs cs m k r
 $1 zrd a1 5 3067 3067 3
 $1 zrec a1 rs cs m k r > junk
-$1 ${wd}/ectest.sh a1 rs cs m k r
+${wd}/ectest.sh a1 rs cs m k r
 $1 zrd a1 7 2767 2767 2
 $1 zrec a1 rs cs m k r > junk
-$1 ${wd}/ectest.sh a1 rs cs m k r
+${wd}/ectest.sh a1 rs cs m k r
 $1 zrd a1 8 2567 2567 1
 $1 zrec a1 rs cs m k r > junk
-$1 ${wd}/ectest.sh a1 rs cs m k r
+${wd}/ectest.sh a1 rs cs m k r
 $1 zrd a1 9 2467 2467 18
 $1 zrec a1 rs cs m k r > junk
-$1 ${wd}/ectest.sh a1 rs cs m k r
+${wd}/ectest.sh a1 rs cs m k r
 $1 zrd a1 11 2267 2267 21
 $1 zrec a1 rs cs m k r > junk
-$1 ${wd}/ectest.sh a1 rs cs m k r
+${wd}/ectest.sh a1 rs cs m k r
 $1 zrd a1 13 2167 2167 29
 $1 zrec a1 rs cs m k r > junk
-$1 ${wd}/ectest.sh a1 rs cs m k r
+${wd}/ectest.sh a1 rs cs m k r
 $1 zrd a1 16 1963 1963 10
 $1 zrec a1 rs cs m k r > junk
-$1 ${wd}/ectest.sh a1 rs cs m k r
+${wd}/ectest.sh a1 rs cs m k r
 $1 zrd a1 17 1933 1933 11
 $1 zrec a1 rs cs m k r > junk
-$1 ${wd}/ectest.sh a1 rs cs m k r
+${wd}/ectest.sh a1 rs cs m k r
 $1 zrd a1 19 1930 1930 38
 $1 zrec a1 rs cs m k r > junk
-$1 ${wd}/ectest.sh a1 rs cs m k r
+${wd}/ectest.sh a1 rs cs m k r
 $1 zrd a1 23 1880 1880 9
 $1 zrec a1 rs cs m k r > junk
-$1 ${wd}/ectest.sh a1 rs cs m k r
+${wd}/ectest.sh a1 rs cs m k r
 $1 zrd a1 25 1800 1800 18
 $1 zrec a1 rs cs m k r > junk
-$1 ${wd}/ectest.sh a1 rs cs m k r
+${wd}/ectest.sh a1 rs cs m k r
 $1 zrd a1 27 1740 1740 53
 $1 zrec a1 rs cs m k r > junk
-$1 ${wd}/ectest.sh a1 rs cs m k r
+${wd}/ectest.sh a1 rs cs m k r
 $1 zrd a1 29 1720 1720 12
 $1 zrec a1 rs cs m k r > junk
-$1 ${wd}/ectest.sh a1 rs cs m k r
+${wd}/ectest.sh a1 rs cs m k r
 $1 zrd a1 163 1202 1200 1
 $1 zrd a2 163 1200 1202 2
 $1 zmu a1 a2 a3
 $1 zrec a3 rs cs m k r > junk
-$1 ${wd}/ectest.sh a3 rs cs m k r
+${wd}/ectest.sh a3 rs cs m k r
 $1 zrd a1 256 1102 1100 1
 $1 zrd a2 256 1100 1102 2
 $1 zmu a1 a2 a3
 $1 ztr a3 a4
 $1 zrec a4 rs cs m k r > junk
-$1 ${wd}/ectest.sh a4 rs cs m k r
+${wd}/ectest.sh a4 rs cs m k r
 $1 zrd a1 343 992 990 1
 $1 zrd a2 343 990 992 2
 $1 zmu a1 a2 a3
 $1 zrec a3 rs cs m k r > junk
-$1 ${wd}/ectest.sh a3 rs cs m k r
+${wd}/ectest.sh a3 rs cs m k r
 $1 zrd a1 729 922 920 1
 $1 zrd a2 729 920 922 2
 $1 zmu a1 a2 a3
 $1 zrec a3 rs cs m k r > junk
-$1 ${wd}/ectest.sh a3 rs cs m k r
+${wd}/ectest.sh a3 rs cs m k r
 $1 znu a3 a4 > junk
 $1 zmu a4 a3 a5
 $1 ztr a5 a6
 $1 zrec a6 rs cs m k r > junk
-$1 ${wd}/ectest.sh a6 rs cs m k r
+${wd}/ectest.sh a6 rs cs m k r
 $1 zrd a1 3539 922 920 1
 $1 zrd a2 3539 920 922 2
 $1 zmu a1 a2 a3
 $1 zrec a3 rs cs m k r > junk
-$1 ${wd}/ectest.sh a3 rs cs m k r
+${wd}/ectest.sh a3 rs cs m k r
 $1 zrd a1 3539 1000 700 1
 $1 zrd a2 3539 700 900 2
 $1 zmu a1 a2 a3
 $1 zrec a3 rs cs m k r > junk
-$1 ${wd}/ectest.sh a3 rs cs m k r
+${wd}/ectest.sh a3 rs cs m k r
 $1 zrd a1 15625 632 630 1
 $1 zrd a2 15625 630 632 2
 $1 zmu a1 a2 a3
 $1 zrec a3 rs cs m k r > junk
-$1 ${wd}/ectest.sh a3 rs cs m k r
+${wd}/ectest.sh a3 rs cs m k r
 $1 zrd a1 17161 612 610 1
 $1 zrd a2 17161 610 612 2
 $1 zmu a1 a2 a3
 $1 zrec a3 rs cs m k r > junk
-$1 ${wd}/ectest.sh a3 rs cs m k r
+${wd}/ectest.sh a3 rs cs m k r
 $1 zrd a1 100019 632 630 1
 $1 zrd a2 100019 630 632 2
 $1 zmu a1 a2 a3
 $1 zrec a3 rs cs m k r > junk
-$1 ${wd}/ectest.sh a3 rs cs m k r
+${wd}/ectest.sh a3 rs cs m k r
 $1 zrd a1 117649 92 90 1
 $1 zrd a2 117649 90 92 2
 $1 zmu a1 a2 a3
 $1 zrec a3 rs cs m k r > junk
-$1 ${wd}/ectest.sh a3 rs cs m k r
+${wd}/ectest.sh a3 rs cs m k r
 $1 zrd a1 1953125 72 70 1
 $1 zrd a2 1953125 70 72 2
 $1 zmu a1 a2 a3
 $1 zrec a3 rs cs m k r > junk
-$1 ${wd}/ectest.sh a3 rs cs m k r
+${wd}/ectest.sh a3 rs cs m k r
 $1 zrd a1 2476099 102 100 1
 $1 zrd a2 2476099 100 102 2
 $1 zmu a1 a2 a3
 $1 zrec a3 rs cs m k r > junk
-$1 ${wd}/ectest.sh a3 rs cs m k r
+${wd}/ectest.sh a3 rs cs m k r
 $1 zrd a1 3798601 192 190 1
 $1 zrd a2 3798601 190 192 2
 $1 zmu a1 a2 a3
 $1 znu a3 a4 > junk
 $1 zmu a4 a3 a5
 $1 zrec a5 rs cs m k r > junk
-$1 ${wd}/ectest.sh a5 rs cs m k r
+${wd}/ectest.sh a5 rs cs m k r
 $1 zrd a1 10000079 462 460 1
 $1 zrd a2 10000079 460 462 2
 $1 zmu a1 a2 a3
 $1 zrec a3 rs cs m k r > junk
-$1 ${wd}/ectest.sh a3 rs cs m k r
+${wd}/ectest.sh a3 rs cs m k r
 $1 zrd a1 1234564627 402 400 1
 $1 zrd a2 1234564627 400 402 2
 $1 zmu a1 a2 a3
 $1 znu a3 a4 > junk
 $1 zmu a4 a3 a5
 $1 zrec a5 rs cs m k r > junk
-$1 ${wd}/ectest.sh a5 rs cs m k r
+${wd}/ectest.sh a5 rs cs m k r
 $1 zrd a1 5000000029 342 340 1
 $1 zrd a2 5000000029 340 342 2
 $1 zmu a1 a2 a3
 $1 zrec a3 rs cs m k r > junk
-$1 ${wd}/ectest.sh a3 rs cs m k r
+${wd}/ectest.sh a3 rs cs m k r
 $1 zrd a1 10604499373 62 60 1
 $1 zrd a2 10604499373 60 62 2
 $1 zmu a1 a2 a3
 $1 zrec a3 rs cs m k r > junk
-$1 ${wd}/ectest.sh a3 rs cs m k r
+${wd}/ectest.sh a3 rs cs m k r
 $1 zrd a1 646541456023 132 130 1
 $1 zrd a2 646541456023 130 132 2
 $1 zmu a1 a2 a3
 $1 zrec a3 rs cs m k r > junk
-$1 ${wd}/ectest.sh a3 rs cs m k r
+${wd}/ectest.sh a3 rs cs m k r
 $1 zrd a1 1000000000039 332 330 1
 $1 zrd a2 1000000000039 330 332 2
 $1 zmu a1 a2 a3
 $1 zrec a3 rs cs m k r > junk
-$1 ${wd}/ectest.sh a3 rs cs m k r
+${wd}/ectest.sh a3 rs cs m k r
 $1 zrd a1 476837158203125 42 40 1
 $1 zrd a2 476837158203125 40 42 2
 $1 zmu a1 a2 a3
 $1 zrec a3 rs cs m k r > junk
-$1 ${wd}/ectest.sh a3 rs cs m k r
+${wd}/ectest.sh a3 rs cs m k r
 $1 zrd a1 450283905890997363 27 25 1
 $1 zrd a2 450283905890997363 25 27 2
 $1 zmu a1 a2 a3
 $1 zrec a3 rs cs m k r > junk
-$1 ${wd}/ectest.sh a3 rs cs m k r
+${wd}/ectest.sh a3 rs cs m k r
 $1 zrd a1 1000009000027000027 142 140 1
 $1 zrd a2 1000009000027000027 140 142 2
 $1 zmu a1 a2 a3
 $1 zrec a3 rs cs m k r > junk
-$1 ${wd}/ectest.sh a3 rs cs m k r
+${wd}/ectest.sh a3 rs cs m k r
 $1 zrd a1 6445601806155464899 102 100 1
 $1 zrd a2 6445601806155464899 100 102 2
 $1 zmu a1 a2 a3
 $1 zrec a3 rs cs m k r > junk
-$1 ${wd}/ectest.sh a3 rs cs m k r
+${wd}/ectest.sh a3 rs cs m k r
 $1 zrd a1 11841258135073152241 112 110 1
 $1 zrd a2 11841258135073152241 110 112 2
 $1 zmu a1 a2 a3
 $1 zrec a3 rs cs m k r > junk
-$1 ${wd}/ectest.sh a3 rs cs m k r
+${wd}/ectest.sh a3 rs cs m k r

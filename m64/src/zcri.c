@@ -12,7 +12,6 @@
 
 int main(int argc, const char * const argv[])
 {
-  argv = parse_line(argc, argv, &argc);
   CLogCmd(argc, argv);
   argv = parse_line(argc, argv, &argc);
   if (4 !=argc) {
