@@ -399,6 +399,7 @@ uint64_t fColumnRiffleIdentity(const char *bs, int sbs, const char *rm,
     EWData(eo, dso.nob, mo);
   }
 
+  free(lix);
   free(mi);
   free(mo);
   free(f);
