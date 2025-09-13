@@ -3,6 +3,8 @@
  * WIP
  */
 
+#define NEON 1
+
 #include <stdint.h>
 #include <stddef.h>
 #include <stdlib.h>
@@ -12,6 +14,9 @@
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
+#if NEON
+#include "arm_neon.h"
+#endif
 
 /* Note this assumes little endian implementation */
 typedef union union_128 {
@@ -170,8 +175,25 @@ uint64_t pcpmad(uint64_t p, uint64_t a, uint64_t b, uint64_t c, const FIELD *f)
   }
 }
 
+#if NEON
+static int foo = 1;
+#endif
+
 void pc1xora(Dfmt *d, const Dfmt *s1, const Dfmt *s2, uint64_t nob)
 {
+#if NEON
+  if (foo) {
+    printf("Using pc1xora\n");
+    foo = 0;
+  }
+  while (nob >= 16) {
+    *(uint16x8_t *)d = veorq_u16(*(uint16x8_t *)s1, *(uint16x8_t *)s2);
+    nob -= 16;
+    d += 16;
+    s1 += 16;
+    s2 += 16;
+  }
+#else
   while (nob >= 8) {
     *(uint64_t *)d = *(uint64_t *)s1 ^ *(uint64_t *)s2;
     nob -= 8;
@@ -179,7 +201,8 @@ void pc1xora(Dfmt *d, const Dfmt *s1, const Dfmt *s2, uint64_t nob)
     s1 += 8;
     s2 += 8;
   }
-  while (nob > 0 ) {
+#endif
+  while (nob > 0) {
     *d++ = *s1++ ^ *s2++;
     nob--;
   }
@@ -566,6 +589,10 @@ void pcbunf(Dfmt *dest, const Dfmt *src, uint64_t nob,
 
 /* Functions from pc2.s */
 
+#if NEON
+static int poo = 1;
+#endif
+
 /*
  * The next 3 functions are used in the BGrease hpmi function
  * They are for grease type 2 (characteristic 2), machine various types
@@ -574,8 +601,18 @@ void pcbunf(Dfmt *dest, const Dfmt *src, uint64_t nob,
 void pc2aca(const uint8_t *prog, uint8_t *bv, uint64_t stride)
 {
   uint64_t slice_count = 8;
+#if NEON
+  uint16x8_t xmm[8]; /* Neon registers */
+#else
   uint64_t xmm[16]; /* Emulate the SSE or AVX registers */
+#endif
 
+#if NEON
+  if (poo) {
+    printf("Using pc2aca\n");
+    poo = 0;
+  }
+#endif
   while (slice_count > 0) {
     uint64_t *dest = (uint64_t *)(bv + 256); /* destination starts slot 2 */
     const uint8_t *current_prog = prog; /* restart program */
@@ -585,12 +622,23 @@ void pc2aca(const uint8_t *prog, uint8_t *bv, uint64_t stride)
     for (;;) {
       uint64_t code = *current_prog++; /* get first/next program byte */
       while (code <= 79) {
+#if NEON
+        uint16x8_t *src;
+#else
         uint64_t *src;
+#endif
         code <<= 7; /* convert to displacement */
+#if NEON
+        src = (uint16x8_t *)(bv + code);
+        for (i = 0; i < 8; i++) {
+          xmm[i] = veorq_u16(xmm[i], src[i]);
+        }
+#else
         src = (uint64_t *)(bv + code);
         for (i = 0; i < 16; i++) {
           xmm[i] ^= src[i];
         }
+#endif
         memcpy(dest, xmm, 128);
         dest += 128 / sizeof(*dest); /* increment destination slot */
         code = *current_prog++; /* get next program byte */
@@ -632,11 +680,25 @@ void pc2acm(const uint8_t *prog, uint8_t *destination, uint64_t stride)
   pc2aca(prog, destination, stride);
 }
 
+#if NEON
+static int boo = 1;
+#endif
+
 void pc2bma(const uint8_t *Afmt, uint8_t *bv, uint8_t *Cfmt)
 {
   uint64_t c_skip, a_code;
+#if NEON
+  uint16x8_t xmm[8]; /* Neon registers */
+#else
   uint64_t xmm[16]; /* Emulate the SSE or AVX registers */
+#endif
 
+#if NEON
+  if (boo) {
+    printf("Using pc2bma\n");
+    boo = 0;
+  }
+#endif
   a_code = *(uint64_t *)Afmt; /* get Afmt word */
   c_skip = a_code & 255;   /* copy for skip */
 
@@ -675,6 +737,18 @@ void pc2bma(const uint8_t *Afmt, uint8_t *bv, uint8_t *Cfmt)
     Afmt += 5; /* point to next Afmt word (yes, this is unaligned) */
 
     memcpy(xmm, Cfmt, 128);
+#if NEON
+    for (i = 0; i < 8; i++) {
+      xmm[i] = veorq_u16(xmm[i], *(uint16x8_t *)(bv + slice_0 + i * 16));
+      xmm[i] = veorq_u16(xmm[i], *(uint16x8_t *)(bv + 2048 + slice_1 + i * 16));
+      xmm[i] = veorq_u16(xmm[i], *(uint16x8_t *)(bv + 4096 + slice_2 + i * 16));
+      xmm[i] = veorq_u16(xmm[i], *(uint16x8_t *)(bv + 6144 + slice_3 + i * 16));
+      xmm[i] = veorq_u16(xmm[i], *(uint16x8_t *)(bv + 8192 + slice_4 + i * 16));
+      xmm[i] = veorq_u16(xmm[i], *(uint16x8_t *)(bv + 10240 + slice_5 + i * 16));
+      xmm[i] = veorq_u16(xmm[i], *(uint16x8_t *)(bv + 12288 + slice_6 + i * 16));
+      xmm[i] = veorq_u16(xmm[i], *(uint16x8_t *)(bv + 14336 + slice_7 + i * 16));
+    }
+#else
     for (i = 0; i < 16; i++) {
       xmm[i] ^= *(uint64_t *)(bv + slice_0 + i * 8);
     }
@@ -699,6 +773,7 @@ void pc2bma(const uint8_t *Afmt, uint8_t *bv, uint8_t *Cfmt)
     for (i = 0; i < 16; i++) {
       xmm[i] ^= *(uint64_t *)(bv + 14336 + slice_7 + i * 8);
     }
+#endif
     memcpy(Cfmt, xmm, 128);
 
     a_code = *(uint64_t *)Afmt; /* get Afmt word */
