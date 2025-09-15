@@ -175,17 +175,9 @@ uint64_t pcpmad(uint64_t p, uint64_t a, uint64_t b, uint64_t c, const FIELD *f)
   }
 }
 
-#if NEON
-static int foo = 1;
-#endif
-
 void pc1xora(Dfmt *d, const Dfmt *s1, const Dfmt *s2, uint64_t nob)
 {
 #if NEON
-  if (foo) {
-    printf("Using pc1xora\n");
-    foo = 0;
-  }
   while (nob >= 16) {
     *(uint16x8_t *)d = veorq_u16(*(uint16x8_t *)s1, *(uint16x8_t *)s2);
     nob -= 16;
@@ -587,11 +579,7 @@ void pcbunf(Dfmt *dest, const Dfmt *src, uint64_t nob,
   }
 }
 
-/* Functions from pc2.s */
-
-#if NEON
-static int poo = 1;
-#endif
+/* Functions from pc2.s. These implement characteristic 2 */
 
 /*
  * The next 3 functions are used in the BGrease hpmi function
@@ -607,12 +595,6 @@ void pc2aca(const uint8_t *prog, uint8_t *bv, uint64_t stride)
   uint64_t xmm[16]; /* Emulate the SSE or AVX registers */
 #endif
 
-#if NEON
-  if (poo) {
-    printf("Using pc2aca\n");
-    poo = 0;
-  }
-#endif
   while (slice_count > 0) {
     uint64_t *dest = (uint64_t *)(bv + 256); /* destination starts slot 2 */
     const uint8_t *current_prog = prog; /* restart program */
@@ -680,10 +662,6 @@ void pc2acm(const uint8_t *prog, uint8_t *destination, uint64_t stride)
   pc2aca(prog, destination, stride);
 }
 
-#if NEON
-static int boo = 1;
-#endif
-
 void pc2bma(const uint8_t *Afmt, uint8_t *bv, uint8_t *Cfmt)
 {
   uint64_t c_skip, a_code;
@@ -693,12 +671,6 @@ void pc2bma(const uint8_t *Afmt, uint8_t *bv, uint8_t *Cfmt)
   uint64_t xmm[16]; /* Emulate the SSE or AVX registers */
 #endif
 
-#if NEON
-  if (boo) {
-    printf("Using pc2bma\n");
-    boo = 0;
-  }
-#endif
   a_code = *(uint64_t *)Afmt; /* get Afmt word */
   c_skip = a_code & 255;   /* copy for skip */
 
@@ -802,10 +774,15 @@ void pc2bmm(const uint8_t *a, uint8_t *bv, uint8_t *c)
  * As above, the j and m versions are just calls to the a version
  */
 /* Grease functions */
+
 void pc3aca(const uint8_t *prog, uint8_t *bv, uint64_t stride)
 {
   uint64_t slice_count = 3;
+#if NEON
+  uint16x8_t xmm[10]; /* neon 128 bit registers */
+#else
   uint64_t xmm[20]; /* Emulate vector registers (extra 4 used differently) */
+#endif
 
   while (slice_count > 0) {
     /* pc3aca1: */
@@ -823,8 +800,23 @@ void pc3aca(const uint8_t *prog, uint8_t *bv, uint64_t stride)
         code <<= 7; /* convert to displacement */
         src = (uint64_t *)(bv + code);
         for (i = 0; i < 4; i++) {
-          uint64_t offset = 2 * i;
+#if NEON
+          uint64_t offset = i;
           /* Move from (0, 64), (16, 80), (32, 96), (48, 112) */
+          xmm[8] = *(uint16x8_t *)(src + offset * 2);
+          xmm[9] = *(uint16x8_t *)(src + 8 + offset * 2); /* xmm{8,9} in x86 world*/
+          xmm[8] = veorq_u16(xmm[8], xmm[offset]); /*  bu^au -> au   */
+          xmm[offset + 4] = veorq_u16(xmm[offset + 4], xmm[9]); /*  at^bt -> bt   */
+          xmm[9] = veorq_u16(xmm[9], xmm[8]); /*  au^at -> at   */
+          xmm[offset] = veorq_u16(xmm[offset], xmm[offset + 4]); /*  bt^bu -> bu   */
+          xmm[9] = vorrq_u16(xmm[9], xmm[offset + 4]); /*  bt|at -> at   */
+          xmm[8] = vorrq_u16(xmm[8], xmm[offset]); /*  bu|au -> au   */
+          xmm[offset] = xmm[9];
+          memcpy(dest + 2 * offset, xmm + offset, 16);
+          xmm[offset + 4] = xmm[8];
+          memcpy(dest + 2 * offset + 64 / sizeof(*dest), xmm + offset + 4, 16);
+#else
+          uint64_t offset = 2 * i;
           memcpy(xmm + 16, src + offset, 16);
           memcpy(xmm + 18, src + 8 + offset, 16); /* xmm{8,9} */
           xmm[16] ^= xmm[offset];
@@ -843,6 +835,7 @@ void pc3aca(const uint8_t *prog, uint8_t *bv, uint64_t stride)
           memcpy(dest + offset, xmm + offset, 16);
           memcpy(xmm + offset + 8, xmm + 16, 16);
           memcpy(dest + offset + 64 / sizeof(*dest), xmm + offset + 8, 16);
+#endif
         }
         dest += 128 / sizeof(*dest); /* increment destination slot */
         code = *current_prog++; /* get next program byte */
@@ -879,19 +872,25 @@ void pc3acm(const uint8_t *prog, uint8_t *bv, uint64_t stride)
 {
   pc3aca(prog, bv, stride);
 }
-/* Others */
 
 /* pc3bma has the same structure as pc2bma, but with different operations in the middle */
 void pc3bma(const uint8_t *Afmt, uint8_t *bv, uint8_t *Cfmt)
 {
   uint64_t c_skip, a_code;
+#if NEON
+  uint16x8_t xmm[8];
+#else
   uint64_t xmm[16]; /* Emulate the SSE or AVX registers */
-
+#endif
   a_code = *(uint64_t *)Afmt; /* get Afmt word */
   c_skip = a_code & 255;   /* copy for skip */
 
   while (c_skip != 255) {
+#if NEON
+    unsigned int j;
+#else
     unsigned int i, j;
+#endif
     int64_t slice_0 = a_code; /* adslice 0 */
     int64_t slice_1 = a_code; /* adslice 1 */
     int64_t slice_2;
@@ -915,6 +914,36 @@ void pc3bma(const uint8_t *Afmt, uint8_t *bv, uint8_t *Cfmt)
     Afmt += 4; /* point to next Afmt word (yes, this is unaligned) */
 
     for (j = 0; j < 64; j += 16) {
+#if NEON
+      xmm[0] = *(uint16x8_t *)(Cfmt + j);
+      xmm[1] = *(uint16x8_t *)(Cfmt + 64 + j);
+      xmm[2] = *(uint16x8_t *)(bv + slice_0 + j);
+      xmm[3] = *(uint16x8_t *)(bv + aslice_0 + j);
+      xmm[2] = veorq_u16(xmm[2], xmm[0]);
+      xmm[1] = veorq_u16(xmm[1], xmm[3]);
+      xmm[3] = veorq_u16(xmm[3], xmm[2]);
+      xmm[0] = veorq_u16(xmm[0], xmm[1]);
+      xmm[3] = vorrq_u16(xmm[3], xmm[1]);
+      xmm[2] = vorrq_u16(xmm[2], xmm[0]);
+      xmm[0] = *(uint16x8_t *)(bv + 5248 + slice_1 + j);
+      xmm[1] = *(uint16x8_t *)(bv + 5248 + aslice_1 + j);
+      xmm[0] = veorq_u16(xmm[0], xmm[3]);
+      xmm[2] = veorq_u16(xmm[2], xmm[1]);
+      xmm[1] = veorq_u16(xmm[1], xmm[0]);
+      xmm[3] = veorq_u16(xmm[3], xmm[2]);
+      xmm[2] = vorrq_u16(xmm[2], xmm[1]);
+      xmm[3] = vorrq_u16(xmm[3], xmm[0]);
+      xmm[1] = *(uint16x8_t *)(bv + 10496 + slice_2 + j);
+      xmm[0] = *(uint16x8_t *)(bv + 10496 + aslice_2 + j);
+      xmm[1] = veorq_u16(xmm[1], xmm[2]);
+      xmm[3] = veorq_u16(xmm[3], xmm[0]);
+      xmm[0] = veorq_u16(xmm[0], xmm[1]);
+      xmm[2] = veorq_u16(xmm[2], xmm[3]);
+      xmm[0] = vorrq_u16(xmm[0], xmm[3]);
+      xmm[1] = vorrq_u16(xmm[1], xmm[2]);
+      *(uint16x8_t *)(Cfmt + j) = xmm[0];
+      *(uint16x8_t *)(Cfmt + 64 + j) = xmm[1];
+#else
       memcpy(xmm, Cfmt + j, 16);
       memcpy(xmm + 2, Cfmt + 64 + j, 16); /* get 32 bytes of Cfmt */
       memcpy(xmm + 4, bv + slice_0 + j, 16);
@@ -979,6 +1008,7 @@ void pc3bma(const uint8_t *Afmt, uint8_t *bv, uint8_t *Cfmt)
       }
       memcpy(Cfmt + j, xmm, 16);
       memcpy(Cfmt + 64 + j, xmm + 2, 16);
+#endif
     }
 
     a_code = *(uint64_t *)Afmt; /* get Afmt word */
