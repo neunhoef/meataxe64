@@ -179,7 +179,7 @@ void pc1xora(Dfmt *d, const Dfmt *s1, const Dfmt *s2, uint64_t nob)
 {
 #if NEON
   while (nob >= 16) {
-    *(uint16x8_t *)d = veorq_u16(*(uint16x8_t *)s1, *(uint16x8_t *)s2);
+    *(uint64x2_t *)d = veorq_u64(*(uint64x2_t *)s1, *(uint64x2_t *)s2);
     nob -= 16;
     d += 16;
     s1 += 16;
@@ -590,7 +590,7 @@ void pc2aca(const uint8_t *prog, uint8_t *bv, uint64_t stride)
 {
   uint64_t slice_count = 8;
 #if NEON
-  uint16x8_t xmm[8]; /* Neon registers */
+  uint64x2_t xmm[8]; /* Neon registers */
 #else
   uint64_t xmm[16]; /* Emulate the SSE or AVX registers */
 #endif
@@ -605,15 +605,20 @@ void pc2aca(const uint8_t *prog, uint8_t *bv, uint64_t stride)
       uint64_t code = *current_prog++; /* get first/next program byte */
       while (code <= 79) {
 #if NEON
-        uint16x8_t *src;
+        uint64x2_t *src;
 #else
         uint64_t *src;
 #endif
         code <<= 7; /* convert to displacement */
 #if NEON
-        src = (uint16x8_t *)(bv + code);
+        src = (uint64x2_t *)(bv + code);
         for (i = 0; i < 8; i++) {
-          xmm[i] = veorq_u16(xmm[i], src[i]);
+          /*
+           * It appears that NEON compilation overloads the logical operations
+           * such that we can treat them like integer operations
+           * and hence not have to use the intrinsics (in this case veorq_u64
+           */
+          xmm[i] ^= src[i];
         }
 #else
         src = (uint64_t *)(bv + code);
@@ -666,7 +671,7 @@ void pc2bma(const uint8_t *Afmt, uint8_t *bv, uint8_t *Cfmt)
 {
   uint64_t c_skip, a_code;
 #if NEON
-  uint16x8_t xmm[8]; /* Neon registers */
+  uint64x2_t xmm[8]; /* Neon registers */
 #else
   uint64_t xmm[16]; /* Emulate the SSE or AVX registers */
 #endif
@@ -711,14 +716,14 @@ void pc2bma(const uint8_t *Afmt, uint8_t *bv, uint8_t *Cfmt)
     memcpy(xmm, Cfmt, 128);
 #if NEON
     for (i = 0; i < 8; i++) {
-      xmm[i] = veorq_u16(xmm[i], *(uint16x8_t *)(bv + slice_0 + i * 16));
-      xmm[i] = veorq_u16(xmm[i], *(uint16x8_t *)(bv + 2048 + slice_1 + i * 16));
-      xmm[i] = veorq_u16(xmm[i], *(uint16x8_t *)(bv + 4096 + slice_2 + i * 16));
-      xmm[i] = veorq_u16(xmm[i], *(uint16x8_t *)(bv + 6144 + slice_3 + i * 16));
-      xmm[i] = veorq_u16(xmm[i], *(uint16x8_t *)(bv + 8192 + slice_4 + i * 16));
-      xmm[i] = veorq_u16(xmm[i], *(uint16x8_t *)(bv + 10240 + slice_5 + i * 16));
-      xmm[i] = veorq_u16(xmm[i], *(uint16x8_t *)(bv + 12288 + slice_6 + i * 16));
-      xmm[i] = veorq_u16(xmm[i], *(uint16x8_t *)(bv + 14336 + slice_7 + i * 16));
+      xmm[i] ^= *(uint64x2_t *)(bv + slice_0 + i * 16);
+      xmm[i] ^= *(uint64x2_t *)(bv + 2048 + slice_1 + i * 16);
+      xmm[i] ^= *(uint64x2_t *)(bv + 4096 + slice_2 + i * 16);
+      xmm[i] ^= *(uint64x2_t *)(bv + 6144 + slice_3 + i * 16);
+      xmm[i] ^= *(uint64x2_t *)(bv + 8192 + slice_4 + i * 16);
+      xmm[i] ^= *(uint64x2_t *)(bv + 10240 + slice_5 + i * 16);
+      xmm[i] ^= *(uint64x2_t *)(bv + 12288 + slice_6 + i * 16);
+      xmm[i] ^= *(uint64x2_t *)(bv + 14336 + slice_7 + i * 16);
     }
 #else
     for (i = 0; i < 16; i++) {
@@ -779,7 +784,7 @@ void pc3aca(const uint8_t *prog, uint8_t *bv, uint64_t stride)
 {
   uint64_t slice_count = 3;
 #if NEON
-  uint16x8_t xmm[10]; /* neon 128 bit registers */
+  uint64x2_t xmm[10]; /* neon 128 bit registers */
 #else
   uint64_t xmm[20]; /* Emulate vector registers (extra 4 used differently) */
 #endif
@@ -803,14 +808,14 @@ void pc3aca(const uint8_t *prog, uint8_t *bv, uint64_t stride)
 #if NEON
           uint64_t offset = i;
           /* Move from (0, 64), (16, 80), (32, 96), (48, 112) */
-          xmm[8] = *(uint16x8_t *)(src + offset * 2);
-          xmm[9] = *(uint16x8_t *)(src + 8 + offset * 2); /* xmm{8,9} in x86 world*/
-          xmm[8] = veorq_u16(xmm[8], xmm[offset]); /*  bu^au -> au   */
-          xmm[offset + 4] = veorq_u16(xmm[offset + 4], xmm[9]); /*  at^bt -> bt   */
-          xmm[9] = veorq_u16(xmm[9], xmm[8]); /*  au^at -> at   */
-          xmm[offset] = veorq_u16(xmm[offset], xmm[offset + 4]); /*  bt^bu -> bu   */
-          xmm[9] = vorrq_u16(xmm[9], xmm[offset + 4]); /*  bt|at -> at   */
-          xmm[8] = vorrq_u16(xmm[8], xmm[offset]); /*  bu|au -> au   */
+          xmm[8] = *(uint64x2_t *)(src + offset * 2);
+          xmm[9] = *(uint64x2_t *)(src + 8 + offset * 2); /* xmm{8,9} in x86 world*/
+          xmm[8] ^= xmm[offset]; /*  bu^au -> au   */
+          xmm[offset + 4] ^= xmm[9]; /*  at^bt -> bt   */
+          xmm[9] ^= xmm[8]; /*  au^at -> at   */
+          xmm[offset] ^= xmm[offset + 4]; /*  bt^bu -> bu   */
+          xmm[9] |= xmm[offset + 4]; /*  bt|at -> at   */
+          xmm[8] |= xmm[offset]; /*  bu|au -> au   */
           xmm[offset] = xmm[9];
           memcpy(dest + 2 * offset, xmm + offset, 16);
           xmm[offset + 4] = xmm[8];
@@ -878,7 +883,7 @@ void pc3bma(const uint8_t *Afmt, uint8_t *bv, uint8_t *Cfmt)
 {
   uint64_t c_skip, a_code;
 #if NEON
-  uint16x8_t xmm[8];
+  uint64x2_t xmm[8];
 #else
   uint64_t xmm[16]; /* Emulate the SSE or AVX registers */
 #endif
@@ -915,34 +920,34 @@ void pc3bma(const uint8_t *Afmt, uint8_t *bv, uint8_t *Cfmt)
 
     for (j = 0; j < 64; j += 16) {
 #if NEON
-      xmm[0] = *(uint16x8_t *)(Cfmt + j);
-      xmm[1] = *(uint16x8_t *)(Cfmt + 64 + j);
-      xmm[2] = *(uint16x8_t *)(bv + slice_0 + j);
-      xmm[3] = *(uint16x8_t *)(bv + aslice_0 + j);
-      xmm[2] = veorq_u16(xmm[2], xmm[0]);
-      xmm[1] = veorq_u16(xmm[1], xmm[3]);
-      xmm[3] = veorq_u16(xmm[3], xmm[2]);
-      xmm[0] = veorq_u16(xmm[0], xmm[1]);
-      xmm[3] = vorrq_u16(xmm[3], xmm[1]);
-      xmm[2] = vorrq_u16(xmm[2], xmm[0]);
-      xmm[0] = *(uint16x8_t *)(bv + 5248 + slice_1 + j);
-      xmm[1] = *(uint16x8_t *)(bv + 5248 + aslice_1 + j);
-      xmm[0] = veorq_u16(xmm[0], xmm[3]);
-      xmm[2] = veorq_u16(xmm[2], xmm[1]);
-      xmm[1] = veorq_u16(xmm[1], xmm[0]);
-      xmm[3] = veorq_u16(xmm[3], xmm[2]);
-      xmm[2] = vorrq_u16(xmm[2], xmm[1]);
-      xmm[3] = vorrq_u16(xmm[3], xmm[0]);
-      xmm[1] = *(uint16x8_t *)(bv + 10496 + slice_2 + j);
-      xmm[0] = *(uint16x8_t *)(bv + 10496 + aslice_2 + j);
-      xmm[1] = veorq_u16(xmm[1], xmm[2]);
-      xmm[3] = veorq_u16(xmm[3], xmm[0]);
-      xmm[0] = veorq_u16(xmm[0], xmm[1]);
-      xmm[2] = veorq_u16(xmm[2], xmm[3]);
-      xmm[0] = vorrq_u16(xmm[0], xmm[3]);
-      xmm[1] = vorrq_u16(xmm[1], xmm[2]);
-      *(uint16x8_t *)(Cfmt + j) = xmm[0];
-      *(uint16x8_t *)(Cfmt + 64 + j) = xmm[1];
+      xmm[0] = *(uint64x2_t *)(Cfmt + j);
+      xmm[1] = *(uint64x2_t *)(Cfmt + 64 + j);
+      xmm[2] = *(uint64x2_t *)(bv + slice_0 + j);
+      xmm[3] = *(uint64x2_t *)(bv + aslice_0 + j);
+      xmm[2] ^= xmm[0];
+      xmm[1] ^= xmm[3];
+      xmm[3] ^= xmm[2];
+      xmm[0] ^= xmm[1];
+      xmm[3] |= xmm[1];
+      xmm[2] |= xmm[0];
+      xmm[0] = *(uint64x2_t *)(bv + 5248 + slice_1 + j);
+      xmm[1] = *(uint64x2_t *)(bv + 5248 + aslice_1 + j);
+      xmm[0] ^= xmm[3];
+      xmm[2] ^= xmm[1];
+      xmm[1] ^= xmm[0];
+      xmm[3] ^= xmm[2];
+      xmm[2] |= xmm[1];
+      xmm[3] |= xmm[0];
+      xmm[1] = *(uint64x2_t *)(bv + 10496 + slice_2 + j);
+      xmm[0] = *(uint64x2_t *)(bv + 10496 + aslice_2 + j);
+      xmm[1] ^= xmm[2];
+      xmm[3] ^= xmm[0];
+      xmm[0] ^= xmm[1];
+      xmm[2] ^= xmm[3];
+      xmm[0] |= xmm[3];
+      xmm[1] |= xmm[2];
+      *(uint64x2_t *)(Cfmt + j) = xmm[0];
+      *(uint64x2_t *)(Cfmt + 64 + j) = xmm[1];
 #else
       memcpy(xmm, Cfmt + j, 16);
       memcpy(xmm + 2, Cfmt + 64 + j, 16); /* get 32 bytes of Cfmt */
@@ -1029,6 +1034,7 @@ void pc3bmm(const uint8_t *a, uint8_t *bv, uint8_t *c)
 
 /*
  * Translations from pc5.s, Add/subtract primes between 5 and 193
+ * And also 32 bit AS codes (pc5bmdd and friends)
  */
 
 #if 0
@@ -1046,10 +1052,12 @@ void pshufd(union_128 *mmx, uint8_t control)
 }
 #endif
 
+#if NEON
 /*
  * The pmullw instruction.
  * Multiply packed 16 bit words inside a 64 bit word
  */
+#else
 static uint64_t pmullw(uint64_t a, uint64_t b)
 {
   union_64_16 x, y;
@@ -1061,6 +1069,7 @@ static uint64_t pmullw(uint64_t a, uint64_t b)
   }
   return y.a;
 }
+#endif
 
 /*
  * The pmulld instruction.
@@ -1180,12 +1189,21 @@ void pc5aca(const uint8_t *prog, uint8_t *bv, const uint64_t *parms)
 void pc5bmwa(const uint8_t *a, uint8_t *bv, uint8_t *c,
              const uint64_t *parms)
 {
+#if NEON
+  uint64x2_t xmm[16]; /* NEON registers like SSE2 */
+#else
   uint64_t xmm[32]; /* Emulate vector registers */
+#endif
   uint64_t slot_size; /* r11 */
   uint64_t *afmt = (uint64_t *)a;
   uint64_t code; /* rax */
   uint64_t skip; /* r9 */
   uint64_t *alcove; /* r8 */
+#if NEON
+  xmm[8] = vld1q_dup_u64(parms + 2); /* Mask */
+  xmm[10] = vld1q_dup_u64(parms + 7); /* 2^S % p */
+  xmm[11] = vld1q_dup_u64(parms + 8); /* bias */
+#else
   xmm[16] = parms[2]; /* Mask */
   xmm[17] = xmm[16]; /* The shuffle */
   xmm[18] = parms[1]; /* Shift S */
@@ -1193,6 +1211,7 @@ void pc5bmwa(const uint8_t *a, uint8_t *bv, uint8_t *c,
   xmm[21] = xmm[20]; /* 2^S % p */
   xmm[22] = parms[8];
   xmm[23] = xmm[22]; /* bias */
+#endif
   slot_size = parms[4]; /* size of one slot */
   slot_size *= parms[5]; /* times slots = slice stride */
   code = *afmt; /* first word of Afmt   */
@@ -1213,14 +1232,43 @@ void pc5bmwa(const uint8_t *a, uint8_t *bv, uint8_t *c,
       hi = ((code >> 4) & 0x780) / sizeof(*alcove);
       lo = (code & 0x780) / sizeof(*alcove);
       code >>= 8; /* next byte of Afmt */ 
+#if NEON
+      for (i = 0; i < 8; i++) {
+        xmm[i] = vaddq_u64(xmm[i], *(uint64x2_t *)(alcove + hi + 2 * i)); /* add in cauldron */
+        xmm[i] = vsubq_u64(xmm[i], *(uint64x2_t *)(alcove + lo + 2 * i));
+      }
+#else
       for (i = 0; i < 16; i++) {
         xmm[i] += alcove[hi + i]; /* add in cauldron */
         xmm[i] -= alcove[lo + i];
       }
+#endif
       alcove += slot_size / sizeof(*alcove); /* move on to next slice */
       slices--;
     }
     for (k = 0; k < 2; k++) {
+#if NEON
+      unsigned int offset = k * 4;
+      memcpy(xmm + 12, xmm + offset, 64); /* 4 16 byte registers */
+      for (i = 0; i < 4; i++) {
+        uint64_t shift = parms[1];
+        uint64_t mask32;
+        mask32 = (1UL << (32 - shift)) - 1;
+        xmm[9] = (uint64x2_t)vdupq_n_u32(mask32);
+        xmm[12 + i] &= xmm[8];
+        xmm[i + offset] ^= xmm[12 + i];
+        /* Shift packed double word right logical */
+        xmm[12 + i] >>= shift; /* An unpacked shift */
+        xmm[12 + i] &= xmm[9]; /* Now mask out the bits moved from one double to the other */
+        /* pmullw: multiply as collections of 16 bits. I think this one is correct */
+        xmm[12 + i] = (uint64x2_t)vmulq_u16((uint16x8_t)xmm[12 + i], (uint16x8_t)xmm[10]);
+        /* paddq %xmm12,%xmm0 13, 14, 15 etc */
+        xmm[i + offset] = vaddq_u64(xmm[i + offset], xmm[12 + i]);
+        /* paddq %xmm11,%xmm0 11, 11, 11etc */
+        xmm[i + offset] = vaddq_u64(xmm[i + offset], xmm[11]);
+      }
+      memcpy(c + offset * sizeof(uint64x2_t), xmm + offset, 64); /* Put results back into C format area */
+#else
       unsigned int offset = k * 8;
       memcpy(xmm + 24, xmm + offset, 64); /* 4 16 byte registers */
       for (i = 0; i < 4; i++) {
@@ -1249,6 +1297,7 @@ void pc5bmwa(const uint8_t *a, uint8_t *bv, uint8_t *c,
         xmm[1 + j + offset] += xmm[23];
       }
       memcpy(c + offset * sizeof(uint64_t), xmm + offset, 64); /* Put results back into C format area */
+#endif
     }
     code = *afmt;
     skip = code & 0xff;
