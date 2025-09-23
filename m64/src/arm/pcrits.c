@@ -1038,11 +1038,11 @@ void pc3bmm(const uint8_t *a, uint8_t *bv, uint8_t *c)
  */
 
 #if NEON
+#else
 /*
  * The pmullw instruction.
  * Multiply packed 16 bit words inside a 64 bit word
  */
-#else
 static uint64_t pmullw(uint64_t a, uint64_t b)
 {
   union_64_16 x, y;
@@ -1054,7 +1054,6 @@ static uint64_t pmullw(uint64_t a, uint64_t b)
   }
   return y.a;
 }
-#endif
 
 /*
  * The pmulld instruction.
@@ -1071,6 +1070,7 @@ static uint64_t pmulld(uint64_t a, uint64_t b)
   }
   return y.a;
 }
+#endif
 
 void pc5aca(const uint8_t *prog, uint8_t *bv, const uint64_t *parms)
 {
@@ -1296,15 +1296,26 @@ void pc5bmwj(const uint8_t *a, uint8_t *bv, uint8_t *c,
   pc5bmwa(a, bv, c, parms);
 }
 
+/* 32 bit A-S primes */
 void pc5bmdd(const uint8_t *a, uint8_t *bv, uint8_t *c,
              const uint64_t *parms)
 {
+#if NEON
+  uint64x2_t xmm[16]; /* Real NEON registers */
+#else
   uint64_t xmm[32]; /* Emulate vector registers */
+#endif
   uint64_t slot_size; /* r11 */
   uint64_t *afmt = (uint64_t *)a;
   uint64_t code; /* rax */
   uint64_t skip; /* r9 */
   uint64_t *alcove; /* r8 */
+#if NEON
+  xmm[8] = vld1q_dup_u64(parms + 2); /* Mask */
+  /* xmm[9] would be shift but we keep that as 64 bits */
+  xmm[10] = vld1q_dup_u64(parms + 7); /* 2^S % p */
+  xmm[11] = vld1q_dup_u64(parms + 8); /* bias */
+#else
   xmm[16] = parms[2]; /* Mask */
   xmm[17] = xmm[16]; /* The shuffle */
   xmm[18] = parms[1]; /* Shift S */
@@ -1312,6 +1323,7 @@ void pc5bmdd(const uint8_t *a, uint8_t *bv, uint8_t *c,
   xmm[21] = xmm[20]; /* 2^S % p */
   xmm[22] = parms[8];
   xmm[23] = xmm[22]; /* bias */
+#endif
   slot_size = parms[4]; /* size of one slot */
   slot_size *= parms[5]; /* times slots = slice stride */
   code = *afmt; /* first word of Afmt   */
@@ -1332,14 +1344,44 @@ void pc5bmdd(const uint8_t *a, uint8_t *bv, uint8_t *c,
       hi = ((code >> 4) & 0x780) / sizeof(*alcove);
       lo = (code & 0x780) / sizeof(*alcove);
       code >>= 8; /* next byte of Afmt */ 
+#if NEON
+      /* As for 5 - 193 A-S primes */
+      for (i = 0; i < 8; i++) {
+        xmm[i] = vaddq_u64(xmm[i], *(uint64x2_t *)(alcove + hi + 2 * i)); /* add in cauldron */
+        xmm[i] = vsubq_u64(xmm[i], *(uint64x2_t *)(alcove + lo + 2 * i));
+      }
+#else
       for (i = 0; i < 16; i++) {
         xmm[i] += alcove[hi + i]; /* add in cauldron */
         xmm[i] -= alcove[lo + i];
       }
+#endif
       alcove += slot_size / sizeof(*alcove); /* move on to next slice */
       slices--;
     }
     for (k = 0; k < 2; k++) {
+#if NEON
+      unsigned int offset = k * 4;
+      memcpy(xmm + 12, xmm + offset, 64); /* 4 16 byte registers */
+      for (i = 0; i < 4; i++) {
+        uint64_t shift = parms[1];
+        uint64_t mask32;
+        mask32 = (1UL << (32 - shift)) - 1;
+        xmm[9] = (uint64x2_t)vdupq_n_u32(mask32);
+        xmm[12 + i] &= xmm[8];
+        xmm[i + offset] ^= xmm[12 + i];
+        /* Shift packed double word right logical */
+        xmm[12 + i] >>= shift; /* An unpacked shift */
+        xmm[12 + i] &= xmm[9]; /* Now mask out the bits moved from one double to the other */
+        /* pmulld: multiply as collections of 32 bits */
+        xmm[12 + i] = (uint64x2_t)vmulq_u32((uint32x4_t)xmm[12 + i], (uint32x4_t)xmm[10]);
+        /* paddq %xmm12,%xmm0 13, 14, 15 etc */
+        xmm[i + offset] = vaddq_u64(xmm[i + offset], xmm[12 + i]);
+        /* paddq %xmm11,%xmm0 11, 11, 11etc */
+        xmm[i + offset] = vaddq_u64(xmm[i + offset], xmm[11]);
+      }
+      memcpy(c + offset * sizeof(uint64x2_t), xmm + offset, 64); /* Put results back into C format area */
+#else
       unsigned int offset = k * 8;
       memcpy(xmm + 24, xmm + offset, 64); /* 4 16 byte registers */
       for (i = 0; i < 4; i++) {
@@ -1357,7 +1399,7 @@ void pc5bmdd(const uint8_t *a, uint8_t *bv, uint8_t *c,
         xmm[24 + j] &= mask64; /* Now mask out the bits moved from one double to the other */
         xmm[25 + j] >>= shift; /* An unpacked shift */
         xmm[25 + j] &= mask64; /* Now mask out the bits moved from one double to the other */
-        /* pmulld: multiply as collections of 16 bits */
+        /* pmulld: multiply as collections of 32 bits */
         xmm[24 + j] = pmulld(xmm[24 + j], xmm[20]);
         xmm[25 + j] = pmulld(xmm[25 + j], xmm[21]);
         /* paddq %xmm12,%xmm0 13, 14, 15 etc */
@@ -1368,6 +1410,7 @@ void pc5bmdd(const uint8_t *a, uint8_t *bv, uint8_t *c,
         xmm[1 + j + offset] += xmm[23];
       }
       memcpy(c + offset * sizeof(uint64_t), xmm + offset, 64); /* Put results back into C format area */
+#endif
     }
     code = *afmt;
     skip = code & 0xff;
