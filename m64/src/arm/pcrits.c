@@ -1,6 +1,6 @@
 /*
  * Implementations of assembler pcrit routines in C for portability
- * WIP
+ * ARM/Neon version
  */
 
 #define NEON 1
@@ -1036,21 +1036,6 @@ void pc3bmm(const uint8_t *a, uint8_t *bv, uint8_t *c)
  * Translations from pc5.s, Add/subtract primes between 5 and 193
  * And also 32 bit AS codes (pc5bmdd and friends)
  */
-
-#if 0
-/* The p shuffle instruction (turns out not to be needed) */
-void pshufd(union_128 *mmx, uint8_t control)
-{
-  unsigned int i;
-  union_128 temp;
-  for (i = 0; i < 4; i++) {
-    unsigned int j = control & 3;
-    temp.ints[i] = mmx->ints[j];
-    control >>= 2;
-  }
-  *mmx = temp;
-}
-#endif
 
 #if NEON
 /*
