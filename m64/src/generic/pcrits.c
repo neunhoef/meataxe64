@@ -1218,7 +1218,7 @@ void pc5bmdd(const uint8_t *a, uint8_t *bv, uint8_t *c,
         xmm[24 + j] &= mask64; /* Now mask out the bits moved from one double to the other */
         xmm[25 + j] >>= shift; /* An unpacked shift */
         xmm[25 + j] &= mask64; /* Now mask out the bits moved from one double to the other */
-        /* pmulld: multiply as collections of 16 bits */
+        /* pmulld: multiply as collections of 32 bits */
         xmm[24 + j] = pmulld(xmm[24 + j], xmm[20]);
         xmm[25 + j] = pmulld(xmm[25 + j], xmm[21]);
         /* paddq %xmm12,%xmm0 13, 14, 15 etc */
