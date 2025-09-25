@@ -1075,16 +1075,28 @@ static uint64_t pmulld(uint64_t a, uint64_t b)
 void pc5aca(const uint8_t *prog, uint8_t *bv, const uint64_t *parms)
 {
   uint64_t slice_count;;
+#if NEON
+  uint64x2_t xmm[16]; /* Neon registers */
+#else
   uint64_t xmm[32]; /* Emulate vector registers */
+#endif
   uint64_t slot_size;
-  uint64_t shift;
+  uint64_t shift = parms[1];
+#if NEON
+  uint64_t mask = (0 == shift) ? 0xfffffffffffffffful : (1UL << (64 - shift)) - 1;
+  mask = (0 == shift) ? 0xfffffffffffffffful : (1UL << (64 - shift)) - 1;
+  xmm[10] = vld1q_dup_u64(&mask);
+  xmm[9] = vld1q_dup_u64(parms + 2);
+  xmm[8] = vld1q_dup_u64(parms + 3);
+  xmm[11] = vld1q_dup_u64(parms);
+#else
   xmm[18] = parms[2];
   xmm[19] = xmm[18];
-  shift = parms[1];
   xmm[16] = parms[3];
   xmm[17] = xmm[16];
   xmm[22] = parms[0];
   xmm[23] = xmm[22];
+#endif
   slice_count = parms[6];
   slot_size = parms[4];
   slot_size *= parms[5];
@@ -1106,10 +1118,37 @@ void pc5aca(const uint8_t *prog, uint8_t *bv, const uint64_t *parms)
         src = (uint64_t *)(bv + code);
         /* This section does 64 bit packed word instructions on mmx registers */
         /* Eg paddq   16(%rax,%rsi),%xmm1 */
+#if NEON
+        for (i = 0; i < 8; i++) {
+          xmm[12] = vld1q_u64(src + i * 2);
+          xmm[i] = vaddq_u64(xmm[i], xmm[12]);
+        }
+#else
         for (i = 0; i < 16; i++) {
           xmm[i] += src[i];
         }
+#endif
         for (i = 0; i < 4; i++) {
+#if NEON
+          uint64_t offset = 2 * i;
+          xmm[12] = xmm[offset];
+          xmm[14] = xmm[offset + 1];
+          xmm[12] = vaddq_u64(xmm[12], xmm[8]);
+          xmm[14] = vaddq_u64(xmm[14], xmm[8]); /* add 2^N - p */
+          xmm[12] &= xmm[9];
+          xmm[14] &= xmm[9]; /* and with mask */
+          xmm[13] = xmm[12];
+          xmm[15] = xmm[14];
+          xmm[13] >>= shift; /* This performs 2 64 bit shifts */
+          xmm[15] >>= shift; /* subtract 1 if set */
+          xmm[12] = vsubq_u64(xmm[12], xmm[13]);
+          xmm[14] = vsubq_u64(xmm[14], xmm[15]);
+          xmm[12] &= xmm[11];
+          xmm[14] &= xmm[11]; /* and with p */
+          xmm[offset] = vsubq_u64(xmm[offset], xmm[12]);
+          xmm[1 + offset] = vsubq_u64(xmm[1 + offset], xmm[14]); /* subtract p if need be */
+          memcpy(dest + 2 * offset, xmm + offset, 32);
+#else
           uint64_t offset = 4 * i;
           memcpy(xmm + 24, xmm + offset, 16);
           memcpy(xmm + 28, xmm + 2 + offset, 16);
@@ -1144,6 +1183,7 @@ void pc5aca(const uint8_t *prog, uint8_t *bv, const uint64_t *parms)
           xmm[2 + offset] -= xmm[28];
           xmm[3 + offset] -= xmm[29]; /* subtract p if need be */
           memcpy(dest + offset, xmm + offset, 32);
+#endif
         }
         dest += 128 / sizeof(*dest); /* increment destination slot */
         code = *current_prog++; /* get next program byte */
