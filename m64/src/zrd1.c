@@ -19,7 +19,7 @@ static uint64_t prand(void)
   x = 1;
   x = x << 63;
   if ((x & pseed) != 0) {
-    pseed =(pseed << 1) ^ 0x3b4f0bf89;
+    pseed = (pseed << 1) ^ 0x3b4f0bf89;
   } else {
     pseed = pseed << 1;
   }

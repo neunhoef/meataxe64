@@ -1,7 +1,9 @@
 /*
  * Implementations of assembler pcrit routines in C for portability
- * WIP
+ * ARM/Neon version
  */
+
+#define NEON 1
 
 #include <stdint.h>
 #include <stddef.h>
@@ -12,6 +14,9 @@
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
+#if NEON
+#include "arm_neon.h"
+#endif
 
 /* Note this assumes little endian implementation */
 typedef union union_128 {
@@ -172,6 +177,15 @@ uint64_t pcpmad(uint64_t p, uint64_t a, uint64_t b, uint64_t c, const FIELD *f)
 
 void pc1xora(Dfmt *d, const Dfmt *s1, const Dfmt *s2, uint64_t nob)
 {
+#if NEON
+  while (nob >= 16) {
+    *(uint64x2_t *)d = veorq_u64(*(uint64x2_t *)s1, *(uint64x2_t *)s2);
+    nob -= 16;
+    d += 16;
+    s1 += 16;
+    s2 += 16;
+  }
+#else
   while (nob >= 8) {
     *(uint64_t *)d = *(uint64_t *)s1 ^ *(uint64_t *)s2;
     nob -= 8;
@@ -179,7 +193,8 @@ void pc1xora(Dfmt *d, const Dfmt *s1, const Dfmt *s2, uint64_t nob)
     s1 += 8;
     s2 += 8;
   }
-  while (nob > 0 ) {
+#endif
+  while (nob > 0) {
     *d++ = *s1++ ^ *s2++;
     nob--;
   }
@@ -564,7 +579,7 @@ void pcbunf(Dfmt *dest, const Dfmt *src, uint64_t nob,
   }
 }
 
-/* Functions from pc2.s */
+/* Functions from pc2.s. These implement characteristic 2 */
 
 /*
  * The next 3 functions are used in the BGrease hpmi function
@@ -574,7 +589,11 @@ void pcbunf(Dfmt *dest, const Dfmt *src, uint64_t nob,
 void pc2aca(const uint8_t *prog, uint8_t *bv, uint64_t stride)
 {
   uint64_t slice_count = 8;
+#if NEON
+  uint64x2_t xmm[8]; /* Neon registers */
+#else
   uint64_t xmm[16]; /* Emulate the SSE or AVX registers */
+#endif
 
   while (slice_count > 0) {
     uint64_t *dest = (uint64_t *)(bv + 256); /* destination starts slot 2 */
@@ -585,12 +604,28 @@ void pc2aca(const uint8_t *prog, uint8_t *bv, uint64_t stride)
     for (;;) {
       uint64_t code = *current_prog++; /* get first/next program byte */
       while (code <= 79) {
+#if NEON
+        uint64x2_t *src;
+#else
         uint64_t *src;
+#endif
         code <<= 7; /* convert to displacement */
+#if NEON
+        src = (uint64x2_t *)(bv + code);
+        for (i = 0; i < 8; i++) {
+          /*
+           * It appears that NEON compilation overloads the logical operations
+           * such that we can treat them like integer operations
+           * and hence not have to use the intrinsics (in this case veorq_u64
+           */
+          xmm[i] ^= src[i];
+        }
+#else
         src = (uint64_t *)(bv + code);
         for (i = 0; i < 16; i++) {
           xmm[i] ^= src[i];
         }
+#endif
         memcpy(dest, xmm, 128);
         dest += 128 / sizeof(*dest); /* increment destination slot */
         code = *current_prog++; /* get next program byte */
@@ -635,7 +670,11 @@ void pc2acm(const uint8_t *prog, uint8_t *destination, uint64_t stride)
 void pc2bma(const uint8_t *Afmt, uint8_t *bv, uint8_t *Cfmt)
 {
   uint64_t c_skip, a_code;
+#if NEON
+  uint64x2_t xmm[8]; /* Neon registers */
+#else
   uint64_t xmm[16]; /* Emulate the SSE or AVX registers */
+#endif
 
   a_code = *(uint64_t *)Afmt; /* get Afmt word */
   c_skip = a_code & 255;   /* copy for skip */
@@ -675,6 +714,18 @@ void pc2bma(const uint8_t *Afmt, uint8_t *bv, uint8_t *Cfmt)
     Afmt += 5; /* point to next Afmt word (yes, this is unaligned) */
 
     memcpy(xmm, Cfmt, 128);
+#if NEON
+    for (i = 0; i < 8; i++) {
+      xmm[i] ^= *(uint64x2_t *)(bv + slice_0 + i * 16);
+      xmm[i] ^= *(uint64x2_t *)(bv + 2048 + slice_1 + i * 16);
+      xmm[i] ^= *(uint64x2_t *)(bv + 4096 + slice_2 + i * 16);
+      xmm[i] ^= *(uint64x2_t *)(bv + 6144 + slice_3 + i * 16);
+      xmm[i] ^= *(uint64x2_t *)(bv + 8192 + slice_4 + i * 16);
+      xmm[i] ^= *(uint64x2_t *)(bv + 10240 + slice_5 + i * 16);
+      xmm[i] ^= *(uint64x2_t *)(bv + 12288 + slice_6 + i * 16);
+      xmm[i] ^= *(uint64x2_t *)(bv + 14336 + slice_7 + i * 16);
+    }
+#else
     for (i = 0; i < 16; i++) {
       xmm[i] ^= *(uint64_t *)(bv + slice_0 + i * 8);
     }
@@ -699,6 +750,7 @@ void pc2bma(const uint8_t *Afmt, uint8_t *bv, uint8_t *Cfmt)
     for (i = 0; i < 16; i++) {
       xmm[i] ^= *(uint64_t *)(bv + 14336 + slice_7 + i * 8);
     }
+#endif
     memcpy(Cfmt, xmm, 128);
 
     a_code = *(uint64_t *)Afmt; /* get Afmt word */
@@ -727,10 +779,15 @@ void pc2bmm(const uint8_t *a, uint8_t *bv, uint8_t *c)
  * As above, the j and m versions are just calls to the a version
  */
 /* Grease functions */
+
 void pc3aca(const uint8_t *prog, uint8_t *bv, uint64_t stride)
 {
   uint64_t slice_count = 3;
+#if NEON
+  uint64x2_t xmm[10]; /* neon 128 bit registers */
+#else
   uint64_t xmm[20]; /* Emulate vector registers (extra 4 used differently) */
+#endif
 
   while (slice_count > 0) {
     /* pc3aca1: */
@@ -748,8 +805,23 @@ void pc3aca(const uint8_t *prog, uint8_t *bv, uint64_t stride)
         code <<= 7; /* convert to displacement */
         src = (uint64_t *)(bv + code);
         for (i = 0; i < 4; i++) {
-          uint64_t offset = 2 * i;
+#if NEON
+          uint64_t offset = i;
           /* Move from (0, 64), (16, 80), (32, 96), (48, 112) */
+          xmm[8] = *(uint64x2_t *)(src + offset * 2);
+          xmm[9] = *(uint64x2_t *)(src + 8 + offset * 2); /* xmm{8,9} in x86 world*/
+          xmm[8] ^= xmm[offset]; /*  bu^au -> au   */
+          xmm[offset + 4] ^= xmm[9]; /*  at^bt -> bt   */
+          xmm[9] ^= xmm[8]; /*  au^at -> at   */
+          xmm[offset] ^= xmm[offset + 4]; /*  bt^bu -> bu   */
+          xmm[9] |= xmm[offset + 4]; /*  bt|at -> at   */
+          xmm[8] |= xmm[offset]; /*  bu|au -> au   */
+          xmm[offset] = xmm[9];
+          memcpy(dest + 2 * offset, xmm + offset, 16);
+          xmm[offset + 4] = xmm[8];
+          memcpy(dest + 2 * offset + 64 / sizeof(*dest), xmm + offset + 4, 16);
+#else
+          uint64_t offset = 2 * i;
           memcpy(xmm + 16, src + offset, 16);
           memcpy(xmm + 18, src + 8 + offset, 16); /* xmm{8,9} */
           xmm[16] ^= xmm[offset];
@@ -768,6 +840,7 @@ void pc3aca(const uint8_t *prog, uint8_t *bv, uint64_t stride)
           memcpy(dest + offset, xmm + offset, 16);
           memcpy(xmm + offset + 8, xmm + 16, 16);
           memcpy(dest + offset + 64 / sizeof(*dest), xmm + offset + 8, 16);
+#endif
         }
         dest += 128 / sizeof(*dest); /* increment destination slot */
         code = *current_prog++; /* get next program byte */
@@ -804,19 +877,25 @@ void pc3acm(const uint8_t *prog, uint8_t *bv, uint64_t stride)
 {
   pc3aca(prog, bv, stride);
 }
-/* Others */
 
 /* pc3bma has the same structure as pc2bma, but with different operations in the middle */
 void pc3bma(const uint8_t *Afmt, uint8_t *bv, uint8_t *Cfmt)
 {
   uint64_t c_skip, a_code;
+#if NEON
+  uint64x2_t xmm[8];
+#else
   uint64_t xmm[16]; /* Emulate the SSE or AVX registers */
-
+#endif
   a_code = *(uint64_t *)Afmt; /* get Afmt word */
   c_skip = a_code & 255;   /* copy for skip */
 
   while (c_skip != 255) {
+#if NEON
+    unsigned int j;
+#else
     unsigned int i, j;
+#endif
     int64_t slice_0 = a_code; /* adslice 0 */
     int64_t slice_1 = a_code; /* adslice 1 */
     int64_t slice_2;
@@ -840,6 +919,36 @@ void pc3bma(const uint8_t *Afmt, uint8_t *bv, uint8_t *Cfmt)
     Afmt += 4; /* point to next Afmt word (yes, this is unaligned) */
 
     for (j = 0; j < 64; j += 16) {
+#if NEON
+      xmm[0] = *(uint64x2_t *)(Cfmt + j);
+      xmm[1] = *(uint64x2_t *)(Cfmt + 64 + j);
+      xmm[2] = *(uint64x2_t *)(bv + slice_0 + j);
+      xmm[3] = *(uint64x2_t *)(bv + aslice_0 + j);
+      xmm[2] ^= xmm[0];
+      xmm[1] ^= xmm[3];
+      xmm[3] ^= xmm[2];
+      xmm[0] ^= xmm[1];
+      xmm[3] |= xmm[1];
+      xmm[2] |= xmm[0];
+      xmm[0] = *(uint64x2_t *)(bv + 5248 + slice_1 + j);
+      xmm[1] = *(uint64x2_t *)(bv + 5248 + aslice_1 + j);
+      xmm[0] ^= xmm[3];
+      xmm[2] ^= xmm[1];
+      xmm[1] ^= xmm[0];
+      xmm[3] ^= xmm[2];
+      xmm[2] |= xmm[1];
+      xmm[3] |= xmm[0];
+      xmm[1] = *(uint64x2_t *)(bv + 10496 + slice_2 + j);
+      xmm[0] = *(uint64x2_t *)(bv + 10496 + aslice_2 + j);
+      xmm[1] ^= xmm[2];
+      xmm[3] ^= xmm[0];
+      xmm[0] ^= xmm[1];
+      xmm[2] ^= xmm[3];
+      xmm[0] |= xmm[3];
+      xmm[1] |= xmm[2];
+      *(uint64x2_t *)(Cfmt + j) = xmm[0];
+      *(uint64x2_t *)(Cfmt + 64 + j) = xmm[1];
+#else
       memcpy(xmm, Cfmt + j, 16);
       memcpy(xmm + 2, Cfmt + 64 + j, 16); /* get 32 bytes of Cfmt */
       memcpy(xmm + 4, bv + slice_0 + j, 16);
@@ -904,6 +1013,7 @@ void pc3bma(const uint8_t *Afmt, uint8_t *bv, uint8_t *Cfmt)
       }
       memcpy(Cfmt + j, xmm, 16);
       memcpy(Cfmt + 64 + j, xmm + 2, 16);
+#endif
     }
 
     a_code = *(uint64_t *)Afmt; /* get Afmt word */
@@ -924,23 +1034,11 @@ void pc3bmm(const uint8_t *a, uint8_t *bv, uint8_t *c)
 
 /*
  * Translations from pc5.s, Add/subtract primes between 5 and 193
+ * And also 32 bit AS codes (pc5bmdd and friends)
  */
 
-#if 0
-/* The p shuffle instruction (turns out not to be needed) */
-void pshufd(union_128 *mmx, uint8_t control)
-{
-  unsigned int i;
-  union_128 temp;
-  for (i = 0; i < 4; i++) {
-    unsigned int j = control & 3;
-    temp.ints[i] = mmx->ints[j];
-    control >>= 2;
-  }
-  *mmx = temp;
-}
-#endif
-
+#if NEON
+#else
 /*
  * The pmullw instruction.
  * Multiply packed 16 bit words inside a 64 bit word
@@ -972,20 +1070,33 @@ static uint64_t pmulld(uint64_t a, uint64_t b)
   }
   return y.a;
 }
+#endif
 
 void pc5aca(const uint8_t *prog, uint8_t *bv, const uint64_t *parms)
 {
   uint64_t slice_count;;
+#if NEON
+  uint64x2_t xmm[16]; /* Neon registers */
+#else
   uint64_t xmm[32]; /* Emulate vector registers */
+#endif
   uint64_t slot_size;
-  uint64_t shift;
+  uint64_t shift = parms[1];
+#if NEON
+  uint64_t mask = (0 == shift) ? 0xfffffffffffffffful : (1UL << (64 - shift)) - 1;
+  mask = (0 == shift) ? 0xfffffffffffffffful : (1UL << (64 - shift)) - 1;
+  xmm[10] = vld1q_dup_u64(&mask);
+  xmm[9] = vld1q_dup_u64(parms + 2);
+  xmm[8] = vld1q_dup_u64(parms + 3);
+  xmm[11] = vld1q_dup_u64(parms);
+#else
   xmm[18] = parms[2];
   xmm[19] = xmm[18];
-  shift = parms[1];
   xmm[16] = parms[3];
   xmm[17] = xmm[16];
   xmm[22] = parms[0];
   xmm[23] = xmm[22];
+#endif
   slice_count = parms[6];
   slot_size = parms[4];
   slot_size *= parms[5];
@@ -1007,10 +1118,37 @@ void pc5aca(const uint8_t *prog, uint8_t *bv, const uint64_t *parms)
         src = (uint64_t *)(bv + code);
         /* This section does 64 bit packed word instructions on mmx registers */
         /* Eg paddq   16(%rax,%rsi),%xmm1 */
+#if NEON
+        for (i = 0; i < 8; i++) {
+          xmm[12] = vld1q_u64(src + i * 2);
+          xmm[i] = vaddq_u64(xmm[i], xmm[12]);
+        }
+#else
         for (i = 0; i < 16; i++) {
           xmm[i] += src[i];
         }
+#endif
         for (i = 0; i < 4; i++) {
+#if NEON
+          uint64_t offset = 2 * i;
+          xmm[12] = xmm[offset];
+          xmm[14] = xmm[offset + 1];
+          xmm[12] = vaddq_u64(xmm[12], xmm[8]);
+          xmm[14] = vaddq_u64(xmm[14], xmm[8]); /* add 2^N - p */
+          xmm[12] &= xmm[9];
+          xmm[14] &= xmm[9]; /* and with mask */
+          xmm[13] = xmm[12];
+          xmm[15] = xmm[14];
+          xmm[13] >>= shift; /* This performs 2 64 bit shifts */
+          xmm[15] >>= shift; /* subtract 1 if set */
+          xmm[12] = vsubq_u64(xmm[12], xmm[13]);
+          xmm[14] = vsubq_u64(xmm[14], xmm[15]);
+          xmm[12] &= xmm[11];
+          xmm[14] &= xmm[11]; /* and with p */
+          xmm[offset] = vsubq_u64(xmm[offset], xmm[12]);
+          xmm[1 + offset] = vsubq_u64(xmm[1 + offset], xmm[14]); /* subtract p if need be */
+          memcpy(dest + 2 * offset, xmm + offset, 32);
+#else
           uint64_t offset = 4 * i;
           memcpy(xmm + 24, xmm + offset, 16);
           memcpy(xmm + 28, xmm + 2 + offset, 16);
@@ -1045,6 +1183,7 @@ void pc5aca(const uint8_t *prog, uint8_t *bv, const uint64_t *parms)
           xmm[2 + offset] -= xmm[28];
           xmm[3 + offset] -= xmm[29]; /* subtract p if need be */
           memcpy(dest + offset, xmm + offset, 32);
+#endif
         }
         dest += 128 / sizeof(*dest); /* increment destination slot */
         code = *current_prog++; /* get next program byte */
@@ -1075,12 +1214,21 @@ void pc5aca(const uint8_t *prog, uint8_t *bv, const uint64_t *parms)
 void pc5bmwa(const uint8_t *a, uint8_t *bv, uint8_t *c,
              const uint64_t *parms)
 {
+#if NEON
+  uint64x2_t xmm[16]; /* NEON registers like SSE2 */
+#else
   uint64_t xmm[32]; /* Emulate vector registers */
+#endif
   uint64_t slot_size; /* r11 */
   uint64_t *afmt = (uint64_t *)a;
   uint64_t code; /* rax */
   uint64_t skip; /* r9 */
   uint64_t *alcove; /* r8 */
+#if NEON
+  xmm[8] = vld1q_dup_u64(parms + 2); /* Mask */
+  xmm[10] = vld1q_dup_u64(parms + 7); /* 2^S % p */
+  xmm[11] = vld1q_dup_u64(parms + 8); /* bias */
+#else
   xmm[16] = parms[2]; /* Mask */
   xmm[17] = xmm[16]; /* The shuffle */
   xmm[18] = parms[1]; /* Shift S */
@@ -1088,6 +1236,7 @@ void pc5bmwa(const uint8_t *a, uint8_t *bv, uint8_t *c,
   xmm[21] = xmm[20]; /* 2^S % p */
   xmm[22] = parms[8];
   xmm[23] = xmm[22]; /* bias */
+#endif
   slot_size = parms[4]; /* size of one slot */
   slot_size *= parms[5]; /* times slots = slice stride */
   code = *afmt; /* first word of Afmt   */
@@ -1108,14 +1257,43 @@ void pc5bmwa(const uint8_t *a, uint8_t *bv, uint8_t *c,
       hi = ((code >> 4) & 0x780) / sizeof(*alcove);
       lo = (code & 0x780) / sizeof(*alcove);
       code >>= 8; /* next byte of Afmt */ 
+#if NEON
+      for (i = 0; i < 8; i++) {
+        xmm[i] = vaddq_u64(xmm[i], *(uint64x2_t *)(alcove + hi + 2 * i)); /* add in cauldron */
+        xmm[i] = vsubq_u64(xmm[i], *(uint64x2_t *)(alcove + lo + 2 * i));
+      }
+#else
       for (i = 0; i < 16; i++) {
         xmm[i] += alcove[hi + i]; /* add in cauldron */
         xmm[i] -= alcove[lo + i];
       }
+#endif
       alcove += slot_size / sizeof(*alcove); /* move on to next slice */
       slices--;
     }
     for (k = 0; k < 2; k++) {
+#if NEON
+      unsigned int offset = k * 4;
+      memcpy(xmm + 12, xmm + offset, 64); /* 4 16 byte registers */
+      for (i = 0; i < 4; i++) {
+        uint64_t shift = parms[1];
+        uint64_t mask32;
+        mask32 = (1UL << (32 - shift)) - 1;
+        xmm[9] = (uint64x2_t)vdupq_n_u32(mask32);
+        xmm[12 + i] &= xmm[8];
+        xmm[i + offset] ^= xmm[12 + i];
+        /* Shift packed double word right logical */
+        xmm[12 + i] >>= shift; /* An unpacked shift */
+        xmm[12 + i] &= xmm[9]; /* Now mask out the bits moved from one double to the other */
+        /* pmullw: multiply as collections of 16 bits. I think this one is correct */
+        xmm[12 + i] = (uint64x2_t)vmulq_u16((uint16x8_t)xmm[12 + i], (uint16x8_t)xmm[10]);
+        /* paddq %xmm12,%xmm0 13, 14, 15 etc */
+        xmm[i + offset] = vaddq_u64(xmm[i + offset], xmm[12 + i]);
+        /* paddq %xmm11,%xmm0 11, 11, 11etc */
+        xmm[i + offset] = vaddq_u64(xmm[i + offset], xmm[11]);
+      }
+      memcpy(c + offset * sizeof(uint64x2_t), xmm + offset, 64); /* Put results back into C format area */
+#else
       unsigned int offset = k * 8;
       memcpy(xmm + 24, xmm + offset, 64); /* 4 16 byte registers */
       for (i = 0; i < 4; i++) {
@@ -1144,6 +1322,7 @@ void pc5bmwa(const uint8_t *a, uint8_t *bv, uint8_t *c,
         xmm[1 + j + offset] += xmm[23];
       }
       memcpy(c + offset * sizeof(uint64_t), xmm + offset, 64); /* Put results back into C format area */
+#endif
     }
     code = *afmt;
     skip = code & 0xff;
@@ -1157,15 +1336,26 @@ void pc5bmwj(const uint8_t *a, uint8_t *bv, uint8_t *c,
   pc5bmwa(a, bv, c, parms);
 }
 
+/* 32 bit A-S primes */
 void pc5bmdd(const uint8_t *a, uint8_t *bv, uint8_t *c,
              const uint64_t *parms)
 {
+#if NEON
+  uint64x2_t xmm[16]; /* Real NEON registers */
+#else
   uint64_t xmm[32]; /* Emulate vector registers */
+#endif
   uint64_t slot_size; /* r11 */
   uint64_t *afmt = (uint64_t *)a;
   uint64_t code; /* rax */
   uint64_t skip; /* r9 */
   uint64_t *alcove; /* r8 */
+#if NEON
+  xmm[8] = vld1q_dup_u64(parms + 2); /* Mask */
+  /* xmm[9] would be shift but we keep that as 64 bits */
+  xmm[10] = vld1q_dup_u64(parms + 7); /* 2^S % p */
+  xmm[11] = vld1q_dup_u64(parms + 8); /* bias */
+#else
   xmm[16] = parms[2]; /* Mask */
   xmm[17] = xmm[16]; /* The shuffle */
   xmm[18] = parms[1]; /* Shift S */
@@ -1173,6 +1363,7 @@ void pc5bmdd(const uint8_t *a, uint8_t *bv, uint8_t *c,
   xmm[21] = xmm[20]; /* 2^S % p */
   xmm[22] = parms[8];
   xmm[23] = xmm[22]; /* bias */
+#endif
   slot_size = parms[4]; /* size of one slot */
   slot_size *= parms[5]; /* times slots = slice stride */
   code = *afmt; /* first word of Afmt   */
@@ -1193,14 +1384,44 @@ void pc5bmdd(const uint8_t *a, uint8_t *bv, uint8_t *c,
       hi = ((code >> 4) & 0x780) / sizeof(*alcove);
       lo = (code & 0x780) / sizeof(*alcove);
       code >>= 8; /* next byte of Afmt */ 
+#if NEON
+      /* As for 5 - 193 A-S primes */
+      for (i = 0; i < 8; i++) {
+        xmm[i] = vaddq_u64(xmm[i], *(uint64x2_t *)(alcove + hi + 2 * i)); /* add in cauldron */
+        xmm[i] = vsubq_u64(xmm[i], *(uint64x2_t *)(alcove + lo + 2 * i));
+      }
+#else
       for (i = 0; i < 16; i++) {
         xmm[i] += alcove[hi + i]; /* add in cauldron */
         xmm[i] -= alcove[lo + i];
       }
+#endif
       alcove += slot_size / sizeof(*alcove); /* move on to next slice */
       slices--;
     }
     for (k = 0; k < 2; k++) {
+#if NEON
+      unsigned int offset = k * 4;
+      memcpy(xmm + 12, xmm + offset, 64); /* 4 16 byte registers */
+      for (i = 0; i < 4; i++) {
+        uint64_t shift = parms[1];
+        uint64_t mask32;
+        mask32 = (1UL << (32 - shift)) - 1;
+        xmm[9] = (uint64x2_t)vdupq_n_u32(mask32);
+        xmm[12 + i] &= xmm[8];
+        xmm[i + offset] ^= xmm[12 + i];
+        /* Shift packed double word right logical */
+        xmm[12 + i] >>= shift; /* An unpacked shift */
+        xmm[12 + i] &= xmm[9]; /* Now mask out the bits moved from one double to the other */
+        /* pmulld: multiply as collections of 32 bits */
+        xmm[12 + i] = (uint64x2_t)vmulq_u32((uint32x4_t)xmm[12 + i], (uint32x4_t)xmm[10]);
+        /* paddq %xmm12,%xmm0 13, 14, 15 etc */
+        xmm[i + offset] = vaddq_u64(xmm[i + offset], xmm[12 + i]);
+        /* paddq %xmm11,%xmm0 11, 11, 11etc */
+        xmm[i + offset] = vaddq_u64(xmm[i + offset], xmm[11]);
+      }
+      memcpy(c + offset * sizeof(uint64x2_t), xmm + offset, 64); /* Put results back into C format area */
+#else
       unsigned int offset = k * 8;
       memcpy(xmm + 24, xmm + offset, 64); /* 4 16 byte registers */
       for (i = 0; i < 4; i++) {
@@ -1218,7 +1439,7 @@ void pc5bmdd(const uint8_t *a, uint8_t *bv, uint8_t *c,
         xmm[24 + j] &= mask64; /* Now mask out the bits moved from one double to the other */
         xmm[25 + j] >>= shift; /* An unpacked shift */
         xmm[25 + j] &= mask64; /* Now mask out the bits moved from one double to the other */
-        /* pmulld: multiply as collections of 16 bits */
+        /* pmulld: multiply as collections of 32 bits */
         xmm[24 + j] = pmulld(xmm[24 + j], xmm[20]);
         xmm[25 + j] = pmulld(xmm[25 + j], xmm[21]);
         /* paddq %xmm12,%xmm0 13, 14, 15 etc */
@@ -1229,6 +1450,7 @@ void pc5bmdd(const uint8_t *a, uint8_t *bv, uint8_t *c,
         xmm[1 + j + offset] += xmm[23];
       }
       memcpy(c + offset * sizeof(uint64_t), xmm + offset, 64); /* Put results back into C format area */
+#endif
     }
     code = *afmt;
     skip = code & 0xff;
