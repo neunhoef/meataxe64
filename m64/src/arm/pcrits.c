@@ -1083,9 +1083,6 @@ void pc5aca(const uint8_t *prog, uint8_t *bv, const uint64_t *parms)
   uint64_t slot_size;
   uint64_t shift = parms[1];
 #if NEON
-  uint64_t mask = (0 == shift) ? 0xfffffffffffffffful : (1UL << (64 - shift)) - 1;
-  mask = (0 == shift) ? 0xfffffffffffffffful : (1UL << (64 - shift)) - 1;
-  xmm[10] = vld1q_dup_u64(&mask);
   xmm[9] = vld1q_dup_u64(parms + 2);
   xmm[8] = vld1q_dup_u64(parms + 3);
   xmm[11] = vld1q_dup_u64(parms);
