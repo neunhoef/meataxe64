@@ -1,4 +1,4 @@
-This is release 3 via github
+This is release 4 via github
 
 It has no known bugs.
 
@@ -22,8 +22,7 @@ bash
 cd mtx64
 make OS=unix ARCH=generic
 
-For the arm specific version (currently no different from the generic
-version but may use NEON in the future) do
+For the arm specific version (with NEON) do
 
 bash
 cd mtx64
